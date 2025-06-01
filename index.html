@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>野獣ゲーム</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<style>
+html, body {
+    width: 100vw; height: 100vh; margin: 0; padding: 0;
+    font-family: "Helvetica Neue", Helvetica, "Noto Sans JP", "Meiryo", sans-serif;
+    color: #222; overflow: hidden;
+    background: linear-gradient(135deg, #ffefc0 0%, #ffecd9 40%, #d1d4e3 100%);
+}
+* { box-sizing: border-box; }
+@media (prefers-color-scheme: dark) {
+    html, body {
+        color: #eee;
+        background: linear-gradient(135deg, #23222b 0%, #1a1b1e 90%, #181925 100%);
+    }
+}
+.block.empty-cell {
+    background: linear-gradient(135deg, #eeeeee 0%, #bbbbbb 100%) !important;
+    cursor: pointer !important;
+}
+@media (prefers-color-scheme: dark) {
+    .block.empty-cell {
+        background: linear-gradient(135deg, #111 0%, #222 100%) !important;
+    }
+}
+.t1, .t2, .t3, .t4, .t5 { background-size: auto 100%; background-image: url("ClickBefore.png"); }
+.tt1, .tt2, .tt3, .tt4, .tt5 { background-size: auto 86%; background-image: url("ClickAfter.png"); }
+.bl { border-left: 1px solid #b8dfe6; }
+#title-bar {
+    display: flex; justify-content: center; align-items: center;
+    margin-top: 32px; margin-bottom: 0.5em; width: 100vw;  backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);   
+}
+#main-title {  backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);   
+    text-align: center;
+    font-size: 2.7em; font-weight: 900; letter-spacing: .03em;
+    color: #262200;
+    line-height: 1.13em; user-select: none;
+    background: linear-gradient(90deg, #ffffff 50%, #ffe8c7 100%);
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1.5px 0 #fff, 0 0 14px #ffe28877;
+    margin: 0 20px 0 0; padding: 0;
+    flex-shrink: 0;
+}
+#welcome {  backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);   
+    display: flex; flex-direction: column; align-items: center;
+    margin-top: 0; padding-top: 0; width: 100vw; min-height: 100vh;
+    position: absolute; top: 0; left: 0; z-index: 10; background: none;
+}
+#welcome-card {
+    background: #fffdfa4a; border-radius: 18px;
+    box-shadow: 0 8px 36px #b7a54a39, 0 1.5px 6px #fff3;
+    padding: 2.3em 2.2em 1.1em 2.2em; max-width: 400px; width: 95vw;
+    margin-top: 0.5em; display: flex; flex-direction: column; align-items: stretch;
+}
+.desc { font-size: 1.14em; line-height: 1.7em; text-align: center; margin-bottom: 1.3em; color: #5d5126; letter-spacing: .02em; }
+.setting-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 8px; }
+.setting-label { font-size: 1.07em; color: #9e924e; width: 80px; text-align: left; user-select: none; }
+.setting-input, .sound-select {
+    border: 1.4px solid #eedb93; border-radius: 7px;
+    background: #fffdfa7b; color: #544511; padding: 0.42em 0.98em;
+    font-size: 1.10em; font-family: inherit; min-width: 60px;
+    transition: border 0.14s, box-shadow 0.14s; outline: none;
+}
+.setting-input:focus, .sound-select:focus { border: 1.7px solid #ffdd44; box-shadow: 0 0 0 2px #ffee9985; }
+.sound-select { min-width: 115px; }
+.sound-check { margin-left: 6px; color: #e7a41a; font-weight: bold; font-size: 1.03em; user-select: none; }
+#start-btn {
+    font-size: 1.33em; font-weight: bold; margin-top: 14px;
+    padding: 0.7em 2.9em;
+    background: linear-gradient(90deg, #d7d7d7 65%, #f4f4f4 100%);backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);   
+    color: #6b5300; border: none; border-radius: 9px;
+    box-shadow: 0 2px 11px #ffe79045; letter-spacing: 0.02em; cursor: pointer;
+    transition: background .14s, box-shadow .14s;
+}
+#start-btn:active {
+    background: linear-gradient(90deg, #ffd400 40%, #ffae46 100%);
+    box-shadow: 0 1px 4px #ffd40044;
+}
+@media (max-width: 600px) {
+    #main-title { font-size: 2em; }
+    #welcome-card { padding: 1.3em 0.5em 1em 0.5em; }
+    #title-bar { margin-top: 16px;}
+}
+#GameTimeLayer { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 2.8em; color: rgb(233,138,131); text-shadow: 0 0 3px #fff,0 0 3px #fff,0 0 3px #fff; z-index: 5; pointer-events: none; }
+#gameBody { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; background-color: #111; }
+#GameLayerBG { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; background-color: #111; }
+.GameLayer { position: absolute; bottom: 0; left: 0; will-change: transform; }
+.block { position: absolute; background-repeat: no-repeat; background-position: center; border-top: 1px solid #b8dfe6; }
+#GameScoreLayer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(69, 69, 69, 0.472); display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 20;}
+#GameScoreLayer h2 { font-size: 2.2em; margin-bottom: 0.8em; }
+#GameScoreLayer .score-item { display: flex; justify-content: center; align-items: center; font-size: 1.2em; margin-bottom: 0.4em; }
+#GameScoreLayer .score-item .label { width: 4em; text-align: right; margin-right: 0.5em; }
+#GameScoreLayer .score-item .value { width: 3em; text-align: left; margin-left: 0.5em; }
+#GameScoreLayer button { font-size: 1.2em; padding: 0.3em 1em; margin: 0.6em; border: none; border-radius: 4px; background-color: #0275d8; color: #fff; transition: background-color .2s; }
+#GameScoreLayer button:hover { background-color: #025aa5; }
+@keyframes flash { 0%{opacity:1;} 50%{opacity:0;} 100%{opacity:1;} }
+.flash { animation: flash .2s 3; }
+.bad { background-color: rgb(211,91,91); animation: flash .2s 3; }
+#customImageFull {
+    display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1000;
+    align-items: center; justify-content: center;
+}
+#customImageBg {
+    position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1001;
+    background: linear-gradient(135deg, #f5f5f5 0%, #dadada 100%);
+    opacity: 0.97;
+}
+@media (prefers-color-scheme: dark) {
+    #customImageBg { background: linear-gradient(135deg, #181818 0%, #191919 100%); }
+}
+#customImageFull img {
+    display: block; width: 100vw; height: 100vh; object-fit: cover; z-index: 1002; position: relative;
+    user-select: none; pointer-events: none;
+}
+</style>
+</head>
+<body onload="init()" oncontextmenu="return false;">
+    <div id="title-bar">
+        <div id="main-title">野獣ゲーム</div>
+    </div>
+    <div id="welcome">
+        <div id="welcome-card">
+            <div class="desc">
+                流れてイクブロックを<br>
+                正しいタイミングでタップだゾ。
+            </div>
+            <div class="setting-row">
+                <div class="setting-label">横のマス</div>
+                <input id="colInput" class="setting-input" type="number" min="2" max="10" value="4">
+            </div>
+            <div class="setting-row">
+                <div class="setting-label">鳴き声</div>
+                <select id="soundSelect" class="sound-select"></select>
+                <span id="soundCheck" class="sound-check"></span>
+            </div>
+            <button id="start-btn" onclick="readyBtn()">やりますねぇ‼️</button>
+        </div>
+    </div>
+    <div id="GameTimeLayer"></div>
+    <div id="gameBody"></div>
+    <div id="GameScoreLayer">
+        <h2 id="GameScoreLayer-text"></h2>
+        <div class="score-item" id="GameScoreLayer-CPS">
+            <div class="label">CPS</div>
+            <div class="value" id="cps">0.00</div>
+        </div>
+        <div class="score-item" id="GameScoreLayer-score">
+            <div class="label">SCORE</div>
+            <div class="value" id="score">0</div>
+        </div>
+        <div class="score-item" id="GameScoreLayer-bast">
+            <div class="label">BEST</div>
+            <div class="value" id="best">0</div>
+        </div>
+        <div>
+            <button onclick="replayBtn()">もう一度</button>
+            <button onclick="location.reload()">タイトル</button>
+        </div>
+    </div>
+    <div id="customImageFull">
+        <div id="customImageBg"></div>
+        <img src="114514.jpg" alt="114514">
+    </div>
+    <script>
+    // 効果音リスト
+    const soundList = [
+        { key: 'cc',    name: '標準',    file: 'cc.mp3'     },
+        { key: '19',    name: '絶頂',    file: '19.mp3'     },
+        { key: 'ka',    name: 'イク',    file: 'ka.mp3'     },
+        { key: 'key',   name: '海外獣',  file: 'key.mp3'    },
+        { key: 'mac',   name: 'フッ',    file: 'mac.wav'    },
+        { key: 'wrong', name: '獣',      file: 'wrong.mp3'  },
+    ];
+    let currentSoundKey = 'cc';
+    let soundErr, soundEnd;
+    let colNum = 4;
+
+    function initSoundSelect() {
+        const sel = document.getElementById('soundSelect');
+        sel.innerHTML = '';
+        soundList.forEach((s) => {
+            const opt = document.createElement('option');
+            opt.value = s.key;
+            opt.innerText = s.name;
+            sel.appendChild(opt);
+        });
+        sel.value = currentSoundKey;
+        updateSoundCheck();
+        sel.onchange = function() {
+            currentSoundKey = sel.value;
+            updateSoundCheck();
+            playSelectedSound();
+        };
+    }
+    function updateSoundCheck() {
+        const sel = document.getElementById('soundSelect');
+        document.getElementById('soundCheck').textContent = '✔ ' + soundList.find(s => s.key === sel.value).name;
+    }
+    function playSelectedSound() {
+        const s = soundList.find(s => s.key === currentSoundKey);
+        if (s) {
+            const audio = new Audio(s.file);
+            audio.currentTime = 0;
+            audio.play();
+        }
+    }
+    function updateColNum() {
+        let v = parseInt(document.getElementById('colInput').value);
+        if (isNaN(v) || v < 2) v = 2;
+        if (v > 10) v = 10;
+        colNum = v;
+        gameRestart();
+    }
+
+    let blockSize, GameLayer = [], GameLayerBG, touchArea = [], GameTimeLayer,
+        _gameBBList = [], _gameBBListIndex = 0, _gameOver = false, _gameStart = false,
+        _gameSettingNum = 20, _gameTime, _gameTimeNum, _gameScore, _date1, deviationTime,
+        _gameStartTime, _gameStartDatetime, mode = 1, soundMode = 'on';
+
+    const _ttreg = / t{1,2}(\d+)/;
+    const _clearttClsReg = / t{1,2}\d+| bad| empty-cell/g;
+
+    function init() {
+        initSoundSelect();
+        document.getElementById('colInput').addEventListener('change', updateColNum);
+        soundErr = new Audio("mac.wav");
+        soundEnd = new Audio("collect.mp3");
+        const gameBody = document.getElementById("gameBody");
+        GameLayer = [];
+        gameBody.innerHTML = '';
+        const bgDiv = document.createElement("div");
+        bgDiv.id = "GameLayerBG";
+        gameBody.appendChild(bgDiv);
+        GameLayerBG = bgDiv;
+        for (let i = 1; i <= 2; i++) {
+            const layerDiv = document.createElement("div");
+            layerDiv.id = "GameLayer" + i;
+            layerDiv.className = "GameLayer";
+            for (let j = 0; j < 10; j++) {
+                for (let k = 0; k < colNum; k++) {
+                    const cellIndex = k + j * colNum;
+                    const blockDiv = document.createElement("div");
+                    blockDiv.id = layerDiv.id + "-" + cellIndex;
+                    blockDiv.setAttribute("num", cellIndex);
+                    blockDiv.className = "block" + (k ? " bl" : "");
+                    layerDiv.appendChild(blockDiv);
+                }
+            }
+            GameLayerBG.appendChild(layerDiv);
+            GameLayer.push(layerDiv);
+        }
+        GameLayer[0].childrenList = Array.from(GameLayer[0].children);
+        GameLayer[1].childrenList = Array.from(GameLayer[1].children);
+        GameTimeLayer = document.getElementById("GameTimeLayer");
+        GameLayerBG.onclick = function(e) {
+            if (_gameOver) return false;
+            let y = e.clientY;
+            if (y > touchArea[0] || y < touchArea[1]) return;
+            if (!e.target.classList.contains("block")) {
+                return gameFail();
+            }
+        };
+        gameRestart();
+        window.addEventListener("resize", refreshSize, false);
+    }
+
+    // === コアの動き・アニメ ===
+    function gameFail() {
+        if (_gameOver) return;
+        _gameOver = true;
+        showCustomImageFull();
+        playMacOnce();
+    }
+    function gameRestart() {
+        _gameBBList = [];
+        _gameBBListIndex = 0;
+        _gameScore = 0;
+        _gameOver = false;
+        _gameStart = false;
+        _gameTimeNum = _gameSettingNum;
+        _gameStartTime = 0;
+        closeCustomImageFull();
+        countBlockSize();
+        refreshGameLayer(GameLayer[0], false);
+        refreshGameLayer(GameLayer[1], true, 1.5); // ←ここで1.5段ずつ上がる用
+        updatePanel();
+    }
+    function countBlockSize() {
+        const body = document.getElementById("gameBody");
+        blockSize = body.offsetWidth / colNum;
+        body.style.height = window.innerHeight + "px";
+        GameLayerBG.style.height = window.innerHeight + "px";
+        touchArea[0] = window.innerHeight;
+        touchArea[1] = window.innerHeight - blockSize * 3;
+    }
+    function refreshGameLayer(box, loop, offset) {
+        let i = Math.floor(Math.random() * 1000) % colNum + (loop ? 0 : colNum);
+        for (let j = 0; j < box.children.length; j++) {
+            const r = box.children[j];
+            const rstyle = r.style;
+            rstyle.left   = (j % colNum) * blockSize + "px";
+            rstyle.bottom = Math.floor(j / colNum) * blockSize + "px";
+            rstyle.top = "";
+            rstyle.width  = blockSize + "px";
+            rstyle.height = blockSize + "px";
+            r.className = r.className.replace(_clearttClsReg, "");
+            if (i === j) {
+                const colorIndex = (Math.floor(Math.random() * 1000) % 5) + 1;
+                r.className += " t" + colorIndex;
+                r.notEmpty = true;
+                _gameBBList.push({ cell: i % colNum, id: r.id });
+                i = (Math.floor(j / colNum) + 1) * colNum + (Math.floor(Math.random() * 1000) % colNum);
+            } else {
+                r.className += " empty-cell";
+                r.notEmpty = false;
+            }
+            // クリック処理
+            r.onclick = function(e) {
+                if (_gameOver) return;
+                if (r.className.match(/tt\d/)) return;
+                if (r.className.match(/t\d/)) {
+                    // ClickBefore拡大フェード→After
+                    r.style.transition = "transform 0.21s cubic-bezier(.5,1.7,.5,1),opacity 0.21s cubic-bezier(.5,1.7,.5,1)";
+                    r.style.zIndex = 11;
+                    r.style.transform = "scale(1.22)";
+                    r.style.opacity = 0;
+                    r.style.pointerEvents = "none";
+                    setTimeout(() => {
+                        r.className = r.className.replace(_ttreg, " tt$1");
+                        r.style.transition = "";
+                        r.style.transform = "";
+                        r.style.opacity = "";
+                        r.style.zIndex = "";
+                        r.style.pointerEvents = "";
+                        if (!_gameOver) {
+                            if (!_gameStart) gameStart();
+                            if (soundMode === "on") {
+                                const sound = new Audio(soundList.find(s => s.key === currentSoundKey).file);
+                                sound.currentTime = 0; sound.play();
+                            }
+                            _gameBBListIndex++;
+                            _gameScore++;
+                            updatePanel();
+                            gameLayerMoveNextRow(1.5); // ←上に1.5段ずつ滑らかに上げる
+                        }
+                    }, 210);
+                    return;
+                }
+                gameFail();
+            };
+            r.ontouchstart = function(e) {
+                if (_gameOver) return;
+                if (r.className.match(/tt\d/)) return;
+                if (r.className.match(/t\d/)) {
+                    r.style.transition = "transform 0.21s cubic-bezier(.5,1.7,.5,1),opacity 0.21s cubic-bezier(.5,1.7,.5,1)";
+                    r.style.zIndex = 11;
+                    r.style.transform = "scale(1.22)";
+                    r.style.opacity = 0;
+                    r.style.pointerEvents = "none";
+                    setTimeout(() => {
+                        r.className = r.className.replace(_ttreg, " tt$1");
+                        r.style.transition = "";
+                        r.style.transform = "";
+                        r.style.opacity = "";
+                        r.style.zIndex = "";
+                        r.style.pointerEvents = "";
+                        if (!_gameOver) {
+                            if (!_gameStart) gameStart();
+                            if (soundMode === "on") {
+                                const sound = new Audio(soundList.find(s => s.key === currentSoundKey).file);
+                                sound.currentTime = 0; sound.play();
+                            }
+                            _gameBBListIndex++;
+                            _gameScore++;
+                            updatePanel();
+                            gameLayerMoveNextRow(1.5);
+                        }
+                    }, 210);
+                    return;
+                }
+                gameFail();
+            };
+        }
+        if (loop) {
+            box.style.transitionDuration = "0ms";
+            box.style.display = "none";
+            box.y = - blockSize * (Math.floor(box.children.length / colNum) + (offset || 0));
+            setTimeout(function() {
+                box.style.transform = "translate3D(0," + box.y + "px,0)";
+                setTimeout(function() { box.style.display = "block"; }, 100);
+            }, 200);
+        } else {
+            box.y = 0;
+            box.style.transform = "translate3D(0," + box.y + "px,0)";
+        }
+        box.style.transitionDuration = "150ms";
+    }
+
+    // ←←ここが「1.5マス分」全体を滑らかに上げるコア
+    function gameLayerMoveNextRow(amount = 1.5) {
+        for (let i = 0; i < GameLayer.length; i++) {
+            const g = GameLayer[i];
+            g.y += blockSize * amount;
+            g.style.transition = "transform 0.24s cubic-bezier(.7,0,.2,1)";
+            g.style.transform = "translate3D(0," + g.y + "px,0)";
+            // もし「下まで来たら」自動でリセット
+            if (g.y > blockSize * (Math.floor(g.children.length / colNum))) {
+                setTimeout(() => refreshGameLayer(g, true, amount), 250);
+            }
+        }
+    }
+
+    function readyBtn() {
+        document.getElementById("welcome").style.display = "none";
+        updatePanel();
+    }
+    function timer() {
+        _gameTimeNum--;
+        _gameStartTime++;
+        if (mode === 1 && _gameTimeNum <= 0) {
+            GameTimeLayer.innerText = "TIME UP!";
+            gameOver();
+            GameLayerBG.classList.add("flash");
+            if (soundMode === "on") {
+                soundEnd.currentTime = 0; soundEnd.play();
+            }
+        }
+        updatePanel();
+    }
+    function updatePanel() {
+        if (!_gameOver) {
+            if (mode === 1) {
+                GameTimeLayer.innerText = "TIME: " + Math.ceil(_gameTimeNum);
+            }
+        }
+        // スコアは絶対即時反映
+        if (document.getElementById("score")) {
+            document.getElementById("score").innerText = _gameScore.toString();
+        }
+    }
+    function getCPS() {
+        const elapsed = (new Date().getTime() - _gameStartDatetime) / 1000;
+        let cps = _gameScore / elapsed;
+        if (isNaN(cps) || cps === Infinity || _gameStartTime < 2) cps = 0;
+        return cps;
+    }
+
+    function playMacOnce() {
+        if (soundErr) {
+            soundErr.currentTime = 0;
+            soundErr.play();
+            soundErr.onended = function() {
+                closeCustomImageFull();
+                showGameScoreAfterCustom();
+                soundErr.onended = null;
+            };
+        } else {
+            closeCustomImageFull();
+            showGameScoreAfterCustom();
+        }
+    }
+    function showCustomImageFull() {
+        document.getElementById('customImageFull').style.display = 'flex';
+    }
+    function closeCustomImageFull() {
+        document.getElementById('customImageFull').style.display = 'none';
+    }
+    function showGameScoreAfterCustom() {
+        clearInterval(_gameTime);
+        const cps = getCPS();
+        updatePanel();
+        setTimeout(() => { showGameScoreLayer(cps); }, 200);
+    }
+    function gameStart() {
+        _date1 = new Date();
+        _gameStartDatetime = _date1.getTime();
+        _gameStart = true;
+        _gameTime = setInterval(timer, 1000);
+    }
+    function gameOver() {
+        _gameOver = true;
+        clearInterval(_gameTime);
+        const cps = getCPS();
+        updatePanel();
+        setTimeout(() => {
+            GameLayerBG.classList.remove("flash");
+            showGameScoreLayer(cps);
+        }, 500);
+    }
+    function showGameScoreLayer(cps) {
+        const layer = document.getElementById("GameScoreLayer");
+        let text = "";
+        if (mode === 1) {
+            const date2 = new Date();
+            deviationTime = date2.getTime() - _date1.getTime();
+            if (deviationTime >= (_gameSettingNum + 3) * 1000) {
+                text = "TIME OVER: +" + ((deviationTime/1000) - _gameSettingNum).toFixed(2) + "s";
+            } else { text = "TIME UP!"; }
+        }
+        document.getElementById("GameScoreLayer-text").innerText = text;
+        document.getElementById("cps").innerText = cps.toFixed(2);
+        document.getElementById("score").innerText = _gameScore.toString();
+        const bestVal = getBestScore(_gameScore);
+        document.getElementById("best").innerText = bestVal;
+        layer.style.display = "flex";
+    }
+    function getBestScore(score) {
+        const keyName = "best-normal";
+        const prev = getCookie(keyName) ? parseFloat(getCookie(keyName)) : 0;
+        const best = Math.max(prev, score);
+        setCookie(keyName, best.toFixed(2), 365);
+        return best.toString();
+    }
+    function replayBtn() {
+        const layer = document.getElementById("GameScoreLayer");
+        layer.style.display = "none";
+        _gameBBList = [];
+        _gameBBListIndex = 0;
+        _gameScore = 0;
+        _gameOver = false;
+        _gameStart = false;
+        _gameTimeNum = _gameSettingNum;
+        _gameStartTime = 0;
+        closeCustomImageFull();
+        GameTimeLayer.innerText = "";
+        refreshSize();
+        gameRestart();
+    }
+    function refreshSize() {
+        clearTimeout(refreshSize._timer);
+        refreshSize._timer = setTimeout(() => {
+            countBlockSize();
+            for (let i = 0; i < GameLayer.length; i++) {
+                const box = GameLayer[i];
+                for (let j = 0; j < box.children.length; j++) {
+                    const r = box.children[j];
+                    const rstyle = r.style;
+                    rstyle.left = (j % colNum) * blockSize + "px";
+                    rstyle.bottom = Math.floor(j / colNum) * blockSize + "px";
+                    rstyle.top = "";
+                    rstyle.width = blockSize + "px";
+                    rstyle.height = blockSize + "px";
+                }
+                box.style.transform = "translate3D(0," + box.y + "px,0)";
+            }
+        }, 100);
+    }
+    document.addEventListener("keydown", function(e) {
+        const key = e.key.toLowerCase();
+        let idx = 0;
+        if      (key === "d") idx = 1;
+        else if (key === "f") idx = 2;
+        else if (key === "j") idx = 3;
+        else if (key === "k") idx = 4;
+        if (idx >= 1 && _gameStart) {
+            clickByKey(idx);
+        }
+    });
+    function clickByKey(index) {
+        const p = _gameBBList[_gameBBListIndex];
+        const numBase = parseInt(document.getElementById(p.id).getAttribute("num")) - p.cell;
+        const targetNum = numBase + (index - 1);
+        const targetId = p.id.substring(0, p.id.indexOf("-") + 1) + targetNum;
+        document.getElementById(targetId).dispatchEvent(new MouseEvent('mousedown', {bubbles:true}));
+    }
+    function setCookie(name, value, days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        document.cookie = name + "=" + encodeURIComponent(value) + ";expires=" + date.toUTCString() + ";path=/";
+    }
+    function getCookie(name) {
+        const re = new RegExp("(?:(?:^|.*;\\s*)" + name + "\\s*\\=\\s*([^;]*).*$)|^.*$");
+        return decodeURIComponent(document.cookie.replace(re, "$1")) || null;
+    }
+    </script>
+</body>
+</html>
