@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard風15パズル</title>
+  <style>
+    body {
+      background: linear-gradient(120deg, #e0e6ef 0%, #c8d0e0 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    }
+    .dashboard-frame {
+      background: rgba(255,255,255,0.95);
+      box-shadow: 0 12px 48px rgba(60,60,60,0.12), 0 2px 8px rgba(0,0,0,0.12);
+      border-radius: 18px;
+        width: 264px;
+      height: 332px;
+      padding:5px;
+      text-align: center;
+    }
+    .puzzle {
+      display: grid;
+      grid-template-columns: repeat(4, 64px);
+      grid-template-rows: repeat(4, 64px);
+      gap: 4px;
+      background: #5a562a;
+      border: none;
+      width: 264px;
+      height: 264px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.286);
+      margin-bottom: 16px;
+      user-select: none;
+    }
+    .tile {
+      background-image: url('image.png');
+      background-size: 256px 256px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0;
+      border: none;
+      outline: none;
+    }
+    .tile:active {
+      box-shadow: 0 0px 0px rgba(0,0,0,0.1);
+      transform: scale(0.9);
+    }
+    .empty {
+      background: transparent !important;
+      cursor: default;
+      box-shadow: none;
+    }
+    .mac-title {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #4b4b4b;
+      letter-spacing: 1.2px;
+      margin-bottom: 12px;
+      font-family: 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    }
+    .mac-btn {
+      margin-top: 10px;
+      display: inline-block;
+      padding: 9px 20px;
+      border-radius: 12px;
+      border: none;
+      background: #8cb577;
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.13);
+      transition: background 0.18s;
+    }
+    .mac-btn:disabled {
+      background: #8682727a;
+      cursor: not-allowed;
+    }
+    .mac-btn:hover:not(:disabled) {
+      background: #636363;
+      border-radius:55px;
+      transition:all 0.5s ease;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="dashboard-frame"><br>
+    <div class="mac-title">いいよ‼️こいよ‼️</div>
+    <div id="puzzle" class="puzzle"></div>
+    <button class="mac-btn" id="startBtn" onclick="startShuffle()">パズル開始</button>
+    <audio id="moveSound" src="mac.mp3" preload="auto"></audio>
+    <div class="status" id="status"></div>
+  </div>
+  <script>
+    const SIZE = 4;
+    const TILE_SIZE = 64;
+    const puzzle = document.getElementById('puzzle');
+    const moveSound = document.getElementById('moveSound');
+    const statusDiv = document.getElementById('status');
+    const startBtn = document.getElementById('startBtn');
+
+    let tiles = [];
+    let shuffling = false;
+    let shuffleTimeout = null;
+
+    // タイル初期化
+    function initTiles() {
+      tiles = [];
+      for (let y = 0; y < SIZE; y++) {
+        for (let x = 0; x < SIZE; x++) {
+          tiles.push({ x, y, num: y*SIZE + x + 1 });
+        }
+      }
+      tiles[tiles.length - 1].num = 0; // 右下が空白
+    }
+
+    // タイル描画
+    function renderTiles(interactive = false) {
+      puzzle.innerHTML = '';
+      for (let i = 0; i < tiles.length; i++) {
+        const t = tiles[i];
+        const tileEl = document.createElement('button');
+        tileEl.className = 'tile';
+        if (t.num === 0) {
+          tileEl.classList.add('empty');
+          tileEl.tabIndex = -1;
+        } else {
+          const bgX = -((t.num-1) % SIZE) * TILE_SIZE;
+          const bgY = -Math.floor((t.num-1) / SIZE) * TILE_SIZE;
+          tileEl.style.backgroundPosition = `${bgX}px ${bgY}px`;
+          if (interactive) {
+            tileEl.onclick = () => moveTile(i);
+          }
+        }
+        puzzle.appendChild(tileEl);
+      }
+    }
+
+    function canMove(idx) {
+      const emptyIdx = tiles.findIndex(t => t.num === 0);
+      const ex = emptyIdx % SIZE, ey = Math.floor(emptyIdx / SIZE);
+      const tx = idx % SIZE, ty = Math.floor(idx / SIZE);
+      return (Math.abs(tx - ex) + Math.abs(ty - ey)) === 1;
+    }
+
+    function moveTile(idx, playSound = true) {
+      if (!canMove(idx)) return;
+      const emptyIdx = tiles.findIndex(t => t.num === 0);
+      [tiles[idx], tiles[emptyIdx]] = [tiles[emptyIdx], tiles[idx]];
+      renderTiles(true);
+      if (playSound) {
+        moveSound.currentTime = 0;
+        moveSound.play();
+      }
+    }
+
+    // 自動シャッフル
+    function autoShuffleStep(count, total, onEnd) {
+      if (!shuffling) return;
+      const emptyIdx = tiles.findIndex(t => t.num === 0);
+      const ex = emptyIdx % SIZE, ey = Math.floor(emptyIdx / SIZE);
+      const moves = [];
+      [[0,-1],[0,1],[-1,0],[1,0]].forEach(([dx,dy]) => {
+        const nx = ex + dx, ny = ey + dy;
+        if (nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE) {
+          moves.push(ny*SIZE + nx);
+        }
+      });
+      const tgt = moves[Math.floor(Math.random() * moves.length)];
+      moveTile(tgt, true);
+      if (count < total) {
+        shuffleTimeout = setTimeout(() => autoShuffleStep(count+1, total, onEnd), 130);
+      } else {
+        shuffling = false;
+        renderTiles(true);
+        statusDiv.textContent = '';
+        if (onEnd) onEnd();
+      }
+    }
+
+    function startShuffle() {
+      startBtn.disabled = true;
+      statusDiv.textContent = '';
+      shuffling = true;
+      renderTiles(false); // 操作不可
+      let steps = 70; // 5秒くらい70ステップ(調整可)
+      autoShuffleStep(0, steps, () => {
+        renderTiles(true);
+        startBtn.style.display = 'none';
+      });
+    }
+
+    // シャッフル途中でクリック停止
+    puzzle.onclick = () => {
+      if (shuffling) {
+        shuffling = false;
+        clearTimeout(shuffleTimeout);
+        renderTiles(true);
+        startBtn.style.display = 'none';
+      }
+    };
+
+    // 最初は完成状態
+    initTiles();
+    renderTiles(false);
+    statusDiv.textContent = '';
+  </script>
+  <audio id="bgm" src="bg.mp3" loop></audio>
+  <script>// ページ読込時、BGM再生
+window.addEventListener('DOMContentLoaded', () => {
+  const bgm = document.getElementById('bgm');
+  // ユーザーが何か操作しないと再生できないブラウザも多いのでtry-catch
+  try {
+    bgm.volume = 0.4; // 好きな音量
+    bgm.play();
+  } catch (e) {}
+});</script>
+</body>
+</html>

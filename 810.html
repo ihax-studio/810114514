@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ホモスケール背景アニメ</title>
+<link rel="stylesheet" href="810.css">
+</head>
+<body>
+<div class="bg-img" id="bg">
+  <img src="bgg.png" alt="背景画像" style="width:0;height:0;opacity:0;">
+</div>
+  <button class="img1-btn" id="img1">
+    <img src="img1.png" alt="開始ボタン" id="img1img">
+  </button>
+  <div class="dialog" id="dialog">
+    <iframe src="pz.html" title="ホモiframe"></iframe>
+  </div>
+  <script>
+    const btn = document.getElementById('img1');
+    const btnImg = document.getElementById('img1img');
+    const bg = document.getElementById('bg');
+    const dialog = document.getElementById('dialog');
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const imgTest = new window.Image();
+      imgTest.src = "bgg.png";
+      imgTest.onload = function() {};
+      imgTest.onerror = function(){
+        bg.classList.add('error');
+        bg.innerHTML = "<div class='error-msg'>bgg.png が見つかりません</div>";
+      };
+      btnImg.onerror = function(){
+        btn.classList.add('error');
+        btn.innerHTML = "<div class='error-msg'>img1.pngが見つかりません</div>";
+        btn.disabled = true;
+      };
+    });
+
+    btn.addEventListener('click', () => {
+      if (btn.disabled || btn.classList.contains('error')) return;
+      // 背景ぼかし＆黒フィルター
+      bg.classList.add('blurred');
+      // ボタン拡大消失
+      btn.classList.add('anim');
+      // ダイアログ表示アニメ
+      setTimeout(() => {
+        dialog.classList.add('active');
+      }, 120);
+    });
+  </script>
+</body>
+</html>
