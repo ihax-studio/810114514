@@ -11,7 +11,7 @@ html, body {
     color: #222; overflow: hidden;
     background: linear-gradient(135deg, #ffefc0 0%, #ffecd9 40%, #d1d4e3 100%);
     /* ★追加：最初は非表示でブラックアウト防止 */
-    visibility: hidden;
+    
 }
 body.ready {
     visibility: visible !important;
@@ -243,7 +243,7 @@ body.ready {
             <button id="start-btn" onclick="readyBtn()">やりますねぇ‼️</button>
         </div>
     </div>
-    <div id="score-ui">SCORE <span id="score-ui-val">0</span></div>
+    <div id="score-ui"><span id="score-ui-val">0</span></div>
     <div id="GameTimeLayer"></div>
     <div id="gameBody"></div>
     <div id="GameScoreLayer">
