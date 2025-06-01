@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>5x5 オセロ</title>
+  <style>
+    body {
+      background-image: url('bg.png');
+      background-size: cover;
+      text-align: center;
+      font-family: sans-serif;
+      overflow-x: hidden;
+      margin: 0;
+    }
+
+    #status {
+      margin: 70px;
+      font-size: 20px;
+      color: white;
+      text-shadow: 0 0 22px #0000009d;
+      transition: transform 0.5s;
+    }
+
+    table {
+  border-collapse: separate; /* ← これでマージン効くようになる */
+  border-spacing: 10px;       /* ← これがマス間の余白 */
+  margin: auto;
+}
+
+td {
+  width: 96px;
+  height: 5rem; /* ← 幅と高さを同じにして正方形に */
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.642);
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  position: relative;
+  box-sizing: border-box;
+}
+
+td:active {
+  border-radius: 55px;
+  transform: scale(0.8);
+}
+
+    td.valid {
+      background-color: rgba(247, 210, 0, 0.7);
+    }
+
+    td.shake {
+      animation: shake 0.5s, flashRed 0.55s;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0px); }
+      20% { transform: translateX(-45px); }
+      40% { transform: translateX(45px); }
+      60% { transform: translateX(-25px); }
+      80% { transform: translateX(25px); }
+      100% { transform: translateX(0px); }
+    }
+
+    @keyframes flashRed {
+      0% { background-color: rgba(255, 0, 0, 0.6); }
+      100% { background-color: rgba(0, 128, 0, 0.6); }
+    }
+
+
+
+    @keyframes popIn {
+      0% { transform: scale(1.2); opacity: 0.6; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    #winnerImage {
+      position: fixed;
+      bottom: -200px;
+      transition: all 0.3s ease;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      opacity: 0;
+      animation-fill-mode: forwards;
+      z-index: 1000;
+    }
+
+    @keyframes slideUp {
+      0% { transform: translateX(-50%) translateY(100px); opacity: 1; }
+      100% { transform: translateX(-50%) translateY(0); opacity: 0; }
+    }
+
+    #retryButton {
+      display: none;
+      padding: 15px 25px;
+      background-color: white;
+      border-radius: 30px;
+      border: none;
+      font-size: 17px;
+      cursor: pointer;
+      margin-top: 50px;
+      opacity: 0;
+      transition: all 0.55s ease;
+    }
+
+    #retryButton:active {
+        transition: all 0.22s ease;
+     transform:scale(0.8);
+    }
+
+
+    #oseroView {
+      position: fixed;
+      top: -100vh;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: white;
+      z-index: 2000;
+      transition: top 0.8s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+    }
+
+    #introImage {
+      pointer-events: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('123.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: bottom center;
+      z-index: 1000;
+      animation: slideUp 2s ease forwards;
+    }
+
+    #board {
+  transform-style: preserve-3d;
+  transition: transform 0.8s ease;
+  perspective: 800px;
+}
+.piece-wrapper {
+  width: 90px;
+  height: 90px;
+  perspective: 800px;
+  transform-style: preserve-3d;
+}
+.piece {
+      width: 90px;
+      height: 90px;
+  transition: transform 0.8s ease;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  animation: popIn 0.88s forwards;
+}
+  </style>
+</head>
+<body>
+    <div id="introImage"></div><!--最初の画像-->
+<h2 id="status">白のターンです。</h2>
+<table id="board"></table>
+
+<img id="winnerImage" src="" width="200">
+
+<button id="retryButton">やり直す</button>
+
+<div id="oseroView"></div>
+
+<audio id="errorSound" src="mac.wav"></audio>
+<audio id="placeSound" src="wrong.mp3"></audio>
+
+<script>
+  const SIZE = 5;
+  const EMPTY = '';
+  const WHITE = 'b1.png';
+  const BLACK = 'b8.png';
+
+  let currentPlayer = WHITE;
+  let isProcessing = false;
+
+  const board = Array.from({ length: SIZE }, () => Array(SIZE).fill(EMPTY));
+  const boardElement = document.getElementById('board');
+  const statusText = document.getElementById('status');
+  const errorSound = document.getElementById('errorSound');
+  const placeSound = document.getElementById('placeSound');
+  const winnerImage = document.getElementById('winnerImage');
+  const retryButton = document.getElementById('retryButton');
+  const oseroView = document.getElementById('oseroView');
+
+  const directions = [
+    [-1, 0], [1, 0], [0, -1], [0, 1],
+    [-1, -1], [1, 1], [-1, 1], [1, -1]
+  ];
+
+  const mid = Math.floor(SIZE / 2);
+  board[mid][mid] = WHITE;
+  board[mid - 1][mid - 1] = WHITE;
+  board[mid - 1][mid] = BLACK;
+  board[mid][mid - 1] = BLACK;
+
+  function drawBoard() {
+    boardElement.innerHTML = '';
+    let validMovesExist = false;
+
+    for (let i = 0; i < SIZE; i++) {
+      const row = document.createElement('tr');
+      for (let j = 0; j < SIZE; j++) {
+        const cell = document.createElement('td');
+        cell.dataset.row = i;
+        cell.dataset.col = j;
+
+        if (isValidMove(i, j, currentPlayer)) {
+          cell.classList.add('valid');
+          validMovesExist = true;
+        }
+
+        const piece = board[i][j];
+        if (piece) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'piece-wrapper';
+
+  const img = document.createElement('img');
+  img.src = piece;
+  img.className = 'piece';
+
+  // ターンに応じて回転（X軸またはY軸）
+  const rotation = currentPlayer === WHITE ? 'rotateY(0deg)' : 'rotateY(180deg)';
+  img.style.transform = rotation;
+
+  wrapper.appendChild(img);
+  cell.appendChild(wrapper);
+}
+
+
+
+        cell.addEventListener('click', handleClick);
+        row.appendChild(cell);
+      }
+      boardElement.appendChild(row);
+    }
+
+    // ステータス表示＆反転
+    statusText.textContent = currentPlayer === WHITE ? "MURのターンです。" : "田所のターンです。";
+    statusText.style.transform = currentPlayer === BLACK ? "rotate(180deg)" : "rotate(0deg)";
+
+  // 3D風回転と奥行き変化
+  const angle = currentPlayer === WHITE ? 15 : -15;
+  const depth = currentPlayer === WHITE ? 'scale(1.05)' : 'scale(0.95)';
+  boardElement.style.transform = `perspective(900px) rotateX(${angle}deg) ${depth}`;
+
+    if (!validMovesExist && !isProcessing) {
+      showWinner();
+    }
+  }
+
+  function isValidMove(x, y, player) {
+    if (board[x][y] !== EMPTY) return false;
+    const opponent = player === WHITE ? BLACK : WHITE;
+
+    for (const [dx, dy] of directions) {
+      let nx = x + dx, ny = y + dy, hasOpponent = false;
+      while (nx >= 0 && ny >= 0 && nx < SIZE && ny < SIZE) {
+        if (board[nx][ny] === opponent) {
+          hasOpponent = true;
+        } else if (board[nx][ny] === player && hasOpponent) {
+          return true;
+        } else {
+          break;
+        }
+        nx += dx; ny += dy;
+      }
+    }
+    return false;
+  }
+
+  function handleClick(e) {
+    if (isProcessing) return;
+
+    const cell = e.currentTarget;
+    const row = parseInt(cell.dataset.row);
+    const col = parseInt(cell.dataset.col);
+
+    if (!isValidMove(row, col, currentPlayer)) {
+      errorSound.currentTime = 0;
+      errorSound.play();
+      cell.classList.add('shake');
+      setTimeout(() => cell.classList.remove('shake'), 550);
+      return;
+    }
+
+    // 即座に置く
+    board[row][col] = currentPlayer;
+    drawBoard();
+
+    placeSound.currentTime = 0;
+    placeSound.play();
+
+    isProcessing = true;
+
+    setTimeout(() => {
+      flipPieces(row, col, currentPlayer);
+      currentPlayer = currentPlayer === WHITE ? BLACK : WHITE;
+      isProcessing = false;
+      drawBoard();
+    }, 220);
+  }
+
+  function flipPieces(x, y, player) {
+    const opponent = player === WHITE ? BLACK : WHITE;
+
+    for (const [dx, dy] of directions) {
+      let nx = x + dx, ny = y + dy;
+      const toFlip = [];
+
+      while (nx >= 0 && ny >= 0 && nx < SIZE && ny < SIZE) {
+        if (board[nx][ny] === opponent) {
+          toFlip.push([nx, ny]);
+        } else if (board[nx][ny] === player) {
+          for (const [fx, fy] of toFlip) {
+            board[fx][fy] = player;
+          }
+          break;
+        } else {
+          break;
+        }
+        nx += dx; ny += dy;
+      }
+    }
+  }
+
+  function showWinner() {
+    let whiteCount = 0, blackCount = 0;
+    for (let row of board) {
+      for (let cell of row) {
+        if (cell === WHITE) whiteCount++;
+        if (cell === BLACK) blackCount++;
+      }
+    }
+
+    const winner = whiteCount > blackCount ? 'white' : 'black';
+    winnerImage.src = `${winner}.png`;
+    winnerImage.style.animation = 'slideUp 0.8s forwards';
+
+    retryButton.style.display = 'inline-block';
+    setTimeout(() => retryButton.style.opacity = 1, 100);
+  }
+
+  retryButton.addEventListener('click', () => {
+    oseroView.style.top = '0'; // スライドダウン
+    setTimeout(() => {
+      // osero.htmlへ実際に遷移（必要なら）
+      window.location.href = 'osero.html';
+    }, 1100);
+  });
+
+  drawBoard();
+</script>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const bgm = new Audio('bg.mp3');
+      bgm.loop = true;
+      bgm.volume = 0.5;
+  
+      const introSound = new Audio('wrong.mp3'); // ← intro 音を再生（wrong.mp3使用）
+  
+      // BGM と効果音の再生トライ
+      Promise.all([
+        bgm.play().catch((e) => console.warn("BGM 自動再生ブロック：", e)),
+        introSound.play().catch((e) => console.warn("効果音 自動再生ブロック：", e))
+      ]).then(() => {
+        // イントロ画像の終了処理
+        setTimeout(() => {
+          document.getElementById("introImage").style.display = "none";
+        }, 1800); // introImageのアニメーションと同期
+      });
+    });
+  </script>
+</body></html>
