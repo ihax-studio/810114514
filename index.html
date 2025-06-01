@@ -10,6 +10,11 @@ html, body {
     font-family: "Helvetica Neue", Helvetica, "Noto Sans JP", "Meiryo", sans-serif;
     color: #222; overflow: hidden;
     background: linear-gradient(135deg, #ffefc0 0%, #ffecd9 40%, #d1d4e3 100%);
+    /* ★追加：最初は非表示でブラックアウト防止 */
+    visibility: hidden;
+}
+body.ready {
+    visibility: visible !important;
 }
 * { box-sizing: border-box; }
 @media (prefers-color-scheme: dark) {
@@ -39,7 +44,7 @@ html, body {
       -webkit-backdrop-filter: blur(8px);   
     text-align: center;
     font-size: 2.7em; font-weight: 900; letter-spacing: .03em;
-    color: #262200;
+    color: #ffffff;
     line-height: 1.13em; user-select: none;
     background: linear-gradient(90deg, #ffffff 50%, #ffe8c7 100%);
     -webkit-text-fill-color: transparent;
@@ -55,52 +60,71 @@ html, body {
 }
 #welcome-card {
     background: #fffdfa4a; border-radius: 18px;
-    box-shadow: 0 8px 36px #b7a54a39, 0 1.5px 6px #fff3;
+    box-shadow: 0 8px 36px #00000039, 0 1.5px 6px #fff3;
     padding: 2.3em 2.2em 1.1em 2.2em; max-width: 400px; width: 95vw;
-    margin-top: 0.5em; display: flex; flex-direction: column; align-items: stretch;
+    margin-top: 10em; display: flex; flex-direction: column; align-items: stretch;
 }
-.desc { font-size: 1.14em; line-height: 1.7em; text-align: center; margin-bottom: 1.3em; color: #5d5126; letter-spacing: .02em; }
+.desc { font-size: 1.14em; line-height: 1.7em; text-align: center; margin-bottom: 1.3em; color: #000000; letter-spacing: .02em; }
 .setting-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 8px; }
-.setting-label { font-size: 1.07em; color: #9e924e; width: 80px; text-align: left; user-select: none; }
+.setting-label { font-size: 1.07em; color: #000000; width: 80px; text-align: left; user-select: none; }
 .setting-input, .sound-select {
-    border: 1.4px solid #eedb93; border-radius: 7px;
+    border: 1px solid #ffffff; border-radius: 7px;
     background: #fffdfa7b; color: #544511; padding: 0.42em 0.98em;
     font-size: 1.10em; font-family: inherit; min-width: 60px;
     transition: border 0.14s, box-shadow 0.14s; outline: none;
 }
-.setting-input:focus, .sound-select:focus { border: 1.7px solid #ffdd44; box-shadow: 0 0 0 2px #ffee9985; }
+.setting-input:focus, .sound-select:focus { border: 1.7px solid #000000; box-shadow: 0 0 0 2px #ffee9985; }
 .sound-select { min-width: 115px; }
-.sound-check { margin-left: 6px; color: #e7a41a; font-weight: bold; font-size: 1.03em; user-select: none; }
+.sound-check { margin-left: 6px; color: #00c194; font-weight: bold; font-size: 1.03em; user-select: none; }
 #start-btn {
     font-size: 1.33em; font-weight: bold; margin-top: 14px;
     padding: 0.7em 2.9em;
-    background: linear-gradient(90deg, #d7d7d7 65%, #f4f4f4 100%);backdrop-filter: blur(8px);
+   backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);   
-    color: #6b5300; border: none; border-radius: 9px;
-    box-shadow: 0 2px 11px #ffe79045; letter-spacing: 0.02em; cursor: pointer;
-    transition: background .14s, box-shadow .14s;
+    color: #ffffff; border: none; border-radius: 9px;
+    box-shadow: 0 2px 22px #00000035; letter-spacing: 0.02em; cursor: pointer;
+    transition: background .14s, box-shadow .14s,transform .3s;
+     transform: scale(1.11);
+    background: rgba(0, 0, 0, 0.8);
+    box-shadow: 0 1px 4px #ffffff44;
+    color:white;
 }
 #start-btn:active {
-    background: linear-gradient(90deg, #ffd400 40%, #ffae46 100%);
-    box-shadow: 0 1px 4px #ffd40044;
+    transform: scale(1.0);
+     background: linear-gradient(90deg, #d7d7d785 0%, #f4f4f461 55%,#dfdfdf61 100%);
+    box-shadow: 0 1px 4px #ffffff44;
+    color:rgb(0, 0, 0);
 }
 @media (max-width: 600px) {
     #main-title { font-size: 2em; }
     #welcome-card { padding: 1.3em 0.5em 1em 0.5em; }
     #title-bar { margin-top: 16px;}
+    #start-btn { transform:scale(0.95); }
 }
-#GameTimeLayer { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 2.8em; color: rgb(233,138,131); text-shadow: 0 0 3px #fff,0 0 3px #fff,0 0 3px #fff; z-index: 5; pointer-events: none; }
-#gameBody { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; background-color: #111; }
+#GameTimeLayer { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 2.8em; color: rgb(255, 255, 255); border-radius:55px;padding:12px 18px;font-weight:1; background-color: rgba(173, 173, 173, 0.55); z-index: 5; pointer-events: none; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);  }
+#gameBody { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; background-color: #111111; }
 #GameLayerBG { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; background-color: #111; }
 .GameLayer { position: absolute; bottom: 0; left: 0; will-change: transform; }
 .block { position: absolute; background-repeat: no-repeat; background-position: center; border-top: 1px solid #b8dfe6; }
-#GameScoreLayer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(69, 69, 69, 0.472); display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 20;}
+#score-ui {backdrop-filter: blur(8px);    background: rgba(255, 255, 255, 0.3);
+      -webkit-backdrop-filter: blur(8px); font-weight: 1;
+    position: absolute; top: 12px; right: 18px; z-index: 9; font-size: 2em; color: #000000;
+     padding: 0.27em 0.8em; border-radius: 55px; 
+    user-select: none; pointer-events: none; box-shadow: 0 0 16px rgba(0, 0, 0, 0.135);
+}
+@media (prefers-color-scheme: dark) {
+    #score-ui {color: #ffffff;backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);  }
+}
+#GameScoreLayer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);  display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 20;}
 #GameScoreLayer h2 { font-size: 2.2em; margin-bottom: 0.8em; }
 #GameScoreLayer .score-item { display: flex; justify-content: center; align-items: center; font-size: 1.2em; margin-bottom: 0.4em; }
 #GameScoreLayer .score-item .label { width: 4em; text-align: right; margin-right: 0.5em; }
 #GameScoreLayer .score-item .value { width: 3em; text-align: left; margin-left: 0.5em; }
-#GameScoreLayer button { font-size: 1.2em; padding: 0.3em 1em; margin: 0.6em; border: none; border-radius: 4px; background-color: #0275d8; color: #fff; transition: background-color .2s; }
-#GameScoreLayer button:hover { background-color: #025aa5; }
+#GameScoreLayer button { font-size: 1.2em; padding: 0.3em 1em; margin: 0.6em; border: none; border-radius: 4px; backdrop-filter: blur(8px);box-shadow:inset 0 0 33px rgba(0, 0, 0, 0.25),0 0 11px rgba(0, 0, 0, 0.1);
+      -webkit-backdrop-filter: blur(8px); background-color: #8e8e8e65; color: #fff; transition: background-color .2s; }
+#GameScoreLayer button:hover { background-color: #007ae5; }
 @keyframes flash { 0%{opacity:1;} 50%{opacity:0;} 100%{opacity:1;} }
 .flash { animation: flash .2s 3; }
 .bad { background-color: rgb(211,91,91); animation: flash .2s 3; }
@@ -114,15 +138,81 @@ html, body {
     opacity: 0.97;
 }
 @media (prefers-color-scheme: dark) {
-    #customImageBg { background: linear-gradient(135deg, #181818 0%, #191919 100%); }
+    #customImageBg { background: linear-gradient(135deg, #181818 0%, #000000 55%, #1a1a1a 100%); }
 }
 #customImageFull img {
     display: block; width: 100vw; height: 100vh; object-fit: cover; z-index: 1002; position: relative;
     user-select: none; pointer-events: none;
 }
+/* ダイアログ縮小アニメ */
+#welcome-card.hide-anim {
+    animation: scaleDownAndHide 0.5s cubic-bezier(.6,-0.1,.5,1.3) forwards;
+}
+@keyframes scaleDownAndHide {
+    0%   { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.8); opacity: 0; }
+}
+/* --- ここからiOS風トグルスイッチ --- */
+.setting-row.timing-row {
+    margin-bottom: 10px;
+    align-items: left;
+}
+.ios-toggle-wrap {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    margin-left: auto;  /* ←追加：右端にピタッ */
+}
+#timingEasyCheckbox {
+    justify-content: flex-end;
+    display: none;
+}
+.ios-toggle {
+    justify-content: flex-end;
+    display: inline-block; position: relative; width: 44px; height: 26px; margin-left: 10px; vertical-align: middle;
+}
+.ios-toggle input {
+    display: none;justify-content: flex-end;
+}
+.ios-toggle-slider {
+
+    align-items: left ;
+    position: absolute; cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #abb2b5;
+    border-radius: 999px;
+    transition: background .33s;
+    box-shadow: 0 0.5px 1.5px #0002;
+}
+.ios-toggle-slider:before {
+    position: absolute; content: "";
+    height: 22px; width: 22px;
+    left: 2px; bottom: 2px;
+    background: #fff;
+    transition: .32s cubic-bezier(.44,1.57,.46,.87);
+    border-radius: 50%;
+    box-shadow: 0 1.2px 2px #0001;
+}
+#timingEasyCheckbox:checked + .ios-toggle-slider {
+    background: linear-gradient(90deg, #05b864 50%, #1de0a1 100%);
+}
+#timingEasyCheckbox:checked + .ios-toggle-slider:before {
+    transform: translateX(18px);
+    background: #fff;
+}
+.timing-easy-label {
+    font-size: 1em;
+    color: #000000;
+    user-select: none;
+    font-weight: bold;
+        margin-right: 100px !important;
+}
+
+@media (prefers-color-scheme: dark) {.timing-easy-label,.desc,.setting-label  { color:white;}}
 </style>
 </head>
-<body onload="init()" oncontextmenu="return false;">
+<body oncontextmenu="return false;">
     <div id="title-bar">
         <div id="main-title">野獣ゲーム</div>
     </div>
@@ -141,9 +231,19 @@ html, body {
                 <select id="soundSelect" class="sound-select"></select>
                 <span id="soundCheck" class="sound-check"></span>
             </div>
+            <div class="setting-row timing-row">
+                <label class="ios-toggle-wrap">
+                      <span class="timing-easy-label">タイミング掴みやすく</span>
+                    <span class="ios-toggle">
+                        <input type="checkbox" id="timingEasyCheckbox">
+                        <span class="ios-toggle-slider"></span>
+                    </span>
+                </label>
+            </div>
             <button id="start-btn" onclick="readyBtn()">やりますねぇ‼️</button>
         </div>
     </div>
+    <div id="score-ui">SCORE <span id="score-ui-val">0</span></div>
     <div id="GameTimeLayer"></div>
     <div id="gameBody"></div>
     <div id="GameScoreLayer">
@@ -154,7 +254,7 @@ html, body {
         </div>
         <div class="score-item" id="GameScoreLayer-score">
             <div class="label">SCORE</div>
-            <div class="value" id="score">0</div>
+            <div class="value" id="score-result">0</div>
         </div>
         <div class="score-item" id="GameScoreLayer-bast">
             <div class="label">BEST</div>
@@ -170,18 +270,33 @@ html, body {
         <img src="114514.jpg" alt="114514">
     </div>
     <script>
-    // 効果音リスト
+    // =============== 表示の瞬間ブラックアウト完全排除 ===============
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('ready');
+        setTimeout(init, 1); // 1msでも即時起動
+    });
+
+    // 効果音リスト・変数
     const soundList = [
         { key: 'cc',    name: '標準',    file: 'cc.mp3'     },
         { key: '19',    name: '絶頂',    file: '19.mp3'     },
         { key: 'ka',    name: 'イク',    file: 'ka.mp3'     },
         { key: 'key',   name: '海外獣',  file: 'key.mp3'    },
-        { key: 'mac',   name: 'フッ',    file: 'mac.wav'    },
+        { key: 'mac',   name: 'フッ',    file: 'mac.mp3'    },
         { key: 'wrong', name: '獣',      file: 'wrong.mp3'  },
     ];
     let currentSoundKey = 'cc';
     let soundErr, soundEnd;
     let colNum = 4;
+    let timingEasy = false; // チェックボックス状態
+
+    let blockSize, GameLayer = [], GameLayerBG, touchArea = [], GameTimeLayer,
+        _gameBBList = [], _gameBBListIndex = 0, _gameOver = false, _gameStart = false,
+        _gameSettingNum = 20, _gameTime, _gameTimeNum, _gameScore, _date1, deviationTime,
+        _gameStartTime, _gameStartDatetime, mode = 1, soundMode = 'on';
+
+    const _ttreg = / t{1,2}(\d+)/;
+    const _clearttClsReg = / t{1,2}\d+| bad| empty-cell/g;
 
     function initSoundSelect() {
         const sel = document.getElementById('soundSelect');
@@ -220,19 +335,20 @@ html, body {
         gameRestart();
     }
 
-    let blockSize, GameLayer = [], GameLayerBG, touchArea = [], GameTimeLayer,
-        _gameBBList = [], _gameBBListIndex = 0, _gameOver = false, _gameStart = false,
-        _gameSettingNum = 20, _gameTime, _gameTimeNum, _gameScore, _date1, deviationTime,
-        _gameStartTime, _gameStartDatetime, mode = 1, soundMode = 'on';
-
-    const _ttreg = / t{1,2}(\d+)/;
-    const _clearttClsReg = / t{1,2}\d+| bad| empty-cell/g;
-
     function init() {
         initSoundSelect();
         document.getElementById('colInput').addEventListener('change', updateColNum);
         soundErr = new Audio("mac.wav");
         soundEnd = new Audio("collect.mp3");
+        // iOSトグルのonchange
+        const timingCb = document.getElementById('timingEasyCheckbox');
+        timingCb.checked = false;
+        timingEasy = false;
+        timingCb.onchange = function() {
+            timingEasy = timingCb.checked;
+        };
+
+        // レイヤー生成
         const gameBody = document.getElementById("gameBody");
         GameLayer = [];
         gameBody.innerHTML = '';
@@ -269,15 +385,38 @@ html, body {
             }
         };
         gameRestart();
-        window.addEventListener("resize", refreshSize, false);
+        window.addEventListener("resize", handleResize, false);
+        setTimeout(refreshSize, 1);
     }
 
-    // === コアの動き・アニメ ===
+    function handleResize() { refreshSize(); }
+
     function gameFail() {
         if (_gameOver) return;
         _gameOver = true;
         showCustomImageFull();
         playMacOnce();
+        updatePanel();
+    }
+    function playMacOnce() {
+        if (soundErr) {
+            soundErr.currentTime = 0;
+            soundErr.play();
+            soundErr.onended = function() {
+                closeCustomImageFull();
+                showGameScoreAfterCustom();
+                soundErr.onended = null;
+            };
+        } else {
+            closeCustomImageFull();
+            showGameScoreAfterCustom();
+        }
+    }
+    function showGameScoreAfterCustom() {
+        clearInterval(_gameTime);
+        const cps = getCPS();
+        updatePanel();
+        setTimeout(() => { showGameScoreLayer(cps); }, 200);
     }
     function gameRestart() {
         _gameBBList = [];
@@ -290,7 +429,7 @@ html, body {
         closeCustomImageFull();
         countBlockSize();
         refreshGameLayer(GameLayer[0], false);
-        refreshGameLayer(GameLayer[1], true, 1.5); // ←ここで1.5段ずつ上がる用
+        refreshGameLayer(GameLayer[1], true, 1.5);
         updatePanel();
     }
     function countBlockSize() {
@@ -322,12 +461,30 @@ html, body {
                 r.className += " empty-cell";
                 r.notEmpty = false;
             }
-            // クリック処理
             r.onclick = function(e) {
                 if (_gameOver) return;
                 if (r.className.match(/tt\d/)) return;
                 if (r.className.match(/t\d/)) {
-                    // ClickBefore拡大フェード→After
+                    if (!_gameStart) gameStart();
+                    if (soundMode === "on") {
+                        const sound = new Audio(soundList.find(s => s.key === currentSoundKey).file);
+                        sound.currentTime = 0; sound.play();
+                    }
+                    // タイミングを掴みやすくON時
+                    if (timingEasy) {
+                        r.className = r.className.replace(_ttreg, " tt$1");
+                        r.style.transition = "";
+                        r.style.transform = "";
+                        r.style.opacity = "";
+                        r.style.zIndex = "";
+                        r.style.pointerEvents = "";
+                        _gameBBListIndex++;
+                        _gameScore++;
+                        updatePanel();
+                        gameLayerMoveNextRow(1.5);
+                        return;
+                    }
+                    // 通常アニメ
                     r.style.transition = "transform 0.21s cubic-bezier(.5,1.7,.5,1),opacity 0.21s cubic-bezier(.5,1.7,.5,1)";
                     r.style.zIndex = 11;
                     r.style.transform = "scale(1.22)";
@@ -341,43 +498,6 @@ html, body {
                         r.style.zIndex = "";
                         r.style.pointerEvents = "";
                         if (!_gameOver) {
-                            if (!_gameStart) gameStart();
-                            if (soundMode === "on") {
-                                const sound = new Audio(soundList.find(s => s.key === currentSoundKey).file);
-                                sound.currentTime = 0; sound.play();
-                            }
-                            _gameBBListIndex++;
-                            _gameScore++;
-                            updatePanel();
-                            gameLayerMoveNextRow(1.5); // ←上に1.5段ずつ滑らかに上げる
-                        }
-                    }, 210);
-                    return;
-                }
-                gameFail();
-            };
-            r.ontouchstart = function(e) {
-                if (_gameOver) return;
-                if (r.className.match(/tt\d/)) return;
-                if (r.className.match(/t\d/)) {
-                    r.style.transition = "transform 0.21s cubic-bezier(.5,1.7,.5,1),opacity 0.21s cubic-bezier(.5,1.7,.5,1)";
-                    r.style.zIndex = 11;
-                    r.style.transform = "scale(1.22)";
-                    r.style.opacity = 0;
-                    r.style.pointerEvents = "none";
-                    setTimeout(() => {
-                        r.className = r.className.replace(_ttreg, " tt$1");
-                        r.style.transition = "";
-                        r.style.transform = "";
-                        r.style.opacity = "";
-                        r.style.zIndex = "";
-                        r.style.pointerEvents = "";
-                        if (!_gameOver) {
-                            if (!_gameStart) gameStart();
-                            if (soundMode === "on") {
-                                const sound = new Audio(soundList.find(s => s.key === currentSoundKey).file);
-                                sound.currentTime = 0; sound.play();
-                            }
                             _gameBBListIndex++;
                             _gameScore++;
                             updatePanel();
@@ -388,6 +508,7 @@ html, body {
                 }
                 gameFail();
             };
+            r.ontouchstart = r.onclick;
         }
         if (loop) {
             box.style.transitionDuration = "0ms";
@@ -404,23 +525,25 @@ html, body {
         box.style.transitionDuration = "150ms";
     }
 
-    // ←←ここが「1.5マス分」全体を滑らかに上げるコア
     function gameLayerMoveNextRow(amount = 1.5) {
         for (let i = 0; i < GameLayer.length; i++) {
             const g = GameLayer[i];
             g.y += blockSize * amount;
             g.style.transition = "transform 0.24s cubic-bezier(.7,0,.2,1)";
             g.style.transform = "translate3D(0," + g.y + "px,0)";
-            // もし「下まで来たら」自動でリセット
             if (g.y > blockSize * (Math.floor(g.children.length / colNum))) {
                 setTimeout(() => refreshGameLayer(g, true, amount), 250);
             }
         }
     }
-
     function readyBtn() {
-        document.getElementById("welcome").style.display = "none";
-        updatePanel();
+        const card = document.getElementById("welcome-card");
+        card.classList.add('hide-anim');
+        setTimeout(() => {
+            document.getElementById("welcome").style.display = "none";
+            card.classList.remove('hide-anim');
+            updatePanel();
+        }, 500);
     }
     function timer() {
         _gameTimeNum--;
@@ -435,16 +558,19 @@ html, body {
         }
         updatePanel();
     }
+    function setScoreDisplay(score) {
+        const ui = document.getElementById("score-ui-val");
+        const res = document.getElementById("score-result");
+        if (ui) { ui.innerText = score; ui.textContent = score; }
+        if (res) { res.innerText = score; res.textContent = score; }
+        if (ui) { ui.style.display='none'; ui.offsetHeight; ui.style.display=''; }
+        if (res) { res.style.display='none'; res.offsetHeight; res.style.display=''; }
+    }
     function updatePanel() {
-        if (!_gameOver) {
-            if (mode === 1) {
-                GameTimeLayer.innerText = "TIME: " + Math.ceil(_gameTimeNum);
-            }
+        if (!_gameOver && mode === 1) {
+            GameTimeLayer.innerText = "" + Math.ceil(_gameTimeNum);
         }
-        // スコアは絶対即時反映
-        if (document.getElementById("score")) {
-            document.getElementById("score").innerText = _gameScore.toString();
-        }
+        setScoreDisplay(_gameScore);
     }
     function getCPS() {
         const elapsed = (new Date().getTime() - _gameStartDatetime) / 1000;
@@ -452,32 +578,11 @@ html, body {
         if (isNaN(cps) || cps === Infinity || _gameStartTime < 2) cps = 0;
         return cps;
     }
-
-    function playMacOnce() {
-        if (soundErr) {
-            soundErr.currentTime = 0;
-            soundErr.play();
-            soundErr.onended = function() {
-                closeCustomImageFull();
-                showGameScoreAfterCustom();
-                soundErr.onended = null;
-            };
-        } else {
-            closeCustomImageFull();
-            showGameScoreAfterCustom();
-        }
-    }
     function showCustomImageFull() {
         document.getElementById('customImageFull').style.display = 'flex';
     }
     function closeCustomImageFull() {
         document.getElementById('customImageFull').style.display = 'none';
-    }
-    function showGameScoreAfterCustom() {
-        clearInterval(_gameTime);
-        const cps = getCPS();
-        updatePanel();
-        setTimeout(() => { showGameScoreLayer(cps); }, 200);
     }
     function gameStart() {
         _date1 = new Date();
@@ -486,6 +591,7 @@ html, body {
         _gameTime = setInterval(timer, 1000);
     }
     function gameOver() {
+        if (_gameOver) return;
         _gameOver = true;
         clearInterval(_gameTime);
         const cps = getCPS();
@@ -496,20 +602,26 @@ html, body {
         }, 500);
     }
     function showGameScoreLayer(cps) {
+        // 必ず全てのスコアUIを正しく再表示
         const layer = document.getElementById("GameScoreLayer");
         let text = "";
         if (mode === 1) {
             const date2 = new Date();
-            deviationTime = date2.getTime() - _date1.getTime();
+            deviationTime = date2.getTime() - (_date1 ? _date1.getTime() : Date.now());
             if (deviationTime >= (_gameSettingNum + 3) * 1000) {
                 text = "TIME OVER: +" + ((deviationTime/1000) - _gameSettingNum).toFixed(2) + "s";
             } else { text = "TIME UP!"; }
         }
         document.getElementById("GameScoreLayer-text").innerText = text;
-        document.getElementById("cps").innerText = cps.toFixed(2);
-        document.getElementById("score").innerText = _gameScore.toString();
+        document.getElementById("cps").innerText = cps ? cps.toFixed(2) : "0.00";
+        setScoreDisplay(_gameScore);
+        // BESTスコア
         const bestVal = getBestScore(_gameScore);
-        document.getElementById("best").innerText = bestVal;
+        const bestElem = document.getElementById("best");
+        if (bestElem) {
+            bestElem.innerText = bestVal;
+            bestElem.textContent = bestVal;
+        }
         layer.style.display = "flex";
     }
     function getBestScore(score) {
@@ -551,7 +663,7 @@ html, body {
                 }
                 box.style.transform = "translate3D(0," + box.y + "px,0)";
             }
-        }, 100);
+        }, 1);
     }
     document.addEventListener("keydown", function(e) {
         const key = e.key.toLowerCase();
