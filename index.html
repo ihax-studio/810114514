@@ -439,20 +439,22 @@ body.ready {
         playMacOnce();
         updatePanel();
     }
-    function playMacOnce() {
-        if (soundErr) {
-            soundErr.currentTime = 0;
-            soundErr.play();
-            soundErr.onended = function() {
-                closeCustomImageFull();
-                showGameScoreAfterCustom();
-                soundErr.onended = null;
-            };
-        } else {
+   function playMacOnce() {
+    if (soundErr) {
+        soundErr.currentTime = 0;
+        soundErr.play();
+        soundErr.onended = function() {
             closeCustomImageFull();
             showGameScoreAfterCustom();
-        }
+            soundErr.onended = null;
+        };
+    } else {
+        closeCustomImageFull();
+        showGameScoreAfterCustom();
     }
+}
+
+
     function showGameScoreAfterCustom() {
         clearInterval(_gameTime);
         const cps = getCPS();
@@ -763,6 +765,29 @@ body.ready {
 });
 
 
+let customImageClickCount = 0;
+
+function showCustomImageFull() {
+    const el = document.getElementById('customImageFull');
+    el.style.display = 'flex';
+    customImageClickCount = 0;
+
+    // イベントを一度解除してから再度付与（多重登録防止）
+    el.onclick = null;
+    el.onclick = function() {
+        customImageClickCount++;
+        if (customImageClickCount >= 2) {
+            // 画像即消してスコア出す、音はそのまま
+            el.style.display = 'none';
+            showGameScoreAfterCustom(true);
+        }
+    }
+}
+function closeCustomImageFull() {
+    const el = document.getElementById('customImageFull');
+    el.style.display = 'none';
+    el.onclick = null;
+}
 
     </script>
 </body>
