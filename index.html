@@ -5,6 +5,32 @@
 <title>野獣ゲーム</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 <style>
+    html{
+          transition: transform 0.55s ease;
+    }
+body {
+    transition: transform 0.55s ease;
+    transform: scale(1.44);
+    
+}
+
+body.page-scaled {
+    transform: scale(1);
+}
+
+#welcome-card {
+    transform: scale(0.85);
+    opacity: 0;
+    transition: transform 0.5s ease, opacity 0.1s ease;
+}
+body.card-in #welcome-card {
+    transform: scale(1);
+    opacity: 1;
+}
+
+
+
+
 html, body {
     width: 100vw; height: 100vh; margin: 0; padding: 0;
     font-family: "Helvetica Neue", Helvetica, "Noto Sans JP", "Meiryo", sans-serif;
@@ -43,7 +69,7 @@ body.ready {
 #main-title {  backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);   
     text-align: center;
-    font-size: 2.7em; font-weight: 900; letter-spacing: .03em;
+    font-size: 2.7em;  letter-spacing: .03em;
     color: #ffffff;
     line-height: 1.13em; user-select: none;
     background: linear-gradient(90deg, #ffffff 50%, #ffe8c7 100%);
@@ -52,28 +78,29 @@ body.ready {
     margin: 0 20px 0 0; padding: 0;
     flex-shrink: 0;
 }
-#welcome {  backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);   
+#welcome {     backdrop-filter: blur(11px);
+      -webkit-backdrop-filter: blur(11px);
     display: flex; flex-direction: column; align-items: center;
     margin-top: 0; padding-top: 0; width: 100vw; min-height: 100vh;
     position: absolute; top: 0; left: 0; z-index: 10; background: none;
 }
 #welcome-card {
-    background: #fffdfa4a; border-radius: 18px;
+    background: #fffdfa4c; border-radius: 18px;
+ 
     box-shadow: 0 8px 36px #00000039, 0 1.5px 6px #fff3;
     padding: 2.3em 2.2em 1.1em 2.2em; max-width: 400px; width: 95vw;
     margin-top: 10em; display: flex; flex-direction: column; align-items: stretch;
 }
 .desc { font-size: 1.14em; line-height: 1.7em; text-align: center; margin-bottom: 1.3em; color: #000000; letter-spacing: .02em; }
 .setting-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 8px; }
-.setting-label { font-size: 1.07em; color: #000000; width: 80px; text-align: left; user-select: none; }
+.setting-label { font-size: 1.07em; color: #000000; width: 80px; text-align: left; user-select: none;text-shadow: 0 2px 20px #00000055; }
 .setting-input, .sound-select {
     border: 1px solid #ffffff; border-radius: 7px;
     background: #fffdfa7b; color: #544511; padding: 0.42em 0.98em;
     font-size: 1.10em; font-family: inherit; min-width: 60px;
     transition: border 0.14s, box-shadow 0.14s; outline: none;
 }
-.setting-input:focus, .sound-select:focus { border: 1.7px solid #000000; box-shadow: 0 0 0 2px #ffee9985; }
+.setting-input:focus, .sound-select:focus {  box-shadow: 0 0 0 2px #ffffff85; }
 .sound-select { min-width: 115px; }
 .sound-check { margin-left: 6px; color: #00c194; font-weight: bold; font-size: 1.03em; user-select: none; }
 #start-btn {
@@ -86,7 +113,7 @@ body.ready {
     transition: background .14s, box-shadow .14s,transform .3s;
      transform: scale(1.11);
     background: rgba(0, 0, 0, 0.8);
-    box-shadow: 0 1px 4px #ffffff44;
+    box-shadow: 0 1px 24px #ffffff44;
     color:white;
 }
 #start-btn:active {
@@ -105,7 +132,7 @@ body.ready {
 #gameBody { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; background-color: #111111; }
 #GameLayerBG { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; background-color: #111; }
 .GameLayer { position: absolute; bottom: 0; left: 0; will-change: transform; }
-.block { position: absolute; background-repeat: no-repeat; background-position: center; border-top: 1px solid #b8dfe6; }
+.block {position: absolute; background-repeat: no-repeat; background-position: center; border: none; }
 #score-ui {backdrop-filter: blur(8px);    background: rgba(255, 255, 255, 0.3);
       -webkit-backdrop-filter: blur(8px); font-weight: 1;
     position: absolute; top: 12px; right: 18px; z-index: 9; font-size: 2em; color: #000000;
@@ -692,6 +719,18 @@ body.ready {
         const re = new RegExp("(?:(?:^|.*;\\s*)" + name + "\\s*\\=\\s*([^;]*).*$)|^.*$");
         return decodeURIComponent(document.cookie.replace(re, "$1")) || null;
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+    document.body.classList.add('ready');
+    setTimeout(() => {
+        document.body.classList.add('page-scaled');
+        setTimeout(() => {
+            document.body.classList.add('card-in');
+            setTimeout(init, 100); // アニメ開始直後にinit
+        }, 500);
+    }, 10); // 10msディレイで全体ズーム開始
+});
+
     </script>
 </body>
 </html>
