@@ -5,18 +5,32 @@
 <title>野獣ゲーム</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 <style>
-    html{
-          transition: transform 0.55s ease;
-    }
 body {
     transition: transform 0.55s ease;
-    transform: scale(1.44);
-    
+    transform: scale(1.5); /* ← 初期値 */
 }
-
 body.page-scaled {
     transform: scale(1);
 }
+body.bg-blowup {
+    transform: scale(1.2); /* ← スコア時のみ1.33倍に再拡大 */
+}
+
+#GameScoreLayer {
+    transform: scale(1.22);
+    transition: transform 0.32s ease;
+}
+
+#GameScoreLayer.score-in {
+    transform: scale(1.22); /* 常に1.22のまま！ */
+}
+
+
+
+    html{
+          transition: transform 0.55s ease;
+    }
+
 
 #welcome-card {
     transform: scale(0.85);
@@ -628,6 +642,8 @@ body.ready {
             showGameScoreLayer(cps);
         }, 500);
     }
+
+
     function showGameScoreLayer(cps) {
         // 必ず全てのスコアUIを正しく再表示
         const layer = document.getElementById("GameScoreLayer");
@@ -649,8 +665,16 @@ body.ready {
             bestElem.innerText = bestVal;
             bestElem.textContent = bestVal;
         }
-        layer.style.display = "flex";
-    }
+      // body拡大
+    document.body.classList.add("bg-blowup");
+
+    // スコアレイヤー拡大表示
+    layer.classList.remove("score-in"); // アニメリセット
+    layer.style.display = "flex";
+    setTimeout(() => {
+        layer.classList.add("score-in"); // 0.22sで拡大
+    }, 10);
+}
     function getBestScore(score) {
         const keyName = "best-normal";
         const prev = getCookie(keyName) ? parseFloat(getCookie(keyName)) : 0;
@@ -658,21 +682,28 @@ body.ready {
         setCookie(keyName, best.toFixed(2), 365);
         return best.toString();
     }
-    function replayBtn() {
-        const layer = document.getElementById("GameScoreLayer");
-        layer.style.display = "none";
-        _gameBBList = [];
-        _gameBBListIndex = 0;
-        _gameScore = 0;
-        _gameOver = false;
-        _gameStart = false;
-        _gameTimeNum = _gameSettingNum;
-        _gameStartTime = 0;
-        closeCustomImageFull();
-        GameTimeLayer.innerText = "";
-        refreshSize();
-        gameRestart();
-    }
+  function replayBtn() {
+    const layer = document.getElementById("GameScoreLayer");
+    layer.style.display = "none";
+    // --- ここでbodyスケールを絶対に1に戻す ---
+    document.body.classList.remove("bg-blowup");
+    document.body.classList.remove("card-in");      // 念のため
+    document.body.classList.remove("page-scaled");  // 念のため
+    document.body.classList.add("page-scaled");     // scale(1)だけ残す
+
+    _gameBBList = [];
+    _gameBBListIndex = 0;
+    _gameScore = 0;
+    _gameOver = false;
+    _gameStart = false;
+    _gameTimeNum = _gameSettingNum;
+    _gameStartTime = 0;
+    closeCustomImageFull();
+    GameTimeLayer.innerText = "";
+    refreshSize();
+    gameRestart();
+}
+
     function refreshSize() {
         clearTimeout(refreshSize._timer);
         refreshSize._timer = setTimeout(() => {
@@ -730,6 +761,8 @@ body.ready {
         }, 500);
     }, 10); // 10msディレイで全体ズーム開始
 });
+
+
 
     </script>
 </body>
