@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+  <title>翻訳デモ</title>
+  <link rel="stylesheet" href="tttt.css">
+</head>
+<body class="jp-bg">
+  <div class="fade-bg" id="fadeBgA"></div>
+  <div class="fade-bg" id="fadeBgB"></div>
+  <div class="fade-blue"></div>
+  <div class="center-container">
+    <div class="top-text" id="topText"></div>
+    <div class="mic-wrapper">
+      <div class="mic" id="mic"></div>
+    </div>
+    <div class="bottom-text" id="bottomText"></div>
+    <div class="close-button" id="closeBtn"></div>
+  </div>
+  <div class="input-area">
+    <div class="input-inner">
+      <input id="inputText" type="text" placeholder="ここに入力…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+    </div>
+  </div>
+  <script>
+    let isJpToEn = true;
+    const mic = document.getElementById('mic');
+    const input = document.getElementById('inputText');
+    const topText = document.getElementById('topText');
+    const bottomText = document.getElementById('bottomText');
+    const closeBtn = document.getElementById('closeBtn');
+    const body = document.body;
+
+    // 背景色切り替え
+    const COLORS = { blue: "#009bff", red: "#ff2d63" };
+    let nowColor = "blue";
+    let fadeA = document.getElementById('fadeBgA');
+    let fadeB = document.getElementById('fadeBgB');
+    let isATop = true;
+
+    function setBg(colorKey) {
+      fadeA.style.background = COLORS[colorKey];
+      fadeB.style.background = COLORS[colorKey];
+      fadeA.style.opacity = 1;
+      fadeB.style.opacity = 0;
+      isATop = true;
+      nowColor = colorKey;
+    }
+    setBg("blue");
+    function crossFadeBg(nextColorKey) {
+      if (nowColor === nextColorKey) return;
+      const fromColor = COLORS[nowColor];
+      const toColor = COLORS[nextColorKey];
+      let topLayer, bottomLayer;
+      if (isATop) { topLayer = fadeB; bottomLayer = fadeA; }
+      else { topLayer = fadeA; bottomLayer = fadeB; }
+      bottomLayer.style.background = fromColor;
+      bottomLayer.style.opacity = 1;
+      topLayer.style.background = toColor;
+      topLayer.style.opacity = 0;
+      topLayer.style.zIndex = 2;
+      bottomLayer.style.zIndex = 1;
+      void topLayer.offsetWidth;
+      topLayer.style.transition = "opacity 0.5s linear";
+      topLayer.style.opacity = 1;
+      setTimeout(() => {
+        bottomLayer.style.opacity = 0;
+        isATop = !isATop;
+        nowColor = nextColorKey;
+      }, 500);
+    }
+    function swapLangBg() {
+      if (isJpToEn) {
+        crossFadeBg("blue");
+        body.classList.add("jp-bg");
+        body.classList.remove("en-bg");
+      } else {
+        crossFadeBg("red");
+        body.classList.add("en-bg");
+        body.classList.remove("jp-bg");
+      }
+    }
+
+    // mic本体の爆発バウンドアニメ
+    function triggerMicBounce() {
+      mic.classList.remove("bounce-anim");
+      void mic.offsetWidth;
+      mic.classList.add("bounce-anim");
+    }
+
+    function scrollInputIntoView() {
+      setTimeout(() => {
+        input.scrollIntoView({behavior: 'smooth', block: 'end', inline: 'nearest'});
+      }, 120);
+    }
+    input.addEventListener('focus', scrollInputIntoView);
+
+    mic.style.transform = "scale(0.5)";
+    setTimeout(()=>{mic.style.transition="transform 0.6s cubic-bezier(.65,1.8,.23,1)";mic.style.transform="scale(1)";}, 100);
+
+    let enterCount = 0;
+
+    input.addEventListener("input", async e => {
+      triggerMicBounce();    // 本体爆発だけ
+      let val = input.value;
+      // 自動言語切替
+      const txt = val.trim().toLowerCase();
+      if(["english","eng","en","英語"].includes(txt)){
+        isJpToEn = false;
+        swapLangBg();
+        input.value = "";
+        bottomText.textContent = "";
+        return;
+      }
+      if(["日本語","にほんご","japanese","かな"].includes(txt)){
+        isJpToEn = true;
+        swapLangBg();
+        input.value = "";
+        bottomText.textContent = "";
+        return;
+      }
+      if (!val.trim()) {
+        bottomText.textContent = "";
+        bottomText.classList.remove("slide-up");
+        return;
+      }
+      // 翻訳API
+      const from = isJpToEn ? "ja" : "en";
+      const to   = isJpToEn ? "en" : "ja";
+      try {
+        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(val)}&langpair=${from}|${to}&rand=${Date.now()}`);
+        const data = await res.json();
+        let translated = (data && data.responseData && data.responseData.translatedText) ? data.responseData.translatedText : "";
+        bottomText.textContent = translated;
+        bottomText.classList.remove("slide-up");
+        void bottomText.offsetWidth;
+        bottomText.classList.add("slide-up");
+      } catch (e) {
+        bottomText.textContent = "翻訳エラー";
+      }
+    });
+
+    // micクリックで爆発
+    mic.addEventListener('click', () => {
+      triggerMicBounce();
+      isJpToEn = !isJpToEn;
+      input.value = "";
+      bottomText.textContent = "";
+      if(isJpToEn){
+        input.placeholder = "ここに入力…";
+      }else{
+        input.placeholder = "Type here...";
+      }
+      swapLangBg();
+      setTimeout(()=>input.focus(),100);
+    });
+
+    // 2回Enterで全消去
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        if (input.value.trim() === "") {
+          enterCount++;
+        } else {
+          enterCount = 0;
+        }
+        if (enterCount >= 2) {
+          bottomText.textContent = "";
+          input.value = "";
+          enterCount = 0;
+        }
+        scrollInputIntoView();
+      } else {
+        enterCount = 0;
+      }
+    });
+
+    closeBtn.addEventListener('click', ()=>{
+      document.body.style.transition = "opacity 0.45s";
+      document.body.style.opacity = 0;
+      setTimeout(()=>location.href="en.html", 500);
+    });
+
+    window.addEventListener("load", () => {
+      input.value = "";
+      bottomText.textContent = "";
+      bottomText.classList.remove("slide-up");
+      setBg("blue");
+      topText.innerHTML = "";
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+  const fadeBlue = document.querySelector('.fade-blue');
+  // 押されるまでずっと明るい単色青
+  fadeBlue.style.background = '#1484ff';
+
+  // micが押されたらCSSグラデ制御に戻す
+  document.getElementById('mic').addEventListener('click', () => {
+    fadeBlue.style.background = '';
+  });
+});
+
+
+
+  </script>
+</body>
+</html>
