@@ -66,7 +66,7 @@
       .close-button:after {text-shadow: 0 0 25px #0000009c; content: "×"; font-size: 40px; color: #ffffff; position: absolute; left: 16px; top: 1px;font-weight:1; pointer-events: none; }
     .input-area { width: 100vw; position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: flex-end; background: none; z-index: 10; padding-bottom: env(safe-area-inset-bottom, 8px); pointer-events: auto;}
     .input-inner { flex: 1; display: flex; justify-content: center; max-width: 520px;}
-    input[type="text"] {transition: all 0.3s ease; width: 95vw; max-width: 500px; font-size: 1.18em; padding: 0.9em 1.5em; border: 0; outline: none; border-radius: 2em; margin: 1em 0 1.1em 0; background: #ffffffdb; box-shadow: 0 2px 16px #ffffff2b, inset 0 0 56px #ffffff; color: #254166; }
+    input[type="text"] {transition: all 0.3s ease; width: 95vw; max-width: 500px; font-size: 1.18em; padding: 0.9em 1.8em; border: 0; outline: none; border-radius: 2em; margin: 1em 0 1.1em 0; background: #ffffffdb; box-shadow: 0 2px 16px #ffffff2b, inset 0 0 56px #ffffff; color: #254166; }
     input[type="text"]:focus { background: #ffffffab; box-shadow: 0 2px 16px #ffffff33, inset 0 0 42px #ffffff;}
     @media (max-width: 600px) {
       .top-text, .bottom-text { font-size: 61px;}
