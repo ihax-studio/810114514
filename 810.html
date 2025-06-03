@@ -2,51 +2,480 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>ホモスケール背景アニメ</title>
-<link rel="stylesheet" href="810.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>ホモワイプ</title>
+<link rel="stylesheet" href="yaju.css">
 </head>
 <body>
-<div class="bg-img" id="bg">
-  <img src="bgg.png" alt="背景画像" style="width:0;height:0;opacity:0;">
-</div>
-  <button class="img1-btn" id="img1">
-    <img src="img1.png" alt="開始ボタン" id="img1img">
-  </button>
-  <div class="dialog" id="dialog">
-    <iframe src="pz.html" title="ホモiframe"></iframe>
+  <div id="bgImage"></div>
+  <div id="bgWrapper" class="bg-wrapper">
+    <div class="panel" id="startPanel">
+      <div class="panel-header">ホモワイプ</div>
+      <div class="panel-section">
+        <div class="panel-item">
+          <span class="label">ホモム数</span>
+          <input type="number" id="bombCountInput" value="5" min="2">
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-item select" id="difficultyItem">
+          <span class="label">難易度</span>
+          <span class="value" id="difficultyLabel">簡単</span>
+        </div>
+      </div>
+      <button id="startBtn">開始する</button>
+    </div>
+    <div id="game"></div>
   </div>
+  <div id="overlay">
+    <img id="overlayImg" src="" alt="爆弾画像">
+    <div id="overlayDialog">
+      <p id="scoreText">スコア:</p>
+      <button id="retryBtn">やり直す</button>
+    </div>
+  </div>
+  <div id="retryCenter"><button id="retryBtn2">やり直す</button></div>
+  <audio id="sound-cc" src="cc.mp3"></audio>
+  <audio id="sound-wrong" src="wrong.mp3"></audio>
+  <audio id="sound-bomb" src="mac.wav"></audio>
+  <audio id="sound-flag" src="mac.mp3"></audio>
+  <audio id="sound-key" src="key.mp3"></audio>
+  <audio id="sound-collect" src="collect.mp3"></audio>
+  <audio id="sound-change" src="change.mp3"></audio>
   <script>
-    const btn = document.getElementById('img1');
-    const btnImg = document.getElementById('img1img');
-    const bg = document.getElementById('bg');
-    const dialog = document.getElementById('dialog');
+let ROWS = 5, COLS = 5, BOMBS = 5, safeCount = 0;
+let grid = [], spawnTimeouts = [], spawning = true, revealed = 0;
+let currentDiff = '簡単';
+const startPanel = document.getElementById('startPanel');
+const bombCountInput = document.getElementById('bombCountInput');
+const difficultyItem = document.getElementById('difficultyItem');
+const difficultyLabel = document.getElementById('difficultyLabel');
+const startBtn = document.getElementById('startBtn');
+const game = document.getElementById('game');
+const overlay = document.getElementById('overlay');
+const overlayImg = document.getElementById('overlayImg');
+const overlayDialog = document.getElementById('overlayDialog');
+const scoreText = document.getElementById('scoreText');
+const retryBtn = document.getElementById('retryBtn');
+const retryCenter = document.getElementById('retryCenter');
+const retryBtn2 = document.getElementById('retryBtn2');
+const bgImage = document.getElementById('bgImage');
+const soundCC = document.getElementById('sound-cc');
+const soundDiff = document.getElementById('sound-flag');
+const soundFlag = document.getElementById('sound-flag');
+const soundBomb = document.getElementById('sound-bomb');
+const soundWrong = document.getElementById('sound-wrong');
+const soundKey = document.getElementById('sound-key');
+const soundCollect = document.getElementById('sound-collect');
+const soundChange = document.getElementById('sound-change');
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const imgTest = new window.Image();
-      imgTest.src = "bgg.png";
-      imgTest.onload = function() {};
-      imgTest.onerror = function(){
-        bg.classList.add('error');
-        bg.innerHTML = "<div class='error-msg'>bgg.png が見つかりません</div>";
-      };
-      btnImg.onerror = function(){
-        btn.classList.add('error');
-        btn.innerHTML = "<div class='error-msg'>img1.pngが見つかりません</div>";
-        btn.disabled = true;
-      };
-    });
+const DIFF_LIST = ['簡単','いいよこいよ','激しい','絵合わせ'];
+const DIFF_SIZES = [5,12,15,7];
 
-    btn.addEventListener('click', () => {
-      if (btn.disabled || btn.classList.contains('error')) return;
-      // 背景ぼかし＆黒フィルター
-      bg.classList.add('blurred');
-      // ボタン拡大消失
-      btn.classList.add('anim');
-      // ダイアログ表示アニメ
-      setTimeout(() => {
-        dialog.classList.add('active');
-      }, 120);
+// パネル内 ホモム数ラッパー取得
+const bombCountInputWrapper = bombCountInput.closest('.panel-item');
+
+// スマホ判定
+function isMobile() {
+  return window.innerWidth <= 600 || /iPhone|Android.+Mobile|iPod|Windows Phone|webOS|BlackBerry/i.test(navigator.userAgent);
+}
+
+// サウンド確実再生（Safari対応、エラー吸収）
+async function playSoundSafe(audio) {
+  if (!audio) return;
+  try { audio.currentTime = 0; await audio.play(); } catch (e) {}
+}
+// 従来のplaySound（エラー握りつぶし。必要なら既存呼び出しにも使う）
+function playSound(audio) {
+  if (!audio) return;
+  try { audio.currentTime = 0; } catch (e) {}
+  audio.play();
+}
+
+// ホモム数inputの表示切替
+function updateBombCountInput() {
+  if(currentDiff === "絵合わせ") {
+    bombCountInputWrapper.style.display = "none";
+  } else {
+    bombCountInputWrapper.style.display = "";
+  }
+}
+
+// 難易度ボタン押下
+difficultyItem.addEventListener('click', ()=>{
+  let idx = DIFF_LIST.indexOf(difficultyLabel.textContent);
+  idx = (idx + 1) % DIFF_LIST.length;
+  difficultyLabel.textContent = DIFF_LIST[idx];
+  currentDiff = DIFF_LIST[idx];
+  if(currentDiff === "絵合わせ"){
+    ROWS = 7; COLS = 5;
+    bombCountInput.value = ""; // 絵合わせ時はinput空
+  } else if(currentDiff === "激しい") {
+    if(isMobile()){
+      ROWS = 4; COLS = 8;
+    } else {
+      ROWS = 9; COLS = 6; 
+    }
+    bombCountInput.value = 15;
+  } else if(currentDiff === "いいよこいよ") {
+    ROWS = 8; COLS = 5;
+    bombCountInput.value = 7;
+  } else {
+    ROWS = 8; COLS = 5;
+    bombCountInput.value = Math.max(2, Math.floor(ROWS * COLS / 12));
+  }
+  BOMBS = +bombCountInput.value || 0;
+  updateBombCountInput();
+  playSound(soundDiff);
+});
+updateBombCountInput();
+
+bombCountInput.addEventListener('input', ()=>{
+  BOMBS = Math.max(4, +bombCountInput.value);
+});
+
+startBtn.addEventListener('click', ()=>{
+  bgImage.style.transform = 'scale(1.2)';
+  setTimeout(()=>{
+    Array.from(startPanel.children).forEach((child,i)=>{
+      setTimeout(()=>{
+        child.style.transition = 'transform 0.33s cubic-bezier(.8,0,.18,1), opacity 0.33s';
+        child.style.transform = 'scale(1.2)';
+        child.style.opacity = '0';
+      }, i * 120);
     });
+    setTimeout(()=>{
+      startPanel.style.display = 'none';
+      bgImage.style.transform = 'scale(1.2)';
+      game.style.display = "grid";
+      init();
+    }, startPanel.children.length * 120 + 350);
+  }, 500);
+});
+
+const PAIR_IMAGES = [
+  "b1.png","b2.png","b3.png","b4.png","b5.png","b6.png","b7.png","b8.png","b9.png","b11.png"
+];
+
+function init(){
+  safeCount = 0; revealed = 0; grid = [];
+  spawnTimeouts = []; spawning = true;
+  game.innerHTML = '';
+  game.style.display = 'grid';
+  overlay.style.opacity = '0'; overlay.classList.remove('show'); overlay.style.display = 'none';
+  overlayDialog.classList.remove('show'); overlayDialog.style.display = 'none';
+  retryCenter.classList.remove('show');
+  bgImage.classList.remove('blurred');
+  bgImage.style.transform = 'scale(1.2)';
+  if(currentDiff === "絵合わせ") {
+    initMemoryGame();
+    return;
+  }
+  game.classList.remove('memory-mode');
+  if(currentDiff === "激しい" && isMobile()){
+    ROWS = 8; COLS = 8;
+  }
+  game.style.position = '';
+  game.style.left = '';
+  game.style.top = '';
+  game.style.transform = '';
+  game.style.width = '';
+  game.style.height = '';
+  game.style.maxWidth = '';
+  game.style.maxHeight = '';
+  game.style.gridTemplateColumns = `repeat(${COLS}, minmax(0, 1fr))`;
+  game.style.gridTemplateRows = `repeat(${ROWS}, minmax(0, 1fr))`;
+  game.style.gap = '1px';
+
+  for(let y=0;y<ROWS;y++){
+    grid[y] = [];
+    for(let x=0;x<COLS;x++){
+      let cellData = {bomb:false,revealed:false,flagged:false,count:0};
+      grid[y][x] = cellData;
+      const btn = document.createElement('button');
+      btn.className = 'cell';
+      btn.dataset.x = x;
+      btn.dataset.y = y;
+      btn.style.background = "url('b10.png') center/cover no-repeat";
+      attachCellEvents(btn, y, x);
+      btn.style.opacity = '0';
+      btn.style.transform = 'translateY(80px) scale(1)';
+      game.appendChild(btn);
+      const idx = y*COLS+x;
+      const t = setTimeout(()=>{
+        btn.style.transition = 'transform 0.24s cubic-bezier(.8,0,.18,1), opacity 0.24s cubic-bezier(.8,0,.18,1)';
+        btn.style.transform = 'translateY(0) scale(1)';
+        btn.style.opacity = '1';
+        playSound(soundCC);
+      }, idx*108+120);
+      spawnTimeouts.push(t);
+    }
+  }
+  let placed = 0;
+  while(placed < BOMBS){
+    const y = Math.random()*ROWS|0, x = Math.random()*COLS|0;
+    if(!grid[y][x].bomb){ grid[y][x].bomb = true; placed++; }
+  }
+  for(let y=0;y<ROWS;y++){
+    for(let x=0;x<COLS;x++){
+      if(grid[y][x].bomb) continue;
+      let cnt = 0;
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)
+        if(dy||dx){
+          const ny=y+dy,nx=x+dx;
+          if(ny>=0&&ny<ROWS&&nx>=0&&nx<COLS&&grid[ny][nx].bomb) cnt++;
+        }
+      grid[y][x].count = cnt;
+    }
+  }
+  game.addEventListener('click', fastSpawn, {once:true});
+}
+
+function fastSpawn(){
+  if(!spawning) return;
+  spawning = false;
+  spawnTimeouts.forEach(t=>clearTimeout(t));
+  document.querySelectorAll('.cell').forEach(btn=>{
+    btn.style.transition = 'transform 0.18s, opacity 0.18s';
+    btn.style.opacity = '1'; btn.style.transform = 'translateY(0) scale(1)';
+  });
+}
+
+function attachCellEvents(btn, y, x) {
+  let timer;
+  const isMinesweeper = (["簡単","いいよこいよ","激しい"].includes(currentDiff));
+  btn.addEventListener('contextmenu', e=>{
+    if(!isMinesweeper) return;
+    e.preventDefault();
+    flagOrUnflag(btn, y, x);
+  });
+  btn.addEventListener('mousedown', e=>{
+    if(!isMinesweeper) return;
+    e.preventDefault();
+    timer = setTimeout(()=>flagOrUnflag(btn, y, x),500);
+  });
+  btn.addEventListener('mouseup', ()=>{
+    clearTimeout(timer);
+    if(isMinesweeper && grid?.[btn.dataset.y]?.[btn.dataset.x]?.flagged) return;
+    if(isMinesweeper) clickCell(btn);
+  });
+  btn.addEventListener('mouseleave', ()=>clearTimeout(timer));
+  if(!isMinesweeper) {
+    btn.addEventListener('click', ()=>clickCell(btn));
+  }
+}
+
+function flagOrUnflag(btn, y, x) {
+  const cell = grid[btn.dataset.y][btn.dataset.x];
+  if(cell.revealed) return;
+  playSound(soundKey);
+  cell.flagged = !cell.flagged;
+  btn.classList.toggle('flagged');
+  if(cell.flagged) {
+    btn.style.background = "url('ball.png') center/cover no-repeat";
+  } else {
+    btn.style.background = "url('b10.png') center/cover no-repeat";
+  }
+}
+function clickCell(btn){
+  const x = +btn.dataset.x, y = +btn.dataset.y, cell = grid[y][x];
+  if(cell.revealed || cell.flagged) {
+    animateCellDisappear(btn);
+    return;
+  }
+  animateCellDisappear(btn);
+  cell.revealed = true; revealed++;
+  btn.classList.add('revealed');
+  btn.style.background = "url('b8.png') center/cover no-repeat";
+  if(cell.bomb){
+    overlayImg.src = (currentDiff === '激しい') ? "./red.png" : "./114514.png";
+    overlay.style.display = 'flex';
+    overlay.classList.add('show');
+    overlay.style.opacity = '1';
+    overlay.style.zIndex = 99999;
+    document.body.style.pointerEvents = 'none';
+    playSound(soundBomb);
+    btn.classList.add('bomb-anim');
+    btn.style.transform = 'scale(2.4)';
+    btn.style.opacity = '0';
+    setTimeout(()=>{
+      scoreText.textContent = `スコア: ${safeCount}`;
+      overlayDialog.style.display = 'block';
+      setTimeout(()=> overlayDialog.classList.add('show'), 30);
+      document.body.style.pointerEvents = '';
+    }, 1000);
+    return;
+  }
+  safeCount++;
+  btn.innerHTML = cell.count ? `<span>${cell.count}</span>` : '';
+  playSound(soundWrong);
+  if(cell.count === 0) revealNeighbors(x,y);
+  if(revealed === ROWS*COLS - BOMBS) setTimeout(clearWin, 240);
+}
+
+function revealNeighbors(x,y){
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+    const nx=x+dx, ny=y+dy;
+    if(nx>=0&&nx<COLS&&ny>=0&&ny<ROWS){
+      const nb=document.querySelector(`.cell[data-x="${nx}"][data-y="${ny}"]`);
+      if(!grid[ny][nx].revealed && !grid[ny][nx].bomb) clickCell(nb);
+    }
+  }
+}
+
+function clearWin(){
+  document.querySelectorAll('.cell, #game').forEach(el=>{
+    el.style.transition = 'transform 0.55s cubic-bezier(.8,0,.18,1), opacity 0.55s cubic-bezier(.8,0,.18,1)';
+    el.style.transform = 'translateY(-60px) scale(0.8)';
+    el.style.opacity = '0';
+  });
+  setTimeout(()=>{
+    bgImage.style.transform = 'scale(1)';
+    bgImage.classList.add('blurred');
+    playSound(soundCollect);
+    setTimeout(()=>{
+      retryCenter.classList.add('show');
+      retryCenter.style.display = "flex";
+      retryBtn2.style.transform = "scale(1)";
+      retryBtn2.style.opacity = "1";
+    }, 720);
+  }, 500);
+}
+
+// ==== 絵合わせモード専用 ====
+let memSelected = [];
+let memPairMap = [];
+let memRevealed = [];
+function initMemoryGame(){
+  ROWS = 7;
+  COLS = 5;
+  game.classList.add('memory-mode');
+  game.style.position = 'absolute';
+  game.style.left = '50%';
+  game.style.top = '50%';
+  game.style.transform = 'translate(-50%,-50%)';
+  const minSide = Math.min(window.innerWidth, window.innerHeight) * 0.92;
+  game.style.width = minSide + 'px';
+  game.style.height = minSide + 'px';
+  game.style.maxWidth = '98vw';
+  game.style.maxHeight = '90vh';
+  game.style.gap = '8px';
+  game.style.gridTemplateColumns = `repeat(${COLS},1fr)`;
+  game.style.gridTemplateRows = `repeat(${ROWS},1fr)`;
+  game.innerHTML = '';
+  let pairList = [];
+  for(let i=0;i<24;i++) pairList.push(PAIR_IMAGES[i%5], PAIR_IMAGES[i%10]);
+  while(pairList.length < ROWS*COLS) pairList.push("b10.png");
+  for(let i=pairList.length-1;i>0;i--){
+    let j = Math.floor(Math.random()*(i+1));
+    [pairList[i], pairList[j]] = [pairList[j], pairList[i]];
+  }
+  memPairMap = pairList;
+  memSelected = [];
+  memRevealed = Array(ROWS*COLS).fill(false);
+  for(let i=0;i<ROWS*COLS;i++){
+    const btn = document.createElement('button');
+    btn.className = 'cell memory-cell';
+    btn.dataset.idx = i;
+    btn.style.opacity = '0';
+    btn.style.transform = 'translateY(80px) scale(1)';
+    btn.style.background = "#eee";
+    btn.style.width = '100%';
+    btn.style.aspectRatio = '1/1';
+    btn.style.height = 'auto';
+    btn.addEventListener('click', ()=>memoryClick(btn, i));
+    setTimeout(()=>{
+      btn.style.transition = 'transform 0.33s ease, opacity 0.24s cubic-bezier(.8,0,.18,1)';
+      btn.style.transform = 'translateY(0) scale(1)';
+      btn.style.opacity = '1';
+      playSound(soundCC);
+    }, i*70+300);
+    game.appendChild(btn);
+  }
+}
+function memoryClick(btn, idx){
+  playSound(soundFlag);
+  animateCellDisappear(btn);
+  if(memRevealed[idx] || memSelected.length>=2) return;
+  btn.style.background = `url(${memPairMap[idx]}) center/cover no-repeat`;
+  memSelected.push({btn, idx});
+  if(memPairMap[idx]==="b10.png"){
+    overlayImg.src = "./114514.png";
+    overlay.style.display = 'flex';
+    overlay.classList.add('show');
+    overlay.style.opacity = '1';
+    overlay.style.zIndex = 99999;
+    playSound(soundBomb);
+    setTimeout(()=>{
+      scoreText.textContent = `スコア: 0`;
+      overlayDialog.style.display = 'block';
+      setTimeout(()=> overlayDialog.classList.add('show'), 30);
+    }, 1000);
+    return;
+  }
+  if(memSelected.length==2){
+    const [a,b] = memSelected;
+    if(memPairMap[a.idx]===memPairMap[b.idx]){
+      setTimeout(()=>{
+        a.btn.style.visibility = "hidden";
+        b.btn.style.visibility = "hidden";
+        memRevealed[a.idx]=true; memRevealed[b.idx]=true;
+        memSelected = [];
+        playSound(soundChange);
+        if(memRevealed.filter(x=>x).length===48){
+          clearWin();
+        }
+      }, 550);
+    }else{
+      setTimeout(()=>{
+        a.btn.style.background = "#eee";
+        b.btn.style.background = "#eee";
+        playSound(soundKey);
+        memSelected = [];
+      }, 700);
+    }
+  }
+}
+
+// ★リサイズ対応！絵合わせ・激しい中は盤面リサイズ
+window.addEventListener("resize", () => {
+  if(game.classList.contains("memory-mode")){
+    const minSide = Math.min(window.innerWidth, window.innerHeight) * 0.92;
+    game.style.width = minSide + 'px';
+    game.style.height = minSide + 'px';
+  }
+  if(currentDiff === "激しい" && isMobile()){
+    game.style.gridTemplateColumns = `repeat(8, minmax(0, 1fr))`;
+    game.style.gridTemplateRows = `repeat(8, minmax(0, 1fr))`;
+  }
+});
+
+// ボタン拡大アニメ→サウンド→リロード
+async function retryAnimAndReload(btn) {
+  btn.classList.add('retry-zoom');
+  await new Promise(r=>requestAnimationFrame(r));
+  await playSoundSafe(soundChange);
+  btn.classList.add('scaling');
+  setTimeout(() => {
+    window.location.reload(true);
+  }, 700);
+}
+// 両方の「やり直す」ボタンで拡大アニメ
+retryBtn.onclick = (e) => { e.preventDefault(); retryAnimAndReload(retryBtn); };
+retryBtn2.onclick = (e) => { e.preventDefault(); retryAnimAndReload(retryBtn2); };
+
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    document.body.classList.add("scaled-in");
+  }, 10);
+});
+
+function animateCellDisappear(btn) {
+  if (!btn.classList.contains('cell-disappear')) {
+    btn.classList.add('cell-disappear');
+  }
+}
+
   </script>
 </body>
 </html>
