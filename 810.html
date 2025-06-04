@@ -108,7 +108,7 @@ difficultyItem.addEventListener('click', ()=>{
   difficultyLabel.textContent = DIFF_LIST[idx];
   currentDiff = DIFF_LIST[idx];
   if(currentDiff === "絵合わせ"){
-    ROWS = 7; COLS = 5;
+    ROWS = 5; COLS = 5;
     bombCountInput.value = ""; // 絵合わせ時はinput空
   } else if(currentDiff === "激しい") {
     if(isMobile()){
@@ -347,7 +347,7 @@ let memSelected = [];
 let memPairMap = [];
 let memRevealed = [];
 function initMemoryGame(){
-  ROWS = 7;
+  ROWS = 5;
   COLS = 5;
   game.classList.add('memory-mode');
   game.style.position = 'absolute';
