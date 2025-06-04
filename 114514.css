@@ -60,7 +60,8 @@ body.ready {
     background: linear-gradient(135deg, #eeeeee 0%, #bbbbbb 100%) !important;
     cursor: pointer !important;
 }
-@media (prefers-color-scheme: dark) {hr{border solid 0.1px white; text-shadow:  0 0 22px black}
+@media (prefers-color-scheme: dark) {
+    hr{border: solid 0.1px white; text-shadow:  0 0 22px black;}
     .block.empty-cell {
         background: linear-gradient(135deg, #111 0%, #222 100%) !important;
     }
