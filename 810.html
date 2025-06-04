@@ -4,44 +4,87 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>ホモワイプ</title>
-<link rel="stylesheet" href="yaju.css">
+  <link rel="stylesheet" href="yaju.css">
+
 </head>
 <body>
-  <div id="bgImage"></div>
-  <div id="bgWrapper" class="bg-wrapper">
-    <div class="panel" id="startPanel">
-      <div class="panel-header">ホモワイプ</div>
-      <div class="panel-section">
-        <div class="panel-item">
-          <span class="label">ホモム数</span>
-          <input type="number" id="bombCountInput" value="5" min="2">
+  <div class="loader"></div>
+  <div id="mainContent" style="display:none">
+    <!-- ここから下はあなたの元のHTMLを全部入れる！省略禁止！ -->
+    <div id="bgImage"></div>
+    <div id="bgWrapper" class="bg-wrapper">
+      <div class="panel" id="startPanel">
+        <div class="panel-header">ホモワイプ</div>
+        <div class="panel-section">
+          <div class="panel-item">
+            <span class="label">ホモム数</span>
+            <input type="number" id="bombCountInput" value="5" min="2">
+          </div>
         </div>
-      </div>
-      <div class="panel-section">
-        <div class="panel-item select" id="difficultyItem">
-          <span class="label">難易度</span>
-          <span class="value" id="difficultyLabel">簡単</span>
+        <div class="panel-section">
+          <div class="panel-item select" id="difficultyItem">
+            <span class="label">難易度</span>
+            <span class="value" id="difficultyLabel">簡単</span>
+          </div>
         </div>
+        <button id="startBtn">開始する</button>
       </div>
-      <button id="startBtn">開始する</button>
+      <div id="game"></div>
     </div>
-    <div id="game"></div>
-  </div>
-  <div id="overlay">
-    <img id="overlayImg" src="" alt="爆弾画像">
-    <div id="overlayDialog">
-      <p id="scoreText">スコア:</p>
-      <button id="retryBtn">やり直す</button>
+    <div id="overlay">
+      <img id="overlayImg" src="" alt="爆弾画像">
+      <div id="overlayDialog">
+        <p id="scoreText">スコア:</p>
+        <button id="retryBtn">やり直す</button>
+      </div>
     </div>
-  </div>
-  <div id="retryCenter"><button id="retryBtn2">やり直す</button></div>
-  <audio id="sound-cc" src="cc.mp3"></audio>
-  <audio id="sound-wrong" src="wrong.mp3"></audio>
-  <audio id="sound-bomb" src="mac.wav"></audio>
-  <audio id="sound-flag" src="mac.mp3"></audio>
-  <audio id="sound-key" src="key.mp3"></audio>
-  <audio id="sound-collect" src="collect.mp3"></audio>
-  <audio id="sound-change" src="change.mp3"></audio>
+    <div id="retryCenter"><button id="retryBtn2">やり直す</button></div>
+    <audio id="sound-cc" src="cc.mp3"></audio>
+    <audio id="sound-wrong" src="wrong.mp3"></audio>
+    <audio id="sound-bomb" src="mac.wav"></audio>
+    <audio id="sound-flag" src="mac.mp3"></audio>
+    <audio id="sound-key" src="key.mp3"></audio>
+    <audio id="sound-collect" src="collect.mp3"></audio>
+    <audio id="sound-change" src="change.mp3"></audio>
+    <!-- ここまでHTML省略禁止 -->
+    <script>
+      // 必要画像一覧（増減自由！.png, jpg等拡張子を正確に）
+      const IMAGE_LIST = [
+        'bg.png', 'b1.png','b2.png','b3.png','b4.png','b5.png','b6.png','b7.png','b8.png','b9.png','b10.png','b11.png','114514.png','red.png','ball.png'
+      ];
+
+      // ローダーDOM
+      const loader = document.querySelector('.loader');
+      const mainContent = document.getElementById('mainContent');
+
+      // 画像をすべてプリロードする
+      function preloadImages(list, callback) {
+        let loaded = 0, total = list.length, done = false;
+        if(total === 0) return callback();
+        list.forEach(src => {
+          const img = new Image();
+          img.onload = img.onerror = () => {
+            loaded++;
+            if(loaded === total && !done) {
+              done = true; callback();
+            }
+          };
+          img.src = src;
+        });
+      }
+
+      // 画像ロード開始！
+      window.addEventListener('DOMContentLoaded', () => {
+        preloadImages(IMAGE_LIST, () => {
+          // 0.3秒だけ遅延して「ロード感」出す
+          setTimeout(()=>{
+            loader.style.display = 'none';
+            mainContent.style.display = '';
+          }, 300);
+        });
+      });
+    </script>
+
   <script>
 let ROWS = 5, COLS = 5, BOMBS = 5, safeCount = 0;
 let grid = [], spawnTimeouts = [], spawning = true, revealed = 0;
