@@ -4,87 +4,44 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>ホモワイプ</title>
-  <link rel="stylesheet" href="yaju.css">
-
+<link rel="stylesheet" href="yaju.css">
 </head>
 <body>
-  <div class="loader"></div>
-  <div id="mainContent" style="display:none">
-    <!-- ここから下はあなたの元のHTMLを全部入れる！省略禁止！ -->
-    <div id="bgImage"></div>
-    <div id="bgWrapper" class="bg-wrapper">
-      <div class="panel" id="startPanel">
-        <div class="panel-header">ホモワイプ</div>
-        <div class="panel-section">
-          <div class="panel-item">
-            <span class="label">ホモム数</span>
-            <input type="number" id="bombCountInput" value="5" min="2">
-          </div>
+  <div id="bgImage"></div>
+  <div id="bgWrapper" class="bg-wrapper">
+    <div class="panel" id="startPanel">
+      <div class="panel-header">ホモワイプ</div>
+      <div class="panel-section">
+        <div class="panel-item">
+          <span class="label">ホモム数</span>
+          <input type="number" id="bombCountInput" value="5" min="2">
         </div>
-        <div class="panel-section">
-          <div class="panel-item select" id="difficultyItem">
-            <span class="label">難易度</span>
-            <span class="value" id="difficultyLabel">簡単</span>
-          </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-item select" id="difficultyItem">
+          <span class="label">難易度</span>
+          <span class="value" id="difficultyLabel">簡単</span>
         </div>
-        <button id="startBtn">開始する</button>
       </div>
-      <div id="game"></div>
+      <button id="startBtn">開始する</button>
     </div>
-    <div id="overlay">
-      <img id="overlayImg" src="" alt="爆弾画像">
-      <div id="overlayDialog">
-        <p id="scoreText">スコア:</p>
-        <button id="retryBtn">やり直す</button>
-      </div>
+    <div id="game"></div>
+  </div>
+  <div id="overlay">
+    <img id="overlayImg" src="" alt="爆弾画像">
+    <div id="overlayDialog">
+      <p id="scoreText">スコア:</p>
+      <button id="retryBtn">やり直す</button>
     </div>
-    <div id="retryCenter"><button id="retryBtn2">やり直す</button></div>
-    <audio id="sound-cc" src="cc.mp3"></audio>
-    <audio id="sound-wrong" src="wrong.mp3"></audio>
-    <audio id="sound-bomb" src="mac.wav"></audio>
-    <audio id="sound-flag" src="mac.mp3"></audio>
-    <audio id="sound-key" src="key.mp3"></audio>
-    <audio id="sound-collect" src="collect.mp3"></audio>
-    <audio id="sound-change" src="change.mp3"></audio>
-    <!-- ここまでHTML省略禁止 -->
-    <script>
-      // 必要画像一覧（増減自由！.png, jpg等拡張子を正確に）
-      const IMAGE_LIST = [
-        'bg.png', 'b1.png','b2.png','b3.png','b4.png','b5.png','b6.png','b7.png','b8.png','b9.png','b10.png','b11.png','114514.png','red.png','ball.png'
-      ];
-
-      // ローダーDOM
-      const loader = document.querySelector('.loader');
-      const mainContent = document.getElementById('mainContent');
-
-      // 画像をすべてプリロードする
-      function preloadImages(list, callback) {
-        let loaded = 0, total = list.length, done = false;
-        if(total === 0) return callback();
-        list.forEach(src => {
-          const img = new Image();
-          img.onload = img.onerror = () => {
-            loaded++;
-            if(loaded === total && !done) {
-              done = true; callback();
-            }
-          };
-          img.src = src;
-        });
-      }
-
-      // 画像ロード開始！
-      window.addEventListener('DOMContentLoaded', () => {
-        preloadImages(IMAGE_LIST, () => {
-          // 0.3秒だけ遅延して「ロード感」出す
-          setTimeout(()=>{
-            loader.style.display = 'none';
-            mainContent.style.display = '';
-          }, 300);
-        });
-      });
-    </script>
-
+  </div>
+  <div id="retryCenter"><button id="retryBtn2">やり直す</button></div>
+  <audio id="sound-cc" src="cc.mp3"></audio>
+  <audio id="sound-wrong" src="wrong.mp3"></audio>
+  <audio id="sound-bomb" src="mac.wav"></audio>
+  <audio id="sound-flag" src="mac.mp3"></audio>
+  <audio id="sound-key" src="key.mp3"></audio>
+  <audio id="sound-collect" src="collect.mp3"></audio>
+  <audio id="sound-change" src="change.mp3"></audio>
   <script>
 let ROWS = 5, COLS = 5, BOMBS = 5, safeCount = 0;
 let grid = [], spawnTimeouts = [], spawning = true, revealed = 0;
@@ -226,8 +183,8 @@ function init(){
   game.style.height = '';
   game.style.maxWidth = '';
   game.style.maxHeight = '';
-  game.style.gridTemplateColumns = `repeat(${COLS}, minmax(0, 1fr))`;
-  game.style.gridTemplateRows = `repeat(${ROWS}, minmax(0, 1fr))`;
+  game.style.gridTemplateColumns = repeat(${COLS}, minmax(0, 1fr));
+  game.style.gridTemplateRows = repeat(${ROWS}, minmax(0, 1fr));
   game.style.gap = '1px';
 
   for(let y=0;y<ROWS;y++){
@@ -342,7 +299,7 @@ function clickCell(btn){
     btn.style.transform = 'scale(2.4)';
     btn.style.opacity = '0';
     setTimeout(()=>{
-      scoreText.textContent = `スコア: ${safeCount}`;
+      scoreText.textContent = スコア: ${safeCount};
       overlayDialog.style.display = 'block';
       setTimeout(()=> overlayDialog.classList.add('show'), 30);
       document.body.style.pointerEvents = '';
@@ -350,7 +307,7 @@ function clickCell(btn){
     return;
   }
   safeCount++;
-  btn.innerHTML = cell.count ? `<span>${cell.count}</span>` : '';
+  btn.innerHTML = cell.count ? <span>${cell.count}</span> : '';
   playSound(soundWrong);
   if(cell.count === 0) revealNeighbors(x,y);
   if(revealed === ROWS*COLS - BOMBS) setTimeout(clearWin, 240);
@@ -360,7 +317,7 @@ function revealNeighbors(x,y){
   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
     const nx=x+dx, ny=y+dy;
     if(nx>=0&&nx<COLS&&ny>=0&&ny<ROWS){
-      const nb=document.querySelector(`.cell[data-x="${nx}"][data-y="${ny}"]`);
+      const nb=document.querySelector(.cell[data-x="${nx}"][data-y="${ny}"]);
       if(!grid[ny][nx].revealed && !grid[ny][nx].bomb) clickCell(nb);
     }
   }
@@ -403,8 +360,8 @@ function initMemoryGame(){
   game.style.maxWidth = '98vw';
   game.style.maxHeight = '90vh';
   game.style.gap = '8px';
-  game.style.gridTemplateColumns = `repeat(${COLS},1fr)`;
-  game.style.gridTemplateRows = `repeat(${ROWS},1fr)`;
+  game.style.gridTemplateColumns = repeat(${COLS},1fr);
+  game.style.gridTemplateRows = repeat(${ROWS},1fr);
   game.innerHTML = '';
   let pairList = [];
   for(let i=0;i<24;i++) pairList.push(PAIR_IMAGES[i%5], PAIR_IMAGES[i%10]);
@@ -440,7 +397,7 @@ function memoryClick(btn, idx){
   playSound(soundFlag);
   animateCellDisappear(btn);
   if(memRevealed[idx] || memSelected.length>=2) return;
-  btn.style.background = `url(${memPairMap[idx]}) center/cover no-repeat`;
+  btn.style.background = url(${memPairMap[idx]}) center/cover no-repeat;
   memSelected.push({btn, idx});
   if(memPairMap[idx]==="b10.png"){
     overlayImg.src = "./114514.png";
@@ -450,7 +407,7 @@ function memoryClick(btn, idx){
     overlay.style.zIndex = 99999;
     playSound(soundBomb);
     setTimeout(()=>{
-      scoreText.textContent = `スコア: 0`;
+      scoreText.textContent = スコア: 0;
       overlayDialog.style.display = 'block';
       setTimeout(()=> overlayDialog.classList.add('show'), 30);
     }, 1000);
@@ -488,8 +445,8 @@ window.addEventListener("resize", () => {
     game.style.height = minSide + 'px';
   }
   if(currentDiff === "激しい" && isMobile()){
-    game.style.gridTemplateColumns = `repeat(8, minmax(0, 1fr))`;
-    game.style.gridTemplateRows = `repeat(8, minmax(0, 1fr))`;
+    game.style.gridTemplateColumns = repeat(8, minmax(0, 1fr));
+    game.style.gridTemplateRows = repeat(8, minmax(0, 1fr));
   }
 });
 
