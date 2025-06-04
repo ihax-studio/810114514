@@ -386,6 +386,35 @@ b{
 }
 .pwa-close-btn:hover { color: #e44; }
 
+
+.loader {
+  position: fixed;
+  left: 50%;
+  top: 44px;
+  transform: translateX(-50%);
+  z-index: 99999999;
+  display: inline-flex;
+  gap: 5px;
+  background: none;
+  pointer-events: none;
+}
+.loader:before,
+.loader:after {
+  content: "";
+  width: 25px;
+  aspect-ratio: 1;
+  box-shadow: 0 0 0 3px inset #fff;
+  animation: l5 1.5s infinite;
+  border-radius: 7px;
+  background: transparent;
+}
+.loader:after { --s:-1; }
+@keyframes l5 {
+  0%   {transform:scaleX(var(--s,1)) translate(0) scale(1)}
+  33%  {transform:scaleX(var(--s,1)) translate(calc(50% + 2.5px)) scale(1)}
+  66%  {transform:scaleX(var(--s,1)) translate(calc(50% + 2.5px)) scale(2)}
+  100% {transform:scaleX(var(--s,1)) translate(0) scale(1)}
+}
 </style>
 </head>
 <body>
@@ -434,7 +463,7 @@ b{
   </div>
 </div>
 
-  
+    <div class="loader" id="imgLoader" style="display:none"></div>
 <script>
 // PWAインストール判定
 function isPWA() {
@@ -474,6 +503,18 @@ window.addEventListener('DOMContentLoaded', ()=>{
 });
 </script>
   <script>
+    const originalStartHandler = startBtn.onclick || function(){};
+
+startBtn.onclick = async function(e){
+  // ローダー表示
+  showLoader(true);
+  // 画像読み込み
+  await preloadImages(IMAGE_LIST.map(n=>n.startsWith("./")||n.startsWith("/")?n:"./"+n));
+  // ローダー消す
+  showLoader(false);
+
+  // オリジナルの動き実行
+  if(typeof originalStartHandler === 'function') originalStartHandler(e);
 let ROWS = 5, COLS = 5, BOMBS = 5, safeCount = 0;
 let grid = [], spawnTimeouts = [], spawning = true, revealed = 0;
 let currentDiff = '簡単';
@@ -908,5 +949,39 @@ function animateCellDisappear(btn) {
 }
 
   </script>
+
+
+<script>
+// 1. ゲームで使う画像名を全部列挙（必要なら追加）
+const IMAGE_LIST = [
+  "b1.png","b2.png","b3.png","b4.png","b5.png","b6.png","b7.png","b8.png","b9.png","b10.png","b11.png",
+  "ball.png","114514.png","red.png","bg.png"
+];
+
+// 2. 画像プリロード関数（Promise.allで全画像読込完了待ち）
+function preloadImages(srcs) {
+  return Promise.all(
+    srcs.map(src => new Promise(res => {
+      const img = new Image();
+      img.onload = () => res({src, ok: true});
+      img.onerror = () => res({src, ok: false});
+      img.src = src;
+    }))
+  );
+}
+
+// 3. ローダー表示制御関数
+function showLoader(show=true) {
+  const l = document.getElementById('imgLoader');
+  if(show){
+    l.style.display = "inline-flex";
+  } else {
+    l.style.display = "none";
+  }
+}
+
+// 4. ローダーCSS（画面上部中央/最前面44px+）
+</script>
+
 </body>
 </html>
