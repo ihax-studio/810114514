@@ -3,18 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>ホモワイプ完全体</title>
+  <title>ホモワイプ</title>
 <link rel="stylesheet" href="yaju.css">
-<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
-<!-- 複数サイズ用意するなら（優先度高いものが先） -->
-<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
-<link rel="manifest" href="manifest.json">
-<script src="sw.js"></script>
-<meta name="theme-color" content="#fff">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="32x32" href="icon-192.png">
-<link rel="shortcut icon" href="icon-192.png">
 </head>
 <body>
   <div id="bgImage"></div>
@@ -52,17 +42,6 @@
   <audio id="sound-key" src="key.mp3"></audio>
   <audio id="sound-collect" src="collect.mp3"></audio>
   <audio id="sound-change" src="change.mp3"></audio>
-
-
-<div id="pwaNotice" style="display:none;">
-  <div class="pwa-notice-inner">
-    <img src="iimage.png" alt="アイコン" class="pwa-icon">
-    <span><b>ホーム画面に追加しよう。</b><br>iOS・macOSは共有から追加。</span>
-    <button class="pwa-close-btn" aria-label="閉じる">&times;</button>
-  </div>
-</div>
-
-
   <script>
 let ROWS = 5, COLS = 5, BOMBS = 5, safeCount = 0;
 let grid = [], spawnTimeouts = [], spawning = true, revealed = 0;
@@ -129,7 +108,7 @@ difficultyItem.addEventListener('click', ()=>{
   difficultyLabel.textContent = DIFF_LIST[idx];
   currentDiff = DIFF_LIST[idx];
   if(currentDiff === "絵合わせ"){
-    ROWS = 5; COLS = 5;
+    ROWS = 7; COLS = 5;
     bombCountInput.value = ""; // 絵合わせ時はinput空
   } else if(currentDiff === "激しい") {
     if(isMobile()){
@@ -368,7 +347,7 @@ let memSelected = [];
 let memPairMap = [];
 let memRevealed = [];
 function initMemoryGame(){
-  ROWS = 5;
+  ROWS = 7;
   COLS = 5;
   game.classList.add('memory-mode');
   game.style.position = 'absolute';
@@ -491,56 +470,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 10);
 });
 
-
-
+function animateCellDisappear(btn) {
+  if (!btn.classList.contains('cell-disappear')) {
+    btn.classList.add('cell-disappear');
+  }
+}
 
   </script>
-
-<script>
-// PWAインストール判定
-function isPWA() {
-  return (window.matchMedia('(display-mode: standalone)').matches)
-    || (window.navigator.standalone === true);
-}
-// バナー表示
-function showPwaBanner() {
-  const banner = document.getElementById('pwaNotice');
-  const noticeInner = banner.querySelector('.pwa-notice-inner');
-  if (!banner) return;
-  banner.style.display = "block";
-  setTimeout(()=>banner.classList.add('show'), 20);
-
-  // ×ボタン: scale+opacity同時トランジション0.6s
-  const closeBtn = banner.querySelector('.pwa-close-btn');
-  closeBtn.onclick = () => {
-    if (noticeInner.classList.contains('shrink')) return;
-    noticeInner.classList.add('shrink');
-    setTimeout(()=>{
-      banner.style.display = "none";
-      noticeInner.classList.remove('shrink');
-      banner.classList.remove('show');
-    }, 600);
-  };
-}
-
-
-// iOS/Androidホーム追加バナー表示（PWA外＆モバイルのみ）
-window.addEventListener('DOMContentLoaded', ()=>{
-  if(
-    !isPWA() &&
-    (window.innerWidth<=600 || /iPhone|Android.+Mobile|iPod|Windows Phone|webOS|BlackBerry/i.test(navigator.userAgent))
-  ){
-    showPwaBanner();
-  }
-});
-
-// sw.js
-self.addEventListener('fetch', function(e) {
-  e.respondWith(caches.match(e.request).then(function(response) {
-    return response || fetch(e.request);
-  }));
-});
-
-</script>
 </body>
 </html>
