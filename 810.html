@@ -556,7 +556,7 @@ difficultyItem.addEventListener('click', ()=>{
     bombCountInput.value = 7;
   } else {
     ROWS = 8; COLS = 5;
-    bombCountInput.value = Math.max(2, Math.floor(ROWS * COLS / 12));
+    bombCountInput.value = Math.max(2, Math.floor(ROWS * COLS / 8));
   }
   BOMBS = +bombCountInput.value || 0;
   updateBombCountInput();
