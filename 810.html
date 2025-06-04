@@ -4,7 +4,307 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>ホモワイプ</title>
-<link rel="stylesheet" href="yaju.css">
+<style>html, body {
+  height: 100%;
+  min-height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+  overflow: hidden;
+  background: #000;
+}
+
+
+
+
+/* 背景画像・フェード */
+#bgImage {
+  position: fixed;
+  left: 0; top: 0;
+  width: 120vw; height: 120vh;
+  background: url('bg.png') center/cover no-repeat;
+  z-index: 0;
+  transform: scale(1);
+  filter: none;
+  transition: transform 0.5s cubic-bezier(.77,0,.18,1), filter 0.5s cubic-bezier(.77,0,.18,1);
+  will-change: transform, filter;
+  pointer-events: none;
+}
+.blurred {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  filter: blur(14px) brightness(0.73);
+}
+
+/* パネル本体 */
+.panel {
+  width: 330px;
+  max-width: 92vw;
+  background: none;
+  border-radius: 18px;
+
+  overflow: hidden;
+  z-index: 3;
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, calc(-52% - 14vh));
+  margin: 0;
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.panel-header {
+  box-shadow: 0 2px 22px rgb(0 0 0 / 20%);
+  background: #0000001f;
+  padding: 20px 16px 10px 16px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  border-radius: 18px 18px 0 0;
+}
+.panel-section {
+  background: #ffffff;
+}
+.panel-item {
+  background: #fff;
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 17px;
+  border-bottom: 1px solid #c4c4c4;
+  transition: transform .3s, opacity .3s;
+}
+.panel-item .label {
+  color: #000;
+}
+.panel-item input {
+  width: 60px;
+  font-size: 20px;
+  text-align: right;
+}
+.panel-item.select {
+  cursor: pointer;
+}
+.panel-item.select .value::after {
+  content: '>';
+  margin-left: 10px;
+}
+
+/* スタートボタン */
+#startBtn {
+  width: 100%;
+  padding: 16px;
+  font-size: 20px;
+  text-align: center;
+  background: linear-gradient(180deg, #2f2f2f91, #4b4b4b96 96%);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 0 0 18px 18px;
+  transition: transform .3s, opacity .3s;
+}
+#startBtn:active {
+  transform: scale(0.95);
+  background: linear-gradient(180deg, #32323275, #0000004a 96%);
+}
+
+#game {
+  display: grid;
+  grid-auto-flow: row;  /* 行で埋める（列ならcolumn） */
+  /* 10列の例（JSで動的に変えても可） */
+  grid-template-columns: repeat(auto-fit, minmax(var(--cell-width), 1fr));
+  gap: var(--cell-gap-y) var(--cell-gap-x);
+  width: max-content;
+  min-width: 10vw;
+  box-sizing: border-box;
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  background: none;
+  overflow-x: auto;  /* 横スクロール可 */
+  /* 他要素の幅やflex等に絶対干渉されない！ */
+}
+/* gapとセルサイズの変数 */
+:root {
+  --cell-gap-x: 1px;   /* 横gap（好きな幅に） */
+  --cell-gap-y: 1px;   /* 縦gap（好きな幅に） */
+  --cell-width: 69px;  /* セルの横幅 */
+  --cell-height: 70px;  /* セルの縦幅 */
+}
+@media (min-width: 600px) {
+:root {
+  --cell-gap-x: 1px;   /* 横gap（好きな幅に） */
+  --cell-gap-y: 1px;   /* 縦gap（好きな幅に） */
+  --cell-width: 84px;  /* セルの横幅 */
+  --cell-height: 80px;  /* セルの縦幅 */
+}
+  }
+/* セル1個：gapだけで必ず等間隔。横幅も自由自在。 */
+.cell {
+  width: var(--cell-width);
+  height: var(--cell-height);
+  background: url('b10.png') center/cover no-repeat;
+  background-size: cover;
+  background-position: center;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  font-size: 24px;
+  color: #1a1a1a;
+  font-weight: bold;
+  opacity: 0;
+  transition: transform 0.22s cubic-bezier(.8, 0, .18, 1), opacity 0.22s cubic-bezier(.8, 0, .18, 1);
+  z-index: 2;
+  will-change: transform, opacity;
+  user-select: none;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;  /* gapだけで間隔取る。margin/padding混ぜるとバグるので禁止 */
+}
+.cell.revealed {
+  background: url('b8.png') center/cover no-repeat !important;
+  cursor: default;
+  text-shadow: 0 2px 5px #01b7ff;
+  color: #fff;
+}
+.cell.flagged {
+  background: url('ball.png') center/cover no-repeat !important;
+  color: #bb0000;
+}
+.cell.bomb-anim {
+  z-index: 50;
+  transition: transform .5s cubic-bezier(.8,0,.18,1), opacity .5s cubic-bezier(.8,0,.18,1);
+}
+#game.memory-mode .cell {
+  border-radius: 5px;
+  transition: border-radius 0.3s ease;
+  font-size: 2.2vw;
+}
+#game.memory-mode .cell:active {
+  border-radius: 55px;
+}
+
+/* オーバーレイ */
+#overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.7);
+  z-index: 99999;
+  pointer-events: auto;
+  transition: opacity 0.4s;
+  flex-direction: column;
+}
+#overlay.show {
+  display: flex; opacity: 1;
+}
+#overlayImg {
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+  z-index: 100000;
+}
+#overlayDialog {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(8px);
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: #ffffff21;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 6px 32px rgba(0,0,0,.22);
+  opacity: 0;
+  z-index: 110000;
+  text-align: center;
+  min-width: 200px;
+  transition: transform 0.5s cubic-bezier(.77,0,.18,1), opacity 0.5s cubic-bezier(.77,0,.18,1);
+  display: none;
+}
+#overlayDialog.show {
+  display: block;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+#overlayDialog p {
+  margin: 0 10 32px;
+  font-size: 22px;
+}
+#overlayDialog button {
+  padding: 11px 32px;
+  font-size: 19px;
+  cursor: pointer;
+  border-radius: 50px;
+  border: none;
+  background: #000;
+  color: #fff;
+  box-shadow: 0 2px 8px #0002;
+}
+
+/* リトライボタン（中央表示） */
+#retryCenter {
+  position: fixed;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  opacity: 0;
+  z-index: 120000;
+  transition: opacity 0.6s cubic-bezier(.77,0,.18,1), transform 0.6s cubic-bezier(.77,0,.18,1);
+  pointer-events: none;
+  background: none;
+}
+#retryCenter.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
+}
+#retryCenter button {
+  padding: 16px 44px;
+  font-size: 26px;
+  cursor: pointer;
+  border-radius: 52px;
+  border: none;
+  background: #fff;
+  color: #000;
+  box-shadow: 0 2px 16px #0003;
+}
+
+/* ページ全体のスケールアニメ（縮小→拡大） */
+body {
+  transform: scale(1.5);
+  transition: transform 0.66s cubic-bezier(.77,0,.18,1);
+}
+body.scaled-in {
+  transform: scale(1);
+}
+
+/* 拡大アニメ用（全画面中央固定＆巨大化） */
+.retry-zoom {
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) scale(1);
+  transform-origin: center center !important;
+  z-index: 9999999 !important;
+  will-change: transform;
+  transition: transform 0.5s ease;
+}
+.retry-zoom.scaling {
+  transform: translate(-50%, -50%) scale(220);
+}
+</style>
 </head>
 <body>
   <div id="bgImage"></div>
@@ -108,7 +408,7 @@ difficultyItem.addEventListener('click', ()=>{
   difficultyLabel.textContent = DIFF_LIST[idx];
   currentDiff = DIFF_LIST[idx];
   if(currentDiff === "絵合わせ"){
-    ROWS = 7; COLS = 5;
+    ROWS = 5; COLS = 5;
     bombCountInput.value = ""; // 絵合わせ時はinput空
   } else if(currentDiff === "激しい") {
     if(isMobile()){
@@ -347,7 +647,7 @@ let memSelected = [];
 let memPairMap = [];
 let memRevealed = [];
 function initMemoryGame(){
-  ROWS = 7;
+  ROWS = 5;
   COLS = 5;
   game.classList.add('memory-mode');
   game.style.position = 'absolute';
