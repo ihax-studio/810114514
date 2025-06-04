@@ -60,7 +60,7 @@ body.ready {
     background: linear-gradient(135deg, #eeeeee 0%, #bbbbbb 100%) !important;
     cursor: pointer !important;
 }
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {hr{border solid 0.1px white; text-shadow:  0 0 22px black}
     .block.empty-cell {
         background: linear-gradient(135deg, #111 0%, #222 100%) !important;
     }
@@ -81,7 +81,7 @@ body.ready {
     line-height: 1.13em; user-select: none;
     background: linear-gradient(90deg, #ffffff 50%, #ffe8c7 100%);
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 1.5px 0 #fff, 0 0 14px #ffe28877;
+    text-shadow: 0 1.5px 0 #fff, 0 0 22px black;
     margin: 0 20px 0 0; padding: 0;
     flex-shrink: 0;
 }
