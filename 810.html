@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>ホモワイプ</title>
+  <title>ホモワイプ完全体</title>
 <link rel="stylesheet" href="yaju.css">
 </head>
 <body>
@@ -183,8 +183,8 @@ function init(){
   game.style.height = '';
   game.style.maxWidth = '';
   game.style.maxHeight = '';
-  game.style.gridTemplateColumns = repeat(${COLS}, minmax(0, 1fr));
-  game.style.gridTemplateRows = repeat(${ROWS}, minmax(0, 1fr));
+  game.style.gridTemplateColumns = `repeat(${COLS}, minmax(0, 1fr))`;
+  game.style.gridTemplateRows = `repeat(${ROWS}, minmax(0, 1fr))`;
   game.style.gap = '1px';
 
   for(let y=0;y<ROWS;y++){
@@ -299,7 +299,7 @@ function clickCell(btn){
     btn.style.transform = 'scale(2.4)';
     btn.style.opacity = '0';
     setTimeout(()=>{
-      scoreText.textContent = スコア: ${safeCount};
+      scoreText.textContent = `スコア: ${safeCount}`;
       overlayDialog.style.display = 'block';
       setTimeout(()=> overlayDialog.classList.add('show'), 30);
       document.body.style.pointerEvents = '';
@@ -307,7 +307,7 @@ function clickCell(btn){
     return;
   }
   safeCount++;
-  btn.innerHTML = cell.count ? <span>${cell.count}</span> : '';
+  btn.innerHTML = cell.count ? `<span>${cell.count}</span>` : '';
   playSound(soundWrong);
   if(cell.count === 0) revealNeighbors(x,y);
   if(revealed === ROWS*COLS - BOMBS) setTimeout(clearWin, 240);
@@ -317,7 +317,7 @@ function revealNeighbors(x,y){
   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
     const nx=x+dx, ny=y+dy;
     if(nx>=0&&nx<COLS&&ny>=0&&ny<ROWS){
-      const nb=document.querySelector(.cell[data-x="${nx}"][data-y="${ny}"]);
+      const nb=document.querySelector(`.cell[data-x="${nx}"][data-y="${ny}"]`);
       if(!grid[ny][nx].revealed && !grid[ny][nx].bomb) clickCell(nb);
     }
   }
@@ -360,8 +360,8 @@ function initMemoryGame(){
   game.style.maxWidth = '98vw';
   game.style.maxHeight = '90vh';
   game.style.gap = '8px';
-  game.style.gridTemplateColumns = repeat(${COLS},1fr);
-  game.style.gridTemplateRows = repeat(${ROWS},1fr);
+  game.style.gridTemplateColumns = `repeat(${COLS},1fr)`;
+  game.style.gridTemplateRows = `repeat(${ROWS},1fr)`;
   game.innerHTML = '';
   let pairList = [];
   for(let i=0;i<24;i++) pairList.push(PAIR_IMAGES[i%5], PAIR_IMAGES[i%10]);
@@ -397,7 +397,7 @@ function memoryClick(btn, idx){
   playSound(soundFlag);
   animateCellDisappear(btn);
   if(memRevealed[idx] || memSelected.length>=2) return;
-  btn.style.background = url(${memPairMap[idx]}) center/cover no-repeat;
+  btn.style.background = `url(${memPairMap[idx]}) center/cover no-repeat`;
   memSelected.push({btn, idx});
   if(memPairMap[idx]==="b10.png"){
     overlayImg.src = "./114514.png";
@@ -407,7 +407,7 @@ function memoryClick(btn, idx){
     overlay.style.zIndex = 99999;
     playSound(soundBomb);
     setTimeout(()=>{
-      scoreText.textContent = スコア: 0;
+      scoreText.textContent = `スコア: 0`;
       overlayDialog.style.display = 'block';
       setTimeout(()=> overlayDialog.classList.add('show'), 30);
     }, 1000);
@@ -445,8 +445,8 @@ window.addEventListener("resize", () => {
     game.style.height = minSide + 'px';
   }
   if(currentDiff === "激しい" && isMobile()){
-    game.style.gridTemplateColumns = repeat(8, minmax(0, 1fr));
-    game.style.gridTemplateRows = repeat(8, minmax(0, 1fr));
+    game.style.gridTemplateColumns = `repeat(8, minmax(0, 1fr))`;
+    game.style.gridTemplateRows = `repeat(8, minmax(0, 1fr))`;
   }
 });
 
