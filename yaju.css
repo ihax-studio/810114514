@@ -284,6 +284,13 @@ body.scaled-in {
   transform: scale(1);
 }
 
+.cell-disappear {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform: scale(5);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999 !important;
+}
 /* 拡大アニメ用（全画面中央固定＆巨大化） */
 .retry-zoom {
   position: fixed !important;
