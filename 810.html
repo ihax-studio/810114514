@@ -9,13 +9,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png">
 <link rel="manifest" href="manifest-810.json">
   <link rel="shortcut icon" href="icon-512.png">
-<script>
-// sw.js
-self.addEventListener('fetch', function(e) {
-  e.respondWith(caches.match(e.request).then(function(response) {
-    return response || fetch(e.request);
-  }));
-});</script>
+
 <meta name="theme-color" content="#479b8d">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-191.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-191.png">
@@ -386,6 +380,13 @@ b{
 }
 .pwa-close-btn:hover { color: #e44; }
 </style>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js');
+      });
+    }
+  </script>
 </head>
 <body>
   <div id="bgImage"></div>
@@ -941,6 +942,20 @@ function showLoader(show=true) {
   }
 }
 </script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js').then(function(registration) {
+      // 成功時
+      // console.log('ServiceWorker registration successful');
+    }).catch(function(error) {
+      // 失敗時
+      // console.error('ServiceWorker registration failed:', error);
+    });
+  });
+}
+</script>
+
 
 </body>
 </html>
