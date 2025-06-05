@@ -466,3 +466,63 @@ b{
 .ox-cell {
   transition: transform 0.5s cubic-bezier(.8,0,.18,1), opacity 0.22s cubic-bezier(.8,0,.18,1);
 }
+
+.img-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%; /* 必要なら幅指定 */
+  height: 100%; /* 必要なら高さ指定 */
+}
+
+.img-wrapper img {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* 画像のサイズ指定は用途で調整 */
+}
+.img-wrapper, .img-bg-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+}
+
+/* --- ローダー表示 --- */
+#loaderOverlay {
+  position: fixed;
+  z-index: 9999999;
+  inset: 0;
+  background: rgba(30,34,36,0.89);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.4s cubic-bezier(.77,0,.18,1);
+  opacity: 1;
+}
+#loaderOverlay.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loader {
+  display: inline-flex;
+  gap: 8px;
+}
+.loader:before,
+.loader:after {
+  content: "";
+  width: 28px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px inset #fff;
+  animation: l5 1.4s infinite;
+}
+.loader:after {
+  --s:-1;
+}
+@keyframes l5 {
+  0%   {transform:scaleX(var(--s,1)) translate(0) scale(1)}
+  33%  {transform:scaleX(var(--s,1)) translate(calc(50% + 3px)) scale(1)}
+  66%  {transform:scaleX(var(--s,1)) translate(calc(50% + 3px)) scale(2)}
+  100% {transform:scaleX(var(--s,1)) translate(0) scale(1)}
+}
