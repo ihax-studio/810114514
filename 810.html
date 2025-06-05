@@ -1,76 +1,79 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
+<meta charset="utf-8" />
+<title>野獣ゲーム</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<link rel="stylesheet" href="114514.css">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-191.png">
 <!-- 複数サイズ用意するなら（優先度高いものが先） -->
-<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-191.png">
 <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="32x32" href="icon-192.png">
-<link rel="manifest" href="manifest-810.json">
-  <link rel="shortcut icon" href="icon-512.png">
-
-<meta name="theme-color" content="#479b8d">
+<link rel="manifest" href="manifest.json">
+<script src="sw.js"></script>
+<meta name="theme-color" content="#fff">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-191.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-191.png">
 <link rel="shortcut icon" href="icon-191.png">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>ホモワイプ</title>
-<link rel="stylesheet" href="114514.css">
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js') // ← ルート直下がベスト
-      .then(function(registration) {
-        // console.log('ServiceWorker registration successful with scope:', registration.scope);
-      })
-      .catch(function(error) {
-        // エラー詳細
-        console.error('ServiceWorker registration failed:', error);
-        alert('ServiceWorker registration failed:\n' + error);
-      });
-  });
-}
-</script>
-
 </head>
-<body>
-  <div id="bgImage"></div>
-  <div id="bgWrapper" class="bg-wrapper">
-    <div class="panel" id="startPanel">
-      <div class="panel-header">ホモワイプ</div>
-      <div class="panel-section">
-        <div class="panel-item">
-          <span class="label">ホモム数</span>
-          <input type="number" id="bombCountInput" value="5" min="2">
-        </div>
-      </div>
-      <div class="panel-section">
-        <div class="panel-item select" id="difficultyItem">
-          <span class="label">難易度</span>
-          <span class="value" id="difficultyLabel">簡単</span>
-        </div>
-      </div>
-      <button id="startBtn">開始する</button>
+<body oncontextmenu="return false;">
+    <div id="title-bar">
+        <div id="main-title">野獣ゲーム</div>
     </div>
-    <div id="game"></div>
-  </div>
-  <div id="overlay">
-    <img id="overlayImg" src="" alt="爆弾画像">
-    <div id="overlayDialog">
-      <p id="scoreText">スコア:</p>
-      <button id="retryBtn">やり直す</button>
+    <div id="welcome">
+        <div id="welcome-card">
+            <div class="desc">
+                <h2>ホモタッチ</h2>
+                流れてイクブロックを<br>
+                正しいタイミングでタップだゾ。<hr>
+            </div>
+            <div class="setting-row">
+                <div class="setting-label">横のマス</div>
+                <input id="colInput" class="setting-input" type="number" min="2" max="10" value="3">
+            </div>
+            <div class="setting-row">
+                <div class="setting-label">鳴き声</div>
+                <select id="soundSelect" class="sound-select"></select>
+                <span id="soundCheck" class="sound-check"></span>
+            </div>
+            <div class="setting-row timing-row">
+                <label class="ios-toggle-wrap">
+                      <span class="timing-easy-label">タイミング掴みやすく</span>
+                    <span class="ios-toggle">
+                        <input type="checkbox" id="timingEasyCheckbox">
+                        <span class="ios-toggle-slider"></span>
+                    </span>
+                </label>
+            </div>
+            <button id="start-btn" onclick="readyBtn()">やりますねぇ‼️</button>
+        </div>
     </div>
-  </div>
-  <div id="retryCenter"><button id="retryBtn2">やり直す</button></div>
-  <audio id="sound-cc" src="cc.mp3"></audio>
-  <audio id="sound-wrong" src="wrong.mp3"></audio>
-  <audio id="sound-bomb" src="mac.wav"></audio>
-  <audio id="sound-flag" src="mac.mp3"></audio>
-  <audio id="sound-key" src="key.mp3"></audio>
-  <audio id="sound-collect" src="collect.mp3"></audio>
-  <audio id="sound-change" src="change.mp3"></audio>
+    <div id="score-ui"><span id="score-ui-val">0</span></div>
+    <div id="GameTimeLayer"></div>
+    <div id="gameBody"></div>
+    <div id="GameScoreLayer">
+        <h2 id="GameScoreLayer-text"></h2>
+        <div class="score-item" id="GameScoreLayer-CPS">
+            <div class="label">CPS</div>
+            <div class="value" id="cps">0.0</div>
+        </div>
+        <div class="score-item" id="GameScoreLayer-score">
+            <div class="label">スコア</div>
+            <div class="value" id="score-result">0</div>
+        </div>
+        <div class="score-item" id="GameScoreLayer-bast">
+            <div class="label">BEST</div>
+            <div class="value" id="best">0</div>
+        </div>
+        <div>
+            <button onclick="replayBtn()">もう一度</button>
+            <button onclick="location.reload()">タイトル</button>
+        </div>
+    </div>
+    <div id="customImageFull">
+        <div id="customImageBg"></div>
+        <img src="114514.jpg" alt="114514">
+    </div>
 
 
 <div id="pwaNotice" style="display:none;">
@@ -80,17 +83,486 @@ if ('serviceWorker' in navigator) {
     <button class="pwa-close-btn" aria-label="閉じる">&times;</button>
   </div>
 </div>
+    <script>
+    // =============== 表示の瞬間ブラックアウト完全排除 ===============
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('ready');
+        setTimeout(init, 1); // 1msでも即時起動
+    });
 
-<!-- 難易度画像パネル -->
-<div id="difficultyPanel" class="difficulty-panel">
-  <div class="difficulty-img-row">
-    <button class="diff-img-btn" data-idx="0"><img src="n1.png" alt="簡単"></button>
-    <button class="diff-img-btn" data-idx="1"><img src="n2.png" alt="いいよこいよ"></button>
-    <button class="diff-img-btn" data-idx="2"><img src="n3.png" alt="激しい"></button>
-    <button class="diff-img-btn" data-idx="3"><img src="n4.png" alt="絵合わせ"></button>
-    <button class="diff-img-btn" data-idx="4"><img src="n5.png" alt="OX"></button>
-  </div>
-</div>
+    // 効果音リスト・変数
+    const soundList = [
+        { key: 'cc',    name: '標準',    file: 'cc.mp3'     },
+        { key: '19',    name: '絶頂',    file: '19.mp3'     },
+        { key: 'ka',    name: 'イク',    file: 'ka.mp3'     },
+        { key: 'key',   name: '海外獣',  file: 'key.mp3'    },
+        { key: 'mac',   name: 'フッ',    file: 'mac.mp3'    },
+        { key: 'wrong', name: '獣',      file: 'wrong.mp3'  },
+    ];
+    let currentSoundKey = 'cc';
+    let soundErr, soundEnd;
+    let colNum = 3;
+    let timingEasy = false; // チェックボックス状態
+
+    let blockSize, GameLayer = [], GameLayerBG, touchArea = [], GameTimeLayer,
+        _gameBBList = [], _gameBBListIndex = 0, _gameOver = false, _gameStart = false,
+        _gameSettingNum = 20, _gameTime, _gameTimeNum, _gameScore, _date1, deviationTime,
+        _gameStartTime, _gameStartDatetime, mode = 1, soundMode = 'on';
+
+    const _ttreg = / t{1,2}(\d+)/;
+    const _clearttClsReg = / t{1,2}\d+| bad| empty-cell/g;
+
+    function initSoundSelect() {
+        const sel = document.getElementById('soundSelect');
+        sel.innerHTML = '';
+        soundList.forEach((s) => {
+            const opt = document.createElement('option');
+            opt.value = s.key;
+            opt.innerText = s.name;
+            sel.appendChild(opt);
+        });
+        sel.value = currentSoundKey;
+        updateSoundCheck();
+        sel.onchange = function() {
+            currentSoundKey = sel.value;
+            updateSoundCheck();
+            playSelectedSound();
+        };
+    }
+    function updateSoundCheck() {
+        const sel = document.getElementById('soundSelect');
+        document.getElementById('soundCheck').textContent = '✔ ' + soundList.find(s => s.key === sel.value).name;
+    }
+    function playSelectedSound() {
+        const s = soundList.find(s => s.key === currentSoundKey);
+        if (s) {
+            const audio = new Audio(s.file);
+            audio.currentTime = 0;
+            audio.play();
+        }
+    }
+    function updateColNum() {
+        let v = parseInt(document.getElementById('colInput').value);
+        if (isNaN(v) || v < 2) v = 2;
+        if (v > 10) v = 10;
+        colNum = v;
+        gameRestart();
+    }
+
+    function init() {
+        initSoundSelect();
+        document.getElementById('colInput').addEventListener('change', updateColNum);
+        soundErr = new Audio("mac.wav");
+        soundEnd = new Audio("collect.mp3");
+        // iOSトグルのonchange
+        const timingCb = document.getElementById('timingEasyCheckbox');
+        timingCb.checked = false;
+        timingEasy = false;
+        timingCb.onchange = function() {
+            timingEasy = timingCb.checked;
+        };
+
+        // レイヤー生成
+        const gameBody = document.getElementById("gameBody");
+        GameLayer = [];
+        gameBody.innerHTML = '';
+        const bgDiv = document.createElement("div");
+        bgDiv.id = "GameLayerBG";
+        gameBody.appendChild(bgDiv);
+        GameLayerBG = bgDiv;
+        for (let i = 1; i <= 2; i++) {
+            const layerDiv = document.createElement("div");
+            layerDiv.id = "GameLayer" + i;
+            layerDiv.className = "GameLayer";
+            for (let j = 0; j < 10; j++) {
+                for (let k = 0; k < colNum; k++) {
+                    const cellIndex = k + j * colNum;
+                    const blockDiv = document.createElement("div");
+                    blockDiv.id = layerDiv.id + "-" + cellIndex;
+                    blockDiv.setAttribute("num", cellIndex);
+                    blockDiv.className = "block" + (k ? " bl" : "");
+                    layerDiv.appendChild(blockDiv);
+                }
+            }
+            GameLayerBG.appendChild(layerDiv);
+            GameLayer.push(layerDiv);
+        }
+        GameLayer[0].childrenList = Array.from(GameLayer[0].children);
+        GameLayer[1].childrenList = Array.from(GameLayer[1].children);
+        GameTimeLayer = document.getElementById("GameTimeLayer");
+        GameLayerBG.onclick = function(e) {
+            if (_gameOver) return false;
+            let y = e.clientY;
+            if (y > touchArea[0] || y < touchArea[1]) return;
+            if (!e.target.classList.contains("block")) {
+                return gameFail();
+            }
+        };
+        gameRestart();
+        window.addEventListener("resize", handleResize, false);
+        setTimeout(refreshSize, 1);
+    }
+
+    function handleResize() { refreshSize(); }
+
+    function gameFail() {
+        if (_gameOver) return;
+        _gameOver = true;
+        showCustomImageFull();
+        playMacOnce();
+        updatePanel();
+    }
+   function playMacOnce() {
+    if (soundErr) {
+        soundErr.currentTime = 0;
+        soundErr.play();
+        soundErr.onended = function() {
+            closeCustomImageFull();
+            showGameScoreAfterCustom();
+            soundErr.onended = null;
+        };
+    } else {
+        closeCustomImageFull();
+        showGameScoreAfterCustom();
+    }
+}
+
+
+    function showGameScoreAfterCustom() {
+        clearInterval(_gameTime);
+        const cps = getCPS();
+        updatePanel();
+        setTimeout(() => { showGameScoreLayer(cps); }, 200);
+    }
+    function gameRestart() {
+        _gameBBList = [];
+        _gameBBListIndex = 0;
+        _gameScore = 0;
+        _gameOver = false;
+        _gameStart = false;
+        _gameTimeNum = _gameSettingNum;
+        _gameStartTime = 0;
+        closeCustomImageFull();
+        countBlockSize();
+        refreshGameLayer(GameLayer[0], false);
+        refreshGameLayer(GameLayer[1], true, 1.5);
+        updatePanel();
+    }
+    function countBlockSize() {
+        const body = document.getElementById("gameBody");
+        blockSize = body.offsetWidth / colNum;
+        body.style.height = window.innerHeight + "px";
+        GameLayerBG.style.height = window.innerHeight + "px";
+        touchArea[0] = window.innerHeight;
+        touchArea[1] = window.innerHeight - blockSize * 3;
+    }
+    function refreshGameLayer(box, loop, offset) {
+        let i = Math.floor(Math.random() * 1000) % colNum + (loop ? 0 : colNum);
+        for (let j = 0; j < box.children.length; j++) {
+            const r = box.children[j];
+            const rstyle = r.style;
+            rstyle.left   = (j % colNum) * blockSize + "px";
+            rstyle.bottom = Math.floor(j / colNum) * blockSize + "px";
+            rstyle.top = "";
+            rstyle.width  = blockSize + "px";
+            rstyle.height = blockSize + "px";
+            r.className = r.className.replace(_clearttClsReg, "");
+            if (i === j) {
+                const colorIndex = (Math.floor(Math.random() * 1000) % 5) + 1;
+                r.className += " t" + colorIndex;
+                r.notEmpty = true;
+                _gameBBList.push({ cell: i % colNum, id: r.id });
+                i = (Math.floor(j / colNum) + 1) * colNum + (Math.floor(Math.random() * 1000) % colNum);
+            } else {
+                r.className += " empty-cell";
+                r.notEmpty = false;
+            }
+            r.onclick = function(e) {
+                if (_gameOver) return;
+                if (r.className.match(/tt\d/)) return;
+                if (r.className.match(/t\d/)) {
+                    if (!_gameStart) gameStart();
+                    if (soundMode === "on") {
+                        const sound = new Audio(soundList.find(s => s.key === currentSoundKey).file);
+                        sound.currentTime = 0; sound.play();
+                    }
+                    // タイミングを掴みやすくON時
+                    if (timingEasy) {
+                        r.className = r.className.replace(_ttreg, " tt$1");
+                        r.style.transition = "";
+                        r.style.transform = "";
+                        r.style.opacity = "";
+                        r.style.zIndex = "";
+                        r.style.pointerEvents = "";
+                        _gameBBListIndex++;
+                        _gameScore++;
+                        updatePanel();
+                        gameLayerMoveNextRow(1.5);
+                        return;
+                    }
+                    // 通常アニメ
+                    r.style.transition = "transform 0.4s cubic-bezier(.5,1.7,.5,1),opacity 0.4s cubic-bezier(.5,1.7,.5,1)";
+                    r.style.zIndex = 11;
+                    r.style.transform = "scale(1.45)";
+                    r.style.opacity = 0;
+                    r.style.pointerEvents = "none";
+                    setTimeout(() => {
+                        r.className = r.className.replace(_ttreg, " tt$1");
+                        r.style.transition = "";
+                        r.style.transform = "";
+                        r.style.opacity = "";
+                        r.style.zIndex = "";
+                        r.style.pointerEvents = "";
+                        if (!_gameOver) {
+                            _gameBBListIndex++;
+                            _gameScore++;
+                            updatePanel();
+                            gameLayerMoveNextRow(1.5);
+                        }
+                    }, 210);
+                    return;
+                }
+                gameFail();
+            };
+            r.ontouchstart = r.onclick;
+        }
+        if (loop) {
+            box.style.transitionDuration = "0ms";
+            box.style.display = "none";
+            box.y = - blockSize * (Math.floor(box.children.length / colNum) + (offset || 0));
+            setTimeout(function() {
+                box.style.transform = "translate3D(0," + box.y + "px,0)";
+                setTimeout(function() { box.style.display = "block"; }, 100);
+            }, 200);
+        } else {
+            box.y = 0;
+            box.style.transform = "translate3D(0," + box.y + "px,0)";
+        }
+        box.style.transitionDuration = "150ms";
+    }
+
+    function gameLayerMoveNextRow(amount = 1.5) {
+        for (let i = 0; i < GameLayer.length; i++) {
+            const g = GameLayer[i];
+            g.y += blockSize * amount;
+            g.style.transition = "transform 0.24s cubic-bezier(.7,0,.2,1)";
+            g.style.transform = "translate3D(0," + g.y + "px,0)";
+            if (g.y > blockSize * (Math.floor(g.children.length / colNum))) {
+                setTimeout(() => refreshGameLayer(g, true, amount), 250);
+            }
+        }
+    }
+    function readyBtn() {
+        const card = document.getElementById("welcome-card");
+        card.classList.add('hide-anim');
+        setTimeout(() => {
+            document.getElementById("welcome").style.display = "none";
+            card.classList.remove('hide-anim');
+            updatePanel();
+        }, 500);
+    }
+    function timer() {
+        _gameTimeNum--;
+        _gameStartTime++;
+        if (mode === 1 && _gameTimeNum <= 0) {
+            GameTimeLayer.innerText = "TIME UP!";
+            gameOver();
+            GameLayerBG.classList.add("flash");
+            if (soundMode === "on") {
+                soundEnd.currentTime = 0; soundEnd.play();
+            }
+        }
+        updatePanel();
+    }
+    function setScoreDisplay(score) {
+        const ui = document.getElementById("score-ui-val");
+        const res = document.getElementById("score-result");
+        if (ui) { ui.innerText = score; ui.textContent = score; }
+        if (res) { res.innerText = score; res.textContent = score; }
+        if (ui) { ui.style.display='none'; ui.offsetHeight; ui.style.display=''; }
+        if (res) { res.style.display='none'; res.offsetHeight; res.style.display=''; }
+    }
+    function updatePanel() {
+        if (!_gameOver && mode === 1) {
+            GameTimeLayer.innerText = "" + Math.ceil(_gameTimeNum);
+        }
+        setScoreDisplay(_gameScore);
+    }
+    function getCPS() {
+        const elapsed = (new Date().getTime() - _gameStartDatetime) / 1000;
+        let cps = _gameScore / elapsed;
+        if (isNaN(cps) || cps === Infinity || _gameStartTime < 2) cps = 0;
+        return cps;
+    }
+    function showCustomImageFull() {
+        document.getElementById('customImageFull').style.display = 'flex';
+    }
+    function closeCustomImageFull() {
+        document.getElementById('customImageFull').style.display = 'none';
+    }
+    function gameStart() {
+        _date1 = new Date();
+        _gameStartDatetime = _date1.getTime();
+        _gameStart = true;
+        _gameTime = setInterval(timer, 1000);
+    }
+    function gameOver() {
+        if (_gameOver) return;
+        _gameOver = true;
+        clearInterval(_gameTime);
+        const cps = getCPS();
+        updatePanel();
+        setTimeout(() => {
+            GameLayerBG.classList.remove("flash");
+            showGameScoreLayer(cps);
+        }, 500);
+    }
+
+
+    function showGameScoreLayer(cps) {
+        // 必ず全てのスコアUIを正しく再表示
+        const layer = document.getElementById("GameScoreLayer");
+        let text = "";
+        if (mode === 1) {
+            const date2 = new Date();
+            deviationTime = date2.getTime() - (_date1 ? _date1.getTime() : Date.now());
+            if (deviationTime >= (_gameSettingNum + 3) * 1000) {
+                text = "TIME OVER: +" + ((deviationTime/1000) - _gameSettingNum).toFixed(2) + "s";
+            } else { text = "TIME UP!"; }
+        }
+        document.getElementById("GameScoreLayer-text").innerText = text;
+        document.getElementById("cps").innerText = cps ? cps.toFixed(2) : "0.00";
+        setScoreDisplay(_gameScore);
+        // BESTスコア
+        const bestVal = getBestScore(_gameScore);
+        const bestElem = document.getElementById("best");
+        if (bestElem) {
+            bestElem.innerText = bestVal;
+            bestElem.textContent = bestVal;
+        }
+      // body拡大
+    document.body.classList.add("bg-blowup");
+
+    // スコアレイヤー拡大表示
+    layer.classList.remove("score-in"); // アニメリセット
+    layer.style.display = "flex";
+    setTimeout(() => {
+        layer.classList.add("score-in"); // 0.22sで拡大
+    }, 10);
+}
+    function getBestScore(score) {
+        const keyName = "best-normal";
+        const prev = getCookie(keyName) ? parseFloat(getCookie(keyName)) : 0;
+        const best = Math.max(prev, score);
+        setCookie(keyName, best.toFixed(2), 365);
+        return best.toString();
+    }
+  function replayBtn() {
+    const layer = document.getElementById("GameScoreLayer");
+    layer.style.display = "none";
+    // --- ここでbodyスケールを絶対に1に戻す ---
+    document.body.classList.remove("bg-blowup");
+    document.body.classList.remove("card-in");      // 念のため
+    document.body.classList.remove("page-scaled");  // 念のため
+    document.body.classList.add("page-scaled");     // scale(1)だけ残す
+
+    _gameBBList = [];
+    _gameBBListIndex = 0;
+    _gameScore = 0;
+    _gameOver = false;
+    _gameStart = false;
+    _gameTimeNum = _gameSettingNum;
+    _gameStartTime = 0;
+    closeCustomImageFull();
+    GameTimeLayer.innerText = "";
+    refreshSize();
+    gameRestart();
+}
+
+    function refreshSize() {
+        clearTimeout(refreshSize._timer);
+        refreshSize._timer = setTimeout(() => {
+            countBlockSize();
+            for (let i = 0; i < GameLayer.length; i++) {
+                const box = GameLayer[i];
+                for (let j = 0; j < box.children.length; j++) {
+                    const r = box.children[j];
+                    const rstyle = r.style;
+                    rstyle.left = (j % colNum) * blockSize + "px";
+                    rstyle.bottom = Math.floor(j / colNum) * blockSize + "px";
+                    rstyle.top = "";
+                    rstyle.width = blockSize + "px";
+                    rstyle.height = blockSize + "px";
+                }
+                box.style.transform = "translate3D(0," + box.y + "px,0)";
+            }
+        }, 1);
+    }
+    document.addEventListener("keydown", function(e) {
+        const key = e.key.toLowerCase();
+        let idx = 0;
+        if      (key === "d") idx = 1;
+        else if (key === "f") idx = 2;
+        else if (key === "j") idx = 3;
+        else if (key === "k") idx = 4;
+        if (idx >= 1 && _gameStart) {
+            clickByKey(idx);
+        }
+    });
+    function clickByKey(index) {
+        const p = _gameBBList[_gameBBListIndex];
+        const numBase = parseInt(document.getElementById(p.id).getAttribute("num")) - p.cell;
+        const targetNum = numBase + (index - 1);
+        const targetId = p.id.substring(0, p.id.indexOf("-") + 1) + targetNum;
+        document.getElementById(targetId).dispatchEvent(new MouseEvent('mousedown', {bubbles:true}));
+    }
+    function setCookie(name, value, days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        document.cookie = name + "=" + encodeURIComponent(value) + ";expires=" + date.toUTCString() + ";path=/";
+    }
+    function getCookie(name) {
+        const re = new RegExp("(?:(?:^|.*;\\s*)" + name + "\\s*\\=\\s*([^;]*).*$)|^.*$");
+        return decodeURIComponent(document.cookie.replace(re, "$1")) || null;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+    document.body.classList.add('ready');
+    setTimeout(() => {
+        document.body.classList.add('page-scaled');
+        setTimeout(() => {
+            document.body.classList.add('card-in');
+            setTimeout(init, 100); // アニメ開始直後にinit
+        }, 500);
+    }, 10); // 10msディレイで全体ズーム開始
+});
+
+
+let customImageClickCount = 0;
+
+function showCustomImageFull() {
+    const el = document.getElementById('customImageFull');
+    el.style.display = 'flex';
+    customImageClickCount = 0;
+
+    // イベントを一度解除してから再度付与（多重登録防止）
+    el.onclick = null;
+    el.onclick = function() {
+        customImageClickCount++;
+        if (customImageClickCount >= 2) {
+            // 画像即消してスコア出す、音はそのまま
+            el.style.display = 'none';
+            showGameScoreAfterCustom(true);
+        }
+    }
+}
+function closeCustomImageFull() {
+    const el = document.getElementById('customImageFull');
+    el.style.display = 'none';
+    el.onclick = null;
+}
+
+    </script>
 
 <script>
 // PWAインストール判定
@@ -129,494 +601,14 @@ window.addEventListener('DOMContentLoaded', ()=>{
     showPwaBanner();
   }
 });
-</script>
-  <script>// ---- グローバル ----
-let ROWS = 8, COLS = 5, BOMBS = 5, safeCount = 0;
-let grid = [], spawnTimeouts = [], spawning = true, revealed = 0;
-let currentDiff = '簡単';
-const DIFF_NAMES = ['簡単','いいよこいよ','激しい','絵合わせ','OX（2人）'];
-const DIFF_SETTINGS = [
-  {rows: 8, cols: 5, bombs: 5, showInput: true},
-  {rows: 8, cols: 5, bombs: 7, showInput: true},
-  {rows: 9, cols: 6, bombs: 15, showInput: true},
-  {rows: 5, cols: 5, bombs: "", showInput: false},
-  {rows: 5, cols: 5, bombs: "", showInput: false},
-];
-const PAIR_IMAGES = [
-  "b1.png","b2.png","b3.png","b4.png","b5.png","b6.png","b7.png","b8.png","b9.png","b11.png"
-];
 
-// DOM
-const startPanel = document.getElementById('startPanel');
-const bombCountInput = document.getElementById('bombCountInput');
-const difficultyItem = document.getElementById('difficultyItem');
-const difficultyLabel = document.getElementById('difficultyLabel');
-const startBtn = document.getElementById('startBtn');
-const game = document.getElementById('game');
-const overlay = document.getElementById('overlay');
-const overlayImg = document.getElementById('overlayImg');
-const overlayDialog = document.getElementById('overlayDialog');
-const scoreText = document.getElementById('scoreText');
-const retryBtn = document.getElementById('retryBtn');
-const retryCenter = document.getElementById('retryCenter');
-const retryBtn2 = document.getElementById('retryBtn2');
-const bgImage = document.getElementById('bgImage');
-const soundCC = document.getElementById('sound-cc');
-const soundFlag = document.getElementById('sound-flag');
-const soundBomb = document.getElementById('sound-bomb');
-const soundWrong = document.getElementById('sound-wrong');
-const soundKey = document.getElementById('sound-key');
-const soundCollect = document.getElementById('sound-collect');
-const soundChange = document.getElementById('sound-change');
-const difficultyPanel = document.getElementById('difficultyPanel');
-const diffImgBtns = Array.from(document.querySelectorAll('.diff-img-btn'));
-const bombCountInputWrapper = bombCountInput.closest('.panel-item');
-
-// ---- サウンド ----
-function playSound(audio) { try { audio.currentTime = 0; audio.play(); } catch(e){} }
-async function playSoundSafe(audio){ try{ audio.currentTime=0; await audio.play(); }catch(e){} }
-
-// ---- 難易度切替 ----
-function updateBombCountInput(show) {
-  if (show === undefined) show = DIFF_SETTINGS.find(x => x.rows===ROWS&&x.cols===COLS)?.showInput ?? true;
-  bombCountInputWrapper.style.display = show ? '' : 'none';
-}
-function setDifficulty(idx){
-  const setting = DIFF_SETTINGS[idx];
-  ROWS = setting.rows;
-  COLS = setting.cols;
-  BOMBS = setting.showInput ? setting.bombs : "";
-  bombCountInput.value = BOMBS;
-  currentDiff = DIFF_NAMES[idx];
-  difficultyLabel.textContent = DIFF_NAMES[idx];
-  updateBombCountInput(setting.showInput);
-  window.currentDiff = currentDiff;
-}
-diffImgBtns.forEach((btn, idx) => {
-  btn.addEventListener('click', () => {
-    diffImgBtns.forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    setDifficulty(idx);
-    playSound(soundKey);
-    closeDifficultyPanel();
-  });
-});
-difficultyItem.addEventListener('click', openDifficultyPanel);
-function openDifficultyPanel(){
-  difficultyPanel.classList.add('active');
-  difficultyPanel.style.opacity = '0';
-  difficultyPanel.style.transform = 'translate(-50%,-50%) scale(0.8)';
-  requestAnimationFrame(()=>{
-    difficultyPanel.style.transition='transform 0.5s cubic-bezier(.77,0,.18,1), opacity 0.5s cubic-bezier(.77,0,.18,1)';
-    difficultyPanel.style.opacity='1';
-    difficultyPanel.style.transform='translate(-50%,-50%) scale(1)';
-    difficultyPanel.style.pointerEvents='auto';
-  });
-}
-function closeDifficultyPanel(){
-  difficultyPanel.style.opacity='0';
-  difficultyPanel.style.transform='translate(-50%,-50%) scale(0.8)';
-  difficultyPanel.style.pointerEvents='none';
-  setTimeout(()=>difficultyPanel.classList.remove('active'), 500);
-}
-
-// ---- bombCount変更 ----
-bombCountInput.addEventListener('input', ()=>{
-  BOMBS = Math.max(1, +bombCountInput.value || 1);
-});
-
-// ---- スタートボタン ----
-startBtn.addEventListener('click', ()=>{
-  // 難易度パネルは絶対にここで開かない！！
-  bgImage.style.transform = 'scale(1.2)';
-  setTimeout(()=>{
-    Array.from(startPanel.children).forEach((child,i)=>{
-      setTimeout(()=>{
-        child.style.transition = 'transform 0.33s cubic-bezier(.8,0,.18,1), opacity 0.33s';
-        child.style.transform = 'scale(1.2)';
-        child.style.opacity = '0';
-      }, i * 120);
-    });
-    setTimeout(()=>{
-      startPanel.style.display = 'none';
-      bgImage.style.transform = 'scale(1.2)';
-      game.style.display = "grid";
-      init();
-    }, startPanel.children.length * 120 + 350);
-  }, 500);
-});
-
-// ==== OX追加用 ====
-let OX_STATE = { turn: 1, cells: [], finished: false };
-
-// ---- 盤面初期化 ----
-function init(){
-  safeCount=0; revealed=0; grid=[]; spawnTimeouts=[]; spawning=true;
-  game.innerHTML=''; game.style.display='grid';
-  overlay.style.opacity='0'; overlay.classList.remove('show'); overlay.style.display='none';
-  overlayDialog.classList.remove('show'); overlayDialog.style.display='none';
-  retryCenter.classList.remove('show');
-  bgImage.classList.remove('blurred');
-  bgImage.style.transform='scale(1.2)';
-  // OXモード
-  if(currentDiff==="OX（2人）"){
-    initOXGame();
-    return;
-  }
-  // 絵合わせ
-  if(currentDiff==="絵合わせ"){ initMemoryGame(); return; }
-  // 既存マインスイーパー
-  game.classList.remove('memory-mode');
-  game.style.gridTemplateColumns = `repeat(${COLS}, minmax(0, 1fr))`;
-  game.style.gridTemplateRows = `repeat(${ROWS}, minmax(0, 1fr))`;
-  for(let y=0;y<ROWS;y++){
-    grid[y]=[];
-    for(let x=0;x<COLS;x++){
-      let cellData={bomb:false,revealed:false,flagged:false,count:0};
-      grid[y][x]=cellData;
-      const btn = document.createElement('button');
-      btn.className='cell'; btn.dataset.x=x; btn.dataset.y=y;
-      btn.style.background="url('b10.png') center/cover no-repeat";
-      attachCellEvents(btn, y, x);
-      btn.style.opacity='0';
-      btn.style.transform='translateY(80px) scale(1)';
-      game.appendChild(btn);
-      const idx=y*COLS+x;
-      setTimeout(()=>{
-        btn.style.transition='transform 0.24s cubic-bezier(.8,0,.18,1), opacity 0.24s cubic-bezier(.8,0,.18,1)';
-        btn.style.transform='translateY(0) scale(1)';
-        btn.style.opacity='1';
-        playSound(soundCC);
-      }, idx*108+120);
-    }
-  }
-  let placed=0;
-  while(placed < BOMBS){
-    const y=Math.random()*ROWS|0, x=Math.random()*COLS|0;
-    if(!grid[y][x].bomb){ grid[y][x].bomb=true; placed++; }
-  }
-  for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
-    if(grid[y][x].bomb) continue;
-    let cnt=0;
-    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)
-      if(dy||dx){
-        const ny=y+dy,nx=x+dx;
-        if(ny>=0&&ny<ROWS&&nx>=0&&nx<COLS&&grid[ny][nx].bomb) cnt++;
-      }
-    grid[y][x].count=cnt;
-  }
-  game.addEventListener('click', fastSpawn, {once:true});
-}
-function fastSpawn(){
-  if(!spawning)return;
-  spawning=false;
-  document.querySelectorAll('.cell').forEach(btn=>{
-    btn.style.transition='transform 0.18s, opacity 0.18s';
-    btn.style.opacity='1'; btn.style.transform='translateY(0) scale(1)';
-  });
-}
-
-// ---- 盤面イベント ----
-function attachCellEvents(btn, y, x){
-  let timer;
-  const isMinesweeper = ["簡単","いいよこいよ","激しい"].includes(currentDiff);
-  btn.addEventListener('contextmenu',e=>{if(!isMinesweeper)return;e.preventDefault();flagOrUnflag(btn,y,x);});
-  btn.addEventListener('mousedown',e=>{if(!isMinesweeper)return;e.preventDefault();timer=setTimeout(()=>flagOrUnflag(btn,y,x),500);});
-  btn.addEventListener('mouseup',()=>{
-    clearTimeout(timer);
-    if(isMinesweeper&&grid?.[btn.dataset.y]?.[btn.dataset.x]?.flagged)return;
-    if(isMinesweeper) clickCell(btn);
-  });
-  btn.addEventListener('mouseleave',()=>clearTimeout(timer));
-  if(!isMinesweeper) btn.addEventListener('click',()=>clickCell(btn));
-}
-function flagOrUnflag(btn, y, x){
-  const cell=grid[btn.dataset.y][btn.dataset.x];
-  if(cell.revealed)return;
-  playSound(soundKey);
-  cell.flagged=!cell.flagged;
-  btn.classList.toggle('flagged');
-  btn.style.background=cell.flagged ? "url('ball.png') center/cover no-repeat" : "url('b10.png') center/cover no-repeat";
-}
-function clickCell(btn){
-  const x=+btn.dataset.x, y=+btn.dataset.y, cell=grid[y][x];
-  if(cell.revealed||cell.flagged){animateCellDisappear(btn);return;}
-  animateCellDisappear(btn); cell.revealed=true; revealed++;
-  btn.classList.add('revealed');
-  btn.style.background="url('b8.png') center/cover no-repeat";
-  if(cell.bomb){
-    overlayImg.src=(currentDiff==='激しい') ? "./red.png" : "./114514.png";
-    overlay.style.display='flex';
-    overlay.classList.add('show');
-    overlay.style.opacity='1'; overlay.style.zIndex=99999;
-    document.body.style.pointerEvents='none';
-    playSound(soundBomb); btn.classList.add('bomb-anim');
-    btn.style.transform='scale(2.4)'; btn.style.opacity='0';
-    setTimeout(()=>{
-      scoreText.textContent=`スコア: ${safeCount}`;
-      overlayDialog.style.display='block';
-      setTimeout(()=>overlayDialog.classList.add('show'),30);
-      document.body.style.pointerEvents='';
-    }, 1000); return;
-  }
-  safeCount++;
-  btn.innerHTML=cell.count ? `<span>${cell.count}</span>` : '';
-  playSound(soundWrong);
-  if(cell.count===0) revealNeighbors(x,y);
-  if(revealed===ROWS*COLS-BOMBS) setTimeout(clearWin,240);
-}
-function revealNeighbors(x,y){
-  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
-    const nx=x+dx, ny=y+dy;
-    if(nx>=0&&nx<COLS&&ny>=0&&ny<ROWS){
-      const nb=document.querySelector(`.cell[data-x="${nx}"][data-y="${ny}"]`);
-      if(!grid[ny][nx].revealed&&!grid[ny][nx].bomb) clickCell(nb);
-    }
-  }
-}
-function clearWin(){
-  document.querySelectorAll('.cell, #game').forEach(el=>{
-    el.style.transition='transform 0.55s cubic-bezier(.8,0,.18,1), opacity 0.55s cubic-bezier(.8,0,.18,1)';
-    el.style.transform='translateY(-60px) scale(0.8)';
-    el.style.opacity='0';
-  });
-  setTimeout(()=>{
-    bgImage.style.transform='scale(1)';
-    bgImage.classList.add('blurred');
-    playSound(soundCollect);
-    setTimeout(()=>{
-      retryCenter.classList.add('show');
-      retryCenter.style.display="flex";
-      retryBtn2.style.transform="scale(1)";
-      retryBtn2.style.opacity="1";
-    },720);
-  },500);
-}
-
-// ---- 絵合わせ ----
-let memSelected=[], memPairMap=[], memRevealed=[];
-function initMemoryGame(){
-  ROWS=5; COLS=5; game.classList.add('memory-mode');
-  game.style.position='absolute'; game.style.left='50%'; game.style.top='50%'; game.style.transform='translate(-50%,-50%)';
-  const minSide=Math.min(window.innerWidth,window.innerHeight)*0.92;
-  game.style.width=minSide+'px'; game.style.height=minSide+'px'; game.style.maxWidth='98vw'; game.style.maxHeight='90vh';
-  game.style.gap='8px'; game.style.gridTemplateColumns=`repeat(${COLS},1fr)`; game.style.gridTemplateRows=`repeat(${ROWS},1fr)`;
-  game.innerHTML=''; let pairList=[];
-  for(let i=0;i<24;i++) pairList.push(PAIR_IMAGES[i%5],PAIR_IMAGES[i%10]);
-  while(pairList.length<ROWS*COLS) pairList.push("b10.png");
-  for(let i=pairList.length-1;i>0;i--){
-    let j=Math.floor(Math.random()*(i+1)); [pairList[i],pairList[j]]=[pairList[j],pairList[i]];
-  }
-  memPairMap=pairList; memSelected=[]; memRevealed=Array(ROWS*COLS).fill(false);
-  for(let i=0;i<ROWS*COLS;i++){
-    const btn=document.createElement('button');
-    btn.className='cell memory-cell'; btn.dataset.idx=i;
-    btn.style.opacity='0'; btn.style.transform='translateY(80px) scale(1)';
-    btn.style.background="#eee"; btn.style.width='100%'; btn.style.aspectRatio='1/1'; btn.style.height='auto';
-    btn.addEventListener('click',()=>memoryClick(btn,i));
-    setTimeout(()=>{
-      btn.style.transition='transform 0.33s ease, opacity 0.24s cubic-bezier(.8,0,.18,1)';
-      btn.style.transform='translateY(0) scale(1)'; btn.style.opacity='1';
-      playSound(soundCC);
-    },i*70+300);
-    game.appendChild(btn);
-  }
-}
-function memoryClick(btn,idx){
-  playSound(soundFlag); animateCellDisappear(btn);
-  if(memRevealed[idx]||memSelected.length>=2)return;
-  btn.style.background=`url(${memPairMap[idx]}) center/cover no-repeat`;
-  memSelected.push({btn,idx});
-  if(memPairMap[idx]==="b10.png"){
-    overlayImg.src="./114514.png"; overlay.style.display='flex';
-    overlay.classList.add('show'); overlay.style.opacity='1'; overlay.style.zIndex=99999;
-    playSound(soundBomb);
-    setTimeout(()=>{
-      scoreText.textContent=`スコア: 0`;
-      overlayDialog.style.display='block';
-      setTimeout(()=>overlayDialog.classList.add('show'),30);
-    },1000); return;
-  }
-  if(memSelected.length==2){
-    const [a,b]=memSelected;
-    if(memPairMap[a.idx]===memPairMap[b.idx]){
-      setTimeout(()=>{
-        a.btn.style.visibility="hidden"; b.btn.style.visibility="hidden";
-        memRevealed[a.idx]=true; memRevealed[b.idx]=true; memSelected=[];
-        playSound(soundChange);
-        if(memRevealed.filter(x=>x).length===48){ clearWin(); }
-      },550);
-    }else{
-      setTimeout(()=>{
-        a.btn.style.background="#eee"; b.btn.style.background="#eee";
-        playSound(soundKey); memSelected=[];
-      },700);
-    }
-  }
-}
-function initOXGame(){
-  ROWS=4; COLS=4;
-  OX_STATE = {turn: 1, cells: Array(25).fill(0), finished: false};
-  game.classList.remove('memory-mode');
-  game.innerHTML = '';
-  game.style.position = 'absolute';
-  game.style.left = '50%';
-  game.style.top = '50%';
-  game.style.transform = 'translate(-50%,-50%)';
-  game.style.width = 'min(390px,90vw)';
-  game.style.height = 'min(600px,80vw)';
-  game.style.maxWidth = '98vw';
-  game.style.maxHeight = '90vh';
-  game.style.gap = '3px';
-  game.style.gridTemplateColumns = `repeat(${COLS},1fr)`;
-  game.style.gridTemplateRows = `repeat(${ROWS},1fr)`;
-
-  // 番表示
-  let turnLabel = document.createElement('div');
-  turnLabel.id = 'ox-turn-label';
-  turnLabel.textContent = "◯の番です";
-  game.appendChild(turnLabel);
-
-  // 盤面
-  for(let i=0;i<20;i++){
-    let btn = document.createElement('button');
-    btn.className = 'cell ox-cell';
-    btn.dataset.idx = i;
-    btn.style.background = "#fafafa";
-    btn.style.opacity = '0';
-    btn.style.transform = 'translateY(80px) scale(1)';
-    btn.style.aspectRatio = '1/1';
-    btn.disabled = false;
-    btn.addEventListener('click',()=>oxClick(btn,i));
-    setTimeout(()=>{
-      btn.style.transition = 'transform 0.32s cubic-bezier(.8,0,.18,1), opacity 0.22s cubic-bezier(.8,0,.18,1)';
-      btn.style.transform = 'translateY(0) scale(1)';
-      btn.style.opacity = '1';
-    },i*72+180);
-    game.appendChild(btn);
-  }
-}
-
-function oxClick(btn, idx){
-  if(OX_STATE.finished || OX_STATE.cells[idx]!==0) return;
-  let turn = OX_STATE.turn;
-  OX_STATE.cells[idx] = turn;
-
-  // タップ演出アニメ: 0.5sでスケール1→1.4・opacity1→0, その後背景画像をセットして元に戻す
-  btn.style.transition = 'transform 0.5s cubic-bezier(.77,0,.18,1), opacity 0.5s cubic-bezier(.77,0,.18,1)';
-  btn.style.transform = 'scale(1.4)';
-  btn.style.opacity = '0';
-  setTimeout(() => {
-    btn.style.transition = '';
-    btn.style.transform = 'scale(1)';
-    btn.style.opacity = '1';
-    btn.style.background = turn===1
-      ? "url('b11.png') center/cover no-repeat"
-      : "url('b10.png') center/cover no-repeat";
-    btn.disabled = true;
-  }, 500);
-
-  // 番交代
-  OX_STATE.turn *= -1;
-  updateOxTurnLabel();
-
-  // 勝利判定
-  let win = oxCheckWinner();
-  if(win!==0){
-    oxEndGame(win);
-    return;
-  }
-  // 引き分け判定
-  if(OX_STATE.cells.every(x=>x!==0)){
-    oxEndGame(0);
-    return;
-  }
-}
-
-function updateOxTurnLabel(){
-  let label = document.getElementById('ox-turn-label');
-  if(OX_STATE.finished) return;
-  label.classList.remove('slide-up');
-  void label.offsetWidth;
-  label.textContent = OX_STATE.turn === 1 ? "◯の番です" : "×の番です";
-  label.classList.add('slide-up');
-}
-
-// --- OX勝敗判定（5x5縦横斜め） ---
-function oxCheckWinner(){
-  const cells = OX_STATE.cells;
-  const lines = [];
-  for(let y=0;y<4;y++) lines.push([0,1,2,3].map(x=>y*4+x));
-  // 縦4列
-  for(let x=0;x<4;x++) lines.push([0,1,2,3].map(y=>y*4+x));
-  // 斜め
-  lines.push([0,5,10,15]); // 左上→右下
-  lines.push([3,6,9,12]);  // 右上→左下
-  for(const line of lines){
-    let sum = line.map(i=>cells[i]).reduce((a,b)=>a+b,0);
-     if(sum===4) return 1;
-    if(sum===-4) return -1;
-  }
-  return 0;
-}
-
-// --- OX勝敗表示+音 ---
-function oxEndGame(winner){
-  OX_STATE.finished = true;
-  overlayImg.src = "./114514.jpg";
-  overlay.style.display = 'flex';
-  overlay.classList.add('show');
-  overlay.style.opacity = '1';
-  overlay.style.zIndex = 99999;
-  playSound(soundBomb); // mac.wav 再生
-  let text = "";
-  if(winner===1) text = "◯の勝ち！";
-  else if(winner===-1) text = "×の勝ち！";
-  else text = "引き分け！";
-  scoreText.textContent = text;
-  overlayDialog.style.display = 'block';
-  setTimeout(()=> overlayDialog.classList.add('show'), 30);
-}
-
-
-// --- リトライ ---
-async function retryAnimAndReload(btn){
-  btn.classList.add('retry-zoom'); await new Promise(r=>requestAnimationFrame(r));
-  await playSoundSafe(soundChange); btn.classList.add('scaling');
-  setTimeout(()=>{ window.location.reload(true); }, 700);
-}
-retryBtn.onclick = (e)=>{e.preventDefault();retryAnimAndReload(retryBtn);};
-retryBtn2.onclick = (e)=>{e.preventDefault();retryAnimAndReload(retryBtn2);};
-
-// --- スケールアニメ ---
-document.addEventListener("DOMContentLoaded",()=>{
-  setTimeout(()=>{document.body.classList.add("scaled-in");},10);
-});
-function animateCellDisappear(btn){
-  if(!btn.classList.contains('cell-disappear')){
-    btn.classList.add('cell-disappear');
-  }
-}
-
-// --- 最初に「簡単」セット ---
-setDifficulty(0);
-diffImgBtns[0].classList.add('selected');
-updateBombCountInput(DIFF_SETTINGS[0].showInput);
-
-// --- リサイズなど ---
-window.addEventListener("resize",()=>{
-  if(game.classList.contains("memory-mode")){
-    const minSide=Math.min(window.innerWidth,window.innerHeight)*0.92;
-    game.style.width=minSide+'px'; game.style.height=minSide+'px';
-  }
-  if(currentDiff==="激しい" && (window.innerWidth<=600)){
-    game.style.gridTemplateColumns = `repeat(8, minmax(0, 1fr))`;
-    game.style.gridTemplateRows = `repeat(8, minmax(0, 1fr))`;
-  }
+// sw.js
+self.addEventListener('fetch', function(e) {
+  e.respondWith(caches.match(e.request).then(function(response) {
+    return response || fetch(e.request);
+  }));
 });
 
 </script>
-
-
 </body>
 </html>
