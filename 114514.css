@@ -1,259 +1,311 @@
-body {
-    transition: transform 0.55s ease;
-    transform: scale(1.5); /* ← 初期値 */
-}
-body.page-scaled {
-    transform: scale(1);
-}
-body.bg-blowup {
-    transform: scale(1.2); /* ← スコア時のみ1.33倍に再拡大 */
-}
-
-#GameScoreLayer {
-    transform: scale(1.22);
-    transition: transform 0.32s ease;
-}
-
-#GameScoreLayer.score-in {
-    transform: scale(1.22); /* 常に1.22のまま！ */
-}
-
-
-
-    html{
-          transition: transform 0.55s ease;
-    }
-
-
-#welcome-card {
-    transform: scale(0.85);
-    opacity: 0;
-    transition: transform 0.5s ease, opacity 0.1s ease;
-}
-body.card-in #welcome-card {
-    transform: scale(1);
-    opacity: 1;
-}
-
-
-
-
 html, body {
-    width: 100vw; height: 100vh; margin: 0; padding: 0;
-    font-family: "Helvetica Neue", Helvetica, "Noto Sans JP", "Meiryo", sans-serif;
-    color: #222; overflow: hidden;
-    background: linear-gradient(135deg, #ffefc0 0%, #ffecd9 40%, #d1d4e3 100%);
-    /* ★追加：最初は非表示でブラックアウト防止 */
-    
-}
-body.ready {
-    visibility: visible !important;
-}
-* { box-sizing: border-box; }
-@media (prefers-color-scheme: dark) {hr{border: solid 0.2px white; color:white;text-shadow:  0 0 22px black;}
-    html, body {
-        color: #eee;
-        background: linear-gradient(135deg, #23222b 0%, #1a1b1e 90%, #181925 100%);
-    }
-}
-.block.empty-cell {
-    background: linear-gradient(135deg, #eeeeee 0%, #bbbbbb 100%) !important;
-    cursor: pointer !important;
-}
-@media (prefers-color-scheme: dark) {
-    .block.empty-cell {
-        background: linear-gradient(135deg, #111 0%, #222 100%) !important;
-    }
-}
-hr{border:solid .1px black;border-radius:22px;width:95%}
-.t1, .t2, .t3, .t4, .t5 { background-size: auto 100%; background-image: url("ClickBefore.png"); }
-.tt1, .tt2, .tt3, .tt4, .tt5 { background-size: auto 86%; background-image: url("ClickAfter.png"); }
-.bl { border-left: 1px solid #b8dfe6; }
-#title-bar {
-    display: flex; justify-content: center; align-items: center;
-    margin-top: 32px; margin-bottom: 0.5em; width: 100vw;  backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);   
-}
-#main-title {  backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);   
-    text-align: center;
-    font-size: 2.7em;  letter-spacing: .03em;
-    color: #ffffff;
-    line-height: 1.13em; user-select: none;
-    background: linear-gradient(90deg, #ffffff 50%, #ffe8c7 100%);
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 1.5px 0 #fff, 0 0 22px black;
-    margin: 0 20px 0 0; padding: 0;
-    flex-shrink: 0;
-}
-#welcome {     backdrop-filter: blur(11px);
-      -webkit-backdrop-filter: blur(11px);
-    display: flex; flex-direction: column; align-items: center;
-    margin-top: 0; padding-top: 0; width: 100vw; min-height: 100vh;
-    position: absolute; top: 0; left: 0; z-index: 10; background: none;
-}
-#welcome-card {
-    background: #fffdfa4c; border-radius: 18px;
- 
-    box-shadow: 0 8px 36px #00000039, 0 1.5px 6px #fff3;
-    padding: 2.3em 2.2em 1.1em 2.2em; max-width: 400px; width: 95vw;
-    margin-top: 10em; display: flex; flex-direction: column; align-items: stretch;
-}
-.desc { font-size: 1.14em; line-height: 1.7em; text-align: center; margin-bottom: 1.3em; color: #000000; letter-spacing: .02em; }
-.setting-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 8px; }
-.setting-label { font-size: 1.07em; color: #000000; width: 80px; text-align: left; user-select: none;text-shadow: 0 2px 20px #00000055; }
-.setting-input, .sound-select {
-    border: 1px solid #ffffff; border-radius: 7px;
-    background: #fffdfa7b; color: #544511; padding: 0.42em 0.98em;
-    font-size: 1.10em; font-family: inherit; min-width: 60px;
-    transition: border 0.14s, box-shadow 0.14s; outline: none;
-}
-.setting-input:focus, .sound-select:focus {  box-shadow: 0 0 0 2px #ffffff85; }
-.sound-select { min-width: 115px; }
-.sound-check { margin-left: 6px; color: #00c194; font-weight: bold; font-size: 1.03em; user-select: none; }
-#start-btn {
-    font-size: 1.33em; font-weight: bold; margin-top: 14px;
-    padding: 0.7em 2.9em;
-   backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);   
-    color: #ffffff; border: none; border-radius: 9px;
-    box-shadow: 0 2px 22px #00000035; letter-spacing: 0.02em; cursor: pointer;
-    transition: background .14s, box-shadow .14s,transform .3s;
-     transform: scale(1.11);
-    background: rgba(0, 0, 0, 0.8);
-    box-shadow: 0 1px 24px #ffffff44;
-    color:white;
-}
-#start-btn:active {
-    transform: scale(1.0);
-     background: linear-gradient(90deg, #d7d7d785 0%, #f4f4f461 55%,#dfdfdf61 100%);
-    box-shadow: 0 1px 4px #ffffff44;
-    color:rgb(0, 0, 0);
-}
-@media (max-width: 600px) {
-    #main-title { font-size: 2em; }
-    #welcome-card { padding: 1.3em 0.5em 1em 0.5em; }
-    #title-bar { margin-top: 16px;}
-    #start-btn { transform:scale(0.95); }
-}
-#GameTimeLayer { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 2.8em; color: rgb(255, 255, 255); border-radius:55px;padding:12px 18px;font-weight:1; background-color: rgba(173, 173, 173, 0.55); z-index: 5; pointer-events: none; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);  }
-#gameBody { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; background-color: #111111; }
-#GameLayerBG { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; background-color: #111; }
-.GameLayer { position: absolute; bottom: 0; left: 0; will-change: transform; }
-.block {position: absolute; background-repeat: no-repeat; background-position: center; border: none; }
-#score-ui {backdrop-filter: blur(8px);    background: rgba(255, 255, 255, 0.3);
-      -webkit-backdrop-filter: blur(8px); font-weight: 1;
-    position: absolute; top: 12px; right: 18px; z-index: 9; font-size: 2em; color: #000000;box-shadow: 0 0 16px rgba(255, 255, 255, 0.5);
-     padding: 0.27em 0.8em; border-radius: 55px; 
-    user-select: none; pointer-events: none; box-shadow: 0 0 16px rgba(0, 0, 0, 0.135);
-}
-@media (prefers-color-scheme: dark) {
-    #score-ui {color: #ffffff;backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);  }
-}
-#GameScoreLayer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);  display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 20;}
-#GameScoreLayer h2 { font-size: 2.2em; margin-bottom: 0.8em; }
-#GameScoreLayer .score-item { display: flex; justify-content: center; align-items: center; font-size: 1.2em; margin-bottom: 0.4em; }
-#GameScoreLayer .score-item .label { width: 4em; text-align: right; margin-right: 0.5em; }
-#GameScoreLayer .score-item .value { width: 3em; text-align: left; margin-left: 0.5em; }
-#GameScoreLayer button { font-size: 1.2em; padding: 0.3em 1em; margin: 0.6em; border: none; border-radius: 4px; backdrop-filter: blur(8px);box-shadow:inset 0 0 33px rgba(0, 0, 0, 0.25),0 0 11px rgba(0, 0, 0, 0.1);
-      -webkit-backdrop-filter: blur(8px); background-color: #8e8e8e65; color: #fff; transition: background-color .2s; }
-#GameScoreLayer button:hover { background-color: #007ae5; }
-@keyframes flash { 0%{opacity:1;} 50%{opacity:0;} 100%{opacity:1;} }
-.flash { animation: flash .2s 3; }
-.bad { background-color: rgb(211,91,91); animation: flash .2s 3; }
-#customImageFull {
-    display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1000;
-    align-items: center; justify-content: center;
-}
-#customImageBg {
-    position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1001;
-    background: linear-gradient(135deg, #f5f5f5 0%, #dadada 100%);
-    opacity: 0.97;
-}
-@media (prefers-color-scheme: dark) {  hr{border: solid 0.2px white; color:white;text-shadow:  0 0 22px black;}
-    #customImageBg { background: linear-gradient(135deg, #181818 0%, #000000 55%, #1a1a1a 100%); }
-}
-#customImageFull img {
-    display: block; width: 100vw; height: 100vh; object-fit: cover; z-index: 1002; position: relative;
-    user-select: none; pointer-events: none;
-}
-/* ダイアログ縮小アニメ */
-#welcome-card.hide-anim {
-    animation: scaleDownAndHide 0.5s cubic-bezier(.6,-0.1,.5,1.3) forwards;
-}
-@keyframes scaleDownAndHide {
-    0%   { transform: scale(1); opacity: 1; }
-    100% { transform: scale(0.8); opacity: 0; }
-}
-/* --- ここからiOS風トグルスイッチ --- */
-.setting-row.timing-row {
-    margin-bottom: 10px;
-    align-items: left;
-}
-.ios-toggle-wrap {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    user-select: none;
-    margin-left: auto;  /* ←追加：右端にピタッ */
-}
-#timingEasyCheckbox {
-    justify-content: flex-end;
-    display: none;
-}
-.ios-toggle {
-    justify-content: flex-end;
-    display: inline-block; position: relative; width: 44px; height: 26px; margin-left: 10px; vertical-align: middle;
-}
-.ios-toggle input {
-    display: none;justify-content: flex-end;
-}
-.ios-toggle-slider {
-
-    align-items: left ;
-    position: absolute; cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: #abb2b5;
-    border-radius: 999px;
-    transition: background .33s;
-    box-shadow: 0 0.5px 1.5px #0002;
-}
-.ios-toggle-slider:before {
-    position: absolute; content: "";
-    height: 22px; width: 22px;
-    left: 2px; bottom: 2px;
-    background: #fff;
-    transition: .32s cubic-bezier(.44,1.57,.46,.87);
-    border-radius: 50%;
-    box-shadow: 0 1.2px 2px #0001;
-}
-#timingEasyCheckbox:checked + .ios-toggle-slider {
-    background: linear-gradient(90deg, #699688 12%, #a1a195 60%);
-}
-#timingEasyCheckbox:checked + .ios-toggle-slider:before {
-    transform: translateX(18px);
-    background: #fff;
-}
-.timing-easy-label {
-    font-size: 1em;
-    color: #000000;
-    user-select: none;
-    font-weight: bold;
-        margin-right: 100px !important;
+  height: 100%;
+  min-height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+  overflow: hidden;
+  background: #000;
 }
 
-@media (prefers-color-scheme: dark) {.timing-easy-label,.desc,.setting-label  { color:white;}}
 
 
+
+/* 背景画像・フェード */
+#bgImage {
+  position: fixed;
+  left: 0; top: 0;
+  width: 120vw; height: 120vh;
+  background: url('bg.png') center/cover no-repeat;
+  z-index: 0;
+  transform: scale(1);
+  filter: none;
+  transition: transform 0.5s cubic-bezier(.77,0,.18,1), filter 0.5s cubic-bezier(.77,0,.18,1);
+  will-change: transform, filter;
+  pointer-events: none;
+}
+.blurred {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  filter: blur(14px) brightness(0.73);
+}
+
+/* パネル本体 */
+.panel {
+  width: 330px;
+  max-width: 92vw;
+  background: none;
+  border-radius: 18px;
+transition: transform 0.5s cubic-bezier(.77,0,.18,1);
+  overflow: hidden;
+  z-index: 3;
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, calc(-52% - 14vh));
+  margin: 0;
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.panel-header {
+  box-shadow: 0 2px 22px rgb(0 0 0 / 20%);
+  background: #0000001f;
+  padding: 20px 16px 10px 16px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  border-radius: 18px 18px 0 0;
+}
+.panel-section {
+  background: #ffffff;
+}
+.panel-item {
+  background: #fff;
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 17px;
+  border-bottom: 1px solid #c4c4c4;
+  transition: transform .3s, opacity .3s;
+}
+.panel-item .label {
+  color: #000;
+}
+.panel-item input {
+  width: 60px;
+  font-size: 20px;
+  text-align: right;
+}
+.panel-item.select {
+  cursor: pointer;
+}
+.panel-item.select .value::after {
+  content: '>';
+  margin-left: 10px;
+}
+
+/* スタートボタン */
+#startBtn {
+  width: 100%;
+  padding: 16px;
+  font-size: 20px;
+  text-align: center;
+  background: linear-gradient(180deg, #2f2f2f91, #4b4b4b96 96%);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 0 0 18px 18px;
+  transition: transform .3s, opacity .3s;
+}
+#startBtn:active {
+  transform: scale(0.95);
+  background: linear-gradient(180deg, #32323275, #0000004a 96%);
+}
+
+#game {
+  display: grid;
+  grid-auto-flow: row;  /* 行で埋める（列ならcolumn） */
+  /* 10列の例（JSで動的に変えても可） */
+  grid-template-columns: repeat(auto-fit, minmax(var(--cell-width), 1fr));
+  gap: var(--cell-gap-y) var(--cell-gap-x);
+  width: max-content;
+  min-width: 10vw;
+  box-sizing: border-box;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  background: none;
+  /* 他要素の幅やflex等に絶対干渉されない！ */
+}
+/* gapとセルサイズの変数 */
+:root {
+  --cell-gap-x: 1px;   /* 横gap（好きな幅に） */
+  --cell-gap-y: 1px;   /* 縦gap（好きな幅に） */
+  --cell-width: 69px;  /* セルの横幅 */
+  --cell-height: 70px;  /* セルの縦幅 */
+}
+@media (min-width: 600px) {
+:root {
+  --cell-gap-x: 1px;   /* 横gap（好きな幅に） */
+  --cell-gap-y: 1px;   /* 縦gap（好きな幅に） */
+  --cell-width: 84px;  /* セルの横幅 */
+  --cell-height: 80px;  /* セルの縦幅 */
+}
+  }
+/* セル1個：gapだけで必ず等間隔。横幅も自由自在。 */
+.cell {
+  width: var(--cell-width);
+  height: var(--cell-height);
+  background: url('b10.png') center/cover no-repeat;
+  background-size: cover;
+  background-position: center;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  font-size: 24px;
+  color: #1a1a1a;
+  font-weight: bold;
+  opacity: 0;
+  transition: transform 0.22s cubic-bezier(.8, 0, .18, 1), opacity 0.22s cubic-bezier(.8, 0, .18, 1);
+  z-index: 2;
+  will-change: transform, opacity;
+  user-select: none;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;  /* gapだけで間隔取る。margin/padding混ぜるとバグるので禁止 */
+}
+.cell.revealed {
+  background: url('b8.png') center/cover no-repeat !important;
+  cursor: default;
+  text-shadow: 0 2px 5px #01b7ff;
+  color: #fff;
+}
+.cell.flagged {
+  background: url('ball.png') center/cover no-repeat !important;
+  color: #bb0000;
+}
+.cell.bomb-anim {
+  z-index: 50;
+  transition: transform .5s cubic-bezier(.8,0,.18,1), opacity .5s cubic-bezier(.8,0,.18,1);
+}
+#game.memory-mode .cell {
+  border-radius: 80px;
+  transition: border-radius 0.3s ease;
+  font-size: 2.2vw;
+}
+#game.memory-mode .cell:active {
+  border-radius: 5px;
+}
+
+/* オーバーレイ */
+#overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.7);
+  z-index: 99999;
+  pointer-events: auto;
+  transition: opacity 0.4s;
+  flex-direction: column;
+}
+#overlay.show {
+  display: flex; opacity: 1;
+}
+#overlayImg {
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+  z-index: 100000;
+}
+#overlayDialog {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(8px);
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: #ffffff21;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 6px 32px rgba(0,0,0,.22);
+  opacity: 0;
+  z-index: 110000;
+  text-align: center;
+  min-width: 200px;
+  transition: transform 0.5s cubic-bezier(.77,0,.18,1), opacity 0.5s cubic-bezier(.77,0,.18,1);
+  display: none;
+}
+#overlayDialog.show {
+  display: block;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+#overlayDialog p {
+  margin: 0 10 32px;
+  font-size: 22px;
+}
+#overlayDialog button {
+  padding: 11px 32px;
+  font-size: 19px;
+  cursor: pointer;
+  border-radius: 50px;
+  border: none;
+  background: #000;
+  color: #fff;
+  box-shadow: 0 2px 8px #0002;
+}
+
+/* リトライボタン（中央表示） */
+#retryCenter {
+  position: fixed;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  opacity: 0;
+  z-index: 120000;
+  transition: opacity 0.6s cubic-bezier(.77,0,.18,1), transform 0.6s cubic-bezier(.77,0,.18,1);
+  pointer-events: none;
+  background: none;
+}
+#retryCenter.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
+}
+#retryCenter button {
+  padding: 16px 44px;
+  font-size: 26px;
+  cursor: pointer;
+  border-radius: 52px;
+  border: none;
+  background: #fff;
+  color: #000;
+  box-shadow: 0 2px 16px #0003;
+}
+
+/* ページ全体のスケールアニメ（縮小→拡大） */
+body {
+  transform: scale(1.5);
+  transition: transform 0.66s cubic-bezier(.77,0,.18,1);
+}
+body.scaled-in {
+  transform: scale(1);
+}
+
+/* 拡大アニメ用（全画面中央固定＆巨大化） */
+.retry-zoom {
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) scale(1);
+  transform-origin: center center !important;
+  z-index: 9999999 !important;
+  will-change: transform;
+  transition: transform 0.5s ease;
+}
+.retry-zoom.scaling {
+  transform: translate(-50%, -50%) scale(220);
+}
+
+  
 #pwaNotice {
   position: fixed;
   top: -100px; left: 0; right: 0;
   z-index: 999999;
   width: 100vw;
   pointer-events: none;
-  transition: top 0.32s cubic-bezier(.77,0,.18,1);
+  transition: top 0.88s cubic-bezier(.77,0,.18,1);
 }
 #pwaNotice.show {
   top: 0;
@@ -268,7 +320,7 @@ hr{border:solid .1px black;border-radius:22px;width:95%}
   border-radius: 23px;
   box-shadow: 0 6px 33px rgba(0, 0, 0, 0.267);
   padding: 13px 60px 13px 16px;
-  max-width: 400px;
+  max-width: 340px;
   font-size: 1.08em;
   color: #202020b2;
   position: relative;
@@ -277,7 +329,7 @@ hr{border:solid .1px black;border-radius:22px;width:95%}
   gap: 14px;
   opacity: 1;
   transform: scale(1);
-  transition: transform 0.6s cubic-bezier(.77,0,.18,1), opacity 0.6s cubic-bezier(.77,0,.18,1);
+  transition: transform 0.7s cubic-bezier(.77,0,.18,1), opacity 0.6s cubic-bezier(.77,0,.18,1);
 }
 .pwa-notice-inner.shrink {
   transform: scale(0.8);
@@ -303,8 +355,114 @@ b{
   font-size: 27px;
   color: #888;
   cursor: pointer;
-  transition: color 0.16s;
+  transition: color 0.2s;
   line-height: 1;
 }
 .pwa-close-btn:hover { color: #e44; }
 
+.difficulty-panel {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%) scale(0.8);
+  opacity: 0;
+  transition:
+    transform 0.5s cubic-bezier(.77,0,.18,1),
+    opacity 0.5s cubic-bezier(.77,0,.18,1);
+  z-index: 99999;
+  width: 477px; max-width: 98vw;
+  background: #fefefe80;
+    backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 26px;
+  box-shadow: 0 4px 42px #0003;
+  padding: 0px 0px 0px 0px;
+  pointer-events: none;
+  display: none;
+}
+.difficulty-panel.active {
+  display: block;
+  pointer-events: auto;
+}
+
+.difficulty-panel.show {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%,-50%) scale(1);
+}
+.difficulty-panel.hiding {
+  transform: translate(-50%,-50%) scale(0.8);
+  opacity: 0;
+  pointer-events: none;
+}
+.difficulty-img-row {
+  display: flex;
+  gap: 0px;
+  justify-content: center;
+  align-items: center;
+}
+.diff-img-btn {
+  background: #ffffff;
+  border: none;
+  border-radius: 25px;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: 0 2px 16px #aaa3;
+  transition: box-shadow 0.2s, transform 0.5s cubic-bezier(.77,0,.18,1), opacity 0.5s;
+  transform: scale(0.9);
+  opacity: 0.7;
+}
+.difficulty-panel.show .diff-img-btn {
+  transform: scale(1);
+  opacity: 1;
+}
+.diff-img-btn.selected {
+  box-shadow: 0 0 0 5px #0082ff, 0 2px 20px #22caff2a;
+  opacity: 1;
+}
+.diff-img-btn img {
+  width: 95px; height: 100%; display: block;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px #0001;
+  pointer-events: none;
+  user-select: none;
+}
+
+#ox-turn-label {
+  grid-column: 1/-1;
+  text-align: center;
+  font-size: 22px;
+  color: #2a2a2a;
+  background: #fff7;
+  border-radius: 55px;
+  padding: 5px 0 5px;
+  margin-bottom:2px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: none;
+
+  /* 追加↓ */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px; /* 必要に応じて。高さを揃える場合は数値を調整 */
+}
+
+#ox-turn-label.slide-up {
+  animation: oxSlideUp 0.7s cubic-bezier(.77,0,.18,1);
+}
+@keyframes oxSlideUp {
+  from { opacity: 0; transform: translateY(33px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
+
+.cell.ox-cell.ox-anim {
+  z-index: 30;
+  transition: transform 0.5s cubic-bezier(.77,0,.18,1), opacity 0.4s cubic-bezier(.77,0,.18,1);
+  transform: scale(5);
+  opacity: 0;
+}
+.ox-cell {
+  transition: transform 0.5s cubic-bezier(.8,0,.18,1), opacity 0.22s cubic-bezier(.8,0,.18,1);
+}
