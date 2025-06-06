@@ -5,15 +5,26 @@ html, body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: sans-serif;
   overflow: hidden;
   background: #000;
 }
+html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
+  font-family:
+    "SF Pro Display",
+    "SF Pro Text",
+    "SF Pro Icons",
+    "SF Pro Rounded",
+    "SF Compact",
+    "SF Compact Text",
+    "San Francisco",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  letter-spacing: 0;
+}
 
-
-
-
-/* 背景画像・フェード */
 #bgImage {
   position: fixed;
   left: 0; top: 0;
@@ -51,9 +62,10 @@ transition: transform 0.5s cubic-bezier(.77,0,.18,1);
   -webkit-backdrop-filter: blur(8px);
 }
 .panel-header {
-  box-shadow: 0 2px 22px rgb(0 0 0 / 20%);
-  background: #0000001f;
-  padding: 20px 16px 10px 16px;
+  background: #ffffff80;
+    backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 18px 16px 10px 18px;
   text-align: center;
   font-size: 22px;
   font-weight: bold;
@@ -65,8 +77,8 @@ transition: transform 0.5s cubic-bezier(.77,0,.18,1);
 }
 .panel-item {
   background: #fff;
-  padding: 16px 18px;
-  display: flex;
+  padding: 16px 15px;
+  display: flex;font-weight:1;
   justify-content: space-between;
   align-items: center;
   font-size: 17px;
@@ -78,25 +90,46 @@ transition: transform 0.5s cubic-bezier(.77,0,.18,1);
 }
 .panel-item input {
   width: 60px;
-  font-size: 20px;
+  font-size: 23px;
+  font-weight:200;
   text-align: right;
+  border:none;
+    font-family:
+    "SF Pro Display",
+    "SF Pro Text",
+    "SF Pro Icons",
+    "SF Pro Rounded",
+    "SF Compact",
+    "SF Compact Text",
+    "San Francisco",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
 }
 .panel-item.select {
   cursor: pointer;
 }
 .panel-item.select .value::after {
-  content: '>';
+  content: '→';
   margin-left: 10px;
 }
+#ox-turn-label {
+  font-family: inherit; /* 必ず親のフォントを使う */
+  font-variant-ligatures: none; /* ligature解除で変な繋がりを消す */
+}
+
 
 /* スタートボタン */
 #startBtn {
   width: 100%;
   padding: 16px;
-  font-size: 20px;
+  font-size: 18px;
   text-align: center;
-  background: linear-gradient(180deg, #2f2f2f91, #4b4b4b96 96%);
-  color: #fff;
+  background: linear-gradient(180deg, #017fff, #0091ff 96%);
+  color: #ffffff;
+  text-shadow: 0 0 32px #00000036;
   border: none;
   cursor: pointer;
   border-radius: 0 0 18px 18px;
@@ -104,7 +137,7 @@ transition: transform 0.5s cubic-bezier(.77,0,.18,1);
 }
 #startBtn:active {
   transform: scale(0.95);
-  background: linear-gradient(180deg, #32323275, #0000004a 96%);
+  background: linear-gradient(180deg, #0089ff75, #0094ff4a 96%);
 }
 
 #game {
@@ -276,8 +309,8 @@ transition: transform 0.5s cubic-bezier(.77,0,.18,1);
 
 /* ページ全体のスケールアニメ（縮小→拡大） */
 body {
-  transform: scale(1.5);
-  transition: transform 0.66s cubic-bezier(.77,0,.18,1);
+  transform: scale(1.55);
+  transition: transform 1.1s cubic-bezier(.77,0,.18,1);
 }
 body.scaled-in {
   transform: scale(1);
@@ -315,12 +348,12 @@ body.scaled-in {
   line-height: 1.2;
     backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  margin: 18px auto;
+  margin: 20px auto;
   background: #ffffff8a;
   border-radius: 23px;
   box-shadow: 0 6px 33px rgba(0, 0, 0, 0.267);
-  padding: 13px 60px 13px 16px;
-  max-width: 340px;
+  padding: 13px 40px 13px 16px;
+  max-width: 320px;
   font-size: 1.08em;
   color: #202020b2;
   position: relative;
@@ -348,8 +381,9 @@ b{
   flex-shrink: 0;
 }
 .pwa-close-btn {
+  font-weight:1;
   position: absolute;
-  right: 18px; top: 23px;
+  right: 18px; top: 21px;font-family: 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
   background: none;font-weight: 100;
   border: none;
   font-size: 27px;
@@ -360,22 +394,23 @@ b{
 }
 .pwa-close-btn:hover { color: #e44; }
 
+
 .difficulty-panel {
+
   position: absolute;
-  top: 50%; left: 50%;
+  top: 60%; left: 50%;
   transform: translate(-50%,-50%) scale(0.8);
   opacity: 0;
   transition:
-    transform 0.5s cubic-bezier(.77,0,.18,1),
+    transform 1s cubic-bezier(0.22, 0.61, 0.36, 1),
     opacity 0.5s cubic-bezier(.77,0,.18,1);
   z-index: 99999;
-  width: 477px; max-width: 98vw;
-  background: #fefefe80;
-    backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 26px;
-  box-shadow: 0 4px 42px #0003;
-  padding: 0px 0px 0px 0px;
+  width: 326px; max-width: 98vw;
+  background: none;
+
+  border-radius: 33px;
+
+  padding: 16px 2px 14px 2px;
   pointer-events: none;
   display: none;
 }
@@ -383,7 +418,6 @@ b{
   display: block;
   pointer-events: auto;
 }
-
 .difficulty-panel.show {
   display: block;
   opacity: 1;
@@ -391,41 +425,59 @@ b{
   transform: translate(-50%,-50%) scale(1);
 }
 .difficulty-panel.hiding {
-  transform: translate(-50%,-50%) scale(0.8);
+  transform: translate(-50%,-50%) scale(0.5);
   opacity: 0;
   pointer-events: none;
 }
-.difficulty-img-row {
-  display: flex;
-  gap: 0px;
-  justify-content: center;
+.difficulty-img-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 20px 0;  /* ← 横（左右）方向は0pxに */
+  justify-items: center;
   align-items: center;
 }
+
 .diff-img-btn {
-  background: #ffffff;
+  background: #fff;
   border: none;
-  border-radius: 25px;
+  border-radius: 20px;
   padding: 0;
   cursor: pointer;
   box-shadow: 0 2px 16px #aaa3;
-  transition: box-shadow 0.2s, transform 0.5s cubic-bezier(.77,0,.18,1), opacity 0.5s;
-  transform: scale(0.9);
-  opacity: 0.7;
+  transition: box-shadow 0.3s ease,
+    transform 0.8s cubic-bezier(.77,0,.18,1),
+    opacity 0.25s;
+  transform: scale(1.33);
+  opacity: 0;
+  outline: none;
+  width: 84px; height: 90px;
+  display: flex; align-items: center; justify-content: center;
+  will-change: transform, opacity;
 }
-.difficulty-panel.show .diff-img-btn {
-  transform: scale(1);
-  opacity: 1;
-}
+
+
 .diff-img-btn.selected {
   box-shadow: 0 0 0 5px #0082ff, 0 2px 20px #22caff2a;
   opacity: 1;
 }
+.diff-img-btn.diff-appear {
+  transform: scale(1.04);
+  opacity: 1;
+}
 .diff-img-btn img {
-  width: 95px; height: 100%; display: block;
+  width: auto; height: 85px; display: block;
   border-radius: 16px;
   box-shadow: 0 2px 10px #0001;
   pointer-events: none;
   user-select: none;
+}
+.diff-img-btn.diff-img-empty {
+  background: none;
+  box-shadow: none;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
 }
 
 #ox-turn-label {
@@ -436,11 +488,12 @@ b{
   background: #fff7;
   border-radius: 55px;
   padding: 5px 0 5px;
-  margin-bottom:2px;
+  margin-bottom:10px;
+  margin-top:-22%;
+  margin-left:12px;
   opacity: 1;
   transform: translateY(0);
   transition: none;
-
   /* 追加↓ */
   display: flex;
   align-items: center;
@@ -464,6 +517,8 @@ b{
   opacity: 0;
 }
 .ox-cell {
+    margin-left:15px;
+  margin-top:15px;
   transition: transform 0.5s cubic-bezier(.8,0,.18,1), opacity 0.22s cubic-bezier(.8,0,.18,1);
 }
 
@@ -525,4 +580,239 @@ b{
   33%  {transform:scaleX(var(--s,1)) translate(calc(50% + 3px)) scale(1)}
   66%  {transform:scaleX(var(--s,1)) translate(calc(50% + 3px)) scale(2)}
   100% {transform:scaleX(var(--s,1)) translate(0) scale(1)}
+}
+
+
+/* 難易度選択用の全画面ブラー */
+#diff-blur-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 99990;
+  background: rgb(255 255 255 / 20%); /* 好みで色調整 */
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(.77,0,.18,1), backdrop-filter 0.5s cubic-bezier(.77,0,.18,1);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+#diff-blur-bg.show {
+  opacity: 1;
+  pointer-events: auto; /* 触りたくない場合はnoneのままでもOK */
+}
+
+
+
+
+/* モバイル小さめ調整 */
+@media (max-width: 440px) {
+  .diff-search-form { width: 98%; max-width: none; }
+  #diffSearchInput { width: 84px; font-size: 0.98em;}
+}
+
+#sContainer {
+  position: relative;
+  display: inline-block;
+  margin: 1em 0;
+}
+#sContainer input {
+  background-color:#ffffff85;
+    backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  padding: 16px 1.9em;
+  font-size: 0.98em;
+  border-radius: 55px;
+  border: none;
+  box-shadow: 0 0 22px #00000011,inset 0 0 72px #ffffffd9;
+  text-shadow:0 12px 22px #ffffff75;
+  width: 247px;
+  box-sizing: border-box;
+  max-width: 300px;
+  margin-top:200px;
+  margin-left:37px;
+  transform: scaleX(1);
+  opacity: 1;
+  pointer-events: auto;
+  transition:
+    transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity   0.4s ease-in-out 0.2s;
+}
+
+
+
+
+/* ポップアップ全体 */
+.diff-popup {
+  position: fixed;
+  left: 50%;
+  top: 66%;
+  transform: translate(-50%,-50%) scale(1);
+  background: rgb(255 255 255 / 30%);
+    backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 40px #0002;
+  z-index: 10010;
+  border-radius: 22px;
+    opacity: 1;
+  padding: 22px 18px 16px 18px;
+  min-width: 210px;
+  max-width: 94vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: popup-fadein 0.4s,transform 0.6s cubic-bezier(.77,0,.18,1), opacity 0.5s cubic-bezier(.77,0,.18,1);;
+}
+@keyframes popup-fadein {
+  from { opacity:0; transform: translate(-50%,-50%) scale(1.4);}
+  to { opacity:1; transform: translate(-50%,-50%) scale(1);}
+}
+.diff-popup.hide {
+
+  transform: translate(-50%,-50%) scale(1.2);
+  pointer-events: none;
+}
+/* グリッド（画像ボタン並び） */
+.diff-popup-grid {
+  display: flex;
+  gap: 18px 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 7px;
+}
+
+/* 画像ボタン */
+.diff-popup-btn {
+  background: #f6fafb;
+  border:none;
+  border-radius: 15px;
+  box-shadow: 0 2px 24px #00000030;
+  padding: 6px 6px 4px 6px;
+  transition: transform 0.3s, box-shadow 0.22s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 68px;
+}
+.diff-popup-btn:hover {
+  transform: scale(1.07);
+  box-shadow: 0 4px 22px #479b8d22;
+}
+.diff-popup-btn img {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 4px;
+  border-radius: 9px;
+  object-fit: cover;
+}
+.diff-popup-btn span {
+  font-size: 14px;
+  color: #202020;
+  margin-top: 0px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+
+
+.floating-retry-btn {
+    backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(8px);
+  position: fixed;
+  left: 50%;
+  font-weight:1;
+  bottom: 46px;
+  transform: translateX(-50%) scale(0.8); /* 中央 & 初期スケール */
+  z-index: 9999999;
+  background: rgb(0 0 0 / 2%);
+  border: 2px solid #fff;
+  color: #fff;
+  font-size: 1.8em;
+  font-weight: 500;
+  box-shadow: 0 2px 24px #00000026,inset 0 2px 24px #00000012;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    transform 0.5s cubic-bezier(.77,0,.18,1),
+    width 0.5s cubic-bezier(.77,0,.18,1),
+    height 0.5s cubic-bezier(.77,0,.18,1),
+    border-radius 0.5s cubic-bezier(.77,0,.18,1),
+    padding 0.5s cubic-bezier(.77,0,.18,1),
+    font-size 0.5s cubic-bezier(.77,0,.18,1),
+    opacity 0.5s ease;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.floating-retry-btn.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) scale(1); /* 拡大して登場 */
+}
+
+.floating-retry-btn.wide {
+  width: 186px;
+  height: 60px;
+  border-radius: 32px;
+  padding: 0 26px;
+  font-size: 1.1em;
+}
+
+.retry-btn-inner {
+  display: inline-block;
+  transform: scale(0.88);
+  transition: transform 0.5s cubic-bezier(.77,0,.18,1);
+}
+
+
+
+/* やり直す出現アニメ中に色変える */
+.retry-btn-inner.fade-in {
+  color: #00000000; /* 表示状態 */
+}
+
+
+
+#blackCurtain {
+  position: fixed;
+  top: 100vh; /* ← 下に隠れておく */
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(13px);
+  -webkit-backdrop-filter: blur(13px);
+  background: #0000005e;
+  z-index: 9999999;
+  transition: top 0.5s ease;
+}
+
+#blackCurtain.show {
+  top: 0; /* ← 画面内にスライドイン */
+}
+
+
+
+
+
+@keyframes pulseShadow {
+  0%   { box-shadow: 0 0 0 rgba(0,0,0,0); transform: scale(1); }
+  50%  { box-shadow: 0 0 12px rgba(0,0,0,0.3); transform: scale(0.94); }
+  100% { box-shadow: 0 0 0 rgba(0,0,0,0); transform: scale(1); }
+}
+#bgImage.slide-down {
+  animation: slideDown 0.5s ease forwards;
+}
+
+@keyframes slideDown {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
 }
