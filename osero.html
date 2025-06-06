@@ -36,23 +36,29 @@ window.addEventListener('DOMContentLoaded', () => {
     retryShowBtn.classList.add('show');
   }, 500);
 });
-
 // ! を押したら → やり直す表示
 retryShowBtn.onclick = () => {
-  // すでにwideなら処理しない
+  // すでにwideなら無視
   if (retryShowBtn.classList.contains('wide')) return;
 
-  // ボタン変形
   retryShowBtn.classList.add('wide');
   retryInner.textContent = 'やり直す';
   retryInner.classList.add('fade-in');
 
-  // クリックでリロード or ページ遷移
+  // 一度押されたらズームアニメへ
   retryShowBtn.onclick = () => {
-    window.location.href = '810.html'; // ← リダイレクト先
+    // ✅ 0.5秒でscale+blurアニメ（JSで確実に）
+    document.body.style.transform = 'scale(1.5)';
+    document.body.style.filter = 'blur(10px)';
+
+    // ✅ 遷移タイミングも確実に同期
+    setTimeout(() => {
+      window.location.href = '810.html';
+    }, 550);
   };
 
-  // 1.7秒後に!に戻す
+  // 1.7秒後に「!」へ戻す
+  if (retryBtnTimer) clearTimeout(retryBtnTimer);
   retryBtnTimer = setTimeout(() => {
     retryShowBtn.classList.remove('wide');
     retryInner.classList.remove('fade-in');
@@ -61,25 +67,20 @@ retryShowBtn.onclick = () => {
   }, 1700);
 };
 
-// 元の「!を押したら」動作を関数化（ループ用）
+// originalClick関数も同様にJS制御
 const originalClick = () => {
-  // ボタン変形
   retryShowBtn.classList.add('wide');
   retryInner.textContent = 'やり直す';
   retryInner.classList.add('fade-in');
 
-const blackCurtain = document.getElementById('blackCurtain');
+  retryShowBtn.onclick = () => {
+    document.body.style.transform = 'scale(1.5)';
+    document.body.style.filter = 'blur(10px)';
 
-retryShowBtn.onclick = () => {
-  // カーテンを表示してからページ遷移
-  blackCurtain.classList.add('show');
-
-  // 0.5秒後に810.htmlへ遷移
-  setTimeout(() => {
-    window.location.href = '810.html';
-  }, 500);
-};
-
+    setTimeout(() => {
+      window.location.href = '810.html';
+    }, 650);
+  };
 
   if (retryBtnTimer) clearTimeout(retryBtnTimer);
   retryBtnTimer = setTimeout(() => {
@@ -90,7 +91,6 @@ retryShowBtn.onclick = () => {
   }, 1700);
 };
 
-retryShowBtn.onclick = originalClick;
 </script>
 
 
