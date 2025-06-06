@@ -234,7 +234,7 @@ const DIFF_NAMES = ['簡単','いいよこいよ','激しい','絵合わせ','OX
 const DIFF_SETTINGS = [
   {rows: 5, cols: 5, bombs: 5, showInput: true},
   {rows: 7, cols: 5, bombs: 7, showInput: true},
-  {rows: 8, cols: 6, bombs: 15, showInput: true},
+  {rows: 8, cols: 6, bombs: 14, showInput: true},
   {rows: 5, cols: 5, bombs: "", showInput: false},
   {rows: 5, cols: 5, bombs: "", showInput: false},
   {rows: 0, cols: 0, bombs: "", showInput: false}, // ←追加
@@ -332,9 +332,17 @@ function closeDifficultyPanel(){
 }
 
 // ---- bombCount変更 ----
-bombCountInput.addEventListener('input', ()=>{
-  BOMBS = Math.max(1, +bombCountInput.value || 1);
+bombCountInput.addEventListener('input', () => {
+  let val = parseInt(bombCountInput.value, 10);
+
+  // 値が数値でない、または範囲外なら補正
+  if (isNaN(val) || val < 2) val = 2;
+  if (val > 14) val = 14;
+
+  bombCountInput.value = val;
+  BOMBS = val;
 });
+
 
 document.getElementById('startBtn').addEventListener('click', () => {
   if (currentDiff === 'オセロ') {
