@@ -3,164 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>5x5 オセロ</title>
-  <style>
-    body {
-      background-image: url('bg.png');
-      background-size: cover;
-      text-align: center;
-      font-family: sans-serif;
-      overflow-x: hidden;
-      margin: 0;
-    }
+  <link rel="stylesheet" href="osero.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    #status {
-      margin: 70px;
-      font-size: 20px;
-      color: white;
-      text-shadow: 0 0 22px #0000009d;
-      transition: transform 0.5s;
-    }
-
-    table {
-  border-collapse: separate; /* ← これでマージン効くようになる */
-  border-spacing: 10px;       /* ← これがマス間の余白 */
-  margin: auto;
-}
-
-td {
-  width: 96px;
-  height: 5rem; /* ← 幅と高さを同じにして正方形に */
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 20px;
-  background-color: rgba(255, 255, 255, 0.642);
-  text-align: center;
-  vertical-align: middle;
-  cursor: pointer;
-  position: relative;
-  box-sizing: border-box;
-}
-
-td:active {
-  border-radius: 55px;
-  transform: scale(0.8);
-}
-
-    td.valid {
-      background-color: rgba(247, 210, 0, 0.7);
-    }
-
-    td.shake {
-      animation: shake 0.5s, flashRed 0.55s;
-    }
-
-    @keyframes shake {
-      0% { transform: translateX(0px); }
-      20% { transform: translateX(-45px); }
-      40% { transform: translateX(45px); }
-      60% { transform: translateX(-25px); }
-      80% { transform: translateX(25px); }
-      100% { transform: translateX(0px); }
-    }
-
-    @keyframes flashRed {
-      0% { background-color: rgba(255, 0, 0, 0.6); }
-      100% { background-color: rgba(0, 128, 0, 0.6); }
-    }
-
-
-
-    @keyframes popIn {
-      0% { transform: scale(1.2); opacity: 0.6; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    #winnerImage {
-      position: fixed;
-      bottom: -200px;
-      transition: all 0.3s ease;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      opacity: 0;
-      animation-fill-mode: forwards;
-      z-index: 1000;
-    }
-
-    @keyframes slideUp {
-      0% { transform: translateX(-50%) translateY(100px); opacity: 1; }
-      100% { transform: translateX(-50%) translateY(0); opacity: 0; }
-    }
-
-    #retryButton {
-      display: none;
-      padding: 15px 25px;
-      background-color: white;
-      border-radius: 30px;
-      border: none;
-      font-size: 17px;
-      cursor: pointer;
-      margin-top: 50px;
-      opacity: 0;
-      transition: all 0.55s ease;
-    }
-
-    #retryButton:active {
-        transition: all 0.22s ease;
-     transform:scale(0.8);
-    }
-
-
-    #oseroView {
-      position: fixed;
-      top: -100vh;
-      left: 0;
-      width: 100%;
-      height: 100vh;
-      background: white;
-      z-index: 2000;
-      transition: top 0.8s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 30px;
-    }
-
-    #introImage {
-      pointer-events: none;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url('123.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: bottom center;
-      z-index: 1000;
-      animation: slideUp 2s ease forwards;
-    }
-
-    #board {
-  transform-style: preserve-3d;
-  transition: transform 0.8s ease;
-  perspective: 800px;
-}
-.piece-wrapper {
-  width: 90px;
-  height: 90px;
-  perspective: 800px;
-  transform-style: preserve-3d;
-}
-.piece {
-      width: 90px;
-      height: 90px;
-  transition: transform 0.8s ease;
-  backface-visibility: hidden;
-  transform-style: preserve-3d;
-  animation: popIn 0.88s forwards;
-}
-  </style>
 </head>
 <body>
     <div id="introImage"></div><!--最初の画像-->
@@ -175,6 +20,79 @@ td:active {
 
 <audio id="errorSound" src="mac.wav"></audio>
 <audio id="placeSound" src="wrong.mp3"></audio>
+
+<!-- !ボタン → やり直す へのボタン -->
+<div id="retryShowBtn" class="floating-retry-btn">
+  <div class="retry-btn-inner">!</div>
+</div>
+<script>
+let retryBtnTimer = null;
+const retryShowBtn = document.getElementById('retryShowBtn');
+const retryInner = retryShowBtn.querySelector('.retry-btn-inner');
+
+// 初期0.5秒後に ! をフェードイン
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    retryShowBtn.classList.add('show');
+  }, 500);
+});
+
+// ! を押したら → やり直す表示
+retryShowBtn.onclick = () => {
+  // すでにwideなら処理しない
+  if (retryShowBtn.classList.contains('wide')) return;
+
+  // ボタン変形
+  retryShowBtn.classList.add('wide');
+  retryInner.textContent = 'やり直す';
+  retryInner.classList.add('fade-in');
+
+  // クリックでリロード or ページ遷移
+  retryShowBtn.onclick = () => {
+    window.location.href = '810.html'; // ← リダイレクト先
+  };
+
+  // 1.7秒後に!に戻す
+  retryBtnTimer = setTimeout(() => {
+    retryShowBtn.classList.remove('wide');
+    retryInner.classList.remove('fade-in');
+    retryInner.textContent = '!';
+    retryShowBtn.onclick = originalClick;
+  }, 1700);
+};
+
+// 元の「!を押したら」動作を関数化（ループ用）
+const originalClick = () => {
+  // ボタン変形
+  retryShowBtn.classList.add('wide');
+  retryInner.textContent = 'やり直す';
+  retryInner.classList.add('fade-in');
+
+const blackCurtain = document.getElementById('blackCurtain');
+
+retryShowBtn.onclick = () => {
+  // カーテンを表示してからページ遷移
+  blackCurtain.classList.add('show');
+
+  // 0.5秒後に810.htmlへ遷移
+  setTimeout(() => {
+    window.location.href = '810.html';
+  }, 500);
+};
+
+
+  if (retryBtnTimer) clearTimeout(retryBtnTimer);
+  retryBtnTimer = setTimeout(() => {
+    retryShowBtn.classList.remove('wide');
+    retryInner.classList.remove('fade-in');
+    retryInner.textContent = '!';
+    retryShowBtn.onclick = originalClick;
+  }, 1700);
+};
+
+retryShowBtn.onclick = originalClick;
+</script>
+
 
 <script>
   const SIZE = 5;
@@ -246,6 +164,7 @@ td:active {
       boardElement.appendChild(row);
     }
 
+
     // ステータス表示＆反転
     statusText.textContent = currentPlayer === WHITE ? "MURのターンです。" : "田所のターンです。";
     statusText.style.transform = currentPlayer === BLACK ? "rotate(180deg)" : "rotate(0deg)";
@@ -303,6 +222,10 @@ td:active {
     placeSound.play();
 
     isProcessing = true;
+// カーテン消去は 0.05秒後に開始（変更不要）
+setTimeout(() => {
+  curtain.classList.add('hide'); // ← hide追加で1秒かけてスライドアップ
+}, 50);
 
     setTimeout(() => {
       flipPieces(row, col, currentPlayer);
@@ -346,7 +269,7 @@ td:active {
 
     const winner = whiteCount > blackCount ? 'white' : 'black';
     winnerImage.src = `${winner}.png`;
-    winnerImage.style.animation = 'slideUp 0.8s forwards';
+    winnerImage.style.animation = 'slideUp 0.7s cubic-bezier(.77,0,.18,1);';
 
     retryButton.style.display = 'inline-block';
     setTimeout(() => retryButton.style.opacity = 1, 100);
@@ -361,25 +284,42 @@ td:active {
   });
 
   drawBoard();
+</script><audio id="bgm" src="bg.mp3" loop></audio>
+<div id="blackCurtain"></div>
+<audio id="bgm" src="bg.mp3" loop></audio>
+
+<script>window.addEventListener('DOMContentLoaded', () => {
+  const curtain = document.getElementById('blackCurtain');
+
+  // ✅ カーテンを1秒かけて上にスライドさせて消す
+  setTimeout(() => {
+    curtain.classList.add('hide');
+  }, 150); // ちょっと遅らせて自然に
+
+  // ✅ 背景スケールを少し遅らせて実行（optional）
+  setTimeout(() => {
+    document.body.style.transition = '0.4s cubic-bezier(.77,0,.18,1)';
+    document.body.style.transform = 'scale(1.1)';
+  }, 400); // curtainの後に動かすことで自然
+
+  // ✅ board表示のスケール（例：scale(0.8→1)）
+  setTimeout(() => {
+    const board = document.getElementById('board');
+    board.style.transition = '0.7s cubic-bezier(.77,0,.18,1)';
+    board.style.transform = 'scale(1)';
+  }, 1000);
+
+
+  // 4. BGM再生
+  const bgm = document.getElementById('bgm');
+  if (bgm) {
+    bgm.volume = 0.5;
+    bgm.play().catch(e => console.warn('BGM再生失敗:', e));
+  }
+});
+
 </script>
-<script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const bgm = new Audio('bg.mp3');
-      bgm.loop = true;
-      bgm.volume = 0.5;
-  
-      const introSound = new Audio('wrong.mp3'); // ← intro 音を再生（wrong.mp3使用）
-  
-      // BGM と効果音の再生トライ
-      Promise.all([
-        bgm.play().catch((e) => console.warn("BGM 自動再生ブロック：", e)),
-        introSound.play().catch((e) => console.warn("効果音 自動再生ブロック：", e))
-      ]).then(() => {
-        // イントロ画像の終了処理
-        setTimeout(() => {
-          document.getElementById("introImage").style.display = "none";
-        }, 1800); // introImageのアニメーションと同期
-      });
-    });
-  </script>
+
+
+
 </body></html>
