@@ -309,7 +309,7 @@ transition: transform 0.5s cubic-bezier(.77,0,.18,1);
 
 /* ページ全体のスケールアニメ（縮小→拡大） */
 body {
-  transform: scale(1.55);
+  transform: scale(1.6);
   transition: transform 1.1s cubic-bezier(.77,0,.18,1);
 }
 body.scaled-in {
