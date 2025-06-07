@@ -307,7 +307,7 @@ const diffBlurBg = document.getElementById('diff-blur-bg');
 function openDifficultyPanel(){
   difficultyPanel.classList.add('active');
   difficultyPanel.style.opacity = '0';
-  difficultyPanel.style.transform = 'translate(-50%,-50%) scale(0.8)';
+  difficultyPanel.style.transform = 'translate(-50%,-50%) scale(0.7)';
   diffBlurBg.classList.add('show'); // ← ぼかし出す
   // popアニメ: 一旦全部外し、0.1s刻みで順次出す
   diffImgBtns.forEach(btn => btn.classList.remove('diff-appear'));
@@ -361,15 +361,15 @@ document.getElementById('startBtn').addEventListener('click', () => {
   setTimeout(() => {
     Array.from(startPanel.children).forEach((child, i) => {
       setTimeout(() => {
-        child.style.transition = 'transform 0.33s cubic-bezier(.8,0,.18,1), opacity 0.33s';
-        child.style.transform = 'scale(1.2)';
+        child.style.transition = 'transform 0.4s cubic-bezier(.8,0,.18,1), opacity 0.33s';
+        child.style.transform = 'scale(1.4)';
         child.style.opacity = '0';
       }, i * 120);
     });
 
     setTimeout(() => {
       startPanel.style.display = 'none';
-      bgImage.style.transform = 'scale(1.2)';
+      bgImage.style.transform = 'scale(1.33)';
       game.style.display = "grid";
       init();
 
