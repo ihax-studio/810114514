@@ -324,7 +324,7 @@ function openDifficultyPanel(){
 
 function closeDifficultyPanel(){
   difficultyPanel.style.opacity='0';
-  difficultyPanel.style.transform='translate(-50%,-50%) scale(0.8)';
+  difficultyPanel.style.transform='translate(-50%,-50%) scale(0.7)';
   difficultyPanel.style.pointerEvents='none';
   diffImgBtns.forEach(btn=>btn.classList.remove('diff-appear'));
   diffBlurBg.classList.remove('show'); // ← ぼかし消す
@@ -356,7 +356,7 @@ document.getElementById('startBtn').addEventListener('click', () => {
   }
 
   // 🔁 通常ゲーム開始処理（簡単、激しい、いいよこいよ、絵合わせ、OXなど）
-  bgImage.style.transform = 'scale(1.2)';
+  bgImage.style.transform = 'scale(1.4)';
 
   setTimeout(() => {
     Array.from(startPanel.children).forEach((child, i) => {
