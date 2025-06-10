@@ -125,7 +125,7 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   letter-spacing: 0.1em;
   color:#ffffff;
   text-shadow:
-    0 0 54px rgb(0 0 0 / 26%),
+    0 0 54px rgb(0 0 0 / 55%),
     0 0 12px rgba(0,0,0,0.2);
   /* すりガラス背景＋縁＋内側シャドウ */
   background: rgb(0 0 0 / 0%);
@@ -370,6 +370,7 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   transform: translate(-50%, -50%);
   z-index: 10;
   background: none;
+  
   /* 他要素の幅やflex等に絶対干渉されない！ */
 }
 /* gapとセルサイズの変数 */
@@ -408,6 +409,13 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   user-select: none;
   box-sizing: border-box;
   padding: 0;
+      box-shadow:
+    inset 0 0 8px rgb(255 255 255),  /* 内側輝き */
+    inset 0 1px 16px rgba(0,0,0,0.12),    /* 内側奥行 */
+    0 12px 48px rgba(0,0,0,0.08),
+     0 1px 8px rgb(0 0 0 / 30%),
+    inset 0 2px 5px rgb(255 255 255 / 57%);  
+  border-radius:50%;
   margin: 0;  /* gapだけで間隔取る。margin/padding混ぜるとバグるので禁止 */
 }
 .cell.revealed {
@@ -965,7 +973,7 @@ b {
   color:white;
   border: none;
   box-shadow: 0 2px 12px #c3b7b7ab,inset 0 0 22px #ffffffd9;
-  text-shadow:0 13px 3px #ffffff75;
+  text-shadow:0 1px 11px #ffffff70;
   width: 247px;
   box-sizing: border-box;
   max-width: 300px;
