@@ -973,7 +973,7 @@ b {
   color:white;
   border: none;
   box-shadow: 0 2px 12px #c3b7b7ab,inset 0 0 22px #ffffffd9;
-  text-shadow:0 1px 11px #ffffff70;
+  text-shadow:0 1px 5px #ffffff70;
   width: 247px;
   box-sizing: border-box;
   max-width: 300px;
