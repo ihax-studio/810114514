@@ -103,9 +103,10 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   /* 内外の陰影で厚みを演出 */
   box-shadow:
     inset 0 0 8px rgb(255 255 255),  /* 内側輝き */
-    inset 0 6px 16px rgba(0,0,0,0.12),    /* 内側奥行 */
-    0 12px 48px rgba(0,0,0,0.08);         /* 外側ふんわり影 */
-
+    inset 0 6px 16px rgb(255 255 255 / 12%),    /* 内側奥行 */
+    0 12px 48px rgb(0 0 0 / 8%),
+    inset 0 1px 5px rgba(255,255,255,0.8),
+    inset 0 2px 5px rgb(0 0 0 / 57%);        /* 外側ふんわり影 */
   overflow: hidden;
   z-index: 3;
   pointer-events: auto;
@@ -122,20 +123,21 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   font-size: 22px;
   font-weight: bold;
   letter-spacing: 0.1em;
-  color:white;
+  color:#ffffff;
   text-shadow:
-    0 0 114px rgb(0 0 0 / 26%),
+    0 0 54px rgb(0 0 0 / 26%),
     0 0 12px rgba(0,0,0,0.2);
   /* すりガラス背景＋縁＋内側シャドウ */
-  background: rgba(255,255,255,0.20);
-  border-bottom: 1px solid rgba(255,255,255,0.7);
+  background: rgb(0 0 0 / 0%);
+  border-bottom: none;
   border-radius: 18px 18px 0 0;
   backdrop-filter: blur(30px) saturate(200%);
   -webkit-backdrop-filter: blur(30px) saturate(200%);
   box-shadow:
-    inset 0 0 8px rgb(255 255 255),
-    inset 0 1px 5px rgba(255,255,255,0.8),
-    inset 0 3px 8px rgba(0,0,0,0.1);
+    inset 0 0 8px rgb(255 255 255),  /* 内側輝き */
+    inset 0 6px 6px rgb(255 255 255 / 12%),    /* 内側奥行 */
+    inset 0 1px 5px rgb(255 255 255 / 80%),
+    inset 0 2px 15px rgb(0 0 0 / 12%);      
 }
 
 /* ヘッドラインにも微レインボーゆらぎ */
@@ -241,9 +243,11 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   font-size: 17px;
   color:white;
   /* 薄めのガラス膜 + 内側シャドウ */
-  background: rgba(255, 255, 255, 0.10);
+  background: rgb(0 0 0 / 8%);
   border-bottom: 1px solid rgba(255,255,255,0.5);
-  box-shadow: inset 0 1px 4px rgba(255,255,255,0.8), inset 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: inset 0 1px 4px rgba(255,255,255,0.8), inset 0 2px 6px rgba(0,0,0,0.1),  
+    inset 0 2px 1px rgba(255,255,255,0.9),
+    inset 0 0 8px rgb(255 255 255);
 
   transition: transform 0.3s ease, background 0.3s ease;
 }
@@ -267,22 +271,22 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   font-size: 18px;
   text-align: center;
   color: #ffffff;
+    box-shadow:
+    inset 0 0 8px rgb(255 255 255),  /* 内側輝き */
+    inset 0 1px 16px rgba(0,0,0,0.12),    /* 内側奥行 */
+    0 12px 48px rgba(0,0,0,0.08),
+    inset 0 1px 5px rgba(255,255,255,0.8),
+    inset 0 2px 5px rgb(255 255 255 / 57%);      
   text-shadow: 0 0 8px rgba(0,0,0,0.6);
   border: none;
   border-radius: 0 0 12px;
   cursor: pointer;
   /* ガラス膜 */
-  background: rgba(255,255,255,0.15);
+  background: rgb(0 0 0 / 7%);
   border: 1px solid rgba(255,255,255,0.6);
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
-  
-  /* 立体シャドウ */
-  box-shadow:
-    inset 0 0 8px rgb(255 255 255),
-    0 8px 24px rgba(0,0,0,0.2),
-    inset 0 1px 10px rgb(0 0 0 / 80%),
-  ;
+  backdrop-filter: blur(2px) saturate(100%);
+  -webkit-backdrop-filter: blur(8px) saturate(100%);
+
   
   /* 3D保持 */
   transform-style: preserve-3d;
@@ -373,13 +377,13 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   --cell-gap-x: 1px;   /* 横gap（好きな幅に） */
   --cell-gap-y: 1px;   /* 縦gap（好きな幅に） */
   --cell-width: 69px;  /* セルの横幅 */
-  --cell-height: 70px;  /* セルの縦幅 */
+  --cell-height: 69px;  /* セルの縦幅 */
 }
 @media (min-width: 600px) {
 :root {
   --cell-gap-x: 1px;   /* 横gap（好きな幅に） */
   --cell-gap-y: 1px;   /* 縦gap（好きな幅に） */
-  --cell-width: 84px;  /* セルの横幅 */
+  --cell-width: 80px;  /* セルの横幅 */
   --cell-height: 80px;  /* セルの縦幅 */
 }
   }
@@ -455,17 +459,22 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   z-index: 100000;
 }
 #overlayDialog {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%) scale(0.8);
-  background: #ffffff21;
+  background: #ffffff00;
   padding: 12px;
-  border-radius: 12px;
-  box-shadow: 0 6px 32px rgba(0,0,0,.22);
+  border-radius: 22px;
   opacity: 0;
+    text-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+   box-shadow: inset 0 0 8px rgb(255 255 255),
+    inset 0 1px 5px rgba(255,255,255,0.8),
+    inset 0 2px 5px rgb(0 0 0 / 57%);
   z-index: 110000;
+  font-weight:1;
+  color:white;
   text-align: center;
   min-width: 200px;
   transition: transform 0.5s cubic-bezier(.77,0,.18,1), opacity 0.5s cubic-bezier(.77,0,.18,1);
@@ -486,10 +495,14 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   cursor: pointer;
   border-radius: 50px;
   border: none;
-  background: #000;
+  background: #ffffff5e;
   color: #fff;
-  box-shadow: 0 2px 8px #0002;
+    box-shadow:
+    inset 0 0 8px rgb(255 255 255),
+    inset 0 1px 5px rgba(255,255,255,0.8),
+    inset 0 3px 8px rgb(0 0 0 / 30%);
 }
+
 
 /* リトライボタン（中央表示） */
 #retryCenter {
