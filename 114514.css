@@ -8,6 +8,36 @@ html, body {
   overflow: hidden;
   background: #000;
 }
+
+
+#ox-turn-label {
+  grid-column: 1/-1;
+  text-align: center;
+  font-size: 22px;
+  color: #2a2a2a;
+  background-color:#ffffff3b;
+    box-shadow:
+    inset 0 0 8px rgb(255 255 255),
+    inset 0 1px 12px rgb(255 255 255 / 80%),
+    inset 0 3px 8px rgb(0 0 0 / 30%);
+  border-radius: 55px;
+  padding: 2px 0 5px;
+  margin-bottom:10px;
+  margin:1px;
+  margin-top:-130px;
+  margin-left:12px;
+  opacity: 1;
+  transform: translateY(88%);
+  transition: none;
+  /* è¿½åŠ â†“ */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 46px; /* å¿…è¦ã«å¿œã˜ã¦ã€‚é«˜ã•ã‚’æƒãˆã‚‹å ´åˆã¯æ•°å€¤ã‚’èª¿æ•´ */
+}
+
+
+
 html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   font-family:
     "SF Pro Display",
@@ -42,24 +72,24 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   -webkit-backdrop-filter: blur(10px);
   filter: blur(14px) brightness(0.73);
 }
-/* 1) パネル全体を「ホバー検知コンテナ」に */
+/* 1) ãƒ‘ãƒãƒ«å…¨ä½“ã‚’ã€Œãƒ›ãƒãƒ¼æ¤œçŸ¥ã‚³ãƒ³ãƒ†ãƒŠã€ã« */
 .panel {
-  /* 既存の定義はそのまま… */
+  /* æ—¢å­˜ã®å®šç¾©ã¯ãã®ã¾ã¾â€¦ */
   position: absolute;
-  /* 略 */
+  /* ç•¥ */
 
-  /* ホバー時に子要素のフィルター変化を有効化 */
-  transition: none; /* フィルターは個別に */
+  /* ãƒ›ãƒãƒ¼æ™‚ã«å­è¦ç´ ã®ãƒ•ã‚£ãƒ«ã‚¿ãƒ¼å¤‰åŒ–ã‚’æœ‰åŠ¹åŒ– */
+  transition: none; /* ãƒ•ã‚£ãƒ«ã‚¿ãƒ¼ã¯å€‹åˆ¥ã« */
 }
 
-/* 2) パネル内のいずれかの要素にホバーすると .panel に擬似クラスが付いたかのように振る舞う */
+/* 2) ãƒ‘ãƒãƒ«å†…ã®ã„ãšã‚Œã‹ã®è¦ç´ ã«ãƒ›ãƒãƒ¼ã™ã‚‹ã¨ .panel ã«æ“¬ä¼¼ã‚¯ãƒ©ã‚¹ãŒä»˜ã„ãŸã‹ã®ã‚ˆã†ã«æŒ¯ã‚‹èˆžã† */
 .panel:hover .panel-header,
 .panel:hover .panel-section,
 .panel:hover .panel-item {
   transition: .5s cubic-bezier(.8,0,.18,1), opacity .5s cubic-bezier(.8,0,.18,1) ,scale .33s ease;
 }
 
-/* 3) ホバーされていない要素だけをぼかす */
+/* 3) ãƒ›ãƒãƒ¼ã•ã‚Œã¦ã„ãªã„è¦ç´ ã ã‘ã‚’ã¼ã‹ã™ */
 .panel:hover .panel-header:not(:hover),
 .panel:hover .panel-section:not(:hover),
 .panel:hover .panel-item:not(:hover) {
@@ -68,7 +98,7 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   opacity: 0.7;
 }
 
-/* 4) ホバー中の要素は手前に出してクリアに */
+/* 4) ãƒ›ãƒãƒ¼ä¸­ã®è¦ç´ ã¯æ‰‹å‰ã«å‡ºã—ã¦ã‚¯ãƒªã‚¢ã« */
 .panel-header:hover,
 .panel-section:hover,
 .panel-item:hover {
@@ -77,12 +107,12 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   opacity: 1 !important;
 }
 
-/* —— ベースのパネル —— */
+/* â€”â€” ãƒ™ãƒ¼ã‚¹ã®ãƒ‘ãƒãƒ« â€”â€” */
 .panel {
     text-shadow:
     0 0 44px rgb(0 0 0 / 80%),
     0 0 12px rgba(0,0,0,0.2);
-  /* ← ここはそのまま！ */
+  /* â† ã“ã“ã¯ãã®ã¾ã¾ï¼ */
   position: absolute;
   top: 55%;
   left: 50%;
@@ -92,30 +122,30 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   margin: 0;
   padding: 0;
 
-  /* すりガラスベースを強化 */
-  background: rgba(255, 255, 255, 0.18);          /* 透明度アップ */   /* 縁をくっきりと */
+  /* ã™ã‚Šã‚¬ãƒ©ã‚¹ãƒ™ãƒ¼ã‚¹ã‚’å¼·åŒ– */
+  background: rgb(0 0 0 / 1%);          /* é€æ˜Žåº¦ã‚¢ãƒƒãƒ— */   /* ç¸ã‚’ãã£ãã‚Šã¨ */
   border-radius: 18px;
 
-  /* 奥の映り込みぼかし + 彩度 + コントラスト */
-  backdrop-filter: blur(36px) saturate(220%) contrast(1.15);
-  -webkit-backdrop-filter: blur(36px) saturate(220%) contrast(1.15);
+  /* å¥¥ã®æ˜ ã‚Šè¾¼ã¿ã¼ã‹ã— + å½©åº¦ + ã‚³ãƒ³ãƒˆãƒ©ã‚¹ãƒˆ */
+  backdrop-filter: blur(3px) saturate(120%) contrast(1.05);
+  -webkit-backdrop-filter: blur(6px) saturate(120%) contrast(1.15);
 
-  /* 内外の陰影で厚みを演出 */
+  /* å†…å¤–ã®é™°å½±ã§åŽšã¿ã‚’æ¼”å‡º */
   box-shadow:
-    inset 0 0 8px rgb(255 255 255),  /* 内側輝き */
-    inset 0 6px 16px rgb(255 255 255 / 12%),    /* 内側奥行 */
+    inset 0 0 8px rgb(255 255 255 / 45%),  /* å†…å´è¼ã */
+    inset 0 6px 16px rgb(255 255 255 / 12%),    /* å†…å´å¥¥è¡Œ */
     0 12px 48px rgb(0 0 0 / 8%),
-    inset 0 1px 5px rgba(255,255,255,0.8),
-    inset 0 2px 5px rgb(0 0 0 / 57%);        /* 外側ふんわり影 */
+    inset 0 -1px 9px rgb(255 255 255),
+    inset 0 2px 5px rgb(255 255 255 / 32%);        /* å¤–å´ãµã‚“ã‚ã‚Šå½± */
   overflow: hidden;
   z-index: 3;
   pointer-events: auto;
   transition: transform 0.5s cubic-bezier(.77,0,.18,1);
 
-  /* シャボン玉的にごくゆるやかな虹色シアー */
+  /* ã‚·ãƒ£ãƒœãƒ³çŽ‰çš„ã«ã”ãã‚†ã‚‹ã‚„ã‹ãªè™¹è‰²ã‚·ã‚¢ãƒ¼ */
   animation: hueShift 12s infinite alternate;
 }
-/* —— ヘッダー部をすりガラス化 —— */
+/* â€”â€” ãƒ˜ãƒƒãƒ€ãƒ¼éƒ¨ã‚’ã™ã‚Šã‚¬ãƒ©ã‚¹åŒ– â€”â€” */
 .panel-header {
   position: relative;
   padding: 18px 16px 10px 18px;
@@ -127,25 +157,25 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   text-shadow:
     0 0 54px rgb(0 0 0 / 55%),
     0 0 12px rgba(0,0,0,0.2);
-  /* すりガラス背景＋縁＋内側シャドウ */
+  /* ã™ã‚Šã‚¬ãƒ©ã‚¹èƒŒæ™¯ï¼‹ç¸ï¼‹å†…å´ã‚·ãƒ£ãƒ‰ã‚¦ */
   background: rgb(0 0 0 / 0%);
   border-bottom: none;
   border-radius: 18px 18px 0 0;
   backdrop-filter: blur(30px) saturate(200%);
   -webkit-backdrop-filter: blur(30px) saturate(200%);
   box-shadow:
-    inset 0 0 8px rgb(255 255 255),  /* 内側輝き */
-    inset 0 6px 6px rgb(255 255 255 / 12%),    /* 内側奥行 */
+    inset 0 0 8px rgb(255 255 255),  /* å†…å´è¼ã */
+    inset 0 6px 6px rgb(255 255 255 / 12%),    /* å†…å´å¥¥è¡Œ */
     inset 0 1px 5px rgb(255 255 255 / 80%),
     inset 0 2px 15px rgb(0 0 0 / 12%);      
 }
 
-/* ヘッドラインにも微レインボーゆらぎ */
+/* ãƒ˜ãƒƒãƒ‰ãƒ©ã‚¤ãƒ³ã«ã‚‚å¾®ãƒ¬ã‚¤ãƒ³ãƒœãƒ¼ã‚†ã‚‰ãŽ */
 .panel-header {
   animation: hueShift 12s infinite alternate;
 }
 
-/* —— input フィールドをガラス化 —— */
+/* â€”â€” input ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã‚’ã‚¬ãƒ©ã‚¹åŒ– â€”â€” */
 .panel-item input {
   position: relative;
   z-index: 2;
@@ -155,15 +185,15 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   text-align: right;
   padding: 4px 8px;
 
-  /* すりガラス背景＋縁＋内側シャドウ */
-  background: rgb(212 212 212 / 16%);
+  /* ã™ã‚Šã‚¬ãƒ©ã‚¹èƒŒæ™¯ï¼‹ç¸ï¼‹å†…å´ã‚·ãƒ£ãƒ‰ã‚¦ */
+  background: rgb(255 255 255 / 33%);
   border: 1px solid rgba(255,255,255,0.7);
-  border-radius: 8px;
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 13px;
+  backdrop-filter: blur(2px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
   box-shadow:
-    inset 0 1px 3px rgb(255 255 255 / 80%), inset -1px 1px 8px rgb(77 255 157 / 22%), inset -1px -1px 3px rgb(255 255 255 / 80%),
-    inset 0 2px 4px rgb(148 91 255 / 8%), inset 3px 2px 3px rgb(254 106 255 / 25%), inset -1px -3px 3px rgb(127 208 255 / 30%);
+    inset 0 1px 3px rgb(255 255 255 / 80%), inset -1px 1px 8px rgb(255 120 34 / 22%), inset -1px -1px 3px rgb(255 255 255 / 80%),
+    inset 0 2px 4px rgb(89 0 255 / 8%), inset 3px 2px 3px rgb(254 106 255 / 25%), inset -1px -3px 3px rgb(113 203 255 / 47%);
 
     font-family:
     "SF Pro Display",
@@ -179,7 +209,7 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
     Arial,
     sans-serif;
   letter-spacing: 0;
-  /* テキストの輪郭を強調 */
+  /* ãƒ†ã‚­ã‚¹ãƒˆã®è¼ªéƒ­ã‚’å¼·èª¿ */
   color: #ffffff;
   text-shadow: 0 0 3px rgb(0 0 0 / 33%);
 
@@ -193,31 +223,31 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
     0 4px 10px rgba(0,0,0,0.2);
 }
 
-/* —— 選択アイテムの矢印もすりガラス調に —— */
+/* â€”â€” é¸æŠžã‚¢ã‚¤ãƒ†ãƒ ã®çŸ¢å°ã‚‚ã™ã‚Šã‚¬ãƒ©ã‚¹èª¿ã« â€”â€” */
 .panel-item.select .value::after {
   content: '→';
   margin-left: 10px;
   display: inline-block;
 
-  /* 半透明ホワイト＋テキストシャドウ */
+  /* åŠé€æ˜Žãƒ›ãƒ¯ã‚¤ãƒˆï¼‹ãƒ†ã‚­ã‚¹ãƒˆã‚·ãƒ£ãƒ‰ã‚¦ */
   color: rgba(255,255,255,0.85);
   text-shadow:
     0 0 14px rgba(255,255,255,0.8),
     0 0 22px rgba(0,0,0,0.2);
 
-  /* ちょっと浮かせて3D感 */
+  /* ã¡ã‚‡ã£ã¨æµ®ã‹ã›ã¦3Dæ„Ÿ */
   transform: translateZ(6px);
   font-size: 18px;
   line-height: 1;
 }
 
-/* ごく淡い虹色ゆらぎ（干渉縞イメージ） */
+/* ã”ãæ·¡ã„è™¹è‰²ã‚†ã‚‰ãŽï¼ˆå¹²æ¸‰ç¸žã‚¤ãƒ¡ãƒ¼ã‚¸ï¼‰ */
 @keyframes hueShift {
   from { filter: hue-rotate(-4deg); }
   to   { filter: hue-rotate(4deg); }
 }
 
-/* 中央レンズハイライト（膜の厚み感） */
+/* ä¸­å¤®ãƒ¬ãƒ³ã‚ºãƒã‚¤ãƒ©ã‚¤ãƒˆï¼ˆè†œã®åŽšã¿æ„Ÿï¼‰ */
 .panel::before {
   content: '';
   position: absolute;
@@ -233,7 +263,7 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   pointer-events: none;
 }
 
-/* —— 各アイテム —— */
+/* â€”â€” å„ã‚¢ã‚¤ãƒ†ãƒ  â€”â€” */
 .panel-item {
   position: relative;
   display: flex;
@@ -242,7 +272,7 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   padding: 16px 15px;
   font-size: 17px;
   color:white;
-  /* 薄めのガラス膜 + 内側シャドウ */
+  /* è–„ã‚ã®ã‚¬ãƒ©ã‚¹è†œ + å†…å´ã‚·ãƒ£ãƒ‰ã‚¦ */
   background: rgb(0 0 0 / 8%);
   border-bottom: 1px solid rgba(255,255,255,0.5);
   box-shadow: inset 0 1px 4px rgba(255,255,255,0.8), inset 0 2px 6px rgba(0,0,0,0.1),  
@@ -257,12 +287,12 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
 }
 
 #ox-turn-label {
-  font-family: inherit; /* 必ず親のフォントを使う */
-  font-variant-ligatures: none; /* ligature解除で変な繋がりを消す */
+  font-family: inherit; /* å¿…ãšè¦ªã®ãƒ•ã‚©ãƒ³ãƒˆã‚’ä½¿ã† */
+  font-variant-ligatures: none; /* ligatureè§£é™¤ã§å¤‰ãªç¹‹ãŒã‚Šã‚’æ¶ˆã™ */
 }
 
 
-/* —— シャボン玉ルーペ風スタートボタン —— */
+/* â€”â€” ã‚·ãƒ£ãƒœãƒ³çŽ‰ãƒ«ãƒ¼ãƒšé¢¨ã‚¹ã‚¿ãƒ¼ãƒˆãƒœã‚¿ãƒ³ â€”â€” */
 #startBtn {
   position: relative;
   display: inline-block;
@@ -272,8 +302,8 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   text-align: center;
   color: #ffffff;
     box-shadow:
-    inset 0 0 8px rgb(255 255 255),  /* 内側輝き */
-    inset 0 1px 16px rgba(0,0,0,0.12),    /* 内側奥行 */
+    inset 0 0 8px rgb(255 255 255),  /* å†…å´è¼ã */
+    inset 0 1px 16px rgba(0,0,0,0.12),    /* å†…å´å¥¥è¡Œ */
     0 12px 48px rgba(0,0,0,0.08),
     inset 0 1px 5px rgba(255,255,255,0.8),
     inset 0 2px 5px rgb(255 255 255 / 57%);      
@@ -281,26 +311,26 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   border: none;
   border-radius: 0 0 12px;
   cursor: pointer;
-  /* ガラス膜 */
+  /* ã‚¬ãƒ©ã‚¹è†œ */
   background: rgb(0 0 0 / 7%);
   border: 1px solid rgba(255,255,255,0.6);
   backdrop-filter: blur(2px) saturate(100%);
   -webkit-backdrop-filter: blur(8px) saturate(100%);
 
   
-  /* 3D保持 */
+  /* 3Dä¿æŒ */
   transform-style: preserve-3d;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   animation: hueShift 8s infinite alternate;
 }
 
-/* 虹色の微妙なゆらぎ */
+/* è™¹è‰²ã®å¾®å¦™ãªã‚†ã‚‰ãŽ */
 @keyframes hueShift {
   from { filter: hue-rotate(-5deg); }
   to   { filter: hue-rotate(5deg); }
 }
 
-/* 上部グレア */
+/* ä¸Šéƒ¨ã‚°ãƒ¬ã‚¢ */
 #startBtn::before {
   content: '';
   position: absolute;
@@ -316,7 +346,7 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   filter: blur(4px);
 }
 
-/* 中央ハイライトレンズ */
+/* ä¸­å¤®ãƒã‚¤ãƒ©ã‚¤ãƒˆãƒ¬ãƒ³ã‚º */
 #startBtn::after {
   content: '';
   position: absolute;
@@ -332,7 +362,7 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   filter: blur(8px);
 }
 
-/* ホバーでふわっと浮き上がり＆スキュー */
+/* ãƒ›ãƒãƒ¼ã§ãµã‚ã£ã¨æµ®ãä¸ŠãŒã‚Šï¼†ã‚¹ã‚­ãƒ¥ãƒ¼ */
 #startBtn:hover {
   transform: perspective(300px) translateZ(4px) scale(1.02) skewX(-1deg);
   box-shadow:
@@ -342,7 +372,7 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
     inset 0 -3px 6px rgb(255 255 255 / 30%);
 }
 
-/* 押下時の沈み込み */
+/* æŠ¼ä¸‹æ™‚ã®æ²ˆã¿è¾¼ã¿ */
 #startBtn:active {
   border:none;
   border-radius:555px;
@@ -357,8 +387,8 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
 
 #game {
   display: grid;
-  grid-auto-flow: row;  /* 行で埋める（列ならcolumn） */
-  /* 10列の例（JSで動的に変えても可） */
+  grid-auto-flow: row;  /* è¡Œã§åŸ‹ã‚ã‚‹ï¼ˆåˆ—ãªã‚‰columnï¼‰ */
+  /* 10åˆ—ã®ä¾‹ï¼ˆJSã§å‹•çš„ã«å¤‰ãˆã¦ã‚‚å¯ï¼‰ */
   grid-template-columns: repeat(auto-fit, minmax(var(--cell-width), 1fr));
   gap: var(--cell-gap-y) var(--cell-gap-x);
   width: max-content;
@@ -371,24 +401,48 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   z-index: 10;
   background: none;
   
-  /* 他要素の幅やflex等に絶対干渉されない！ */
+  /* ä»–è¦ç´ ã®å¹…ã‚„flexç­‰ã«çµ¶å¯¾å¹²æ¸‰ã•ã‚Œãªã„ï¼ */
 }
-/* gapとセルサイズの変数 */
+/* gapã¨ã‚»ãƒ«ã‚µã‚¤ã‚ºã®å¤‰æ•° */
 :root {
-  --cell-gap-x: 1px;   /* 横gap（好きな幅に） */
-  --cell-gap-y: 1px;   /* 縦gap（好きな幅に） */
-  --cell-width: 69px;  /* セルの横幅 */
-  --cell-height: 69px;  /* セルの縦幅 */
+  --cell-gap-x: 1px;   /* æ¨ªgapï¼ˆå¥½ããªå¹…ã«ï¼‰ */
+  --cell-gap-y: 1px;   /* ç¸¦gapï¼ˆå¥½ããªå¹…ã«ï¼‰ */
+  --cell-width: 69px;  /* ã‚»ãƒ«ã®æ¨ªå¹… */
+  --cell-height: 69px;  /* ã‚»ãƒ«ã®ç¸¦å¹… */
 }
 @media (min-width: 600px) {
+  #ox-turn-label {
+  grid-column: 1/-1;
+  text-align: center;
+  font-size: 22px;
+  color: #2a2a2a;
+  background-color:#ffffff3b;
+    box-shadow:
+    inset 0 0 8px rgb(255 255 255),
+    inset 0 1px 12px rgb(255 255 255 / 80%),
+    inset 0 3px 8px rgb(0 0 0 / 30%);
+  border-radius: 55px;
+  padding: 2px 0 5px;
+  margin-bottom:10px;
+  margin:1px;
+  margin-top:-48px;
+  margin-left:12px;
+  opacity: 1;
+  transition: none;
+  /* è¿½åŠ â†“ */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 46px; /* å¿…è¦ã«å¿œã˜ã¦ã€‚é«˜ã•ã‚’æƒãˆã‚‹å ´åˆã¯æ•°å€¤ã‚’èª¿æ•´ */
+}
 :root {
-  --cell-gap-x: 1px;   /* 横gap（好きな幅に） */
-  --cell-gap-y: 1px;   /* 縦gap（好きな幅に） */
-  --cell-width: 80px;  /* セルの横幅 */
-  --cell-height: 80px;  /* セルの縦幅 */
+  --cell-gap-x: 1px;   /* æ¨ªgapï¼ˆå¥½ããªå¹…ã«ï¼‰ */
+  --cell-gap-y: 1px;   /* ç¸¦gapï¼ˆå¥½ããªå¹…ã«ï¼‰ */
+  --cell-width: 80px;  /* ã‚»ãƒ«ã®æ¨ªå¹… */
+  --cell-height: 80px;  /* ã‚»ãƒ«ã®ç¸¦å¹… */
 }
   }
-/* セル1個：gapだけで必ず等間隔。横幅も自由自在。 */
+/* ã‚»ãƒ«1å€‹ï¼šgapã ã‘ã§å¿…ãšç­‰é–“éš”ã€‚æ¨ªå¹…ã‚‚è‡ªç”±è‡ªåœ¨ã€‚ */
 .cell {
   width: var(--cell-width);
   height: var(--cell-height);
@@ -398,6 +452,8 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   border: none;
   outline: none;
   cursor: pointer;
+    backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(3px);
   position: relative;
   font-size: 24px;
   color: #1a1a1a;
@@ -410,38 +466,49 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   box-sizing: border-box;
   padding: 0;
       box-shadow:
-    inset 0 0 8px rgb(255 255 255),  /* 内側輝き */
-    inset 0 1px 16px rgba(0,0,0,0.12),    /* 内側奥行 */
+           inset 2px 5px 2px rgb(110 213 255 / 13%),  /* å†…å´è¼ã */
+    inset -1px -5px 3px rgb(231 229 255 / 65%), 
+    inset 0 0 12px rgb(255 255 255),  /* å†…å´è¼ã */
+    inset 0 1px 1px rgb(255 255 255 / 65%),    /* å†…å´å¥¥è¡Œ */
     0 12px 48px rgba(0,0,0,0.08),
-     0 1px 8px rgb(0 0 0 / 30%),
+     0 1px 88px rgb(237 171 234 / 20%),
     inset 0 2px 5px rgb(255 255 255 / 57%);  
   border-radius:50%;
-  margin: 0;  /* gapだけで間隔取る。margin/padding混ぜるとバグるので禁止 */
+  margin: 0;  /* gapã ã‘ã§é–“éš”å–ã‚‹ã€‚margin/paddingæ··ãœã‚‹ã¨ãƒã‚°ã‚‹ã®ã§ç¦æ­¢ */
 }
 .cell.revealed {
   background: url('b8.png') center/cover no-repeat !important;
-  cursor: default;
-  text-shadow: 0 2px 5px #00b7ff;
+  cursor: default; font-weight:300; font-size:40px;
+  text-shadow: 0 2px 15px #000000;
   color: #fff;
 }
 .cell.flagged {
   background: url('ball.png') center/cover no-repeat !important;
-  color: #bb0000;
+  color: #ffffff85;
 }
 .cell.bomb-anim {
   z-index: 50;
   transition: transform .5s cubic-bezier(.8,0,.18,1), opacity .5s cubic-bezier(.8,0,.18,1);
 }
+
 #game.memory-mode .cell {
   border-radius: 80px;
-  transition: border-radius 0.3s ease;
   font-size: 2.2vw;
+  transition: all 0.33s cubic-bezier(.77,0,.18,1);
 }
 #game.memory-mode .cell:active {
-  border-radius: 5px;
+  border-radius: 20px;
+  transition: all 0.3s cubic-bezier(.77,0,.18,1); /* â†è‡ªç„¶ãªåŠ é€Ÿæ¸›é€Ÿã€å¥½ã¿ã§ */
+  background: none !important; /* â†èƒŒæ™¯å¼·åˆ¶æ¶ˆã— */
 }
 
-/* オーバーレイ */
+#game.memory-mode .cell.anim-pressed {
+  border-radius: 24px;
+  background: none !important;
+}
+
+
+/* ã‚ªãƒ¼ãƒãƒ¼ãƒ¬ã‚¤ */
 #overlay {
   position: fixed;
   top: 0; left: 0;
@@ -512,7 +579,7 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
 }
 
 
-/* リトライボタン（中央表示） */
+/* ãƒªãƒˆãƒ©ã‚¤ãƒœã‚¿ãƒ³ï¼ˆä¸­å¤®è¡¨ç¤ºï¼‰ */
 #retryCenter {
   position: fixed;
   left: 50%; top: 50%;
@@ -539,7 +606,7 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   box-shadow: 0 2px 16px #0003;
 }
 
-/* ページ全体のスケールアニメ（縮小→拡大） */
+/* ãƒšãƒ¼ã‚¸å…¨ä½“ã®ã‚¹ã‚±ãƒ¼ãƒ«ã‚¢ãƒ‹ãƒ¡ï¼ˆç¸®å°â†’æ‹¡å¤§ï¼‰ */
 body {
   transform: scale(1.6);
   transition: transform 1.1s cubic-bezier(.77,0,.18,1);
@@ -548,7 +615,7 @@ body.scaled-in {
   transform: scale(1);
 }
 
-/* 拡大アニメ用（全画面中央固定＆巨大化） */
+/* æ‹¡å¤§ã‚¢ãƒ‹ãƒ¡ç”¨ï¼ˆå…¨ç”»é¢ä¸­å¤®å›ºå®šï¼†å·¨å¤§åŒ–ï¼‰ */
 .retry-zoom {
   position: fixed !important;
   left: 50% !important;
@@ -563,7 +630,7 @@ body.scaled-in {
   transform: translate(-50%, -50%) scale(220);
 }
 
-/* ——— PWA Notice Container ——— */
+/* â€”â€”â€” PWA Notice Container â€”â€”â€” */
 #pwaNotice {
   position: fixed;
   top: -100px;
@@ -571,7 +638,7 @@ body.scaled-in {
   width: 100vw;
   z-index: 999999;
   pointer-events: none;
-  perspective: 800px;                     /* 3D 空間を定義 */
+  perspective: 800px;                     /* 3D ç©ºé–“ã‚’å®šç¾© */
   transition: top 0.88s cubic-bezier(.77,0,.18,1);
 }
 #pwaNotice.show {
@@ -579,7 +646,7 @@ body.scaled-in {
   pointer-events: auto;
 }
 
-/* ——— 内部ボックス（ガラス膜強化） ——— */
+/* â€”â€”â€” å†…éƒ¨ãƒœãƒƒã‚¯ã‚¹ï¼ˆã‚¬ãƒ©ã‚¹è†œå¼·åŒ–ï¼‰ â€”â€”â€” */
 .pwa-notice-inner {
   position: relative;
   display: flex;
@@ -587,25 +654,25 @@ body.scaled-in {
   gap: 20px;
   margin: 23px auto;
   padding: 13px 40px 13px 16px;
-  max-width: 320px;
+  max-width: 310px;
   font-size: 1.08em;
   line-height: 1.1;
   color: #202020b2;
   border-radius: 55px;
 
-  /* 強化されたすりガラス背景 */
+  /* å¼·åŒ–ã•ã‚ŒãŸã™ã‚Šã‚¬ãƒ©ã‚¹èƒŒæ™¯ */
   background: rgba(255,255,255,0.18);
   border: 1px solid rgba(255,255,255,0.7);
   backdrop-filter: blur(18px) saturate(200%);
   -webkit-backdrop-filter: blur(18px) saturate(200%);
 
-  /* 内外シャドウで厚みと浮遊感 */
+  /* å†…å¤–ã‚·ãƒ£ãƒ‰ã‚¦ã§åŽšã¿ã¨æµ®éŠæ„Ÿ */
   box-shadow:
     inset 0 1px 5px rgba(255,255,255,0.8),
     inset 0 3px 32px rgb(0 0 0 / 10%),
     0 8px 42px rgba(0,0,0,0.2);
 
-  /* 3D マテリアル＆虹色ゆらぎ */
+  /* 3D ãƒžãƒ†ãƒªã‚¢ãƒ«ï¼†è™¹è‰²ã‚†ã‚‰ãŽ */
   transform-style: preserve-3d;
   animation: hueShift 12s infinite alternate;
   opacity: 1;
@@ -615,19 +682,19 @@ body.scaled-in {
     opacity 0.6s cubic-bezier(.77,0,.18,1);
 }
 
-/* ——— 出現／縮小アニメ ——— */
+/* â€”â€”â€” å‡ºç¾ï¼ç¸®å°ã‚¢ãƒ‹ãƒ¡ â€”â€”â€” */
 .pwa-notice-inner.shrink {
   transform: scale(0.8) translateZ(-30px);
   opacity: 0;
 }
 
-/* ——— ミニ虹色干渉縞アニメ ——— */
+/* â€”â€”â€” ãƒŸãƒ‹è™¹è‰²å¹²æ¸‰ç¸žã‚¢ãƒ‹ãƒ¡ â€”â€”â€” */
 @keyframes hueShift {
   from { filter: hue-rotate(-6deg); }
   to   { filter: hue-rotate(6deg); }
 }
 
-/* ——— 上部グレア（光沢膜） ——— */
+/* â€”â€”â€” ä¸Šéƒ¨ã‚°ãƒ¬ã‚¢ï¼ˆå…‰æ²¢è†œï¼‰ â€”â€”â€” */
 .pwa-notice-inner::before {
   content: '';
   position: absolute;
@@ -643,7 +710,7 @@ body.scaled-in {
   filter: blur(8px);
 }
 
-/* ——— 中央レンズハイライト ——— */
+/* â€”â€”â€” ä¸­å¤®ãƒ¬ãƒ³ã‚ºãƒã‚¤ãƒ©ã‚¤ãƒˆ â€”â€”â€” */
 .pwa-notice-inner::after {
   content: '';
   position: absolute;
@@ -655,13 +722,13 @@ body.scaled-in {
   filter: blur(12px);
 }
 
-/* ——— 太字タグ調整 ——— */
+/* â€”â€”â€” å¤ªå­—ã‚¿ã‚°èª¿æ•´ â€”â€”â€” */
 b {
   line-height: 1.6;
   color: black;
 }
 
-/* ——— アイコン ——— */
+/* â€”â€”â€” ã‚¢ã‚¤ã‚³ãƒ³ â€”â€”â€” */
 .pwa-icon {
   flex-shrink: 0;
   width: 42px;
@@ -671,7 +738,7 @@ b {
   background: none;
   object-fit: cover;
 }
-/* ——— クローズボタンをシャボン玉ガラス風に強化 ——— */
+/* â€”â€”â€” ã‚¯ãƒ­ãƒ¼ã‚ºãƒœã‚¿ãƒ³ã‚’ã‚·ãƒ£ãƒœãƒ³çŽ‰ã‚¬ãƒ©ã‚¹é¢¨ã«å¼·åŒ– â€”â€”â€” */
 .pwa-close-btn {
   position: absolute;
   top: 22px;
@@ -679,21 +746,21 @@ b {
   width: 32px;
   height: 32px;
   padding: 0;
-  font-family: inherit;       /* body で定義の SF Pro を継承 */
+  font-family: inherit;       /* body ã§å®šç¾©ã® SF Pro ã‚’ç¶™æ‰¿ */
   font-weight: 1; 
   font-size: 24px;
   color: #ffffff00;
   border: none;
   border-radius: 50%;
   
-  /* すりガラス膜＋縁 */
+  /* ã™ã‚Šã‚¬ãƒ©ã‚¹è†œï¼‹ç¸ */
   background: rgb(255 255 255 / 0%);
 
-  /* 3D 保持＆虹色ゆらぎ */
+  /* 3D ä¿æŒï¼†è™¹è‰²ã‚†ã‚‰ãŽ */
   transform-style: preserve-3d;
   animation: hueShift 10s infinite alternate;
   
-  /* JSでクラス切り替えされるプロパティに対応 */
+  /* JSã§ã‚¯ãƒ©ã‚¹åˆ‡ã‚Šæ›¿ãˆã•ã‚Œã‚‹ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã«å¯¾å¿œ */
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease,
@@ -707,13 +774,13 @@ b {
   color:red;
 }
 
-/* ——— ミニ虹色干渉縞アニメ ——— */
+/* â€”â€”â€” ãƒŸãƒ‹è™¹è‰²å¹²æ¸‰ç¸žã‚¢ãƒ‹ãƒ¡ â€”â€”â€” */
 @keyframes hueShift {
   from { filter: hue-rotate(-5deg); }
   to   { filter: hue-rotate(5deg); }
 }
 
-/* ——— 上部グレア（薄い光沢膜） ——— */
+/* â€”â€”â€” ä¸Šéƒ¨ã‚°ãƒ¬ã‚¢ï¼ˆè–„ã„å…‰æ²¢è†œï¼‰ â€”â€”â€” */
 .pwa-close-btn::before {
   content: '';
   position: absolute;
@@ -728,7 +795,7 @@ b {
   filter: blur(6px);
 }
 
-/* ——— 中央レンズハイライト ——— */
+/* â€”â€”â€” ä¸­å¤®ãƒ¬ãƒ³ã‚ºãƒã‚¤ãƒ©ã‚¤ãƒˆ â€”â€”â€” */
 .pwa-close-btn::after {
   content: '';
   position: absolute;
@@ -744,7 +811,7 @@ b {
   filter: blur(8px);
 }
 
-/* ——— ホバー時：浮き上がり＋スキュー＋拡大 ——— */
+/* â€”â€”â€” ãƒ›ãƒãƒ¼æ™‚ï¼šæµ®ãä¸ŠãŒã‚Šï¼‹ã‚¹ã‚­ãƒ¥ãƒ¼ï¼‹æ‹¡å¤§ â€”â€”â€” */
 .pwa-close-btn:hover {
   transform: translateZ(4px) skewX(-1deg) skewY(1deg) scale(1.1);
   box-shadow:
@@ -755,7 +822,7 @@ b {
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
   
-  /* 内外シャドウで厚みと浮遊感 */
+  /* å†…å¤–ã‚·ãƒ£ãƒ‰ã‚¦ã§åŽšã¿ã¨æµ®éŠæ„Ÿ */
   box-shadow:
     inset 0 1px 3px rgba(255,255,255,0.8),
     inset 0 -1px 6px rgba(0,0,0,0.2),
@@ -763,13 +830,13 @@ b {
   
 }
 
-/* ——— アクティブ時：沈み込み ——— */
+/* â€”â€”â€” ã‚¢ã‚¯ãƒ†ã‚£ãƒ–æ™‚ï¼šæ²ˆã¿è¾¼ã¿ â€”â€”â€” */
 .pwa-close-btn:active {
     border: 0.1px solid rgba(255,255,255,0.6);
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
   
-  /* 内外シャドウで厚みと浮遊感 */
+  /* å†…å¤–ã‚·ãƒ£ãƒ‰ã‚¦ã§åŽšã¿ã¨æµ®éŠæ„Ÿ */
   box-shadow:
     inset 0 1px 3px rgba(255,255,255,0.8),
     inset 0 -1px 6px rgba(0,0,0,0.2),
@@ -821,7 +888,7 @@ b {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  gap: 20px 0;  /* ← 横（左右）方向は0pxに */
+  gap: 20px 0;  /* â† æ¨ªï¼ˆå·¦å³ï¼‰æ–¹å‘ã¯0pxã« */
   justify-items: center;
   align-items: center;
 }
@@ -848,7 +915,7 @@ b {
 .diff-img-btn.selected {
   box-shadow:  -5px 12px 22px #f0ff817a,-17px -4px 17px #b554ff94, 5px 11px 27px #ff2690a6, 14px -14px 27px #31d0ff78;
   opacity: 1;  
-  border:solid 42px white;
+  border:solid 42px #ffffff85;
 }
 .diff-img-btn.diff-appear {
   transform: scale(1.04);
@@ -869,26 +936,6 @@ b {
   visibility: hidden;
 }
 
-#ox-turn-label {
-  grid-column: 1/-1;
-  text-align: center;
-  font-size: 22px;
-  color: #2a2a2a;
-  background: #fff7;
-  border-radius: 55px;
-  padding: 5px 0 5px;
-  margin-bottom:10px;
-  margin-top:-22%;
-  margin-left:12px;
-  opacity: 1;
-  transform: translateY(0);
-  transition: none;
-  /* 追加↓ */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 46px; /* 必要に応じて。高さを揃える場合は数値を調整 */
-}
 
 #ox-turn-label.slide-up {
   animation: oxSlideUp 0.7s cubic-bezier(.77,0,.18,1);
@@ -908,21 +955,22 @@ b {
 .ox-cell {
     margin-left:15px;
   margin-top:15px;
+  bottom:32px;
   transition: transform 0.5s cubic-bezier(.8,0,.18,1), opacity 0.22s cubic-bezier(.8,0,.18,1);
 }
 
 .img-wrapper {
   position: relative;
   display: inline-block;
-  width: 100%; /* 必要なら幅指定 */
-  height: 100%; /* 必要なら高さ指定 */
+  width: 100%; /* å¿…è¦ãªã‚‰å¹…æŒ‡å®š */
+  height: 100%; /* å¿…è¦ãªã‚‰é«˜ã•æŒ‡å®š */
 }
 
 .img-wrapper img {
   display: block;
   width: 100%;
   height: auto;
-  /* 画像のサイズ指定は用途で調整 */
+  /* ç”»åƒã®ã‚µã‚¤ã‚ºæŒ‡å®šã¯ç”¨é€”ã§èª¿æ•´ */
 }
 .img-wrapper, .img-bg-wrapper {
   position: relative;
@@ -932,12 +980,12 @@ b {
 }
 
 
-/* 難易度選択用の全画面ブラー */
+/* é›£æ˜“åº¦é¸æŠžç”¨ã®å…¨ç”»é¢ãƒ–ãƒ©ãƒ¼ */
 #diff-blur-bg {
   position: fixed;
   inset: 0;
   z-index: 99990;
-  background: rgb(255 255 255 / 20%); /* 好みで色調整 */
+  background: rgb(255 255 255 / 20%); /* å¥½ã¿ã§è‰²èª¿æ•´ */
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.5s cubic-bezier(.77,0,.18,1), backdrop-filter 0.5s cubic-bezier(.77,0,.18,1);
@@ -946,13 +994,13 @@ b {
 }
 #diff-blur-bg.show {
   opacity: 1;
-  pointer-events: auto; /* 触りたくない場合はnoneのままでもOK */
+  pointer-events: auto; /* è§¦ã‚ŠãŸããªã„å ´åˆã¯noneã®ã¾ã¾ã§ã‚‚OK */
 }
 
 
 
 
-/* モバイル小さめ調整 */
+/* ãƒ¢ãƒã‚¤ãƒ«å°ã•ã‚èª¿æ•´ */
 @media (max-width: 440px) {
   .diff-search-form { width: 98%; max-width: none; }
   #diffSearchInput { width: 84px; font-size: 0.98em;}
@@ -963,6 +1011,13 @@ b {
   display: inline-block;
   margin: 1em 0;
 }
+
+#sContainer input::placeholder {
+  color: #ffffff !important;
+    text-shadow:0 0 5px #9c9c9c70;
+  opacity: 1;  /* é€æ˜Žåº¦ã‚’ç¢ºå®Ÿã«1ã« */
+}
+
 #sContainer input {
   background-color:#ffffff2e;
     backdrop-filter: blur(3px);
@@ -972,13 +1027,13 @@ b {
   border-radius: 55px;
   color:white;
   border: none;
-  box-shadow: 0 2px 12px #c3b7b7ab,inset 0 0 22px #ffffffd9;
-  text-shadow:0 1px 5px #ffffff70;
-  width: 247px;
+  box-shadow: 0 0 2px #e1e1e18c,inset 0 0 2px #ffffffd9,inset 0 10px 12px #14141414;
+
+  width: 288px;
   box-sizing: border-box;
-  max-width: 300px;
+  max-width: 360px;
   margin-top:200px;
-  margin-left:37px;
+  margin-left:18px;
   transform: scaleX(1);
   opacity: 1;
   pointer-events: auto;
@@ -990,7 +1045,7 @@ b {
 
 
 
-/* ポップアップ全体 */
+/* ãƒãƒƒãƒ—ã‚¢ãƒƒãƒ—å…¨ä½“ */
 .diff-popup {
   position: fixed;
   left: 50%;
@@ -1020,7 +1075,7 @@ b {
   transform: translate(-50%,-50%) scale(1.2);
   pointer-events: none;
 }
-/* グリッド（画像ボタン並び） */
+/* ã‚°ãƒªãƒƒãƒ‰ï¼ˆç”»åƒãƒœã‚¿ãƒ³ä¸¦ã³ï¼‰ */
 .diff-popup-grid {
   display: flex;
   gap: 18px 14px;
@@ -1029,7 +1084,7 @@ b {
   margin-bottom: 7px;
 }
 
-/* 画像ボタン */
+/* ç”»åƒãƒœã‚¿ãƒ³ */
 .diff-popup-btn {
   background: #f6fafb;
   border:none;
@@ -1063,7 +1118,7 @@ b {
 }
 
 .floating-retry-btn {
-  /* ← ここはそのまま位置・サイズ・基本スタイルを継承 */
+  /* â† ã“ã“ã¯ãã®ã¾ã¾ä½ç½®ãƒ»ã‚µã‚¤ã‚ºãƒ»åŸºæœ¬ã‚¹ã‚¿ã‚¤ãƒ«ã‚’ç¶™æ‰¿ */
   position: fixed;
   left: 50%;
   bottom: 46px;
@@ -1093,21 +1148,22 @@ b {
   transform-style: preserve-3d;
   animation: hueShift 12s infinite alternate;
   
-  /* 強化されたすりガラス背景＋縁 */
+  /* å¼·åŒ–ã•ã‚ŒãŸã™ã‚Šã‚¬ãƒ©ã‚¹èƒŒæ™¯ï¼‹ç¸ */
   background: rgba(255,255,255,0.12);
-    border: 0.1px solid rgba(255,255,255,0.6);
+    border: 0.1px solid rgb(107 107 107 / 60%);
   border-radius: 50%;
-  backdrop-filter: blur(24px) saturate(200%);
-  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  backdrop-filter: blur(1px) saturate(66%);
+  -webkit-backdrop-filter: blur(2px) saturate(66%);
   
-  /* インセット＋アウトセットシャドウで厚みと浮遊感 */
+  /* ã‚¤ãƒ³ã‚»ãƒƒãƒˆï¼‹ã‚¢ã‚¦ãƒˆã‚»ãƒƒãƒˆã‚·ãƒ£ãƒ‰ã‚¦ã§åŽšã¿ã¨æµ®éŠæ„Ÿ */
   box-shadow:
     inset 0 1px 7px rgba(255,255,255,0.8),
-    inset 0 -2px 3px rgb(0 0 0 / 48%),
+        inset 1px 1px 3px rgb(255 255 255 / 50%),
+    inset 0 -2px 3px rgb(255 255 255 / 79%),
     0 8px 24px rgba(0,0,0,0.15);
 }
 
-/* 上部グレア：薄い光沢を追加 */
+/* ä¸Šéƒ¨ã‚°ãƒ¬ã‚¢ï¼šè–„ã„å…‰æ²¢ã‚’è¿½åŠ  */
 .floating-retry-btn::before {
   content: '';
   position: absolute;
@@ -1122,7 +1178,7 @@ b {
   filter: blur(6px);
 }
 
-/* 中央レンズハイライト */
+/* ä¸­å¤®ãƒ¬ãƒ³ã‚ºãƒã‚¤ãƒ©ã‚¤ãƒˆ */
 .floating-retry-btn::after {
   content: '';
   position: absolute;
@@ -1131,45 +1187,48 @@ b {
   transform: translate(-50%, -50%);
   background: radial-gradient(
     circle at center,
-    rgb(255 255 255 / 50%),
-    transparent 70%
+    rgb(255 255 255 / 26%),
+    transparent 20%
   );
   pointer-events: none;
-  filter: blur(8px);
+  filter: blur(1px);
 }
 
-/* 表示モード */
+/* è¡¨ç¤ºãƒ¢ãƒ¼ãƒ‰ */
 .floating-retry-btn.show {
   opacity: 1;
   pointer-events: auto;
   transform: translateX(-50%) scale3d(1, 1, 1);
 }
 
-/* ワイドモード */
+/* ãƒ¯ã‚¤ãƒ‰ãƒ¢ãƒ¼ãƒ‰ */
 .floating-retry-btn.wide {
   width: 186px;
- box-shadow:
-    inset 0 2px 6px rgba(255,255,255,0.9),
-    0 12px 82px rgba(0,0,0,0.2);
+  box-shadow:
+    inset 0 1px 17px rgb(255 255 255 / 57%),
+        inset 1px 0 13px rgb(0 0 0 / 63%),
+    inset 0 -2px 13px rgb(0 0 0 / 32%),
+    0 8px 24px rgba(0,0,0,0.15);
+  border:solid 2px white;
   height: 60px;
   border-radius: 32px;
   padding: 0 26px;
   font-size: 1.1em;
 }
 
-/* ボタン内テキストのスケール */
+/* ãƒœã‚¿ãƒ³å†…ãƒ†ã‚­ã‚¹ãƒˆã®ã‚¹ã‚±ãƒ¼ãƒ« */
 .retry-btn-inner {
   display: inline-block;
   transform: scale(0.88);
   transition: transform 0.5s cubic-bezier(.77,0,.18,1);
 }
 
-/* 「やり直す」出現時にフェードアウト */
+/* ã€Œã‚„ã‚Šç›´ã™ã€å‡ºç¾æ™‚ã«ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆ */
 .retry-btn-inner.fade-in {
   color: transparent;
 }
 
-/* ホバー時の3D浮き上がり＋スキュー */
+/* ãƒ›ãƒãƒ¼æ™‚ã®3Dæµ®ãä¸ŠãŒã‚Šï¼‹ã‚¹ã‚­ãƒ¥ãƒ¼ */
 .floating-retry-btn:hover {
   transform: translateX(-50%) scale3d(1.1,1.1,1.1) skewX(-1deg) skewY(1deg);
   box-shadow:
@@ -1177,7 +1236,7 @@ b {
     0 12px 32px rgba(0,0,0,0.25);
 }
 
-/* 押下時の沈み込み */
+/* æŠ¼ä¸‹æ™‚ã®æ²ˆã¿è¾¼ã¿ */
 .floating-retry-btn:active {
   transform: translateX(-50%) scale3d(0.95,0.95,0.95) skewX(1deg) skewY(-1deg);
   background: rgba(255,255,255,0.08);
@@ -1186,7 +1245,7 @@ b {
     0 4px 12px rgba(0,0,0,0.2);
 }
 
-/* ごく淡い虹色ゆらぎ（シャボン玉の干渉縞） */
+/* ã”ãæ·¡ã„è™¹è‰²ã‚†ã‚‰ãŽï¼ˆã‚·ãƒ£ãƒœãƒ³çŽ‰ã®å¹²æ¸‰ç¸žï¼‰ */
 @keyframes hueShift {
   from { filter: hue-rotate(-5deg); }
   to   { filter: hue-rotate(5deg); }
@@ -1194,7 +1253,7 @@ b {
 
 #blackCurtain {
   position: fixed;
-  top: 100vh; /* ← 下に隠れておく */
+  top: 100vh; /* â† ä¸‹ã«éš ã‚Œã¦ãŠã */
   left: 0;
   width: 100vw;
   height: 100vh;
@@ -1206,7 +1265,7 @@ b {
 }
 
 #blackCurtain.show {
-  top: 0; /* ← 画面内にスライドイン */
+  top: 0; /* â† ç”»é¢å†…ã«ã‚¹ãƒ©ã‚¤ãƒ‰ã‚¤ãƒ³ */
 }
 
 
@@ -1230,5 +1289,36 @@ b {
     transform: translateY(0);
   }
 }
+
+
+.cell,
+.ox-cell {
+
+  background-color: #00000000 !important;
+
+}
+
+  @media (max-width: 400px) {
+#sContainer input {
+  background-color:#ffffff2e;
+    backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  font-size: 0.98em;
+  border-radius: 55px;
+  color:white;
+  border: none;
+  box-shadow: 0 0 2px #e1e1e18c,inset 0 0 2px #ffffffd9,inset 0 10px 12px #14141414;
+  width: 288px;
+  box-sizing: border-box;
+  max-width: 360px;
+  margin-top:150px;
+  margin-left:18px;
+  transform: scaleX(1);
+  opacity: 1;
+  pointer-events: auto;
+  transition:
+    transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity   0.4s ease-in-out 0.2s;
+}}
 
 

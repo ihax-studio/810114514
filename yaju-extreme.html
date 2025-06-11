@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
+<!-- 複数サイズ用意するなら（優先度高いものが先） -->
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-192.png">
+<link rel="manifest" href="manifest-810.json">
+  <link rel="shortcut icon" href="icon-512.png">
+
+<meta name="theme-color" content="#479b8d">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-191.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-191.png">
+<link rel="shortcut icon" href="icon-191.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>ホモワイプ</title>
+<link rel="stylesheet" href="114514.css">
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js') // ← ルート直下がベスト
+      .then(function(registration) {
+        // console.log('ServiceWorker registration successful with scope:', registration.scope);
+      })
+      .catch(function(error) {
+        // エラー詳細
+        console.error('ServiceWorker registration failed:', error);
+        alert('ServiceWorker registration failed:\n' + error);
+      });
+  });
+}
+</script>
+
+</head>
+<body>
+  <div id="bgImage"></div>
+  <div id="bgWrapper" class="bg-wrapper">
+    <div class="panel" id="startPanel">
+      <div class="panel-header">ホモワイプ</div>
+      <div class="panel-section">
+        <div class="panel-item">
+          <span class="label">ホモム数</span>
+          <input type="number" id="bombCountInput" value="5" min="2">
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-item select" id="difficultyItem">
+          <span class="label">難易度</span>
+          <span class="value" id="difficultyLabel">簡単</span>
+        </div>
+      </div>
+      <button id="startBtn">開始する</button>
+    </div>
+    <div id="game"></div>
+  </div>
+  <div id="overlay">
+    <img id="overlayImg" src="" alt="爆弾画像">
+    <div id="overlayDialog">
+      <p id="scoreText">スコア:</p>
+      <button id="retryBtn">やり直す</button>
+    </div>
+  </div>
+  <div id="retryCenter"><button id="retryBtn2">やり直す</button></div>
+  <audio id="sound-cc" src="cc.mp3"></audio>
+  <audio id="sound-wrong" src="wrong.mp3"></audio>
+  <audio id="sound-bomb" src="mac.wav"></audio>
+  <audio id="sound-flag" src="mac.mp3"></audio>
+  <audio id="sound-key" src="key.mp3"></audio>
+  <audio id="sound-collect" src="collect.mp3"></audio>
+  <audio id="sound-change" src="change.mp3"></audio>
+
+
+<div id="pwaNotice" style="display:none;">
+  <div class="pwa-notice-inner">
+    <img src="iimage.png" alt="アイコン" class="pwa-icon">
+    <span><b>ホーム画面に追加。</b><br>iOS・macOSは共有から。</span>
+    <button class="pwa-close-btn" aria-label="閉じる">&times;</button>
+  </div>
+</div>
+
+<!-- 難易度画像パネル（3×2レイアウトに変更、5個なので5つだけ、6マス目は空ボタン） -->
+<!-- 難易度画像パネル（既存のdiv）内の検索UIを完全対応するため追加 -->
+<div id="difficultyPanel" class="difficulty-panel">
+  <div class="difficulty-img-grid" id="diffGrid">
+    <button class="diff-img-btn" data-idx="0"><img src="n1.png" alt="簡単"></button>
+    <button class="diff-img-btn" data-idx="1"><img src="n2.png" alt="いいよこいよ"></button>
+    <button class="diff-img-btn" data-idx="2"><img src="n3.png" alt="激しい"></button>
+    <button class="diff-img-btn" data-idx="3"><img src="n4.png" alt="絵合わせ"></button>
+    <button class="diff-img-btn" data-idx="4"><img src="n5.png" alt="OX"></button>
+    <button class="diff-img-btn" data-idx="5"><img src="n6.png" alt="オセロ"></button>
+
+    <button class="diff-img-btn diff-img-empty" tabindex="-1" disabled style="background:none;border:none;pointer-events:none;visibility:hidden"></button>
+  </div>
+  <!-- 検索ボックス -->
+<div id="sContainer" class="s-container">
+  <input id="textToTranslate" type="text" placeholder="Appを検索..." autocomplete="off">
+</div>
+
+<!-- 難易度検索ポップアップ（下記JSが自動で出す） -->
+<div id="diffPopup" class="diff-popup" style="display:none;">
+  <div id="diffPopupGrid" class="diff-popup-grid"></div>
+  <div id="diffPopupNone" class="diff-popup-none">結果なし</div>
+</div>
+
+
+
+<!-- 画面最前列用レスポンスエリア -->
+<div id="response" style="display:none"></div>
+
+
+
+</div>
+
+</div>
+<!-- 難易度パネル内・虫眼鏡検索UI -->
+
+<div id="diff-blur-bg"></div>
+<div id="floatingRetry">
+<button id="toggleRetryBtn" class="floating-retry-btn">
+  <span class="retry-btn-inner">!</span>
+</button>
+
+<div id="blackCurtain"></div>
+<audio id="macSound" src="mac.mp3" preload="auto"></audio>
+<script>
+
+
+const toggleBtn = document.getElementById('toggleRetryBtn');
+const innerSpan = toggleBtn.querySelector('.retry-btn-inner');
+const curtain = document.getElementById('blackCurtain');
+let isWide = false;
+let revertTimer = null;
+
+function fadeInWhiteText(element, text, duration = 500) {
+  element.textContent = text;
+  element.style.color = 'rgba(255,255,255,0)';
+  element.style.transform = 'scale(0.6)';
+
+  const startTime = performance.now();
+
+  function update(ts) {
+    const elapsed = ts - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const alpha = progress.toFixed(2);
+
+    element.style.color = `rgba(255,255,255,${alpha})`;
+    element.style.transform = `scale(${0.6 + 0.4 * progress})`;
+
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    }
+  }
+
+  requestAnimationFrame(update);
+}
+
+
+toggleBtn.addEventListener('click', () => {
+  if (!isWide) {
+    toggleBtn.classList.add('wide');
+    fadeInWhiteText(innerSpan, 'やり直す'); // ←ここでフェード実行
+    isWide = true;
+
+    clearTimeout(revertTimer);
+    revertTimer = setTimeout(() => {
+      toggleBtn.classList.remove('wide');
+      innerSpan.textContent = '!';
+      innerSpan.style.transform = 'scale(0.88)';
+      innerSpan.style.color = '#fff'; // ✔️完全に白に戻す
+      isWide = false;
+    }, 2000);
+
+  } else {
+    curtain.classList.add('show');
+    setTimeout(() => {
+      location.reload();
+    }, 900);
+  }
+});
+
+
+
+</script>
+
+
+
+<script>
+// PWAインストール判定
+function isPWA() {
+  return (window.matchMedia('(display-mode: standalone)').matches)
+    || (window.navigator.standalone === true);
+}
+// バナー表示
+function showPwaBanner() {
+  const banner = document.getElementById('pwaNotice');
+  const noticeInner = banner.querySelector('.pwa-notice-inner');
+  if (!banner) return;
+  banner.style.display = "block";
+  setTimeout(()=>banner.classList.add('show'), 20);
+
+  // ×ボタン: scale+opacity同時トランジション0.6s
+  const closeBtn = banner.querySelector('.pwa-close-btn');
+  closeBtn.onclick = () => {
+    if (noticeInner.classList.contains('shrink')) return;
+    noticeInner.classList.add('shrink');
+    setTimeout(()=>{
+      banner.style.display = "none";
+      noticeInner.classList.remove('shrink');
+      banner.classList.remove('show');
+    }, 600);
+  };
+}
+
+
+// iOS/Androidホーム追加バナー表示（PWA外＆モバイルのみ）
+window.addEventListener('DOMContentLoaded', ()=>{
+  if(
+    !isPWA() &&
+    (window.innerWidth<=600 || /iPhone|Android.+Mobile|iPod|Windows Phone|webOS|BlackBerry/i.test(navigator.userAgent))
+  ){
+    showPwaBanner();
+  }
+});
+</script>
+  <script>// ---- グローバル ----
+// ---- グローバル ----
+let ROWS = 8, COLS = 5, BOMBS = 5, safeCount = 0;
+let grid = [], spawnTimeouts = [], spawning = true, revealed = 0;
+let currentDiff = '簡単';
+const DIFF_NAMES = ['簡単','いいよこいよ','激しい','絵合わせ','OX（2人）', 'オセロ']; // ←追加
+const DIFF_SETTINGS = [
+  {rows: 5, cols: 5, bombs: 5, showInput: true},
+  {rows: 7, cols: 5, bombs: 7, showInput: true},
+  {rows: 8, cols: 6, bombs: 14, showInput: true},
+  {rows: 5, cols: 5, bombs: "", showInput: false},
+  {rows: 5, cols: 5, bombs: "", showInput: false},
+  {rows: 0, cols: 0, bombs: "", showInput: false}, // ←追加
+];
+
+
+const PAIR_IMAGES = [
+  "b1.png","b2.png","b3.png","b4.png","b5.png","b6.png","b7.png","b8.png","b9.png","b11.png"
+];
+
+// DOM
+const startPanel = document.getElementById('startPanel');
+const bombCountInput = document.getElementById('bombCountInput');
+const difficultyItem = document.getElementById('difficultyItem');
+const difficultyLabel = document.getElementById('difficultyLabel');
+const startBtn = document.getElementById('startBtn');
+const game = document.getElementById('game');
+const overlay = document.getElementById('overlay');
+const overlayImg = document.getElementById('overlayImg');
+const overlayDialog = document.getElementById('overlayDialog');
+const scoreText = document.getElementById('scoreText');
+const retryBtn = document.getElementById('retryBtn');
+const retryCenter = document.getElementById('retryCenter');
+const retryBtn2 = document.getElementById('retryBtn2');
+const bgImage = document.getElementById('bgImage');
+const soundCC = document.getElementById('sound-cc');
+const soundFlag = document.getElementById('sound-flag');
+const soundBomb = document.getElementById('sound-bomb');
+const soundWrong = document.getElementById('sound-wrong');
+const soundKey = document.getElementById('sound-key');
+const soundCollect = document.getElementById('sound-collect');
+const soundChange = document.getElementById('sound-change');
+const difficultyPanel = document.getElementById('difficultyPanel');
+const bombCountInputWrapper = bombCountInput.closest('.panel-item');
+// diffImgBtns: 6マス目(空ダミー)除外
+const diffImgBtns = Array.from(document.querySelectorAll('.diff-img-btn:not(.diff-img-empty)'));
+
+// ---- サウンド ----
+function playSound(audio) { try { audio.currentTime = 0; audio.play(); } catch(e){} }
+async function playSoundSafe(audio){ try{ audio.currentTime=0; await audio.play(); }catch(e){} }
+
+// ---- 難易度切替 ----
+function updateBombCountInput(show) {
+  if (show === undefined) show = DIFF_SETTINGS.find(x => x.rows===ROWS&&x.cols===COLS)?.showInput ?? true;
+  bombCountInputWrapper.style.display = show ? '' : 'none';
+}
+function setDifficulty(idx){
+  const setting = DIFF_SETTINGS[idx];
+  ROWS = setting.rows;
+  COLS = setting.cols;
+  BOMBS = setting.showInput ? setting.bombs : "";
+  bombCountInput.value = BOMBS;
+  currentDiff = DIFF_NAMES[idx];
+  difficultyLabel.textContent = DIFF_NAMES[idx];
+  updateBombCountInput(setting.showInput);
+  window.currentDiff = currentDiff;
+}
+diffImgBtns.forEach((btn, idx) => {
+  btn.addEventListener('click', () => {
+    diffImgBtns.forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    setDifficulty(idx);
+    playSound(soundKey);
+    closeDifficultyPanel();
+  });
+});
+difficultyItem.addEventListener('click', openDifficultyPanel);
+const diffBlurBg = document.getElementById('diff-blur-bg');
+
+function openDifficultyPanel(){
+  difficultyPanel.classList.add('active');
+  difficultyPanel.style.opacity = '0';
+  difficultyPanel.style.transform = 'translate(-50%,-50%) scale(0.7)';
+  diffBlurBg.classList.add('show'); // ← ぼかし出す
+  // popアニメ: 一旦全部外し、0.1s刻みで順次出す
+  diffImgBtns.forEach(btn => btn.classList.remove('diff-appear'));
+  requestAnimationFrame(()=>{
+    difficultyPanel.style.transition='transform 0.7s cubic-bezier(.77,0,.18,1), opacity 0.7s cubic-bezier(.77,0,.18,1)';
+    difficultyPanel.style.opacity='1';
+    difficultyPanel.style.transform='translate(-50%,-50%) scale(1)';
+    difficultyPanel.style.pointerEvents='auto';
+    diffImgBtns.forEach((btn, idx) => {
+      setTimeout(()=>btn.classList.add('diff-appear'), idx*100);
+    });
+  });
+}
+
+function closeDifficultyPanel(){
+  difficultyPanel.style.opacity='0';
+  difficultyPanel.style.transform='translate(-50%,-50%) scale(0.7)';
+  difficultyPanel.style.pointerEvents='none';
+  diffImgBtns.forEach(btn=>btn.classList.remove('diff-appear'));
+  diffBlurBg.classList.remove('show'); // ← ぼかし消す
+  setTimeout(()=>difficultyPanel.classList.remove('active'), 500);
+}
+
+// ---- bombCount変更 ----
+bombCountInput.addEventListener('input', () => {
+  let val = parseInt(bombCountInput.value, 10);
+
+  // 値が数値でない、または範囲外なら補正
+  if (isNaN(val) || val < 2) val = 2;
+  if (val > 14) val = 14;
+
+  bombCountInput.value = val;
+  BOMBS = val;
+});
+
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  if (currentDiff === 'オセロ') {
+    // オセロ選択時：黒カーテンスライドダウンして遷移
+    const curtain = document.getElementById('blackCurtain');
+    curtain.classList.add('show');
+    setTimeout(() => {
+      window.location.href = 'osero.html';
+    }, 500);
+    return; // ここで以降のゲーム開始処理をキャンセル
+  }
+
+  // 🔁 通常ゲーム開始処理（簡単、激しい、いいよこいよ、絵合わせ、OXなど）
+  bgImage.style.transform = 'scale(1.4)';
+
+  setTimeout(() => {
+    Array.from(startPanel.children).forEach((child, i) => {
+      setTimeout(() => {
+        child.style.transition = 'transform 0.4s cubic-bezier(.8,0,.18,1), opacity 0.33s';
+        child.style.transform = 'scale(1.4)';
+        child.style.opacity = '0';
+      }, i * 120);
+    });
+
+    setTimeout(() => {
+      startPanel.style.display = 'none';
+      bgImage.style.transform = 'scale(1.33)';
+      game.style.display = "grid";
+      init();
+
+      setTimeout(() => {
+        const btn = document.getElementById('toggleRetryBtn');
+        btn.classList.add('show'); // ← やり直すボタン表示
+      }, 2000);
+
+    }, startPanel.children.length * 120 + 350);
+
+  }, 500);
+});
+
+
+
+
+ 
+
+// ==== OX追加用 ====
+let OX_STATE = { turn: 1, cells: [], finished: false };
+
+// ---- 盤面初期化 ----
+function init(){
+  safeCount = 0; revealed = 0; grid = []; spawnTimeouts = []; spawning = true;
+  game.innerHTML = ''; game.style.display = 'grid';
+  overlay.style.opacity = '0'; overlay.classList.remove('show'); overlay.style.display = 'none';
+  overlayDialog.classList.remove('show'); overlayDialog.style.display = 'none';
+  retryCenter.classList.remove('show');
+  bgImage.classList.remove('blurred');
+  bgImage.style.transform = 'scale(1.2)';
+  // OXモード
+  if(currentDiff==="OX（2人）"){
+    initOXGame();
+    return;
+  }
+  // 絵合わせ
+  if(currentDiff==="絵合わせ"){ initMemoryGame(); return; }
+  // 既存マインスイーパー
+  game.classList.remove('memory-mode');
+  game.style.gridTemplateColumns = `repeat(${COLS}, minmax(0, 1fr))`;
+  game.style.gridTemplateRows = `repeat(${ROWS}, minmax(0, 1fr))`;
+  for(let y=0; y<ROWS; y++){
+    grid[y]=[];
+    for(let x=0; x<COLS; x++){
+      let cellData = {bomb:false, revealed:false, flagged:false, count:0};
+      grid[y][x]=cellData;
+      const btn = document.createElement('button');
+      btn.className='cell'; btn.dataset.x=x; btn.dataset.y=y;
+      btn.style.background="url('b10.png') center/cover no-repeat";
+      attachCellEvents(btn, y, x);
+      btn.style.opacity='0';
+      btn.style.transform='translateY(80px) scale(1)';
+      game.appendChild(btn);
+      const idx = y*COLS+x;
+      setTimeout(()=>{
+        btn.style.transition='transform 0.24s cubic-bezier(.8,0,.18,1), opacity 0.24s cubic-bezier(.8,0,.18,1)';
+        btn.style.transform='translateY(0) scale(1)';
+        btn.style.opacity='1';
+        playSound(soundCC);
+      }, idx*108+120);
+    }
+  }
+  let placed = 0;
+  while(placed < BOMBS){
+    const y = Math.random()*ROWS|0, x = Math.random()*COLS|0;
+    if(!grid[y][x].bomb){ grid[y][x].bomb=true; placed++; }
+  }
+  for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
+    if(grid[y][x].bomb) continue;
+    let cnt=0;
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)
+      if(dy||dx){
+        const ny=y+dy,nx=x+dx;
+        if(ny>=0&&ny<ROWS&&nx>=0&&nx<COLS&&grid[ny][nx].bomb) cnt++;
+      }
+    grid[y][x].count=cnt;
+  }
+  game.addEventListener('click', fastSpawn, {once:true});
+}
+function fastSpawn(){
+  if(!spawning)return;
+  spawning=false;
+  document.querySelectorAll('.cell').forEach(btn=>{
+    btn.style.transition='transform 0.18s, opacity 0.18s';
+    btn.style.opacity='1'; btn.style.transform='translateY(0) scale(1)';
+  });
+}
+
+// ---- 盤面イベント ----
+function attachCellEvents(btn, y, x){
+  let timer;
+  const isMinesweeper = ["簡単","いいよこいよ","激しい"].includes(currentDiff);
+  btn.addEventListener('contextmenu',e=>{if(!isMinesweeper)return;e.preventDefault();flagOrUnflag(btn,y,x);});
+  btn.addEventListener('mousedown',e=>{if(!isMinesweeper)return;e.preventDefault();timer=setTimeout(()=>flagOrUnflag(btn,y,x),500);});
+  btn.addEventListener('mouseup',()=>{
+    clearTimeout(timer);
+    if(isMinesweeper&&grid?.[btn.dataset.y]?.[btn.dataset.x]?.flagged)return;
+    if(isMinesweeper) clickCell(btn);
+  });
+  btn.addEventListener('mouseleave',()=>clearTimeout(timer));
+  if(!isMinesweeper) btn.addEventListener('click',()=>clickCell(btn));
+}
+function flagOrUnflag(btn, y, x){
+  const cell=grid[btn.dataset.y][btn.dataset.x];
+  if(cell.revealed)return;
+  playSound(soundKey);
+  cell.flagged=!cell.flagged;
+  btn.classList.toggle('flagged');
+  btn.style.background=cell.flagged ? "url('ball.png') center/cover no-repeat" : "url('b10.png') center/cover no-repeat";
+}
+function clickCell(btn){
+  const x=+btn.dataset.x, y=+btn.dataset.y, cell=grid[y][x];
+  if(cell.revealed||cell.flagged){animateCellDisappear(btn);return;}
+  animateCellDisappear(btn); cell.revealed=true; revealed++;
+  btn.classList.add('revealed');
+  btn.style.background="url('b8.png') center/cover no-repeat";
+  if(cell.bomb){
+    overlayImg.src=(currentDiff==='激しい') ? "./red.png" : "./114514.png";
+    overlay.style.display='flex';
+    overlay.classList.add('show');
+    overlay.style.opacity='1'; overlay.style.zIndex=99999;
+    document.body.style.pointerEvents='none';
+    playSound(soundBomb); btn.classList.add('bomb-anim');
+    btn.style.transform='scale(2.4)'; btn.style.opacity='0';
+    setTimeout(()=>{
+      scoreText.textContent=`スコア: ${safeCount}`;
+      overlayDialog.style.display='block';
+      setTimeout(()=>overlayDialog.classList.add('show'),30);
+      document.body.style.pointerEvents='';
+    }, 1000); return;
+  }
+  safeCount++;
+  btn.innerHTML=cell.count ? `<span>${cell.count}</span>` : '';
+  playSound(soundWrong);
+  if(cell.count===0) revealNeighbors(x,y);
+  if(revealed===ROWS*COLS-BOMBS) setTimeout(clearWin,240);
+}
+function revealNeighbors(x,y){
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+    const nx=x+dx, ny=y+dy;
+    if(nx>=0&&nx<COLS&&ny>=0&&ny<ROWS){
+      const nb=document.querySelector(`.cell[data-x="${nx}"][data-y="${ny}"]`);
+      if(!grid[ny][nx].revealed&&!grid[ny][nx].bomb) clickCell(nb);
+    }
+  }
+}
+function clearWin(){
+  document.querySelectorAll('.cell, #game').forEach(el=>{
+    el.style.transition='transform 0.55s cubic-bezier(.8,0,.18,1), opacity 0.55s cubic-bezier(.8,0,.18,1)';
+    el.style.transform='translateY(-60px) scale(0.8)';
+    el.style.opacity='0';
+  });
+  setTimeout(()=>{
+    bgImage.style.transform='scale(1)';
+    bgImage.classList.add('blurred');
+    playSound(soundCollect);
+    setTimeout(()=>{
+      retryCenter.classList.add('show');
+      retryCenter.style.display="flex";
+      retryBtn2.style.transform="scale(1)";
+      retryBtn2.style.opacity="1";
+    },720);
+  },500);
+}
+
+// ---- 絵合わせ ----
+let memSelected=[], memPairMap=[], memRevealed=[];
+function initMemoryGame(){
+  ROWS=5; COLS=5; game.classList.add('memory-mode');
+  game.style.position='absolute'; game.style.left='50%'; game.style.top='50%'; game.style.transform='translate(-50%,-50%)';
+  const minSide=Math.min(window.innerWidth,window.innerHeight)*0.92;
+  game.style.width=minSide+'px'; game.style.height=minSide+'px'; game.style.maxWidth='98vw'; game.style.maxHeight='90vh';
+  game.style.gap='8px'; game.style.gridTemplateColumns=`repeat(${COLS},1fr)`; game.style.gridTemplateRows=`repeat(${ROWS},1fr)`;
+  game.innerHTML=''; let pairList=[];
+  for(let i=0;i<24;i++) pairList.push(PAIR_IMAGES[i%5],PAIR_IMAGES[i%10]);
+  while(pairList.length<ROWS*COLS) pairList.push("b10.png");
+  for(let i=pairList.length-1;i>0;i--){
+    let j=Math.floor(Math.random()*(i+1)); [pairList[i],pairList[j]]=[pairList[j],pairList[i]];
+  }
+  memPairMap=pairList; memSelected=[]; memRevealed=Array(ROWS*COLS).fill(false);
+  for(let i=0;i<ROWS*COLS;i++){
+    const btn=document.createElement('button');
+    btn.className='cell memory-cell'; btn.dataset.idx=i;
+    btn.style.opacity='0'; btn.style.transform='translateY(80px) scale(1)';
+    btn.style.background="#eee"; btn.style.width='100%'; btn.style.aspectRatio='1/1'; btn.style.height='auto';
+    btn.addEventListener('click',()=>memoryClick(btn,i));
+    setTimeout(()=>{
+      btn.style.transition='transform 0.33s ease, opacity 0.24s cubic-bezier(.8,0,.18,1)';
+      btn.style.transform='translateY(0) scale(1)'; btn.style.opacity='1';
+      playSound(soundCC);
+    },i*70+300);
+    game.appendChild(btn);
+  }
+}
+function memoryClick(btn,idx){
+  playSound(soundFlag); animateCellDisappear(btn);
+  if(memRevealed[idx]||memSelected.length>=2)return;
+  btn.style.background=`url(${memPairMap[idx]}) center/cover no-repeat`;
+  memSelected.push({btn,idx});
+  if(memPairMap[idx]==="b10.png"){
+    overlayImg.src="./114514.png"; overlay.style.display='flex';
+    overlay.classList.add('show'); overlay.style.opacity='1'; overlay.style.zIndex=99999;
+    playSound(soundBomb);
+    setTimeout(()=>{
+      scoreText.textContent=`スコア: 0`;
+      overlayDialog.style.display='block';
+      setTimeout(()=>overlayDialog.classList.add('show'),30);
+    },1000); return;
+  }
+  if(memSelected.length==2){
+    const [a,b]=memSelected;
+    if(memPairMap[a.idx]===memPairMap[b.idx]){
+      setTimeout(()=>{
+        a.btn.style.visibility="hidden"; b.btn.style.visibility="hidden";
+        memRevealed[a.idx]=true; memRevealed[b.idx]=true; memSelected=[];
+        playSound(soundChange);
+        if(memRevealed.filter(x=>x).length===48){ clearWin(); }
+      },550);
+    }else{
+      setTimeout(()=>{
+        a.btn.style.background="#eee"; b.btn.style.background="#eee";
+        playSound(soundKey); memSelected=[];
+      },700);
+    }
+  }
+}
+function initOXGame(){
+  ROWS=4; COLS=4;
+  OX_STATE = {turn: 1, cells: Array(25).fill(0), finished: false};
+  game.classList.remove('memory-mode');
+  game.innerHTML = '';
+  game.style.position = 'absolute';
+  game.style.left = '50%';
+  game.style.top = '50%';
+  game.style.transform = 'translate(-50%,-50%)';
+  game.style.width = 'min(390px,90vw)';
+  game.style.height = 'min(600px,80vw)';
+  game.style.maxWidth = '98vw';
+  game.style.maxHeight = '90vh';
+  game.style.gap = '3px';
+  game.style.gridTemplateColumns = `repeat(${COLS},1fr)`;
+  game.style.gridTemplateRows = `repeat(${ROWS},1fr)`;
+
+  // 番表示
+  let turnLabel = document.createElement('div');
+  turnLabel.id = 'ox-turn-label';
+  turnLabel.textContent = "◯の番です";
+  game.appendChild(turnLabel);
+
+  // 盤面
+  for(let i=0;i<20;i++){
+    let btn = document.createElement('button');
+    btn.className = 'cell ox-cell';
+    btn.dataset.idx = i;
+    btn.style.background = "#fafafa";
+    btn.style.opacity = '0';
+    btn.style.transform = 'translateY(80px) scale(1)';
+    btn.style.aspectRatio = '1/1';
+    btn.disabled = false;
+    btn.addEventListener('click',()=>oxClick(btn,i));
+    setTimeout(()=>{
+      btn.style.transition = 'transform 0.32s cubic-bezier(.8,0,.18,1), opacity 0.22s cubic-bezier(.8,0,.18,1)';
+      btn.style.transform = 'translateY(0) scale(1)';
+      btn.style.opacity = '1';
+    },i*72+180);
+    game.appendChild(btn);
+  }
+}
+function oxClick(btn, idx){
+  if(OX_STATE.finished || OX_STATE.cells[idx]!==0) return;
+  playSound(soundChange); // ←ここ
+
+  let turn = OX_STATE.turn;
+  OX_STATE.cells[idx] = turn;
+
+  // アニメ他…（この後はそのまま）
+  btn.style.transition = 'transform 0.5s cubic-bezier(.77,0,.18,1), opacity 0.5s cubic-bezier(.77,0,.18,1)';
+  btn.style.transform = 'scale(1.4)';
+  btn.style.opacity = '0';
+  setTimeout(() => {
+    btn.style.transition = '';
+    btn.style.transform = 'scale(1)';
+    btn.style.opacity = '1';
+    btn.style.background = turn===1
+      ? "url('b11.png') center/cover no-repeat"
+      : "url('b10.png') center/cover no-repeat";
+    btn.disabled = true;
+  }, 500);
+
+  OX_STATE.turn *= -1;
+  updateOxTurnLabel();
+
+  let win = oxCheckWinner();
+  if(win!==0){
+    oxEndGame(win);
+    return;
+  }
+  if(OX_STATE.cells.every(x=>x!==0)){
+    oxEndGame(0);
+    return;
+  }
+}
+
+
+function updateOxTurnLabel(){
+  let label = document.getElementById('ox-turn-label');
+  if(OX_STATE.finished) return;
+  label.classList.remove('slide-up');
+  void label.offsetWidth;
+  label.textContent = OX_STATE.turn === 1 ? "◯の番です" : "×の番です";
+  label.classList.add('slide-up');
+}
+
+// --- OX勝敗判定（5x5縦横斜め） ---
+function oxCheckWinner(){
+  const cells = OX_STATE.cells;
+  const lines = [];
+  for(let y=0;y<4;y++) lines.push([0,1,2,3].map(x=>y*4+x));
+  // 縦4列
+  for(let x=0;x<4;x++) lines.push([0,1,2,3].map(y=>y*4+x));
+  // 斜め
+  lines.push([0,5,10,15]); // 左上→右下
+  lines.push([3,6,9,12]);  // 右上→左下
+  for(const line of lines){
+    let sum = line.map(i=>cells[i]).reduce((a,b)=>a+b,0);
+     if(sum===4) return 1;
+    if(sum===-4) return -1;
+  }
+  return 0;
+}
+
+// --- OX勝敗表示+音 ---
+function oxEndGame(winner){
+  OX_STATE.finished = true;
+  overlayImg.src = "./114514.jpg";
+  overlay.style.display = 'flex';
+  overlay.classList.add('show');
+  overlay.style.opacity = '1';
+  overlay.style.zIndex = 99999;
+  playSound(soundBomb); // mac.wav 再生
+  let text = "";
+  if(winner===1) text = "◯の勝ち！";
+  else if(winner===-1) text = "×の勝ち！";
+  else text = "引き分け！";
+  scoreText.textContent = text;
+  overlayDialog.style.display = 'block';
+  setTimeout(()=> overlayDialog.classList.add('show'), 30);
+}
+
+
+// --- リトライ ---
+async function retryAnimAndReload(btn){
+  btn.classList.add('retry-zoom'); await new Promise(r=>requestAnimationFrame(r));
+  await playSoundSafe(soundChange); btn.classList.add('scaling');
+  setTimeout(()=>{ window.location.reload(true); }, 700);
+}
+retryBtn.onclick = (e)=>{e.preventDefault();retryAnimAndReload(retryBtn);};
+retryBtn2.onclick = (e)=>{e.preventDefault();retryAnimAndReload(retryBtn2);};
+
+// --- スケールアニメ ---
+document.addEventListener("DOMContentLoaded",()=>{
+  setTimeout(()=>{document.body.classList.add("scaled-in");},10);
+});
+function animateCellDisappear(btn){
+  if(!btn.classList.contains('cell-disappear')){
+    btn.classList.add('cell-disappear');
+  }
+}
+
+// --- 最初に「簡単」セット ---
+setDifficulty(0);
+diffImgBtns[0].classList.add('selected');
+updateBombCountInput(DIFF_SETTINGS[0].showInput);
+
+// --- リサイズなど ---
+window.addEventListener("resize",()=>{
+  if(game.classList.contains("memory-mode")){
+    const minSide=Math.min(window.innerWidth,window.innerHeight)*0.92;
+    game.style.width=minSide+'px'; game.style.height=minSide+'px';
+  }
+  if(currentDiff==="激しい" && (window.innerWidth<=600)){
+    game.style.gridTemplateColumns = `repeat(8, minmax(0, 1fr))`;
+    game.style.gridTemplateRows = `repeat(8, minmax(0, 1fr))`;
+  }
+});
+
+(function(){
+  // 1. ゲームで使う画像全リスト
+  const imageList = [
+    // 難易度
+    "n1.png","n2.png","n3.png","n4.png","n5.png",
+    // ペア画像
+    "b1.png","b2.png","b3.png","b4.png","b5.png","b6.png","b7.png","b8.png","b9.png","b10.png","b11.png",
+    // ゲームパネル
+    "red.png","114514.png","114514.jpg",
+    // UI
+    "iimage.png","ball.png", 
+    // 必要あればさらに追加
+  ].map(x=>x);
+
+  const bg = document.getElementById('bgImage');
+  const startPanel = document.getElementById('startPanel');
+  const loaderOverlay = document.getElementById('loaderOverlay');
+  if(!bg||!startPanel||!loaderOverlay){ return; }
+
+  // 2. ロード開始時状態
+  bg.style.transition = 'transform 0.7s cubic-bezier(.77,0,.18,1)';
+  bg.style.transform = 'scale(0.8)';
+  startPanel.style.opacity = '0';
+  startPanel.style.pointerEvents = 'none';
+
+  // 3. 画像全部プリロード
+  let loaded = 0, required = imageList.length, failed = 0;
+  imageList.forEach(src => {
+    const img = new window.Image();
+    img.onload = check;
+    img.onerror = check;
+    img.src = src;
+  });
+
+  function check(){
+    loaded++;
+    // console.log("Loaded",loaded,"/",required);
+    if(loaded >= required){
+      setTimeout(allImagesLoaded, 230);
+    }
+  }
+
+  // 4. 全部ロード完了→アニメーション
+  function allImagesLoaded(){
+    loaderOverlay.classList.add('hide');
+    setTimeout(()=>{
+      loaderOverlay.style.display='none';
+      // 背景をscale=1にアニメ
+      bg.style.transform = 'scale(1)';
+      setTimeout(()=>{
+        // タイトルパネルfadeIn
+        startPanel.style.transition = "opacity 0.44s cubic-bezier(.77,0,.18,1)";
+        startPanel.style.opacity = '1';
+        startPanel.style.pointerEvents = '';
+      }, 410);
+    }, 410);
+  }
+})();
+
+
+// 19.mp3, 123.png 必要
+
+let winAudio = new Audio('19.mp3');
+winAudio.loop = false;
+
+// OX or 絵合わせ全クリア時に呼ぶ関数
+function showClearOverlayWithSound() {
+  overlayImg.src = "123.png";
+  overlay.style.display = 'flex';
+  overlay.classList.add('show');
+  overlay.style.opacity = '1';
+  overlay.style.zIndex = 99999;
+
+  // --- 19.mp3を「終わるまで」再生（ループなら loop = true だが、1回だけなら loop = false）
+  winAudio.currentTime = 0;
+  winAudio.play();
+
+  // 再生終わったら dialog 拡大→テキスト→やり直し
+  winAudio.onended = () => {
+    // ダイアログを scale 0.8→1 に
+    overlayDialog.style.display = 'block';
+    overlayDialog.style.transform = 'translate(-50%, -50%) scale(0.8)';
+    overlayDialog.style.opacity = '0';
+    setTimeout(() => {
+      overlayDialog.style.transition = "transform 0.6s cubic-bezier(.77,0,.18,1), opacity 0.45s cubic-bezier(.77,0,.18,1)";
+      overlayDialog.style.transform = 'translate(-50%, -50%) scale(1)';
+      overlayDialog.style.opacity = '1';
+      // テキストを「やりますねぇ！」に
+      scoreText.textContent = "やりますねぇ！";
+      overlayDialog.classList.add('show');
+      // やり直すボタンはもとから出す or pointer-eventsで制御してもOK
+      retryBtn.disabled = false;
+      retryBtn2.disabled = false;
+    }, 60);
+  };
+}
+
+// ---- 絵合わせで全クリ時
+function memoryClick(btn, idx) {
+  playSound(soundFlag);
+  animateCellDisappear(btn);
+  if (memRevealed[idx] || memSelected.length >= 2) return;
+  btn.style.background = `url(${memPairMap[idx]}) center/cover no-repeat`;
+  memSelected.push({ btn, idx });
+  if (memPairMap[idx] === "b10.png") {
+    // 爆弾
+    // ...既存の処理
+    return;
+  }
+  if (memSelected.length == 2) {
+    const [a, b] = memSelected;
+    if (memPairMap[a.idx] === memPairMap[b.idx]) {
+      setTimeout(() => {
+        a.btn.style.visibility = "hidden";
+        b.btn.style.visibility = "hidden";
+        memRevealed[a.idx] = true;
+        memRevealed[b.idx] = true;
+        memSelected = [];
+        playSound(soundChange);
+        // --- ここでクリア判定
+        if (memRevealed.filter(x => x).length === 25) { // 5*5=25
+          showClearOverlayWithSound();
+        }
+      }, 550);
+    } else {
+      setTimeout(() => {
+        a.btn.style.background = "#eee";
+        b.btn.style.background = "#eee";
+        playSound(soundKey); memSelected = [];
+      }, 700);
+    }
+  }
+}(function() {
+  const DIFF_IMAGES = [
+    {src:'n1.png',alt:'簡単',  keys:["かんたん","簡単","easy","か","かんた","易しい","k","野獣"]},
+    {src:'n2.png',alt:'いいよこいよ', keys:["i","いいよ","こいよ","ふつう","普通","標準","デフォルト","い","comming"]},
+    {src:'n3.png',alt:'激しい', keys:["h","激しい","はげしい","むずい","難しい","difficult","は"]},
+    {src:'n4.png',alt:'絵合わせ', keys:["先輩","h","え","絵合わせ","panel","えあわせ"]},
+    {src:'n5.png',alt:'OX',     keys:["⚪︎","ox","⚪︎×","丸","まる","ばつ","まるばつ","マルバツ","○×","⭕️❌"]}
+  ];
+
+  const CLOSE_WORDS = ["閉じる", "とじる", "close","死ね","消え","とじ"];
+  const input = document.getElementById('textToTranslate');
+  const popup = document.getElementById('diffPopup');
+  const grid = document.getElementById('diffPopupGrid');
+  const none = document.getElementById('diffPopupNone');
+  const diffBlurBg = document.getElementById('diff-blur-bg');
+  const difficultyPanel = document.getElementById('difficultyPanel');
+
+  // サウンド
+  const soundFlag = document.getElementById('sound-flag');
+  function playMac() {
+    if (soundFlag) {
+      try {
+        let audio = soundFlag.cloneNode(true);
+        audio.currentTime = 0;
+        audio.play();
+        setTimeout(() => { audio.remove(); }, 2000);
+      } catch (e) {}
+    }
+  }
+
+  let scaleAnimTimer = null;
+  let lastMatchedKeys = null;
+  let lastHasResult = false;
+
+  function normalize(str) {
+    if (!str) return '';
+    return str
+      .replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0)-0xFEE0))
+      .replace(/[\u30a1-\u30f6]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x60))
+      .replace(/\s+/g, '')
+      .toLowerCase();
+  }
+
+  function showPopup() {
+    if (scaleAnimTimer) clearTimeout(scaleAnimTimer);
+    popup.style.display = 'flex';
+    popup.style.transition = '';
+    popup.style.transform = 'translate(-50%,-50%) scale(1)';
+    requestAnimationFrame(() => {
+      popup.style.transition = 'transform 0.5s cubic-bezier(.77,0,.18,1)';
+      popup.style.transform = 'translate(-50%,-50%) scale(1)';
+    });
+  }
+  function hidePopup(force) {
+    // force: true の場合のみ絶対閉じ
+    if (!popup || popup.style.display === 'none') return;
+    if (scaleAnimTimer) clearTimeout(scaleAnimTimer);
+    popup.style.transition = '';
+    popup.style.transform = 'translate(-50%,-50%) scale(1)';
+    if (force) {
+      popup.style.display = 'none';
+      popup.style.transform = 'translate(-50%,-50%) scale(1.2)';
+      lastHasResult = false;
+      return;
+    }
+    // 通常の消す条件は呼ばれない（外部から呼ばれることはもう無い）
+  }
+
+  function closeAllDifficultyUI() {
+    // 難易度パネル
+    if (typeof closeDifficultyPanel === 'function') closeDifficultyPanel();
+    // 検索ポップアップ
+    hidePopup(true);
+    // ぼかし
+    if (diffBlurBg) diffBlurBg.classList.remove('show');
+    // パネル強制無効化
+    if (difficultyPanel) {
+      difficultyPanel.classList.remove('active');
+      difficultyPanel.style.opacity = '0';
+      difficultyPanel.style.pointerEvents = 'none';
+      setTimeout(()=>{ difficultyPanel.style.display = ''; }, 510);
+    }
+    // 入力リセット
+    input.value = '';
+    lastHasResult = false;
+  }
+
+  function updatePopup() {
+    const val = normalize(input.value.trim());
+    if (val.length === 0) {
+      hidePopup(true);
+      lastHasResult = false;
+      lastMatchedKeys = null;
+      return;
+    }
+    let matched = [];
+    DIFF_IMAGES.forEach((obj, idx) => {
+      for (const k of obj.keys) {
+        if (val.includes(normalize(k))) {
+          matched.push(idx);
+          break;
+        }
+      }
+    });
+
+    grid.innerHTML = '';
+    matched.forEach(idx => {
+      const img = DIFF_IMAGES[idx];
+      const btn = document.createElement('button');
+      btn.className = 'diff-popup-btn';
+
+      const image = document.createElement('img');
+      image.src = img.src;
+      image.alt = img.alt;
+
+      const txt = document.createElement('span');
+      txt.textContent = img.alt;
+
+      btn.appendChild(image);
+      btn.appendChild(txt);
+
+      btn.onclick = () => {
+        if (typeof setDifficulty === 'function') setDifficulty(idx);
+        const panelBtns = document.querySelectorAll('.diff-img-btn');
+        panelBtns.forEach((b, i) => b.classList.toggle('selected', i === idx));
+        if (typeof closeDifficultyPanel === 'function') closeDifficultyPanel();
+        hidePopup(true);
+        input.value = '';
+        lastHasResult = false;
+      };
+      grid.appendChild(btn);
+    });
+
+    none.style.display = matched.length === 0 ? '' : 'none';
+    // ここが大事！候補がある間は何しても消えない
+    if (matched.length > 0) {
+      showPopup();
+      lastHasResult = true;
+      lastMatchedKeys = matched.slice();
+    } else {
+      hidePopup(true);
+      lastHasResult = false;
+      lastMatchedKeys = null;
+    }
+  }
+
+  // --- 入力時
+  input.addEventListener('input', function() {
+    playMac && playMac();
+    const val = normalize(input.value.trim());
+    if (CLOSE_WORDS.some(w => val === normalize(w))) {
+      closeAllDifficultyUI();
+      return;
+    }
+    updatePopup();
+  });
+
+  // --- blurしても候補ある限り絶対消えない
+  input.addEventListener('blur', () => {
+    if (!lastHasResult) hidePopup(true);
+    // それ以外絶対消さない
+  });
+
+
+
+  // --- popup自体をどこクリックしても消さないようにイベント奪う ---
+  if (popup) {
+    popup.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+    });
+    popup.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
+    });
+  }
+  // --- 外部クリックでも消さない（window等のmousedownは何も書かない）
+
+  // 初回
+  updatePopup();
+})();
+
+
+const alertBtn = document.getElementById('alertBtn');
+const retryShowBtn = document.getElementById('retryShowBtn');
+let retryBtnTimer = null;
+
+// !を押したらやり直す表示（0.5秒間でアニメ）
+alertBtn.onclick = () => {
+  retryShowBtn.classList.add('show');
+  retryShowBtn.style.display = 'block';
+  if (retryBtnTimer) clearTimeout(retryBtnTimer);
+  retryBtnTimer = setTimeout(() => {
+    retryShowBtn.classList.remove('show');
+    retryShowBtn.style.display = 'none';
+  }, 5000); // 5秒以内なら自動消去（必要に応じて延長/短縮）
+};
+
+// やり直す→ページリロード
+retryShowBtn.onclick = () => {
+  window.location.reload();
+};
+
+// 「やり直す」以外をクリックしたら消す
+window.addEventListener('mousedown', e => {
+  if (!retryShowBtn.contains(e.target) && !alertBtn.contains(e.target)) {
+    retryShowBtn.classList.remove('show');
+    retryShowBtn.style.display = 'none';
+    if (retryBtnTimer) clearTimeout(retryBtnTimer);
+  }
+});
+
+</script>
+
+
+<script>
+(function() {
+  const banner = document.getElementById('pwaNotice');
+  const noticeInner = banner?.querySelector('.pwa-notice-inner');
+
+  if (!banner || !noticeInner) return;
+
+  let startY = null;
+  let currentY = null;
+  let isDragging = false;
+
+  const threshold = 33; // スワイプ閾値（50px以上で発動）
+
+  function onTouchStart(e) {
+    const touch = e.touches?.[0] || e;
+    startY = touch.clientY;
+    isDragging = true;
+  }
+
+  function onTouchMove(e) {
+    if (!isDragging) return;
+    const touch = e.touches?.[0] || e;
+    currentY = touch.clientY;
+
+    const deltaY = currentY - startY;
+
+    // 上方向のみ動かす（drag視覚効果 optional）
+    if (deltaY < 0) {
+      noticeInner.style.transform = `translateY(-110px) scale(1)`;
+    }
+  }
+
+  function onTouchEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+
+    const deltaY = currentY - startY;
+    if (deltaY < -threshold) {
+      // スワイプで非表示処理（既存の shrink 演出再利用）
+      noticeInner.classList.add('shrink');
+      setTimeout(() => {
+        banner.style.display = "none";
+        noticeInner.classList.remove('shrink');
+        banner.classList.remove('show');
+        noticeInner.style.transform = '';
+      }, 600);
+    } else {
+      // キャンセル：位置リセット
+      noticeInner.style.transition = 'transform 0.33s ease';
+      noticeInner.style.transform = 'translateY(-50)';
+      setTimeout(() => noticeInner.style.transition = '', 300);
+    }
+  }
+
+  // タッチイベント
+  noticeInner.addEventListener('touchstart', onTouchStart, { passive: true });
+  noticeInner.addEventListener('touchmove', onTouchMove, { passive: true });
+  noticeInner.addEventListener('touchend', onTouchEnd);
+
+  // マウス対応（PCでも消せる）
+  noticeInner.addEventListener('mousedown', onTouchStart);
+  noticeInner.addEventListener('mousemove', onTouchMove);
+  noticeInner.addEventListener('mouseup', onTouchEnd);
+})();
+
+
+</script>
+
+
+
+</body>
+</html>
