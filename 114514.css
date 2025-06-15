@@ -291,7 +291,6 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   font-variant-ligatures: none; /* ligatureè§£é™¤ã§å¤‰ãªç¹‹ãŒã‚Šã‚’æ¶ˆã™ */
 }
 
-
 /* â€”â€” ã‚·ãƒ£ãƒœãƒ³çŽ‰ãƒ«ãƒ¼ãƒšé¢¨ã‚¹ã‚¿ãƒ¼ãƒˆãƒœã‚¿ãƒ³ â€”â€” */
 #startBtn {
   position: relative;
@@ -302,19 +301,15 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   text-align: center;
   color: #ffffff;
     box-shadow:
-    inset 0 0 8px rgb(255 255 255),  /* å†…å´è¼ã */
-    inset 0 1px 16px rgba(0,0,0,0.12),    /* å†…å´å¥¥è¡Œ */
-    0 12px 48px rgba(0,0,0,0.08),
-    inset 0 1px 5px rgba(255,255,255,0.8),
-    inset 0 2px 5px rgb(255 255 255 / 57%);      
-  text-shadow: 0 0 8px rgba(0,0,0,0.6);
+    inset 0 1px 55px rgb(0 123 241);
+  text-shadow: 0 0 22px rgb(255 255 255 / 60%);
   border: none;
   border-radius: 0 0 12px;
   cursor: pointer;
   /* ã‚¬ãƒ©ã‚¹è†œ */
-  background: rgb(0 0 0 / 7%);
+  background: rgb(0 101 208 / 57%);
   border: 1px solid rgba(255,255,255,0.6);
-  backdrop-filter: blur(2px) saturate(100%);
+  backdrop-filter: blur(8px) saturate(100%);
   -webkit-backdrop-filter: blur(8px) saturate(100%);
 
   
@@ -330,37 +325,6 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   to   { filter: hue-rotate(5deg); }
 }
 
-/* ä¸Šéƒ¨ã‚°ãƒ¬ã‚¢ */
-#startBtn::before {
-  content: '';
-  position: absolute;
-  top: -2px; left: -2px; right: -2px;
-  height: 50%;
-  background: linear-gradient(
-    135deg,
-    rgba(255,255,255,0.6) 0%,
-    rgba(255,255,255,0) 60%
-  );
-  border-radius: inherit;
-  pointer-events: none;
-  filter: blur(4px);
-}
-
-/* ä¸­å¤®ãƒã‚¤ãƒ©ã‚¤ãƒˆãƒ¬ãƒ³ã‚º */
-#startBtn::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 50%;
-  width: 60%; height: 60%;
-  transform: translateX(-50%) translateY(-30%) rotate(45deg);
-  background: radial-gradient(
-    circle at top left,
-    rgba(255,255,255,0.5),
-    transparent 50%
-  );
-  pointer-events: none;
-  filter: blur(8px);
-}
 
 /* ãƒ›ãƒãƒ¼ã§ãµã‚ã£ã¨æµ®ãä¸ŠãŒã‚Šï¼†ã‚¹ã‚­ãƒ¥ãƒ¼ */
 #startBtn:hover {
@@ -534,19 +498,21 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   z-index: 100000;
 }
 #overlayDialog {
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(1px);
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%) scale(0.8);
-  background: #ffffff00;
+  background: #ffffff08;
   padding: 12px;
   border-radius: 22px;
   opacity: 0;
-    text-shadow: 0 2px 8px rgb(0 0 0 / 40%);
-   box-shadow: inset 0 0 8px rgb(255 255 255),
-    inset 0 1px 5px rgba(255,255,255,0.8),
-    inset 0 2px 5px rgb(0 0 0 / 57%);
+    text-shadow: 0 2px 12px rgb(0 0 0 / 40%);
+   box-shadow:     inset 0 1px 5px rgb(71 71 71 / 54%),
+      inset 0 0 3px rgb(255 255 255 / 9%),
+    inset 0 1px 4px rgb(0 0 0 / 57%),
+    inset 0 3px 8px rgb(255 255 255 / 30%);
+
   z-index: 110000;
   font-weight:1;
   color:white;
@@ -570,11 +536,12 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   cursor: pointer;
   border-radius: 50px;
   border: none;
-  background: #ffffff5e;
+  background: #ffffff00;
   color: #fff;
     box-shadow:
-    inset 0 0 8px rgb(255 255 255),
-    inset 0 1px 5px rgba(255,255,255,0.8),
+    inset 0 2px 5px rgb(0 0 0 / 63%),
+      inset 0 0 1px rgb(255 255 255 / 9%),
+    inset 0 1px 4px rgb(255 255 255),
     inset 0 3px 8px rgb(0 0 0 / 30%);
 }
 
@@ -601,9 +568,16 @@ html, body, .panel, .cell, .diff-img-btn, #ox-turn-label {
   cursor: pointer;
   border-radius: 52px;
   border: none;
-  background: #fff;
-  color: #000;
-  box-shadow: 0 2px 16px #0003;
+  background: #007dff0a;
+  color: #ffffff;
+  text-shadow:  0 1px 11px rgb(0 0 0 / 21%);
+    box-shadow:
+    inset 0 1px 7px rgb(188 188 188 / 80%),
+        inset 1px 1px 3px rgb(255 255 255 / 50%),
+    inset 0 -2px 3px rgb(255 255 255 / 79%),
+    0 8px 24px rgba(0,0,0,0.15);
+    backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 /* ãƒšãƒ¼ã‚¸å…¨ä½“ã®ã‚¹ã‚±ãƒ¼ãƒ«ã‚¢ãƒ‹ãƒ¡ï¼ˆç¸®å°â†’æ‹¡å¤§ï¼‰ */
@@ -985,12 +959,19 @@ b {
   position: fixed;
   inset: 0;
   z-index: 99990;
-  background: rgb(255 255 255 / 20%); /* å¥½ã¿ã§è‰²èª¿æ•´ */
+
+      border: 0.1px solid rgb(107 107 107 / 60%);
+  /* ã‚¤ãƒ³ã‚»ãƒƒãƒˆï¼‹ã‚¢ã‚¦ãƒˆã‚»ãƒƒãƒˆã‚·ãƒ£ãƒ‰ã‚¦ã§åŽšã¿ã¨æµ®éŠæ„Ÿ */
+  box-shadow:
+    inset 0 1px 7px rgb(122 122 122 / 32%),
+        inset 1px 1px 2px rgb(255 255 255),
+    inset 0 -2px 2px rgb(255 255 255 / 20%),
+    0 8px 22px rgb(0 0 0 / 15%);
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.5s cubic-bezier(.77,0,.18,1), backdrop-filter 0.5s cubic-bezier(.77,0,.18,1);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
 }
 #diff-blur-bg.show {
   opacity: 1;
@@ -999,12 +980,42 @@ b {
 
 
 
-
 /* ãƒ¢ãƒã‚¤ãƒ«å°ã•ã‚èª¿æ•´ */
 @media (max-width: 440px) {
+      #diff-blur-bg {
+  position: fixed;
+  inset: 0;margin:10px 28px;
+  margin-top:340px;margin-bottom:173px;border-radius:52px 52px 40px 40px ;}
   .diff-search-form { width: 98%; max-width: none; }
   #diffSearchInput { width: 84px; font-size: 0.98em;}
+      }
+#sContainer input {
+  background-color:#ffffff2e;
+    backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+    padding: 18px 1.9em;
+  font-size: 0.98em;
+  border-radius: 100px;
+  color:white;
+  border: none;
+  box-shadow: 0 0 2px #e1e1e18c,inset 0 0 2px #ffffffd9,inset 0 10px 12px #14141414;
+  width: 300px;
+  box-sizing: border-box;
+  max-width: 360px;
+  margin-left:13px;
+  transform: scale(1.1);
+  opacity: 1;
+  pointer-events: auto;
+  transition:
+    transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity   0.4s ease-in-out 0.2s;
 }
+
+
+  .diff-search-form { width: 98%; max-width: none; }
+  #diffSearchInput { width: 84px; font-size: 0.98em;}
+
+
 
 #sContainer {
   position: relative;
@@ -1017,31 +1028,6 @@ b {
     text-shadow:0 0 5px #9c9c9c70;
   opacity: 1;  /* é€æ˜Žåº¦ã‚’ç¢ºå®Ÿã«1ã« */
 }
-
-#sContainer input {
-  background-color:#ffffff2e;
-    backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
-  padding: 16px 1.9em;
-  font-size: 0.98em;
-  border-radius: 55px;
-  color:white;
-  border: none;
-  box-shadow: 0 0 2px #e1e1e18c,inset 0 0 2px #ffffffd9,inset 0 10px 12px #14141414;
-
-  width: 288px;
-  box-sizing: border-box;
-  max-width: 360px;
-  margin-top:200px;
-  margin-left:18px;
-  transform: scaleX(1);
-  opacity: 1;
-  pointer-events: auto;
-  transition:
-    transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity   0.4s ease-in-out 0.2s;
-}
-
 
 
 
@@ -1149,16 +1135,16 @@ b {
   animation: hueShift 12s infinite alternate;
   
   /* å¼·åŒ–ã•ã‚ŒãŸã™ã‚Šã‚¬ãƒ©ã‚¹èƒŒæ™¯ï¼‹ç¸ */
-  background: rgba(255,255,255,0.12);
-    border: 0.1px solid rgb(107 107 107 / 60%);
+  background: rgb(255 255 255 / 0%);
+
   border-radius: 50%;
   backdrop-filter: blur(1px) saturate(66%);
   -webkit-backdrop-filter: blur(2px) saturate(66%);
-  
+      border: 0.1px solid rgb(107 107 107 / 60%);
   /* ã‚¤ãƒ³ã‚»ãƒƒãƒˆï¼‹ã‚¢ã‚¦ãƒˆã‚»ãƒƒãƒˆã‚·ãƒ£ãƒ‰ã‚¦ã§åŽšã¿ã¨æµ®éŠæ„Ÿ */
   box-shadow:
-    inset 0 1px 7px rgba(255,255,255,0.8),
-        inset 1px 1px 3px rgb(255 255 255 / 50%),
+    inset 0 1px 7px rgb(21 21 21 / 99%),
+        inset 1px 1px 2px rgb(255 255 255 / 59%),
     inset 0 -2px 3px rgb(255 255 255 / 79%),
     0 8px 24px rgba(0,0,0,0.15);
 }
@@ -1311,7 +1297,7 @@ b {
   width: 288px;
   box-sizing: border-box;
   max-width: 360px;
-  margin-top:150px;
+  margin-top:118px;
   margin-left:18px;
   transform: scaleX(1);
   opacity: 1;
@@ -1322,3 +1308,28 @@ b {
 }}
 
 
+/* ãƒ¢ãƒã‚¤ãƒ«å°ã•ã‚èª¿æ•´ */
+@media (max-width: 420px) {
+      #diff-blur-bg {
+  position: fixed;
+  inset: 0;margin:10px 28px;
+  margin-top:325px;margin-bottom:170px;border-radius:60px 60px 40px 40px ;}}
+
+/* ãƒ¢ãƒã‚¤ãƒ«å°ã•ã‚èª¿æ•´ */
+@media (max-width: 390px) {
+      #diff-blur-bg {
+  position: fixed;
+  inset: 0;margin:10px 28px;
+  margin-top:240px;margin-bottom:380px;border-radius:52px;}
+  .diff-search-form { width: 98%; max-width: none; }
+  #diffSearchInput { width: 84px; font-size: 0.98em;}
+}
+
+@media (max-width: 380px) {
+    #diff-blur-bg {
+  position: fixed;
+  margin:0;
+  border-radius:1px;
+  .diff-search-form { width: 98%; max-width: none; }
+  #diffSearchInput { width: 84px; font-size: 0.98em;}
+}}
