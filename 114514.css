@@ -981,11 +981,11 @@ b {
 
 
 /* ãƒ¢ãƒã‚¤ãƒ«å°ã•ã‚èª¿æ•´ */
-@media (max-width: 440px) {
+@media (max-width: 448px) {
       #diff-blur-bg {
   position: fixed;
   inset: 0;margin:10px 28px;
-  margin-top:340px;margin-bottom:173px;border-radius:52px 52px 40px 40px ;}
+  margin-top:333px;margin-bottom:173px;border-radius:57px 57px 40px 40px ;}
   .diff-search-form { width: 98%; max-width: none; }
   #diffSearchInput { width: 84px; font-size: 0.98em;}
       }
@@ -993,7 +993,7 @@ b {
   background-color:#ffffff2e;
     backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
-    padding: 18px 1.9em;
+    padding: 17px 1.9em;
   font-size: 0.98em;
   border-radius: 100px;
   color:white;
