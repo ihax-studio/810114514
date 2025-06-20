@@ -17,6 +17,10 @@
       --card-h-mb-horiz: 65vw;
       --card-max-w: 880px;
       --card-max-h: 950px;
+      --style-panel-w: 72vw;
+      --style-panel-maxw: 720px;
+      --style-panel-minw: 300px;
+      --style-panel-h: 69vh;
     }
     html, body {
       margin: 0; padding: 0; width: 100vw; height: 100vh;
@@ -52,7 +56,14 @@
       border-radius: 28px;
       transition:
         width var(--trans-close), height var(--trans-close),
-        max-width var(--trans-close), max-height var(--trans-close);
+        max-width var(--trans-close), max-height var(--trans-close),
+        transform 1s cubic-bezier(.5,0,.2,1);
+      perspective: 1500px;
+    }
+    /* 回転アニメ */
+    .card-container.rotated {
+      transform: rotateY(180deg);
+      transition: transform 0.8s cubic-bezier(.77,0,.18,1);
     }
     /* モバイル縦長 */
     @media (max-width: 600px) {
@@ -65,12 +76,13 @@
         border-radius: 18px;
         transition:
           width var(--trans-close), height var(--trans-close),
-          max-width var(--trans-close), max-height var(--trans-close);
+          max-width var(--trans-close), max-height var(--trans-close),
+          transform 1s cubic-bezier(.5,0,.2,1);
       }
       body { background-attachment: fixed; }
     }
-    /* 横長状態（モバイルのみ、.landscapeクラス付与時） */
-    .card-container.landscape {
+    /* スタイルパネル中は横長へ */
+    .card-container.landscape:not(.rotated) {
       width: var(--card-w-mb-horiz) !important;
       height: var(--card-h-mb-horiz) !important;
       min-height: 160px !important;
@@ -78,7 +90,8 @@
       max-height: 100vw !important;
       transition:
         width var(--trans-open), height var(--trans-open),
-        max-width var(--trans-open), max-height var(--trans-open);
+        max-width var(--trans-open), max-height var(--trans-open),
+        transform 1s cubic-bezier(.5,0,.2,1);
     }
     .card {
       width: 100%; height: 100%; position: absolute;
@@ -87,6 +100,7 @@
       backface-visibility: hidden; overflow: hidden;
       display: flex; flex-direction: column; justify-content: flex-end;
       box-shadow: 0 4px 36px 0 #2222;
+      transition: transform 0.9s cubic-bezier(.5,0,.2,1);
     }
     .card-front, .card-back {
       display: flex; flex-direction: column;
@@ -95,7 +109,6 @@
       height: 100%; min-height: 0;
     }
     .card-back { transform: rotateY(180deg); background: rgb(255 255 255 / 97%); }
-    .rotated { transform: rotateY(180deg); }
     #editor, #plainInput {
       width: 100%; height: 100%; min-height: 0;
       flex: 1; box-sizing: border-box; font-size: 1em; resize: none;
@@ -114,6 +127,16 @@
       background-color: transparent !important;
       border-radius: 20px;
       box-shadow: 0 2px 16px 0 #4e4e8e2e;
+      transition: margin 0.7s cubic-bezier(.57,0,.2,1), box-shadow 0.7s cubic-bezier(.57,0,.2,1);
+      margin-bottom: 0;
+      z-index: 1;
+    }
+    /* スタイル編集中のプレビューアニメ浮上 */
+    .style-editor-panel.active .preview-floating {
+      margin-top: 18px;
+      margin-bottom: 22px;
+      box-shadow: 0 4px 18px #8866fc44;
+      transition: margin 0.7s cubic-bezier(.57,0,.2,1), box-shadow 0.7s cubic-bezier(.57,0,.2,1);
     }
     .btn-group {
       position: absolute;
@@ -147,31 +170,48 @@
       left: 0;
       margin: auto;
       bottom: -100vh;
-      width: 62vw;
-      max-width: 600px;
-      min-width: 260px;
-      height: 69vh;
+      width: var(--style-panel-w);
+      max-width: var(--style-panel-maxw);
+      min-width: var(--style-panel-minw);
+      height: var(--style-panel-h);
       background: rgb(250 250 255 / 98%);
       backdrop-filter: blur(12px);
       border-top-left-radius: 28px;
       border-top-right-radius: 28px;
       box-shadow: 0 -8px 30px rgba(0,0,0,0.25);
       transition: bottom 0.8s cubic-bezier(.6,0,.2,1), box-shadow 0.55s cubic-bezier(.5,0,.2,1);
-      overflow: hidden;
+      overflow: visible;
       z-index: 999;
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      justify-content: flex-end;
+      justify-content: flex-start;
     }
     .style-editor-panel.active {
       bottom: 0;
       transition: bottom 1s cubic-bezier(.6,0,.2,1), box-shadow 0.55s cubic-bezier(.5,0,.2,1);
     }
-    #styleEditor {
-      flex: 1;
+    .style-editor-panel #styleEditor {
+      flex: 0 0 65%;
       width: 100%;
-      min-height: 0;
+      min-height: 160px;
+      height: 48vh;
+      margin-top: 0;
+      z-index: 3;
+      transition: height 0.7s cubic-bezier(.6,0,.2,1);
+    }
+    .style-editor-panel .preview-floating {
+      width: 94%;
+      max-width: 670px;
+      margin: 18px auto 10px auto;
+      height: 140px;
+      min-height: 90px;
+      max-height: 200px;
+      z-index: 4;
+      border-radius: 15px;
+      background: rgba(252,252,255,0.32);
+      border: 1.2px solid #d6ccfe3d;
+      transition: margin 0.7s cubic-bezier(.57,0,.2,1), box-shadow 0.7s cubic-bezier(.57,0,.2,1);
     }
     .close-style {
       border: none;
@@ -185,9 +225,36 @@
       align-self: center;
       margin: 13px 0 13px 0;
       cursor: pointer;
+      z-index: 10;
     }
     .close-style:hover {
       background: rgba(0,0,0,0.7);
+    }
+    @media (max-width: 900px) {
+      .style-editor-panel {
+        width: 96vw; min-width: 0; max-width: 98vw;
+      }
+    }
+    @media (max-width: 600px) {
+      .style-editor-panel {
+        width: 99vw;
+        max-width: 99vw;
+        min-width: 0;
+        left: 0; right: 0;
+        border-radius: 18px 18px 0 0;
+      }
+      .style-editor-panel .preview-floating {
+        width: 98vw;
+        min-width: 0;
+        max-width: 99vw;
+        height: 18vw;
+        min-height: 70px;
+        max-height: 130px;
+      }
+      .style-editor-panel #styleEditor {
+        height: 40vw;
+        min-height: 90px;
+      }
     }
     #dock-overlay {
       width: 100%;
@@ -306,7 +373,6 @@
       white-space: nowrap;
       font-weight: 600;
     }
-    /* --- iOS16風スイッチ --- */
     .ios-toggle {
       position: relative;
       width: 50px;
@@ -386,11 +452,15 @@
   </div>
   <div class="bottom-space"></div>
   <div class="style-editor-panel" id="stylePanel">
+    <div id="stylePreviewWrap" style="width:100%;">
+      <iframe id="stylePreview" class="preview-floating" title="Preview"></iframe>
+    </div>
     <div id="styleEditor"></div>
     <button class="close-style" id="closeStyle">✖</button>
   </div>
   <input type="file" id="fileInput" accept=".html,.txt,.htm" style="display:none;">
   <script>
+    // ===== JSコードここから全てノーカット =====
     let editorInstance;
     let styleEditorInstance;
     let isRotated = false;
@@ -416,7 +486,8 @@
     const preview = document.getElementById("preview");
     const stylePanel = document.getElementById("stylePanel");
     const closeStyle = document.getElementById("closeStyle");
-    // Dock関連
+    const stylePreview = document.getElementById("stylePreview");
+    // Dock・設定
     const dockOverlay = document.getElementById("dock-overlay");
     const settingsBtn = document.getElementById("settingsBtn");
     const settingsOverlay = document.getElementById("settingsOverlay");
@@ -433,8 +504,8 @@
 
     let lastClipboard = '';
 
-    // Monaco Editorのセットアップ
-    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+    // Monaco Editorセットアップ
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
     require(["vs/editor/editor.main"], function () {
       editorInstance = monaco.editor.create(document.getElementById("editor"), {
         value: htmlContent,
@@ -460,13 +531,27 @@
       plainInput.addEventListener("input", () => {
         if (plainInputMode) {
           htmlContent = plainInput.value;
-          editorInstance.setValue(htmlContent); // 同期
+          editorInstance.setValue(htmlContent); // Monaco同期
           updatePreview();
         }
       });
       updatePreview();
     });
 
+    function getPreviewContent() {
+      const val = plainInputMode ? plainInput.value : (editorInstance?.getValue() ?? htmlContent);
+      const styleBlock = `<style>\n${styleEditorInstance?.getValue() || ''}\n</style>`;
+      return val.replace(/<\/head>/, `${styleBlock}\n</head>`)
+        .replace(/<body([^>]*)>/, `<body$1 style="background:none !important;">`);
+    }
+    function updatePreview() {
+      // 通常カード側
+      preview.srcdoc = getPreviewContent();
+      // スタイルパネル側プレビューも
+      stylePreview.srcdoc = getPreviewContent();
+    }
+
+    // カード回転
     rotateBtn.addEventListener("click", () => {
       isRotated = !isRotated;
       container.classList.toggle("rotated", isRotated);
@@ -476,30 +561,25 @@
       if (!isRotated) updatePreview();
     });
 
+    // スタイルパネル：スマホではカードを横長にしてプレビュー上部に
     styleBtn.addEventListener("click", () => {
       stylePanel.classList.add("active");
-      // スマホ＆プレビュー時のみ横長へ
-      if (window.innerWidth <= 600 && !plainInputMode && !container.classList.contains("rotated")) {
+      stylePreview.classList.add("preview-floating");
+      // スマホ・カードが回転してない時だけカード横長
+      if (window.innerWidth <= 600 && !isRotated && !plainInputMode) {
         container.classList.add("landscape");
         container.style.transitionDuration = "1s";
       }
+      updatePreview();
     });
     closeStyle.addEventListener("click", () => {
       stylePanel.classList.remove("active");
-      // スマホ＆プレビュー時のみ縦長へ戻す
-      if (window.innerWidth <= 600 && !plainInputMode && !container.classList.contains("rotated")) {
+      stylePreview.classList.remove("preview-floating");
+      if (window.innerWidth <= 600 && !isRotated && !plainInputMode) {
         container.style.transitionDuration = "0.8s";
         container.classList.remove("landscape");
       }
     });
-
-    function updatePreview() {
-      const val = plainInputMode ? plainInput.value : (editorInstance?.getValue() ?? htmlContent);
-      const styleBlock = `<style>\n${styleEditorInstance?.getValue() || ''}\n</style>`;
-      const content = val.replace(/<\/head>/, `${styleBlock}\n</head>`)
-        .replace(/<body([^>]*)>/, `<body$1 style="background:none !important;">`);
-      preview.srcdoc = content;
-    }
 
     // Dock設定オーバーレイ
     settingsBtn.addEventListener('click', (e) => {
@@ -528,6 +608,7 @@
       }
     });
 
+    // コピー
     copyBtn.addEventListener('click', async () => {
       let text = "";
       if (plainInputMode) {
@@ -547,6 +628,7 @@
       }
     });
 
+    // ペースト
     pasteBtn.addEventListener('click', async () => {
       let text = "";
       try {
@@ -571,6 +653,7 @@
       setTimeout(() => pasteBtn.textContent = "ペースト", 800);
     });
 
+    // 選択
     selectBtn.addEventListener('click', () => {
       let text = "";
       if (plainInputMode) {
@@ -601,6 +684,7 @@
       settingsOverlay.classList.remove('show');
     });
 
+    // ファイル読み込み
     loadBtn.addEventListener("click", () => {
       fileInput.value = "";
       fileInput.click();
@@ -624,6 +708,7 @@
       }
     });
 
+    // Undo
     undoBtn.addEventListener("click", () => {
       if (undoStack.length > 0) {
         const last = undoStack.pop();
@@ -637,6 +722,7 @@
       }
     });
 
+    // input⇔Monacoトグル
     togglePlain.addEventListener("change", () => {
       plainInputMode = togglePlain.checked;
       if (plainInputMode) {
@@ -644,7 +730,6 @@
         plainInput.style.display = "";
         document.getElementById("editor").style.display = "none";
         plainInput.focus();
-        // スタイルパネル開いてたら横長変形も解除
         if (window.innerWidth <= 600) {
           container.classList.remove("landscape");
         }
@@ -657,11 +742,19 @@
       updatePreview();
     });
 
+    // Escで設定閉じる
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && settingsOverlay.classList.contains('show')) {
         settingsOverlay.classList.remove('show');
         selectInput.style.display = "none";
         selectBtn.style.display = "";
+      }
+    });
+
+    // ウィンドウリサイズ時にスマホ→PC/PC→スマホのlandscape解除
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 600) {
+        container.classList.remove("landscape");
       }
     });
   </script>
