@@ -7,114 +7,109 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
   <style>
     :root {
-      --rubikcube-mac-ease: cubic-bezier(.5, 0, .2, 1);
-      --card-v-space: 8vh;      /* 上下余白 */
-      --card-height: 74vh;      /* カードの高さ */
+      --trans-open: 1s cubic-bezier(.6,0,.2,1);
+      --trans-close: 0.8s cubic-bezier(.6,0,.2,1);
+      --card-w-pc: 95vw;
+      --card-h-pc: 74vh;
+      --card-w-mb: 94vw;
+      --card-h-mb: 86vh;
+      --card-w-mb-horiz: 98vw;
+      --card-h-mb-horiz: 65vw;
+      --card-max-w: 880px;
+      --card-max-h: 950px;
     }
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100vw;
-      height: 100vh;
+      margin: 0; padding: 0; width: 100vw; height: 100vh;
       background: linear-gradient(135deg, #ff4e00, #ea38ff, #5ca7ff);
       font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      overflow: hidden;
-      box-sizing: border-box;
+      overflow: hidden; box-sizing: border-box;
     }
     body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      display: flex; flex-direction: column; align-items: center; min-height: 100vh;
       justify-content: flex-start;
-      min-height: 100vh;
     }
-    .vertical-space { height: var(--card-v-space); flex-shrink: 0; pointer-events: none; user-select: none; }
-    .bottom-space { height: calc(var(--card-v-space) * 1.2); flex-shrink: 0; pointer-events: none; user-select: none; }
+    .vertical-space { height: 6.2vh; flex-shrink: 0; }
+    .bottom-space { height: 10vh; flex-shrink: 0; }
     .center-row {
       flex: 1 0 0;
       width: 100vw;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      display: flex; justify-content: center; align-items: center;
       min-height: 0;
     }
     .card-container {
-      width: 95vw;
-      height:88vh;
-      max-width: 880px;
-      height: var(--card-height);
-      min-height: 320px;
-      max-height: 1200px;
+      width: var(--card-w-pc);
+      height: var(--card-h-pc);
+      max-width: var(--card-max-w);
+      max-height: var(--card-max-h);
+      min-width: 260px;
+      min-height: 280px;
       position: relative;
       transform-style: preserve-3d;
-      transition: transform 1s cubic-bezier(.77,0,.18,1);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      display: flex; justify-content: center; align-items: center;
       background: none;
       z-index: 2;
       box-shadow: 0 3px 24px 6px #0002;
       border-radius: 28px;
+      transition:
+        width var(--trans-close), height var(--trans-close),
+        max-width var(--trans-close), max-height var(--trans-close);
+    }
+    /* モバイル縦長 */
+    @media (max-width: 600px) {
+      .card-container {
+        width: var(--card-w-mb);
+        height: var(--card-h-mb);
+        min-height: 66vw;
+        max-width: 100vw;
+        max-height: 98vh;
+        border-radius: 18px;
+        transition:
+          width var(--trans-close), height var(--trans-close),
+          max-width var(--trans-close), max-height var(--trans-close);
+      }
+      body { background-attachment: fixed; }
+    }
+    /* 横長状態（モバイルのみ、.landscapeクラス付与時） */
+    .card-container.landscape {
+      width: var(--card-w-mb-horiz) !important;
+      height: var(--card-h-mb-horiz) !important;
+      min-height: 160px !important;
+      max-width: 100vw !important;
+      max-height: 100vw !important;
+      transition:
+        width var(--trans-open), height var(--trans-open),
+        max-width var(--trans-open), max-height var(--trans-open);
     }
     .card {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      border-radius: 24px;
-      backdrop-filter: blur(18px);
+      width: 100%; height: 100%; position: absolute;
+      border-radius: 24px; backdrop-filter: blur(18px);
       background: rgb(255 255 255 / 29%);
-      backface-visibility: hidden;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
+      backface-visibility: hidden; overflow: hidden;
+      display: flex; flex-direction: column; justify-content: flex-end;
       box-shadow: 0 4px 36px 0 #2222;
     }
     .card-front, .card-back {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 5px;
-      box-sizing: border-box;
-      height: 100%;
-      min-height: 0;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      padding: 5px; box-sizing: border-box;
+      height: 100%; min-height: 0;
     }
-    .card-back {
-      transform: rotateY(180deg);
-      background: rgb(255 255 255 / 97%);
-      justify-content: flex-end;
-      align-items: stretch;
-    }
-    .rotated {
-      transform: rotateY(180deg);
-    }
+    .card-back { transform: rotateY(180deg); background: rgb(255 255 255 / 97%); }
+    .rotated { transform: rotateY(180deg); }
     #editor, #plainInput {
-      width: 100%;
-      height: 100%;
-      min-height: 0;
-      flex: 1;
-      box-sizing: border-box;
-      font-size: 1em;
-      resize: none;
+      width: 100%; height: 100%; min-height: 0;
+      flex: 1; box-sizing: border-box; font-size: 1em; resize: none;
     }
     #plainInput {
       font-family: "SF Mono", "Menlo", "Consolas", "monospace", sans-serif;
-      padding: 15px;
-      border: 1px solid #ddd;
-      background: #fcfcfc;
-      color: #222;
-      border-radius: 12px;
+      padding: 15px; border: 1px solid #ddd; background: #fcfcfc;
+      color: #222; border-radius: 12px;
       transition: box-shadow 0.25s;
       box-shadow: 0 0 0 1.5px #ebe5ff;
     }
-    #plainInput:focus {
-      box-shadow: 0 0 0 2.5px #7b56ff48;
-    }
+    #plainInput:focus { box-shadow: 0 0 0 2.5px #7b56ff48; }
     iframe#preview {
-      width: 100%;
-      height: 100%;
-      border: none;
+      width: 100%; height: 100%; border: none;
       background: none !important;
       background-color: transparent !important;
       border-radius: 20px;
@@ -149,17 +144,19 @@
     .style-editor-panel {
       position: fixed;
       right: 0;
+      left: 0;
+      margin: auto;
       bottom: -100vh;
       width: 62vw;
       max-width: 600px;
-      min-width: 290px;
-      height: 70vh;
+      min-width: 260px;
+      height: 69vh;
       background: rgb(250 250 255 / 98%);
       backdrop-filter: blur(12px);
       border-top-left-radius: 28px;
       border-top-right-radius: 28px;
       box-shadow: 0 -8px 30px rgba(0,0,0,0.25);
-      transition: bottom 0.7s var(--rubikcube-mac-ease), box-shadow 0.55s var(--rubikcube-mac-ease);
+      transition: bottom 0.8s cubic-bezier(.6,0,.2,1), box-shadow 0.55s cubic-bezier(.5,0,.2,1);
       overflow: hidden;
       z-index: 999;
       display: flex;
@@ -169,6 +166,7 @@
     }
     .style-editor-panel.active {
       bottom: 0;
+      transition: bottom 1s cubic-bezier(.6,0,.2,1), box-shadow 0.55s cubic-bezier(.5,0,.2,1);
     }
     #styleEditor {
       flex: 1;
@@ -315,9 +313,7 @@
       height: 31px;
       display: inline-block;
     }
-    .ios-toggle input {
-      display: none;
-    }
+    .ios-toggle input { display: none; }
     .ios-slider {
       position: absolute;
       cursor: pointer;
@@ -331,8 +327,7 @@
       position: absolute;
       left: 2.5px;
       top: 2.5px;
-      width: 26px;
-      height: 26px;
+      width: 26px; height: 26px;
       border-radius: 50%;
       background: #fff;
       box-shadow: 0 2px 7px #cac9dc85, 0 1.5px 0.5px #eee inset;
@@ -345,24 +340,6 @@
       transform: translateX(19px);
       background: #fff;
       box-shadow: 0 2px 8px #56ce7285, 0 1.5px 0.5px #c4fad6 inset;
-    }
-    /* モバイル向け高さ調整 */
-    @media (max-width: 600px) {
-      :root {
-        --card-v-space: 5.5vw;
-        --card-height: 84vw;
-      }
-      .style-editor-panel {
-        width: 99vw;
-        max-width: 99vw;
-        min-width: 0;
-        border-radius: 17px 17px 0 0;
-      }
-      .card-container {
-        width: 99vw;
-        max-width: 99vw;
-        min-width: 0;
-      }
     }
   </style>
 </head>
@@ -439,7 +416,6 @@
     const preview = document.getElementById("preview");
     const stylePanel = document.getElementById("stylePanel");
     const closeStyle = document.getElementById("closeStyle");
-
     // Dock関連
     const dockOverlay = document.getElementById("dock-overlay");
     const settingsBtn = document.getElementById("settingsBtn");
@@ -457,6 +433,7 @@
 
     let lastClipboard = '';
 
+    // Monaco Editorのセットアップ
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
     require(["vs/editor/editor.main"], function () {
       editorInstance = monaco.editor.create(document.getElementById("editor"), {
@@ -464,7 +441,7 @@
         language: "html",
         theme: "vs",
         automaticLayout: true,
-        minimap: { enabled: false },     // Monaco minimap消す
+        minimap: { enabled: false },
         scrollbar: { vertical: 'hidden', horizontal: 'hidden' }
       });
       styleEditorInstance = monaco.editor.create(document.getElementById("styleEditor"), {
@@ -475,18 +452,7 @@
         minimap: { enabled: false },
         scrollbar: { vertical: 'hidden', horizontal: 'hidden' }
       });
-      // スタイルエディタのコマンドパレット等無効化
-      styleEditorInstance.updateOptions({
-        minimap: { enabled: false },
-        lineNumbers: "off",
-        glyphMargin: false,
-        folding: false,
-        lineDecorationsWidth: 0,
-        lineNumbersMinChars: 0,
-        scrollbar: { vertical: 'hidden', horizontal: 'hidden' },
-        overviewRulerLanes: 0,
-        renderLineHighlight: "none"
-      });
+      styleEditorInstance.onDidChangeModelContent(updatePreview);
       editorInstance.onDidChangeModelContent(() => {
         if (!plainInputMode) updatePreview();
       });
@@ -507,23 +473,24 @@
       rotateBtn.textContent = isRotated ? "×" : "回転";
       dockOverlay.style.opacity = isRotated ? "1" : "0";
       dockOverlay.style.pointerEvents = isRotated ? "auto" : "none";
-      // 切替時に現在の内容でpreview
       if (!isRotated) updatePreview();
     });
 
     styleBtn.addEventListener("click", () => {
       stylePanel.classList.add("active");
-      // Monacoのキーボードボタン非表示
-      document.activeElement.blur();
-      // モバイル用：スタイルエディタ表示中はキーボード出さない
-      setTimeout(() => {
-        try {
-          document.getElementById("styleEditor").querySelector("textarea").blur();
-        } catch {}
-      }, 150);
+      // スマホ＆プレビュー時のみ横長へ
+      if (window.innerWidth <= 600 && !plainInputMode && !container.classList.contains("rotated")) {
+        container.classList.add("landscape");
+        container.style.transitionDuration = "1s";
+      }
     });
     closeStyle.addEventListener("click", () => {
       stylePanel.classList.remove("active");
+      // スマホ＆プレビュー時のみ縦長へ戻す
+      if (window.innerWidth <= 600 && !plainInputMode && !container.classList.contains("rotated")) {
+        container.style.transitionDuration = "0.8s";
+        container.classList.remove("landscape");
+      }
     });
 
     function updatePreview() {
@@ -534,7 +501,7 @@
       preview.srcdoc = content;
     }
 
-    // Dock 設定オーバーレイの表示/非表示
+    // Dock設定オーバーレイ
     settingsBtn.addEventListener('click', (e) => {
       if (settingsOverlay.classList.contains('show')) {
         settingsOverlay.classList.remove('show');
@@ -561,7 +528,6 @@
       }
     });
 
-    // コピー
     copyBtn.addEventListener('click', async () => {
       let text = "";
       if (plainInputMode) {
@@ -581,7 +547,6 @@
       }
     });
 
-    // ペースト
     pasteBtn.addEventListener('click', async () => {
       let text = "";
       try {
@@ -606,7 +571,6 @@
       setTimeout(() => pasteBtn.textContent = "ペースト", 800);
     });
 
-    // 選択
     selectBtn.addEventListener('click', () => {
       let text = "";
       if (plainInputMode) {
@@ -637,9 +601,8 @@
       settingsOverlay.classList.remove('show');
     });
 
-    // 読み込みボタン: ファイルダイアログから読み込み
     loadBtn.addEventListener("click", () => {
-      fileInput.value = ""; // reset for re-upload
+      fileInput.value = "";
       fileInput.click();
     });
     fileInput.addEventListener("change", (e) => {
@@ -661,7 +624,6 @@
       }
     });
 
-    // 取り消す（undo）ボタン
     undoBtn.addEventListener("click", () => {
       if (undoStack.length > 0) {
         const last = undoStack.pop();
@@ -675,7 +637,6 @@
       }
     });
 
-    // トグル：オンでプレーンinput, オフでMonaco
     togglePlain.addEventListener("change", () => {
       plainInputMode = togglePlain.checked;
       if (plainInputMode) {
@@ -683,6 +644,10 @@
         plainInput.style.display = "";
         document.getElementById("editor").style.display = "none";
         plainInput.focus();
+        // スタイルパネル開いてたら横長変形も解除
+        if (window.innerWidth <= 600) {
+          container.classList.remove("landscape");
+        }
       } else {
         editorInstance.setValue(plainInput.value);
         plainInput.style.display = "none";
@@ -698,10 +663,6 @@
         selectInput.style.display = "none";
         selectBtn.style.display = "";
       }
-    });
-
-    window.addEventListener("resize", () => {
-      // body: flexなのでリフレッシュ不要
     });
   </script>
 </body>
