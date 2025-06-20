@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vision UI Card Editor with Dock</title>
+  <!-- Monaco Editor CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+  <style>
+    :root {
+      --rubikcube-mac-ease: cubic-bezier(.5, 0, .2, 1);
+    }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: linear-gradient(135deg, #ff4e00, #ea38ff, #5ca7ff);
+      font-family: sans-serif;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 2000px;
+    }
+    .card-container {
+      width: 90vw;
+      max-width: 900px;
+      height: 80vh;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 1s cubic-bezier(.77,0,.18,1);
+    }
+    .card {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      border-radius: 24px;
+      backdrop-filter: blur(20px);
+      background: rgb(255 255 255 / 29%);
+      backface-visibility: hidden;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .card-front, .card-back {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 5px;
+      box-sizing: border-box;
+    }
+    .card-back {
+      transform: rotateY(180deg);
+      background: rgb(255 255 255);
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: stretch;
+    }
+    .rotated {
+      transform: rotateY(180deg);
+    }
+    #editor {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      flex: 1;
+    }
+    iframe#preview {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: none !important;
+      background-color: transparent !important;
+      border-radius: 20px;
+    }
+    .btn-group {
+      position: absolute;
+      bottom: -60px;
+      left: 50%;
+      display: flex;
+      gap: 12px;
+      transform: translateX(-50%);
+      z-index: 2;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 1em;
+      border-radius: 30px;
+      border: none;
+      background: rgb(255 255 255 / 22%);
+      color: white;
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: rgba(255, 255, 255, 0.45);
+    }
+    .style-editor-panel {
+      position: fixed;
+      right: 0;
+      bottom: -100vh;
+      width: 50vw;
+      height: 66vh;
+      background: rgb(255 255 255 / 22%);
+      backdrop-filter: blur(12px);
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      box-shadow: 0 -8px 30px rgba(0,0,0,0.3);
+      transition: bottom 0.7s var(--rubikcube-mac-ease),box-shadow 0.55s var(--rubikcube-mac-ease);
+      overflow: hidden;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+    }
+    .style-editor-panel.active {
+      bottom: 0;
+    }
+    #styleEditor {
+      flex: 1;
+    }
+    .close-style {
+      border: none;
+      background: #aba5ff;
+      color: white;
+      font-size: 20px;
+      border:solid 1px white;
+      font-weight:1;
+      padding: 10px 17px;
+      border-radius: 50%;
+      align-self: center;
+      margin: 10px 0;
+      cursor: pointer;
+    }
+    .close-style:hover {
+      background: rgba(0,0,0,0.6);
+    }
+    /* --- Dock Bar --- */
+    #dock-overlay {
+      width: 100%;
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 10;
+      pointer-events: none;
+      transition: opacity 0.4s;
+      opacity: 1;
+    }
+    .dock {
+      background-color: #222c;
+      box-shadow: 1px 1px 8px rgb(0 0 0 / 30%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 6px 16px 6px 12px;
+      border-radius: 40px;
+      gap: 6px;
+      margin-bottom: 10px;
+      pointer-events: auto;
+      transition: background 0.3s;
+      backdrop-filter: blur(15px);
+      min-width: 220px;
+    }
+    .dock button {
+      box-shadow: 1px 1px 11px rgb(0 0 0 / 2%);
+      background-color: #000000c9;
+      color: #ffffff;
+      padding: 11px 22px;
+      margin: 3px;
+      border: none;
+      cursor: pointer;
+      border-radius: 36px;
+      box-shadow: inset 5px 3px 11px rgb(255 255 255 / 1%);
+      transition: all 0.3s;
+      flex: 1;
+      font-size: 1em;
+      pointer-events: auto;
+    }
+    .dock button:hover {
+      background-color: #363636c9;
+      transform:scale(1.05);
+    }
+    #settingsOverlay {
+      display: none;
+      position: absolute;
+      left: 50%;
+      bottom: 60px;
+      background-color: #e2e2e2e3;
+      padding: 17px 14px 14px 14px;
+      border-radius: 25px;
+      box-shadow: 0 0 18px rgba(0, 0, 0, 0.16);
+      width: 220px;
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.22s ease;
+      pointer-events: auto;
+      z-index: 100;
+      transform: translateX(-50%) translateY(30px);
+    }
+    #settingsOverlay.show {
+      display: block;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0px);
+    }
+    .settings-content {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .settings-content button {
+      margin-bottom: 12px;
+      flex: 1;
+      padding: 11px 0;
+      font-size: 1em;
+      background: #4933b1;
+      color: #fff;
+      border-radius: 18px;
+      border: none;
+    }
+    .settings-content button:hover {
+      background: #6e57e6;
+    }
+    #selectInput {
+      width: 100%;
+      font-size: 1em;
+      border-radius: 10px;
+      border: 1px solid #aaa;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+      outline: none;
+    }
+    .switch {
+      display: flex;
+      align-items: center;
+      margin-left: -2px;
+      cursor: pointer;
+      margin-top: 3px;
+      height: 34px;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .label-text {
+      padding-left: 1.1rem;
+      margin-top: 4.5px;
+      color: #000000;
+      font-size: 16px;
+      text-shadow: 3px 1px 22px rgba(0, 0, 0, 0.147);
+      white-space: nowrap;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .lider {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+      background-color: #838383;
+      border-radius: 34px;
+      box-shadow: 1px 1px 15px rgba(0, 0, 0, 0.18);
+      transition: 0.4s;
+    }
+    .lider:before {
+      content: "";
+      position: absolute;
+      height: 29px;
+      width: 29px;
+      border-radius: 50%;
+      background-color: rgb(255, 255, 255);
+      transition: opacity 1s ease-in-out, transform 0.4s ease;
+      left: 2.5px;
+      bottom: 2.5px;
+      transition: opacity 1s ease-in-out, transform 0.4s ease;
+    }
+    .lider:hover {
+      transform: scale(1.05);
+    }
+    .lider:active:before {
+      transform: scale(1.65);
+      transition: 0.3s ease;
+    }
+    input:checked + .lider {
+      background-color: hsl(149deg 95.6% 34.84%);
+      box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.18);
+    }
+    input:checked + .lider:before {
+      transform: translateX(26px);
+    }
+    @media (max-width: 600px) {
+      .card-container {
+        height: 95vh;
+      }
+      .style-editor-panel {
+        width: 99vw;
+        border-radius: 16px 16px 0 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card-container" id="cardContainer">
+    <div class="card card-front">
+      <iframe id="preview" title="Preview"></iframe>
+    </div>
+    <div class="card card-back">
+      <div id="editor"></div>
+      <div id="dock-overlay">
+        <div class="dock">
+          <button id="saveBtn">保存</button>
+          <button id="loadBtn">読み込み</button>
+          <button id="settingsBtn">編集</button>
+        </div>
+        <div id="settingsOverlay">
+          <div class="settings-content" id="settingsContent">
+            <button id="copyBtn">コピー</button>
+            <button id="pasteBtn">ペースト</button>
+            <button id="selectBtn">選択</button>
+            <input type="text" id="selectInput" style="display:none;" readonly>
+            <button id="doneBtn" style="margin-top:8px; background:#aaa4ff;">完了</button>
+            <div class="switch">
+              <span class="label-text">取り消す</span>
+              <label class="switch">
+                <input type="checkbox" id="textSizeSwitch">
+                <span class="lider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-group">
+      <button id="rotateBtn">回転</button>
+      <button id="styleBtn">スタイル</button>
+    </div>
+  </div>
+  <div class="style-editor-panel" id="stylePanel">
+    <div id="styleEditor"></div>
+    <button class="close-style" id="closeStyle">✖</button>
+  </div>
+  <script>
+    let editorInstance;
+    let styleEditorInstance;
+    let isRotated = false;
+    let htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>タブに表示されるタイトル</title>
+  <link rel="stylesheet" href="スタイル.css">
+</head>
+<body>
+  <h1>Hello World</h1>
+</body>
+</html>`;
+    let cssContent = `body { font-family: sans-serif; }`;
+    const rotateBtn = document.getElementById("rotateBtn");
+    const styleBtn = document.getElementById("styleBtn");
+    const container = document.getElementById("cardContainer");
+    const preview = document.getElementById("preview");
+    const stylePanel = document.getElementById("stylePanel");
+    const closeStyle = document.getElementById("closeStyle");
+    // Dock関連
+    const dockOverlay = document.getElementById("dock-overlay");
+    const settingsBtn = document.getElementById("settingsBtn");
+    const settingsOverlay = document.getElementById("settingsOverlay");
+    const copyBtn = document.getElementById("copyBtn");
+    const pasteBtn = document.getElementById("pasteBtn");
+    const selectBtn = document.getElementById("selectBtn");
+    const selectInput = document.getElementById("selectInput");
+    const doneBtn = document.getElementById("doneBtn");
+    let lastClipboard = '';
+    // Monaco Editorの読み込み
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+    require(["vs/editor/editor.main"], function () {
+      editorInstance = monaco.editor.create(document.getElementById("editor"), {
+        value: htmlContent,
+        language: "html",
+        theme: "vs",
+        automaticLayout: true
+      });
+      styleEditorInstance = monaco.editor.create(document.getElementById("styleEditor"), {
+        value: cssContent,
+        language: "css",
+        theme: "vs-light",
+        automaticLayout: true
+      });
+      updatePreview();
+    });
+    // カード回転とDock表示
+    rotateBtn.addEventListener("click", () => {
+      isRotated = !isRotated;
+      container.classList.toggle("rotated", isRotated);
+      rotateBtn.textContent = isRotated ? "×" : "回転";
+      // 裏（エディタ面）でDockを表示・表ならDockを非表示
+      dockOverlay.style.opacity = isRotated ? "1" : "0";
+      dockOverlay.style.pointerEvents = isRotated ? "auto" : "none";
+      if (!isRotated) {
+        settingsOverlay.classList.remove('show');
+        htmlContent = editorInstance.getValue();
+        const styleBlock = `<style>\n${styleEditorInstance.getValue()}\n</style>`;
+        const merged = htmlContent.replace(/<\/head>/, `${styleBlock}\n</head>`);
+        preview.srcdoc = merged;
+      }
+    });
+    styleBtn.addEventListener("click", () => {
+      stylePanel.classList.add("active");
+    });
+    closeStyle.addEventListener("click", () => {
+      stylePanel.classList.remove("active");
+    });
+    function updatePreview() {
+      const styleBlock = `<style>\n${styleEditorInstance?.getValue() || ''}\n</style>`;
+      const content = editorInstance?.getValue()?.replace(/<\/head>/, `${styleBlock}\n</head>`)
+        .replace(/<body([^>]*)>/, `<body$1 style="background:none !important;">`);
+      preview.srcdoc = content;
+    }
+    // Dock 設定オーバーレイの表示/非表示
+    settingsBtn.addEventListener('click', (e) => {
+      if (settingsOverlay.classList.contains('show')) {
+        settingsOverlay.classList.remove('show');
+        selectInput.style.display = "none";
+        selectBtn.style.display = "";
+      } else {
+        settingsOverlay.classList.add('show');
+        selectInput.style.display = "none";
+        selectBtn.style.display = "";
+      }
+      e.stopPropagation();
+    });
+    // オーバーレイ外クリックで閉じる（Dock裏でのみ）
+    document.addEventListener('click', (e) => {
+      if (
+        settingsOverlay.classList.contains('show') &&
+        !settingsOverlay.contains(e.target) &&
+        e.target !== settingsBtn &&
+        isRotated
+      ) {
+        settingsOverlay.classList.remove('show');
+        selectInput.style.display = "none";
+        selectBtn.style.display = "";
+      }
+    });
+    // コピー
+    copyBtn.addEventListener('click', async () => {
+      let text = "";
+      if (editorInstance) {
+        text = editorInstance.getModel().getValueInRange(editorInstance.getSelection());
+        if (!text) text = editorInstance.getValue();
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        lastClipboard = text;
+        copyBtn.textContent = "コピー済！";
+        setTimeout(() => copyBtn.textContent = "コピー", 800);
+      } catch {
+        copyBtn.textContent = "失敗";
+        setTimeout(() => copyBtn.textContent = "コピー", 800);
+      }
+    });
+    // ペースト
+    pasteBtn.addEventListener('click', async () => {
+      let text = "";
+      try {
+        text = await navigator.clipboard.readText();
+      } catch {
+        text = lastClipboard; // fallback
+      }
+      if (editorInstance && text) {
+        const pos = editorInstance.getPosition();
+        editorInstance.executeEdits("", [{
+          range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column),
+          text: text,
+          forceMoveMarkers: true
+        }]);
+        pasteBtn.textContent = "ペースト済";
+        setTimeout(() => pasteBtn.textContent = "ペースト", 800);
+      }
+    });
+    // 選択（inputフィールドに表示＆自動選択。スマホ長押しコピペも可）
+    selectBtn.addEventListener('click', () => {
+      if (editorInstance) {
+        let text = editorInstance.getModel().getValueInRange(editorInstance.getSelection());
+        if (!text) text = editorInstance.getValue();
+        selectInput.value = text;
+        selectInput.style.display = "";
+        selectInput.readOnly = false;
+        selectInput.focus();
+        selectInput.select();
+        selectBtn.style.display = "none";
+        setTimeout(() => {
+          selectInput.setSelectionRange(0, text.length);
+        }, 100);
+      }
+    });
+    // 選択input：完了・blurで戻す
+    selectInput.addEventListener('blur', () => {
+      selectInput.style.display = "none";
+      selectBtn.style.display = "";
+    });
+    // 完了ボタン
+    doneBtn.addEventListener('click', () => {
+      selectInput.style.display = "none";
+      selectBtn.style.display = "";
+      settingsOverlay.classList.remove('show');
+    });
+    // Dock裏でのEscキー押下で閉じる
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && settingsOverlay.classList.contains('show')) {
+        settingsOverlay.classList.remove('show');
+        selectInput.style.display = "none";
+        selectBtn.style.display = "";
+      }
+    });
+  </script>
+</body>
+</html>
