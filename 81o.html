@@ -1,10 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Vision UI Card Editor with Dock</title>
-  <!-- Monaco Editor CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
   <style>
     :root {
@@ -12,22 +12,55 @@
     }
     html, body {
       margin: 0;
-      height: 100%;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
       background: linear-gradient(135deg, #ff4e00, #ea38ff, #5ca7ff);
       font-family: sans-serif;
       overflow: hidden;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      width: 100vw;
+      height: 100vh;
+    }
+    .vertical-space {
+      height: 10vh;
+      flex-shrink: 0;
+      pointer-events: none;
+      user-select: none;
+    }
+    .bottom-space {
+      height: 15vh;
+      flex-shrink: 0;
+      pointer-events: none;
+      user-select: none;
+    }
+    .center-row {
+      flex: 1 0 0;
+      width: 100vw;
       display: flex;
       justify-content: center;
       align-items: center;
-      perspective: 2000px;
+      min-height: 0;
     }
     .card-container {
-      width: 90vw;
+      width: 92vw;
       max-width: 900px;
-      height: 80vh;
+      height: 65vh;
+      min-height: 320px;
+      max-height: 850px;
       position: relative;
       transform-style: preserve-3d;
       transition: transform 1s cubic-bezier(.77,0,.18,1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: none;
+      z-index: 2;
     }
     .card {
       width: 100%;
@@ -44,26 +77,44 @@
     }
     .card-front, .card-back {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       padding: 5px;
       box-sizing: border-box;
+      height: 100%;
+      min-height: 0;
     }
     .card-back {
       transform: rotateY(180deg);
       background: rgb(255 255 255);
-      flex-direction: column;
       justify-content: flex-end;
       align-items: stretch;
     }
     .rotated {
       transform: rotateY(180deg);
     }
-    #editor {
+    #editor, #plainInput {
       width: 100%;
       height: 100%;
       min-height: 0;
       flex: 1;
+      box-sizing: border-box;
+      font-size: 1em;
+    }
+    #plainInput {
+      font-family: "SF Mono", "Menlo", "Consolas", "monospace", sans-serif;
+      padding: 15px;
+      border: 1px solid #bbb;
+      background: #fff;
+      color: #222;
+      resize: none;
+      outline: none;
+      border-radius: 12px;
+      transition: box-shadow 0.25s;
+    }
+    #plainInput:focus {
+      box-shadow: 0 0 0 2px #7b56ff44;
     }
     iframe#preview {
       width: 100%;
@@ -135,7 +186,6 @@
     .close-style:hover {
       background: rgba(0,0,0,0.6);
     }
-    /* --- Dock Bar --- */
     #dock-overlay {
       width: 100%;
       position: absolute;
@@ -192,7 +242,7 @@
       padding: 17px 14px 14px 14px;
       border-radius: 25px;
       box-shadow: 0 0 18px rgba(0, 0, 0, 0.16);
-      width: 220px;
+      width: 240px;
       opacity: 0;
       transition: transform 0.3s ease, opacity 0.22s ease;
       pointer-events: auto;
@@ -231,69 +281,58 @@
       margin-bottom: 10px;
       box-sizing: border-box;
       outline: none;
+      display: none;
     }
-    .switch {
+    .switch-row {
       display: flex;
       align-items: center;
-      margin-left: -2px;
-      cursor: pointer;
-      margin-top: 3px;
-      height: 34px;
-      justify-content: space-between;
+      gap: 10px;
+      margin: 10px 0 0 0;
       width: 100%;
+      justify-content: space-between;
     }
     .label-text {
-      padding-left: 1.1rem;
-      margin-top: 4.5px;
-      color: #000000;
+      color: #222;
       font-size: 16px;
-      text-shadow: 3px 1px 22px rgba(0, 0, 0, 0.147);
       white-space: nowrap;
+      font-weight: 500;
     }
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .lider {
-      position: relative;
+    .toggle-switch {
       display: inline-block;
-      width: 60px;
-      height: 34px;
-      background-color: #838383;
-      border-radius: 34px;
-      box-shadow: 1px 1px 15px rgba(0, 0, 0, 0.18);
-      transition: 0.4s;
+      width: 50px;
+      height: 28px;
+      background: #bbb;
+      border-radius: 16px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+      vertical-align: middle;
     }
-    .lider:before {
-      content: "";
+    .toggle-switch input {
+      display: none;
+    }
+    .toggle-slider {
       position: absolute;
-      height: 29px;
-      width: 29px;
+      top: 2.5px;
+      left: 3px;
+      width: 23px;
+      height: 23px;
       border-radius: 50%;
-      background-color: rgb(255, 255, 255);
-      transition: opacity 1s ease-in-out, transform 0.4s ease;
-      left: 2.5px;
-      bottom: 2.5px;
-      transition: opacity 1s ease-in-out, transform 0.4s ease;
+      background: #fff;
+      transition: left 0.23s, background 0.3s;
     }
-    .lider:hover {
-      transform: scale(1.05);
+    .toggle-switch input:checked + .toggle-slider {
+      left: 24px;
+      background: #6fff8a;
     }
-    .lider:active:before {
-      transform: scale(1.65);
-      transition: 0.3s ease;
-    }
-    input:checked + .lider {
-      background-color: hsl(149deg 95.6% 34.84%);
-      box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.18);
-    }
-    input:checked + .lider:before {
-      transform: translateX(26px);
+    .toggle-switch input:checked ~ .toggle-switch {
+      background: #6fff8a;
     }
     @media (max-width: 600px) {
       .card-container {
-        height: 95vh;
+        height: 65vw;
+        min-height: 220px;
+        max-height: 80vw;
       }
       .style-editor-panel {
         width: 99vw;
@@ -303,45 +342,52 @@
   </style>
 </head>
 <body>
-  <div class="card-container" id="cardContainer">
-    <div class="card card-front">
-      <iframe id="preview" title="Preview"></iframe>
-    </div>
-    <div class="card card-back">
-      <div id="editor"></div>
-      <div id="dock-overlay">
-        <div class="dock">
-          <button id="saveBtn">保存</button>
-          <button id="loadBtn">読み込み</button>
-          <button id="settingsBtn">編集</button>
-        </div>
-        <div id="settingsOverlay">
-          <div class="settings-content" id="settingsContent">
-            <button id="copyBtn">コピー</button>
-            <button id="pasteBtn">ペースト</button>
-            <button id="selectBtn">選択</button>
-            <input type="text" id="selectInput" style="display:none;" readonly>
-            <button id="doneBtn" style="margin-top:8px; background:#aaa4ff;">完了</button>
-            <div class="switch">
-              <span class="label-text">取り消す</span>
-              <label class="switch">
-                <input type="checkbox" id="textSizeSwitch">
-                <span class="lider"></span>
-              </label>
+  <div class="vertical-space"></div>
+  <div class="center-row">
+    <div class="card-container" id="cardContainer">
+      <div class="card card-front">
+        <iframe id="preview" title="Preview"></iframe>
+      </div>
+      <div class="card card-back">
+        <div id="editor"></div>
+        <textarea id="plainInput" style="display:none;" placeholder="HTMLを入力"></textarea>
+        <div id="dock-overlay">
+          <div class="dock">
+            <button id="saveBtn">保存</button>
+            <button id="loadBtn">読み込み</button>
+            <button id="settingsBtn">編集</button>
+          </div>
+          <div id="settingsOverlay">
+            <div class="settings-content" id="settingsContent">
+              <button id="copyBtn">コピー</button>
+              <button id="pasteBtn">ペースト</button>
+              <button id="selectBtn">選択</button>
+              <input type="text" id="selectInput" readonly>
+              <button id="undoBtn" style="background:#e74c3c;">取り消す</button>
+              <div class="switch-row">
+                <span class="label-text">選択</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="togglePlain">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <button id="doneBtn" style="margin-top:8px; background:#aaa4ff;">完了</button>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="btn-group">
-      <button id="rotateBtn">回転</button>
-      <button id="styleBtn">スタイル</button>
+      <div class="btn-group">
+        <button id="rotateBtn">回転</button>
+        <button id="styleBtn">スタイル</button>
+      </div>
     </div>
   </div>
+  <div class="bottom-space"></div>
   <div class="style-editor-panel" id="stylePanel">
     <div id="styleEditor"></div>
     <button class="close-style" id="closeStyle">✖</button>
   </div>
+  <input type="file" id="fileInput" accept=".html,.txt,.htm" style="display:none;">
   <script>
     let editorInstance;
     let styleEditorInstance;
@@ -359,12 +405,16 @@
 </body>
 </html>`;
     let cssContent = `body { font-family: sans-serif; }`;
+
+    let plainInputMode = false;
+    let undoStack = [];
     const rotateBtn = document.getElementById("rotateBtn");
     const styleBtn = document.getElementById("styleBtn");
     const container = document.getElementById("cardContainer");
     const preview = document.getElementById("preview");
     const stylePanel = document.getElementById("stylePanel");
     const closeStyle = document.getElementById("closeStyle");
+
     // Dock関連
     const dockOverlay = document.getElementById("dock-overlay");
     const settingsBtn = document.getElementById("settingsBtn");
@@ -374,8 +424,14 @@
     const selectBtn = document.getElementById("selectBtn");
     const selectInput = document.getElementById("selectInput");
     const doneBtn = document.getElementById("doneBtn");
+    const loadBtn = document.getElementById("loadBtn");
+    const fileInput = document.getElementById("fileInput");
+    const plainInput = document.getElementById("plainInput");
+    const togglePlain = document.getElementById("togglePlain");
+    const undoBtn = document.getElementById("undoBtn");
+
     let lastClipboard = '';
-    // Monaco Editorの読み込み
+
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
     require(["vs/editor/editor.main"], function () {
       editorInstance = monaco.editor.create(document.getElementById("editor"), {
@@ -390,36 +446,45 @@
         theme: "vs-light",
         automaticLayout: true
       });
+      editorInstance.onDidChangeModelContent(() => {
+        if (!plainInputMode) updatePreview();
+      });
+      plainInput.value = htmlContent;
+      plainInput.addEventListener("input", () => {
+        if (plainInputMode) {
+          htmlContent = plainInput.value;
+          editorInstance.setValue(htmlContent); // 同期
+          updatePreview();
+        }
+      });
       updatePreview();
     });
-    // カード回転とDock表示
+
     rotateBtn.addEventListener("click", () => {
       isRotated = !isRotated;
       container.classList.toggle("rotated", isRotated);
       rotateBtn.textContent = isRotated ? "×" : "回転";
-      // 裏（エディタ面）でDockを表示・表ならDockを非表示
       dockOverlay.style.opacity = isRotated ? "1" : "0";
       dockOverlay.style.pointerEvents = isRotated ? "auto" : "none";
-      if (!isRotated) {
-        settingsOverlay.classList.remove('show');
-        htmlContent = editorInstance.getValue();
-        const styleBlock = `<style>\n${styleEditorInstance.getValue()}\n</style>`;
-        const merged = htmlContent.replace(/<\/head>/, `${styleBlock}\n</head>`);
-        preview.srcdoc = merged;
-      }
+      // 切替時に現在の内容でpreview
+      if (!isRotated) updatePreview();
     });
+
     styleBtn.addEventListener("click", () => {
       stylePanel.classList.add("active");
     });
     closeStyle.addEventListener("click", () => {
       stylePanel.classList.remove("active");
     });
+
     function updatePreview() {
+      const val = plainInputMode ? plainInput.value : (editorInstance?.getValue() ?? htmlContent);
       const styleBlock = `<style>\n${styleEditorInstance?.getValue() || ''}\n</style>`;
-      const content = editorInstance?.getValue()?.replace(/<\/head>/, `${styleBlock}\n</head>`)
+      const content = val.replace(/<\/head>/, `${styleBlock}\n</head>`)
         .replace(/<body([^>]*)>/, `<body$1 style="background:none !important;">`);
       preview.srcdoc = content;
     }
+
     // Dock 設定オーバーレイの表示/非表示
     settingsBtn.addEventListener('click', (e) => {
       if (settingsOverlay.classList.contains('show')) {
@@ -433,7 +498,7 @@
       }
       e.stopPropagation();
     });
-    // オーバーレイ外クリックで閉じる（Dock裏でのみ）
+
     document.addEventListener('click', (e) => {
       if (
         settingsOverlay.classList.contains('show') &&
@@ -446,10 +511,13 @@
         selectBtn.style.display = "";
       }
     });
+
     // コピー
     copyBtn.addEventListener('click', async () => {
       let text = "";
-      if (editorInstance) {
+      if (plainInputMode) {
+        text = plainInput.value;
+      } else if (editorInstance) {
         text = editorInstance.getModel().getValueInRange(editorInstance.getSelection());
         if (!text) text = editorInstance.getValue();
       }
@@ -463,52 +531,117 @@
         setTimeout(() => copyBtn.textContent = "コピー", 800);
       }
     });
+
     // ペースト
     pasteBtn.addEventListener('click', async () => {
       let text = "";
       try {
         text = await navigator.clipboard.readText();
       } catch {
-        text = lastClipboard; // fallback
+        text = lastClipboard;
       }
-      if (editorInstance && text) {
+      if (plainInputMode) {
+        const pos = plainInput.selectionStart;
+        plainInput.value = plainInput.value.slice(0, pos) + text + plainInput.value.slice(pos);
+        plainInput.dispatchEvent(new Event('input'));
+      } else if (editorInstance && text) {
         const pos = editorInstance.getPosition();
         editorInstance.executeEdits("", [{
           range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column),
           text: text,
           forceMoveMarkers: true
         }]);
-        pasteBtn.textContent = "ペースト済";
-        setTimeout(() => pasteBtn.textContent = "ペースト", 800);
+        updatePreview();
       }
+      pasteBtn.textContent = "ペースト済";
+      setTimeout(() => pasteBtn.textContent = "ペースト", 800);
     });
-    // 選択（inputフィールドに表示＆自動選択。スマホ長押しコピペも可）
+
+    // 選択
     selectBtn.addEventListener('click', () => {
-      if (editorInstance) {
-        let text = editorInstance.getModel().getValueInRange(editorInstance.getSelection());
+      let text = "";
+      if (plainInputMode) {
+        text = plainInput.value.substring(plainInput.selectionStart, plainInput.selectionEnd) || plainInput.value;
+      } else if (editorInstance) {
+        text = editorInstance.getModel().getValueInRange(editorInstance.getSelection());
         if (!text) text = editorInstance.getValue();
-        selectInput.value = text;
-        selectInput.style.display = "";
-        selectInput.readOnly = false;
-        selectInput.focus();
-        selectInput.select();
-        selectBtn.style.display = "none";
-        setTimeout(() => {
-          selectInput.setSelectionRange(0, text.length);
-        }, 100);
       }
+      selectInput.value = text;
+      selectInput.style.display = "";
+      selectInput.readOnly = false;
+      selectInput.focus();
+      selectInput.select();
+      selectBtn.style.display = "none";
+      setTimeout(() => {
+        selectInput.setSelectionRange(0, text.length);
+      }, 100);
     });
-    // 選択input：完了・blurで戻す
+
     selectInput.addEventListener('blur', () => {
       selectInput.style.display = "none";
       selectBtn.style.display = "";
     });
-    // 完了ボタン
+
     doneBtn.addEventListener('click', () => {
       selectInput.style.display = "none";
       selectBtn.style.display = "";
       settingsOverlay.classList.remove('show');
     });
+
+    // 読み込みボタン: ファイルダイアログから読み込み
+    loadBtn.addEventListener("click", () => {
+      fileInput.value = ""; // reset for re-upload
+      fileInput.click();
+    });
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = evt => {
+          undoStack.push(plainInputMode ? plainInput.value : editorInstance.getValue());
+          htmlContent = evt.target.result;
+          if (plainInputMode) {
+            plainInput.value = htmlContent;
+            plainInput.dispatchEvent(new Event('input'));
+          } else {
+            editorInstance.setValue(htmlContent);
+          }
+          updatePreview();
+        };
+        reader.readAsText(file, "utf-8");
+      }
+    });
+
+    // 取り消す（undo）ボタン
+    undoBtn.addEventListener("click", () => {
+      if (undoStack.length > 0) {
+        const last = undoStack.pop();
+        if (plainInputMode) {
+          plainInput.value = last;
+          plainInput.dispatchEvent(new Event('input'));
+        } else {
+          editorInstance.setValue(last);
+        }
+        updatePreview();
+      }
+    });
+
+    // トグル：オンでプレーンinput, オフでMonaco
+    togglePlain.addEventListener("change", () => {
+      plainInputMode = togglePlain.checked;
+      if (plainInputMode) {
+        plainInput.value = editorInstance.getValue();
+        plainInput.style.display = "";
+        document.getElementById("editor").style.display = "none";
+      } else {
+        editorInstance.setValue(plainInput.value);
+        plainInput.style.display = "none";
+        document.getElementById("editor").style.display = "";
+      }
+      updatePreview();
+    });
+
+    // Monaco側でCtrl+Z等はMonaco自身のundoになるが、取り消すボタンはスタック管理
     // Dock裏でのEscキー押下で閉じる
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && settingsOverlay.classList.contains('show')) {
@@ -516,6 +649,11 @@
         selectInput.style.display = "none";
         selectBtn.style.display = "";
       }
+    });
+
+    // モバイルでキーボードが出て画面がズレても高さ維持（body: flexで中央固定）
+    window.addEventListener("resize", () => {
+      // ここでカード高さや配置を再調整する場合はflexレイアウトで十分
     });
   </script>
 </body>
