@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ArakawaKoukaKoukou</title>
+  <link rel="stylesheet" href="ara.css">
+  <style>
+      body { background: #ffffff73; }
+    #mainTableWrap {
+      display: inline-block;
+      transition: transform 0.3s cubic-bezier(.6,0,.3,1);
+      transform: scale(0.8);
+         filter: brightness(1.1);
+      will-change: transform;
+        font-family:
+    "SF Pro Display",
+    "SF Pro Text",
+    "SF Pro Icons",
+    "SF Pro Rounded",
+    "SF Compact",
+    "SF Compact Text",
+    "San Francisco",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+      font-weight:1;
+    }
+    td:hover { transform: scale(1.1);background-color:#ffebfb;      box-shadow:0 0 77px #0000007d;}
+    td:active { transform: scale(0.8); 
+              transition:all 0.3s ease; background-color:#344144;border-radius:55px;box-shadow:0 0 33px #00000073; }
+    td, th {
+      top:33px;
+      border-radius: 8px;
+      transform:scale(0.95);
+      position: relative;
+          backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(3px);
+          box-shadow:
+           inset 2px 5px 2px rgb(110 213 255 / 13%),  /* å†…å´è¼ã */
+    inset -1px -5px 3px rgb(255 255 255 / 31%), 
+    inset 0 0 2px rgb(255 255 255),  /* å†…å´è¼ã */
+    inset 0 1px 1px rgb(255 255 255 / 65%),    /* å†…å´å¥¥è¡Œ */
+    0 12px 48px rgba(0,0,0,0.08),
+     0 1px 88px rgb(237 171 234 / 20%),
+    inset 0 2px 5px rgb(255 255 255 / 57%);  
+      background:  radial-gradient(at 46% 54%, rgb(200 0 217 / 22%) 0px, transparent 50%),
+    radial-gradient(at 30% 94%, rgb(116 25 223 / 3%) 0px, transparent 50%),
+    radial-gradient(at 90% 5%, rgb(191 0 255 / 14%) 0px, transparent 50%),
+    radial-gradient(at 24% 60%, rgb(217 0 255 / 19%) 0px, transparent 50%),
+    radial-gradient(at 64% 7%, rgb(3 255 195 / 19%) 0px, transparent 50%),
+    radial-gradient(at 63% 5%, rgb(0 217 62 / 33%) 0px, transparent 50%),
+    radial-gradient(at 6% 40%, rgb(0 83 255 / 31%) 0px, transparent 50%);
+      background-color:#c2b0ce21;
+      transition: all 0.5s cubic-bezier(.7,0,.2,1);
+      cursor: pointer;
+      user-select: none;
+      overflow: hidden;
+    }
+    .fixed { cursor: default !important; }
+    #arakawaCell {
+      transition: all 0.44s cubic-bezier(.7,0,.2,1);
+      will-change: transform;
+      z-index: 11;
+      position: relative;
+      color:black;
+      background:     radial-gradient(at 46% 54%, rgb(232 232 232 / 24%) 0px, transparent 50%),
+    radial-gradient(at 30% 94%, rgb(255 255 255 / 9%) 0px, transparent 50%),
+    radial-gradient(at 90% 5%, rgb(0 0 0 / 17%) 0px, transparent 50%),
+    radial-gradient(at 24% 30%, rgb(199 208 214 / 49%) 0px, transparent 50%),
+    radial-gradient(at 64% 7%, rgb(239 239 239 / 20%) 0px, transparent 50%),
+    radial-gradient(at 63% 5%, rgb(220 220 220 / 46%) 0px, transparent 50%),
+    radial-gradient(at 6% 40%, rgb(198 198 198 / 25%) 0px, transparent 50%);
+      background-color:#ffffff54;
+      
+    }
+    #arakawaCell.fading {
+      transform: scale(150);
+      background: #ffffffba !important;
+      pointer-events: none;
+    }
+    #addressMapOverlay {
+      position: absolute;
+      left: 0; top: 0; width: 100%; height: 100%;
+      z-index: 10;
+      display: none;
+      border: none;
+      pointer-events: auto;
+      border-radius: 12px;
+      background: #222;
+      transform: scale(0.8);
+      transition: transform 1s cubic-bezier(.77,0,.18,1);
+    }
+    #addressMapOverlay.showing {
+      display: block;
+      transform: scale(1);
+      transition: transform 1s cubic-bezier(.77,0,.18,1);
+    }
+    #addressMapOverlay.hiding {
+      display: block;
+      transform: scale(0.8);
+      transition: transform 0.44s cubic-bezier(.77,0,.18,1);
+    }
+    #kImage {
+      transition: transform 0.5s cubic-bezier(.8,0,.2,1), filter 0.3s cubic-bezier(.8,0,.2,1);
+      filter: brightness(1) blur(0px);
+      transform: scale(1);
+    }
+    #kImage.fadingOut {
+      /* opacity使わず、縮小＋ブラーのみ */
+      transform: scale(0.8);
+      filter: brightness(1.7) blur(12px);
+      transition: transform 0.5s, filter 0.3s cubic-bezier(.8,0,.2,1);
+    }
+
+.address-cell{
+  top:38px;
+  transform:scale(0.99);
+}
+  </style>
+</head>
+<body>
+  <center>
+    <div id="mainTableWrap">
+      <table border="0" cellspacing="1" align="center">
+        <colgroup>
+          <col width="100">
+          <col width="150">
+          <col width="450">
+          <col width="100">
+        </colgroup>
+        <!-- 1段目 -->
+        <tr align="center" height="150">
+          <td width="100" bgcolor="#000000" height="150"><font color="#ffffff" size="6">A</font></td>
+          <td id="arakawaCell" colspan="2" width="600" bgcolor="#000000" height="150" class="fixed"><font size="6">東京都立荒川工科高校</font></td>
+          <td width="100" bgcolor="#000000" height="150"><font color="#ffffff" size="6">D</font></td>
+        </tr>
+        <!-- 2段目 -->
+        <tr align="center" height="80">
+          <td width="100" bgcolor="#000000" height="80"><font color="#ffffff" size="6">E</font></td>
+          <td colspan="2" width="600" bgcolor="#000000" height="80" class="fixed"><font color="#ffffff" size="6">トップページ 工科高校</font></td>
+          <td width="100" bgcolor="#000000" height="80"><font color="#ffffff" size="6">H</font></td>
+        </tr>
+        <!-- 3段目 -->
+        <tr align="center" height="80">
+          <td width="100" bgcolor="#000000" height="80"><font color="#ffffff" size="6">I</font></td>
+          <td width="150" bgcolor="#000000" height="80" class="fixed"><font color="#ffffff" class="topp">トップページ</font></td>
+          <td rowspan="5" width="450" bgcolor="#000000" height="400" style="position:relative;" class="fixed">
+            <img id="kImage" src="img.png" style="width:400px;max-width:95%;height:360px;object-fit:contain;display:block;margin:0 auto;user-select:none;cursor:pointer;transform:scale(1);border-radius:22px;">
+            <div style="color:#fff;position:absolute;bottom:8px;left:0;width:100%;font-size:26px;text-align:center;pointer-events:none;">K</div>
+          </td>
+          <td width="100" bgcolor="#000000" height="80"><font color="#ffffff" size="6">L</font></td>
+        </tr>
+        <!-- 4段目 -->
+        <tr align="center" height="80">
+          <td width="100" bgcolor="#000000" height="80"><font color="#ffffff" size="6">M</font></td>
+          <td width="150" bgcolor="#000000" height="80" class="fixed"><font color="#ffffff" size="6">電気科</font></td>
+          <td width="100" bgcolor="#000000" height="80"><font color="#ffffff" size="6">P</font></td>
+        </tr>
+        <!-- 5段目 -->
+        <tr align="center" height="80">
+          <td width="100" bgcolor="#000000" height="80"><font color="#ffffff" size="6">Q</font></td>
+          <td width="150" bgcolor="#000000" height="80" class="fixed"><font color="#ffffff" size="6">電子科</font></td>
+          <td width="100" bgcolor="#000000" height="80"><font color="#ffffff" size="6">T</font></td>
+        </tr>
+        <!-- 6段目 -->
+        <tr align="center" height="80">
+          <td width="100" bgcolor="#000000" height="80"><font color="#ffffff" size="6">U</font></td>
+          <td width="150" bgcolor="#000000" height="80" class="fixed"><font color="#ffffff" size="4">情報技術科</font></td>
+          <td width="100" bgcolor="#000000" height="80"><font color="#ffffff" size="6">X</font></td>
+        </tr>
+        <!-- 7段目 -->
+        <tr align="center" height="80">
+          <td width="100" bgcolor="#000000" height="80"><font color="#ffffff" size="6">Y</font></td>
+          <td width="150" bgcolor="#000000" height="80" class="fixed"><font color="#ffffff" size="6">Z</font></td>
+          <td width="100" bgcolor="#000000" height="80"><font color="#ffffff" size="6">b</font></td>
+        </tr>
+        <!-- 8段目：c（住所セル） -->
+        <tr align="center" height="150">
+          <td colspan="4" width="800" bgcolor="#000000" height="100" class="address-cell" id="addressCell" style="position:relative;">
+            <font color="#ffffff" size="6">住所：荒川区南千住19191919</font>
+            <div id="addressMapOverlay">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d1872.722223878165!2d139.7912023480273!3d35.7368078110341!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188e60b7192b6d%3A0x969690ab293cf8af!2z5p2x5Lqs6YO956uL6I2S5bed5bel56eR6auY562J5a2m5qCh!5e0!3m2!1sja!2sjp!4v1748657862196!5m2!1sja!2sjp"
+                width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </center>
+  <audio id="macAudio" src="mac.mp3" preload="auto"></audio>
+  <script>
+    // テーブル拡大アニメ
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.getElementById('mainTableWrap').style.transform = "scale(1)";
+      }, 150);
+    });
+
+    // 荒川工科高校セルアニメ＋遷移
+    const arakawaCell = document.getElementById('arakawaCell');
+    arakawaCell.addEventListener('click', function(){
+      if(arakawaCell.classList.contains('fading')) return;
+      arakawaCell.classList.add('fading');
+      setTimeout(()=>{ location.href = 'https://app.com'; }, 700);
+    });
+
+    // ===== k画像押下時「毎回0.8→1へ0.5s拡大」JSで確実に実行（opacity使わず） =====
+    const kImage = document.getElementById('kImage');
+    let resetTimer = null, isDown = false;
+    const originalSrc = 'img.png';
+    const clickSrc = 'clickbefore.png';
+
+    kImage.addEventListener('pointerdown', e => {
+      if(resetTimer) clearTimeout(resetTimer);
+      isDown = true;
+      // clickbefore.pngに切替
+      kImage.src = clickSrc;
+      // フェード中なら解除
+      kImage.classList.remove('fadingOut');
+      // 一度transition解除してscale0.8に即座にセット
+      kImage.style.transition = 'none';
+      kImage.style.transform = 'scale(0.8)';
+      // 強制リフロー
+      void kImage.offsetWidth;
+      // 0.5sトランジションを戻して1へ拡大
+      kImage.style.transition = 'transform 0.5s cubic-bezier(.8,0,.2,1)';
+      kImage.style.transform = 'scale(1)';
+    });
+
+    // pointerup/leaveで縮小フェード後リセット
+    function fadeOutAndReset() {
+      if(!isDown) return;
+      isDown = false;
+      // 縮小＋ブラー（opacity無し）
+      kImage.classList.add('fadingOut');
+      kImage.style.transition = 'transform 0.3s, filter 0.3s cubic-bezier(.8,0,.2,1)';
+      kImage.style.transform = 'scale(0.8)';
+      kImage.style.filter = 'brightness(1.7) blur(12px)';
+      resetTimer = setTimeout(() => {
+        kImage.classList.remove('fadingOut');
+        kImage.src = originalSrc;
+        kImage.style.filter = '';
+        kImage.style.transform = 'scale(1)';
+        kImage.style.transition = 'transform 0.5s cubic-bezier(.8,0,.2,1), filter 0.3s cubic-bezier(.8,0,.2,1)';
+      }, 300);
+    }
+    kImage.addEventListener('pointerup', fadeOutAndReset);
+    kImage.addEventListener('pointerleave', fadeOutAndReset);
+    kImage.addEventListener('pointercancel', fadeOutAndReset);
+
+    // ===== どのtd押してもmac.mp3再生：連打・長押し可 =====
+    function playMacSound() {
+      const se = new Audio('mac.mp3');
+      se.play();
+    }
+    document.querySelectorAll('td').forEach(td => {
+      td.addEventListener('mousedown', playMacSound);
+      td.addEventListener('touchstart', playMacSound, {passive:true});
+    });
+
+    // ===== 住所セル: Google Mapオーバーレイ =====
+    const addressCell = document.getElementById('addressCell');
+    const mapOverlay  = document.getElementById('addressMapOverlay');
+    function showMap(e) {
+      e && e.preventDefault();
+      mapOverlay.style.display = 'block';
+      mapOverlay.classList.remove('hiding');
+      setTimeout(() => {
+        mapOverlay.classList.add('showing');
+      }, 10);
+    }
+    function hideMap(e) {
+      e && e.preventDefault();
+      mapOverlay.classList.remove('showing');
+      mapOverlay.classList.add('hiding');
+      setTimeout(() => {
+        mapOverlay.classList.remove('hiding');
+        mapOverlay.style.display = 'none';
+      }, 440);
+    }
+    addressCell.addEventListener('mousedown', showMap);
+    addressCell.addEventListener('touchstart', showMap, {passive:false});
+    addressCell.addEventListener('mouseup', hideMap);
+    addressCell.addEventListener('mouseleave', hideMap);
+    addressCell.addEventListener('touchend', hideMap, {passive:false});
+    addressCell.addEventListener('touchcancel', hideMap, {passive:false});
+    mapOverlay.addEventListener('mousedown', e=>e.stopPropagation());
+    mapOverlay.addEventListener('touchstart', e=>e.stopPropagation());
+  </script>
+  
+<script>window.addEventListener('DOMContentLoaded', () => {
+  const body = document.body;
+
+  // 背景だけを載せるレイヤー
+  const bgLayer = document.createElement('div');
+  bgLayer.style.position = 'fixed';
+  bgLayer.style.top = 0;
+  bgLayer.style.left = 0;
+  bgLayer.style.width = '100vw';
+  bgLayer.style.height = '100vh';
+  bgLayer.style.zIndex = -1;
+  bgLayer.style.pointerEvents = 'none';
+  bgLayer.style.backgroundBlendMode = 'screen';
+  body.style.background = 'none';
+  body.style.backgroundColor = 'transparent';
+  body.appendChild(bgLayer);
+
+  let hue = 0;
+
+  function getGradientsByWidth() {
+    const isPC = window.matchMedia('(min-width: 920px)').matches;
+    hue = (hue + 1) % 360;
+
+    if (isPC) {
+      // WWDC25ロゴ風、hue回転で多色グラデーション
+      const c1 = `hsl(${(hue + 120) % 360}, 100%, 60%)`; // 緑
+      const c2 = `hsl(${(hue + 60) % 360}, 100%, 60%)`;  // 黄
+      const c3 = `hsl(${(hue + 30) % 360}, 100%, 60%)`;  // オレンジ
+      const c4 = `hsl(${(hue + 330) % 360}, 100%, 65%)`; // ピンク
+      const c5 = `hsl(${(hue + 260) % 360}, 100%, 65%)`; // 紫
+      const c6 = `hsl(${(hue + 210) % 360}, 100%, 65%)`; // 青
+      const c7 = `hsl(${(hue + 190) % 360}, 100%, 65%)`; // 水色
+
+      bgLayer.style.background = `
+        radial-gradient(at 46% 54%, ${c1} 0px, transparent 50%),
+        radial-gradient(at 30% 94%, ${c2} 0px, transparent 50%),
+        radial-gradient(at 90% 5%, ${c3} 0px, transparent 50%),
+        radial-gradient(at 24% 60%, ${c4} 0px, transparent 50%),
+        radial-gradient(at 64% 7%, ${c5} 0px, transparent 50%),
+        radial-gradient(at 63% 5%, ${c6} 0px, transparent 50%),
+        radial-gradient(at 6% 40%, ${c7} 0px, transparent 50%)
+      `;
+      bgLayer.style.backgroundColor = '#ffffff00';
+    } else {
+      // スマホ用グラデーション（今まで通り、色も変えない）
+      const c1 = `hsl(${hue}, 100%, 65%)`;
+      const c2 = `hsl(${(hue + 90) % 360}, 100%, 60%)`;
+      const c3 = `hsl(${(hue + 180) % 360}, 100%, 50%)`;
+      const c4 = `hsl(${(hue + 270) % 360}, 100%, 70%)`;
+      const c5 = `hsl(${(hue + 45) % 360}, 100%, 55%)`;
+
+      bgLayer.style.background = `
+        radial-gradient(circle at 30% 70%, ${c1}, transparent 60%),
+        radial-gradient(circle at 60% 30%, ${c2}, transparent 60%),
+        radial-gradient(circle at 90% 80%, ${c3}, transparent 60%),
+        radial-gradient(circle at 10% 20%, ${c4}, transparent 60%),
+        radial-gradient(circle at 50% 50%, ${c5}, transparent 70%)
+      `;
+      bgLayer.style.backgroundColor = '#ffffff30';
+    }
+  }
+
+  function animate() {
+    getGradientsByWidth();
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+});
+
+</script>
+
+</body>
+</html>
