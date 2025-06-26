@@ -1214,6 +1214,46 @@ window.addEventListener("DOMContentLoaded",()=>{
 
 </script>
 
+<!-- 省略 ... 既存のHTML ... -->
+
+<!-- hapticトグル：非表示でOK -->
+<input id="sw" switch type="checkbox" style="display:none;">
+<label for="sw" style="display:none;">hapticトグル</label>
+
+<script>
+/**
+ * 1回だけ確実にhaptic振動
+ */
+function fireHaptic() {
+  const sw = document.getElementById("sw");
+  // 状態toggle（外部から分かるようにしてるだけで実用上は不要なら省略OK）
+  sw.checked = !sw.checked;
+  // changeイベントも必ず発火（必要なら）
+  sw.dispatchEvent(new Event("change"));
+  // haptic
+  if (navigator.vibrate) navigator.vibrate(20);
+}
+
+// cellを押した時（ボタン要素 class="cell" 前提）
+document.addEventListener("DOMContentLoaded", ()=>{
+  document.body.addEventListener("click", e=>{
+    if (e.target.classList.contains("cell")) {
+      fireHaptic();
+    }
+  });
+
+  // mac.mp3, macL.mp3, macR.mp3の再生でhaptic
+  ["sound-bomb", "sound-changeL", "sound-changeR"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el){
+      el.addEventListener("play", ()=>{ fireHaptic(); }, {passive:true});
+    }
+  });
+
+  // トグル本体のchangeでも一応haptic
+  sw.onchange = ()=>{ if(navigator.vibrate) navigator.vibrate(20); };
+});
+</script>
 
 
 </body>
