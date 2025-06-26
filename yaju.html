@@ -1311,6 +1311,78 @@ document.addEventListener("DOMContentLoaded", function() {
   }).observe(document.body, {childList:true, subtree:true});
 });
 </script>
+<!-- tapticトグル (どこでもページ下に1セットだけ置く) -->
+<input id="taptic-sw" type="checkbox" style="display:none;">
+<label for="taptic-sw" style="display:none;">tapticトグル</label>
+
+<script>
+// ---- iOS Taptic switch+label強制トグル発振 ----
+function fireTaptic() {
+  const sw = document.getElementById("taptic-sw");
+  const label = document.querySelector('label[for="taptic-sw"]');
+  if (!sw || !label) return;
+  sw.checked = !sw.checked;
+  label.click(); // ラベルも一応保険でclick（Safari/iOS実機系）
+  sw.dispatchEvent(new Event("change", {bubbles:true}));
+  if (window.navigator.vibrate) window.navigator.vibrate(20);
+}
+
+// トグルon/off時にも物理振動（保険）
+document.getElementById("taptic-sw").onchange = function() {
+  if (window.navigator.vibrate) window.navigator.vibrate(20);
+};
+
+// ---- 全イベントにtaptic割当 ----
+document.addEventListener("DOMContentLoaded", function() {
+  // すべてのボタン/セル/リトライ/難易度/overlay/pwa-closeなどを網羅
+  document.querySelectorAll(
+    "button, .diff-img-btn, .diff-popup-btn, .cell, .pwa-close-btn"
+  ).forEach(btn => {
+    btn.addEventListener("click", fireTaptic, {passive:true});
+    btn.addEventListener("touchstart", fireTaptic, {passive:true});
+  });
+  // body全体にも(任意:不要なら削除)
+  document.body.addEventListener("click", fireTaptic, {passive:true});
+  document.body.addEventListener("touchstart", fireTaptic, {passive:true});
+  // PWAバナー swip
+  const banner = document.getElementById('pwaNotice');
+  const noticeInner = banner?.querySelector('.pwa-notice-inner');
+  const closeBtn = banner?.querySelector('.pwa-close-btn');
+  if (noticeInner) {
+    noticeInner.addEventListener("click", fireTaptic, {passive:true});
+    noticeInner.addEventListener("touchstart", fireTaptic, {passive:true});
+    let startY = null, endY = null;
+    noticeInner.addEventListener("touchstart", e => { startY = e.touches[0].clientY; }, {passive:true});
+    noticeInner.addEventListener("touchend", e => {
+      endY = e.changedTouches[0].clientY;
+      if (startY !== null && Math.abs(endY - startY) > 30) {
+        fireTaptic();
+      }
+      startY = null; endY = null;
+    }, {passive:true});
+  }
+  if (closeBtn) {
+    closeBtn.addEventListener("click", fireTaptic, {passive:true});
+    closeBtn.addEventListener("touchstart", fireTaptic, {passive:true});
+  }
+  // audio再生でもtaptic (音と連動)
+  [
+    "sound-cc", "sound-wrong", "sound-bomb", "sound-flag", "sound-key", "sound-collect",
+    "sound-change", "sound-changeL", "sound-changeLL", "sound-changeR", "sound-macmac",
+    "macL", "macC", "macR", "macSound"
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("play", fireTaptic, {passive:true});
+  });
+  // .cell生成後にも割当て直したい時
+  new MutationObserver(() => {
+    document.querySelectorAll(".cell").forEach(btn => {
+      btn.onclick = fireTaptic;
+      btn.ontouchstart = fireTaptic;
+    });
+  }).observe(document.body, {childList:true, subtree:true});
+});
+</script>
 
 
 
