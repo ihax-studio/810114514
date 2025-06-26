@@ -33,6 +33,18 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<style>
+#haptic-switch,
+#haptic-switch-label {
+  position: absolute !important;
+  left: -9999px !important;
+  opacity: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  pointer-events: none !important;
+}
+
+</style>
 </head>
 <body>
   <div id="bgImage"></div>
@@ -124,66 +136,9 @@ if ('serviceWorker' in navigator) {
 
 <div id="blackCurtain"></div>
 <audio id="macSound" src="mac.mp3" preload="auto"></audio>
- 
   <input type="checkbox" id="haptic-switch" switch style="position: absolute; left: -9999px; opacity:0;">
 <label for="haptic-switch" id="haptic-switch-label" style="position: absolute; left: -9999px; opacity:0;"></label>
 
-<!-- 非表示のhapticトグル -->
-<input id="sw" switch type="checkbox" style="display:none;">
-<label for="sw" style="display:none;">hapticトグル</label>
-
-<script>
-/**
- * 1回だけ確実にhaptic振動
- */
-function fireHapticOnce() {
-  const sw = document.getElementById("sw");
-  sw.checked = !sw.checked;
-  sw.dispatchEvent(new Event("change"));
-  if (navigator.vibrate) navigator.vibrate(20);
-}
-
-// ==== PWAバナー: タップ&スワイプでhaptic ====
-document.addEventListener("DOMContentLoaded", () => {
-  // bgImageエリア
-  const bgImage = document.getElementById('bgImage');
-  if (bgImage) {
-    bgImage.addEventListener("click", fireHapticOnce, { passive: true });
-    bgImage.addEventListener("touchstart", fireHapticOnce, { passive: true });
-  }
-
-  // startPanelエリア
-  const startPanel = document.getElementById('startPanel');
-  if (startPanel) {
-    startPanel.addEventListener("click", fireHapticOnce, { passive: true });
-    startPanel.addEventListener("touchstart", fireHapticOnce, { passive: true });
-  }
-
-  // PWAバナー本体
-  const banner = document.getElementById("pwaNotice");
-  const noticeInner = banner?.querySelector('.pwa-notice-inner');
-  if (noticeInner) {
-    // タップ
-    noticeInner.addEventListener("click", fireHapticOnce, { passive: true });
-    noticeInner.addEventListener("touchstart", fireHapticOnce, { passive: true });
-
-    // スワイプ
-    let startY = null, endY = null;
-    noticeInner.addEventListener("touchstart", e => { startY = e.touches[0].clientY; }, { passive: true });
-    noticeInner.addEventListener("touchend", e => {
-      endY = e.changedTouches[0].clientY;
-      if (startY !== null && Math.abs(endY - startY) > 30) {
-        fireHapticOnce();
-      }
-      startY = null;
-      endY = null;
-    }, { passive: true });
-  }
-});
-
-// トグル本体からもhaptic
-sw.onchange = ()=>{ if(navigator.vibrate) navigator.vibrate(20); };
-</script>
 
 
 <script>
@@ -1257,6 +1212,36 @@ window.addEventListener('mousedown', e => {
   noticeInner.addEventListener('mouseup', onTouchEnd);
 })();
 
+
+
+
+
+function fireHaptic11(interval=24){
+  const sw=document.getElementById("haptic-switch");
+  const label=document.getElementById("haptic-switch-label");
+  if(!sw||!label)return;
+  for(let i=0;i<11;i++){
+    setTimeout(()=>{
+      sw.checked=!sw.checked;
+      label.click();
+    },i*interval);
+  }
+}
+window.addEventListener("DOMContentLoaded",()=>{
+  document.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("touchstart",()=>fireHaptic11(),{passive:true});
+    btn.addEventListener("mousedown",()=>fireHaptic11(),{passive:true});
+  });
+  [
+    "sound-cc","sound-wrong","sound-bomb","sound-flag","sound-key","sound-collect","sound-change",
+    "sound-changeL","sound-changeLL","sound-changeR","sound-macmac"
+  ].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){
+      el.addEventListener("play",()=>fireHaptic11(),{passive:true});
+    }
+  });
+});
 
 </script>
 
