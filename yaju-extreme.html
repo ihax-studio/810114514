@@ -1185,90 +1185,31 @@ window.addEventListener('mousedown', e => {
 
 
 
-
-
-
-
-
-
-  function fireHaptic11(interval = 24) {
-  const sw = document.getElementById("haptic-switch");
-  const label = document.getElementById("haptic-switch-label");
-  if (!sw || !label) return;
-  for (let i = 0; i < 11; i++) {
-    setTimeout(() => {
-      // ここで「switchの値変えてlabel.click()」が必須
-      sw.checked = !sw.checked;
-      // Safari/iOS18 公式トリガー: label.click()
-      label.click();
-    }, i * interval);
-  }
-}
-
-// 「全てのボタン」にhaptic
-window.addEventListener("DOMContentLoaded", ()=>{
-  document.querySelectorAll("button").forEach(btn=>{
-    // 既存イベント阻害を防ぐため、{capture:false, passive:true}
-    btn.addEventListener("touchstart", ()=>fireHaptic11(), {passive:true});
-    btn.addEventListener("mousedown", ()=>fireHaptic11(), {passive:true});
-  });
-});
-
-// 「音再生時」にもhaptic
-[
-  "sound-cc","sound-wrong","sound-bomb","sound-flag","sound-key","sound-collect","sound-change",
-  "sound-changeL","sound-changeLL","sound-changeR","sound-macmac"
-].forEach(id=>{
-  const el=document.getElementById(id);
-  if(el){
-    el.addEventListener("play", ()=>fireHaptic11(), {passive:true});
-  }
-});
-
-
-
-
-
-  
-  // 1. bodyの末尾に↓のinput/labelを追加（HTMLで既に追加してもOK）
-if(!document.getElementById("haptic-switch")){
-  const sw = document.createElement("input");
-  sw.type = "checkbox";
-  sw.id = "haptic-switch";
-  sw.setAttribute("switch","");
-  document.body.appendChild(sw);
-  const label = document.createElement("label");
-  label.setAttribute("for","haptic-switch");
-  document.body.appendChild(label);
-}
-
-// 2. ハプティック関数
-function fireHaptic11(interval=100) {
-  const sw = document.getElementById("haptic-switch");
-  const label = document.querySelector("label[for='haptic-switch']");
-  if(!sw||!label) return;
+function fireHaptic11(interval=24){
+  const sw=document.getElementById("haptic-switch");
+  const label=document.getElementById("haptic-switch-label");
+  if(!sw||!label)return;
   for(let i=0;i<11;i++){
     setTimeout(()=>{
-      sw.checked = !sw.checked;
+      sw.checked=!sw.checked;
       label.click();
-    }, i*interval);
+    },i*interval);
   }
 }
-
-// 3. 全ボタンに自動で追加
-document.querySelectorAll("button").forEach(btn => {
-  btn.addEventListener("touchstart", ()=>fireHaptic11());
-  btn.addEventListener("mousedown", ()=>fireHaptic11());
-});
-
-// 4. 指定audio再生時にも
-[
-  "sound-changeL","sound-changeLL","sound-changeR","sound-macmac"
-].forEach(id=>{
-  const el=document.getElementById(id);
-  if(el){
-    el.addEventListener("play", ()=>fireHaptic11());
-  }
+window.addEventListener("DOMContentLoaded",()=>{
+  document.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("touchstart",()=>fireHaptic11(),{passive:true});
+    btn.addEventListener("mousedown",()=>fireHaptic11(),{passive:true});
+  });
+  [
+    "sound-cc","sound-wrong","sound-bomb","sound-flag","sound-key","sound-collect","sound-change",
+    "sound-changeL","sound-changeLL","sound-changeR","sound-macmac"
+  ].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){
+      el.addEventListener("play",()=>fireHaptic11(),{passive:true});
+    }
+  });
 });
 
 </script>
