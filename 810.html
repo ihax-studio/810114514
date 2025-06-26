@@ -10,6 +10,23 @@
 <link rel="manifest" href="manifest-810.json">
   <link rel="shortcut icon" href="icon-512.png">
 
+
+
+  
+   <style>
+#haptic-switch,
+#haptic-switch-label {
+  position: absolute !important;
+  left: -9999px !important;
+  opacity: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  pointer-events: none !important;
+}
+
+</style>
+
+  
 <meta name="theme-color" content="#479b8d">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-191.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-191.png">
@@ -36,6 +53,97 @@ if ('serviceWorker' in navigator) {
 
 </head>
 <body>
+
+
+
+  <input type="checkbox" id="haptic-switch" switch style="position: absolute; left: -9999px; opacity:0;">
+<label for="haptic-switch" id="haptic-switch-label" style="position: absolute; left: -9999px; opacity:0;"></label>
+
+<!-- 非表示のhapticトグル -->
+<input id="sw" switch type="checkbox" style="display:none;">
+<label for="sw" style="display:none;">hapticトグル</label>
+
+<script>
+/**
+ * 1回だけ確実にhaptic振動
+ */
+function fireHapticOnce() {
+  const sw = document.getElementById("sw");
+  sw.checked = !sw.checked;
+  sw.dispatchEvent(new Event("change"));
+  if (navigator.vibrate) navigator.vibrate(20);
+}
+
+// ==== PWAバナー: タップ&スワイプでhaptic ====
+document.addEventListener("DOMContentLoaded", () => {
+  // bgImageエリア
+  const bgImage = document.getElementById('bgImage');
+  if (bgImage) {
+    bgImage.addEventListener("click", fireHapticOnce, { passive: true });
+    bgImage.addEventListener("touchstart", fireHapticOnce, { passive: true });
+  }
+
+  // startPanelエリア
+  const startPanel = document.getElementById('startPanel');
+  if (startPanel) {
+    startPanel.addEventListener("click", fireHapticOnce, { passive: true });
+    startPanel.addEventListener("touchstart", fireHapticOnce, { passive: true });
+  }
+
+  // PWAバナー本体
+  const banner = document.getElementById("pwaNotice");
+  const noticeInner = banner?.querySelector('.pwa-notice-inner');
+  if (noticeInner) {
+    // タップ
+    noticeInner.addEventListener("click", fireHapticOnce, { passive: true });
+    noticeInner.addEventListener("touchstart", fireHapticOnce, { passive: true });
+
+    // スワイプ
+    let startY = null, endY = null;
+    noticeInner.addEventListener("touchstart", e => { startY = e.touches[0].clientY; }, { passive: true });
+    noticeInner.addEventListener("touchend", e => {
+      endY = e.changedTouches[0].clientY;
+      if (startY !== null && Math.abs(endY - startY) > 30) {
+        fireHapticOnce();
+      }
+      startY = null;
+      endY = null;
+    }, { passive: true });
+  }
+});
+
+// トグル本体からもhaptic
+sw.onchange = ()=>{ if(navigator.vibrate) navigator.vibrate(20); };
+</script>
+
+
+<script>
+// 1回だけhaptic + トグルON/OFF
+function fireHaptic() {
+  const sw = document.getElementById("sw");
+  sw.checked = !sw.checked;
+  sw.dispatchEvent(new Event("change", { bubbles: true }));
+  if (navigator.vibrate) navigator.vibrate(20); // iOS18/macで確実に1回だけ振動
+}
+
+// ページ内の「クリック or タップ」どこでも発動（PWAボタンも網羅！）
+window.addEventListener("DOMContentLoaded", () => {
+  // 画面全体クリック
+  document.body.addEventListener("click", fireHaptic);
+
+  // PWA専用ボタン（例: #toggleRetryBtn、#startBtn など好きなIDを追加OK）
+  ["toggleRetryBtn", "startBtn", "retryBtn", "retryBtn2"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("click", fireHaptic);
+      el.addEventListener("touchstart", fireHaptic, {passive:true});
+    }
+  });
+
+  // hapticトグル本体changeでも保険で振動
+  const sw = document.getElementById("sw");
+  sw.onchange = () => { if (navigator.vibrate) navigator.vibrate(20); };
+});</script>
   <div id="bgImage"></div>
   <div id="bgWrapper" class="bg-wrapper">
     <div class="panel" id="startPanel">
