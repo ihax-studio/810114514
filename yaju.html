@@ -74,71 +74,16 @@ if ('serviceWorker' in navigator) {
   <audio id="sound-wrong" src="wrong.mp3"></audio>
   <audio id="sound-bomb" src="mac.wav"></audio>
   <audio id="sound-flag" src="mac.mp3"></audio>
+  <audio id="sound-key" src="key.mp3"></audio>
   <audio id="sound-collect" src="collect.mp3"></audio>
   <audio id="sound-change" src="change.mp3"></audio>
-<!-- 必要なaudio要素（既存） -->
+
+  <!-- 必要なaudio要素（既存） -->
 <audio id="sound-key" src="key.mp3"></audio>
 <audio id="sound-changeL" src="changeL.mp3"></audio>
 <audio id="sound-changeLL" src="changeLL.mp3"></audio>
 <audio id="sound-changeR" src="changeR.mp3"></audio>
 <audio id="sound-macmac" src="Mac.mac.wav"></audio>
-
-<!-- ハプティック用トグル要素（隠し） -->
-<input type="checkbox" id="haptic-toggle" style="position:absolute;top:-9999px;">
-<label for="haptic-toggle" style="position:absolute;top:-9999px;"></label>
-
-<script>
-/** iOS18/iPadでも確実にhaptic鳴らす：物理トグル＋ラベルclick */
-const hapticToggle = document.getElementById('haptic-toggle');
-const hapticLabel = document.querySelector('label[for="haptic-toggle"]');
-function triggerHaptic() {
-  hapticToggle.checked = !hapticToggle.checked;
-  hapticLabel.click();
-}
-
-/** 指定回数＆間隔でhaptic＋トグル */
-function repeatHaptic(count, interval = 220) {
-  triggerHaptic();
-  for (let i = 1; i < count; ++i) {
-    setTimeout(triggerHaptic, i * interval);
-  }
-}
-
-/** サウンド再生＋haptic複数回併用 */
-function playSoundWithHaptic(audioId, hapticTimes = 1, hapticInterval = 220) {
-  const audio = document.getElementById(audioId);
-  try { audio.currentTime = 0; audio.play(); } catch (e) {}
-  repeatHaptic(hapticTimes, hapticInterval);
-}
-
-/** key.mp3, startBtn, retryBtn → 2回haptic(0.2s間隔) */
-function keyAction() {
-  playSoundWithHaptic('sound-key', 2, 200);
-}
-document.getElementById('startBtn')?.addEventListener('click', keyAction);
-document.getElementById('retryBtn')?.addEventListener('click', keyAction);
-document.getElementById('retryBtn2')?.addEventListener('click', keyAction);
-// 他のkeyボタンも同様に付加OK
-
-/** changeL/LL/R, Mac.mac.wav再生時は4回haptic(0.22s) */
-['sound-changeL', 'sound-changeLL', 'sound-changeR', 'sound-macmac'].forEach(id => {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.addEventListener('play', () => repeatHaptic(4, 220));
-});
-
-// 直接サウンド再生箇所で呼び出す例（change.mp3系）
-function playChangeLSound() {
-  playSoundWithHaptic('sound-changeL', 4, 220);
-  // ...他の処理
-}
-function playChangeRSound() {
-  playSoundWithHaptic('sound-changeR', 4, 220);
-  // ...他の処理
-}
-// 必要に応じてstartBtn/retryBtnもイベント修正
-</script>
-
 
 <div id="pwaNotice" style="display:none;">
   <div class="pwa-notice-inner">
@@ -1294,6 +1239,69 @@ function playSoundSequence(soundList) {
 
 </script>
 
+
+
+<!-- tapticトグル -->
+<input id="taptic-sw" type="checkbox" style="display:none;">
+<label for="taptic-sw" style="display:none;">tapticトグル</label>
+<script>
+function fireTaptic() {
+  const sw = document.getElementById("taptic-sw");
+  if (!sw) return;
+  sw.checked = !sw.checked;
+  sw.dispatchEvent(new Event("change"));
+  if (navigator.vibrate) navigator.vibrate(20);
+}
+document.getElementById("taptic-sw").onchange = function() {
+  if (navigator.vibrate) navigator.vibrate(20);
+};
+
+document.addEventListener("DOMContentLoaded", function() {
+  // すべてのボタン, diff, close, cellも
+  document.querySelectorAll("button, .pwa-close-btn, .diff-img-btn, .diff-popup-btn").forEach(btn => {
+    btn.addEventListener("click", fireTaptic, {passive:true});
+    btn.addEventListener("touchstart", fireTaptic, {passive:true});
+  });
+  document.querySelectorAll(".cell").forEach(btn => {
+    btn.addEventListener("click", fireTaptic, {passive:true});
+    btn.addEventListener("touchstart", fireTaptic, {passive:true});
+  });
+  // bodyどこ押してもhaptic（不要なら削除可）
+  document.body.addEventListener("click", fireTaptic, {passive:true});
+  document.body.addEventListener("touchstart", fireTaptic, {passive:true});
+
+  // PWAバナー
+  const banner = document.getElementById('pwaNotice');
+  const noticeInner = banner?.querySelector('.pwa-notice-inner');
+  const closeBtn = banner?.querySelector('.pwa-close-btn');
+  if (noticeInner) {
+    noticeInner.addEventListener("click", fireTaptic, {passive:true});
+    noticeInner.addEventListener("touchstart", fireTaptic, {passive:true});
+    let startY = null, endY = null;
+    noticeInner.addEventListener("touchstart", e => { startY = e.touches[0].clientY; }, {passive:true});
+    noticeInner.addEventListener("touchend", e => {
+      endY = e.changedTouches[0].clientY;
+      if (startY !== null && Math.abs(endY - startY) > 30) {
+        fireTaptic();
+      }
+      startY = null; endY = null;
+    }, {passive:true});
+  }
+  if (closeBtn) {
+    closeBtn.addEventListener("click", fireTaptic, {passive:true});
+    closeBtn.addEventListener("touchstart", fireTaptic, {passive:true});
+  }
+
+  // 音声再生でhaptic
+  [
+    "macSound", "macL", "macR",
+    "sound-bomb", "sound-flag", "sound-key", "sound-collect", "sound-change"
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("play", fireTaptic, {passive:true});
+  });
+});
+</script>
 
 
 </body>
