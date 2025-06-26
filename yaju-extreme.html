@@ -34,13 +34,13 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <style>
-  /* haptic switch + labelは絶対に画面に出ないようにする */
 #haptic-switch,
-label[for="haptic-switch"] {
+#haptic-switch-label {
   position: absolute !important;
   left: -9999px !important;
-  width: 1px; height: 1px;
   opacity: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
   pointer-events: none !important;
 }
 
@@ -136,8 +136,9 @@ label[for="haptic-switch"] {
 
 <div id="blackCurtain"></div>
 <audio id="macSound" src="mac.mp3" preload="auto"></audio>
-  <input type="checkbox" id="haptic-switch" switch style="position:absolute;top:-9999px;">
-<label for="haptic-switch" style="position:absolute;top:-9999px;"></label>
+  <input type="checkbox" id="haptic-switch" switch style="position: absolute; left: -9999px; opacity:0;">
+<label for="haptic-switch" id="haptic-switch-label" style="position: absolute; left: -9999px; opacity:0;"></label>
+
 
 <script>
 
@@ -1181,6 +1182,54 @@ window.addEventListener('mousedown', e => {
 })();
 
 
+
+
+
+
+
+
+
+
+
+  function fireHaptic11(interval = 24) {
+  const sw = document.getElementById("haptic-switch");
+  const label = document.getElementById("haptic-switch-label");
+  if (!sw || !label) return;
+  for (let i = 0; i < 11; i++) {
+    setTimeout(() => {
+      // ここで「switchの値変えてlabel.click()」が必須
+      sw.checked = !sw.checked;
+      // Safari/iOS18 公式トリガー: label.click()
+      label.click();
+    }, i * interval);
+  }
+}
+
+// 「全てのボタン」にhaptic
+window.addEventListener("DOMContentLoaded", ()=>{
+  document.querySelectorAll("button").forEach(btn=>{
+    // 既存イベント阻害を防ぐため、{capture:false, passive:true}
+    btn.addEventListener("touchstart", ()=>fireHaptic11(), {passive:true});
+    btn.addEventListener("mousedown", ()=>fireHaptic11(), {passive:true});
+  });
+});
+
+// 「音再生時」にもhaptic
+[
+  "sound-cc","sound-wrong","sound-bomb","sound-flag","sound-key","sound-collect","sound-change",
+  "sound-changeL","sound-changeLL","sound-changeR","sound-macmac"
+].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el){
+    el.addEventListener("play", ()=>fireHaptic11(), {passive:true});
+  }
+});
+
+
+
+
+
+  
   // 1. bodyの末尾に↓のinput/labelを追加（HTMLで既に追加してもOK）
 if(!document.getElementById("haptic-switch")){
   const sw = document.createElement("input");
