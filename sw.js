@@ -2,6 +2,7 @@
 const CACHE_NAME = 'homo-waipu-v1';
 const FILES_TO_CACHE = [
   '/',
+  '/810.html',
   '/index.html',
   '/yaju.css', // 必要なCSS
   '/main.js',  // 必要なら
