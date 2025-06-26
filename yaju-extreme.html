@@ -140,6 +140,61 @@ if ('serviceWorker' in navigator) {
 <label for="haptic-switch" id="haptic-switch-label" style="position: absolute; left: -9999px; opacity:0;"></label>
 
 
+
+
+  <!-- hapticトグル本体はこの1個だけ、必ずbodyの一番下でOK -->
+<input id="sw" switch type="checkbox" style="display:none;">
+<label for="sw" style="display:none;">hapticトグル</label>
+
+<script>
+/**
+ * 1回だけ確実にhaptic振動＆トグル切り替え
+ */
+function fireHaptic() {
+  const sw = document.getElementById("sw");
+  // toggle ON/OFF
+  sw.checked = !sw.checked;
+  // イベント発火（外部用）
+  sw.dispatchEvent(new Event("change", { bubbles: true }));
+  // 実haptic（iOS18/mac対応）
+  if (navigator.vibrate) navigator.vibrate(20);
+}
+
+/**
+ * 初回ページロード時にmac.wav再生＋haptic
+ */
+window.addEventListener("DOMContentLoaded", () => {
+  // ---- 1. cell押下で1回だけhaptic
+  document.body.addEventListener("click", e => {
+    if (e.target.classList.contains("cell")) {
+      fireHaptic();
+    }
+  });
+
+  // ---- 2. mac.wav, macL.mp3, macR.mp3（再生時に1回だけhaptic）
+  ["sound-bomb", "sound-changeL", "sound-changeR"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      // 「再生時に必ず1回だけ」haptic
+      el.addEventListener("play", () => fireHaptic(), { passive: true });
+    }
+  });
+
+  // ---- 3. ページ初回ロード時にもmac.wav再生＋haptic
+  const mac = document.getElementById("sound-bomb");
+  if (mac) {
+    // ユーザー操作（タップ/クリック）が必要な場合は工夫推奨（自動再生ブロック回避のため）
+    mac.currentTime = 0;
+    mac.play().catch(()=>{});
+    fireHaptic();
+  }
+
+  // ---- 4. sw本体のchangeでも一応haptic
+  const sw = document.getElementById("sw");
+  sw.onchange = () => { if (navigator.vibrate) navigator.vibrate(20); };
+});
+</script>
+
 <script>
 
 
@@ -1213,48 +1268,6 @@ window.addEventListener("DOMContentLoaded",()=>{
 });
 
 </script>
-
-<!-- 省略 ... 既存のHTML ... -->
-
-<!-- hapticトグル：非表示でOK -->
-<input id="sw" switch type="checkbox" style="display:none;">
-<label for="sw" style="display:none;">hapticトグル</label>
-
-<script>
-/**
- * 1回だけ確実にhaptic振動
- */
-function fireHaptic() {
-  const sw = document.getElementById("sw");
-  // 状態toggle（外部から分かるようにしてるだけで実用上は不要なら省略OK）
-  sw.checked = !sw.checked;
-  // changeイベントも必ず発火（必要なら）
-  sw.dispatchEvent(new Event("change"));
-  // haptic
-  if (navigator.vibrate) navigator.vibrate(20);
-}
-
-// cellを押した時（ボタン要素 class="cell" 前提）
-document.addEventListener("DOMContentLoaded", ()=>{
-  document.body.addEventListener("click", e=>{
-    if (e.target.classList.contains("cell")) {
-      fireHaptic();
-    }
-  });
-
-  // mac.mp3, macL.mp3, macR.mp3の再生でhaptic
-  ["sound-bomb", "sound-changeL", "sound-changeR"].forEach(id=>{
-    const el = document.getElementById(id);
-    if(el){
-      el.addEventListener("play", ()=>{ fireHaptic(); }, {passive:true});
-    }
-  });
-
-  // トグル本体のchangeでも一応haptic
-  sw.onchange = ()=>{ if(navigator.vibrate) navigator.vibrate(20); };
-});
-</script>
-
 
 </body>
 </html>
