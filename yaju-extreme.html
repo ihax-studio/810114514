@@ -141,59 +141,35 @@ if ('serviceWorker' in navigator) {
 
 
 
-
-  <!-- hapticトグル本体はこの1個だけ、必ずbodyの一番下でOK -->
-<input id="sw" switch type="checkbox" style="display:none;">
-<label for="sw" style="display:none;">hapticトグル</label>
-
 <script>
-/**
- * 1回だけ確実にhaptic振動＆トグル切り替え
- */
+// 1回だけhaptic + トグルON/OFF
 function fireHaptic() {
   const sw = document.getElementById("sw");
-  // toggle ON/OFF
   sw.checked = !sw.checked;
-  // イベント発火（外部用）
   sw.dispatchEvent(new Event("change", { bubbles: true }));
-  // 実haptic（iOS18/mac対応）
-  if (navigator.vibrate) navigator.vibrate(20);
+  if (navigator.vibrate) navigator.vibrate(20); // iOS18/macで確実に1回だけ振動
 }
 
-/**
- * 初回ページロード時にmac.wav再生＋haptic
- */
+// ページ内の「クリック or タップ」どこでも発動（PWAボタンも網羅！）
 window.addEventListener("DOMContentLoaded", () => {
-  // ---- 1. cell押下で1回だけhaptic
-  document.body.addEventListener("click", e => {
-    if (e.target.classList.contains("cell")) {
-      fireHaptic();
-    }
-  });
+  // 画面全体クリック
+  document.body.addEventListener("click", fireHaptic);
 
-  // ---- 2. mac.wav, macL.mp3, macR.mp3（再生時に1回だけhaptic）
-  ["sound-bomb", "sound-changeL", "sound-changeR"].forEach(id => {
+  // PWA専用ボタン（例: #toggleRetryBtn、#startBtn など好きなIDを追加OK）
+  ["toggleRetryBtn", "startBtn", "retryBtn", "retryBtn2"].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
-      // 「再生時に必ず1回だけ」haptic
-      el.addEventListener("play", () => fireHaptic(), { passive: true });
+      el.addEventListener("click", fireHaptic);
+      el.addEventListener("touchstart", fireHaptic, {passive:true});
     }
   });
 
-  // ---- 3. ページ初回ロード時にもmac.wav再生＋haptic
-  const mac = document.getElementById("sound-bomb");
-  if (mac) {
-    // ユーザー操作（タップ/クリック）が必要な場合は工夫推奨（自動再生ブロック回避のため）
-    mac.currentTime = 0;
-    mac.play().catch(()=>{});
-    fireHaptic();
-  }
-
-  // ---- 4. sw本体のchangeでも一応haptic
+  // hapticトグル本体changeでも保険で振動
   const sw = document.getElementById("sw");
   sw.onchange = () => { if (navigator.vibrate) navigator.vibrate(20); };
 });
 </script>
+
 
 <script>
 
