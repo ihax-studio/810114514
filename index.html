@@ -919,6 +919,81 @@ self.addEventListener('fetch', function(e) {
   }));
 });
 
+
+// iOS18以降向けハプティック
+function hapticFeedback() {
+    if (window.navigator && typeof window.navigator.vibrate === 'function') {
+        window.navigator.vibrate(40); // 軽くバイブ
+    }
+    // iOS18 Safari Haptic API（今後拡張も想定、あればこっち優先）
+    if (window.navigator?.vibrate || window.navigator?.haptic) {
+        try {
+            // iOS18+, ChromeのHaptic API
+            if (window.navigator?.haptic) {
+                window.navigator.haptic.vibrate('light');
+            }
+        } catch (e) {}
+    }
+}
+
+// iOSスイッチ物理的に切り替え
+function toggleIOSSwitch(forceVal) {
+    const sw = document.getElementById('timingEasyCheckbox');
+    sw.checked = (typeof forceVal === 'boolean') ? forceVal : !sw.checked;
+    sw.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+function hapticWithSwitch(forceVal) {
+    toggleIOSSwitch(forceVal);
+    hapticFeedback();
+}
+
+// --- (1) ブロックを押したとき
+function addHomoTouchHapticToBlocks() {
+    // 全ブロックにイベント上書き
+    document.querySelectorAll('.block').forEach(block => {
+        // 元のonclickは残してその前にhaptic
+        const origClick = block.onclick;
+        block.onclick = function(e) {
+            hapticWithSwitch();
+            if (origClick) origClick.call(this, e);
+        };
+        // タッチでも
+        block.ontouchstart = function(e) {
+            hapticWithSwitch();
+            if (origClick) origClick.call(this, e);
+        };
+    });
+}
+
+// --- (2) 「もう一度」「タイトル」もhaptic
+function addHomoTouchHapticToButtons() {
+    document.querySelectorAll('#GameScoreLayer button').forEach(btn => {
+        btn.addEventListener('click', hapticWithSwitch);
+        btn.addEventListener('touchstart', hapticWithSwitch);
+    });
+}
+
+// --- (3) タイトルバー押下も有効化
+function addHomoTouchHapticToTitle() {
+    document.getElementById('main-title').addEventListener('click', hapticWithSwitch);
+    document.getElementById('main-title').addEventListener('touchstart', hapticWithSwitch);
+}
+
+// (4) ゲーム初期化後に必ず全ブロック/ボタンへ再適用
+function enableHomoTouchEverywhere() {
+    addHomoTouchHapticToBlocks();
+    addHomoTouchHapticToButtons();
+    addHomoTouchHapticToTitle();
+}
+
+// ★init/再描画/replay/gameRestart後に呼ぶ
+// 例: init(), gameRestart(), replayBtn() のラストなどで↓追加
+// enableHomoTouchEverywhere();
+
+// -------- ▼既存initの最後やreplayBtnの最後で追記 --------
+setTimeout(enableHomoTouchEverywhere, 10);
+
 </script>
 </body>
 </html>
