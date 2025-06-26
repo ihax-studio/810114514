@@ -33,7 +33,18 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<style>
+  /* haptic switch + labelは絶対に画面に出ないようにする */
+#haptic-switch,
+label[for="haptic-switch"] {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px; height: 1px;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
 
+</style>
 </head>
 <body>
   <div id="bgImage"></div>
@@ -125,6 +136,9 @@ if ('serviceWorker' in navigator) {
 
 <div id="blackCurtain"></div>
 <audio id="macSound" src="mac.mp3" preload="auto"></audio>
+  <input type="checkbox" id="haptic-switch" switch style="position:absolute;top:-9999px;">
+<label for="haptic-switch" style="position:absolute;top:-9999px;"></label>
+
 <script>
 
 
@@ -1166,6 +1180,47 @@ window.addEventListener('mousedown', e => {
   noticeInner.addEventListener('mouseup', onTouchEnd);
 })();
 
+
+  // 1. bodyの末尾に↓のinput/labelを追加（HTMLで既に追加してもOK）
+if(!document.getElementById("haptic-switch")){
+  const sw = document.createElement("input");
+  sw.type = "checkbox";
+  sw.id = "haptic-switch";
+  sw.setAttribute("switch","");
+  document.body.appendChild(sw);
+  const label = document.createElement("label");
+  label.setAttribute("for","haptic-switch");
+  document.body.appendChild(label);
+}
+
+// 2. ハプティック関数
+function fireHaptic11(interval=100) {
+  const sw = document.getElementById("haptic-switch");
+  const label = document.querySelector("label[for='haptic-switch']");
+  if(!sw||!label) return;
+  for(let i=0;i<11;i++){
+    setTimeout(()=>{
+      sw.checked = !sw.checked;
+      label.click();
+    }, i*interval);
+  }
+}
+
+// 3. 全ボタンに自動で追加
+document.querySelectorAll("button").forEach(btn => {
+  btn.addEventListener("touchstart", ()=>fireHaptic11());
+  btn.addEventListener("mousedown", ()=>fireHaptic11());
+});
+
+// 4. 指定audio再生時にも
+[
+  "sound-changeL","sound-changeLL","sound-changeR","sound-macmac"
+].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el){
+    el.addEventListener("play", ()=>fireHaptic11());
+  }
+});
 
 </script>
 
