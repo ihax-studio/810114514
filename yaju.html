@@ -7,105 +7,151 @@
   <title>やじゅルシ・リアルタイム東コンパス</title>
   <style>
         body {
-      margin: 0;
-      background: #00a4ff;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+        margin: 0;
+        background: #00a4ff;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
+
     .compass-container {
-      width: 180px; height: 180px;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      touch-action: none;
-      user-select: none;
+        width: 180px;
+        height: 180px;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        touch-action: none;
+        user-select: none;
     }
 
     .compass-arrow {
-      width: 140px; height: 140px;
-      position: absolute;
-      top: 20px; left: 20px;
-      display: flex; justify-content: center; align-items: center;
-      transition: transform 0.5s cubic-bezier(.7,0,.3,1);
-      z-index: 2;
+        width: 140px;
+        height: 140px;
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: transform 0.5s cubic-bezier(.7, 0, .3, 1);
+        z-index: 2;
     }
-    .arrow-body, .arrow-diag {
-      position: absolute;
-      background: #fff;
-      border-radius: 9999px;
-      opacity: 1;
-      transition: opacity 0.28s, width 0.4s cubic-bezier(.7,0,.3,1), transform 0.8s cubic-bezier(.7,0,.3,1);
-    }
-    .arrow-body {
-      width: 336px; height: 7px;
-      left: -80px; top: 71px;
-      z-index: 2;
-      transform: rotate(0deg);
-    }
+
+    .arrow-body,
     .arrow-diag {
-      width: 200px; height: 7px;
-      left: 88px;
-      background: #fff;
-      z-index: 1;
+        position: absolute;
+        background: #fff;
+        border-radius: 9999px;
+        opacity: 1;
+        transition: opacity 0.28s, width 0.4s cubic-bezier(.7, 0, .3, 1), transform 0.8s cubic-bezier(.7, 0, .3, 1);
     }
-    .arrow-diag.left  { top:3px;  transform: rotate(45deg);}
-    .arrow-diag.right { top: 140px;  transform: rotate(-45deg);}
 
-.compass-circle {
-  top: -80px;
-      z-index: 3;
-  position: absolute;
-  width: 332px; height: 332px;
-  pointer-events: auto;      /* ← タップ有効にするならauto */
-  z-index: 3;
-  transition: transform 0.2s ease;
-}
-.compass-circle.active {
-  transform: scale(1.5);
-}
-.compass-circle circle {
-  fill: none;
-  stroke: #fff;
-  stroke-width: 7;
-  stroke-dasharray: 1018;     /* 2π×162 */
-  stroke-dashoffset: 1018;
-  opacity: 0;
-  transition:
-    stroke-dashoffset 0.92s cubic-bezier(.7,0,.3,1),
-    opacity 0.22s 0.14s;
-}
+    .arrow-body {
+        width: 336px;
+        height: 7px;
+        left: -80px;
+        top: 71px;
+        z-index: 2;
+        transform: rotate(0deg);
+    }
 
+    .arrow-diag {
+        width: 200px;
+        height: 7px;
+        left: 88px;
+        background: #fff;
+        z-index: 1;
+    }
+
+    .arrow-diag.left {
+        top: 3px;
+        transform: rotate(45deg);
+    }
+
+    .arrow-diag.right {
+        top: 140px;
+        transform: rotate(-45deg);
+    }
+
+    .compass-circle {
+        top: -80px;
+        z-index: 3;
+        position: absolute;
+        width: 332px;
+        height: 332px;
+        pointer-events: auto;
+        /* ← タップ有効にするならauto */
+        z-index: 3;
+        transition: transform 0.3s ease;
+    }
+
+    .compass-circle.active {
+        transform: scale(1.33);
+    }
+
+    .compass-circle circle {
+        fill: none;
+        stroke: #fff;
+        stroke-width: 7;
+        stroke-dasharray: 1018;
+        stroke-dashoffset: 1018;
+        /* 0%から */
+        opacity: 0;
+        transition:
+            stroke-dashoffset 0.92s cubic-bezier(.7, 0, .3, 1),
+            opacity 0.22s 0.14s;
+    }
 
     /* 丸状態 */
     .circle-mode .arrow-body,
-    .circle-mode .arrow-diag { opacity: 0; width: 0; }
-    .circle-mode .compass-circle circle {
-      stroke-dashoffset: 0;
-      opacity: 1;
-      transition:
-        stroke-dashoffset 0.92s cubic-bezier(.7,0,.3,1),
-        opacity 0.2s 0.14s;
+    .circle-mode .arrow-diag {
+        opacity: 0;
+        width: 0;
+        transform: scale(0.45);
+        /* ←縮小強化 */
+        transition:
+            opacity 0.3s,
+            width 0.4s cubic-bezier(.7, 0, .3, 1),
+            transform 0.5s cubic-bezier(.7, 0, .3, 1);
     }
+
+    .circle-mode .compass-circle circle {
+        stroke-dashoffset: 0;
+        opacity: 1;
+        transition:
+            stroke-dashoffset 0.92s cubic-bezier(.7, 0, .3, 1),
+            opacity 0.2s 0.14s;
+    }
+
     /* 矢印状態 */
     .arrow-mode .compass-circle circle {
-      stroke-dashoffset: 350;
-      opacity: 0;
-      transition:
-        opacity 0.16s,
-        stroke-dashoffset 0.0s;
+        stroke-dashoffset: 1018;
+        /* ←ここ重要！必ず0%から */
+        opacity: 0;
+        transition:
+            opacity 0.22s,
+            stroke-dashoffset 0.01s;
     }
+
     /* フェードインアニメ */
     .fade {
-      animation: fadein 0.24s;
+        animation: fadein 0.3s;
     }
+
     @keyframes fadein {
-      from { opacity: 0; transform: scale(0.6);}
-      to   { opacity: 1; transform: scale(1);}
+        from {
+            opacity: 0;
+            transform: scale(0.6);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
     }
   </style>
 </head>
@@ -233,55 +279,59 @@ function switchMode(east) {
   // メイン分岐処理
   // --------------------------
   (function main() {
-    const info = getDeviceInfo();
+  const info = getDeviceInfo();
 
-    // ---- iPadOS18以前 or Mac or Windows ----
-    if (
-      (info.isiPad && info.iPadOSver > 0 && info.iPadOSver <= 18) ||
-      info.isMac || info.isWindows
-    ) {
-      // 最初から丸のみ表示・アニメはfadeで残す
+  // ---- iPadOS18以前 or Mac or Windows ----
+  if (
+    (info.isiPad && info.iPadOSver > 0 && info.iPadOSver <= 18) ||
+    info.isMac || info.isWindows
+  ) {
+    // まずarrow-mode＆円非表示から開始
+    cmp.classList.remove('circle-mode');
+    cmp.classList.add('arrow-mode');
+    // 0.1秒後にcircle-modeを追加して円のアニメ発動
+    setTimeout(() => {
       cmp.classList.remove('arrow-mode');
       cmp.classList.add('circle-mode', 'fade');
-      // センサー登録しない。何も切り替えない
-      return;
-    }
+    }, 100);
+    // センサー登録しない。何も切り替えない
+    return;
+  }
 
-    // ---- iPhone全部 or iPadOS26以降 ----
-    if (
-      info.isiPhone ||
-      (info.isiPad && info.iPadOSver >= 26)
-    ) {
-      if (window.DeviceOrientationEvent) {
-        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-          // iOS13+はユーザー許可が必要
-          document.body.addEventListener('click', async function askPerm() {
-            try {
-              const p = await DeviceOrientationEvent.requestPermission();
-              if (p === 'granted') {
-                window.addEventListener('deviceorientation', handleOrientation, true);
-                document.body.removeEventListener('click', askPerm);
-                startIntervalRotate();
-              }
-            } catch (e) {}
-          });
-        } else {
-          window.addEventListener('deviceorientation', handleOrientation, true);
-          startIntervalRotate();
-        }
+  // ---- iPhone全部 or iPadOS26以降 ----
+  if (
+    info.isiPhone ||
+    (info.isiPad && info.iPadOSver >= 26)
+  ) {
+    if (window.DeviceOrientationEvent) {
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // iOS13+はユーザー許可が必要
+        document.body.addEventListener('click', async function askPerm() {
+          try {
+            const p = await DeviceOrientationEvent.requestPermission();
+            if (p === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation, true);
+              document.body.removeEventListener('click', askPerm);
+              startIntervalRotate();
+            }
+          } catch (e) {}
+        });
       } else {
-        // センサー自体未対応→丸固定
-        cmp.classList.remove('arrow-mode');
-        cmp.classList.add('circle-mode', 'fade');
+        window.addEventListener('deviceorientation', handleOrientation, true);
+        startIntervalRotate();
       }
-      return;
+    } else {
+      // センサー自体未対応→丸固定
+      cmp.classList.remove('arrow-mode');
+      cmp.classList.add('circle-mode', 'fade');
     }
+    return;
+  }
 
-    // ---- それ以外（Androidタブなど謎端末） ----
-    cmp.classList.remove('arrow-mode');
-    cmp.classList.add('circle-mode', 'fade');
-  })();
-  
+  // ---- それ以外（Androidタブなど謎端末） ----
+  cmp.classList.remove('arrow-mode');
+  cmp.classList.add('circle-mode', 'fade');
+})();
 
 </script>
 
