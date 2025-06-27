@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -56,25 +55,32 @@
     }
     .arrow-diag.left  { top:3px;  transform: rotate(45deg);}
     .arrow-diag.right { top: 140px;  transform: rotate(-45deg);}
-    /* 円 */
-    .compass-circle {
-      position: absolute;
-      left: 16px; top: 16px;
-      width: 108px; height: 108px;
-      pointer-events: none;
+
+.compass-circle {
+  top: -80px;
       z-index: 3;
-    }
-    .compass-circle circle {
-      fill: none;
-      stroke: #fff;
-      stroke-width: 7;
-      stroke-dasharray: 350;
-      stroke-dashoffset: 350;
-      opacity: 0;
-      transition:
-        stroke-dashoffset 0.92s cubic-bezier(.7,0,.3,1),
-        opacity 0.22s 0.14s;
-    }
+  position: absolute;
+  width: 332px; height: 332px;
+  pointer-events: auto;      /* ← タップ有効にするならauto */
+  z-index: 3;
+  transition: transform 0.2s ease;
+}
+.compass-circle.active {
+  transform: scale(1.5);
+}
+.compass-circle circle {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 7;
+  stroke-dasharray: 1018;     /* 2π×162 */
+  stroke-dashoffset: 1018;
+  opacity: 0;
+  transition:
+    stroke-dashoffset 0.92s cubic-bezier(.7,0,.3,1),
+    opacity 0.22s 0.14s;
+}
+
+
     /* 丸状態 */
     .circle-mode .arrow-body,
     .circle-mode .arrow-diag { opacity: 0; width: 0; }
@@ -111,12 +117,23 @@
       <div class="arrow-body"></div>
       <div class="arrow-diag left"></div>
       <div class="arrow-diag right"></div>
-      <svg class="compass-circle" width="108" height="108">
-        <circle cx="54" cy="54" r="52"/>
-      </svg>
+<svg class="compass-circle" width="336" height="336" viewBox="0 0 336 336">
+  <circle cx="168" cy="168" r="162"/>
+</svg>
     </div>
   </div>
 <script>
+    const compassCircle = document.querySelector('.compass-circle');
+compassCircle.addEventListener('pointerdown', () => {
+  compassCircle.classList.add('active');
+});
+compassCircle.addEventListener('pointerup', () => {
+  compassCircle.classList.remove('active');
+});
+compassCircle.addEventListener('pointerleave', () => {
+  compassCircle.classList.remove('active');
+});
+
   // --------------------------
   // 端末情報取得関数
   // --------------------------
@@ -265,6 +282,7 @@ function switchMode(east) {
     cmp.classList.add('circle-mode', 'fade');
   })();
   
+
 </script>
 
 </body>
