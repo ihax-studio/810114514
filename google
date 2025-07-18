@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Events - Yes, And Workshop</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+              background: url('bg.png') center/cover no-repeat;
+        }
+
+        .floating-orbs {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(10px);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .orb:nth-child(1) {
+            width: 60px;
+            height: 60px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .orb:nth-child(2) {
+            width: 100px;
+            height: 100px;
+            top: 60%;
+            right: 15%;
+            animation-delay: -2s;
+        }
+
+        .orb:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            bottom: 30%;
+            left: 20%;
+            animation-delay: -4s;
+        }
+
+        .orb:nth-child(4) {
+            width: 40px;
+            height: 40px;
+            top: 10%;
+            right: 30%;
+            animation-delay: -1s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .hero-content {
+            max-width: 800px;
+            padding: 0 20px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: slideUp 1s ease-out 0.5s forwards;
+           background: linear-gradient(45deg, #81b1ff, #619eff,#619eff, #ff708d, #ffb452, #00ff80,#FBBC05, #ff4aa5, #ff4aa5);
+
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: slideUp 1s ease-out 1s forwards;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #4285f4, #34a853);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            opacity: 0;
+            animation: slideUp 1s ease-out 1.5s forwards;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            background: linear-gradient(45deg, #3367d6, #2e8b57);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .event-details {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 50px 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            color: #333;
+        }
+
+        .event-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .event-title {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #1a1a2e;
+            font-weight: 700;
+        }
+
+        .event-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .event-meta {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(66, 133, 244, 0.1);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+        }
+
+        .meta-icon {
+            width: 20px;
+            height: 20px;
+            background: #4285f4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .section {
+            background: rgba(255,255,255,0.8);
+            padding: 30px;
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+        }
+
+        .section h3 {
+            color: #1a1a2e;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .section p, .section li {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .section ul {
+            padding-left: 20px;
+        }
+
+        .section li {
+            margin-bottom: 8px;
+        }
+
+        .instructor {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 40px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .instructor h3 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .instructor p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .timeline {
+            background: rgba(255,255,255,0.9);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(66, 133, 244, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid #4285f4;
+        }
+
+        .timeline-time {
+            font-weight: 700;
+            color: #4285f4;
+            min-width: 80px;
+        }
+
+        .timeline-content {
+            margin-left: 20px;
+        }
+
+        .sponsors {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .sponsor {
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .sponsor h4 {
+            color: #1a1a2e;
+            margin-bottom: 10px;
+        }
+
+        .register-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .register-button {
+            display: inline-block;
+            padding: 20px 50px;
+            background: linear-gradient(45deg, #4285f4, #34a853);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .register-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .event-title {
+                font-size: 1.8rem;
+            }
+            
+            .event-meta {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .sections {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="floating-orbs">
+            <div class="orb"></div>
+            <div class="orb"></div>
+            <div class="orb"></div>
+            <div class="orb"></div>
+        </div>
+        
+        <div class="hero-content">
+            <h1 class="logo">Google Events</h1>
+            <p class="tagline">Experience the future of connection and creativity</p>
+            <a href="#event-details" class="cta-button">Discover Events</a>
+        </div>
+    </div>
+
+    <div class="event-details" id="event-details">
+        <div class="event-header">
+            <h2 class="event-title">「Yes, And」で学ぶ即興演劇体験ワークショップ</h2>
+            <p class="event-subtitle">Building a Forward-Looking Mindset — An Improv Workshop for a 'Yes, And' Culture</p>
+            
+            <div class="event-meta">
+                <div class="meta-item">
+                    <div class="meta-icon">📅</div>
+                    <span>9月2日（火）</span>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-icon">🕕</div>
+                    <span>6:30 PM - 10:00 PM</span>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-icon">📍</div>
+                    <span>Google for Startups Campus Tokyo</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sections">
+            <div class="section">
+                <h3>🎭 イベント概要</h3>
+                <p>あなたは今、心から自分らしく人とつながれていますか？チームで、思いを遠慮なく伝え合えていますか？</p>
+                <br>
+                <p>台本も配役も決めずに、その場で物語を創造していく即興演劇（インプロ）。それは、相手を丸ごと受け入れる「Yes, And」の精神、瞬間のひらめき、そして失敗をも遊びに変えるマインドを育む、まさに内なる可能性を解き放つ機会です。</p>
+            </div>
+
+            <div class="section">
+                <h3>🎯 こんな方におすすめ</h3>
+                <ul>
+                    <li>チームに安心感や信頼関係を育てたい企業・団体</li>
+                    <li>社員の関係性改善に悩む人事などの担当者</li>
+                    <li>変化の多い今を前向きに生きたい方</li>
+                    <li>自分をもっと理解し、伝えられるようになりたい方</li>
+                    <li>自分を縛っていたものから自由になりたい方</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h3>✨ インプロがもたらす4つの変化</h3>
+                <ul>
+                    <li><strong>心理的安全性のある関係性</strong>：否定しない・否定されない空間</li>
+                    <li><strong>相互信頼と共創力</strong>：「合わせる」ではなく「響き合う」体験</li>
+                    <li><strong>柔軟な発想と創造性</strong>：正解のない問いから生まれる自由なアイデア</li>
+                    <li><strong>自己理解と自己受容</strong>：即興する自分にあらわれる「本当の自分」</li>
+                </ul>
+            </div>
+
+
+        <div class="instructor">
+            <h3>古新 舜（Shun Coney）</h3>
+            <p>映画監督 × ストーリーエバンジェリスト × 教育者</p>
+            <br>
+            <p>「Give Life to Your Story! ―物語を動かそう！―」をテーマに掲げ、映画と即興演劇（インプロ）、そして教育を融合させた活動を展開。厚生労働省推薦作品『いまダンスをするのは誰だ？』はロサンゼルスJFFLA最高賞を受賞。</p>
+        </div>
+
+        <div class="timeline">
+            <h3>📅 タイムテーブル</h3>
+            <div class="timeline-item">
+                <div class="timeline-time">6:00 PM</div>
+                <div class="timeline-content">受付開始（受付は18:45まで）</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">6:30 PM</div>
+                <div class="timeline-content">オープニング</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">6:45 PM</div>
+                <div class="timeline-content">ワークショップ：「人生もチームも未来志向に行動できる」</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">8:15 PM</div>
+                <div class="timeline-content">写真・軽食・ネットワーキング</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">9:45 PM</div>
+                <div class="timeline-content">クロージング</div>
+            </div>
+        </div>
+
+        <div class="sponsors">
+            <div class="sponsor">
+                <h4>主催</h4>
+                <p><strong>Google Events</strong><br>学生や若手社会人のキャリアデザインと成長を支援する、メンバー主導型のキャリアメンターコミュニティ</p>
+            </div>
+            <div class="sponsor">
+                <h4>会場協賛</h4>
+                <p><strong>Google for Startups</strong><br>より良い世界を目指して未来を切り開く、スタートアップの成長をサポート</p>
+            </div>
+            <div class="sponsor">
+                <h4>フード協賛</h4>
+                <p><strong>505 Tacos</strong><br>「LAスタイルのタコスを日本へ」をテーマにした本格派タコス専門店</p>
+            </div>
+        </div>
+
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Parallax effect for floating orbs
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const orbs = document.querySelectorAll('.orb');
+            
+            orbs.forEach((orb, index) => {
+                const speed = 0.5 + (index * 0.1);
+                orb.style.transform = `translateY(${scrolled * speed}px)`;
+            });
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe sections for animation
+        document.querySelectorAll('.section, .instructor, .timeline').forEach(section => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(30px)';
+            section.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>
