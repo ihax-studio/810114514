@@ -605,27 +605,6 @@
         const picker4 = new Picker(document.getElementById('picker-list-4'), shuffle([...symbols]), '⭐');
         let pickers = [picker1, picker2, picker3];
         
-        // --- Dark Mode and Settings Panel Logic ---
-        let hasBeenLightMode = !window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        mediaQuery.addEventListener('change', (e) => {
-            if (e.matches) { // Switched to Dark Mode
-                if (hasBeenLightMode) {
-                    settingsOverlay.classList.add('visible');
-                }
-            } else { // Switched to Light Mode
-                hasBeenLightMode = true;
-                settingsOverlay.classList.remove('visible');
-            }
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                settingsOverlay.classList.remove('visible');
-            }
-        });
-
         // --- Settings Event Listeners ---
         // --- Settings Event Listeners ---
         // Initialize slider fill
