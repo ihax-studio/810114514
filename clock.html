@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>パ・チンコ</title>
+    <title>Apple 新宿 アニメーション</title>
     <style>
         /* 基本設定 */
         :root {
@@ -12,7 +12,7 @@
         }
 
         body {
-                        font-weight: 600;
+            font-weight: 600;
             margin: 0;
             font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', -apple-system, BlinkMacSystem-Font, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f5f5f7;
@@ -64,7 +64,7 @@
         }
 
         .main-title h1 {
-                        transform: translateY(60px);
+            transform: translateY(60px);
             font-size: 3.5rem;
             font-weight: 700;
             /* 背景枠を削除し、読みやすいように白い文字と影に変更 */
@@ -173,7 +173,7 @@
                 padding: 20px 10px;
             }
             .animation-container {
-                aspect-ratio: 16 / 22; /* スマホでは少し縦長に */
+                aspect-ratio: 16 / 20; /* スマホでは少し縦長に */
                 margin-bottom: 30px;
             }
             .main-title h1 {
@@ -206,13 +206,12 @@
     <div class="bubble bubble-left">
         <img src="aaaaa.png" alt="アナログ時計のアイコン">
         <h2>お馴染みのデザイン</h2>
-
         <p class="red-text">やりますねぇ!!</p>
     </div>
 
     <div class="bubble bubble-right">
         <img src="AppIcon.png" alt="プロフィールアイコン" class="profile-icon">
-        <p style=font-size:1.5rem;>いや、見ろよ見ろよ!!</p>
+        <p style="font-size:1.5rem;">いや、見ろよ見ろよ!!</p>
         <p>
             見とけよ見とけよ〜!!
         </p>
@@ -220,5 +219,35 @@
 </div>
 <hr style="height: 2px; color: black;">
 <h3>他にも様々な魅力を体験シよう</h3>
+
+<script type="module">
+  import { haptic } from "https://esm.sh/ios-haptics";
+
+  // ページ上のすべてのdiv要素を取得
+  const allDivs = document.querySelectorAll('div');
+
+  // 各div要素にクリックイベントリスナーを追加
+  allDivs.forEach(div => {
+    div.addEventListener('click', () => {
+      // hapticのパターンを実行する関数
+      const playHapticPattern = () => {
+        // 1. 最初に1回再生
+        haptic.error();
+
+        // 2. 1秒後 (1000ms) に、爆速6回を再生
+        const baseDelay = 1000;
+        const rapidDelay = 50; // 連続再生の間隔 (ミリ秒)
+        
+        for (let i = 0; i < 6; i++) {
+          setTimeout(() => haptic.error(), baseDelay + i * rapidDelay);
+        }
+      };
+      
+      // 関数を実行
+      playHapticPattern();
+    });
+  });
+</script>
+
 </body>
 </html>
