@@ -5,49 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Apple 新宿 アニメーション</title>
     <style>
-        /* 基本設定 */
         :root {
-            --title-appear-delay: 0.5s;  /* ページ拡大後にタイトル表示 */
-            --bubble-appear-delay: 0.8s; /* ページ拡大後にバブル表示 */
+            --title-appear-delay: 0.5s;
+            --bubble-appear-delay: 0.8s;
+            /* 色の変数を定義 */
+            --blue-color: #007aff;
+            --white-color: #ffffff;
+            --dark-text-color: #1d1d1f;
         }
 
-        /* ページ操作のロックと読み込みアニメーション */
         html {
-            overscroll-behavior-x: contain; /* 左右スワイプでのナビゲーションを無効化 */
+            overscroll-behavior-x: contain;
         }
 
         body {
             font-weight: 600;
             margin: 0;
-            font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', -apple-system, BlinkMacSystem-Font, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f5f5f7;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 40px 20px;
             box-sizing: border-box;
-            /* ページ操作をロック */
-            user-select: none; /* テキスト選択を無効化 */
+            user-select: none;
             -webkit-user-select: none;
-            -webkit-touch-callout: none; /* iOSでの長押しメニューを無効化 */
-            /* 新しいページ読み込みアニメーション */
+            -webkit-touch-callout: none;
             transform: scale(0.8);
             opacity: 0;
             animation: pageZoomIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
 
-        /* 画像のポインターイベントを無効化して保存を防ぐ */
         img {
             pointer-events: none;
         }
         
-        /* インタラクション用の画像は有効化 */
         .interactive-image {
             pointer-events: auto;
             cursor: pointer;
         }
 
-        /* 背景アニメーション用のコンテナ */
         .animation-container {
             position: relative;
             width: 100%;
@@ -55,7 +52,8 @@
             border-radius: 18px;
             overflow: hidden;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            aspect-ratio: 16 / 8;
+            /* 比率を16:23に変更 */
+            aspect-ratio: 16 / 23;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -113,36 +111,32 @@
             flex: 1;
             box-sizing: border-box;
             min-width: 280px;
+            /* 傾きによる変化を滑らかにするためのtransition */
+            transition: background-color 0.2s linear, color 0.2s linear, border-radius 0.2s linear;
         }
         
         .bubble-left {
-            background-color: #ffffff;
-            color: #1d1d1f;
+            background-color: var(--white-color);
+            color: var(--dark-text-color);
         }
         .bubble-left img {
             width: 70px;
             margin-bottom: 15px;
         }
-        .bubble-left h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin: 0 0 10px 0;
-        }
-        .bubble-left p {
-            font-size: 1.1rem;
-            font-weight: 600;
-            line-height: 1.6;
-            margin: 0;
-        }
-        .bubble-left p.red-text {
-             font-weight: 600;
-             color: #0084ff;
+        
+        /* 時刻表示用のスタイル */
+        #time-display-container {
+            font-size: 3rem;
+            font-weight: 700;
+            text-align: center;
+            padding: 20px 0;
         }
 
         .bubble-right {
-            background-color: #007aff;
-            color: white;
+            background-color: var(--blue-color);
+            color: var(--white-color);
             animation-delay: calc(var(--bubble-appear-delay) + 0.15s);
+            cursor: pointer;
         }
         .bubble-right .profile-icon {
             width: 60px;
@@ -154,19 +148,12 @@
         .bubble-right p {
             font-size: 1.4rem;
             font-weight: 600;
-            color: #ffffff;
             margin: 0 0 8px 0;
             display: flex;
             align-items: center;
+            pointer-events: none; /* テキストをタップしても親divのイベントが発火 */
         }
-        .bubble-right .small-icon {
-            width: 16px;
-            height: 16px;
-            margin-right: 8px;
-            filter: invert(41%) sepia(83%) saturate(3015%) hue-rotate(338deg) brightness(100%) contrast(105%);
-        }
-
-        /* --- 隠し機能用オーバーレイ --- */
+        
         #secret-overlay {
             position: fixed;
             top: 0;
@@ -179,12 +166,12 @@
             align-items: center;
             z-index: 10000;
             opacity: 0;
-            pointer-events: none; /* 通常時は非表示 */
+            pointer-events: none;
             transition: opacity 0.3s ease-in-out;
         }
         #secret-overlay.visible {
             opacity: 1;
-            pointer-events: auto; /* 表示されたら操作可能に */
+            pointer-events: auto;
         }
         #secret-overlay img {
             max-width: 90%;
@@ -192,7 +179,6 @@
             pointer-events: none;
         }
         
-        /* --- アニメーションの定義 --- */
         @keyframes pageZoomIn {
             to {
                 transform: scale(1);
@@ -200,19 +186,12 @@
             }
         }
         
-        /* タップ時の拡大アニメーション用クラス */
         .apply-tap-animation {
             animation: tap-pop 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        .apply-image-tap-animation {
-             animation: tap-pop-image 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         
         @keyframes tap-pop {
             50% { transform: scale(1.1); }
-        }
-        @keyframes tap-pop-image {
-            50% { transform: scale(1.2); }
         }
 
         @keyframes zoomOut {
@@ -231,13 +210,12 @@
             }
         }
 
-        /* スマートフォン向けの調整 */
         @media (max-width: 768px) {
             body {
                 padding: 20px 10px;
             }
             .animation-container {
-                aspect-ratio: 16 / 10;
+                aspect-ratio: 16 / 23;
                 margin-bottom: 30px;
             }
             .main-title h1 {
@@ -267,16 +245,17 @@
 <div class="bubbles-container">
     <div class="bubble bubble-left">
         <img id="interactive-image-1" src="aaaaa.png" alt="アナログ時計のアイコン" class="interactive-image">
-        <h2>お馴染みのデザイン</h2>
-        <p class="red-text">やりますねぇ!!</p>
+        <div id="initial-content-left">
+            <h2>お馴染みのデザイン</h2>
+            <p style="color: #0084ff;">やりますねぇ!!</p>
+        </div>
+        <div id="time-display-container"></div>
     </div>
 
-    <div class="bubble bubble-right">
-        <img id="secret-trigger-image" src="AppIcon.png" alt="プロフィールアイコン" class="profile-icon interactive-image">
+    <div class="bubble bubble-right" id="secret-trigger-div">
+        <img src="AppIcon.png" alt="プロフィールアイコン" class="profile-icon">
         <p style="font-size:1.5rem;">いや、見ろよ見ろよ!!</p>
-        <p>
-            見とけよ見とけよ〜!!
-        </p>
+        <p>見とけよ見とけよ〜!!</p>
     </div>
 </div>
 <hr style="height: 2px; color: black;">
@@ -291,19 +270,20 @@
 <script type="module">
   import { haptic } from "https://esm.sh/ios-haptics";
   
-  // DOMが読み込まれたら実行
   document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 要素を取得 ---
     const allDivs = document.querySelectorAll('div');
+    const bubbleLeft = document.querySelector('.bubble-left');
+    const bubbleRight = document.querySelector('.bubble-right');
     const interactiveImage1 = document.getElementById('interactive-image-1');
-    const secretTriggerImage = document.getElementById('secret-trigger-image');
+    const initialContentLeft = document.getElementById('initial-content-left');
+    const timeDisplayContainer = document.getElementById('time-display-container');
+    const secretTriggerDiv = document.getElementById('secret-trigger-div');
     const secretOverlay = document.getElementById('secret-overlay');
     const macSound = document.getElementById('mac-sound');
 
-    // --- 触覚フィードバック（Haptic）のパターン定義 ---
     const playHapticPattern = () => {
-      haptic.error(); // 1回再生
+      haptic.error();
       const baseDelay = 1000;
       const rapidDelay = 50;
       for (let i = 0; i < 6; i++) {
@@ -311,50 +291,111 @@
       }
     };
     
-    // --- ページ操作のロック ---
     document.addEventListener('contextmenu', event => event.preventDefault());
 
-    // --- イベントリスナーを設定 ---
-
-    // 1. 全てのDIV要素へのイベント
     allDivs.forEach(div => {
       div.addEventListener('click', (event) => {
-        // Hapticを再生
         playHapticPattern();
-
-        // アニメーションクラスを付与
         div.classList.add('apply-tap-animation');
-        
-        // アニメーション完了後にクラスを削除
         setTimeout(() => {
           div.classList.remove('apply-tap-animation');
         }, 300);
       });
     });
     
-    // 2. 左の画像へのイベント
+    // アナログ時計画像クリックで時刻表示
     interactiveImage1.addEventListener('click', (event) => {
         event.stopPropagation(); // 親divのイベント発火を防ぐ
-        interactiveImage1.classList.add('apply-image-tap-animation');
-        setTimeout(() => {
-            interactiveImage1.classList.remove('apply-image-tap-animation');
-        }, 400);
+        
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        // 初期コンテンツを隠し、時刻を表示
+        initialContentLeft.style.display = 'none';
+        timeDisplayContainer.textContent = `${hours}:${minutes}`;
     });
 
-    // 3. 右の画像（隠し機能トリガー）へのイベント
-    secretTriggerImage.addEventListener('click', (event) => {
-        event.stopPropagation(); // 親divのイベント発火を防ぐ
+    // 青いボックス全体クリックで隠し機能作動
+    secretTriggerDiv.addEventListener('click', (event) => {
+        // ここではstopPropagationは不要
         secretOverlay.classList.add('visible');
         if(macSound.paused) {
             macSound.play();
         }
     });
 
-    // 4. オーバーレイ表示中のイベント
     secretOverlay.addEventListener('click', () => {
-        // オーバーレイ表示中もHapticは有効
         playHapticPattern();
     });
+    
+    // --- デバイス傾き検知機能 ---
+    let animationFrameId = null;
+
+    const handleOrientation = (event) => {
+        // gamma: -90(左) to 90(右)
+        const gamma = event.gamma;
+        
+        if (gamma === null) return;
+
+        // 描画処理が重複しないようにする
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+        }
+
+        animationFrameId = requestAnimationFrame(() => {
+            // 傾きの進行度を計算 (0:垂直 -> 1:水平)
+            const progress = Math.min(Math.abs(gamma) / 90, 1);
+
+            // 1. 色の補間 (RGB)
+            // 白(255,255,255) <-> 青(0,122,255)
+            // テキスト: 黒(29,29,31) <-> 白(255,255,255)
+            const whiteToBlue_R = 255 - 255 * progress;
+            const whiteToBlue_G = 255 - (255 - 122) * progress;
+            const whiteToBlue_B = 255;
+            
+            const blueToWhite_R = 0 + 255 * progress;
+            const blueToWhite_G = 122 + (255 - 122) * progress;
+            const blueToWhite_B = 255;
+
+            const darkToWhite_R = 29 + (255 - 29) * progress;
+            const darkToWhite_G = 29 + (255 - 29) * progress;
+            const darkToWhite_B = 31 + (255 - 31) * progress;
+
+            const whiteToDark_R = 255 - (255 - 29) * progress;
+            const whiteToDark_G = 255 - (255 - 29) * progress;
+            const whiteToDark_B = 255 - (255 - 31) * progress;
+
+            // 2. 角丸(border-radius)の補間 (24px -> 8px)
+            const newBorderRadius = 24 - 16 * progress;
+
+            // 3. スタイルを適用
+            bubbleLeft.style.backgroundColor = `rgb(${whiteToBlue_R}, ${whiteToBlue_G}, ${whiteToBlue_B})`;
+            bubbleLeft.style.color = `rgb(${darkToWhite_R}, ${darkToWhite_G}, ${darkToWhite_B})`;
+            
+            bubbleRight.style.backgroundColor = `rgb(${blueToWhite_R}, ${blueToWhite_G}, ${blueToWhite_B})`;
+            bubbleRight.style.color = `rgb(${whiteToDark_R}, ${whiteToDark_G}, ${whiteToDark_B})`;
+
+            bubbleLeft.style.borderRadius = `${newBorderRadius}px`;
+            bubbleRight.style.borderRadius = `${newBorderRadius}px`;
+        });
+    };
+    
+    // ジャイロスコープへのアクセス許可を試みる（iOS 13+で必要）
+    if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // ユーザーインタラクション（最初のタップなど）をトリガーにするのが理想的
+        // ここではシンプルにページ読み込み時に試みる
+        DeviceOrientationEvent.requestPermission()
+            .then(permissionState => {
+                if (permissionState === 'granted') {
+                    window.addEventListener('deviceorientation', handleOrientation);
+                }
+            })
+            .catch(console.error);
+    } else {
+        // requestPermissionがない、またはAndroidデバイスの場合
+        window.addEventListener('deviceorientation', handleOrientation);
+    }
   });
 </script>
 
