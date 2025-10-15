@@ -33,6 +33,13 @@
             transform: scale(0.8);
             opacity: 0;
             animation: pageZoomIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            /* ダークモード時の回転を滑らかにする */
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        /* ダークモード時にページを180度回転 */
+        body.dark-mode-active {
+            transform: scale(1) rotate(180deg);
         }
 
         img {
@@ -46,7 +53,7 @@
             border-radius: 18px;
             overflow: hidden;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            aspect-ratio: 16 / 10;
+            aspect-ratio: 16 / 23;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -91,6 +98,8 @@
             gap: 25px;
             width: 100%;
             max-width: 1000px;
+            /* ダークモード時の3D傾き効果のため */
+            perspective: 1000px;
         }
 
         .bubble {
@@ -98,17 +107,17 @@
             border-radius: 24px;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(0); /* 初期値を変更 */
             animation: slideUpFadeIn 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
             animation-delay: var(--bubble-appear-delay);
             flex: 1;
             box-sizing: border-box;
             min-width: 280px;
-            transition: background-color 0.2s linear, color 0.2s linear, border-radius 0.2s linear;
-            cursor: default; /* デフォルトのカーソル */
+            /* 色、角丸、傾きの変化を滑らかにする */
+            transition: background-color 0.2s linear, color 0.2s linear, border-radius 0.2s linear, transform 0.1s linear;
+            cursor: default;
         }
         
-        /* クリック可能なDIVのみカーソルを変更 */
         #time-trigger-div, #secret-trigger-div {
             cursor: pointer;
         }
@@ -145,22 +154,21 @@
         
         /* --- 隠し機能用オーバーレイ --- */
 
-        /* ClickAfter (非表示にできない) */
+        /* ClickAfter (一瞬で表示) */
         #secret-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            /* 背景色を透過させることでフェードイン効果を強調 */
             background-color: #000;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 99999; /* 最上位 */
+            z-index: 99999;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.4s ease-in-out; /* フェードを少し滑らかに */
+            /* transitionを削除して一瞬で表示 */
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
@@ -169,16 +177,14 @@
             opacity: 1;
             pointer-events: auto;
         }
-        /* 画像を画面全体に引き伸ばす */
         #secret-overlay img {
             width: 100%;
             height: 100%;
-            /* アスペクト比を保ちつつ、コンテナを完全に覆う */
             object-fit: cover;
             pointer-events: none;
         }
 
-        /* Time Display (タップで非表示にできる) */
+        /* Time Display (フェード表示) */
         #time-overlay {
             position: fixed;
             top: 0;
@@ -203,13 +209,12 @@
         }
         #time-display {
             font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-            font-weight: 100; /* 最も細いウェイト */
+            font-weight: 100;
             font-size: 8rem;
             color: white;
             text-shadow: 0 2px 15px rgba(0,0,0,0.5);
         }
 
-        /* --- アニメーションの定義 --- */
         @keyframes pageZoomIn {
             to {
                 transform: scale(1);
@@ -222,7 +227,7 @@
         }
         
         @keyframes tap-pop {
-            50% { transform: scale(1.05); } /* 少し控えめに変更 */
+            50% { transform: scale(1.05); }
         }
 
         @keyframes zoomOut {
@@ -232,18 +237,18 @@
 
         @keyframes slideUpFadeIn {
             from {
-                transform: translateY(20px);
                 opacity: 0;
+                transform: translateY(20px);
             }
             to {
-                transform: translateY(0);
                 opacity: 1;
+                transform: translateY(0);
             }
         }
 
         @media (max-width: 768px) {
             body { padding: 20px 10px; }
-            .animation-container { aspect-ratio: 16 / 22; margin-bottom: 30px; }
+            .animation-container { aspect-ratio: 16 / 23; margin-bottom: 30px; }
             .main-title h1 { font-size: 2.5rem; }
             .bubbles-container { flex-direction: column; gap: 20px; align-items: center; }
             .bubble { width: 100%; max-width: 400px; }
@@ -285,13 +290,12 @@
 
 <audio id="mac-sound" src="mac.wav" loop></audio>
 
-
 <script type="module">
   import { haptic } from "https://esm.sh/ios-haptics";
   
   document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 要素を取得 ---
+    const body = document.body;
     const allDivs = document.querySelectorAll('div:not(#secret-overlay):not(#time-overlay):not(#time-display)');
     const bubbleLeft = document.querySelector('.bubble-left');
     const bubbleRight = document.querySelector('.bubble-right');
@@ -302,7 +306,6 @@
     const timeDisplay = document.getElementById('time-display');
     const macSound = document.getElementById('mac-sound');
     
-    // --- 触覚フィードバックのパターン定義 ---
     const playHapticPattern = () => {
       haptic.error();
       const baseDelay = 1000;
@@ -314,12 +317,10 @@
     
     document.addEventListener('contextmenu', event => event.preventDefault());
 
-    // --- 汎用DIVクリックイベント ---
     allDivs.forEach(div => {
       div.addEventListener('click', () => {
-        requestOrientationPermission(); // 最初のタップで傾きセンサーの許可を求める
+        requestOrientationPermission();
         playHapticPattern();
-        // 既にアニメーション中の場合は何もしない
         if (!div.classList.contains('apply-tap-animation')) {
             div.classList.add('apply-tap-animation');
             setTimeout(() => {
@@ -329,68 +330,74 @@
       });
     });
     
-    // --- 隠し機能のトリガー ---
-
-    // 1. 時刻表示オーバーレイ
     timeTriggerDiv.addEventListener('click', (event) => {
-        event.stopPropagation(); // 親のイベント(汎用haptic)の発火を防ぐ
-        
+        event.stopPropagation();
         const now = new Date();
         const hours = now.getHours();
         const minutes = String(now.getMinutes()).padStart(2, '0');
-        
         timeDisplay.textContent = `${hours}:${minutes}`;
         timeOverlay.classList.add('visible');
     });
 
-    // 時刻オーバーレイをタップして閉じる
     timeOverlay.addEventListener('click', () => {
         timeOverlay.classList.remove('visible');
     });
 
-    // 2. ClickAfterオーバーレイ (閉じられない)
     secretTriggerDiv.addEventListener('click', (event) => {
-        event.stopPropagation(); // 親のイベント(汎用haptic)の発火を防ぐ
+        event.stopPropagation();
         secretOverlay.classList.add('visible');
         if(macSound.paused) {
             macSound.play().catch(e => console.error("Audio play failed:", e));
         }
     });
 
-    // --- デバイス傾き検知機能 ---
+    // --- ダークモード検知 & 傾き機能 ---
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    let isDarkMode = darkModeMediaQuery.matches;
     let animationFrameId = null;
     let permissionsRequested = false;
 
-    // 最初のユーザー操作で一度だけ呼び出される
+    const handleDarkModeChange = (matches) => {
+        isDarkMode = matches;
+        if (isDarkMode) {
+            body.classList.add('dark-mode-active');
+        } else {
+            body.classList.remove('dark-mode-active');
+            // ライトモードに戻ったら傾きをリセット
+            bubbleLeft.style.transform = '';
+            bubbleRight.style.transform = '';
+        }
+    };
+
+    darkModeMediaQuery.addEventListener('change', e => handleDarkModeChange(e.matches));
+    handleDarkModeChange(isDarkMode); // 初期状態をセット
+
     const requestOrientationPermission = () => {
         if (permissionsRequested) return;
         permissionsRequested = true;
-
         if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
             DeviceOrientationEvent.requestPermission()
-                .then(permissionState => {
-                    if (permissionState === 'granted') {
+                .then(state => {
+                    if (state === 'granted') {
                         window.addEventListener('deviceorientation', handleOrientation);
                     }
-                })
-                .catch(console.error);
+                }).catch(console.error);
         } else {
             window.addEventListener('deviceorientation', handleOrientation);
         }
     };
 
     const handleOrientation = (event) => {
-        const gamma = event.gamma;
-        if (gamma === null) return;
         if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
         animationFrameId = requestAnimationFrame(() => {
-            const progress = Math.min(Math.abs(gamma) / 90, 1);
-            const whiteToBlue_R = 255 - 255 * progress, whiteToBlue_G = 255 - 133 * progress;
-            const blueToWhite_R = 255 * progress, blueToWhite_G = 122 + 133 * progress;
-            const darkToWhite = 29 + 226 * progress;
-            const whiteToDark = 255 - 226 * progress;
-            const newBorderRadius = 24 - 16 * progress;
+            // 機能1: 色と角丸の変更 (常時)
+            const gammaProgress = Math.min(Math.abs(event.gamma) / 90, 1);
+            const whiteToBlue_R = 255 - 255 * gammaProgress, whiteToBlue_G = 255 - 133 * gammaProgress;
+            const blueToWhite_R = 255 * gammaProgress, blueToWhite_G = 122 + 133 * gammaProgress;
+            const darkToWhite = 29 + 226 * gammaProgress;
+            const whiteToDark = 255 - 226 * gammaProgress;
+            const newBorderRadius = 24 - 16 * gammaProgress;
 
             bubbleLeft.style.backgroundColor = `rgb(${whiteToBlue_R}, ${whiteToBlue_G}, 255)`;
             bubbleLeft.style.color = `rgb(${darkToWhite}, ${darkToWhite}, ${darkToWhite + 2})`;
@@ -398,6 +405,15 @@
             bubbleRight.style.color = `rgb(${whiteToDark}, ${whiteToDark}, ${whiteToDark})`;
             bubbleLeft.style.borderRadius = `${newBorderRadius}px`;
             bubbleRight.style.borderRadius = `${newBorderRadius}px`;
+
+            // 機能2: 要素の3D傾き (ダークモードのみ)
+            if (isDarkMode) {
+                const rotateX = (event.beta || 0) * -0.2; // 上下 tilt
+                const rotateY = (event.gamma || 0) * 0.2; // 左右 tilt
+                const transformStyle = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                bubbleLeft.style.transform = transformStyle;
+                bubbleRight.style.transform = transformStyle;
+            }
         });
     };
   });
