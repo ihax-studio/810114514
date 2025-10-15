@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>スロットマシンスピナー 🥨❤️‍🔥🫧</title>
     <style>
+        /* Your CSS remains unchanged */
         :root {
             --item-height: 50px;
             --wheel-radius: 80px;
@@ -428,7 +429,7 @@
         <div class="settings-panel">
             <h2>Liquid Glass</h2>
             <p>Flosed glass</p>
-    
+        
             <div class="setting-item">
                 <label for="match-rate-slider">揃う率 (Match Rate)</label>
                 <div class="slider-container">
@@ -436,7 +437,7 @@
                     <span id="match-rate-value">0%</span>
                 </div>
             </div>
-    
+        
             <div class="setting-item">
                 <label for="always-go-toggle">GOボタン常時ON</label>
                 <label class="switch">
@@ -444,7 +445,7 @@
                     <span class="slider round"></span>
                 </label>
             </div>
-    
+        
             <div class="setting-item">
                 <label for="absolute-value-toggle">絶対値ON (7揃い率UP)</label>
                 <label class="switch">
@@ -452,7 +453,7 @@
                     <span class="slider round"></span>
                 </label>
             </div>
-    
+        
             <div class="setting-item">
                 <label for="high-difficulty-toggle">高難易度 (4リール)</label>
                 <label class="switch">
@@ -473,8 +474,11 @@
         <span id="squeeze-meter-text">0%</span>
     </div>
 
-    <script>
+    <script type="module">
     document.addEventListener('DOMContentLoaded', () => {
+        // CHANGE 2: Imported the haptics library
+        import { haptic } from "https://esm.sh/ios-haptics";
+
         const symbols = ['🍒', '🔔', '🍇', '7️⃣', '🍉', '⭐', '🥨', '❤️‍🔥', '🫧'];
         const ANGLE_PER_ITEM = 360 / symbols.length;
         const WHEEL_RADIUS = 80;
@@ -606,8 +610,6 @@
         let pickers = [picker1, picker2, picker3];
         
         // --- Settings Event Listeners ---
-        // --- Settings Event Listeners ---
-        // Initialize slider fill
         matchRateSlider.style.setProperty('--value-percent', `${matchRateSlider.value}%`);
 
         let sliderTextAnimation = {
@@ -635,10 +637,8 @@
             const newRate = parseInt(e.target.value, 10);
             matchRate = newRate;
             
-            // Update slider bar fill
             e.target.style.setProperty('--value-percent', `${newRate}%`);
 
-            // Animate text
             sliderTextAnimation.target = newRate;
             if (!sliderTextAnimation.id) {
                 animateSliderText();
@@ -675,18 +675,10 @@
         });
 
         const symbolPatterns = {
-            '🥨': ['🥨'],
-            '❤️‍🔥': ['❤️‍🔥', '🔥', '🥵', '🌶️'],
-            '🫧': ['🫧', '💧', '💦'],
-            '🍒': ['🍒'],
-            '🔔': ['🔔'],
-            '🍇': ['🍇'],
-            '7️⃣': ['7️⃣', '💎', '💰'],
-            '🍉': ['🍉'],
-            '⭐': ['⭐', '✨', '💫']
+            '🥨': ['🥨'], '❤️‍🔥': ['❤️‍🔥', '🔥', '🥵', '🌶️'], '🫧': ['🫧', '💧', '💦'], '🍒': ['🍒'], '🔔': ['🔔'], '🍇': ['🍇'], '7️⃣': ['7️⃣', '💎', '💰'], '🍉': ['🍉'], '⭐': ['⭐', '✨', '💫']
         };
 
-        let backgroundLayout = 'circular'; // random-tile, circular, split-vertical
+        let backgroundLayout = 'circular';
         let winHistory = [];
 
         function layoutRandomTile(background, symbols) {
@@ -714,7 +706,7 @@
 
         function layoutCircular(background, symbols) {
             const rect = background.getBoundingClientRect();
-            const centerX = rect.width / 2 - 35; // Shift left to center on the picker
+            const centerX = rect.width / 2 - 35; 
             const centerY = rect.height / 2;
             const numCircles = 5;
             const emojisPerCircle = 16;
@@ -724,7 +716,7 @@
             for (let i = 1; i <= numCircles; i++) {
                 const radius = (maxRadius / numCircles) * i;
                 for (let j = 0; j < emojisPerCircle; j++) {
-                    const angle = (j / emojisPerCircle) * 2 * Math.PI + (i/2); // offset angle per circle
+                    const angle = (j / emojisPerCircle) * 2 * Math.PI + (i/2); 
                     const emojiSpan = document.createElement('span');
                     const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
                     emojiSpan.textContent = randomSymbol;
@@ -801,6 +793,8 @@
             if (settingsOverlay.classList.contains('visible') || e.target.closest('.arrow-button, .go-button-container, .settings-panel, #win-background, #squeeze-meter')) {
                 return;
             }
+            // CHANGE 3: Added light haptic for screen press
+            haptic.selection(); 
             document.body.style.transform = 'scale(0.95)';
             bodyScaledByPress = true;
         });
@@ -813,6 +807,9 @@
         });
 
         spinButton.addEventListener('click', async () => {
+            // CHANGE 4: Added medium haptic for spin button
+            haptic.medium();
+            
             document.getElementById('win-background').style.opacity = 0;
             spinButton.disabled = true;
             document.body.style.transform = 'scale(1.1)';
@@ -848,6 +845,8 @@
 
             const allSame = results.length > 0 && results.every(s => s === results[0]);
             if (allSame) {
+                // CHANGE 5: Added success haptic for a win
+                haptic.success(); 
                 const winningSymbol = results[0];
                 winHistory.unshift(winningSymbol);
                 if (winHistory.length > 2) winHistory.pop();
@@ -860,6 +859,23 @@
                 document.body.style.transform = 'scale(1)';
                 spinButton.disabled = false;
             }, 200);
+        });
+        
+        // CHANGE 6: Added event listener and powerful haptic for GO button
+        goButtonContainer.addEventListener('click', () => {
+            if (goButtonContainer.classList.contains('go-active') || goButtonContainer.classList.contains('always-active')) {
+                // This creates a strong, bursting vibration
+                const delay = 40;
+                for (let i = 0; i < 4; i++) {
+                    setTimeout(() => haptic.heavy(), i * delay);
+                }
+                // You can trigger a special spin or action here
+                console.log('GO button clicked!');
+                // For now, let's just make it trigger a regular spin
+                if (!spinButton.disabled) {
+                    spinButton.click();
+                }
+            }
         });
 
         const background = document.getElementById('win-background');
@@ -908,11 +924,13 @@
         const handleSqueezeMove = (e) => {
             if (!isSqueezing) return;
             const deltaX = e.clientX - squeezeStartX;
-            const newMatchRate = Math.max(0, Math.min(100, Math.floor(deltaX / 4))); // 1% per 4px
+            const newMatchRate = Math.max(0, Math.min(100, Math.floor(deltaX / 4))); 
             
             matchRate = newMatchRate;
             matchRateSlider.value = newMatchRate;
-            matchRateValue.textContent = `${newMatchRate}%`;
+            matchRateSlider.style.setProperty('--value-percent', `${newMatchRate}%`);
+            sliderTextAnimation.target = newMatchRate;
+            if (!sliderTextAnimation.id) { animateSliderText(); }
             
             squeezeMeterBar.style.width = `${newMatchRate}%`;
             
@@ -926,7 +944,7 @@
                     if (!squeezeTextAnimation.id) {
                         animateSqueezeText();
                     }
-                }, 100); // 0.1s delay
+                }, 100); 
             }
         };
 
@@ -947,7 +965,7 @@
 
         document.body.addEventListener('webkitmouseforcechanged', (e) => {
             if (e.webkitForce >= 2.0 && !isSqueezing) {
-                if (e.target.closest('input[type="range"]')) return; // Don't trigger on sliders
+                if (e.target.closest('input[type="range"]')) return;
                 
                 isSqueezing = true;
                 squeezeStartX = e.clientX;
