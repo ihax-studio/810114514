@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>スロットマシンスピナー 🥨❤️‍🔥🫧</title>
     <style>
-        /* Your CSS remains unchanged */
         :root {
             --item-height: 50px;
             --wheel-radius: 80px;
@@ -126,7 +125,7 @@
             justify-content: center;
             align-items: center;
         }
-        .go-button-container{position:relative;width:80px;height:80px;display:flex;justify-content:center;align-items:center;transition: transform 0.3s ease-out;}
+        .go-button-container{position:relative;width:80px;height:80px;display:flex;justify-content:center;align-items:center;transition: transform 0.3s ease-out; cursor: pointer;}
         
         @keyframes go-pulse {
             from { transform: scale(0.8); }
@@ -151,7 +150,6 @@
             align-items:center;
             font-size:26px;
             font-weight:700;
-            cursor:pointer;
             transition: all .3s ease;
             z-index:1;
         }
@@ -474,11 +472,8 @@
         <span id="squeeze-meter-text">0%</span>
     </div>
 
-    <script type="module">
+    <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // CHANGE 2: Imported the haptics library
-        import { haptic } from "https://esm.sh/ios-haptics";
-
         const symbols = ['🍒', '🔔', '🍇', '7️⃣', '🍉', '⭐', '🥨', '❤️‍🔥', '🫧'];
         const ANGLE_PER_ITEM = 360 / symbols.length;
         const WHEEL_RADIUS = 80;
@@ -610,6 +605,7 @@
         let pickers = [picker1, picker2, picker3];
         
         // --- Settings Event Listeners ---
+        // Initialize slider fill
         matchRateSlider.style.setProperty('--value-percent', `${matchRateSlider.value}%`);
 
         let sliderTextAnimation = {
@@ -637,8 +633,10 @@
             const newRate = parseInt(e.target.value, 10);
             matchRate = newRate;
             
+            // Update slider bar fill
             e.target.style.setProperty('--value-percent', `${newRate}%`);
 
+            // Animate text
             sliderTextAnimation.target = newRate;
             if (!sliderTextAnimation.id) {
                 animateSliderText();
@@ -675,10 +673,18 @@
         });
 
         const symbolPatterns = {
-            '🥨': ['🥨'], '❤️‍🔥': ['❤️‍🔥', '🔥', '🥵', '🌶️'], '🫧': ['🫧', '💧', '💦'], '🍒': ['🍒'], '🔔': ['🔔'], '🍇': ['🍇'], '7️⃣': ['7️⃣', '💎', '💰'], '🍉': ['🍉'], '⭐': ['⭐', '✨', '💫']
+            '🥨': ['🥨'],
+            '❤️‍🔥': ['❤️‍🔥', '🔥', '🥵', '🌶️'],
+            '🫧': ['🫧', '💧', '💦'],
+            '🍒': ['🍒'],
+            '🔔': ['🔔'],
+            '🍇': ['🍇'],
+            '7️⃣': ['7️⃣', '💎', '💰'],
+            '🍉': ['🍉'],
+            '⭐': ['⭐', '✨', '💫']
         };
 
-        let backgroundLayout = 'circular';
+        let backgroundLayout = 'circular'; // random-tile, circular, split-vertical
         let winHistory = [];
 
         function layoutRandomTile(background, symbols) {
@@ -706,7 +712,7 @@
 
         function layoutCircular(background, symbols) {
             const rect = background.getBoundingClientRect();
-            const centerX = rect.width / 2 - 35; 
+            const centerX = rect.width / 2 - 35; // Shift left to center on the picker
             const centerY = rect.height / 2;
             const numCircles = 5;
             const emojisPerCircle = 16;
@@ -716,7 +722,7 @@
             for (let i = 1; i <= numCircles; i++) {
                 const radius = (maxRadius / numCircles) * i;
                 for (let j = 0; j < emojisPerCircle; j++) {
-                    const angle = (j / emojisPerCircle) * 2 * Math.PI + (i/2); 
+                    const angle = (j / emojisPerCircle) * 2 * Math.PI + (i/2); // offset angle per circle
                     const emojiSpan = document.createElement('span');
                     const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
                     emojiSpan.textContent = randomSymbol;
@@ -793,8 +799,8 @@
             if (settingsOverlay.classList.contains('visible') || e.target.closest('.arrow-button, .go-button-container, .settings-panel, #win-background, #squeeze-meter')) {
                 return;
             }
-            // CHANGE 3: Added light haptic for screen press
-            haptic.selection(); 
+            // HAPTIC TRIGGER
+            if (window.triggerHapticBurst) window.triggerHapticBurst();
             document.body.style.transform = 'scale(0.95)';
             bodyScaledByPress = true;
         });
@@ -807,8 +813,8 @@
         });
 
         spinButton.addEventListener('click', async () => {
-            // CHANGE 4: Added medium haptic for spin button
-            haptic.medium();
+            // HAPTIC TRIGGER
+            if (window.triggerHapticBurst) window.triggerHapticBurst();
             
             document.getElementById('win-background').style.opacity = 0;
             spinButton.disabled = true;
@@ -845,8 +851,6 @@
 
             const allSame = results.length > 0 && results.every(s => s === results[0]);
             if (allSame) {
-                // CHANGE 5: Added success haptic for a win
-                haptic.success(); 
                 const winningSymbol = results[0];
                 winHistory.unshift(winningSymbol);
                 if (winHistory.length > 2) winHistory.pop();
@@ -860,21 +864,14 @@
                 spinButton.disabled = false;
             }, 200);
         });
-        
-        // CHANGE 6: Added event listener and powerful haptic for GO button
+
+        // GO Button Click Listener
         goButtonContainer.addEventListener('click', () => {
-            if (goButtonContainer.classList.contains('go-active') || goButtonContainer.classList.contains('always-active')) {
-                // This creates a strong, bursting vibration
-                const delay = 40;
-                for (let i = 0; i < 4; i++) {
-                    setTimeout(() => haptic.heavy(), i * delay);
-                }
-                // You can trigger a special spin or action here
-                console.log('GO button clicked!');
-                // For now, let's just make it trigger a regular spin
-                if (!spinButton.disabled) {
-                    spinButton.click();
-                }
+            // Only trigger if the spin button is not disabled (i.e., not already spinning)
+            if (!spinButton.disabled) {
+                // We just need to trigger a click on the main spin button.
+                // The haptic feedback will be handled by the spinButton's own click listener.
+                spinButton.click();
             }
         });
 
@@ -924,13 +921,12 @@
         const handleSqueezeMove = (e) => {
             if (!isSqueezing) return;
             const deltaX = e.clientX - squeezeStartX;
-            const newMatchRate = Math.max(0, Math.min(100, Math.floor(deltaX / 4))); 
+            const newMatchRate = Math.max(0, Math.min(100, Math.floor(deltaX / 4))); // 1% per 4px
             
             matchRate = newMatchRate;
             matchRateSlider.value = newMatchRate;
             matchRateSlider.style.setProperty('--value-percent', `${newMatchRate}%`);
-            sliderTextAnimation.target = newMatchRate;
-            if (!sliderTextAnimation.id) { animateSliderText(); }
+            matchRateValue.textContent = `${newMatchRate}%`; // Update settings panel value too
             
             squeezeMeterBar.style.width = `${newMatchRate}%`;
             
@@ -944,7 +940,7 @@
                     if (!squeezeTextAnimation.id) {
                         animateSqueezeText();
                     }
-                }, 100); 
+                }, 100); // 0.1s delay
             }
         };
 
@@ -965,7 +961,7 @@
 
         document.body.addEventListener('webkitmouseforcechanged', (e) => {
             if (e.webkitForce >= 2.0 && !isSqueezing) {
-                if (e.target.closest('input[type="range"]')) return;
+                if (e.target.closest('input[type="range"]')) return; // Don't trigger on sliders
                 
                 isSqueezing = true;
                 squeezeStartX = e.clientX;
@@ -979,6 +975,23 @@
             }
         });
     });
+    </script>
+    
+    <script type="module">
+        import { haptic } from "https://esm.sh/ios-haptics";
+
+        const triggerHapticBurst = () => {
+            // The library gracefully handles non-iOS devices, but we can check to be sure.
+            if (haptic) {
+                const delay = 30; // Milliseconds between each vibration
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => haptic('error'), i * delay);
+                }
+            }
+        };
+        
+        // Make the function available globally so the other script can call it
+        window.triggerHapticBurst = triggerHapticBurst;
     </script>
 </body>
 </html>
