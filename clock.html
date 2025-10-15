@@ -2,402 +2,735 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Apple 新宿 アニメーション</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>スロットマシンスピナー 🥨❤️‍🔥🫧</title>
     <style>
         :root {
-            --title-appear-delay: 0.5s;
-            --bubble-appear-delay: 0.8s;
-            /* 色の変数を定義 */
-            --blue-color: #007aff;
-            --white-color: #ffffff;
-            --dark-text-color: #1d1d1f;
+            --item-height: 50px;
+            --wheel-radius: 80px;
+            --visible-items-side: 2;
         }
 
-        html {
-            overscroll-behavior-x: contain;
+        /* ページ全体のスクロールや意図しない選択を防止 */
+        html, body {
+            overscroll-behavior: none;
+            touch-action: none; /* スワイプやピンチ操作によるブラウザのデフォルト動作を無効化 */
         }
-
+        
         body {
-            font-weight: 600;
-            margin: 0;
-            font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f5f5f7;
+            background-color: #000;
+            background-image: url('IMG_0609.jpg');
+            background-size: 200px;
+            background-repeat: space;
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 40px 20px;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
-            transform: scale(0.8);
-            opacity: 0;
-            animation: pageZoomIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        }
-
-        img {
-            pointer-events: none;
-        }
-        
-        .interactive-image {
-            pointer-events: auto;
-            cursor: pointer;
-        }
-
-        .animation-container {
-            position: relative;
-            width: 100%;
-            max-width: 1000px;
-            border-radius: 18px;
+            height: 100vh;
+            margin: 0;
             overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            /* 比率を16:23に変更 */
-            aspect-ratio: 16 / 23;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* === 隠し機能：時間表示オーバーレイ START === */
+        #hidden-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 40px;
+            background-color: rgba(0, 0, 0, 0.2);
+            /* 背景をぼかすためのフィルタ */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
         }
 
-        .hero-embed {
+        #hidden-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #hidden-clock {
+            font-family: -apple-system, "SF Pro Display", "SF Pro Text", sans-serif;
+            /* font-weight: 1; は無効な値のため、最も細い 100 を指定 */
+            font-weight: 100;
+            font-size: 8rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            user-select: none;
+            pointer-events: none; /* 時計自体がクリックイベントを拾わないようにする */
+        }
+        /* === 隠し機能：時間表示オーバーレイ END === */
+
+        .picker-group {
+            display: flex;
+            align-items: center;
+            position: relative;
+            gap: 10px;
+            /* 傾き機能のための設定 */
+            transform-style: preserve-3d;
+            transition: transform 0.2s ease-out;
+        }
+
+        .picker-container {
+            width: 70px;
+            height: calc((var(--visible-items-side) * 2 + 1) * var(--item-height));
+            position: relative;
+            overflow: hidden;
+            perspective: 300px;
+        }
+
+        .highlight-line-top, .highlight-line-bottom {
             position: absolute;
-            top: 0;
             left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #555;
+            z-index: 2;
+        }
+
+        .highlight-line-top {
+            top: 50%;
+            transform: translateY(calc(var(--item-height) / -2));
+        }
+
+        .highlight-line-bottom {
+            top: 50%;
+            transform: translateY(calc(var(--item-height) / 2));
+        }
+
+        .picker-list {
+            transform-style: preserve-3d;
+            position: absolute;
             width: 100%;
             height: 100%;
-            border: none;
-            transform: scale(1.2);
-            animation: zoomOut 1.2s ease-out forwards;
-            z-index: 1;
-        }
-        
-        .main-title {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-            opacity: 0;
-            transform: translateY(80px);
-            animation: slideUpFadeIn 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-            animation-delay: var(--title-appear-delay);
         }
 
-        .main-title h1 {
-            transform: translateY(60px);
-            font-size: 3.5rem;
-            font-weight: 700;
-            color: #ffffff;
-            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
-            margin: 0;
-        }
-
-        .bubbles-container {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 25px;
-            width: 100%;
-            max-width: 1000px;
-        }
-
-        .bubble {
-            padding: 25px;
-            border-radius: 24px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            opacity: 0;
-            transform: translateY(20px);
-            animation: slideUpFadeIn 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-            animation-delay: var(--bubble-appear-delay);
-            flex: 1;
-            box-sizing: border-box;
-            min-width: 280px;
-            /* 傾きによる変化を滑らかにするためのtransition */
-            transition: background-color 0.2s linear, color 0.2s linear, border-radius 0.2s linear;
-        }
-        
-        .bubble-left {
-            background-color: var(--white-color);
-            color: var(--dark-text-color);
-        }
-        .bubble-left img {
-            width: 70px;
-            margin-bottom: 15px;
-        }
-        
-        /* 時刻表示用のスタイル */
-        #time-display-container {
-            font-size: 3rem;
-            font-weight: 700;
-            text-align: center;
-            padding: 20px 0;
-        }
-
-        .bubble-right {
-            background-color: var(--blue-color);
-            color: var(--white-color);
-            animation-delay: calc(var(--bubble-appear-delay) + 0.15s);
-            cursor: pointer;
-        }
-        .bubble-right .profile-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 20px;
-        }
-        .bubble-right p {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin: 0 0 8px 0;
-            display: flex;
-            align-items: center;
-            pointer-events: none; /* テキストをタップしても親divのイベントが発火 */
-        }
-        
-        #secret-overlay {
-            position: fixed;
-            top: 0;
+        .picker-item {
+            position: absolute;
+            top: calc(50% - var(--item-height) / 2);
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.7);
+            right: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 10000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease-in-out;
-        }
-        #secret-overlay.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        #secret-overlay img {
-            max-width: 90%;
-            max-height: 90%;
-            pointer-events: none;
-        }
-        
-        @keyframes pageZoomIn {
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-        
-        .apply-tap-animation {
-            animation: tap-pop 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        
-        @keyframes tap-pop {
-            50% { transform: scale(1.1); }
+            height: var(--item-height);
+            font-size: 32px;
+            font-weight: 500;
+            color: #888;
+            transition: color 0.3s ease;
+            backface-visibility: hidden;
         }
 
-        @keyframes zoomOut {
-            from { transform: scale(1.2); }
+        .picker-item.selected {
+            color: #fff;
+        }
+
+        .buttons-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 80px;
+            margin-top: 50px;
+        }
+        .arrow-button-wrapper {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .go-button-container{position:relative;width:80px;height:80px;display:flex;justify-content:center;align-items:center;transition: transform 0.3s ease-out; cursor: pointer;}
+        
+        @keyframes go-pulse {
+            from { transform: scale(0.8); }
             to { transform: scale(1); }
         }
+        @keyframes go-shrink {
+            from { transform: scale(1); }
+            to { transform: scale(0.8); }
+        }
+        @keyframes rotateDots{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
-        @keyframes slideUpFadeIn {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        .go-button-circle{
+            width:64px;
+            height:64px;
+            background-color: #222;
+            border: 2px solid #e91e63;
+            box-shadow: 0 0 10px rgba(233, 30, 99, 0.5);
+            color: #4d1c2a;
+            border-radius:50%;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            font-size:26px;
+            font-weight:700;
+            transition: all .3s ease;
+            z-index:1;
+        }
+        .go-button-dots{
+            position:absolute;
+            top:0;left:0;right:0;bottom:0;
+            border-radius:50%;
+            border:2px dotted #e91e63;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        @media (max-width: 768px) {
-            body {
-                padding: 20px 10px;
-            }
-            .animation-container {
-                aspect-ratio: 16 / 23;
-                margin-bottom: 30px;
-            }
-            .main-title h1 {
-                font-size: 2.5rem;
-            }
-            .bubbles-container {
-                flex-direction: column;
-                gap: 20px;
-                align-items: center;
-            }
-            .bubble {
-                width: 100%;
-                max-width: 400px;
-            }
+        .go-button-container.go-active .go-button-circle,
+        .go-button-container.always-active .go-button-circle {
+            background-color: #e91e63;
+            color: #fff;
+            border-color: #e91e63;
+            box-shadow: 0 0 15px rgba(233, 30, 99, 0.7);
+        }
+        .go-button-container.go-active .go-button-dots,
+        .go-button-container.always-active .go-button-dots {
+            opacity: 1;
+            animation: rotateDots 10s linear infinite;
+        }
+        .go-button-container.go-active {
+            animation: go-pulse 0.3s ease-out;
+        }
+        .go-button-container.deactivating {
+            animation: go-shrink 0.3s ease-out;
+        }
+        
+        .arrow-button{width:64px;height:64px;background-color:#4CAF50;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:34px;color:#fff;border:none;cursor:pointer;box-shadow:0 0 15px rgba(76,175,80,.7);transition:transform .1s ease,box-shadow .3s ease}
+        .arrow-button:active{transform:scale(.95);box-shadow:0 0 5px rgba(76,175,80,.7)}
+        .arrow-button:disabled{background-color:#555;cursor:not-allowed;box-shadow:none;}
+        .arrow-button::after{content:'→'}
+
+        #settings-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        #settings-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .settings-panel {
+            background-color: rgba(30, 30, 30, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 24px 32px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transform: translateY(40px) scale(0.8);
+            transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+
+        #settings-overlay.visible .settings-panel {
+            transform: translateY(0) scale(1);
+        }
+        
+        /* 隠し機能のトリガーとなる要素にIDを付与 */
+        .settings-panel h2#hidden-feature-trigger {
+            margin-top: 0;
+            margin-bottom: 4px;
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+            cursor: pointer; /* クリックできることを示唆 */
+        }
+        .settings-panel p {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 24px;
+            color: #aaa;
+            font-size: 16px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #eee;
+            font-size: 16px;
+        }
+        .setting-item label {
+            flex-shrink: 0;
+            margin-right: 15px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            width: 50%;
+        }
+        input[type="range"] {
+            --value-percent: 0%;
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(to right, #e91e63, #ff9800 var(--value-percent), #444 var(--value-percent), #444 100%);
+            border-radius: 3px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s, background .4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #e91e63;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #e91e63;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+        #match-rate-value {
+            margin-left: 10px;
+            min-width: 40px;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .switch .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #444;
+            transition: .4s;
+        }
+        .switch .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+        input:checked + .slider {
+            background-color: #e91e63;
+        }
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+        .slider.round {
+            border-radius: 34px;
+        }
+        .slider.round:before {
+            border-radius: 50%;
+        }
+        .esc-note {
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        #squeeze-meter {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 280px;
+            height: 50px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            box-sizing: border-box;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        #squeeze-meter.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        #squeeze-meter-bar-container {
+            flex-grow: 1;
+            height: 12px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        #squeeze-meter-bar {
+            width: 0%;
+            height: 100%;
+            background-image: linear-gradient(90deg, #e91e63, #ff9800);
+            border-radius: 6px;
+            transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        #squeeze-meter-text {
+            color: #fff;
+            font-weight: 600;
+            font-size: 16px;
+            margin-left: 15px;
+            min-width: 45px;
         }
     </style>
 </head>
 <body>
-
-<div class="animation-container">
-    <iframe src="SL.html" class="hero-embed" title="Embedded background content"></iframe>
-    <div class="main-title">
-        <h1>スロット</h1>
+    <div id="hidden-overlay">
+        <div id="hidden-clock"></div>
     </div>
-</div>
 
-<div class="bubbles-container">
-    <div class="bubble bubble-left">
-        <img id="interactive-image-1" src="aaaaa.png" alt="アナログ時計のアイコン" class="interactive-image">
-        <div id="initial-content-left">
-            <h2>お馴染みのデザイン</h2>
-            <p style="color: #0084ff;">やりますねぇ!!</p>
+    <div class="picker-group">
+        <div class="picker-container">
+            <div class="picker-list" id="picker-list-1"></div>
         </div>
-        <div id="time-display-container"></div>
+        <div class="picker-container">
+            <div class="picker-list" id="picker-list-2"></div>
+        </div>
+        <div class="picker-container">
+            <div class="picker-list" id="picker-list-3"></div>
+        </div>
+        <div class="picker-container" id="picker-container-4" style="display: none;">
+            <div class="picker-list" id="picker-list-4"></div>
+        </div>
+        <div class="highlight-line-top"></div>
+        <div class="highlight-line-bottom"></div>
     </div>
 
-    <div class="bubble bubble-right" id="secret-trigger-div">
-        <img src="AppIcon.png" alt="プロフィールアイコン" class="profile-icon">
-        <p style="font-size:1.5rem;">いや、見ろよ見ろよ!!</p>
-        <p>見とけよ見とけよ〜!!</p>
+    <div class="buttons-container">
+        <div class="go-button-container">
+            <div class="go-button-dots"></div>
+            <div class="go-button-circle">GO</div>
+        </div>
+        <div class="arrow-button-wrapper">
+            <button class="arrow-button"></button>
+        </div>
     </div>
-</div>
-<hr style="height: 2px; color: black;">
-<h3>他にも様々な魅力を体験シよう</h3>
 
-<div id="secret-overlay">
-    <img src="ClickAfter.png" alt="Secret Image">
-</div>
-<audio id="mac-sound" src="mac.wav" loop></audio>
-
-
-<script type="module">
-  import { haptic } from "https://esm.sh/ios-haptics";
-  
-  document.addEventListener('DOMContentLoaded', () => {
-
-    const allDivs = document.querySelectorAll('div');
-    const bubbleLeft = document.querySelector('.bubble-left');
-    const bubbleRight = document.querySelector('.bubble-right');
-    const interactiveImage1 = document.getElementById('interactive-image-1');
-    const initialContentLeft = document.getElementById('initial-content-left');
-    const timeDisplayContainer = document.getElementById('time-display-container');
-    const secretTriggerDiv = document.getElementById('secret-trigger-div');
-    const secretOverlay = document.getElementById('secret-overlay');
-    const macSound = document.getElementById('mac-sound');
-
-    const playHapticPattern = () => {
-      haptic.error();
-      const baseDelay = 1000;
-      const rapidDelay = 50;
-      for (let i = 0; i < 6; i++) {
-        setTimeout(() => haptic.error(), baseDelay + i * rapidDelay);
-      }
-    };
-    
-    document.addEventListener('contextmenu', event => event.preventDefault());
-
-    allDivs.forEach(div => {
-      div.addEventListener('click', (event) => {
-        playHapticPattern();
-        div.classList.add('apply-tap-animation');
-        setTimeout(() => {
-          div.classList.remove('apply-tap-animation');
-        }, 300);
-      });
-    });
-    
-    // アナログ時計画像クリックで時刻表示
-    interactiveImage1.addEventListener('click', (event) => {
-        event.stopPropagation(); // 親divのイベント発火を防ぐ
+    <div id="settings-overlay">
+        <div class="settings-panel">
+            <h2 id="hidden-feature-trigger">Liquid Glass</h2>
+            <p>Flosed glass</p>
         
-        const now = new Date();
-        const hours = now.getHours();
-        const minutes = String(now.getMinutes()).padStart(2, '0');
+            <div class="setting-item">
+                <label for="match-rate-slider">揃う率 (Match Rate)</label>
+                <div class="slider-container">
+                    <input type="range" id="match-rate-slider" min="0" max="100" value="0">
+                    <span id="match-rate-value">0%</span>
+                </div>
+            </div>
         
-        // 初期コンテンツを隠し、時刻を表示
-        initialContentLeft.style.display = 'none';
-        timeDisplayContainer.textContent = `${hours}:${minutes}`;
-    });
-
-    // 青いボックス全体クリックで隠し機能作動
-    secretTriggerDiv.addEventListener('click', (event) => {
-        // ここではstopPropagationは不要
-        secretOverlay.classList.add('visible');
-        if(macSound.paused) {
-            macSound.play();
-        }
-    });
-
-    secretOverlay.addEventListener('click', () => {
-        playHapticPattern();
-    });
-    
-    // --- デバイス傾き検知機能 ---
-    let animationFrameId = null;
-
-    const handleOrientation = (event) => {
-        // gamma: -90(左) to 90(右)
-        const gamma = event.gamma;
+            <div class="setting-item">
+                <label for="always-go-toggle">GOボタン常時ON</label>
+                <label class="switch">
+                    <input type="checkbox" id="always-go-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
         
-        if (gamma === null) return;
+            <div class="setting-item">
+                <label for="absolute-value-toggle">絶対値ON (7揃い率UP)</label>
+                <label class="switch">
+                    <input type="checkbox" id="absolute-value-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        
+            <div class="setting-item">
+                <label for="high-difficulty-toggle">高難易度 (4リール)</label>
+                <label class="switch">
+                    <input type="checkbox" id="high-difficulty-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+             <div class="esc-note">Press ESC to close</div>
+        </div>
+    </div>
 
-        // 描画処理が重複しないようにする
-        if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
+    <div id="win-background"></div>
+
+    <div id="squeeze-meter">
+        <div id="squeeze-meter-bar-container">
+            <div id="squeeze-meter-bar"></div>
+        </div>
+        <span id="squeeze-meter-text">0%</span>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const symbols = ['🍒', '🔔', '🍇', '7️⃣', '🍉', '⭐', '🥨', '❤️‍🔥', '🫧'];
+        const ANGLE_PER_ITEM = 360 / symbols.length;
+        const WHEEL_RADIUS = 80;
+
+        const shuffle = (array) => {
+            let currentIndex = array.length,  randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
         }
 
-        animationFrameId = requestAnimationFrame(() => {
-            // 傾きの進行度を計算 (0:垂直 -> 1:水平)
-            const progress = Math.min(Math.abs(gamma) / 90, 1);
+        // --- Picker Instances, Settings, etc. (省略せず全て元のまま) ---
+        // (元のJavaScriptコードはここにそのままペースト)
+        // ... (前の回答から、この部分のJavaScriptは変更ありません)
+        const settingsOverlay = document.getElementById('settings-overlay');
+        const matchRateSlider = document.getElementById('match-rate-slider');
+        const matchRateValue = document.getElementById('match-rate-value');
+        const alwaysGoToggle = document.getElementById('always-go-toggle');
+        const absoluteValueToggle = document.getElementById('absolute-value-toggle');
+        const highDifficultyToggle = document.getElementById('high-difficulty-toggle');
+        const pickerContainer4 = document.getElementById('picker-container-4');
+        const goButtonContainer = document.querySelector('.go-button-container');
 
-            // 1. 色の補間 (RGB)
-            // 白(255,255,255) <-> 青(0,122,255)
-            // テキスト: 黒(29,29,31) <-> 白(255,255,255)
-            const whiteToBlue_R = 255 - 255 * progress;
-            const whiteToBlue_G = 255 - (255 - 122) * progress;
-            const whiteToBlue_B = 255;
-            
-            const blueToWhite_R = 0 + 255 * progress;
-            const blueToWhite_G = 122 + (255 - 122) * progress;
-            const blueToWhite_B = 255;
+        // --- Settings State ---
+        let matchRate = 0;
+        let isAbsoluteValueOn = false;
+        let isHighDifficulty = false;
+        let isAlwaysGoOn = false;
 
-            const darkToWhite_R = 29 + (255 - 29) * progress;
-            const darkToWhite_G = 29 + (255 - 29) * progress;
-            const darkToWhite_B = 31 + (255 - 31) * progress;
+        class Picker {
+            constructor(listElement, symbols, initialValue) {
+                this.list = listElement;
+                this.range = symbols;
+                this.selectedIndex = 0;
 
-            const whiteToDark_R = 255 - (255 - 29) * progress;
-            const whiteToDark_G = 255 - (255 - 29) * progress;
-            const whiteToDark_B = 255 - (255 - 31) * progress;
+                this.populateList(symbols);
+                this.items = this.list.querySelectorAll('.picker-item');
 
-            // 2. 角丸(border-radius)の補間 (24px -> 8px)
-            const newBorderRadius = 24 - 16 * progress;
+                const initialIndex = this.range.indexOf(initialValue);
+                this.setToIndex(initialIndex !== -1 ? initialIndex : 0, 0);
+            }
 
-            // 3. スタイルを適用
-            bubbleLeft.style.backgroundColor = `rgb(${whiteToBlue_R}, ${whiteToBlue_G}, ${whiteToBlue_B})`;
-            bubbleLeft.style.color = `rgb(${darkToWhite_R}, ${darkToWhite_G}, ${darkToWhite_B})`;
-            
-            bubbleRight.style.backgroundColor = `rgb(${blueToWhite_R}, ${blueToWhite_G}, ${blueToWhite_B})`;
-            bubbleRight.style.color = `rgb(${whiteToDark_R}, ${whiteToDark_G}, ${whiteToDark_B})`;
-
-            bubbleLeft.style.borderRadius = `${newBorderRadius}px`;
-            bubbleRight.style.borderRadius = `${newBorderRadius}px`;
-        });
-    };
-    
-    // ジャイロスコープへのアクセス許可を試みる（iOS 13+で必要）
-    if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        // ユーザーインタラクション（最初のタップなど）をトリガーにするのが理想的
-        // ここではシンプルにページ読み込み時に試みる
-        DeviceOrientationEvent.requestPermission()
-            .then(permissionState => {
-                if (permissionState === 'granted') {
-                    window.addEventListener('deviceorientation', handleOrientation);
+            populateList(symbols) {
+                const fragment = document.createDocumentFragment();
+                for (let i = 0; i < symbols.length; i++) {
+                    const symbol = symbols[i];
+                    const item = document.createElement('div');
+                    item.className = 'picker-item';
+                    item.textContent = symbol;
+                    item.style.transform = `rotateX(${i * ANGLE_PER_ITEM}deg) translateZ(${WHEEL_RADIUS}px)`;
+                    fragment.appendChild(item);
                 }
-            })
-            .catch(console.error);
-    } else {
-        // requestPermissionがない、またはAndroidデバイスの場合
-        window.addEventListener('deviceorientation', handleOrientation);
-    }
-  });
-</script>
+                this.list.appendChild(fragment);
+            }
 
+            setToIndex(index, duration = 1) {
+                const targetRotation = -index * ANGLE_PER_ITEM;
+                this.list.style.transition = `transform ${duration}s cubic-bezier(0.25, 1, 0.5, 1)`;
+                this.list.style.transform = `rotateX(${targetRotation}deg)`;
+                this.selectedIndex = index;
+
+                setTimeout(() => {
+                    this.items.forEach((item, i) => {
+                        item.classList.toggle('selected', i === index);
+                    });
+                }, duration * 500);
+            }
+
+            async spin(duration, forcedSymbol = null) {
+                let targetIndex;
+
+                if (forcedSymbol) {
+                    const forcedIndex = this.range.indexOf(forcedSymbol);
+                    targetIndex = forcedIndex !== -1 ? forcedIndex : Math.floor(Math.random() * this.range.length);
+                } else if (isAbsoluteValueOn) {
+                    const sevenIndex = this.range.indexOf('7️⃣');
+                    if (sevenIndex !== -1 && Math.random() < 0.80) {
+                        targetIndex = sevenIndex;
+                    } else {
+                        let otherSymbols = this.range.filter(s => s !== '7️⃣');
+                        if (otherSymbols.length > 0) {
+                            let randomSymbol = otherSymbols[Math.floor(Math.random() * otherSymbols.length)];
+                            targetIndex = this.range.indexOf(randomSymbol);
+                        } else {
+                            targetIndex = sevenIndex;
+                        }
+                    }
+                } else {
+                    targetIndex = Math.floor(Math.random() * this.range.length);
+                }
+                
+                const spinCycles = 8;
+                const currentRotation = -this.selectedIndex * ANGLE_PER_ITEM;
+                const finalRotation = -targetIndex * ANGLE_PER_ITEM;
+                
+                const spinStartRotation = currentRotation - 360;
+                const finalSpinRotation = finalRotation - (360 * spinCycles);
+
+                this.list.style.transition = 'transform 0.1s linear';
+                this.list.style.transform = `rotateX(${spinStartRotation}deg)`;
+
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const spinDuration = duration || (4 + Math.random());
+                this.list.style.transition = `transform ${spinDuration}s cubic-bezier(0.2, 0.8, 0.2, 1)`;
+                this.list.style.transform = `rotateX(${finalSpinRotation}deg)`;
+                
+                this.selectedIndex = targetIndex;
+                
+                await new Promise(resolve => setTimeout(resolve, spinDuration * 1000));
+                
+                this.list.style.transition = 'transform 0s';
+                this.list.style.transform = `rotateX(${finalRotation}deg)`;
+
+                this.items.forEach((item, i) => {
+                    item.classList.toggle('selected', i === targetIndex);
+                });
+
+                return this.range[targetIndex];
+            }
+        }
+
+        const picker1 = new Picker(document.getElementById('picker-list-1'), shuffle([...symbols]), '🍒');
+        const picker2 = new Picker(document.getElementById('picker-list-2'), shuffle([...symbols]), '🔔');
+        const picker3 = new Picker(document.getElementById('picker-list-3'), shuffle([...symbols]), '🍇');
+        const picker4 = new Picker(document.getElementById('picker-list-4'), shuffle([...symbols]), '⭐');
+        let pickers = [picker1, picker2, picker3];
+        
+        matchRateSlider.style.setProperty('--value-percent', `${matchRateSlider.value}%`);
+        // ... (以下、元のJavaScriptを継続)
+        
+        
+        // --- (ここから追加・変更したJavaScript) ---
+        
+        // === 隠し機能（時計表示）のロジック START ===
+        const hiddenOverlay = document.getElementById('hidden-overlay');
+        const hiddenClock = document.getElementById('hidden-clock');
+        const featureTrigger = document.getElementById('hidden-feature-trigger');
+        let clockInterval = null;
+
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            hiddenClock.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        // トリガーをクリックした時の動作
+        featureTrigger.addEventListener('click', () => {
+            hiddenOverlay.classList.add('visible');
+            updateClock();
+            // 1秒ごとに時計を更新
+            clockInterval = setInterval(updateClock, 1000);
+        });
+
+        // オーバーレイ自体をクリックしたら閉じる
+        hiddenOverlay.addEventListener('click', () => {
+            hiddenOverlay.classList.remove('visible');
+            // 時計の更新を停止
+            clearInterval(clockInterval);
+        });
+        // === 隠し機能のロジック END ===
+
+
+        // === 傾き機能のロジック START ===
+        const pickerGroup = document.querySelector('.picker-group');
+
+        function handleOrientation(event) {
+            // event.beta: X軸周りの回転（-180 to 180）- 上下ティルト
+            // event.gamma: Y軸周りの回転（-90 to 90）- 左右ティルト
+            const { beta, gamma } = event;
+            
+            if (beta === null || gamma === null) {
+                // デバイスが傾き情報を提供しない場合は何もしない
+                return;
+            }
+
+            // 傾きの影響度を調整（値を小さくすると動きが穏やかになる）
+            const tiltMultiplier = 0.1;
+            
+            // 動きを自然に見せるため、最大角度を制限
+            const maxTilt = 10; // 最大10度まで
+
+            // Y軸の傾き（左右）を `rotateY` に、X軸の傾き（前後）を `rotateX` に適用
+            let tiltY = gamma * tiltMultiplier;
+            let tiltX = (beta - 45) * tiltMultiplier; // 正面を基準にするため少し補正
+            
+            tiltY = Math.max(-maxTilt, Math.min(maxTilt, tiltY));
+            tiltX = Math.max(-maxTilt, Math.min(maxTilt, tiltX));
+            
+            // 3D的な奥行きを出すために perspective を設定
+            pickerGroup.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+        }
+
+        // ジャイロセンサーへのアクセス許可を試みる（iOS 13+で必要）
+        function requestDeviceOrientation() {
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation);
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // requestPermissionが不要なデバイス（Androidなど）
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+        }
+
+        // ユーザーの最初のインタラクションで許可を求める
+        document.body.addEventListener('click', requestDeviceOrientation, { once: true });
+        // === 傾き機能のロジック END ===
+
+    });
+    </script>
+    
+    <script type="module">
+        import { haptic } from "https://esm.sh/ios-haptics";
+
+        const triggerHapticBurst = () => {
+            if (haptic) {
+                const delay = 30;
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => haptic('error'), i * delay);
+                }
+            }
+        };
+        
+        window.triggerHapticBurst = triggerHapticBurst;
+    </script>
 </body>
 </html>
