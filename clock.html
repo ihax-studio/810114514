@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple 新宿 アニメーション</title>
+    <style>
+        /* 基本設定 */
+        :root {
+            --title-appear-delay: 0.5s;  /* タイトルの表示開始時間 */
+            --bubble-appear-delay: 0.8s; /* バブルの表示開始時間 */
+        }
+
+        body {
+                        font-weight: 600;
+            margin: 0;
+            font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', -apple-system, BlinkMacSystem-Font, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f5f7;
+            /* ページ全体をフレックスコンテナにして要素を中央に配置 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px; /* 上下の余白 */
+            box-sizing: border-box;
+        }
+
+        /* 背景アニメーション用のコンテナ */
+        .animation-container {
+            position: relative;
+            width: 100%;
+            max-width: 1000px; /* 最大幅を少し調整 */
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            aspect-ratio: 16 / 8; /* 少し横長の比率に */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px; /* 下の要素とのマージン */
+        }
+
+        /* 埋め込みコンテンツ（re.html） */
+        .hero-embed {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            transform: scale(1.2);
+            animation: zoomOut 1.2s ease-out forwards;
+            z-index: 1;
+        }
+        
+        /* タイトルテキスト */
+        .main-title {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(80px);
+            animation: slideUpFadeIn 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+            animation-delay: var(--title-appear-delay);
+        }
+
+        .main-title h1 {
+                        transform: translateY(60px);
+            font-size: 3.5rem;
+            font-weight: 700;
+            /* 背景枠を削除し、読みやすいように白い文字と影に変更 */
+            color: #ffffff;
+            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+            margin: 0;
+        }
+
+        /* 2つの要素を囲むコンテナ (コンテナの外に配置) */
+        .bubbles-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 25px; /* 要素間の隙間 */
+            width: 100%;
+            max-width: 1000px; /* 上のコンテナと幅を合わせる */
+        }
+
+        /* 要素の共通スタイル */
+        .bubble {
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUpFadeIn 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+            animation-delay: var(--bubble-appear-delay);
+            flex: 1;
+            box-sizing: border-box;
+            min-width: 280px; /* 最小幅を設定 */
+        }
+        
+        /* 左の要素 */
+        .bubble-left {
+            background-color: #ffffff;
+            color: #1d1d1f;
+        }
+        .bubble-left img {
+            width: 70px;
+            margin-bottom: 15px;
+        }
+        .bubble-left h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+        }
+        .bubble-left p {
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.6;
+            margin: 0;
+        }
+        .bubble-left p.red-text {
+             font-weight: 600;
+             color: #0084ff;
+        }
+
+        /* 右の要素 */
+        .bubble-right {
+            background-color: #007aff;
+            color: white;
+            animation-delay: calc(var(--bubble-appear-delay) + 0.15s); /* 少し遅れて表示 */
+        }
+        .bubble-right .profile-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+        .bubble-right p {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin: 0 0 8px 0;
+            display: flex;
+            align-items: center;
+        }
+        .bubble-right .small-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            filter: invert(41%) sepia(83%) saturate(3015%) hue-rotate(338deg) brightness(100%) contrast(105%);
+        }
+
+        /* --- アニメーションの定義 --- */
+        @keyframes zoomOut {
+            from { transform: scale(1.2); }
+            to { transform: scale(1); }
+        }
+
+        @keyframes slideUpFadeIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* スマートフォン向けの調整 */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+            .animation-container {
+                aspect-ratio: 16 / 9; /* スマホでは少し縦長に */
+                margin-bottom: 30px;
+            }
+            .main-title h1 {
+                font-size: 2.5rem;
+            }
+            /* スマホでは縦並びにする */
+            .bubbles-container {
+                flex-direction: column;
+                gap: 20px;
+                align-items: center;
+            }
+            .bubble {
+                width: 100%;
+                max-width: 400px; /* スマホでの最大幅 */
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="animation-container">
+    <iframe src="SL.html" class="hero-embed" title="Embedded background content"></iframe>
+    <div class="main-title">
+        <h1>スロット</h1>
+    </div>
+</div>
+
+<div class="bubbles-container">
+    <div class="bubble bubble-left">
+        <img src="aaaaa.png" alt="アナログ時計のアイコン">
+        <h2>お馴染みのデザイン</h2>
+
+        <p class="red-text">やりますねぇ!!</p>
+    </div>
+
+    <div class="bubble bubble-right">
+        <img src="AppIcon.png" alt="プロフィールアイコン" class="profile-icon">
+        <p style=font-size:1.5rem;>いや、見ろよ見ろよ!!</p>
+        <p>
+            見とけよ見とけよ〜!!
+        </p>
+    </div>
+</div>
+<hr style="height: 2px; color: black;">
+<h3>他にも様々な魅力を体験シよう</h3>
+</body>
+</html>

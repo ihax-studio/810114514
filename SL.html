@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スロットマシンスピナー 🥨❤️‍🔥🫧</title>
+    <style>
+        :root {
+            --item-height: 50px;
+            --wheel-radius: 80px;
+            --visible-items-side: 2;
+        }
+
+        body {
+            background-color: #000;
+            background-image: url('IMG_0609.jpg');
+            background-size: 200px;
+            background-repeat: space;
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        #win-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -10;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            background-color: #000;
+        }
+        #win-background span {
+            position: absolute;
+            user-select: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .picker-group {
+            display: flex;
+            align-items: center;
+            position: relative;
+            gap: 10px;
+        }
+
+        .picker-container {
+            width: 70px;
+            height: calc((var(--visible-items-side) * 2 + 1) * var(--item-height));
+            position: relative;
+            overflow: hidden;
+            perspective: 300px;
+        }
+
+        .highlight-line-top, .highlight-line-bottom {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #555;
+            z-index: 2;
+        }
+
+        .highlight-line-top {
+            top: 50%;
+            transform: translateY(calc(var(--item-height) / -2));
+        }
+
+        .highlight-line-bottom {
+            top: 50%;
+            transform: translateY(calc(var(--item-height) / 2));
+        }
+
+        .picker-list {
+            transform-style: preserve-3d;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .picker-item {
+            position: absolute;
+            top: calc(50% - var(--item-height) / 2);
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: var(--item-height);
+            font-size: 32px;
+            font-weight: 500;
+            color: #888;
+            transition: color 0.3s ease;
+            backface-visibility: hidden;
+        }
+
+        .picker-item.selected {
+            color: #fff;
+        }
+
+        .buttons-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 80px;
+            margin-top: 50px;
+        }
+        .arrow-button-wrapper {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .go-button-container{position:relative;width:80px;height:80px;display:flex;justify-content:center;align-items:center;transition: transform 0.3s ease-out;}
+        
+        @keyframes go-pulse {
+            from { transform: scale(0.8); }
+            to { transform: scale(1); }
+        }
+        @keyframes go-shrink {
+            from { transform: scale(1); }
+            to { transform: scale(0.8); }
+        }
+        @keyframes rotateDots{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+        .go-button-circle{
+            width:64px;
+            height:64px;
+            background-color: #222;
+            border: 2px solid #e91e63;
+            box-shadow: 0 0 10px rgba(233, 30, 99, 0.5);
+            color: #4d1c2a;
+            border-radius:50%;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            font-size:26px;
+            font-weight:700;
+            cursor:pointer;
+            transition: all .3s ease;
+            z-index:1;
+        }
+        .go-button-dots{
+            position:absolute;
+            top:0;left:0;right:0;bottom:0;
+            border-radius:50%;
+            border:2px dotted #e91e63;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .go-button-container.go-active .go-button-circle,
+        .go-button-container.always-active .go-button-circle {
+            background-color: #e91e63;
+            color: #fff;
+            border-color: #e91e63;
+            box-shadow: 0 0 15px rgba(233, 30, 99, 0.7);
+        }
+        .go-button-container.go-active .go-button-dots,
+        .go-button-container.always-active .go-button-dots {
+            opacity: 1;
+            animation: rotateDots 10s linear infinite;
+        }
+        .go-button-container.go-active {
+            animation: go-pulse 0.3s ease-out;
+        }
+        .go-button-container.deactivating {
+            animation: go-shrink 0.3s ease-out;
+        }
+        
+        .arrow-button{width:64px;height:64px;background-color:#4CAF50;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:34px;color:#fff;border:none;cursor:pointer;box-shadow:0 0 15px rgba(76,175,80,.7);transition:transform .1s ease,box-shadow .3s ease}
+        .arrow-button:active{transform:scale(.95);box-shadow:0 0 5px rgba(76,175,80,.7)}
+        .arrow-button:disabled{background-color:#555;cursor:not-allowed;box-shadow:none;}
+        .arrow-button::after{content:'→'}
+
+        /* --- Settings Panel --- */
+        #settings-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        #settings-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .settings-panel {
+            background-color: rgba(30, 30, 30, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 24px 32px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transform: translateY(40px) scale(0.8);
+            transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+
+        #settings-overlay.visible .settings-panel {
+            transform: translateY(0) scale(1);
+        }
+
+        .settings-panel h2 {
+            margin-top: 0;
+            margin-bottom: 4px;
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+        }
+        .settings-panel p {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 24px;
+            color: #aaa;
+            font-size: 16px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #eee;
+            font-size: 16px;
+        }
+        .setting-item label {
+            flex-shrink: 0;
+            margin-right: 15px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            width: 50%;
+        }
+        input[type="range"] {
+            --value-percent: 0%;
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(to right, #e91e63, #ff9800 var(--value-percent), #444 var(--value-percent), #444 100%);
+            border-radius: 3px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s, background .4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #e91e63;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #e91e63;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+        #match-rate-value {
+            margin-left: 10px;
+            min-width: 40px;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .switch .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #444;
+            transition: .4s;
+        }
+        .switch .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+        input:checked + .slider {
+            background-color: #e91e63;
+        }
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+        .slider.round {
+            border-radius: 34px;
+        }
+        .slider.round:before {
+            border-radius: 50%;
+        }
+        .esc-note {
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        /* --- Squeeze Meter --- */
+        #squeeze-meter {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 280px;
+            height: 50px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            box-sizing: border-box;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        #squeeze-meter.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        #squeeze-meter-bar-container {
+            flex-grow: 1;
+            height: 12px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+                #squeeze-meter-bar {
+            width: 0%;
+            height: 100%;
+            background-image: linear-gradient(90deg, #e91e63, #ff9800);
+            border-radius: 6px;
+            transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        #squeeze-meter-text {
+            color: #fff;
+            font-weight: 600;
+            font-size: 16px;
+            margin-left: 15px;
+            min-width: 45px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="picker-group">
+        <div class="picker-container">
+            <div class="picker-list" id="picker-list-1"></div>
+        </div>
+        <div class="picker-container">
+            <div class="picker-list" id="picker-list-2"></div>
+        </div>
+        <div class="picker-container">
+            <div class="picker-list" id="picker-list-3"></div>
+        </div>
+        <div class="picker-container" id="picker-container-4" style="display: none;">
+            <div class="picker-list" id="picker-list-4"></div>
+        </div>
+        <div class="highlight-line-top"></div>
+        <div class="highlight-line-bottom"></div>
+    </div>
+
+    <div class="buttons-container">
+        <div class="go-button-container">
+            <div class="go-button-dots"></div>
+            <div class="go-button-circle">GO</div>
+        </div>
+        <div class="arrow-button-wrapper">
+            <button class="arrow-button"></button>
+        </div>
+    </div>
+
+    <div id="settings-overlay">
+        <div class="settings-panel">
+            <h2>Liquid Glass</h2>
+            <p>Flosed glass</p>
+    
+            <div class="setting-item">
+                <label for="match-rate-slider">揃う率 (Match Rate)</label>
+                <div class="slider-container">
+                    <input type="range" id="match-rate-slider" min="0" max="100" value="0">
+                    <span id="match-rate-value">0%</span>
+                </div>
+            </div>
+    
+            <div class="setting-item">
+                <label for="always-go-toggle">GOボタン常時ON</label>
+                <label class="switch">
+                    <input type="checkbox" id="always-go-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+    
+            <div class="setting-item">
+                <label for="absolute-value-toggle">絶対値ON (7揃い率UP)</label>
+                <label class="switch">
+                    <input type="checkbox" id="absolute-value-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+    
+            <div class="setting-item">
+                <label for="high-difficulty-toggle">高難易度 (4リール)</label>
+                <label class="switch">
+                    <input type="checkbox" id="high-difficulty-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+             <div class="esc-note">Press ESC to close</div>
+        </div>
+    </div>
+
+    <div id="win-background"></div>
+
+    <div id="squeeze-meter">
+        <div id="squeeze-meter-bar-container">
+            <div id="squeeze-meter-bar"></div>
+        </div>
+        <span id="squeeze-meter-text">0%</span>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const symbols = ['🍒', '🔔', '🍇', '7️⃣', '🍉', '⭐', '🥨', '❤️‍🔥', '🫧'];
+        const ANGLE_PER_ITEM = 360 / symbols.length;
+        const WHEEL_RADIUS = 80;
+
+        const shuffle = (array) => {
+            let currentIndex = array.length,  randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // --- Settings Panel Elements ---
+        const settingsOverlay = document.getElementById('settings-overlay');
+        const matchRateSlider = document.getElementById('match-rate-slider');
+        const matchRateValue = document.getElementById('match-rate-value');
+        const alwaysGoToggle = document.getElementById('always-go-toggle');
+        const absoluteValueToggle = document.getElementById('absolute-value-toggle');
+        const highDifficultyToggle = document.getElementById('high-difficulty-toggle');
+        const pickerContainer4 = document.getElementById('picker-container-4');
+        const goButtonContainer = document.querySelector('.go-button-container');
+
+        // --- Settings State ---
+        let matchRate = 0;
+        let isAbsoluteValueOn = false;
+        let isHighDifficulty = false;
+        let isAlwaysGoOn = false;
+
+        class Picker {
+            constructor(listElement, symbols, initialValue) {
+                this.list = listElement;
+                this.range = symbols;
+                this.selectedIndex = 0;
+
+                this.populateList(symbols);
+                this.items = this.list.querySelectorAll('.picker-item');
+
+                const initialIndex = this.range.indexOf(initialValue);
+                this.setToIndex(initialIndex !== -1 ? initialIndex : 0, 0);
+            }
+
+            populateList(symbols) {
+                const fragment = document.createDocumentFragment();
+                for (let i = 0; i < symbols.length; i++) {
+                    const symbol = symbols[i];
+                    const item = document.createElement('div');
+                    item.className = 'picker-item';
+                    item.textContent = symbol;
+                    item.style.transform = `rotateX(${i * ANGLE_PER_ITEM}deg) translateZ(${WHEEL_RADIUS}px)`;
+                    fragment.appendChild(item);
+                }
+                this.list.appendChild(fragment);
+            }
+
+            setToIndex(index, duration = 1) {
+                const targetRotation = -index * ANGLE_PER_ITEM;
+                this.list.style.transition = `transform ${duration}s cubic-bezier(0.25, 1, 0.5, 1)`;
+                this.list.style.transform = `rotateX(${targetRotation}deg)`;
+                this.selectedIndex = index;
+
+                setTimeout(() => {
+                    this.items.forEach((item, i) => {
+                        item.classList.toggle('selected', i === index);
+                    });
+                }, duration * 500);
+            }
+
+            async spin(duration, forcedSymbol = null) {
+                let targetIndex;
+
+                if (forcedSymbol) {
+                    const forcedIndex = this.range.indexOf(forcedSymbol);
+                    targetIndex = forcedIndex !== -1 ? forcedIndex : Math.floor(Math.random() * this.range.length);
+                } else if (isAbsoluteValueOn) {
+                    const sevenIndex = this.range.indexOf('7️⃣');
+                    if (sevenIndex !== -1 && Math.random() < 0.80) {
+                        targetIndex = sevenIndex;
+                    } else {
+                        let otherSymbols = this.range.filter(s => s !== '7️⃣');
+                        if (otherSymbols.length > 0) {
+                            let randomSymbol = otherSymbols[Math.floor(Math.random() * otherSymbols.length)];
+                            targetIndex = this.range.indexOf(randomSymbol);
+                        } else {
+                            targetIndex = sevenIndex;
+                        }
+                    }
+                } else {
+                    targetIndex = Math.floor(Math.random() * this.range.length);
+                }
+                
+                const spinCycles = 8;
+                const currentRotation = -this.selectedIndex * ANGLE_PER_ITEM;
+                const finalRotation = -targetIndex * ANGLE_PER_ITEM;
+                
+                const spinStartRotation = currentRotation - 360;
+                const finalSpinRotation = finalRotation - (360 * spinCycles);
+
+                this.list.style.transition = 'transform 0.1s linear';
+                this.list.style.transform = `rotateX(${spinStartRotation}deg)`;
+
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const spinDuration = duration || (4 + Math.random());
+                this.list.style.transition = `transform ${spinDuration}s cubic-bezier(0.2, 0.8, 0.2, 1)`;
+                this.list.style.transform = `rotateX(${finalSpinRotation}deg)`;
+                
+                this.selectedIndex = targetIndex;
+                
+                await new Promise(resolve => setTimeout(resolve, spinDuration * 1000));
+                
+                this.list.style.transition = 'transform 0s';
+                this.list.style.transform = `rotateX(${finalRotation}deg)`;
+
+                this.items.forEach((item, i) => {
+                    item.classList.toggle('selected', i === targetIndex);
+                });
+
+                return this.range[targetIndex];
+            }
+        }
+
+        // --- Picker Instances ---
+        const picker1 = new Picker(document.getElementById('picker-list-1'), shuffle([...symbols]), '🍒');
+        const picker2 = new Picker(document.getElementById('picker-list-2'), shuffle([...symbols]), '🔔');
+        const picker3 = new Picker(document.getElementById('picker-list-3'), shuffle([...symbols]), '🍇');
+        const picker4 = new Picker(document.getElementById('picker-list-4'), shuffle([...symbols]), '⭐');
+        let pickers = [picker1, picker2, picker3];
+        
+        // --- Dark Mode and Settings Panel Logic ---
+        let hasBeenLightMode = !window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        mediaQuery.addEventListener('change', (e) => {
+            if (e.matches) { // Switched to Dark Mode
+                if (hasBeenLightMode) {
+                    settingsOverlay.classList.add('visible');
+                }
+            } else { // Switched to Light Mode
+                hasBeenLightMode = true;
+                settingsOverlay.classList.remove('visible');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                settingsOverlay.classList.remove('visible');
+            }
+        });
+
+        // --- Settings Event Listeners ---
+        // --- Settings Event Listeners ---
+        // Initialize slider fill
+        matchRateSlider.style.setProperty('--value-percent', `${matchRateSlider.value}%`);
+
+        let sliderTextAnimation = {
+            current: parseInt(matchRateSlider.value, 10),
+            target: parseInt(matchRateSlider.value, 10),
+            id: null
+        };
+        matchRateValue.textContent = `${sliderTextAnimation.current}%`;
+
+        function animateSliderText() {
+            const diff = sliderTextAnimation.target - sliderTextAnimation.current;
+            if (Math.abs(diff) < 0.1) {
+                sliderTextAnimation.current = sliderTextAnimation.target;
+                matchRateValue.textContent = `${Math.round(sliderTextAnimation.current)}%`;
+                cancelAnimationFrame(sliderTextAnimation.id);
+                sliderTextAnimation.id = null;
+                return;
+            }
+            sliderTextAnimation.current += diff * 0.12; // Smoother easing
+            matchRateValue.textContent = `${Math.round(sliderTextAnimation.current)}%`;
+            sliderTextAnimation.id = requestAnimationFrame(animateSliderText);
+        }
+
+        matchRateSlider.addEventListener('input', (e) => {
+            const newRate = parseInt(e.target.value, 10);
+            matchRate = newRate;
+            
+            // Update slider bar fill
+            e.target.style.setProperty('--value-percent', `${newRate}%`);
+
+            // Animate text
+            sliderTextAnimation.target = newRate;
+            if (!sliderTextAnimation.id) {
+                animateSliderText();
+            }
+        });
+
+        highDifficultyToggle.addEventListener('change', (e) => {
+            isHighDifficulty = e.target.checked;
+            if (isHighDifficulty) {
+                pickerContainer4.style.display = 'block';
+                pickers = [picker1, picker2, picker3, picker4];
+            } else {
+                pickerContainer4.style.display = 'none';
+                pickers = [picker1, picker2, picker3];
+            }
+        });
+
+        absoluteValueToggle.addEventListener('change', (e) => {
+            isAbsoluteValueOn = e.target.checked;
+        });
+
+        alwaysGoToggle.addEventListener('change', (e) => {
+            isAlwaysGoOn = e.target.checked;
+            goButtonContainer.classList.toggle('always-active', isAlwaysGoOn);
+
+            if (!isAlwaysGoOn) {
+                goButtonContainer.classList.add('deactivating');
+                goButtonContainer.addEventListener('animationend', () => {
+                    goButtonContainer.classList.remove('deactivating');
+                }, { once: true });
+            } else {
+                goButtonContainer.classList.remove('deactivating');
+            }
+        });
+
+        const symbolPatterns = {
+            '🥨': ['🥨'],
+            '❤️‍🔥': ['❤️‍🔥', '🔥', '🥵', '🌶️'],
+            '🫧': ['🫧', '💧', '💦'],
+            '🍒': ['🍒'],
+            '🔔': ['🔔'],
+            '🍇': ['🍇'],
+            '7️⃣': ['7️⃣', '💎', '💰'],
+            '🍉': ['🍉'],
+            '⭐': ['⭐', '✨', '💫']
+        };
+
+        let backgroundLayout = 'circular'; // random-tile, circular, split-vertical
+        let winHistory = [];
+
+        function layoutRandomTile(background, symbols) {
+            const containerRect = background.getBoundingClientRect();
+            const cellSize = 150;
+            const numX = Math.ceil(containerRect.width / cellSize);
+            const numY = Math.ceil(containerRect.height / cellSize);
+            const fragment = document.createDocumentFragment();
+            for (let y = 0; y < numY; y++) {
+                for (let x = 0; x < numX; x++) {
+                    const emojiSpan = document.createElement('span');
+                    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                    emojiSpan.textContent = randomSymbol;
+                    const jitterX = (Math.random() - 0.5) * cellSize * 0.5;
+                    const jitterY = (Math.random() - 0.5) * cellSize * 0.5;
+                    emojiSpan.style.left = `${x * cellSize + jitterX}px`;
+                    emojiSpan.style.top = `${y * cellSize + jitterY}px`;
+                    emojiSpan.style.fontSize = `${40 + (Math.random() - 0.5) * 20}px`;
+                    emojiSpan.style.transform = `rotate(${(Math.random() - 0.5) * 40}deg)`;
+                    fragment.appendChild(emojiSpan);
+                }
+            }
+            background.appendChild(fragment);
+        }
+
+        function layoutCircular(background, symbols) {
+            const rect = background.getBoundingClientRect();
+            const centerX = rect.width / 2 - 35; // Shift left to center on the picker
+            const centerY = rect.height / 2;
+            const numCircles = 5;
+            const emojisPerCircle = 16;
+            const maxRadius = Math.min(rect.width / 2, rect.height / 2) * 0.9;
+            const fragment = document.createDocumentFragment();
+
+            for (let i = 1; i <= numCircles; i++) {
+                const radius = (maxRadius / numCircles) * i;
+                for (let j = 0; j < emojisPerCircle; j++) {
+                    const angle = (j / emojisPerCircle) * 2 * Math.PI + (i/2); // offset angle per circle
+                    const emojiSpan = document.createElement('span');
+                    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                    emojiSpan.textContent = randomSymbol;
+                    const x = centerX + radius * Math.cos(angle);
+                    const y = centerY + radius * Math.sin(angle);
+                    emojiSpan.style.left = `${x}px`;
+                    emojiSpan.style.top = `${y}px`;
+                    emojiSpan.style.fontSize = `${20 + (radius/maxRadius * 20)}px`;
+                    emojiSpan.style.transform = `translate(-50%, -50%) rotate(${angle * 180 / Math.PI + 90}deg)`;
+                    fragment.appendChild(emojiSpan);
+                }
+            }
+            background.appendChild(fragment);
+        }
+
+        function populateHalf(container, symbols) {
+            const rect = container.getBoundingClientRect();
+            const numCols = 3;
+            const numRows = 6;
+            const cellWidth = rect.width / numCols;
+            const cellHeight = rect.height / numRows;
+            const fragment = document.createDocumentFragment();
+            for (let r = 0; r < numRows; r++) {
+                for (let c = 0; c < numCols; c++) {
+                    const emojiSpan = document.createElement('span');
+                    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                    emojiSpan.textContent = randomSymbol;
+                    const jitterX = (Math.random() - 0.5) * cellWidth * 0.4;
+                    const jitterY = (Math.random() - 0.5) * cellHeight * 0.4;
+                    emojiSpan.style.left = `${c * cellWidth + jitterX}px`;
+                    emojiSpan.style.top = `${r * cellHeight + jitterY}px`;
+                    emojiSpan.style.fontSize = `${Math.min(cellWidth, cellHeight) * 0.6}px`;
+                    emojiSpan.style.transform = `rotate(${(Math.random() - 0.5) * 30}deg)`;
+                    fragment.appendChild(emojiSpan);
+                }
+            }
+            container.appendChild(fragment);
+        }
+
+        function layoutSplitVertical(background, symbols1, symbols2) {
+            const leftHalf = document.createElement('div');
+            leftHalf.style.cssText = 'position: absolute; left: 0; top: 0; width: 50%; height: 100%; overflow: hidden;';
+            background.appendChild(leftHalf);
+            populateHalf(leftHalf, symbols1);
+            
+            const rightHalf = document.createElement('div');
+            rightHalf.style.cssText = 'position: absolute; right: 0; top: 0; width: 50%; height: 100%; overflow: hidden;';
+            background.appendChild(rightHalf);
+            populateHalf(rightHalf, symbols2);
+        }
+
+        function showWinningBackground() {
+            if (winHistory.length === 0) return;
+            const background = document.getElementById('win-background');
+            background.innerHTML = '';
+            const symbols1 = symbolPatterns[winHistory[0]] || [winHistory[0]];
+            if (backgroundLayout === 'random-tile') {
+                layoutRandomTile(background, symbols1);
+            } else if (backgroundLayout === 'circular') {
+                layoutCircular(background, symbols1);
+            } else if (backgroundLayout === 'split-vertical') {
+                const symbols2 = (winHistory.length > 1) ? (symbolPatterns[winHistory[1]] || [winHistory[1]]) : symbols1;
+                layoutSplitVertical(background, symbols1, symbols2);
+            }
+            background.style.opacity = 0.3;
+        }
+
+        const spinButton = document.querySelector('.arrow-button');
+        let spinCount = 0;
+        let nextGoSpin = Math.floor(Math.random() * 4) + 2; // 2-5
+
+        let bodyScaledByPress = false;
+        document.body.addEventListener('mousedown', (e) => {
+            if (settingsOverlay.classList.contains('visible') || e.target.closest('.arrow-button, .go-button-container, .settings-panel, #win-background, #squeeze-meter')) {
+                return;
+            }
+            document.body.style.transform = 'scale(0.95)';
+            bodyScaledByPress = true;
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (bodyScaledByPress) {
+                document.body.style.transform = 'scale(1)';
+                bodyScaledByPress = false;
+            }
+        });
+
+        spinButton.addEventListener('click', async () => {
+            document.getElementById('win-background').style.opacity = 0;
+            spinButton.disabled = true;
+            document.body.style.transform = 'scale(1.1)';
+
+            if (!isAlwaysGoOn) {
+                if (goButtonContainer.classList.contains('go-active')) {
+                    goButtonContainer.classList.remove('go-active');
+                    goButtonContainer.classList.add('deactivating');
+                    goButtonContainer.addEventListener('animationend', () => {
+                        goButtonContainer.classList.remove('deactivating');
+                    }, { once: true });
+                }
+
+                spinCount++;
+                if (spinCount >= nextGoSpin) {
+                    goButtonContainer.classList.add('go-active');
+                    spinCount = 0;
+                    nextGoSpin = Math.floor(Math.random() * 4) + 2;
+                }
+            }
+
+            const spinDuration = 4 + Math.random();
+            const forceMatch = Math.random() * 100 < matchRate;
+            let forcedSymbol = null;
+            if (forceMatch) {
+                forcedSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+            }
+
+            const spinPromises = pickers.map(p => p.spin(spinDuration, forcedSymbol));
+            const results = await Promise.all(spinPromises);
+
+            console.log("Result:", results);
+
+            const allSame = results.length > 0 && results.every(s => s === results[0]);
+            if (allSame) {
+                const winningSymbol = results[0];
+                winHistory.unshift(winningSymbol);
+                if (winHistory.length > 2) winHistory.pop();
+                backgroundLayout = 'circular';
+                showWinningBackground();
+            }
+
+            document.body.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                document.body.style.transform = 'scale(1)';
+                spinButton.disabled = false;
+            }, 200);
+        });
+
+        const background = document.getElementById('win-background');
+        
+        background.addEventListener('wheel', e => {
+            if (e.ctrlKey) return;
+            e.preventDefault();
+            
+            if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 10) {
+                if (backgroundLayout === 'circular') {
+                    backgroundLayout = 'split-vertical';
+                } else {
+                    backgroundLayout = 'circular';
+                }
+                showWinningBackground();
+            }
+        }, { passive: false });
+
+        // --- Squeeze to set Match Rate --- 
+        const squeezeMeter = document.getElementById('squeeze-meter');
+        const squeezeMeterBar = document.getElementById('squeeze-meter-bar');
+        const squeezeMeterText = document.getElementById('squeeze-meter-text');
+        let isSqueezing = false;
+        let squeezeStartX = 0;
+        let squeezeTextAnimation = {
+            current: 0,
+            target: 0,
+            id: null,
+            delayTimeout: null
+        };
+
+        function animateSqueezeText() {
+            const diff = squeezeTextAnimation.target - squeezeTextAnimation.current;
+            if (Math.abs(diff) < 0.5) {
+                squeezeTextAnimation.current = squeezeTextAnimation.target;
+                squeezeMeterText.textContent = `${Math.round(squeezeTextAnimation.current)}%`;
+                cancelAnimationFrame(squeezeTextAnimation.id);
+                squeezeTextAnimation.id = null;
+                return;
+            }
+            squeezeTextAnimation.current += diff * 0.1;
+            squeezeMeterText.textContent = `${Math.round(squeezeTextAnimation.current)}%`;
+            squeezeTextAnimation.id = requestAnimationFrame(animateSqueezeText);
+        }
+
+        const handleSqueezeMove = (e) => {
+            if (!isSqueezing) return;
+            const deltaX = e.clientX - squeezeStartX;
+            const newMatchRate = Math.max(0, Math.min(100, Math.floor(deltaX / 4))); // 1% per 4px
+            
+            matchRate = newMatchRate;
+            matchRateSlider.value = newMatchRate;
+            matchRateValue.textContent = `${newMatchRate}%`;
+            
+            squeezeMeterBar.style.width = `${newMatchRate}%`;
+            
+            squeezeTextAnimation.target = newMatchRate;
+
+            clearTimeout(squeezeTextAnimation.delayTimeout);
+
+            if (!squeezeTextAnimation.id) {
+                squeezeTextAnimation.delayTimeout = setTimeout(() => {
+                    squeezeTextAnimation.current = parseInt(squeezeMeterText.textContent, 10) || 0;
+                    if (!squeezeTextAnimation.id) {
+                        animateSqueezeText();
+                    }
+                }, 100); // 0.1s delay
+            }
+        };
+
+        const handleSqueezeEnd = () => {
+            if (!isSqueezing) return;
+            isSqueezing = false;
+
+            document.body.style.transform = 'scale(0.95)';
+            squeezeMeter.classList.remove('visible');
+            setTimeout(() => {
+                 document.body.style.transform = 'scale(1)';
+            }, 300);
+
+            document.removeEventListener('mousemove', handleSqueezeMove);
+            document.removeEventListener('mouseup', handleSqueezeEnd);
+            document.removeEventListener('webkitmouseforceup', handleSqueezeEnd);
+        };
+
+        document.body.addEventListener('webkitmouseforcechanged', (e) => {
+            if (e.webkitForce >= 2.0 && !isSqueezing) {
+                if (e.target.closest('input[type="range"]')) return; // Don't trigger on sliders
+                
+                isSqueezing = true;
+                squeezeStartX = e.clientX;
+                
+                document.body.style.transform = 'scale(0.95)';
+                squeezeMeter.classList.add('visible');
+
+                document.addEventListener('mousemove', handleSqueezeMove);
+                document.addEventListener('mouseup', handleSqueezeEnd, { once: true });
+                document.addEventListener('webkitmouseforceup', handleSqueezeEnd, { once: true });
+            }
+        });
+    });
+    </script>
+</body>
+</html>
