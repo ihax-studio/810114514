@@ -46,7 +46,7 @@
             border-radius: 18px;
             overflow: hidden;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            aspect-ratio: 16 / 23;
+            aspect-ratio: 16 / 10;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -152,14 +152,15 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background-color: rgba(0, 0, 0, 0.9);
+            /* 背景色を透過させることでフェードイン効果を強調 */
+            background-color: #000;
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 99999; /* 最上位 */
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease-in-out;
+            transition: opacity 0.4s ease-in-out; /* フェードを少し滑らかに */
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
@@ -168,9 +169,12 @@
             opacity: 1;
             pointer-events: auto;
         }
+        /* 画像を画面全体に引き伸ばす */
         #secret-overlay img {
-            max-width: 90%;
-            max-height: 90%;
+            width: 100%;
+            height: 100%;
+            /* アスペクト比を保ちつつ、コンテナを完全に覆う */
+            object-fit: cover;
             pointer-events: none;
         }
 
