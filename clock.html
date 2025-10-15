@@ -33,11 +33,6 @@
             transform: scale(0.8);
             opacity: 0;
             animation: pageZoomIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        }
-
-        body.dark-mode-active {
-            transform: scale(1) rotate(180deg);
         }
 
         img {
@@ -51,7 +46,8 @@
             border-radius: 18px;
             overflow: hidden;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            aspect-ratio: 16 / 23;
+            /* PCでは16:10 */
+            aspect-ratio: 16 / 10;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -110,7 +106,8 @@
             flex: 1;
             box-sizing: border-box;
             min-width: 280px;
-            transition: background-color 0.2s linear, color 0.2s linear, border-radius 0.2s linear, transform 0.1s linear;
+            /* ダークモードの回転と傾きを滑らかにする */
+            transition: background-color 0.2s linear, color 0.2s linear, border-radius 0.2s linear, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
             cursor: default;
         }
         
@@ -148,9 +145,6 @@
             pointer-events: none;
         }
         
-        /* --- 隠し機能用オーバーレイ --- */
-
-        /* ClickAfter (拡大しながら表示) */
         #secret-overlay {
             position: fixed;
             top: 0;
@@ -167,15 +161,12 @@
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
-            /* 初期状態を縮小 */
             transform: scale(0.8);
-            /* 拡大アニメーションを追加 */
             transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
         #secret-overlay.visible {
             opacity: 1;
             pointer-events: auto;
-            /* 表示時に拡大 */
             transform: scale(1);
         }
         #secret-overlay img {
@@ -185,7 +176,6 @@
             pointer-events: none;
         }
 
-        /* Time Display (フェード表示) */
         #time-overlay {
             position: fixed;
             top: 0;
@@ -247,9 +237,14 @@
             }
         }
 
+        /* スマホ向け（狭画面）のスタイル */
         @media (max-width: 768px) {
             body { padding: 20px 10px; }
-            .animation-container { aspect-ratio: 16 / 23; margin-bottom: 30px; }
+            .animation-container {
+                /* スマホでは16:23 */
+                aspect-ratio: 16 / 23;
+                margin-bottom: 30px;
+            }
             .main-title h1 { font-size: 2.5rem; }
             .bubbles-container { flex-direction: column; gap: 20px; align-items: center; }
             .bubble { width: 100%; max-width: 400px; }
@@ -296,7 +291,6 @@
   
   document.addEventListener('DOMContentLoaded', () => {
 
-    const body = document.body;
     const allDivs = document.querySelectorAll('div:not(#secret-overlay):not(#time-overlay):not(#time-display)');
     const bubbleLeft = document.querySelector('.bubble-left');
     const bubbleRight = document.querySelector('.bubble-right');
@@ -358,21 +352,23 @@
 
     const handleDarkModeChange = (matches) => {
         isDarkMode = matches;
+        // JSで直接transformを制御
         if (isDarkMode) {
-            body.classList.add('dark-mode-active');
+            bubbleLeft.style.transform = 'rotate(180deg)';
+            bubbleRight.style.transform = 'rotate(180deg)';
         } else {
-            body.classList.remove('dark-mode-active');
             bubbleLeft.style.transform = '';
             bubbleRight.style.transform = '';
         }
     };
 
     darkModeMediaQuery.addEventListener('change', e => handleDarkModeChange(e.matches));
-    handleDarkModeChange(isDarkMode);
+    handleDarkModeChange(isDarkMode); // 初期状態をセット
 
     const handleOrientation = (event) => {
         if (animationFrameId) cancelAnimationFrame(animationFrameId);
         animationFrameId = requestAnimationFrame(() => {
+            // 色と角丸の変更 (常時)
             const gammaProgress = Math.min(Math.abs(event.gamma) / 90, 1);
             const whiteToBlue_R = 255 - 255 * gammaProgress, whiteToBlue_G = 255 - 133 * gammaProgress;
             const blueToWhite_R = 255 * gammaProgress, blueToWhite_G = 122 + 133 * gammaProgress;
@@ -387,10 +383,12 @@
             bubbleLeft.style.borderRadius = `${newBorderRadius}px`;
             bubbleRight.style.borderRadius = `${newBorderRadius}px`;
 
+            // 要素の3D傾き (ダークモードのみ)
             if (isDarkMode) {
                 const rotateX = (event.beta || 0) * -0.2;
                 const rotateY = (event.gamma || 0) * 0.2;
-                const transformStyle = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                // 180度回転に加えて傾きを適用
+                const transformStyle = `rotate(180deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
                 bubbleLeft.style.transform = transformStyle;
                 bubbleRight.style.transform = transformStyle;
             }
@@ -399,7 +397,6 @@
 
     // ページ読み込み時に傾き検知を開始
     if (window.DeviceOrientationEvent) {
-        // iOS 13+対応: ユーザーの操作が必要なため、最初のタップで許可を求める
         if (typeof DeviceOrientationEvent.requestPermission === 'function') {
             document.body.addEventListener('click', function requestPermission() {
                 DeviceOrientationEvent.requestPermission().then(state => {
@@ -407,11 +404,9 @@
                         window.addEventListener('deviceorientation', handleOrientation);
                     }
                 }).catch(console.error);
-                // 一度だけ実行
                 document.body.removeEventListener('click', requestPermission);
-            });
+            }, { once: true }); // イベントリスナーを一度だけ実行
         } else {
-            // Androidなど許可が不要なデバイス
             window.addEventListener('deviceorientation', handleOrientation);
         }
     }
