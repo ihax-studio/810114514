@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ジャグラー風スロットマシン（固定BET/無効時no音/リングフェード + TU演出）</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      background:linear-gradient(135deg,#1a0033 0%,#4a0080 100%);
+      min-height:100vh;display:flex;justify-content:center;align-items:center;
+      font-family:"SF Pro Display","SF Pro Text","SF Pro Icons","SF Pro Rounded","SF Compact","SF Compact Text","San Francisco",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+      font-weight:1;
+      cursor:auto; /* カーソル表示 */
+      overflow:hidden;
+    }
+
+    .machine{
+      background:linear-gradient(180deg,#ff0090 0%,#cc0070 50%,#990050 100%);
+      border:8px solid #ffd700;border-radius:30px;padding:40px;position:relative;
+      max-width:900px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.8), inset 0 0 40px rgba(255,255,255,.1);
+    }
+    .top-section{text-align:center;margin-bottom:30px}
+    .title{
+      font-size:48px;color:#ffff00;letter-spacing:4px;margin-bottom:20px;
+      text-shadow:0 0 20px #ff0000,0 0 40px #ff0000,4px 4px 0 #cc0000;
+      animation:titleGlow 2s ease-in-out infinite;
+    }
+    @keyframes titleGlow{0%,100%{text-shadow:0 0 20px #ff0000,0 0 40px #ff0000,4px 4px 0 #cc0000}50%{text-shadow:0 0 30px #ff0000,0 0 60px #ff0000,4px 4px 0 #cc0000}}
+    .gogo-lamp{
+      width:200px;height:80px;margin:0 auto 20px;background:linear-gradient(180deg,#330000 0%,#000 100%);
+      border:5px solid #444;border-radius:15px;display:flex;align-items:center;justify-content:center;
+      font-size:42px;font-weight:bold;color:#222;text-shadow:0 0 5px rgba(255,255,255,.1);
+      box-shadow:inset 0 5px 15px rgba(0,0,0,.9);transition:all .3s;
+    }
+    .gogo-lamp.active{
+      background:linear-gradient(180deg,#ff3333 0%,#ff0000 50%,#cc0000 100%);
+      color:#fff;text-shadow:0 0 20px #fff,0 0 30px #ffff00;
+      box-shadow:0 0 30px rgba(255,0,0,.8), inset 0 0 20px rgba(255,255,255,.3);
+      animation:gogoFlash .5s ease-in-out infinite;
+    }
+    @keyframes gogoFlash{0%,100%{opacity:1}50%{opacity:.7}}
+
+    .display-area{
+      position:relative;
+      background:linear-gradient(180deg,#fff 0%,#e0e0e0 100%);
+      border:12px solid #333;border-radius:20px;padding:30px 20px;margin-bottom:30px;
+      box-shadow:inset 0 10px 30px rgba(0,0,0,.3);
+      overflow:hidden;
+    }
+
+    .reels-container{display:flex;justify-content:center;gap:20px;margin-bottom:30px}
+    .reel{
+      width:180px;height:200px;background:#fff;border:6px solid #000;border-radius:10px;overflow:hidden;position:relative;
+      box-shadow:inset 0 5px 15px rgba(0,0,0,.4);
+    }
+    .reel-strip{position:absolute;width:100%;transition:transform .1s linear}
+    .reel.spinning .reel-strip{animation:spin .1s linear infinite}
+    @keyframes spin{0%{transform:translateY(0)}100%{transform:translateY(-600px)}}
+    .symbol{height:200px;display:flex;align-items:center;justify-content:center;font-size:120px;background:#fff;border-bottom:2px solid #ddd}
+    .symbol img{max-height:140px;object-fit:contain}
+
+    .info-panel{
+      display:flex;justify-content:space-around;background:linear-gradient(180deg,#1a1a1a 0%,#000 100%);
+      border:5px solid #333;border-radius:15px;padding:20px;color:#00ff00;font-size:20px;font-weight:bold;text-shadow:0 0 10px #00ff00;
+    }
+    .info-item{text-align:center}
+    .info-label{color:#888;font-size:14px;margin-bottom:5px}
+    .info-value{font-size:32px;font-family:'Courier New',monospace}
+
+    .control-panel{
+      background:linear-gradient(180deg,#2a2a2a 0%,#1a1a1a 100%);border:8px solid #444;border-radius:20px;padding:40px;margin-top:30px;
+      box-shadow:inset 0 5px 20px rgba(0,0,0,.5); position:relative;
+    }
+    .start-row{display:flex;justify-content:flex-start;margin-bottom:30px}
+    .buttons-row{display:flex;justify-content:center;gap:40px;margin-bottom:0}
+    .button{
+      width:100px;height:100px;border-radius:50%;border:8px solid #666;background:linear-gradient(180deg,#ff0000 0%,#cc0000 50%,#990000 100%);
+      cursor:pointer;
+      transition:all .1s;box-shadow:0 8px 0 #660000,0 12px 20px rgba(0,0,0,.5);position:relative;display:flex;align-items:center;justify-content:center;
+      font-size:14px;font-weight:bold;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.8);
+    }
+    .button:active{transform:translateY(4px);box-shadow:0 4px 0 #660000,0 6px 10px rgba(0,0,0,.5)}
+    .button:disabled{background:linear-gradient(180deg,#666 0%,#444 50%,#333 100%);box-shadow:0 8px 0 #222,0 12px 20px rgba(0,0,0,.5)}
+    .button::before{content:'';position:absolute;top:10px;left:10px;right:10px;height:30%;background:linear-gradient(180deg,rgba(255,255,255,.4) 0%,transparent 100%);border-radius:50%}
+    .lever-button{background:linear-gradient(180deg,#ffdd00 0%,#ffaa00 50%,#ff8800 100%);box-shadow:0 8px 0 #cc6600,0 12px 20px rgba(0,0,0,.5);width:120px;height:120px;font-size:18px}
+    .lever-button:active{box-shadow:0 4px 0 #cc6600,0 6px 10px rgba(0,0,0,.5)}
+    .message{
+      text-align:center;font-size:24px;font-weight:bold;color:#ffff00;text-shadow:0 0 20px #ff0000,0 0 30px #ff0000;min-height:50px;margin-top:20px;
+      animation:messageGlow 1s ease-in-out infinite;
+    }
+    @keyframes messageGlow{0%,100%{opacity:1}50%{opacity:.7}}
+    .win-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:1000}
+    .win-overlay.active{display:flex}
+    .win-message{font-size:120px;color:#ffff00;text-shadow:0 0 40px #ff0000,0 0 80px #ff0000;animation:winPulse .5s ease-in-out infinite}
+    @keyframes winPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+    .top-right{position:absolute;top:10px;right:16px;color:#fff;font:700 14px/1 Arial,sans-serif;text-shadow:0 2px 6px rgba(0,0,0,.7)}
+
+    /* 勝利時の白点（通常） */
+    #gogo-dots-overlay{position:fixed;inset:0;z-index:1500;pointer-events:none;overflow:hidden}
+    .gdot{position:absolute;border-radius:9999px;background:#fff;opacity:1;animation:dot-pop-opaque 1.9s cubic-bezier(.25,1,.5,1) forwards}
+    @keyframes dot-pop-opaque{0%{opacity:1;transform:translate(-50%,-50%) scale(.3)}12%{opacity:1}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(1.05)}}
+
+    /* Final Counterにも白い点 */
+    #fc-dots-overlay{position:fixed;inset:0;z-index:2050;pointer-events:none;overflow:hidden}
+
+    /* Final Counter（1→5、SF Pro/weight1） */
+    #final-counter-overlay{position:fixed;inset:0;z-index:2000;background:#000;display:grid;place-items:center;opacity:0;visibility:hidden;transition:opacity .5s ease,visibility .5s ease}
+    #final-counter-overlay.visible{opacity:1;visibility:visible}
+    .fc-wrap{display:grid;place-items:center}
+    .fc-ring{position:relative;width:240px;height:240px}
+    .fc-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+    .fc-ring .bg{fill:none;stroke-linecap:round;stroke-width:6;stroke:rgba(255,255,255,.10)}
+    .fc-ring .fg{fill:none;stroke-linecap:round;stroke-width:6;stroke:url(#fc-g);stroke-dasharray:calc(2*3.14159265*50);stroke-dashoffset:calc(2*3.14159265*50);filter:drop-shadow(0 0 4px rgba(255,255,255,.15));transition:stroke-dashoffset 1.45s cubic-bezier(.3,1,.3,1)}
+    .fc-center{position:absolute;inset:0;display:grid;place-items:center;perspective:900px}
+    .fc-wheel{position:relative;width:100px;height:80px;display:grid;place-items:center;transform-style:preserve-3d;transition:transform 1.45s cubic-bezier(.3,1,.3,1)}
+    .fc-face{
+      position:absolute;inset:0;display:grid;place-items:center;width:100px;height:80px;
+      font-size:64px;color:#fff;text-shadow:0 4px 14px rgba(0,0,0,.35),0 0 10px rgba(255,255,255,.35);backface-visibility:hidden;
+      font-family:"SF Pro Display","SF Pro Text","San Francisco",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+      font-weight:1;
+    }
+
+    /* Thanks（→の周囲リング拡大→フェードアウト） */
+    #gradient-box{position:fixed;inset:0;background:linear-gradient(135deg,#FF00C8,#FF7A00,#FFF500,#00FF85,#00E0FF,#4D7CFF,#B000FF);clip-path:circle(0% at 50% 50%);transition:clip-path .8s cubic-bezier(.8,0,.2,1),opacity .5s ease;opacity:0;pointer-events:none;z-index:2400}
+    #gradient-box.visible{opacity:1}
+    #gradient-box.animate{clip-path:circle(75% at 50% 50%)}
+    #thanks-overlay{position:fixed;inset:0;z-index:2500;background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px;opacity:0;visibility:hidden;transition:opacity .6s ease,visibility .6s ease}
+    #thanks-overlay.visible{opacity:1;visibility:visible}
+    #thanks-circle{width:220px;height:220px;border:3px solid rgba(255,255,255,.9);border-radius:9999px;box-shadow:0 0 24px rgba(255,255,255,.35),0 0 64px rgba(255,255,255,.15) inset;display:grid;place-items:center;animation:circle-pop .7s cubic-bezier(.2,1,.3,1) both;position:relative;overflow:visible}
+    @keyframes circle-pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+    #thanks-arrow{
+      font-weight:1;font-size:84px;line-height:1;color:#fff;
+      font-family:"SF Pro Display","SF Pro Text","San Francisco",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+      position:relative; z-index:2;
+    }
+    #thanks-ring{
+      position:absolute; inset:0; margin:auto; width:220px; height:220px; border-radius:9999px;
+      border:3px solid rgba(255,255,255,.9); box-shadow:0 0 20px rgba(255,255,255,.35);
+      z-index:1; opacity:0; transform:scale(1);
+    }
+    .ring-anim{animation:ring-expand 1.2s cubic-bezier(.2,1,.3,1) forwards}
+    @keyframes ring-expand{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(3)}}
+    #thanks-text{font-size:36px;font-weight:700;color:#fff;letter-spacing:.02em;text-shadow:0 6px 22px rgba(0,0,0,.55)}
+    #thanks-sub{font-size:18px;color:#cfcfcf}
+    #thanks-dots{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2550}
+    .dot{position:absolute;border-radius:9999px;background:#fff;opacity:0;animation:dot-pop 1.6s ease forwards}
+    @keyframes dot-pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}10%{opacity:1}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(1)}}
+
+    /* --- TU 演出 --- */
+    /* 背景グラデ回転（演出中のみ可視） */
+    #tu-bg{
+      position:fixed;inset:-10%; /* 余白で回転時の切れを防ぐ */
+      background:conic-gradient(from 0deg,#ff00c8,#ff7a00,#fff500,#00ff85,#00e0ff,#4d7cff,#b000ff,#ff00c8);
+      opacity:0; pointer-events:none; z-index:1800; mix-blend-mode:screen;
+      transition:opacity .35s ease;
+      filter:blur(8px) saturate(1.2);
+    }
+    #tu-bg.active{opacity:.35;animation:tu-rotate 5s linear infinite}
+    @keyframes tu-rotate{to{transform:rotate(360deg)}}
+
+    /* スロット内で回る tu.png オーバーレイ */
+    #tu-overlay{
+      position:absolute; inset:0; display:none; align-items:center; justify-content:center; gap:20px;
+      z-index:1200; pointer-events:none;
+      background:transparent;
+    }
+    #tu-overlay.visible{display:flex;animation:tu-fade-in .25s ease both}
+    @keyframes tu-fade-in{from{opacity:0}to{opacity:1}}
+    .tu-chip{
+      width:160px;height:160px;display:grid;place-items:center;border-radius:20px;
+      background:rgba(255,255,255,.06); backdrop-filter:blur(6px);
+      box-shadow:0 8px 24px rgba(0,0,0,.35), inset 0 0 20px rgba(255,255,255,.15);
+    }
+    .tu-chip img{
+      width:120px;height:120px;object-fit:contain;opacity:.92;
+      animation:tu-spin 1.2s linear infinite;
+      filter:drop-shadow(0 8px 24px rgba(0,0,0,.45));
+    }
+    @keyframes tu-spin{to{transform:rotate(360deg)}}
+    .tu-overlay-dim{position:absolute;inset:0;background:rgba(0,0,0,.08)}
+    .fade-out{animation:fade-out .35s ease both}
+    @keyframes fade-out{to{opacity:0}}
+  </style>
+</head>
+<body>
+  <div class="machine">
+    <div class="top-section">
+      <div class="title">GOOD LUCK!</div>
+      <div class="gogo-lamp" id="gogoLamp">GOGO!</div>
+    </div>
+
+    <div class="display-area" id="displayArea">
+      <div class="reels-container">
+        <div class="reel" id="reel1"><div class="reel-strip" id="strip1"></div></div>
+        <div class="reel" id="reel2"><div class="reel-strip" id="strip2"></div></div>
+        <div class="reel" id="reel3"><div class="reel-strip" id="strip3"></div></div>
+      </div>
+
+      <!-- TU演出（スロット内オーバーレイ） -->
+      <div id="tu-overlay" aria-hidden="true">
+        <div class="tu-overlay-dim"></div>
+        <div class="tu-chip"><img src="tu.png" alt="tu"/></div>
+        <div class="tu-chip"><img src="tu.png" alt="tu"/></div>
+        <div class="tu-chip"><img src="tu.png" alt="tu"/></div>
+      </div>
+
+      <div class="info-panel">
+        <div class="info-item">
+          <div class="info-label">CREDIT</div>
+          <div class="info-value" id="credit">100</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">BET</div>
+          <div class="info-value" id="bet">10</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">PAYOUT</div>
+          <div class="info-value" id="payout">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-panel">
+      <div class="start-row">
+        <button class="button lever-button" id="startButton">START</button>
+      </div>
+      <div class="buttons-row">
+        <button class="button" id="stop1" disabled>STOP<br>1</button>
+        <button class="button" id="stop2" disabled>STOP<br>2</button>
+        <button class="button" id="stop3" disabled>STOP<br>3</button>
+      </div>
+      <div class="message" id="message"></div>
+    </div>
+    <div class="top-right">SPINS LEFT: <span id="spinsLeft">5</span></div>
+  </div>
+
+  <div class="win-overlay" id="winOverlay"><div class="win-message">🎰 BIG WIN! 🎰</div></div>
+
+  <!-- 背景グラデ回転 -->
+  <div id="tu-bg"></div>
+
+  <!-- 勝利ドット（通常） -->
+  <div id="gogo-dots-overlay"></div>
+
+  <!-- Final Counter（1→5） -->
+  <div id="final-counter-overlay" aria-hidden="true">
+    <div class="fc-wrap">
+      <div class="fc-ring">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <defs>
+            <linearGradient id="fc-g" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="userSpaceOnUse">
+              <stop offset="0%"   stop-color="#ff3b30"/>
+              <stop offset="35%"  stop-color="#ffcc00"/>
+              <stop offset="70%"  stop-color="#4cd964"/>
+              <stop offset="100%" stop-color="#34aadc"/>
+              <animateTransform attributeName="gradientTransform" type="rotate" from="0 60 60" to="360 60 60" dur="5s" repeatCount="indefinite"/>
+            </linearGradient>
+          </defs>
+          <circle class="bg" cx="60" cy="60" r="50"></circle>
+          <circle class="fg" cx="60" cy="60" r="50"></circle>
+        </svg>
+        <div class="fc-center">
+          <div class="fc-wheel" id="fc-wheel">
+            <div class="fc-face" style="transform:rotateX(0deg) translateZ(55px);">1</div>
+            <div class="fc-face" style="transform:rotateX(-72deg) translateZ(55px);">2</div>
+            <div class="fc-face" style="transform:rotateX(-144deg) translateZ(55px);">3</div>
+            <div class="fc-face" style="transform:rotateX(-216deg) translateZ(55px);">4</div>
+            <div class="fc-face" style="transform:rotateX(-288deg) translateZ(55px);">5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- リング表示中の白点 -->
+  <div id="fc-dots-overlay"></div>
+
+  <div id="gradient-box"></div>
+  <div id="thanks-overlay">
+    <div id="thanks-circle">
+      <div id="thanks-ring"></div>
+      <div id="thanks-arrow">→</div>
+    </div>
+    <div id="thanks-text">ありがとう。</div>
+    <div id="thanks-sub">Thanks💝</div>
+    <div id="thanks-dots"></div>
+  </div>
+
+  <script>
+    const MAX_SPINS = 5;
+
+    const EMO_CHERRY='🍒', EMO_LEMON='🍋', EMO_ORANGE='🍊', EMO_GRAPE='🍇', EMO_STAR='⭐', EMO_DIAMOND='💎';
+    const emojiSymbols = [EMO_CHERRY,EMO_LEMON,EMO_ORANGE,EMO_GRAPE,EMO_STAR,EMO_DIAMOND]; // 7以外
+    const SPECIAL_7 = '7️⃣';
+    const SPECIAL_SAFUR = 'safur';
+
+    function buildWeightedPool(){
+      const pool=[];
+      emojiSymbols.forEach(sym=>{
+        const w = (sym===EMO_ORANGE)?0.45:1; // オレンジは低確率
+        pool.push({type:'emoji',key:sym,val:sym,weight:w});
+      });
+      pool.push({type:'image',key:SPECIAL_SAFUR,src:'safur.png',weight:1});
+      pool.push({type:'emoji',key:SPECIAL_7,val:SPECIAL_7,weight:3}); // 7を厚め
+      return pool;
+    }
+    const weightedPool = buildWeightedPool();
+    function pickRandomSymbol(){
+      const total = weightedPool.reduce((s,it)=>s+it.weight,0);
+      let r=Math.random()*total;
+      for(const it of weightedPool){ if((r-=it.weight)<=0) return it; }
+      return weightedPool[0];
+    }
+
+    const strips=[document.getElementById('strip1'),document.getElementById('strip2'),document.getElementById('strip3')];
+    const stopButtons=[document.getElementById('stop1'),document.getElementById('stop2'),document.getElementById('stop3')];
+    const gogoLamp=document.getElementById('gogoLamp');
+    const startButton=document.getElementById('startButton');
+    const spinsLeftEl=document.getElementById('spinsLeft');
+    const tuBg=document.getElementById('tu-bg');
+    const tuOverlay=document.getElementById('tu-overlay');
+
+    let credit=100, betAmount=10, isSpinning=false, stoppedReels=[false,false,false];
+    let finalSymbols=['','',''], reels=[[],[],[]], spinCount=0, winsCount=0;
+
+    /* キー状態（Option + Shift + K 押しながら START で確定オレンジ） */
+    const keyState={ Alt:false, Shift:false, k:false };
+    window.addEventListener('keydown',e=>{
+      if(e.key==='Alt') keyState.Alt=true;
+      if(e.key==='Shift') keyState.Shift=true;
+      if(e.key.toLowerCase()==='k') keyState.k=true;
+    });
+    window.addEventListener('keyup',e=>{
+      if(e.key==='Alt') keyState.Alt=false;
+      if(e.key==='Shift') keyState.Shift=false;
+      if(e.key.toLowerCase()==='k') keyState.k=false;
+    });
+
+    const sounds={
+      lever:new Audio('d.mp3'),
+      stop:new Audio('dd.mp3'),
+      spin:new Audio('k.mp3'),
+      gogo:new Audio('GO.mp3'),
+      bigwin:new Audio('777.mp3'),
+      haptic:new Audio('WorkoutSaved_Haptic.caf'),
+      return:new Audio('return.mp3'),
+      no:new Audio('no.mp3'),
+      tu:new Audio('tu.mp3')
+    };
+    sounds.spin.loop=true;
+
+    function renderCell(parent,symObj){
+      const div=document.createElement('div'); div.className='symbol';
+      if(symObj.type==='emoji'){ div.textContent=symObj.val; }
+      else{ const img=document.createElement('img'); img.src=symObj.src; img.alt='safur'; img.draggable=false; div.appendChild(img); }
+      parent.appendChild(div);
+    }
+    function initReels(){
+      for(let i=0;i<3;i++){
+        reels[i]=[];
+        for(let j=0;j<20;j++){ reels[i].push(pickRandomSymbol()); }
+        renderReel(i);
+      }
+    }
+    function renderReel(i){
+      const strip=strips[i]; strip.innerHTML='';
+      for(const s of reels[i]) renderCell(strip,s);
+    }
+    function shuffleReel(i){
+      reels[i].push(pickRandomSymbol());
+      reels[i].shift();
+      renderReel(i);
+    }
+    function setReelTopSymbol(i, symObj){
+      // 先頭を書き換えて見た目も即反映
+      reels[i][0]=symObj;
+      renderReel(i);
+    }
+
+    function updateDisplay(){
+      document.getElementById('credit').textContent=credit;
+      document.getElementById('bet').textContent=10; // 固定
+      document.getElementById('payout').textContent = document.getElementById('payout').textContent || '0';
+      spinsLeftEl.textContent=Math.max(0, MAX_SPINS - spinCount);
+    }
+
+    /* 勝利時の白点 */
+    const gogoDots=document.getElementById('gogo-dots-overlay');
+    const fcDotsOverlay=document.getElementById('fc-dots-overlay');
+    let lastDotsAt=0;
+    function spawnDynamicDots(container,count=200,{durationSec=2.0}={}){
+      if(!container) return;
+      const now=Date.now(); if(now-lastDotsAt<200) return; lastDotsAt=now;
+      const W=innerWidth,H=innerHeight; const cx=W/2,cy=H/2;
+      container.innerHTML='';
+      const total=Math.max(count, Math.floor((W*H)/4000));
+      for(let i=0;i<total;i++){
+        const d=document.createElement('div'); d.className='gdot';
+        const sizePick=Math.random(), sz = sizePick<.6?(Math.random()*3+2): sizePick<.9?(Math.random()*6+4):(Math.random()*10+8);
+        const sx=cx+(Math.random()*220-110), sy=cy+(Math.random()*220-110);
+        const angle=Math.random()*Math.PI*2, dist=(Math.hypot(W,H)*0.45)+(Math.random()*Math.hypot(W,H)*0.65);
+        const tx=Math.cos(angle)*dist, ty=Math.sin(angle)*dist;
+        d.style.width=`${sz}px`; d.style.height=`${sz}px`;
+        d.style.left=`${sx}px`; d.style.top=`${sy}px`;
+        d.style.setProperty('--tx',`${tx}px`); d.style.setProperty('--ty',`${ty}px`);
+        d.style.animationDelay=`${Math.random()*0.18}s`;
+        d.style.animationDuration=durationSec+'s';
+        container.appendChild(d);
+      }
+      setTimeout(()=>{ container.innerHTML=''; }, (durationSec*1000)+600);
+    }
+
+    /* Final Counter（1→5） */
+    const finalCounterOverlay=document.getElementById('final-counter-overlay');
+    const fcRingFg=document.querySelector('#final-counter-overlay .fg');
+    const fcWheel=document.getElementById('fc-wheel');
+    function showFinalCounter(count){
+      const c=Math.max(1,Math.min(5, Number(count)||1));
+      const r=50, C=2*Math.PI*r;
+      fcRingFg.style.strokeDasharray=`${C} ${C}`;
+      fcRingFg.style.strokeDashoffset=C;
+      requestAnimationFrame(()=>{ fcRingFg.style.strokeDashoffset=C*(1-(c/5)); });
+      const deg=-(c-1)*72;
+      fcWheel.style.transition='none'; fcWheel.style.transform='rotateX(0deg)'; void fcWheel.offsetHeight;
+      fcWheel.style.transition='transform 1.45s cubic-bezier(.3,1,.3,1)';
+      fcWheel.style.transform=`rotateX(${deg}deg)`;
+      finalCounterOverlay.classList.add('visible');
+      const dotsCount = Math.max(260, Math.floor((innerWidth*innerHeight)/4200));
+      spawnDynamicDots(fcDotsOverlay, dotsCount, {durationSec:1.9});
+      setTimeout(()=>spawnDynamicDots(fcDotsOverlay, Math.floor(dotsCount*0.6), {durationSec:1.6}), 300);
+      return new Promise(res=>setTimeout(()=>{ finalCounterOverlay.classList.remove('visible'); res(); },2600));
+    }
+
+    /* Thanks（return.mp3→リング拡大フェード→リロード） */
+    const gradientBox=document.getElementById('gradient-box');
+    const thanksOverlay=document.getElementById('thanks-overlay');
+    const thanksDots=document.getElementById('thanks-dots');
+    const thanksRing=document.getElementById('thanks-ring');
+
+    function spawnThanksDots(n=160){
+      const W=innerWidth,H=innerHeight; thanksDots.innerHTML='';
+      for(let i=0;i<n;i++){
+        const d=document.createElement('div'); d.className='dot';
+        const size=Math.random()<.8?(Math.random()*3+2):(Math.random()*6+4);
+        const cx=W/2, cy=H/2;
+        const sx=cx+(Math.random()*160-80), sy=cy+(Math.random()*160-80);
+        const a=Math.random()*Math.PI*2, dist=120+Math.random()*280;
+        const tx=Math.cos(a)*dist, ty=Math.sin(a)*dist;
+        d.style.width=`${size}px`; d.style.height=`${size}px`;
+        d.style.left=`${sx}px`; d.style.top=`${sy}px`;
+        d.style.setProperty('--tx',`${tx}px`); d.style.setProperty('--ty',`${ty}px`);
+        d.style.animationDelay=`${Math.random()*0.25}s`;
+        thanksDots.appendChild(d);
+      }
+    }
+    function waitAudioEnd(audio){
+      return new Promise(resolve=>{
+        if(!audio) return resolve();
+        const done=()=>{ audio.removeEventListener('ended',done); resolve(); };
+        audio.addEventListener('ended',done);
+        setTimeout(done, 20000); // 安全タイムアウト
+      });
+    }
+    async function showThanksAndReload(){
+      try{ sounds.return.currentTime=0; await sounds.return.play(); }catch(e){}
+      gradientBox.classList.add('visible'); await new Promise(r=>setTimeout(r,50));
+      gradientBox.classList.add('animate'); await new Promise(r=>setTimeout(r,800));
+      gradientBox.classList.remove('animate'); await new Promise(r=>setTimeout(r,80));
+
+      thanksOverlay.classList.add('visible');
+      spawnThanksDots(160);
+
+      await new Promise(r=>setTimeout(r,900));
+      thanksRing.classList.add('ring-anim');
+
+      await Promise.all([
+        waitAudioEnd(sounds.return),
+        new Promise(r=>setTimeout(r,1600))
+      ]);
+
+      thanksOverlay.classList.remove('visible');
+      gradientBox.classList.remove('visible');
+      location.reload();
+    }
+
+    /* 無効時 no.mp3 を必ず鳴らす（クリック/タッチ/キー） */
+    let noLock=false;
+    function playNo(){
+      if(noLock) return;
+      noLock=true;
+      try{ sounds.no.currentTime=0; sounds.no.play().catch(()=>{});}catch{}
+      setTimeout(()=>{ noLock=false; }, 150);
+    }
+    function isButtonInvalid(btn){
+      if(!btn) return false;
+      if(btn.disabled) return true;
+      if(btn.id==='startButton' && isSpinning) return true;
+      if(btn.id?.startsWith('stop') && (!isSpinning || stoppedReels[Number(btn.id.slice(-1))-1])) return true;
+      return false;
+    }
+    document.addEventListener('pointerdown',e=>{
+      const btn=e.target.closest('button'); if(!btn) return;
+      if(isButtonInvalid(btn)){ playNo(); e.preventDefault(); }
+    },{passive:false});
+    document.addEventListener('keydown',e=>{
+      if(e.key!=='Enter' && e.key!==' ') return;
+      const btn=document.activeElement?.closest && document.activeElement.closest('button');
+      if(isButtonInvalid(btn)){ playNo(); e.preventDefault(); }
+    });
+
+    /* スロット操作 */
+    function symbolKey(s){return s.key||s;}
+    function isSeven(k){return k===SPECIAL_7;}
+    function isSafur(k){return k===SPECIAL_SAFUR;}
+    function isOrange(k){return k===EMO_ORANGE;}
+
+    // START
+    let forceOrangeThisSpin=false;
+    startButton.addEventListener('click',()=>{
+      if(isSpinning){ playNo(); return; }
+      if(spinCount>=MAX_SPINS){
+        document.getElementById('message').textContent='本日のスピン上限に達しました！';
+        startButton.disabled=true; playNo(); return;
+      }
+      if(credit<betAmount){ document.getElementById('message').textContent='クレジット不足！'; playNo(); return; }
+
+      // Option + Shift + K 押しながら -> 確定でオレンジ揃い
+      forceOrangeThisSpin = !!(keyState.Alt && keyState.Shift && keyState.k);
+
+      sounds.lever.currentTime=0; sounds.lever.play().catch(()=>{});
+      credit -= betAmount; updateDisplay();
+      document.getElementById('message').textContent='';
+      document.getElementById('payout').textContent='0';
+      isSpinning=true; stoppedReels=[false,false,false]; finalSymbols=['','',''];
+
+      if(Math.random()<0.2){
+        setTimeout(()=>{ gogoLamp.classList.add('active'); sounds.gogo.currentTime=0; sounds.gogo.play().catch(()=>{}); },500);
+      }else{ gogoLamp.classList.remove('active'); }
+
+      sounds.spin.currentTime=0; sounds.spin.play().catch(()=>{});
+      for(let i=0;i<3;i++){
+        document.getElementById(`reel${i+1}`).classList.add('spinning');
+        const interval=setInterval(()=>{
+          if(!isSpinning||stoppedReels[i]){ clearInterval(interval); return; }
+          shuffleReel(i);
+          // 強制オレンジ時はたまに先頭をオレンジにしておく（停止時に確実にトップへ）
+          if(forceOrangeThisSpin && Math.random()<0.35){
+            setReelTopSymbol(i,{type:'emoji',key:EMO_ORANGE,val:EMO_ORANGE});
+          }
+        },100);
+      }
+      stopButtons.forEach(btn=>btn.disabled=false);
+      startButton.disabled=true;
+
+      spinCount++; updateDisplay();
+    });
+
+    // STOP
+    stopButtons.forEach((button,index)=>{
+      button.addEventListener('click',()=>{
+        if(stoppedReels[index]){ playNo(); return; }
+        if(button.disabled){ playNo(); return; }
+        if(!isSpinning){ playNo(); return; }
+
+        sounds.stop.currentTime=0; sounds.stop.play().catch(()=>{});
+        stoppedReels[index]=true;
+        document.getElementById(`reel${index+1}`).classList.remove('spinning');
+
+        if(forceOrangeThisSpin){
+          setReelTopSymbol(index,{type:'emoji',key:EMO_ORANGE,val:EMO_ORANGE});
+        }
+        const current=reels[index]; finalSymbols[index]=symbolKey(current[0]);
+        button.disabled=true;
+
+        if(stoppedReels.every(Boolean)){
+          sounds.spin.pause(); sounds.spin.currentTime=0;
+          setTimeout(checkWin,300);
+        }
+      });
+    });
+
+    // TU 演出： tu.mp3 再生中、背景回転 & tu.png がスロット内で回転
+    let tuRunning=false;
+    async function runTuSequence(){
+      if(tuRunning) return; // 再入防止
+      tuRunning=true;
+      try{
+        tuBg.classList.add('active');
+        tuOverlay.classList.add('visible');
+
+        // 表示中は既存絵文字をふわっと隠す（復帰時フェード）
+        strips.forEach(s=>{
+          s.style.transition='opacity .25s ease';
+          s.style.opacity='0';
+        });
+
+        sounds.tu.currentTime=0;
+        await sounds.tu.play().catch(()=>{});
+        await waitAudioEnd(sounds.tu);
+      }finally{
+        // フェードで戻す
+        tuOverlay.classList.add('fade-out');
+        tuBg.classList.remove('active');
+        setTimeout(()=>{
+          tuOverlay.classList.remove('visible','fade-out');
+        },350);
+        strips.forEach(s=>{
+          s.style.opacity='1';
+        });
+        tuRunning=false;
+      }
+    }
+
+    function checkWin(){
+      isSpinning=false;
+      if(spinCount<MAX_SPINS) startButton.disabled=false;
+
+      const [s1,s2,s3]=finalSymbols;
+      let payout=0, message='';
+      const triple=(s1===s2&&s2===s3);
+      const jackpot = triple&&(isSeven(s1)||isSafur(s1));
+
+      // オレンジ & safur が混在（2個以上の意味で「同時にいる」） or オレンジ3つ
+      const hasOrange=[s1,s2,s3].some(isOrange);
+      const hasSafur=[s1,s2,s3].some(isSafur);
+      const orangeCount=[s1,s2,s3].filter(isOrange).length;
+      const tuTrigger = (hasOrange && hasSafur) || (orangeCount===3);
+
+      if(triple){
+        spawnDynamicDots(gogoDots, Math.max(260, Math.floor((innerWidth*innerHeight)/4200)), {durationSec:1.9});
+      }
+
+      if(jackpot){
+        // 7 or safur の3つ揃い → 同演出
+        payout=betAmount*100; message='🎰 BIG WIN! 🎰';
+        document.getElementById('winOverlay').classList.add('active');
+        sounds.bigwin.currentTime=0; sounds.bigwin.play().catch(()=>{});
+        setTimeout(()=>{ document.getElementById('winOverlay').classList.remove('active'); }, 3000);
+        credit+=payout; winsCount++;
+      }else if(triple){
+        payout=betAmount*10; message='🎉 当たり！ 🎉';
+        sounds.haptic.currentTime=0; sounds.haptic.play().catch(()=>{});
+        credit+=payout; winsCount++;
+      }else{
+        message='もう一度！';
+      }
+
+      // TU演出：演出中は「tu.png は 7 / safur / オレンジ と同等の“役”扱い（ワイルド）」。
+      // ここではボーナスとして勝数を+1して“稼げる”仕様とし、演出後は通常表示へフェード復帰。
+      if(tuTrigger){
+        // tu.mp3 再生と演出
+        runTuSequence().catch(()=>{});
+        // ボーナス（勝ち回数加算 & 白点も少し追加）
+        winsCount++;
+        spawnDynamicDots(gogoDots, Math.max(200, Math.floor((innerWidth*innerHeight)/5200)), {durationSec:1.7});
+        // Payout も少し追加（任意に軽めのボーナス）
+        payout += Math.floor(betAmount * 3);
+        credit += Math.floor(betAmount * 3);
+        message = (message ? message + ' + TU BONUS!' : 'TU BONUS!');
+      }
+
+      document.getElementById('payout').textContent=payout;
+      document.getElementById('message').textContent=message;
+      updateDisplay();
+
+      setTimeout(()=>{ gogoLamp.classList.remove('active'); },2000);
+
+      if(spinCount>=MAX_SPINS){
+        startButton.disabled=true;
+        (async ()=>{
+          await showFinalCounter(winsCount>0?winsCount:1);
+          await showThanksAndReload();
+        })();
+      }
+    }
+
+    initReels(); updateDisplay();
+  </script>
+</body>
+</html>
