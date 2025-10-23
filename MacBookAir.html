@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スロットマシンスピナー 🥨❤️‍🔥🫧</title>
+<style>:root {
+    --item-height: 130px;
+    --wheel-radius: 160px;
+    --visible-items-side: 2;
+}
+
+body {
+    background-color: #000;
+    font-family: "SF Pro Display", "SF Pro Text", "SF Pro Icons", "SF Pro Rounded", "SF Compact", "SF Compact Text", "San Francisco", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    transition: transform .5s cubic-bezier(0.2, 1, 0.3, 1), background 1s ease;
+}
+
+/* --- Background System --- */
+.gradient-bg {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -1; opacity: 0; transition: opacity 0.5s ease-in-out;
+}
+body::after {
+    content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-size: 200px; background-repeat: space; z-index: -2;
+}
+
+#win-background {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 500;
+    overflow: hidden; opacity: 0; transition: opacity .55s cubic-bezier(0.8, 0, 0.2, 1);
+    pointer-events: none;
+}
+#win-background span {
+    position: absolute; user-select: none; animation: fadeIn .77s cubic-bezier(0.8, 0, 0.2, 1);
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.5) translate(-50%, -50%); }
+    to { opacity: 1; transform: scale(1) translate(-50%, -50%); }
+}
+
+.picker-group, .buttons-container {
+    transition: transform 0.7s cubic-bezier(0.8, 0, 0.2, 1), opacity 0.7s cubic-bezier(0.8, 0, 0.2, 1);
+}
+.picker-group { display: flex; align-items: center; position: relative; gap: 35px; z-index: 10; }
+.picker-container {
+    width: 150px; height: calc((var(--visible-items-side) * 2 + 1) * var(--item-height));
+    position: relative; overflow: hidden; perspective: 1000px;
+}
+
+@keyframes move-pale-gradient {
+    0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; }
+}
+
+.highlight-line-top, .highlight-line-bottom {
+    position: absolute; left: 0; width: 100%; height: 3px; border-radius: 50px;
+    z-index: 12; overflow: hidden; background-color: rgba(148, 148, 148, 0.25);
+}
+.highlight-line-top::before, .highlight-line-bottom::before {
+    content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 100%;
+    background: linear-gradient(90deg, #757c92, #6f928d, #dd0172, #5d6bd1, #b76a38, #33a0df, #606578);
+    background-size: 400% 400%; animation: move-pale-gradient 10s ease infinite;
+    filter: none; transition: all 0.5s cubic-bezier(0.8, 0, 0.2, 1);
+}
+.highlight-line-top { top: 50%; transform: translateY(calc(var(--item-height) / -2)); }
+.highlight-line-bottom { top: 50%; transform: translateY(calc(var(--item-height) / 2)); }
+
+.picker-list {
+    transform-style: preserve-3d; position: absolute; width: 100%; height: 100%;
+}
+.picker-item {
+    position: absolute; top: calc(50% - var(--item-height) / 2); left: 0; right: 0;
+    display: flex; justify-content: center; align-items: center; height: var(--item-height);
+    font-size: 60px; font-weight: 500; color: #888;
+    transition: color 0.55s cubic-bezier(0.8, 0, 0.2, 1);
+    backface-visibility: hidden; z-index: 11;
+}
+.picker-item.selected { color: #fff; }
+
+.buttons-container {
+    display: none;
+}
+
+/* --- Settings Panel --- */
+#settings-overlay {
+    position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.4); z-index: 600;
+    display: flex; justify-content: center; align-items: center;
+    opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility .77s cubic-bezier(0.8, 0, 0.2, 1);
+}
+#settings-overlay.visible { opacity: 1; visibility: visible; }
+.settings-panel {
+    background-color: rgba(30, 30, 30, 0.75); border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px; padding: 24px 32px; width: 90%; max-width: 420px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    transform: translateY(40px) scale(0.8); transition: transform 0.55s cubic-bezier(0.2, 1, 0.3, 1);
+    z-index: 101;
+}
+#settings-overlay.visible .settings-panel { transform: translateY(0) scale(1); }
+.settings-panel h2 {
+    margin-top: 0; margin-bottom: 4px; font-size: 28px; font-weight: 700;
+    color: #fff; text-align: center;
+}
+.settings-panel p {
+    text-align: center; margin-top: 0; margin-bottom: 24px;
+    color: #aaa; font-size: 16px;
+}
+.setting-item {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; color: #eee; font-size: 16px;
+}
+.setting-item label { flex-shrink: 0; margin-right: 15px; }
+.slider-container { display: flex; align-items: center; width: 50%; }
+input[type="range"] {
+    --value-percent: 0%; -webkit-appearance: none; appearance: none;
+    width: 100%; height: 6px;
+    background: linear-gradient(to right, #e91e63, #ff9800 var(--value-percent), #444 var(--value-percent), #444 100%);
+    border-radius: 3px; outline: none; opacity: 0.7;
+    transition: opacity .2s, background .4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+input[type="range"]:hover { opacity: 1; }
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 20px; height: 20px;
+    background: #e91e63; cursor: pointer; border-radius: 50%; border: 2px solid #fff;
+}
+input[type="range"]::-moz-range-thumb {
+    width: 20px; height: 20px; background: #e91e63; cursor: pointer;
+    border-radius: 50%; border: 2px solid #fff;
+}
+#match-rate-value { margin-left: 10px; min-width: 40px; text-align: right; font-weight: 500; }
+.switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch .slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #444; transition: .4s;
+}
+.switch .slider:before {
+    position: absolute; content: ""; height: 20px; width: 20px; left: 4px;
+    bottom: 4px; background-color: white; transition: .77s cubic-bezier(0.8, 0, 0.2, 1);
+}
+input:checked+.slider { background-color: #e91e63; }
+input:checked+.slider:before { transform: translateX(22px); }
+.slider.round { border-radius: 34px; }
+.slider.round:before { border-radius: 50%; }
+.esc-note { text-align: center; color: #888; font-size: 12px; margin-top: 20px; }
+
+#force-indicator {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
+    width: auto; padding: 0 30px; height: 50px; background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 25px; border: 1px solid rgba(255, 255, 255, 0.2); z-index: 200;
+    display: flex; align-items: center; box-sizing: border-box;
+    opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    color: #fff; font-weight: 600; font-size: 20px; user-select: none;
+}
+#force-indicator.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
+.slots-hidden { transform: translateY(150px); opacity: 0; pointer-events: none; }
+
+/* --- New Results Screen Styles --- */
+#pre-results-overlay {
+    position: fixed; inset: 0; 
+    z-index: 5001; 
+    display: flex; justify-content: center;
+    align-items: center; background-color: #000000; opacity: 0;
+    visibility: hidden; pointer-events: none; transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+#pre-results-overlay.visible { opacity: 1; visibility: visible; }
+.expanding-circle {
+    width: 50px; height: 50px; background-color: white; border-radius: 50%;
+    transform: scale(1); opacity: 1;
+}
+#pre-results-overlay.visible .expanding-circle { animation: expand-and-fade 1s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+@keyframes expand-and-fade {
+    0% { transform: scale(1); opacity: 1; background-color: white; }
+    100% { transform: scale(40); opacity: 0; background-color: #000000; }
+}
+
+#results-overlay {
+    position: fixed; inset: 0; 
+    z-index: 5000; 
+    display: flex; justify-content: center;
+    align-items: center; flex-direction: column; background-color: #000000;
+    opacity: 0; visibility: hidden; transition: opacity 0.5s ease, visibility 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+    color: white;
+}
+#results-overlay.visible { opacity: 1; visibility: visible; }
+.progress-ring { transform: scale(1.5); }
+.progress-ring__bg { fill: transparent; stroke: #000000; stroke-width: 10; }
+.progress-ring__fg {
+    fill: transparent; stroke: #ffffff; stroke-width: 10; stroke-linecap: round;
+    transform: rotate(-90deg) scaleX(-1); transform-origin: 50% 50%;
+    transition: stroke-dashoffset 1.1s cubic-bezier(0.65, 0, 0.35, 1);
+}
+#results-text-container {
+    position: absolute; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; text-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden; height: 100px;
+}
+#results-percentage {
+    font-size: 72px; font-weight: 700; line-height: 1;
+    opacity: 0; transform: translateY(100%);
+}
+#results-count-text {
+    font-size: 18px; font-weight: 500; opacity: 0; transform: translateY(10px);
+    transition: opacity 0.8s ease, transform 0.88s cubic-bezier(0.65, 0, 0.35, 1);
+}
+#results-count-text.visible { opacity: 1; transform: translateY(0); }
+
+
+/* --- GOGO Chance & Special Spin Styles --- */
+.special-spin-mode {
+    font-family: -apple-system, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.gogo-chance-mode {
+    background: #000;
+    transition: background 0.5s ease-in-out;
+}
+.gogo-chance-mode.active {
+    background: radial-gradient(at 46% 54%, rgb(250, 182, 218) 0px, transparent 50%),
+                radial-gradient(at 30% 94%, rgb(114, 122, 255) 0px, transparent 50%),
+                radial-gradient(at 90% 5%, rgb(182, 198, 255) 0px, transparent 50%),
+                radial-gradient(at 24% 60%, rgb(90, 186, 246) 0px, transparent 50%),
+                radial-gradient(at 64% 7%, rgb(255, 51, 204) 0px, transparent 50%),
+                radial-gradient(at 63% 5%, rgb(231, 169, 234) 0px, transparent 50%);
+    background-size: 400% 400%;
+    animation: rotate-gradient 3s ease-in-out infinite;
+}
+@keyframes rotate-gradient {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* 最終スピン用の背景 */
+.final-spin-mode {
+    background: radial-gradient(at 46% 54%, rgb(255, 81, 0) 0px, transparent 50%),
+                radial-gradient(at 30% 94%, rgb(208, 255, 0) 0px, transparent 50%),
+                radial-gradient(at 90% 5%, rgb(255, 213, 0) 0px, transparent 50%),
+                radial-gradient(at 24% 60%, rgb(238, 86, 48) 0px, transparent 50%),
+                radial-gradient(at 64% 7%, rgb(205, 57, 13) 0px, transparent 50%),
+                radial-gradient(at 63% 5%, rgb(230, 212, 25) 0px, transparent 50%),
+                #000;
+    background-size: 400% 400%;
+    animation: rotate-gradient 3s ease-in-out infinite;
+}
+
+.special-spin-mode.win-state {
+    background: radial-gradient(ellipse at center, #FFDF87 0%, #F3C34F 40%, #D49B2A 80%, #A56C0F 100%);
+    background-size: 300% 300%;
+    animation: rotate-gradient 12s ease infinite;
+}
+
+#special-spin-stage {
+    display: none; width: 100%; height: 100vh;
+    perspective: 1200px; overflow: hidden;
+    position: fixed; top: 0; left: 0; z-index: 1000;
+}
+#special-spin-stage .ring {
+    position: relative; width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+#special-spin-stage .item {
+    position: absolute; top: 50%; left: 50%;
+    transform-style: preserve-3d; transform-origin: center center;
+    backface-visibility: hidden; opacity: 0;
+    transform: translateZ(800px) scale(2);
+    transition: transform 3s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 1.5s ease-out;
+}
+#special-spin-stage .item.closing {
+    transform: translateZ(800px) scale(2); opacity: 0;
+    transition: transform 1s cubic-bezier(0.7, 0, 0.8, 0.1), opacity 1s ease-in;
+}
+#special-spin-stage .item span {
+    position: absolute; top: 0; left: 0;
+    font-size: 80px; display: block;
+    transform: translate(-50%, -50%);
+    will-change: transform;
+}
+
+/* クリックエフェクト用のCSS */
+.click-ripple {
+    position: fixed;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.7);
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+    pointer-events: none;
+    z-index: 9999;
+    animation: click-ripple-anim 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+@keyframes click-ripple-anim {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
+
+/* ▼▼▼ 変更点: ここから ▼▼▼ */
+/* 背景アニメーション用のCSS */
+#gradient-box {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #FF007A, #9D00FF);
+    
+    /* 初期状態: 中央に配置された scale(0) の円 */
+    transform: scale(0);
+    border-radius: 50%;
+    
+    /* transition対象に border-radius を追加 */
+    transition: transform 0.8s cubic-bezier(0.8, 0, 0.2, 1), 
+                opacity 0.5s ease,
+                border-radius 0.8s cubic-bezier(0.8, 0, 0.2, 1);
+
+    /* clip-path は不要になったため削除 */
+    
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4500;
+}
+
+
+#gradient-box.visible {
+    opacity: 1;
+}
+
+#gradient-box.animate {
+    /* アニメーション状態: 画面全体に広がる (scale(1) の四角形) */
+    transform: scale(1);
+    border-radius: 0%;
+    /* clip-path は不要になったため削除 */
+}
+/* ▲▲▲ 変更点: ここまで ▲▲▲ */
+
+
+
+
+</style>
+</head>
+<body>
+
+<audio id="gogo_chance_audio" src="BGN.mp3" preload="auto"></audio>
+<audio id="final_spin_audio" src="chibnaaa.mp3" preload="auto"></audio>
+<audio id="fail_audio" src="cf.mp3" preload="auto"></audio>
+<audio id="click_audio" src="click.mp3" preload="auto"></audio>
+<audio id="return_audio" src="return.mp3" preload="auto"></audio>
+
+<div id="gradient-box"></div>
+<div id="dots-overlay"></div>
+
+<div class="stage" id="special-spin-stage">
+    <div class="ring" id="special-spin-ring"></div>
+</div>
+<div id="gradient-bg-1" class="gradient-bg"></div>
+<div id="gradient-bg-2" class="gradient-bg"></div>
+
+<div class="picker-group">
+    <div class="picker-container">
+        <div class="picker-list" id="picker-list-1"></div>
+    </div>
+    <div class="picker-container">
+        <div class="picker-list" id="picker-list-2"></div>
+    </div>
+    <div class="picker-container">
+        <div class="picker-list" id="picker-list-3"></div>
+    </div>
+    <div class="picker-container" id="picker-container-4" style="display: none;">
+        <div class="picker-list" id="picker-list-4"></div>
+    </div>
+    <div class="highlight-line-top"></div>
+    <div class="highlight-line-bottom"></div>
+</div>
+
+<div id="pre-results-overlay">
+    <div class="expanding-circle"></div>
+</div>
+
+<div id="results-overlay">
+    <svg class="progress-ring" width="200" height="200" viewBox="0 0 200 200">
+        <circle class="progress-ring__bg" cx="100" cy="100" r="90" />
+        <circle class="progress-ring__fg" cx="100" cy="100" r="90" />
+    </svg>
+    <div id="results-text-container">
+        <span id="results-percentage">0</span>
+        <span id="results-count-text"></span>
+    </div>
+</div>
+
+<div id="settings-overlay">
+    <div class="settings-panel">
+        <h2>Liquid Glass</h2>
+        <p>Flosed glass</p>
+        <div class="setting-item">
+            <label for="match-rate-slider">揃う率 (Match Rate)</label>
+            <div class="slider-container">
+                <input type="range" id="match-rate-slider" min="0" max="100" value="0">
+                <span id="match-rate-value">0%</span>
+            </div>
+        </div>
+        <div class="setting-item">
+            <label for="always-go-toggle">GOボタン常時ON</label>
+            <label class="switch">
+                <input type="checkbox" id="always-go-toggle">
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div class="setting-item">
+            <label for="absolute-value-toggle">絶対値ON (7揃い率UP)</label>
+            <label class="switch">
+                <input type="checkbox" id="absolute-value-toggle">
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div class="setting-item">
+            <label for="high-difficulty-toggle">高難易度 (4リール)</label>
+            <label class="switch">
+                <input type="checkbox" id="high-difficulty-toggle">
+                <span class="slider round"></span>
+            </label>
+        </div>
+         <div class="esc-note">Press ESC to close</div>
+    </div>
+</div>
+
+<div id="win-background"></div>
+
+<div id="force-indicator">もっと強く押してみて👀</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const symbols = ['🍒', '🔔', '🍇', '7️⃣', '🍉', '⭐', '🥨', '❤️‍🔥', '🫧'];
+    const WHEEL_RADIUS = 160;
+    const ANGLE_PER_ITEM = 360 / symbols.length;
+
+    const shuffle = (array) => {
+        let currentIndex = array.length,  randomIndex;
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    const settingsOverlay = document.getElementById('settings-overlay');
+    const matchRateSlider = document.getElementById('match-rate-slider');
+    const matchRateValue = document.getElementById('match-rate-value');
+    const absoluteValueToggle = document.getElementById('absolute-value-toggle');
+    const highDifficultyToggle = document.getElementById('high-difficulty-toggle');
+    const pickerContainer4 = document.getElementById('picker-container-4');
+    const pickerGroup = document.querySelector('.picker-group');
+    const bg1 = document.getElementById('gradient-bg-1');
+    const bg2 = document.getElementById('gradient-bg-2');
+    const forceIndicator = document.getElementById('force-indicator');
+    // ▼▼▼ GOGOエフェクト用の要素を取得 ▼▼▼
+    const dotsOverlay = document.getElementById('dots-overlay');
+
+    let matchRate = 0;
+    let isAbsoluteValueOn = false;
+    let isHighDifficulty = false;
+    let activeBg = bg1;
+    let inactiveBg = bg2;
+    let currentGradientIndex = -1;
+    let spinCycleCounter = 0;
+    let spinHistory = [];
+    let spinPlan = [];
+    let gogoChanceSpinNumber;
+    let lastSpinTime = 0;
+    let isSpinning = false;
+
+    const gradients = [
+        'linear-gradient(135deg, #007bff, #00bcd4, #00e0ff)', 'linear-gradient(135deg, #FFD700, #FFEA00, #FFC107)', 'linear-gradient(135deg, #FF1493, #FF4500, #FF6347)',
+        'linear-gradient(135deg, #7CFC00, #32CD32, #ADFF2F)', 'linear-gradient(135deg, #ff6b6b, #f06595, #cc5de8)', 'linear-gradient(135deg, #63e6be, #38d9a9, #20c997)',
+        'linear-gradient(135deg, #74c0fc, #4dabf7, #339af0)', 'linear-gradient(135deg, #da77f2, #be4bdb, #9c36b5)'
+    ];
+    const resultGradients = {
+        '7': gradients[1], 'cherry': gradients[2], 'watermelon': gradients[3]
+    };
+
+    function switchBackground(newGradient) {
+        if (!newGradient) return;
+        inactiveBg.style.background = newGradient;
+        inactiveBg.style.opacity = '1';
+        activeBg.style.opacity = '0';
+        [activeBg, inactiveBg] = [inactiveBg, activeBg];
+    }
+    function clearBackground() {
+        activeBg.style.opacity = '0';
+        inactiveBg.style.opacity = '0';
+    }
+
+    class Picker {
+        constructor(listElement, symbols, initialValue) { this.list = listElement; this.range = symbols; this.selectedIndex = 0; this.populateList(symbols); this.items = this.list.querySelectorAll('.picker-item'); const initialIndex = this.range.indexOf(initialValue); this.setToIndex(initialIndex !== -1 ? initialIndex : 0, 0); }
+        populateList(symbols) { const fragment = document.createDocumentFragment(); for (let i = 0; i < symbols.length; i++) { const symbol = symbols[i]; const item = document.createElement('div'); item.className = 'picker-item'; item.textContent = symbol; item.style.transform = `rotateX(${i * ANGLE_PER_ITEM}deg) translateZ(${WHEEL_RADIUS}px)`; fragment.appendChild(item); } this.list.appendChild(fragment); }
+        setToIndex(index, duration = 1) { const targetRotation = -index * ANGLE_PER_ITEM; this.list.style.transition = `transform ${duration}s cubic-bezier(0.25, 1, 0.5, 1)`; this.list.style.transform = `rotateX(${targetRotation}deg)`; this.selectedIndex = index; setTimeout(() => { this.items.forEach((item, i) => { item.classList.toggle('selected', i === index); }); }, duration * 500); }
+        async spin(duration, forcedSymbol = null) { let targetIndex; if (forcedSymbol) { const forcedIndex = this.range.indexOf(forcedSymbol); targetIndex = forcedIndex !== -1 ? forcedIndex : Math.floor(Math.random() * this.range.length); } else if (isAbsoluteValueOn) { const sevenIndex = this.range.indexOf('7️⃣'); if (sevenIndex !== -1 && Math.random() < 0.80) { targetIndex = sevenIndex; } else { let otherSymbols = this.range.filter(s => s !== '7️⃣'); if (otherSymbols.length > 0) { let randomSymbol = otherSymbols[Math.floor(Math.random() * otherSymbols.length)]; targetIndex = this.range.indexOf(randomSymbol); } else { targetIndex = sevenIndex; } } } else { targetIndex = Math.floor(Math.random() * this.range.length); } const spinCycles = Math.max(8, Math.floor(duration * 2)); const currentRotation = -this.selectedIndex * ANGLE_PER_ITEM; const finalRotation = -targetIndex * ANGLE_PER_ITEM; const spinStartRotation = currentRotation - 360; const finalSpinRotation = finalRotation - (360 * spinCycles); this.list.style.transition = 'transform 0.1s linear'; this.list.style.transform = `rotateX(${spinStartRotation}deg)`; await new Promise(resolve => setTimeout(resolve, 100)); const spinDuration = duration || (4 + Math.random()); this.list.style.transition = `transform ${spinDuration}s cubic-bezier(0.2, 0.8, 0.2, 1)`; this.list.style.transform = `rotateX(${finalSpinRotation}deg)`; this.selectedIndex = targetIndex; await new Promise(resolve => setTimeout(resolve, spinDuration * 1000)); this.list.style.transition = 'transform 0s'; this.list.style.transform = `rotateX(${finalRotation}deg)`; this.items.forEach((item, i) => { item.classList.toggle('selected', i === targetIndex); }); return this.range[targetIndex]; }
+    }
+
+    const picker1 = new Picker(document.getElementById('picker-list-1'), shuffle([...symbols]), '🍒');
+    const picker2 = new Picker(document.getElementById('picker-list-2'), shuffle([...symbols]), '🔔');
+    const picker3 = new Picker(document.getElementById('picker-list-3'), shuffle([...symbols]), '🍇');
+    const picker4 = new Picker(document.getElementById('picker-list-4'), shuffle([...symbols]), '⭐');
+    let pickers = [picker1, picker2, picker3];
+
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { settingsOverlay.classList.remove('visible'); } });
+    matchRateSlider.style.setProperty('--value-percent', `${matchRateSlider.value}%`);
+    let sliderTextAnimation = { current: parseInt(matchRateSlider.value, 10), target: parseInt(matchRateSlider.value, 10), id: null };
+    matchRateValue.textContent = `${sliderTextAnimation.current}%`;
+    function animateSliderText() { const diff = sliderTextAnimation.target - sliderTextAnimation.current; if (Math.abs(diff) < 0.1) { sliderTextAnimation.current = sliderTextAnimation.target; matchRateValue.textContent = `${Math.round(sliderTextAnimation.current)}%`; cancelAnimationFrame(sliderTextAnimation.id); sliderTextAnimation.id = null; return; } sliderTextAnimation.current += diff * 0.12; matchRateValue.textContent = `${Math.round(sliderTextAnimation.current)}%`; sliderTextAnimation.id = requestAnimationFrame(animateSliderText); }
+    matchRateSlider.addEventListener('input', (e) => { const newRate = parseInt(e.target.value, 10); matchRate = newRate; e.target.style.setProperty('--value-percent', `${newRate}%`); sliderTextAnimation.target = newRate; if (!sliderTextAnimation.id) { animateSliderText(); } });
+    highDifficultyToggle.addEventListener('change', (e) => { isHighDifficulty = e.target.checked; if (isHighDifficulty) { pickerContainer4.style.display = 'block'; pickers = [picker1, picker2, picker3, picker4]; } else { pickerContainer4.style.display = 'none'; pickers = [picker1, picker2, picker3]; } });
+    absoluteValueToggle.addEventListener('change', (e) => { isAbsoluteValueOn = e.target.checked; });
+    
+    const symbolPatterns = {
+        '🥨': ['🥨'], '❤️‍🔥': ['❤️‍🔥', '🔥', '🥵', '🌶️'], '🫧': ['🫧', '💧', '💦'],
+        '🍒': ['🍒'], '🔔': ['🔔'], '🍇': ['🍇'], '7️⃣': ['7️⃣', '💎', '💰'], '🍉': ['🍉'], '⭐': ['⭐', '✨', '💫']
+    };
+
+    function layoutCircular(background, symbols) {
+        background.innerHTML = '';
+        const rect = background.getBoundingClientRect(); const fragment = document.createDocumentFragment(); const numCols = 4; const numRows = 6; const cellWidth = rect.width / numCols; const cellHeight = rect.height / numRows; const emojiSize = Math.min(cellWidth, cellHeight) * 0.9; for (let r = 0; r < numRows; r++) { for (let c = 0; c < numCols; c++) { const emojiSpan = document.createElement('span'); const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)]; emojiSpan.textContent = randomSymbol; const offsetX = (r % 2 !== 0) ? cellWidth / 2 : 0; const posX = (c * cellWidth) + (cellWidth / 2) + offsetX; const posY = (r * cellHeight) + (cellHeight / 2); emojiSpan.style.position = 'absolute'; emojiSpan.style.left = `${posX}px`; emojiSpan.style.top = `${posY}px`; emojiSpan.style.fontSize = `${emojiSize}px`; emojiSpan.style.transform = `translate(-50%, -50%) rotate(${(Math.random() - 0.5) * 15}deg)`; fragment.appendChild(emojiSpan); } } background.appendChild(fragment);
+    }
+
+    function resetForNewCycle() {
+        const guaranteedMatches = Math.floor(Math.random() * 3) + 1;
+        const plan = new Array(5).fill(false);
+        for (let i = 0; i < guaranteedMatches; i++) {
+            plan[i] = true;
+        }
+        spinPlan = shuffle(plan);
+        gogoChanceSpinNumber = Math.floor(Math.random() * 4);
+        spinHistory = [];
+        spinCycleCounter = 0;
+    }
+
+    async function showResultsAnimation() {
+        document.getElementById('settings-overlay').classList.remove('visible');
+        document.getElementById('special-spin-stage').style.display = 'none';
+        document.body.className = '';
+
+        const preOverlay = document.getElementById('pre-results-overlay');
+        pickerGroup.classList.add('slots-hidden');
+        await new Promise(r => setTimeout(r, 300));
+        preOverlay.classList.add('visible');
+        await new Promise(r => setTimeout(r, 1000));
+        const overlay = document.getElementById('results-overlay');
+        const percentageText = document.getElementById('results-percentage');
+        const countText = document.getElementById('results-count-text');
+        const ringFg = document.querySelector('.progress-ring__fg');
+        const winBg = document.getElementById('win-background');
+        preOverlay.classList.remove('visible');
+        overlay.classList.add('visible');
+        const matches = spinHistory.filter(result => result !== null);
+        const matchCount = matches.length;
+        const percentage = matchCount * 20;
+        const uniqueMatchedSymbols = [...new Set(matches)];
+        const radius = ringFg.r.baseVal.value;
+        const circumference = 2 * Math.PI * radius;
+        ringFg.style.strokeDasharray = `${circumference} ${circumference}`;
+        ringFg.style.strokeDashoffset = circumference;
+        percentageText.textContent = matchCount;
+        countText.textContent = `5回中 ${matchCount}回 揃いました`;
+        await new Promise(r => setTimeout(r, 100));
+        percentageText.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease-in';
+        percentageText.style.transform = 'translateY(-10%)';
+        percentageText.style.opacity = '1';
+        await new Promise(r => setTimeout(r, 300));
+        countText.classList.add('visible');
+        const offset = circumference - (percentage / 100) * circumference;
+        ringFg.style.strokeDashoffset = offset;
+        if (matchCount > 0) {
+            const allSymbolsForBg = uniqueMatchedSymbols.flatMap(s => symbolPatterns[s] || [s]);
+            layoutCircular(winBg, allSymbolsForBg);
+            winBg.style.opacity = 0.3;
+        }
+        await new Promise(r => setTimeout(r, 4000));
+        overlay.classList.remove('visible');
+        winBg.style.opacity = 0;
+        
+        const gradientBox = document.getElementById('gradient-box');
+        gradientBox.classList.add('visible');
+        await new Promise(r => setTimeout(r, 50));
+        gradientBox.classList.add('animate');
+        await new Promise(r => setTimeout(r, 800));
+        
+        gradientBox.classList.remove('animate');
+        gradientBox.classList.remove('visible');
+        await new Promise(r => setTimeout(r, 500));
+
+        pickerGroup.classList.remove('slots-hidden');
+        resetForNewCycle();
+    }
+    
+    async function startSpecialSpin(audio) { 
+        return new Promise(async (resolve) => {
+            pickerGroup.classList.add('slots-hidden');
+            document.getElementById('win-background').style.opacity = 0;
+            clearBackground();
+
+            const specialStage = document.getElementById("special-spin-stage");
+            const ring = document.getElementById("special-spin-ring");
+            const failAudio = document.getElementById("fail_audio");
+            const emojis = ["🍒", "7️⃣", "😍", "😉", "🍀", "💎", "🍋", "⭐️"];
+            const radius = 300;
+            const n = emojis.length;
+            const items = [];
+            ring.innerHTML = '';
+            
+            audio.currentTime = 0;
+            audio.play().catch(e => console.error("Audio play failed:", e));
+
+            if (audio.id === 'final_spin_audio') {
+                setTimeout(() => {
+                    if(audio.played) { audio.pause(); audio.currentTime = 0; }
+                }, 20000);
+            }
+
+            for (let i = 0; i < n; i++) {
+                const angle = (360 / n) * i;
+                const item = document.createElement("div");
+                item.className = "item";
+                const z = radius * Math.cos(angle * Math.PI / 180);
+                const x = radius * Math.sin(angle * Math.PI / 180);
+                const finalTransform = `translate3d(${x}px, 0, ${z}px) rotateY(${angle}deg)`;
+                items.push({ element: item, transform: finalTransform });
+                const span = document.createElement("span");
+                span.textContent = emojis[i];
+                item.appendChild(span);
+                ring.appendChild(item);
+            }
+            function clearItems() {
+                setTimeout(() => { items.forEach((item, i) => { setTimeout(() => { item.element.classList.add('closing'); }, i * 80); }); }, 500);
+            }
+            
+            function checkFinalResult(finalAngle) {
+                const anglePerItem = 360 / n;
+                const targetAngle = (360 - (finalAngle % 360)) % 360;
+                let closestIndex = 0, minDiff = 360;
+                for (let i = 0; i < n; i++) {
+                    const itemAngle = anglePerItem * i;
+                    let diff = Math.abs(itemAngle - targetAngle);
+                    if (diff > 180) { diff = 360 - diff; }
+                    if (diff < minDiff) { minDiff = diff; closestIndex = i; }
+                }
+                const winningEmoji = emojis[closestIndex];
+
+                if (audio.id === 'gogo_chance_audio' && audio.played) {
+                    audio.pause(); audio.currentTime = 0;
+                }
+                if (winningEmoji === "7️⃣") {
+                    document.body.classList.add('win-state');
+                } 
+                else if (audio.id === 'gogo_chance_audio') { 
+                    failAudio.play().catch(e => console.log("Fail audio blocked:", e));
+                }
+                spinHistory.push(winningEmoji);
+
+                clearItems();
+                setTimeout(() => {
+                    document.body.className = '';
+                    specialStage.style.display = 'none';
+                    pickerGroup.classList.remove('slots-hidden');
+                    
+                    resolve();
+                }, 2000);
+            }
+            
+            function startRotation() {
+                let animationFrameId, angleY = 0;
+                const rotationStartTime = performance.now();
+                
+                const totalAnimationDuration = 13000;
+                const accelPoint = 4000;
+                const rampUpDuration = 1000;
+                const decelPoint = 9000;
+                const stopPoint = 13000;
+                
+                const initialVel = 1.0;
+                const fastVel = 8.0;
+
+                function animateRing(currentTime) {
+                    const elapsed = currentTime - rotationStartTime;
+                    
+                    if (elapsed >= totalAnimationDuration) {
+                        cancelAnimationFrame(animationFrameId);
+                        
+                        const anglePerItem = 360 / n;
+                        const targetStopAngle = Math.round(angleY / anglePerItem) * anglePerItem;
+                        
+                        ring.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+                        ring.style.transform = `rotateY(${targetStopAngle}deg)`;
+                        
+                        setTimeout(() => {
+                            ring.style.transition = '';
+                            checkFinalResult(targetStopAngle);
+                        }, 400);
+                        
+                        return;
+                    }
+                    
+                    let vel;
+                    if (elapsed < accelPoint) { vel = initialVel; } 
+                    else if (elapsed < decelPoint) {
+                        if (elapsed < accelPoint + rampUpDuration) {
+                            let t = (elapsed - accelPoint) / rampUpDuration;
+                            vel = initialVel + (fastVel - initialVel) * t;
+                        } else { vel = fastVel; }
+                    } else {
+                        let t = (elapsed - decelPoint) / (stopPoint - decelPoint);
+                        let easeFactor = (Math.cos(t * Math.PI) + 1) / 2;
+                        vel = fastVel * easeFactor;
+                    }
+
+                    ring.style.transition = '';
+                    angleY += vel;
+                    ring.style.transform = `rotateY(${angleY}deg)`;
+                    animationFrameId = requestAnimationFrame(animateRing);
+                }
+                animationFrameId = requestAnimationFrame(animateRing);
+            }
+            
+            function runAnimationSequence() {
+                document.body.classList.add('special-spin-mode');
+                specialStage.style.display = 'block';
+                setTimeout(() => {
+                    items.forEach((item, i) => {
+                        setTimeout(() => {
+                            item.element.style.transform = item.transform;
+                            item.element.style.opacity = 1;
+                        }, i * 100);
+                    });
+                }, 2000);
+                setTimeout(startRotation, 2000);
+            }
+            
+            setTimeout(runAnimationSequence, 500);
+            
+        });
+    }
+
+    async function processSpin(spinDuration) {
+        pickerGroup.classList.add('spinning');
+        document.getElementById('win-background').style.opacity = 0;
+        
+        let randomIndex;
+        do { randomIndex = Math.floor(Math.random() * gradients.length); }
+        while (randomIndex === currentGradientIndex && gradients.length > 1);
+        currentGradientIndex = randomIndex;
+        switchBackground(gradients[currentGradientIndex]);
+        
+        const forceMatch = spinPlan[spinCycleCounter] || (Math.random() * 100 < matchRate);
+        let forcedSymbol = null;
+        if (forceMatch) { forcedSymbol = symbols[Math.floor(Math.random() * symbols.length)]; }
+        
+        const spinPromises = pickers.map(p => p.spin(spinDuration, forcedSymbol));
+        const results = await Promise.all(spinPromises);
+        
+        pickerGroup.classList.remove('spinning');
+        let resultGradient = null;
+        if (results.includes('7️⃣')) { resultGradient = resultGradients['7']; }
+        else if (results.includes('🍒')) { resultGradient = resultGradients['cherry']; }
+        else if (results.includes('🍉')) { resultGradient = resultGradients['watermelon']; }
+        
+        if (resultGradient) { switchBackground(resultGradient); } 
+        else { clearBackground(); }
+        
+        const allSame = results.length > 0 && results.every(s => s === results[0]);
+        if (allSame) {
+            const winningSymbol = results[0];
+            const winBg = document.getElementById('win-background');
+            const symbolsForBg = symbolPatterns[winningSymbol] || [winningSymbol];
+            layoutCircular(winBg, symbolsForBg);
+            winBg.style.opacity = 0.3;
+            spinHistory.push(winningSymbol);
+        } else {
+            spinHistory.push(null);
+        }
+        
+        spinCycleCounter++;
+    }
+
+    async function triggerSpin() {
+        const now = Date.now();
+        if (now - lastSpinTime < 1000 || isSpinning) return;
+        lastSpinTime = now;
+        isSpinning = true;
+
+        forceIndicator.classList.remove('visible');
+        
+        // GOGOチャンス
+        if (spinCycleCounter === gogoChanceSpinNumber) {
+            document.body.classList.add('gogo-chance-mode');
+            setTimeout(() => document.body.classList.add('active'), 50);
+            
+            // ▼▼▼ GOGO用の音声とエフェクトを開始 ▼▼▼
+            const gogoAudio = document.getElementById("gogo_chance_audio");
+            const returnAudio = document.getElementById('return_audio');
+            returnAudio.currentTime = 0;
+            returnAudio.play().catch(e => console.log("Return audio failed"));
+            
+            dotsOverlay.classList.add('animate');
+            // 3秒後にアニメーションクラスを削除
+            setTimeout(() => { dotsOverlay.classList.remove('animate'); }, 3000);
+            // ▲▲▲ 変更点 ▲▲▲
+            
+            await startSpecialSpin(gogoAudio);
+            spinCycleCounter++;
+        } 
+        // 最終スピン (5回目)
+        else if (spinCycleCounter === 4) {
+             const gogoAudio = document.getElementById('gogo_chance_audio');
+             const failAudio = document.getElementById('fail_audio');
+             // ▼▼▼ return_audioも停止対象に追加 ▼▼▼
+             const returnAudio = document.getElementById('return_audio');
+             gogoAudio.pause();
+             failAudio.pause();
+             returnAudio.pause();
+             gogoAudio.currentTime = 0;
+             failAudio.currentTime = 0;
+             returnAudio.currentTime = 0;
+             // ▲▲▲ 変更点 ▲▲▲
+            
+             document.body.classList.add('final-spin-mode');
+             const finalAudio = document.getElementById("final_spin_audio");
+             await startSpecialSpin(finalAudio);
+             spinCycleCounter++;
+        }
+        // 通常スピン
+        else {
+            const randomDuration = 4 + Math.random();
+            await processSpin(randomDuration);
+        }
+        
+        // スピン終了後に結果をチェック
+        if (spinCycleCounter >= 5) {
+            setTimeout(async () => {
+                await showResultsAnimation();
+                isSpinning = false;
+                lastSpinTime = 0; 
+            }, 500);
+        } else {
+            setTimeout(() => {
+                isSpinning = false;
+                lastSpinTime = 0;
+            }, 500);
+        }
+    }
+    
+    document.body.addEventListener('mousedown', (e) => {
+        if (isSpinning || settingsOverlay.classList.contains('visible') || e.target.closest('.settings-panel')) {
+            return;
+        }
+        forceIndicator.classList.add('visible');
+        document.body.style.transform = 'scale(0.95)';
+    });
+
+    document.addEventListener('mouseup', () => {
+        forceIndicator.classList.remove('visible');
+        document.body.style.transform = 'scale(1)';
+    });
+
+    document.body.addEventListener('webkitmouseforcechanged', (e) => {
+        
+        if (e.webkitForce >= 2.0) {
+            const clickAudio = document.getElementById('click_audio');
+            clickAudio.currentTime = 0;
+            clickAudio.play().catch(e => console.log("Click audio failed"));
+
+            const ripple = document.createElement('div');
+            ripple.className = 'click-ripple';
+            ripple.style.left = `${e.clientX}px`;
+            ripple.style.top = `${e.clientY}px`;
+            document.body.appendChild(ripple);
+            setTimeout(() => { ripple.remove(); }, 600);
+            
+            document.body.style.transform = 'scale(0.9)';
+            forceIndicator.classList.remove('visible');
+
+            if (isSpinning) {
+                return;
+            }
+            triggerSpin();
+
+        } else if (e.webkitForce > 0) {
+            if (isSpinning) {
+                 return;
+            }
+            document.body.style.transform = 'scale(0.95)';
+            forceIndicator.classList.add('visible');
+        }
+    });
+
+    // 初期化
+    resetForNewCycle();
+});
+</script>
+</body>
+</html>
