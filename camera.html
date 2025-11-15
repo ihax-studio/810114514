@@ -87,6 +87,7 @@
     }
 
     .btn {
+      position: relative; /* for ::before pseudo-element */
       width: 70px;
       height: 70px;
       background-size: contain;
@@ -97,6 +98,17 @@
       touch-action: manipulation;
     }
 
+    /* Tappable area expansion */
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: -15px;
+      left: -15px;
+      right: -15px;
+      bottom: -15px;
+      border-radius: 50%;
+    }
+
     .btn:active {
       transform: scale(0.8);
     }
@@ -105,10 +117,22 @@
       background-image: url('cam.png');
       width: 90px;
       height: 90px;
+      border-radius: 50%;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3); /* Emphasized protective frame */
+    }
+
+    /* Larger tappable area for the main button */
+    #photo-btn::before {
+      top: -20px;
+      left: -20px;
+      right: -20px;
+      bottom: -20px;
     }
 
     #video-btn {
       background-image: url('video.png');
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2); /* Protective frame */
     }
 
     #timer-btn {
@@ -611,8 +635,35 @@
       };
     }
 
-    // Button handlers
-    photoBtn.addEventListener('click', () => {
+    // Unified button action handlers for both touch and mouse
+    const setupButtonEvents = (btn, action) => {
+      let isPressed = false;
+
+      const onPress = (e) => {
+        e.preventDefault();
+        if (isPressed) return; // Prevent re-triggering
+        isPressed = true;
+        btn.style.transform = 'scale(0.8)';
+        action();
+      };
+
+      const onRelease = (e) => {
+        e.preventDefault();
+        if (!isPressed) return;
+        isPressed = false;
+        btn.style.transform = 'scale(1)';
+      };
+
+      btn.addEventListener('touchstart', onPress, { passive: false });
+      btn.addEventListener('mousedown', onPress, { passive: false });
+
+      btn.addEventListener('touchend', onRelease);
+      btn.addEventListener('mouseup', onRelease);
+      btn.addEventListener('mouseleave', onRelease); // Handle cursor leaving the button
+    };
+
+    // Define actions
+    const photoAction = () => {
       hapticRapidBurst();
       if (isTimerActive) {
         haptic.confirm();
@@ -621,9 +672,9 @@
       } else {
         takePhoto();
       }
-    });
+    };
 
-    videoBtn.addEventListener('click', () => {
+    const videoAction = () => {
       hapticRapidBurst();
       if (isTimerActive) {
         haptic.confirm();
@@ -632,25 +683,17 @@
       } else {
         toggleVideoRecording();
       }
-    });
+    };
 
-    timerBtn.addEventListener('click', () => {
+    const timerAction = () => {
       hapticRapidBurst();
       startTimer();
-    });
+    };
 
-    // Touch handlers for buttons (mobile)
-    [photoBtn, videoBtn, timerBtn].forEach(btn => {
-      btn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        btn.style.transform = 'scale(0.8)';
-      });
-
-      btn.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        btn.style.transform = 'scale(1)';
-      });
-    });
+    // Assign actions to buttons
+    setupButtonEvents(photoBtn, photoAction);
+    setupButtonEvents(videoBtn, videoAction);
+    setupButtonEvents(timerBtn, timerAction);
 
     // Lux button handler
     luxBtn.addEventListener('click', () => {
@@ -863,6 +906,17 @@
     // Initialize
     initCamera();
     applyLuxFilter();
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(registration => {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }, err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
   </script>
 </body>
 </html>
