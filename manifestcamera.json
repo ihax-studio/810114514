@@ -1,6 +1,6 @@
 {
-  "name": "高速カメラ",
-  "short_name": "高速カメラ",
+  "name": "カメラ",
+  "short_name": "カメラ",
   "start_url": "camera",
   "display": "fullscreen",
   "background_color": "#000000",
