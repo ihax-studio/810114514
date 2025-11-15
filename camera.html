@@ -50,10 +50,6 @@
       transition: filter 0.2s ease;
     }
 
-    .dual-video {
-      position: absolute;
-      object-fit: cover;
-    }
 
     #camera-select {
       position: absolute;
@@ -66,6 +62,9 @@
       background: rgba(0, 0, 0, 0.5);
       color: white;
       z-index: 10;
+      touch-action: manipulation;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     #lux-btn {
@@ -85,42 +84,50 @@
       box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
       z-index: 10;
       transition: transform 0.1s ease;
+      touch-action: manipulation;
+    }
+
+    #lux-btn::before {
+      content: '';
+      position: absolute;
+      top: -15px;
+      left: -15px;
+      right: -15px;
+      bottom: -15px;
+      border-radius: 50%;
     }
 
     #lux-btn:active {
       transform: scale(0.9);
     }
 
-    #dual-btn {
-      position: absolute;
-      top: 20px;
-      right: 80px;
-      width: 44px;
-      height: 44px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.9);
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
-      z-index: 10;
-      transition: transform 0.1s ease, opacity 0.2s ease;
+    /* Mobile optimization */
+    @media (max-width: 768px) {
+      #lux-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 26px;
+      }
+
+      #camera-select {
+        font-size: 14px;
+        padding: 6px 12px;
+        max-width: 150px;
+      }
+
+      #video-container {
+        width: 100vw;
+        height: 100vh;
+      }
     }
 
-    #dual-btn:active {
-      transform: scale(0.9);
-    }
-
-    #dual-btn.active {
-      background: rgba(255, 215, 0, 0.9);
-    }
-
-    #dual-btn.disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
+    /* Ensure no overflow */
+    @media (max-width: 480px) {
+      #camera-select {
+        font-size: 12px;
+        padding: 4px 8px;
+        max-width: 120px;
+      }
     }
 
     #controls {
@@ -437,6 +444,66 @@
     #reload-overlay.visible {
       opacity: 1;
     }
+
+    /* Recording timer */
+    #recording-timer {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 30px;
+      background: rgba(255, 0, 0, 0.8);
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      border-radius: 8px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 50;
+      transition: opacity 0.3s ease;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+    }
+
+    #recording-timer.visible {
+      opacity: 1;
+    }
+
+    /* Permission overlay */
+    #permission-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      cursor: pointer;
+    }
+
+    #permission-overlay.visible {
+      display: flex;
+    }
+
+    #permission-message {
+      text-align: center;
+      color: white;
+      padding: 40px;
+    }
+
+    #permission-message h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #ff6b6b;
+    }
+
+    #permission-message p {
+      font-size: 18px;
+      line-height: 1.6;
+    }
   </style>
 </head>
 <body>
@@ -447,11 +514,20 @@
 
     <div id="bg-overlay"></div>
     <div id="flash-overlay"></div>
+    <div id="reload-overlay">タップして再読み込み</div>
+    <div id="recording-timer">00:00:00</div>
+
+    <div id="permission-overlay">
+      <div id="permission-message">
+        <h2>カメラの許可が必要です</h2>
+        <p>許可を押してください</p>
+        <p style="margin-top: 20px; font-size: 16px; color: #aaa;">タップで再読み込み</p>
+      </div>
+    </div>
 
     <select id="camera-select"></select>
 
     <button id="lux-btn">☀️</button>
-    <button id="dual-btn">⬜</button>
 
     <div id="focus-indicator"></div>
 
@@ -515,12 +591,14 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const luxBtn = document.getElementById('lux-btn');
-    const dualBtn = document.getElementById('dual-btn');
     const swipeOuter = document.getElementById('swipeOuter');
     const swipeList = document.getElementById('swipe-list');
     const centerDot = document.getElementById('center-bar-dot');
     const bgOverlay = document.getElementById('bg-overlay');
     const flashOverlay = document.getElementById('flash-overlay');
+    const reloadOverlay = document.getElementById('reload-overlay');
+    const recordingTimer = document.getElementById('recording-timer');
+    const permissionOverlay = document.getElementById('permission-overlay');
 
     // State
     let currentStream = null;
@@ -534,13 +612,18 @@
     let luxValue = 1;
     let bgState = 0;
     let lastTapTime = 0;
-    let isDualMode = false;
-    let dualStreams = [];
     let zoomLevel = 1;
+    let isBlackout = false;
+    let blackoutCheckInterval = null;
+    let recordingStartTime = 0;
+    let recordingTimerInterval = null;
 
     // Pinch zoom state
     let initialDistance = 0;
     let initialZoom = 1;
+
+    // Haptic initialization flag
+    let hapticInitialized = false;
 
     // Lux slider state
     const luxItems = Array.from(swipeList.querySelectorAll('.swipe-item'));
@@ -551,8 +634,21 @@
     let ticking = false;
     let prevSelectedIndex = 2;
 
+    // Initialize haptic - call this on first user interaction
+    const initializeHaptic = () => {
+      if (!hapticInitialized) {
+        try {
+          haptic.confirm();
+          hapticInitialized = true;
+        } catch (e) {
+          console.log('Haptic initialization:', e);
+        }
+      }
+    };
+
     // Haptic feedback functions
     const hapticRapidBurst = () => {
+      initializeHaptic();
       const delay = 45;
       const sequence = [];
       for (let i = 0; i < 3; i++) {
@@ -565,12 +661,57 @@
     };
 
     const hapticError = () => {
+      initializeHaptic();
       const delay = 100;
       const sequence = [0, 1, 2, 4, 5, 6];
       sequence.forEach(i => {
         setTimeout(() => haptic.error(), i * delay);
       });
     };
+
+    const hapticConfirm = () => {
+      initializeHaptic();
+      try {
+        haptic.confirm();
+      } catch (e) {
+        console.log('Haptic confirm error:', e);
+      }
+    };
+
+    // Recording timer functions
+    function updateRecordingTimer() {
+      const elapsed = Date.now() - recordingStartTime;
+      const hours = Math.floor(elapsed / 3600000);
+      const minutes = Math.floor((elapsed % 3600000) / 60000);
+      const seconds = Math.floor((elapsed % 60000) / 1000);
+
+      const timeString =
+        String(hours).padStart(2, '0') + ':' +
+        String(minutes).padStart(2, '0') + ':' +
+        String(seconds).padStart(2, '0');
+
+      recordingTimer.textContent = timeString;
+    }
+
+    function startRecordingTimer() {
+      recordingStartTime = Date.now();
+      recordingTimer.textContent = '00:00:00';
+      recordingTimer.classList.add('visible');
+
+      if (recordingTimerInterval) {
+        clearInterval(recordingTimerInterval);
+      }
+
+      recordingTimerInterval = setInterval(updateRecordingTimer, 100);
+    }
+
+    function stopRecordingTimer() {
+      if (recordingTimerInterval) {
+        clearInterval(recordingTimerInterval);
+        recordingTimerInterval = null;
+      }
+      recordingTimer.classList.remove('visible');
+    }
 
     // Apply zoom
     function applyZoom(zoom) {
@@ -595,6 +736,40 @@
       setTimeout(() => {
         flashOverlay.classList.remove('active');
       }, 400);
+    }
+
+    // Check if video is playing
+    function isVideoPlaying(vid) {
+      return !!(vid.currentTime > 0 && !vid.paused && !vid.ended && vid.readyState > 2);
+    }
+
+    // Check for blackout
+    function checkBlackout() {
+      if (!isVideoPlaying(video) && currentStream) {
+        isBlackout = true;
+        reloadOverlay.classList.add('visible');
+      } else {
+        isBlackout = false;
+        reloadOverlay.classList.remove('visible');
+      }
+    }
+
+    // Start blackout check
+    function startBlackoutCheck() {
+      if (blackoutCheckInterval) {
+        clearInterval(blackoutCheckInterval);
+      }
+      blackoutCheckInterval = setInterval(checkBlackout, 1000);
+    }
+
+    // Stop blackout check
+    function stopBlackoutCheck() {
+      if (blackoutCheckInterval) {
+        clearInterval(blackoutCheckInterval);
+        blackoutCheckInterval = null;
+      }
+      isBlackout = false;
+      reloadOverlay.classList.remove('visible');
     }
 
     // Initialize camera
@@ -622,14 +797,32 @@
         audioFiles.error.pause();
         audioFiles.error.currentTime = 0;
 
+        // Hide permission overlay if visible
+        permissionOverlay.classList.remove('visible');
+
         await loadCameras();
 
         // Apply current zoom
         applyZoom(zoomLevel);
+
+        // Start blackout check
+        startBlackoutCheck();
       } catch (error) {
         console.error('Camera error:', error);
-        audioFiles.error.loop = true;
-        audioFiles.error.play();
+
+        // Check if error is permission denied
+        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+          // Show permission overlay
+          permissionOverlay.classList.add('visible');
+
+          // Stop error sound
+          audioFiles.error.pause();
+          audioFiles.error.currentTime = 0;
+        } else {
+          // For other errors, play error sound
+          audioFiles.error.loop = true;
+          audioFiles.error.play();
+        }
       }
     }
 
@@ -658,6 +851,9 @@
 
     // Camera select change
     cameraSelect.addEventListener('change', (e) => {
+      // 確実にhapticを発生させる
+      hapticConfirm();
+      hapticRapidBurst();
       audioFiles.luxSound.currentTime = 0;
       audioFiles.luxSound.play();
       initCamera(e.target.value);
@@ -672,11 +868,6 @@
 
     // Take photo
     async function takePhoto() {
-      if (isDualMode) {
-        takeDualPhoto();
-        return;
-      }
-
       // Trigger flash effect
       triggerFlash();
 
@@ -693,57 +884,6 @@
         const a = document.createElement('a');
         a.href = url;
         a.download = `photo-${Date.now()}.jpg`;
-        a.click();
-        URL.revokeObjectURL(url);
-      }, 'image/jpeg', 0.95);
-    }
-
-    // Take dual photo
-    async function takeDualPhoto() {
-      // Trigger flash effect
-      triggerFlash();
-
-      const videos = videoContainer.querySelectorAll('video');
-      const totalWidth = video.videoWidth;
-      const totalHeight = video.videoHeight;
-
-      canvas.width = totalWidth;
-      canvas.height = totalHeight;
-      ctx.filter = video.style.filter;
-
-      const numCameras = videos.length;
-
-      if (numCameras === 2) {
-        // 2 cameras: split vertically 50-50
-        const halfHeight = totalHeight / 2;
-        videos.forEach((vid, idx) => {
-          ctx.drawImage(vid, 0, idx * halfHeight, totalWidth, halfHeight);
-        });
-      } else if (numCameras === 3) {
-        // 3 cameras: split vertically 33.33-33.33-33.33
-        const thirdHeight = totalHeight / 3;
-        videos.forEach((vid, idx) => {
-          ctx.drawImage(vid, 0, idx * thirdHeight, totalWidth, thirdHeight);
-        });
-      } else if (numCameras >= 4) {
-        // 4+ cameras: 2x2 grid (max 4 cameras)
-        const halfWidth = totalWidth / 2;
-        const halfHeight = totalHeight / 2;
-        for (let i = 0; i < Math.min(4, numCameras); i++) {
-          const x = (i % 2) * halfWidth;
-          const y = Math.floor(i / 2) * halfHeight;
-          ctx.drawImage(videos[i], x, y, halfWidth, halfHeight);
-        }
-      }
-
-      audioFiles.shutter.currentTime = 0;
-      audioFiles.shutter.play();
-
-      canvas.toBlob(blob => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `dual-photo-${Date.now()}.jpg`;
         a.click();
         URL.revokeObjectURL(url);
       }, 'image/jpeg', 0.95);
@@ -795,7 +935,9 @@
       mediaRecorder.start();
       isRecording = true;
       videoBtn.classList.add('recording');
-      updateDualButtonState();
+
+      // Start recording timer
+      startRecordingTimer();
 
       // Play video start sound
       audioFiles.videoStart.currentTime = 0;
@@ -807,16 +949,9 @@
         mediaRecorder.stop();
         isRecording = false;
         videoBtn.classList.remove('recording');
-        updateDualButtonState();
-      }
-    }
 
-    // Update dual button state when recording changes
-    function updateDualButtonState() {
-      if (isRecording) {
-        dualBtn.classList.add('disabled');
-      } else {
-        dualBtn.classList.remove('disabled');
+        // Stop recording timer
+        stopRecordingTimer();
       }
     }
 
@@ -884,9 +1019,12 @@
 
     // Define actions
     const photoAction = () => {
+      // 確実にhapticを発生させる
+      hapticConfirm();
       hapticRapidBurst();
+
       if (isTimerActive) {
-        haptic.confirm();
+        hapticConfirm();
         audioFiles.cancel.currentTime = 0;
         audioFiles.cancel.play();
       } else {
@@ -895,9 +1033,18 @@
     };
 
     const videoAction = () => {
-      hapticRapidBurst();
+      // 確実にhapticを発生させる（複数回）
+      hapticConfirm();
+      hapticError(); // 6回のhaptic
+      hapticRapidBurst(); // 追加のhaptic
+
+      // さらに確実にするため
+      haptic.error();
+      setTimeout(() => haptic.error(), 50);
+      setTimeout(() => haptic.error(), 100);
+
       if (isTimerActive) {
-        haptic.confirm();
+        hapticConfirm();
         audioFiles.cancel.currentTime = 0;
         audioFiles.cancel.play();
       } else {
@@ -906,6 +1053,8 @@
     };
 
     const timerAction = () => {
+      // 確実にhapticを発生させる
+      hapticConfirm();
       hapticRapidBurst();
       startTimer();
     };
@@ -914,85 +1063,6 @@
     setupButtonEvents(photoBtn, photoAction);
     setupButtonEvents(videoBtn, videoAction);
     setupButtonEvents(timerBtn, timerAction);
-
-    // Dual camera mode
-    async function toggleDualMode() {
-      if (isRecording) {
-        // Cannot switch while recording
-        return;
-      }
-
-      hapticRapidBurst();
-      audioFiles.luxSound.currentTime = 0;
-      audioFiles.luxSound.play();
-
-      if (!isDualMode) {
-        isDualMode = true;
-        dualBtn.classList.add('active');
-
-        if (currentStream) {
-          currentStream.getTracks().forEach(track => track.stop());
-        }
-
-        videoContainer.innerHTML = '';
-
-        const numCameras = Math.min(cameras.length, 4); // Max 4 cameras
-        dualStreams = [];
-
-        for (let i = 0; i < numCameras; i++) {
-          const constraints = {
-            video: {
-              deviceId: { exact: cameras[i].deviceId },
-              width: { ideal: 1920 },
-              height: { ideal: 1080 }
-            },
-            audio: false
-          };
-
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
-            dualStreams.push(stream);
-
-            const vid = document.createElement('video');
-            vid.autoplay = true;
-            vid.playsInline = true;
-            vid.srcObject = stream;
-            vid.style.objectFit = 'cover';
-            vid.classList.add('dual-video');
-
-            if (numCameras === 2) {
-              // 2 cameras: split vertically 50-50
-              vid.style.width = '100%';
-              vid.style.height = '50%';
-              vid.style.top = (i * 50) + '%';
-              vid.style.left = '0';
-            } else if (numCameras === 3) {
-              // 3 cameras: split vertically 33.33-33.33-33.33
-              vid.style.width = '100%';
-              vid.style.height = (100 / 3) + '%';
-              vid.style.top = (i * (100 / 3)) + '%';
-              vid.style.left = '0';
-            } else if (numCameras === 4) {
-              // 4 cameras: 2x2 grid
-              vid.style.width = '50%';
-              vid.style.height = '50%';
-              vid.style.top = (Math.floor(i / 2) * 50) + '%';
-              vid.style.left = ((i % 2) * 50) + '%';
-            }
-
-            videoContainer.appendChild(vid);
-          } catch (err) {
-            console.error('Failed to start camera', i, err);
-          }
-        }
-      } else {
-        // Exit dual mode and reload page
-        location.reload();
-      }
-    }
-
-    // Dual button handler
-    dualBtn.addEventListener('click', toggleDualMode);
 
     // Pinch zoom
     videoContainer.addEventListener('touchstart', (e) => {
@@ -1023,18 +1093,47 @@
       }
     }, { passive: false });
 
-    // Lux button handler
-    luxBtn.addEventListener('click', () => {
-      hapticRapidBurst();
-      audioFiles.luxSound.currentTime = 0;
-      audioFiles.luxSound.play();
-      swipeOuter.classList.add('active');
-      setupPadding();
-      scrollToItem(prevSelectedIndex, 'auto');
-      setTimeout(() => {
-        updateSelected();
-      }, 120);
-    });
+    // Lux button handler with touch support
+    const setupLuxButtonEvents = () => {
+      let isPressed = false;
+
+      const onPress = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isPressed) return;
+
+        isPressed = true;
+        luxBtn.style.transform = 'scale(0.9)';
+
+        // 確実にhapticを発生させる
+        hapticConfirm();
+        hapticRapidBurst();
+
+        audioFiles.luxSound.currentTime = 0;
+        audioFiles.luxSound.play();
+        swipeOuter.classList.add('active');
+        setupPadding();
+        scrollToItem(prevSelectedIndex, 'auto');
+        setTimeout(() => {
+          updateSelected();
+        }, 120);
+      };
+
+      const onRelease = (e) => {
+        e.preventDefault();
+        if (!isPressed) return;
+        isPressed = false;
+        luxBtn.style.transform = 'scale(1)';
+      };
+
+      luxBtn.addEventListener('touchstart', onPress, { passive: false });
+      luxBtn.addEventListener('mousedown', onPress, { passive: false });
+      luxBtn.addEventListener('touchend', onRelease, { passive: false });
+      luxBtn.addEventListener('mouseup', onRelease, { passive: false });
+      luxBtn.addEventListener('mouseleave', onRelease, { passive: false });
+    };
+
+    setupLuxButtonEvents();
 
     // Lux slider functions
     function getClosestItemIndex() {
@@ -1060,7 +1159,7 @@
       });
       moveCenterBarToItem(i);
       if (i !== prevSelectedIndex) {
-        haptic.confirm();
+        hapticConfirm();
         prevSelectedIndex = i;
       }
     }
@@ -1156,7 +1255,8 @@
     // Click on slider to confirm
     swipeOuter.addEventListener('click', (e) => {
       if (!swipeOuter.classList.contains('active')) return;
-      haptic.confirm();
+      // 確実にhapticを発生させる
+      hapticConfirm();
       const i = getClosestItemIndex();
       const value = parseFloat(luxItems[i].textContent);
       luxValue = value;
@@ -1165,11 +1265,17 @@
     });
 
     // Focus control - tap on video
-    video.addEventListener('click', (e) => {
+    videoContainer.addEventListener('click', (e) => {
       // Ignore if slider is active
       if (swipeOuter.classList.contains('active')) return;
 
-      const rect = video.getBoundingClientRect();
+      // If blackout, reload page
+      if (isBlackout) {
+        location.reload();
+        return;
+      }
+
+      const rect = videoContainer.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
@@ -1190,6 +1296,8 @@
     video.addEventListener('dblclick', (e) => {
       if (!isRecording) return;
 
+      // 確実にhapticを発生させる
+      hapticConfirm();
       hapticRapidBurst();
 
       if (bgState === 0) {
@@ -1216,6 +1324,9 @@
     bgOverlay.addEventListener('click', (e) => {
       e.stopPropagation();
 
+      // 確実にhapticを発生させる
+      hapticConfirm();
+
       if (bgState === 1) {
         // Switch to bg2.png
         audioFiles.cancel.currentTime = 0;
@@ -1229,6 +1340,26 @@
         bgOverlay.classList.remove('active');
         bgState = 0;
       }
+    });
+
+    // Reload page when coming back from background
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        // Reload when page becomes visible again
+        location.reload();
+      }
+    });
+
+    // Reload overlay click handler
+    reloadOverlay.addEventListener('click', () => {
+      hapticConfirm();
+      location.reload();
+    });
+
+    // Permission overlay click handler
+    permissionOverlay.addEventListener('click', () => {
+      hapticConfirm();
+      location.reload();
     });
 
     // Initialize
