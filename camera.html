@@ -53,17 +53,6 @@
     .dual-video {
       position: absolute;
       object-fit: cover;
-      background: #000;
-    }
-
-    .dual-video::-webkit-media-controls {
-      display: none !important;
-    }
-    .dual-video::-webkit-media-controls-enclosure {
-      display: none !important;
-    }
-    .dual-video::-webkit-media-controls-panel {
-      display: none !important;
     }
 
     #camera-select {
@@ -77,9 +66,6 @@
       background: rgba(0, 0, 0, 0.5);
       color: white;
       z-index: 10;
-      touch-action: manipulation;
-      -webkit-appearance: none;
-      appearance: none;
     }
 
     #lux-btn {
@@ -99,17 +85,6 @@
       box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
       z-index: 10;
       transition: transform 0.1s ease;
-      touch-action: manipulation;
-    }
-
-    #lux-btn::before {
-      content: '';
-      position: absolute;
-      top: -15px;
-      left: -15px;
-      right: -15px;
-      bottom: -15px;
-      border-radius: 50%;
     }
 
     #lux-btn:active {
@@ -133,16 +108,6 @@
       box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
       z-index: 10;
       transition: transform 0.1s ease, opacity 0.2s ease;
-      touch-action: manipulation;
-    }
-
-    #dual-btn::before {
-      content: '';
-      position: absolute;
-      top: -15px;
-      left: -15px;
-      right: -15px;
-      bottom: -15px;
     }
 
     #dual-btn:active {
@@ -156,51 +121,6 @@
     #dual-btn.disabled {
       opacity: 0.3;
       cursor: not-allowed;
-    }
-
-    /* Mobile optimization for dual capture */
-    @media (max-width: 768px) {
-      #dual-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 26px;
-        right: 85px;
-      }
-
-      #lux-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 26px;
-      }
-
-      #camera-select {
-        font-size: 14px;
-        padding: 6px 12px;
-        max-width: 150px;
-      }
-
-      #video-container {
-        width: 100vw;
-        height: 100vh;
-      }
-
-      .dual-video {
-        width: 100% !important;
-        height: auto !important;
-      }
-    }
-
-    /* Ensure no overflow */
-    @media (max-width: 480px) {
-      #dual-btn {
-        right: 75px;
-      }
-
-      #camera-select {
-        font-size: 12px;
-        padding: 4px 8px;
-        max-width: 120px;
-      }
     }
 
     #controls {
@@ -527,7 +447,6 @@
 
     <div id="bg-overlay"></div>
     <div id="flash-overlay"></div>
-    <div id="reload-overlay">タップして再読み込み</div>
 
     <select id="camera-select"></select>
 
@@ -602,7 +521,6 @@
     const centerDot = document.getElementById('center-bar-dot');
     const bgOverlay = document.getElementById('bg-overlay');
     const flashOverlay = document.getElementById('flash-overlay');
-    const reloadOverlay = document.getElementById('reload-overlay');
 
     // State
     let currentStream = null;
@@ -619,8 +537,6 @@
     let isDualMode = false;
     let dualStreams = [];
     let zoomLevel = 1;
-    let isBlackout = false;
-    let blackoutCheckInterval = null;
 
     // Pinch zoom state
     let initialDistance = 0;
@@ -681,57 +597,6 @@
       }, 400);
     }
 
-    // Check if video is playing
-    function isVideoPlaying(vid) {
-      return !!(vid.currentTime > 0 && !vid.paused && !vid.ended && vid.readyState > 2);
-    }
-
-    // Check for blackout
-    function checkBlackout() {
-      if (isDualMode) {
-        const videos = videoContainer.querySelectorAll('video');
-        let anyPlaying = false;
-        videos.forEach(vid => {
-          if (isVideoPlaying(vid)) {
-            anyPlaying = true;
-          }
-        });
-        if (!anyPlaying && videos.length > 0) {
-          isBlackout = true;
-          reloadOverlay.classList.add('visible');
-        } else {
-          isBlackout = false;
-          reloadOverlay.classList.remove('visible');
-        }
-      } else {
-        if (!isVideoPlaying(video) && currentStream) {
-          isBlackout = true;
-          reloadOverlay.classList.add('visible');
-        } else {
-          isBlackout = false;
-          reloadOverlay.classList.remove('visible');
-        }
-      }
-    }
-
-    // Start blackout check
-    function startBlackoutCheck() {
-      if (blackoutCheckInterval) {
-        clearInterval(blackoutCheckInterval);
-      }
-      blackoutCheckInterval = setInterval(checkBlackout, 1000);
-    }
-
-    // Stop blackout check
-    function stopBlackoutCheck() {
-      if (blackoutCheckInterval) {
-        clearInterval(blackoutCheckInterval);
-        blackoutCheckInterval = null;
-      }
-      isBlackout = false;
-      reloadOverlay.classList.remove('visible');
-    }
-
     // Initialize camera
     async function initCamera(deviceId = null) {
       try {
@@ -761,9 +626,6 @@
 
         // Apply current zoom
         applyZoom(zoomLevel);
-
-        // Start blackout check
-        startBlackoutCheck();
       } catch (error) {
         console.error('Camera error:', error);
         audioFiles.error.loop = true;
@@ -796,7 +658,6 @@
 
     // Camera select change
     cameraSelect.addEventListener('change', (e) => {
-      hapticRapidBurst();
       audioFiles.luxSound.currentTime = 0;
       audioFiles.luxSound.play();
       initCamera(e.target.value);
@@ -1061,7 +922,7 @@
         return;
       }
 
-      // Play sound
+      hapticRapidBurst();
       audioFiles.luxSound.currentTime = 0;
       audioFiles.luxSound.play();
 
@@ -1099,10 +960,6 @@
             vid.style.objectFit = 'cover';
             vid.classList.add('dual-video');
 
-            // Ensure video fits within viewport
-            vid.style.maxWidth = '100vw';
-            vid.style.maxHeight = '100vh';
-
             if (numCameras === 2) {
               // 2 cameras: split vertically 50-50
               vid.style.width = '100%';
@@ -1128,49 +985,14 @@
             console.error('Failed to start camera', i, err);
           }
         }
-
-        // Start blackout check for dual mode
-        startBlackoutCheck();
       } else {
         // Exit dual mode and reload page
         location.reload();
       }
     }
 
-    // Dual button handler with touch support
-    const setupDualButtonEvents = () => {
-      let isPressed = false;
-
-      const onPress = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (isPressed) return;
-        if (isRecording) return; // Don't allow during recording
-
-        isPressed = true;
-        dualBtn.style.transform = 'scale(0.9)';
-
-        // Trigger haptic immediately on press
-        hapticRapidBurst();
-
-        toggleDualMode();
-      };
-
-      const onRelease = (e) => {
-        e.preventDefault();
-        if (!isPressed) return;
-        isPressed = false;
-        dualBtn.style.transform = 'scale(1)';
-      };
-
-      dualBtn.addEventListener('touchstart', onPress, { passive: false });
-      dualBtn.addEventListener('mousedown', onPress, { passive: false });
-      dualBtn.addEventListener('touchend', onRelease, { passive: false });
-      dualBtn.addEventListener('mouseup', onRelease, { passive: false });
-      dualBtn.addEventListener('mouseleave', onRelease, { passive: false });
-    };
-
-    setupDualButtonEvents();
+    // Dual button handler
+    dualBtn.addEventListener('click', toggleDualMode);
 
     // Pinch zoom
     videoContainer.addEventListener('touchstart', (e) => {
@@ -1201,46 +1023,18 @@
       }
     }, { passive: false });
 
-    // Lux button handler with touch support
-    const setupLuxButtonEvents = () => {
-      let isPressed = false;
-
-      const onPress = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (isPressed) return;
-
-        isPressed = true;
-        luxBtn.style.transform = 'scale(0.9)';
-
-        // Trigger haptic immediately on press
-        hapticRapidBurst();
-
-        audioFiles.luxSound.currentTime = 0;
-        audioFiles.luxSound.play();
-        swipeOuter.classList.add('active');
-        setupPadding();
-        scrollToItem(prevSelectedIndex, 'auto');
-        setTimeout(() => {
-          updateSelected();
-        }, 120);
-      };
-
-      const onRelease = (e) => {
-        e.preventDefault();
-        if (!isPressed) return;
-        isPressed = false;
-        luxBtn.style.transform = 'scale(1)';
-      };
-
-      luxBtn.addEventListener('touchstart', onPress, { passive: false });
-      luxBtn.addEventListener('mousedown', onPress, { passive: false });
-      luxBtn.addEventListener('touchend', onRelease, { passive: false });
-      luxBtn.addEventListener('mouseup', onRelease, { passive: false });
-      luxBtn.addEventListener('mouseleave', onRelease, { passive: false });
-    };
-
-    setupLuxButtonEvents();
+    // Lux button handler
+    luxBtn.addEventListener('click', () => {
+      hapticRapidBurst();
+      audioFiles.luxSound.currentTime = 0;
+      audioFiles.luxSound.play();
+      swipeOuter.classList.add('active');
+      setupPadding();
+      scrollToItem(prevSelectedIndex, 'auto');
+      setTimeout(() => {
+        updateSelected();
+      }, 120);
+    });
 
     // Lux slider functions
     function getClosestItemIndex() {
@@ -1371,17 +1165,11 @@
     });
 
     // Focus control - tap on video
-    videoContainer.addEventListener('click', (e) => {
+    video.addEventListener('click', (e) => {
       // Ignore if slider is active
       if (swipeOuter.classList.contains('active')) return;
 
-      // If blackout, reload page
-      if (isBlackout) {
-        location.reload();
-        return;
-      }
-
-      const rect = videoContainer.getBoundingClientRect();
+      const rect = video.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
@@ -1441,19 +1229,6 @@
         bgOverlay.classList.remove('active');
         bgState = 0;
       }
-    });
-
-    // Reload page when coming back from background
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        // Reload when page becomes visible again
-        location.reload();
-      }
-    });
-
-    // Reload overlay click handler
-    reloadOverlay.addEventListener('click', () => {
-      location.reload();
     });
 
     // Initialize
