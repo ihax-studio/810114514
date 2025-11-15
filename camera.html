@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>カメラUI</title>
+  <title>BEAST TAKE</title>
   <link rel="icon" type="image/png" href="beasst.png">
   <link rel="apple-touch-icon" href="beasst.png">
   <link rel="manifest" href="manifestcamera.json">
@@ -53,6 +53,17 @@
     .dual-video {
       position: absolute;
       object-fit: cover;
+      background: #000;
+    }
+
+    .dual-video::-webkit-media-controls {
+      display: none !important;
+    }
+    .dual-video::-webkit-media-controls-enclosure {
+      display: none !important;
+    }
+    .dual-video::-webkit-media-controls-panel {
+      display: none !important;
     }
 
     #camera-select {
@@ -66,6 +77,9 @@
       background: rgba(0, 0, 0, 0.5);
       color: white;
       z-index: 10;
+      touch-action: manipulation;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     #lux-btn {
@@ -85,6 +99,17 @@
       box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
       z-index: 10;
       transition: transform 0.1s ease;
+      touch-action: manipulation;
+    }
+
+    #lux-btn::before {
+      content: '';
+      position: absolute;
+      top: -15px;
+      left: -15px;
+      right: -15px;
+      bottom: -15px;
+      border-radius: 50%;
     }
 
     #lux-btn:active {
@@ -108,6 +133,16 @@
       box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
       z-index: 10;
       transition: transform 0.1s ease, opacity 0.2s ease;
+      touch-action: manipulation;
+    }
+
+    #dual-btn::before {
+      content: '';
+      position: absolute;
+      top: -15px;
+      left: -15px;
+      right: -15px;
+      bottom: -15px;
     }
 
     #dual-btn:active {
@@ -121,6 +156,51 @@
     #dual-btn.disabled {
       opacity: 0.3;
       cursor: not-allowed;
+    }
+
+    /* Mobile optimization for dual capture */
+    @media (max-width: 768px) {
+      #dual-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 26px;
+        right: 85px;
+      }
+
+      #lux-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 26px;
+      }
+
+      #camera-select {
+        font-size: 14px;
+        padding: 6px 12px;
+        max-width: 150px;
+      }
+
+      #video-container {
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .dual-video {
+        width: 100% !important;
+        height: auto !important;
+      }
+    }
+
+    /* Ensure no overflow */
+    @media (max-width: 480px) {
+      #dual-btn {
+        right: 75px;
+      }
+
+      #camera-select {
+        font-size: 12px;
+        padding: 4px 8px;
+        max-width: 120px;
+      }
     }
 
     #controls {
@@ -387,6 +467,56 @@
     #video::-webkit-media-controls-panel {
       display: none !important;
     }
+
+    /* Flash effect */
+    #flash-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    @keyframes flashEffect {
+      0% {
+        opacity: 0;
+      }
+      20% {
+        opacity: 0.9;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+    #flash-overlay.active {
+      animation: flashEffect 0.4s ease-out;
+    }
+
+    /* Reload overlay */
+    #reload-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 40px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      font-size: 18px;
+      border-radius: 12px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 50;
+      transition: opacity 0.3s ease;
+    }
+
+    #reload-overlay.visible {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
@@ -396,6 +526,8 @@
     </div>
 
     <div id="bg-overlay"></div>
+    <div id="flash-overlay"></div>
+    <div id="reload-overlay">タップして再読み込み</div>
 
     <select id="camera-select"></select>
 
@@ -469,6 +601,8 @@
     const swipeList = document.getElementById('swipe-list');
     const centerDot = document.getElementById('center-bar-dot');
     const bgOverlay = document.getElementById('bg-overlay');
+    const flashOverlay = document.getElementById('flash-overlay');
+    const reloadOverlay = document.getElementById('reload-overlay');
 
     // State
     let currentStream = null;
@@ -485,6 +619,8 @@
     let isDualMode = false;
     let dualStreams = [];
     let zoomLevel = 1;
+    let isBlackout = false;
+    let blackoutCheckInterval = null;
 
     // Pinch zoom state
     let initialDistance = 0;
@@ -535,6 +671,67 @@
       zoomLevel = zoom;
     }
 
+    // Flash effect
+    function triggerFlash() {
+      flashOverlay.classList.remove('active');
+      void flashOverlay.offsetWidth; // Force reflow
+      flashOverlay.classList.add('active');
+      setTimeout(() => {
+        flashOverlay.classList.remove('active');
+      }, 400);
+    }
+
+    // Check if video is playing
+    function isVideoPlaying(vid) {
+      return !!(vid.currentTime > 0 && !vid.paused && !vid.ended && vid.readyState > 2);
+    }
+
+    // Check for blackout
+    function checkBlackout() {
+      if (isDualMode) {
+        const videos = videoContainer.querySelectorAll('video');
+        let anyPlaying = false;
+        videos.forEach(vid => {
+          if (isVideoPlaying(vid)) {
+            anyPlaying = true;
+          }
+        });
+        if (!anyPlaying && videos.length > 0) {
+          isBlackout = true;
+          reloadOverlay.classList.add('visible');
+        } else {
+          isBlackout = false;
+          reloadOverlay.classList.remove('visible');
+        }
+      } else {
+        if (!isVideoPlaying(video) && currentStream) {
+          isBlackout = true;
+          reloadOverlay.classList.add('visible');
+        } else {
+          isBlackout = false;
+          reloadOverlay.classList.remove('visible');
+        }
+      }
+    }
+
+    // Start blackout check
+    function startBlackoutCheck() {
+      if (blackoutCheckInterval) {
+        clearInterval(blackoutCheckInterval);
+      }
+      blackoutCheckInterval = setInterval(checkBlackout, 1000);
+    }
+
+    // Stop blackout check
+    function stopBlackoutCheck() {
+      if (blackoutCheckInterval) {
+        clearInterval(blackoutCheckInterval);
+        blackoutCheckInterval = null;
+      }
+      isBlackout = false;
+      reloadOverlay.classList.remove('visible');
+    }
+
     // Initialize camera
     async function initCamera(deviceId = null) {
       try {
@@ -564,6 +761,9 @@
 
         // Apply current zoom
         applyZoom(zoomLevel);
+
+        // Start blackout check
+        startBlackoutCheck();
       } catch (error) {
         console.error('Camera error:', error);
         audioFiles.error.loop = true;
@@ -596,6 +796,7 @@
 
     // Camera select change
     cameraSelect.addEventListener('change', (e) => {
+      hapticRapidBurst();
       audioFiles.luxSound.currentTime = 0;
       audioFiles.luxSound.play();
       initCamera(e.target.value);
@@ -614,6 +815,9 @@
         takeDualPhoto();
         return;
       }
+
+      // Trigger flash effect
+      triggerFlash();
 
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -635,6 +839,9 @@
 
     // Take dual photo
     async function takeDualPhoto() {
+      // Trigger flash effect
+      triggerFlash();
+
       const videos = videoContainer.querySelectorAll('video');
       const totalWidth = video.videoWidth;
       const totalHeight = video.videoHeight;
@@ -644,25 +851,28 @@
       ctx.filter = video.style.filter;
 
       const numCameras = videos.length;
+
       if (numCameras === 2) {
+        // 2 cameras: split vertically 50-50
         const halfHeight = totalHeight / 2;
         videos.forEach((vid, idx) => {
           ctx.drawImage(vid, 0, idx * halfHeight, totalWidth, halfHeight);
         });
       } else if (numCameras === 3) {
-        const halfHeight = totalHeight / 2;
-        ctx.drawImage(videos[0], 0, 0, totalWidth, halfHeight);
-        const quarterWidth = totalWidth / 2;
-        ctx.drawImage(videos[1], 0, halfHeight, quarterWidth, halfHeight);
-        ctx.drawImage(videos[2], quarterWidth, halfHeight, quarterWidth, halfHeight);
-      } else if (numCameras === 4) {
+        // 3 cameras: split vertically 33.33-33.33-33.33
+        const thirdHeight = totalHeight / 3;
+        videos.forEach((vid, idx) => {
+          ctx.drawImage(vid, 0, idx * thirdHeight, totalWidth, thirdHeight);
+        });
+      } else if (numCameras >= 4) {
+        // 4+ cameras: 2x2 grid (max 4 cameras)
         const halfWidth = totalWidth / 2;
         const halfHeight = totalHeight / 2;
-        videos.forEach((vid, idx) => {
-          const x = (idx % 2) * halfWidth;
-          const y = Math.floor(idx / 2) * halfHeight;
-          ctx.drawImage(vid, x, y, halfWidth, halfHeight);
-        });
+        for (let i = 0; i < Math.min(4, numCameras); i++) {
+          const x = (i % 2) * halfWidth;
+          const y = Math.floor(i / 2) * halfHeight;
+          ctx.drawImage(videos[i], x, y, halfWidth, halfHeight);
+        }
       }
 
       audioFiles.shutter.currentTime = 0;
@@ -851,7 +1061,7 @@
         return;
       }
 
-      hapticRapidBurst();
+      // Play sound
       audioFiles.luxSound.currentTime = 0;
       audioFiles.luxSound.play();
 
@@ -865,7 +1075,7 @@
 
         videoContainer.innerHTML = '';
 
-        const numCameras = cameras.length;
+        const numCameras = Math.min(cameras.length, 4); // Max 4 cameras
         dualStreams = [];
 
         for (let i = 0; i < numCameras; i++) {
@@ -889,24 +1099,24 @@
             vid.style.objectFit = 'cover';
             vid.classList.add('dual-video');
 
+            // Ensure video fits within viewport
+            vid.style.maxWidth = '100vw';
+            vid.style.maxHeight = '100vh';
+
             if (numCameras === 2) {
+              // 2 cameras: split vertically 50-50
               vid.style.width = '100%';
               vid.style.height = '50%';
               vid.style.top = (i * 50) + '%';
               vid.style.left = '0';
             } else if (numCameras === 3) {
-              if (i === 0) {
-                vid.style.width = '100%';
-                vid.style.height = '50%';
-                vid.style.top = '0';
-                vid.style.left = '0';
-              } else {
-                vid.style.width = '50%';
-                vid.style.height = '50%';
-                vid.style.top = '50%';
-                vid.style.left = ((i - 1) * 50) + '%';
-              }
+              // 3 cameras: split vertically 33.33-33.33-33.33
+              vid.style.width = '100%';
+              vid.style.height = (100 / 3) + '%';
+              vid.style.top = (i * (100 / 3)) + '%';
+              vid.style.left = '0';
             } else if (numCameras === 4) {
+              // 4 cameras: 2x2 grid
               vid.style.width = '50%';
               vid.style.height = '50%';
               vid.style.top = (Math.floor(i / 2) * 50) + '%';
@@ -918,14 +1128,49 @@
             console.error('Failed to start camera', i, err);
           }
         }
+
+        // Start blackout check for dual mode
+        startBlackoutCheck();
       } else {
         // Exit dual mode and reload page
         location.reload();
       }
     }
 
-    // Dual button handler
-    dualBtn.addEventListener('click', toggleDualMode);
+    // Dual button handler with touch support
+    const setupDualButtonEvents = () => {
+      let isPressed = false;
+
+      const onPress = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isPressed) return;
+        if (isRecording) return; // Don't allow during recording
+
+        isPressed = true;
+        dualBtn.style.transform = 'scale(0.9)';
+
+        // Trigger haptic immediately on press
+        hapticRapidBurst();
+
+        toggleDualMode();
+      };
+
+      const onRelease = (e) => {
+        e.preventDefault();
+        if (!isPressed) return;
+        isPressed = false;
+        dualBtn.style.transform = 'scale(1)';
+      };
+
+      dualBtn.addEventListener('touchstart', onPress, { passive: false });
+      dualBtn.addEventListener('mousedown', onPress, { passive: false });
+      dualBtn.addEventListener('touchend', onRelease, { passive: false });
+      dualBtn.addEventListener('mouseup', onRelease, { passive: false });
+      dualBtn.addEventListener('mouseleave', onRelease, { passive: false });
+    };
+
+    setupDualButtonEvents();
 
     // Pinch zoom
     videoContainer.addEventListener('touchstart', (e) => {
@@ -956,18 +1201,46 @@
       }
     }, { passive: false });
 
-    // Lux button handler
-    luxBtn.addEventListener('click', () => {
-      hapticRapidBurst();
-      audioFiles.luxSound.currentTime = 0;
-      audioFiles.luxSound.play();
-      swipeOuter.classList.add('active');
-      setupPadding();
-      scrollToItem(prevSelectedIndex, 'auto');
-      setTimeout(() => {
-        updateSelected();
-      }, 120);
-    });
+    // Lux button handler with touch support
+    const setupLuxButtonEvents = () => {
+      let isPressed = false;
+
+      const onPress = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isPressed) return;
+
+        isPressed = true;
+        luxBtn.style.transform = 'scale(0.9)';
+
+        // Trigger haptic immediately on press
+        hapticRapidBurst();
+
+        audioFiles.luxSound.currentTime = 0;
+        audioFiles.luxSound.play();
+        swipeOuter.classList.add('active');
+        setupPadding();
+        scrollToItem(prevSelectedIndex, 'auto');
+        setTimeout(() => {
+          updateSelected();
+        }, 120);
+      };
+
+      const onRelease = (e) => {
+        e.preventDefault();
+        if (!isPressed) return;
+        isPressed = false;
+        luxBtn.style.transform = 'scale(1)';
+      };
+
+      luxBtn.addEventListener('touchstart', onPress, { passive: false });
+      luxBtn.addEventListener('mousedown', onPress, { passive: false });
+      luxBtn.addEventListener('touchend', onRelease, { passive: false });
+      luxBtn.addEventListener('mouseup', onRelease, { passive: false });
+      luxBtn.addEventListener('mouseleave', onRelease, { passive: false });
+    };
+
+    setupLuxButtonEvents();
 
     // Lux slider functions
     function getClosestItemIndex() {
@@ -1098,11 +1371,17 @@
     });
 
     // Focus control - tap on video
-    video.addEventListener('click', (e) => {
+    videoContainer.addEventListener('click', (e) => {
       // Ignore if slider is active
       if (swipeOuter.classList.contains('active')) return;
 
-      const rect = video.getBoundingClientRect();
+      // If blackout, reload page
+      if (isBlackout) {
+        location.reload();
+        return;
+      }
+
+      const rect = videoContainer.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
@@ -1162,6 +1441,19 @@
         bgOverlay.classList.remove('active');
         bgState = 0;
       }
+    });
+
+    // Reload page when coming back from background
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        // Reload when page becomes visible again
+        location.reload();
+      }
+    });
+
+    // Reload overlay click handler
+    reloadOverlay.addEventListener('click', () => {
+      location.reload();
     });
 
     // Initialize
