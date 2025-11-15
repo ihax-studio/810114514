@@ -13,6 +13,9 @@
       padding: 0;
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     body {
@@ -22,12 +25,22 @@
       background: #000;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       user-select: none;
+      touch-action: pan-x pan-y;
+      overscroll-behavior: none;
     }
 
     #camera-container {
       width: 100%;
       height: 100%;
       position: relative;
+      overflow: hidden;
+    }
+
+    #video-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
     }
 
     #video {
@@ -35,6 +48,11 @@
       height: 100%;
       object-fit: cover;
       transition: filter 0.2s ease;
+    }
+
+    .dual-video {
+      position: absolute;
+      object-fit: cover;
     }
 
     #camera-select {
@@ -71,6 +89,38 @@
 
     #lux-btn:active {
       transform: scale(0.9);
+    }
+
+    #dual-btn {
+      position: absolute;
+      top: 20px;
+      right: 80px;
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+      transition: transform 0.1s ease, opacity 0.2s ease;
+    }
+
+    #dual-btn:active {
+      transform: scale(0.9);
+    }
+
+    #dual-btn.active {
+      background: rgba(255, 215, 0, 0.9);
+    }
+
+    #dual-btn.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
     }
 
     #controls {
@@ -341,13 +391,16 @@
 </head>
 <body>
   <div id="camera-container">
-    <video id="video" autoplay playsinline></video>
+    <div id="video-container">
+      <video id="video" autoplay playsinline></video>
+    </div>
 
     <div id="bg-overlay"></div>
 
     <select id="camera-select"></select>
 
     <button id="lux-btn">☀️</button>
+    <button id="dual-btn">⬜</button>
 
     <div id="focus-indicator"></div>
 
@@ -378,6 +431,17 @@
   <script type="module">
     import { haptic } from "https://esm.sh/ios-haptics";
 
+    // Prevent default gestures
+    document.addEventListener('gesturestart', function(e) {
+      e.preventDefault();
+    });
+    document.addEventListener('gesturechange', function(e) {
+      e.preventDefault();
+    });
+    document.addEventListener('gestureend', function(e) {
+      e.preventDefault();
+    });
+
     // Audio elements
     const audioFiles = {
       shutter: new Audio('tock.mp3'),
@@ -391,6 +455,7 @@
 
     // Elements
     const video = document.getElementById('video');
+    const videoContainer = document.getElementById('video-container');
     const photoBtn = document.getElementById('photo-btn');
     const videoBtn = document.getElementById('video-btn');
     const timerBtn = document.getElementById('timer-btn');
@@ -399,6 +464,7 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const luxBtn = document.getElementById('lux-btn');
+    const dualBtn = document.getElementById('dual-btn');
     const swipeOuter = document.getElementById('swipeOuter');
     const swipeList = document.getElementById('swipe-list');
     const centerDot = document.getElementById('center-bar-dot');
@@ -414,8 +480,15 @@
     let cameras = [];
     let currentTrack = null;
     let luxValue = 1;
-    let bgState = 0; // 0: hidden, 1: bg1.jpg, 2: bg2.png
+    let bgState = 0;
     let lastTapTime = 0;
+    let isDualMode = false;
+    let dualStreams = [];
+    let zoomLevel = 1;
+
+    // Pinch zoom state
+    let initialDistance = 0;
+    let initialZoom = 1;
 
     // Lux slider state
     const luxItems = Array.from(swipeList.querySelectorAll('.swipe-item'));
@@ -424,7 +497,7 @@
     let scrollStart = 0;
     let snapDebounce = null;
     let ticking = false;
-    let prevSelectedIndex = 2; // Default to index 2 (value 1)
+    let prevSelectedIndex = 2;
 
     // Haptic feedback functions
     const hapticRapidBurst = () => {
@@ -446,6 +519,21 @@
         setTimeout(() => haptic.error(), i * delay);
       });
     };
+
+    // Apply zoom
+    function applyZoom(zoom) {
+      if (!currentTrack) return;
+      const capabilities = currentTrack.getCapabilities();
+      if (capabilities.zoom) {
+        const constraints = {
+          advanced: [{ zoom: Math.min(Math.max(zoom, capabilities.zoom.min), capabilities.zoom.max) }]
+        };
+        currentTrack.applyConstraints(constraints).catch(err => {
+          console.error('Zoom error:', err);
+        });
+      }
+      zoomLevel = zoom;
+    }
 
     // Initialize camera
     async function initCamera(deviceId = null) {
@@ -473,9 +561,11 @@
         audioFiles.error.currentTime = 0;
 
         await loadCameras();
+
+        // Apply current zoom
+        applyZoom(zoomLevel);
       } catch (error) {
         console.error('Camera error:', error);
-        // Play error sound continuously
         audioFiles.error.loop = true;
         audioFiles.error.play();
       }
@@ -520,21 +610,69 @@
 
     // Take photo
     async function takePhoto() {
+      if (isDualMode) {
+        takeDualPhoto();
+        return;
+      }
+
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       ctx.filter = video.style.filter;
       ctx.drawImage(video, 0, 0);
 
-      // Play shutter sound
       audioFiles.shutter.currentTime = 0;
       audioFiles.shutter.play();
 
-      // Download photo
       canvas.toBlob(blob => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `photo-${Date.now()}.jpg`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/jpeg', 0.95);
+    }
+
+    // Take dual photo
+    async function takeDualPhoto() {
+      const videos = videoContainer.querySelectorAll('video');
+      const totalWidth = video.videoWidth;
+      const totalHeight = video.videoHeight;
+
+      canvas.width = totalWidth;
+      canvas.height = totalHeight;
+      ctx.filter = video.style.filter;
+
+      const numCameras = videos.length;
+      if (numCameras === 2) {
+        const halfHeight = totalHeight / 2;
+        videos.forEach((vid, idx) => {
+          ctx.drawImage(vid, 0, idx * halfHeight, totalWidth, halfHeight);
+        });
+      } else if (numCameras === 3) {
+        const halfHeight = totalHeight / 2;
+        ctx.drawImage(videos[0], 0, 0, totalWidth, halfHeight);
+        const quarterWidth = totalWidth / 2;
+        ctx.drawImage(videos[1], 0, halfHeight, quarterWidth, halfHeight);
+        ctx.drawImage(videos[2], quarterWidth, halfHeight, quarterWidth, halfHeight);
+      } else if (numCameras === 4) {
+        const halfWidth = totalWidth / 2;
+        const halfHeight = totalHeight / 2;
+        videos.forEach((vid, idx) => {
+          const x = (idx % 2) * halfWidth;
+          const y = Math.floor(idx / 2) * halfHeight;
+          ctx.drawImage(vid, x, y, halfWidth, halfHeight);
+        });
+      }
+
+      audioFiles.shutter.currentTime = 0;
+      audioFiles.shutter.play();
+
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `dual-photo-${Date.now()}.jpg`;
         a.click();
         URL.revokeObjectURL(url);
       }, 'image/jpeg', 0.95);
@@ -586,6 +724,7 @@
       mediaRecorder.start();
       isRecording = true;
       videoBtn.classList.add('recording');
+      updateDualButtonState();
 
       // Play video start sound
       audioFiles.videoStart.currentTime = 0;
@@ -597,6 +736,16 @@
         mediaRecorder.stop();
         isRecording = false;
         videoBtn.classList.remove('recording');
+        updateDualButtonState();
+      }
+    }
+
+    // Update dual button state when recording changes
+    function updateDualButtonState() {
+      if (isRecording) {
+        dualBtn.classList.add('disabled');
+      } else {
+        dualBtn.classList.remove('disabled');
       }
     }
 
@@ -694,6 +843,118 @@
     setupButtonEvents(photoBtn, photoAction);
     setupButtonEvents(videoBtn, videoAction);
     setupButtonEvents(timerBtn, timerAction);
+
+    // Dual camera mode
+    async function toggleDualMode() {
+      if (isRecording) {
+        // Cannot switch while recording
+        return;
+      }
+
+      hapticRapidBurst();
+      audioFiles.luxSound.currentTime = 0;
+      audioFiles.luxSound.play();
+
+      if (!isDualMode) {
+        isDualMode = true;
+        dualBtn.classList.add('active');
+
+        if (currentStream) {
+          currentStream.getTracks().forEach(track => track.stop());
+        }
+
+        videoContainer.innerHTML = '';
+
+        const numCameras = cameras.length;
+        dualStreams = [];
+
+        for (let i = 0; i < numCameras; i++) {
+          const constraints = {
+            video: {
+              deviceId: { exact: cameras[i].deviceId },
+              width: { ideal: 1920 },
+              height: { ideal: 1080 }
+            },
+            audio: false
+          };
+
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            dualStreams.push(stream);
+
+            const vid = document.createElement('video');
+            vid.autoplay = true;
+            vid.playsInline = true;
+            vid.srcObject = stream;
+            vid.style.objectFit = 'cover';
+            vid.classList.add('dual-video');
+
+            if (numCameras === 2) {
+              vid.style.width = '100%';
+              vid.style.height = '50%';
+              vid.style.top = (i * 50) + '%';
+              vid.style.left = '0';
+            } else if (numCameras === 3) {
+              if (i === 0) {
+                vid.style.width = '100%';
+                vid.style.height = '50%';
+                vid.style.top = '0';
+                vid.style.left = '0';
+              } else {
+                vid.style.width = '50%';
+                vid.style.height = '50%';
+                vid.style.top = '50%';
+                vid.style.left = ((i - 1) * 50) + '%';
+              }
+            } else if (numCameras === 4) {
+              vid.style.width = '50%';
+              vid.style.height = '50%';
+              vid.style.top = (Math.floor(i / 2) * 50) + '%';
+              vid.style.left = ((i % 2) * 50) + '%';
+            }
+
+            videoContainer.appendChild(vid);
+          } catch (err) {
+            console.error('Failed to start camera', i, err);
+          }
+        }
+      } else {
+        // Exit dual mode and reload page
+        location.reload();
+      }
+    }
+
+    // Dual button handler
+    dualBtn.addEventListener('click', toggleDualMode);
+
+    // Pinch zoom
+    videoContainer.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        initialDistance = Math.hypot(
+          touch2.clientX - touch1.clientX,
+          touch2.clientY - touch1.clientY
+        );
+        initialZoom = zoomLevel;
+      }
+    }, { passive: false });
+
+    videoContainer.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        const currentDistance = Math.hypot(
+          touch2.clientX - touch1.clientX,
+          touch2.clientY - touch1.clientY
+        );
+        const scale = currentDistance / initialDistance;
+        const newZoom = Math.max(1, Math.min(10, initialZoom * scale));
+        applyZoom(newZoom);
+      }
+    }, { passive: false });
 
     // Lux button handler
     luxBtn.addEventListener('click', () => {
