@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>カメラUI</title>
+  <link rel="icon" type="image/png" href="beasst.png">
+  <link rel="apple-touch-icon" href="beasst.png">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      user-select: none;
+    }
+
+    #camera-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    #video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: filter 0.2s ease;
+    }
+
+    #camera-select {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 16px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      z-index: 10;
+    }
+
+    #lux-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+      transition: transform 0.1s ease;
+    }
+
+    #lux-btn:active {
+      transform: scale(0.9);
+    }
+
+    #controls {
+      position: absolute;
+      bottom: 40px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 60px;
+      padding: 0 20px;
+      z-index: 10;
+    }
+
+    .btn {
+      width: 70px;
+      height: 70px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+      touch-action: manipulation;
+    }
+
+    .btn:active {
+      transform: scale(0.8);
+    }
+
+    #photo-btn {
+      background-image: url('cam.png');
+      width: 90px;
+      height: 90px;
+    }
+
+    #video-btn {
+      background-image: url('video.png');
+    }
+
+    #timer-btn {
+      background-image: url('clock.png');
+    }
+
+    #focus-indicator {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border: 2px solid #FFD700;
+      border-radius: 50%;
+      pointer-events: none;
+      display: none;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+      animation: focusAnimation 0.3s ease;
+      z-index: 5;
+    }
+
+    @keyframes focusAnimation {
+      0% {
+        transform: scale(1.5);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .recording {
+      background-image: url('video.png');
+      border: 3px solid #ff0000;
+      border-radius: 50%;
+      animation: recordingPulse 1s infinite;
+    }
+
+    @keyframes recordingPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .timer-active {
+      background-image: url('timer.png') !important;
+    }
+
+    /* Lux slider styles */
+    .swipe-outer {
+      width: 95vw;
+      height: 77px;
+      max-width: 600px;
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%) scale(0.8);
+      overflow: hidden;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: inset 1px -1px 11px rgba(85, 85, 85, 0.33),
+                  inset 1px -1px 55px rgba(110, 110, 110, 0.38),
+                  1px -1px 1px #e9e9e9,
+                  -1px 1px 1px rgba(214, 214, 214, 0.91),
+                  0 2px 25px rgba(111, 111, 111, 0.733);
+      opacity: 0;
+      transition: transform 0.5s cubic-bezier(0.4, 2, 0.5, 1),
+                  opacity 0.33s cubic-bezier(0.4, 2, 0.5, 1);
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .swipe-outer.active {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+      pointer-events: auto;
+    }
+
+    .swipe-list {
+      display: flex;
+      gap: 15px;
+      border-radius: 50px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      cursor: grab;
+      overflow-x: scroll;
+      scroll-behavior: smooth;
+      background: transparent;
+    }
+
+    .swipe-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    .swipe-item {
+      font-size: 18px;
+      color: #ffffff;
+      opacity: 0.8;
+      font-weight: 300;
+      text-align: center;
+      min-width: 55px;
+      line-height: 1px;
+      pointer-events: auto;
+      letter-spacing: 1.7px;
+      position: relative;
+      transition: transform 0.7s cubic-bezier(0.5, 1.7, 0.5, 1),
+                  color 0.4s ease-out,
+                  opacity 0.4s ease-out;
+      transform: translateY(-12px) scale(1);
+    }
+
+    .swipe-item.selected {
+      color: #ffc63e;
+      opacity: 1;
+      font-weight: 330;
+      transform: translateY(-14px) scale(1.1);
+    }
+
+    .gray-bar {
+      position: absolute;
+      bottom: -42px;
+      left: 50%;
+      width: 3px;
+      height: 23px;
+      border-radius: 2px;
+      background: #cbcbcb;
+      transform: translateX(-50%);
+      transition: opacity 0.2s ease;
+      opacity: 1;
+    }
+
+    .swipe-item.selected .gray-bar {
+      opacity: 0;
+    }
+
+    .center-bar {
+      pointer-events: none;
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      z-index: 10;
+      width: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .center-bar-dot {
+      position: absolute;
+      top: 38px;
+      left: -2.5px;
+      width: 4px;
+      height: 13px;
+      border-radius: 2.5px;
+      background: #ffcd00;
+      box-shadow: 0 2px 15px rgba(255, 209, 51, 0.47);
+      z-index: 20;
+      transition: transform 0.5s cubic-bezier(0.4, 2, 0.5, 1);
+    }
+
+    .tap-hint {
+      position: absolute;
+      bottom: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #ffffff;
+      font-size: 13px;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Background overlay */
+    #bg-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      display: none;
+      z-index: 15;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    #bg-overlay.active {
+      display: block;
+      opacity: 1;
+      transform: scale(1);
+    }
+  </style>
+</head>
+<body>
+  <div id="camera-container">
+    <video id="video" autoplay playsinline></video>
+
+    <div id="bg-overlay"></div>
+
+    <select id="camera-select"></select>
+
+    <button id="lux-btn">☀️</button>
+
+    <div id="focus-indicator"></div>
+
+    <div class="swipe-outer" id="swipeOuter">
+      <div class="swipe-list" id="swipe-list">
+        <div class="swipe-item">0.3<div class="gray-bar"></div></div>
+        <div class="swipe-item">0.7<div class="gray-bar"></div></div>
+        <div class="swipe-item">1<div class="gray-bar"></div></div>
+        <div class="swipe-item">1.3<div class="gray-bar"></div></div>
+        <div class="swipe-item">1.7<div class="gray-bar"></div></div>
+        <div class="swipe-item">2<div class="gray-bar"></div></div>
+      </div>
+      <div class="center-bar">
+        <div class="center-bar-dot" id="center-bar-dot"></div>
+      </div>
+      <div class="tap-hint">タップして決定</div>
+    </div>
+
+    <div id="controls">
+      <div id="video-btn" class="btn"></div>
+      <div id="photo-btn" class="btn"></div>
+      <div id="timer-btn" class="btn"></div>
+    </div>
+  </div>
+
+  <canvas id="canvas" style="display: none;"></canvas>
+
+  <script type="module">
+    import { haptic } from "https://esm.sh/ios-haptics";
+
+    // Audio elements
+    const audioFiles = {
+      shutter: new Audio('tock.mp3'),
+      videoStart: new Audio('action.mp3'),
+      videoStop: new Audio('tock.mp3'),
+      timer: new Audio('long.mp3'),
+      cancel: new Audio('mac.wav'),
+      error: new Audio('wrong.mp3'),
+      luxSound: new Audio('mac.wav')
+    };
+
+    // Elements
+    const video = document.getElementById('video');
+    const photoBtn = document.getElementById('photo-btn');
+    const videoBtn = document.getElementById('video-btn');
+    const timerBtn = document.getElementById('timer-btn');
+    const cameraSelect = document.getElementById('camera-select');
+    const focusIndicator = document.getElementById('focus-indicator');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const luxBtn = document.getElementById('lux-btn');
+    const swipeOuter = document.getElementById('swipeOuter');
+    const swipeList = document.getElementById('swipe-list');
+    const centerDot = document.getElementById('center-bar-dot');
+    const bgOverlay = document.getElementById('bg-overlay');
+
+    // State
+    let currentStream = null;
+    let mediaRecorder = null;
+    let isRecording = false;
+    let timerTimeout = null;
+    let isTimerActive = false;
+    let currentDeviceId = null;
+    let cameras = [];
+    let currentTrack = null;
+    let luxValue = 1;
+    let bgState = 0; // 0: hidden, 1: bg1.jpg, 2: bg2.png
+    let lastTapTime = 0;
+
+    // Lux slider state
+    const luxItems = Array.from(swipeList.querySelectorAll('.swipe-item'));
+    let isDragging = false;
+    let startX = 0;
+    let scrollStart = 0;
+    let snapDebounce = null;
+    let ticking = false;
+    let prevSelectedIndex = 2; // Default to index 2 (value 1)
+
+    // Haptic feedback functions
+    const hapticRapidBurst = () => {
+      const delay = 45;
+      const sequence = [];
+      for (let i = 0; i < 3; i++) {
+        const base = i * 3.5;
+        sequence.push(base, base + 1, base + 2);
+      }
+      sequence.forEach(i => {
+        setTimeout(() => haptic.error(), i * delay);
+      });
+    };
+
+    const hapticError = () => {
+      const delay = 100;
+      const sequence = [0, 1, 2, 4, 5, 6];
+      sequence.forEach(i => {
+        setTimeout(() => haptic.error(), i * delay);
+      });
+    };
+
+    // Initialize camera
+    async function initCamera(deviceId = null) {
+      try {
+        if (currentStream) {
+          currentStream.getTracks().forEach(track => track.stop());
+        }
+
+        const constraints = {
+          video: {
+            deviceId: deviceId ? { exact: deviceId } : undefined,
+            width: { ideal: 3840 },
+            height: { ideal: 2160 },
+            frameRate: { ideal: 60 }
+          },
+          audio: false
+        };
+
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = currentStream;
+        currentTrack = currentStream.getVideoTracks()[0];
+
+        // Stop error sound if playing
+        audioFiles.error.pause();
+        audioFiles.error.currentTime = 0;
+
+        await loadCameras();
+      } catch (error) {
+        console.error('Camera error:', error);
+        // Play error sound continuously
+        audioFiles.error.loop = true;
+        audioFiles.error.play();
+      }
+    }
+
+    // Load available cameras
+    async function loadCameras() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        cameras = devices.filter(device => device.kind === 'videoinput');
+
+        cameraSelect.innerHTML = '';
+        cameras.forEach(camera => {
+          const option = document.createElement('option');
+          option.value = camera.deviceId;
+          option.text = camera.label || `Camera ${cameras.indexOf(camera) + 1}`;
+          cameraSelect.appendChild(option);
+        });
+
+        if (currentTrack) {
+          const settings = currentTrack.getSettings();
+          cameraSelect.value = settings.deviceId;
+        }
+      } catch (error) {
+        console.error('Failed to load cameras:', error);
+      }
+    }
+
+    // Camera select change
+    cameraSelect.addEventListener('change', (e) => {
+      audioFiles.luxSound.currentTime = 0;
+      audioFiles.luxSound.play();
+      initCamera(e.target.value);
+    });
+
+    // Apply lux filter
+    function applyLuxFilter() {
+      const brightness = 50 + (luxValue - 1) * 50;
+      const contrast = 100 + (luxValue - 1) * 30;
+      video.style.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+    }
+
+    // Take photo
+    async function takePhoto() {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.filter = video.style.filter;
+      ctx.drawImage(video, 0, 0);
+
+      // Play shutter sound
+      audioFiles.shutter.currentTime = 0;
+      audioFiles.shutter.play();
+
+      // Download photo
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `photo-${Date.now()}.jpg`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/jpeg', 0.95);
+    }
+
+    // Start/stop video recording
+    function toggleVideoRecording() {
+      if (!isRecording) {
+        startRecording();
+      } else {
+        stopRecording();
+      }
+    }
+
+    function startRecording() {
+      const options = {
+        mimeType: 'video/webm;codecs=vp9',
+        videoBitsPerSecond: 10000000
+      };
+
+      try {
+        mediaRecorder = new MediaRecorder(currentStream, options);
+      } catch (e) {
+        mediaRecorder = new MediaRecorder(currentStream);
+      }
+
+      const chunks = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `video-${Date.now()}.webm`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        // Play stop sound
+        audioFiles.videoStop.currentTime = 0;
+        audioFiles.videoStop.play();
+      };
+
+      mediaRecorder.start();
+      isRecording = true;
+      videoBtn.classList.add('recording');
+
+      // Play video start sound
+      audioFiles.videoStart.currentTime = 0;
+      audioFiles.videoStart.play();
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        videoBtn.classList.remove('recording');
+      }
+    }
+
+    // Timer photo
+    function startTimer() {
+      if (isTimerActive) {
+        // Cancel timer
+        clearTimeout(timerTimeout);
+        isTimerActive = false;
+        photoBtn.classList.remove('timer-active');
+        videoBtn.classList.remove('timer-active');
+        timerBtn.classList.remove('timer-active');
+        audioFiles.timer.pause();
+        audioFiles.timer.currentTime = 0;
+        return;
+      }
+
+      isTimerActive = true;
+      photoBtn.classList.add('timer-active');
+      videoBtn.classList.add('timer-active');
+      timerBtn.classList.add('timer-active');
+
+      // Play timer sound
+      audioFiles.timer.currentTime = 0;
+      audioFiles.timer.play();
+
+      // Wait for timer sound to finish
+      audioFiles.timer.onended = () => {
+        if (isTimerActive) {
+          takePhoto();
+          isTimerActive = false;
+          photoBtn.classList.remove('timer-active');
+          videoBtn.classList.remove('timer-active');
+          timerBtn.classList.remove('timer-active');
+        }
+      };
+    }
+
+    // Button handlers
+    photoBtn.addEventListener('click', () => {
+      hapticRapidBurst();
+      if (isTimerActive) {
+        haptic.confirm();
+        audioFiles.cancel.currentTime = 0;
+        audioFiles.cancel.play();
+      } else {
+        takePhoto();
+      }
+    });
+
+    videoBtn.addEventListener('click', () => {
+      hapticRapidBurst();
+      if (isTimerActive) {
+        haptic.confirm();
+        audioFiles.cancel.currentTime = 0;
+        audioFiles.cancel.play();
+      } else {
+        toggleVideoRecording();
+      }
+    });
+
+    timerBtn.addEventListener('click', () => {
+      hapticRapidBurst();
+      startTimer();
+    });
+
+    // Touch handlers for buttons (mobile)
+    [photoBtn, videoBtn, timerBtn].forEach(btn => {
+      btn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        btn.style.transform = 'scale(0.8)';
+      });
+
+      btn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        btn.style.transform = 'scale(1)';
+      });
+    });
+
+    // Lux button handler
+    luxBtn.addEventListener('click', () => {
+      hapticRapidBurst();
+      audioFiles.luxSound.currentTime = 0;
+      audioFiles.luxSound.play();
+      swipeOuter.classList.add('active');
+      setupPadding();
+      scrollToItem(prevSelectedIndex, 'auto');
+      setTimeout(() => {
+        updateSelected();
+      }, 120);
+    });
+
+    // Lux slider functions
+    function getClosestItemIndex() {
+      const o = swipeOuter.getBoundingClientRect().left + swipeOuter.offsetWidth / 2;
+      let i = 0;
+      let m = Infinity;
+      luxItems.forEach((e, n) => {
+        const r = e.getBoundingClientRect();
+        const c = r.left + r.width / 2;
+        const d = Math.abs(o - c);
+        if (d < m) {
+          i = n;
+          m = d;
+        }
+      });
+      return i;
+    }
+
+    function updateSelected() {
+      const i = getClosestItemIndex();
+      luxItems.forEach((e, n) => {
+        e.classList.toggle('selected', n === i);
+      });
+      moveCenterBarToItem(i);
+      if (i !== prevSelectedIndex) {
+        haptic.confirm();
+        prevSelectedIndex = i;
+      }
+    }
+
+    function scrollToItem(i, b = 'smooth') {
+      const e = luxItems[i];
+      const o = swipeOuter.offsetWidth / 2;
+      const t = e.offsetLeft + e.offsetWidth / 2 - o;
+      swipeList.scrollTo({ left: t, behavior: b });
+    }
+
+    function moveCenterBarToItem(i) {
+      const e = luxItems[i];
+      const ir = e.getBoundingClientRect();
+      const or = swipeOuter.getBoundingClientRect();
+      const off = (ir.left + ir.width / 2) - (or.left + or.width / 2);
+      centerDot.style.transform = `translateX(${off}px)`;
+    }
+
+    function debounceSnap() {
+      clearTimeout(snapDebounce);
+      snapDebounce = setTimeout(() => {
+        const i = getClosestItemIndex();
+        scrollToItem(i);
+      }, 150);
+    }
+
+    function setupPadding() {
+      const f = luxItems[0];
+      const l = luxItems[luxItems.length - 1];
+      const w = swipeOuter.offsetWidth;
+      const pL = (w - f.offsetWidth) / 2;
+      const pR = (w - l.offsetWidth) / 2;
+      swipeList.style.padding = `38px ${pR}px 50px ${pL}px`;
+    }
+
+    function handleDragStart(e) {
+      isDragging = true;
+      swipeList.style.cursor = 'grabbing';
+      swipeList.style.scrollBehavior = 'auto';
+      if (e.touches) {
+        startX = e.touches[0].pageX - swipeList.offsetLeft;
+      } else {
+        startX = e.pageX - swipeList.offsetLeft;
+      }
+      scrollStart = swipeList.scrollLeft;
+      clearTimeout(snapDebounce);
+    }
+
+    function handleDragMove(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+      let x;
+      if (e.touches) {
+        x = e.touches[0].pageX - swipeList.offsetLeft;
+      } else {
+        x = e.pageX - swipeList.offsetLeft;
+      }
+      const walk = x - startX;
+      swipeList.scrollLeft = scrollStart - walk;
+    }
+
+    function handleDragEnd() {
+      if (!isDragging) return;
+      isDragging = false;
+      swipeList.style.cursor = 'grab';
+      swipeList.style.scrollBehavior = 'smooth';
+      debounceSnap();
+    }
+
+    function handleScroll() {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          updateSelected();
+          ticking = false;
+        });
+        ticking = true;
+      }
+      if (!isDragging) {
+        debounceSnap();
+      }
+    }
+
+    swipeList.addEventListener('mousedown', handleDragStart);
+    swipeList.addEventListener('mousemove', handleDragMove);
+    document.addEventListener('mouseup', handleDragEnd);
+    swipeList.addEventListener('mouseleave', handleDragEnd);
+    swipeList.addEventListener('touchstart', handleDragStart, { passive: true });
+    swipeList.addEventListener('touchmove', handleDragMove, { passive: false });
+    swipeList.addEventListener('touchend', handleDragEnd);
+    swipeList.addEventListener('scroll', handleScroll);
+
+    // Click on slider to confirm
+    swipeOuter.addEventListener('click', (e) => {
+      if (!swipeOuter.classList.contains('active')) return;
+      haptic.confirm();
+      const i = getClosestItemIndex();
+      const value = parseFloat(luxItems[i].textContent);
+      luxValue = value;
+      applyLuxFilter();
+      swipeOuter.classList.remove('active');
+    });
+
+    // Focus control - tap on video
+    video.addEventListener('click', (e) => {
+      // Ignore if slider is active
+      if (swipeOuter.classList.contains('active')) return;
+
+      const rect = video.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Show focus indicator
+      focusIndicator.style.left = `${x - 40}px`;
+      focusIndicator.style.top = `${y - 40}px`;
+      focusIndicator.style.display = 'block';
+
+      // Haptic feedback
+      hapticError();
+
+      setTimeout(() => {
+        focusIndicator.style.display = 'none';
+      }, 2000);
+    });
+
+    // Double tap for background overlay (only when recording)
+    video.addEventListener('dblclick', (e) => {
+      if (!isRecording) return;
+
+      hapticRapidBurst();
+
+      if (bgState === 0) {
+        // Show bg1.jpg
+        bgOverlay.style.backgroundImage = 'url(bg1.jpg)';
+        bgOverlay.classList.add('active');
+        bgState = 1;
+      } else if (bgState === 1) {
+        // Switch to bg2.png
+        audioFiles.cancel.currentTime = 0;
+        audioFiles.cancel.play();
+        bgOverlay.style.backgroundImage = 'url(bg2.png)';
+        bgState = 2;
+      } else if (bgState === 2) {
+        // Close
+        audioFiles.cancel.currentTime = 0;
+        audioFiles.cancel.play();
+        bgOverlay.classList.remove('active');
+        bgState = 0;
+      }
+    });
+
+    // Background overlay tap for switching
+    bgOverlay.addEventListener('click', (e) => {
+      e.stopPropagation();
+
+      if (bgState === 1) {
+        // Switch to bg2.png
+        audioFiles.cancel.currentTime = 0;
+        audioFiles.cancel.play();
+        bgOverlay.style.backgroundImage = 'url(bg2.png)';
+        bgState = 2;
+      } else if (bgState === 2) {
+        // Close
+        audioFiles.cancel.currentTime = 0;
+        audioFiles.cancel.play();
+        bgOverlay.classList.remove('active');
+        bgState = 0;
+      }
+    });
+
+    // Initialize
+    initCamera();
+    applyLuxFilter();
+  </script>
+</body>
+</html>
