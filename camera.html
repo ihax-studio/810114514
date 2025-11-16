@@ -446,24 +446,37 @@
       opacity: 1;
     }
 
-    /* Recording timer */
+    /* Recording timer - SF font with Liquid Glass style */
     #recording-timer {
       position: absolute;
       top: 80px;
       left: 50%;
       transform: translateX(-50%);
-      padding: 10px 30px;
-      background: rgba(255, 0, 0, 0.8);
-      color: white;
-      font-size: 28px;
-      font-weight: bold;
-      border-radius: 8px;
+      padding: 15px 35px;
+      background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0.05) 100%);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.4),
+        inset 0 -1px 1px rgba(0, 0, 0, 0.1),
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 2px 8px rgba(255, 0, 0, 0.2);
+      color: #ffffff;
+      font-size: 32px;
+      font-weight: 600;
       opacity: 0;
       pointer-events: none;
       z-index: 50;
       transition: opacity 0.3s ease;
-      font-family: 'Courier New', monospace;
-      letter-spacing: 2px;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+      letter-spacing: 1px;
+      text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.3),
+        0 0 10px rgba(255, 0, 0, 0.3);
     }
 
     #recording-timer.visible {
@@ -505,6 +518,53 @@
       font-size: 18px;
       line-height: 1.6;
     }
+
+    /* ZIP download button */
+    #zip-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 12px 20px;
+      background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.2) 0%,
+        rgba(255, 255, 255, 0.1) 100%);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 15px;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      z-index: 10;
+      transition: transform 0.1s ease, opacity 0.3s ease;
+      touch-action: manipulation;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.3),
+        0 4px 16px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #zip-btn.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #zip-btn:active {
+      transform: scale(0.95);
+    }
+
+    #zip-btn::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      border-radius: 15px;
+    }
   </style>
 </head>
 <body>
@@ -529,6 +589,7 @@
     <select id="camera-select"></select>
 
     <button id="lux-btn">☀️</button>
+    <button id="zip-btn">📦 ZIP保存 (<span id="zip-count">0</span>)</button>
 
     <div id="focus-indicator"></div>
 
@@ -558,6 +619,7 @@
 
   <script type="module">
     import { haptic } from "https://esm.sh/ios-haptics";
+    import JSZip from "https://esm.sh/jszip@3.10.1";
 
     // Prevent default gestures
     document.addEventListener('gesturestart', function(e) {
@@ -600,6 +662,8 @@
     const reloadOverlay = document.getElementById('reload-overlay');
     const recordingTimer = document.getElementById('recording-timer');
     const permissionOverlay = document.getElementById('permission-overlay');
+    const zipBtn = document.getElementById('zip-btn');
+    const zipCount = document.getElementById('zip-count');
 
     // State
     let currentStream = null;
@@ -618,6 +682,65 @@
     let blackoutCheckInterval = null;
     let recordingStartTime = 0;
     let recordingTimerInterval = null;
+    let blackoutStartTime = null;
+
+    // ZIP保存用の配列
+    let capturedFiles = [];
+
+    // Update ZIP button display
+    function updateZipButton() {
+      zipCount.textContent = capturedFiles.length;
+      if (capturedFiles.length > 0) {
+        zipBtn.classList.add('active');
+      } else {
+        zipBtn.classList.remove('active');
+      }
+    }
+
+    // Download all files as ZIP
+    async function downloadZip() {
+      if (capturedFiles.length === 0) {
+        return;
+      }
+
+      hapticConfirm();
+      audioFiles.luxSound.currentTime = 0;
+      audioFiles.luxSound.play();
+
+      const zip = new JSZip();
+
+      // Add all captured files to ZIP
+      for (const file of capturedFiles) {
+        zip.file(file.filename, file.blob);
+      }
+
+      // Generate ZIP file
+      try {
+        const zipBlob = await zip.generateAsync({
+          type: 'blob',
+          compression: 'DEFLATE',
+          compressionOptions: { level: 6 }
+        });
+
+        // Download ZIP
+        const url = URL.createObjectURL(zipBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `capture-${Date.now()}.zip`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        // Clear captured files
+        capturedFiles = [];
+        updateZipButton();
+
+        hapticRapidBurst();
+      } catch (error) {
+        console.error('ZIP generation error:', error);
+        audioFiles.error.currentTime = 0;
+        audioFiles.error.play();
+      }
+    }
 
     // Pinch zoom state
     let initialDistance = 0;
@@ -747,10 +870,21 @@
     // Check for blackout
     function checkBlackout() {
       if (!isVideoPlaying(video) && currentStream) {
-        isBlackout = true;
-        reloadOverlay.classList.add('visible');
+        // ブラックアウト開始時刻を記録
+        if (blackoutStartTime === null) {
+          blackoutStartTime = Date.now();
+        }
+
+        // 1.5秒経過したら再読み込みオーバーレイを表示
+        const elapsed = Date.now() - blackoutStartTime;
+        if (elapsed >= 1500) {
+          isBlackout = true;
+          reloadOverlay.classList.add('visible');
+        }
       } else {
+        // 正常に戻ったらリセット
         isBlackout = false;
+        blackoutStartTime = null;
         reloadOverlay.classList.remove('visible');
       }
     }
@@ -760,7 +894,8 @@
       if (blackoutCheckInterval) {
         clearInterval(blackoutCheckInterval);
       }
-      blackoutCheckInterval = setInterval(checkBlackout, 1000);
+      blackoutStartTime = null;
+      blackoutCheckInterval = setInterval(checkBlackout, 100);
     }
 
     // Stop blackout check
@@ -862,8 +997,9 @@
 
     // Apply lux filter
     function applyLuxFilter() {
-      const brightness = 50 + (luxValue - 1) * 50;
-      const contrast = 100 + (luxValue - 1) * 30;
+      // 1の時に2倍の明るさ（200%）、2の時に4倍の明るさ（400%）
+      const brightness = 100 * Math.pow(1.3, luxValue - 0.3);
+      const contrast = 100 + (luxValue - 0.3) * 20;
       video.style.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
     }
 
@@ -881,12 +1017,19 @@
       audioFiles.shutter.play();
 
       canvas.toBlob(blob => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `photo-${Date.now()}.jpg`;
-        a.click();
-        URL.revokeObjectURL(url);
+        const timestamp = Date.now();
+        const filename = `photo-${timestamp}.jpg`;
+
+        // ZIP用に保存
+        capturedFiles.push({
+          type: 'photo',
+          blob: blob,
+          filename: filename,
+          timestamp: timestamp
+        });
+
+        // ZIP保存ボタンを更新
+        updateZipButton();
       }, 'image/jpeg', 0.95);
     }
 
@@ -900,15 +1043,26 @@
     }
 
     function startRecording() {
+      // iOS用の高画質MP4対応設定
       const options = {
-        mimeType: 'video/webm;codecs=vp9',
-        videoBitsPerSecond: 10000000
+        mimeType: 'video/mp4;codecs=h264',
+        videoBitsPerSecond: 20000000  // 20Mbps - 高画質長時間録画対応
       };
 
       try {
         mediaRecorder = new MediaRecorder(currentStream, options);
       } catch (e) {
-        mediaRecorder = new MediaRecorder(currentStream);
+        // MP4が使えない場合、webmで試す（高ビットレート維持）
+        try {
+          const webmOptions = {
+            mimeType: 'video/webm;codecs=h264',
+            videoBitsPerSecond: 20000000
+          };
+          mediaRecorder = new MediaRecorder(currentStream, webmOptions);
+        } catch (e2) {
+          // どちらも使えない場合、デフォルトで（高ビットレート維持）
+          mediaRecorder = new MediaRecorder(currentStream, { videoBitsPerSecond: 20000000 });
+        }
       }
 
       const chunks = [];
@@ -920,20 +1074,33 @@
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'video/webm' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `video-${Date.now()}.webm`;
-        a.click();
-        URL.revokeObjectURL(url);
+        // MP4フォーマットで保存
+        const mimeType = mediaRecorder.mimeType || 'video/mp4';
+        const blob = new Blob(chunks, { type: mimeType });
+        const timestamp = Date.now();
+
+        // 拡張子をMP4に設定
+        const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
+        const filename = `video-${timestamp}.${extension}`;
+
+        // ZIP用に保存
+        capturedFiles.push({
+          type: 'video',
+          blob: blob,
+          filename: filename,
+          timestamp: timestamp
+        });
+
+        // ZIP保存ボタンを更新
+        updateZipButton();
 
         // Play stop sound
         audioFiles.videoStop.currentTime = 0;
         audioFiles.videoStop.play();
       };
 
-      mediaRecorder.start();
+      // 長時間録画対応：1秒ごとにデータを取得（メモリ効率化）
+      mediaRecorder.start(1000);
       isRecording = true;
       videoBtn.classList.add('recording');
 
@@ -1020,9 +1187,18 @@
 
     // Define actions
     const photoAction = () => {
-      // 確実にhapticを発生させる
+      // 画像自体にhapticを確実に発生させる
+      initializeHaptic();
       hapticConfirm();
       hapticRapidBurst();
+
+      // さらに確実にするため追加のhaptic
+      try {
+        haptic.confirm();
+        haptic.error();
+      } catch (e) {
+        console.log('Additional haptic:', e);
+      }
 
       if (isTimerActive) {
         hapticConfirm();
@@ -1135,6 +1311,36 @@
     };
 
     setupLuxButtonEvents();
+
+    // ZIP button event handler
+    const setupZipButtonEvents = () => {
+      let isPressed = false;
+
+      const onPress = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isPressed || capturedFiles.length === 0) return;
+
+        isPressed = true;
+        zipBtn.style.transform = 'scale(0.95)';
+        downloadZip();
+      };
+
+      const onRelease = (e) => {
+        e.preventDefault();
+        if (!isPressed) return;
+        isPressed = false;
+        zipBtn.style.transform = 'scale(1)';
+      };
+
+      zipBtn.addEventListener('touchstart', onPress, { passive: false });
+      zipBtn.addEventListener('mousedown', onPress, { passive: false });
+      zipBtn.addEventListener('touchend', onRelease, { passive: false });
+      zipBtn.addEventListener('mouseup', onRelease, { passive: false });
+      zipBtn.addEventListener('mouseleave', onRelease, { passive: false });
+    };
+
+    setupZipButtonEvents();
 
     // Lux slider functions
     function getClosestItemIndex() {
