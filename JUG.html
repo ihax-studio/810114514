@@ -10,39 +10,50 @@
         * { touch-action: none; -webkit-user-select: none; box-sizing: border-box; font-family: -apple-system, "SF Pro Display", sans-serif; font-weight: 1 !important; }
         body, html { margin: 0; padding: 0; height: 100dvh; width: 100vw; background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* コンテナ */
         .container-box { width: calc(100% - 20px); margin: 8px auto; border-radius: 18px; background: #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
         #preview-section { flex: 1.2; transition: 0.5s var(--ios-ease); z-index: 10; }
         #preview-section.fullscreen { position: fixed; inset: 0; margin: 0; width: 100%; height: 100%; border-radius: 0; z-index: 8000; }
-        #output-frame { width: 100%; height: 100%; border: none; background: #fff; pointer-events: none; } /* ピンチ検知のため一時的にnone */
+        #output-frame { width: 100%; height: 100%; border: none; background: #fff; pointer-events: none; }
         
-        #expand-toggle-btn { position: absolute; bottom: 15px; right: 15px; width: 44px; height: 44px; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 8010; transition: 0.4s var(--ios-ease); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        #editor-section { flex: 0.8; display: flex; margin-bottom: 85px; pointer-events: auto; }
+        #expand-toggle-btn { position: absolute; bottom: 15px; right: 15px; width: 44px; height: 44px; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 8010; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        #editor-section { flex: 0.8; display: flex; margin-bottom: 85px; }
         #raw-editor { flex: 1; border: none; padding: 15px; outline: none; font-family: "SF Mono", monospace; background: #fff; -webkit-user-select: text; font-size: 13px; resize: none; touch-action: pan-y; }
 
-        /* 削除ボタン（明るい赤） */
-        .del-trigger { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background: #ff3b30; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold !important; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-
-        /* Dock & アイコン */
+        /* Dock & Item */
         #dock-area { position: fixed; bottom: 25px; right: 15px; display: flex; align-items: center; z-index: 4000; }
         #dock-wrapper { display: flex; align-items: center; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); padding: 6px; border-radius: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-        #file-list { display: flex; gap: 8px; width: 0; opacity: 0; overflow: hidden; transition: 0.4s var(--ios-ease); }
+        #file-list { display: flex; gap: 10px; width: 0; opacity: 0; overflow: hidden; transition: 0.4s var(--ios-ease); padding: 0; }
         #file-list.open { width: auto; opacity: 1; margin-right: 10px; padding: 5px; }
-        .dock-item { width: 50px; height: 50px; background: #eee; border-radius: 12px; position: relative; flex-shrink: 0; transition: 0.3s var(--ios-ease); }
-        .dock-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
-        .dock-item.removing { transform: scale(0); width: 0; opacity: 0; }
+        
+        .dock-item { width: 50px; height: 50px; background: #eee; border-radius: 12px; position: relative; flex-shrink: 0; }
+        .dock-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: block; }
+        .dock-item.removing { transform: scale(0); width: 0; opacity: 0; transition: 0.3s var(--ios-ease); }
 
-        /* 拡大オーバーレイ */
-        #media-overlay { position: fixed; inset: 0; backdrop-filter: blur(30px); background: rgba(0,0,0,0.3); z-index: 9000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; }
+        /* 強力な削除ボタン */
+        .del-trigger { 
+            position: absolute; top: -10px; right: -10px; width: 26px; height: 26px; 
+            background: #ff3b30 !important; color: white !important; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 20px; font-weight: bold !important; z-index: 5000; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3); pointer-events: auto;
+        }
+
+        /* 拡大プレビュー UI */
+        #media-overlay { position: fixed; inset: 0; backdrop-filter: blur(35px); background: rgba(0,0,0,0.5); z-index: 9000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; }
         #media-overlay.active { display: flex; opacity: 1; }
-        #expanded-media { max-width: 85%; max-height: 70%; border-radius: 15px; box-shadow: 0 30px 60px rgba(0,0,0,0.3); transform: scale(0.5); transition: 0.4s var(--ios-ease); }
+        #expanded-media { max-width: 85%; max-height: 70%; border-radius: 12px; box-shadow: 0 25px 50px rgba(0,0,0,0.4); transform: scale(0.7); transition: 0.4s var(--ios-ease); }
         #media-overlay.active #expanded-media { transform: scale(1); }
+        
+        .overlay-btn-left { position: absolute; top: 50px; left: 30px; font-size: 40px; color: white; z-index: 9100; }
+        .overlay-btn-right { position: absolute; top: 50px; right: 30px; font-size: 40px; color: white; z-index: 9100; }
+        #media-filename { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); background: white; padding: 6px 20px; border-radius: 20px; font-size: 15px; font-weight: 500 !important; color: #333; }
 
-        /* その他UI */
+        /* Monaco/Save UI */
         #monaco-container { position: fixed; inset: 0; background: #fff; z-index: 5000; display: none; opacity: 0; transform: scale(1.05); transition: 0.4s var(--ios-ease); flex-direction: column; }
         #monaco-container.active { display: flex; opacity: 1; transform: scale(1); }
-        #save-input-bar { position: fixed; bottom: 25px; left: 15px; width: min(280px, 60vw); height: 50px; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: 25px; display: none; opacity: 0; transform: translateY(20px); transition: 0.3s var(--ios-ease); z-index: 4500; align-items: center; padding: 0 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
-        #save-input-bar.active { display: flex; opacity: 1; transform: translateY(0); }
+        #save-input-bar { position: fixed; bottom: 25px; left: 15px; width: min(280px, 60vw); height: 50px; background: white; border-radius: 25px; display: none; opacity: 0; transition: 0.3s; z-index: 4500; align-items: center; padding: 0 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        #save-input-bar.active { display: flex; opacity: 1; }
         #ios-loader { position: fixed; inset: 0; background: rgba(255,255,255,0.6); backdrop-filter: blur(8px); z-index: 9999; display: none; align-items: center; justify-content: center; }
         .spinner { width: 35px; height: 35px; border: 3px solid rgba(0,0,0,0.05); border-top: 3px solid #007aff; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -58,7 +69,7 @@
     </div>
 
     <div id="editor-section" class="container-box">
-        <textarea id="raw-editor" oninput="sync('input')" placeholder="Pinch to open Monaco..."></textarea>
+        <textarea id="raw-editor" oninput="sync('input')" placeholder="Pinch out to open Monaco editor..."></textarea>
     </div>
 
     <div style="position:fixed; bottom:25px; left:15px; display:flex; gap:12px; z-index:4000;">
@@ -67,15 +78,15 @@
     </div>
 
     <div id="save-input-bar" onclick="event.stopPropagation()">
-        <input type="text" id="fn" value="index.html" style="border:none; outline:none; flex:1; background:transparent; -webkit-user-select:text;">
+        <input type="text" id="fn" value="index.html" style="border:none; outline:none; flex:1; background:transparent; -webkit-user-select:text; font-size:16px;">
         <div style="font-size:26px; color:#007aff;" onclick="downloadHtml(event)">→</div>
     </div>
 
     <div id="dock-area">
         <div id="dock-wrapper" onclick="event.stopPropagation()">
             <div id="file-list">
-                <div class="dock-item" onclick="document.getElementById('file-input').click()" style="display:flex; align-items:center; justify-content:center; font-size:20px;">＋</div>
-                <div id="media-items" style="display:flex; gap:8px;"></div>
+                <div class="dock-item" onclick="document.getElementById('file-input').click()" style="display:flex; align-items:center; justify-content:center; font-size:20px; background:#e5e5ea;">＋</div>
+                <div id="media-items" style="display:flex; gap:10px;"></div>
             </div>
             <div onclick="toggleDock(event)" id="folder-btn" style="font-size:24px; padding:0 8px;">📁</div>
         </div>
@@ -83,12 +94,14 @@
 
     <div id="monaco-container">
         <div id="monaco-body" style="flex:1;"></div>
-        <div id="monaco-close-btn" style="position:absolute; bottom:30px; left:25px; width:55px; height:55px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);" onclick="toggleUI('monaco-container', false)">←</div>
+        <div style="position:absolute; bottom:30px; left:25px; width:55px; height:55px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);" onclick="toggleUI('monaco-container', false)">←</div>
     </div>
 
     <div id="media-overlay" onclick="closeMedia()">
-        <img id="expanded-media">
-        <div id="media-filename" style="position:absolute; bottom:50px; background:#fff; padding:5px 15px; border-radius:15px;">file.png</div>
+        <div class="overlay-btn-left" onclick="closeMedia(event)">←</div>
+        <div class="overlay-btn-right" onclick="downloadMedia(event)">↓</div>
+        <img id="expanded-media" onclick="event.stopPropagation()">
+        <div id="media-filename" onclick="event.stopPropagation()">file.png</div>
     </div>
 
     <input type="file" id="file-input" hidden onchange="handleFile(event)" accept="image/*">
@@ -102,13 +115,13 @@
         const previewSection = document.getElementById('preview-section');
         const saveBar = document.getElementById('save-input-bar');
 
-        // --- ピンチ操作でMonaco起動 ---
+        // ピンチ操作でMonaco
         let initialDist = 0;
         document.addEventListener('touchstart', e => { if(e.touches.length === 2) initialDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); });
         document.addEventListener('touchmove', e => {
             if(e.touches.length === 2 && initialDist > 0) {
                 let dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                if(dist > initialDist + 50) { toggleUI('monaco-container', true); initialDist = 0; }
+                if(dist > initialDist + 60) { toggleUI('monaco-container', true); initialDist = 0; }
             }
         });
 
@@ -137,17 +150,51 @@
             r.onload = (ev) => {
                 const div = document.createElement('div');
                 div.className = 'dock-item';
-                div.innerHTML = `<img src="${ev.target.result}" onclick="openMedia('${ev.target.result}', '${f.name}')">
-                                 <div class="del-trigger" onclick="removeFile(event, this)">－</div>`;
+                div.innerHTML = `
+                    <img src="${ev.target.result}" onclick="openMedia('${ev.target.result}', '${f.name.replace(/'/g, "\\'")}')">
+                    <div class="del-trigger" onclick="removeFile(event, this)">－</div>
+                `;
                 document.getElementById('media-items').appendChild(div);
                 document.getElementById('ios-loader').style.display = 'none';
+                e.target.value = '';
             };
             r.readAsDataURL(f);
         };
 
-        window.removeFile = (e, el) => { e.stopPropagation(); haptic.notification('warning'); const p = el.parentElement; p.classList.add('removing'); setTimeout(() => p.remove(), 300); };
-        window.openMedia = (src, name) => { const o = document.getElementById('media-overlay'); document.getElementById('expanded-media').src = src; document.getElementById('media-filename').innerText = name; o.style.display = 'flex'; setTimeout(() => o.classList.add('active'), 10); haptic.confirm(); };
-        window.closeMedia = () => { const o = document.getElementById('media-overlay'); o.classList.remove('active'); setTimeout(() => o.style.display = 'none', 300); };
+        window.removeFile = (e, el) => { 
+            e.preventDefault();
+            e.stopPropagation(); 
+            haptic.notification('warning'); 
+            const p = el.closest('.dock-item'); 
+            p.classList.add('removing'); 
+            setTimeout(() => p.remove(), 300); 
+        };
+
+        window.openMedia = (src, name) => { 
+            const o = document.getElementById('media-overlay'); 
+            document.getElementById('expanded-media').src = src; 
+            document.getElementById('media-filename').innerText = name; 
+            o.style.display = 'flex'; 
+            setTimeout(() => o.classList.add('active'), 10); 
+            haptic.confirm(); 
+        };
+
+        window.closeMedia = (e) => { 
+            if(e) e.stopPropagation();
+            const o = document.getElementById('media-overlay'); 
+            o.classList.remove('active'); 
+            setTimeout(() => o.style.display = 'none', 300); 
+        };
+
+        window.downloadMedia = (e) => {
+            e.stopPropagation();
+            const a = document.createElement('a');
+            a.href = document.getElementById('expanded-media').src;
+            a.download = document.getElementById('media-filename').innerText;
+            a.click();
+            haptic.confirm();
+        };
+
         window.toggleDock = (e) => { e.stopPropagation(); isDockOpen = !isDockOpen; document.getElementById('file-list').classList.toggle('open', isDockOpen); haptic.confirm(); };
         window.toggleFullscreen = (e) => { e.stopPropagation(); previewSection.classList.toggle('fullscreen'); haptic.confirm(); };
         window.toggleUI = (id, show) => { const t = document.getElementById(id); if(show){ t.style.display='flex'; setTimeout(()=>t.classList.add('active'),10); haptic.confirm(); } else { t.classList.remove('active'); setTimeout(()=>t.style.display='none',400); } };
