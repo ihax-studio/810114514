@@ -20,15 +20,15 @@
 
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* プレビュー */
+        /* プレビュー (標準のピンチズームはJS側でもブロック) */
         #preview-section { 
             flex: 1; background: #fff; position: relative; transition: 0.6s var(--ios-ease); z-index: 10; 
             transform: scale(0.97); border-radius: 12px; margin: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
         }
         #preview-section.fullscreen { position: fixed; inset: 0; transform: scale(1); border-radius: 0; margin: 0; z-index: 8000; }
-        #output-frame { width: 100%; height: 100%; border: none; }
+        #output-frame { width: 100%; height: 100%; border: none; pointer-events: auto; }
         
-        /* 拡大/閉じるボタン (左下) */
+        /* 拡大/戻るボタン (左下) */
         #expand-toggle-btn { 
             position: absolute; bottom: 20px; left: 20px; width: 44px; height: 44px;
             background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
@@ -62,10 +62,10 @@
         #media-overlay.active #expanded-media { transform: scale(1); }
         #expanded-media.zoomed { transform: scale(1.8) !important; }
 
-        /* 画像オーバーレイUI */
+        /* 画像オーバーレイUI (配置変更) */
         .media-ui-btn { position: absolute; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; color: #000; font-size: 40px; z-index: 9010; cursor: pointer; }
-        #media-close { top: 30px; right: 20px; } /* 画像外右上 */
-        #media-download { top: 30px; left: 20px; } /* 画像外左上 */
+        #media-close { top: 30px; left: 20px; } /* 左側：← (戻る) */
+        #media-download { top: 30px; right: 20px; } /* 右側：↓ (保存) */
         #media-filename { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); color: #000; font-size: 16px; border-bottom: 0.5px solid #000; padding: 2px 10px; z-index: 9010; }
 
         /* Monaco */
@@ -119,14 +119,14 @@
 
     <div id="monaco-container">
         <div style="height:80px; display:flex; justify-content:flex-start; padding:0 30px; align-items:center;">
-            <div style="font-size:40px; color:#000; cursor:pointer;" onclick="monacoClose()">✕</div>
+            <div style="font-size:40px; color:#000; cursor:pointer;" onclick="monacoClose()">←</div>
         </div>
         <div id="monaco-body" style="flex:1;"></div>
     </div>
 
     <div id="media-overlay" onclick="closeMedia()">
+        <div id="media-close" class="media-ui-btn" onclick="closeMedia(event)">←</div>
         <div id="media-download" class="media-ui-btn" onclick="downloadMedia(event)">↓</div>
-        <div id="media-close" class="media-ui-btn" onclick="closeMedia(event)">✕</div>
         <img id="expanded-media" onclick="event.stopPropagation(); toggleZoom(this)" src="">
         <div id="media-filename" onclick="event.stopPropagation(); editMediaName(event)">image.png</div>
     </div>
@@ -146,11 +146,24 @@
         const saveBar = document.getElementById('save-input-bar');
         const expandBtn = document.getElementById('expand-toggle-btn');
 
-        // 二本指タップ検知 (プレビュー拡大)
+        // 標準の拡大縮小(ピンチ)を完全にブロック
+        window.addEventListener('gesturestart', e => e.preventDefault(), {passive: false});
+        window.addEventListener('gesturechange', e => e.preventDefault(), {passive: false});
+
+        // キーボード操作 (Escで閉じる)
+        window.addEventListener('keydown', e => {
+            if(e.key === "Escape") {
+                if(preview.classList.contains('fullscreen')) toggleFullscreen();
+                if(document.getElementById('monaco-container').classList.contains('active')) monacoClose();
+                if(document.getElementById('media-overlay').classList.contains('active')) closeMedia();
+            }
+        });
+
+        // 二本指タップ検知 (プレビュー拡大/解除)
         let touchStartTime = 0;
         preview.addEventListener('touchstart', e => { if(e.touches.length === 2) touchStartTime = Date.now(); }, {passive: false});
         preview.addEventListener('touchend', e => {
-            if(touchStartTime && (Date.now() - touchStartTime < 300) && e.touches.length === 0) {
+            if(touchStartTime && (Date.now() - touchStartTime < 300)) {
                 toggleFullscreen();
                 touchStartTime = 0;
             }
@@ -200,7 +213,8 @@
             if(e) e.stopPropagation(); 
             haptic.confirm(); 
             preview.classList.toggle('fullscreen');
-            expandBtn.innerText = preview.classList.contains('fullscreen') ? "✕" : "⤢";
+            // ✕は使わず、閉じる時も←にする
+            expandBtn.innerText = preview.classList.contains('fullscreen') ? "←" : "⤢";
         };
 
         window.toggleDock = (e) => {
@@ -225,7 +239,7 @@
                 const div = document.createElement('div');
                 div.className = 'dock-item';
                 div.dataset.name = f.name;
-                div.innerHTML = `<img src="${ev.target.result}"><div class="del-trigger">✕</div>`;
+                div.innerHTML = `<img src="${ev.target.result}"><div class="del-trigger">←</div>`; // 削除トリガーも←
                 let sY;
                 div.ontouchstart = (ts) => { sY = ts.touches[0].pageY; ts.stopPropagation(); };
                 div.ontouchend = (te) => {
