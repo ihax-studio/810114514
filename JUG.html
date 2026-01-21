@@ -20,7 +20,7 @@
         #editor-section { flex: 0.8; display: flex; margin-bottom: 85px; }
         #raw-editor { flex: 1; border: none; padding: 15px; outline: none; font-family: "SF Mono", monospace; background: #fff; -webkit-user-select: text; font-size: 13px; resize: none; touch-action: pan-y; }
 
-        /* Dock & Item */
+        /* Dock */
         #dock-area { position: fixed; bottom: 25px; right: 15px; display: flex; align-items: center; z-index: 4000; }
         #dock-wrapper { display: flex; align-items: center; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); padding: 6px; border-radius: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
         #file-list { display: flex; gap: 10px; width: 0; opacity: 0; overflow: hidden; transition: 0.4s var(--ios-ease); padding: 0; }
@@ -29,7 +29,7 @@
         .dock-item { width: 50px; height: 50px; background: #eee; border-radius: 12px; position: relative; flex-shrink: 0; }
         .dock-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: block; }
 
-        /* 拡大プレビュー UI */
+        /* Media Overlay */
         #media-overlay { position: fixed; inset: 0; backdrop-filter: blur(35px); background: rgba(0,0,0,0.5); z-index: 9000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; }
         #media-overlay.active { display: flex; opacity: 1; }
         #expanded-media { max-width: 85%; max-height: 70%; border-radius: 12px; box-shadow: 0 25px 50px rgba(0,0,0,0.4); transform: scale(0.7); transition: 0.4s var(--ios-ease); }
@@ -37,13 +37,27 @@
         
         .overlay-btn-left { position: absolute; top: 50px; left: 30px; font-size: 40px; color: white; z-index: 9100; }
         .overlay-btn-right { position: absolute; top: 50px; right: 30px; font-size: 40px; color: white; z-index: 9100; }
-        #media-filename { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); background: white; padding: 6px 20px; border-radius: 20px; font-size: 15px; font-weight: 500 !important; color: #333; }
+        
+        /* Media Toolbar (Bottom) */
+        #media-toolbar { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; }
+        #delete-media-btn { width: 40px; height: 40px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 200 !important; }
+        #media-filename { background: white; padding: 10px 20px; border-radius: 20px; font-size: 15px; font-weight: 500 !important; color: #333; min-width: 100px; text-align: center; }
 
-        /* Monaco/Save UI */
+        /* Save UI - iOS Animation */
+        #save-input-bar { 
+            position: fixed; bottom: 25px; left: 15px; width: min(280px, 60vw); height: 50px; 
+            background: white; border-radius: 25px; z-index: 4500; display: flex; align-items: center; padding: 0 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            opacity: 0; pointer-events: none;
+            transform: translateY(20px) scale(0.9);
+            transition: 0.4s var(--ios-ease);
+        }
+        #save-input-bar.active { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+
+        /* Monaco */
         #monaco-container { position: fixed; inset: 0; background: #fff; z-index: 5000; display: none; opacity: 0; transform: scale(1.05); transition: 0.4s var(--ios-ease); flex-direction: column; }
         #monaco-container.active { display: flex; opacity: 1; transform: scale(1); }
-        #save-input-bar { position: fixed; bottom: 25px; left: 15px; width: min(280px, 60vw); height: 50px; background: white; border-radius: 25px; display: none; opacity: 0; transition: 0.3s; z-index: 4500; align-items: center; padding: 0 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
-        #save-input-bar.active { display: flex; opacity: 1; }
+        
         #ios-loader { position: fixed; inset: 0; background: rgba(255,255,255,0.6); backdrop-filter: blur(8px); z-index: 9999; display: none; align-items: center; justify-content: center; }
         .spinner { width: 35px; height: 35px; border: 3px solid rgba(0,0,0,0.05); border-top: 3px solid #007aff; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -91,7 +105,11 @@
         <div class="overlay-btn-left" onclick="closeMedia(event)">←</div>
         <div class="overlay-btn-right" onclick="downloadMedia(event)">↓</div>
         <img id="expanded-media" onclick="event.stopPropagation()">
-        <div id="media-filename" onclick="event.stopPropagation()">file.png</div>
+        
+        <div id="media-toolbar" onclick="event.stopPropagation()">
+            <div id="delete-media-btn" onclick="deleteCurrentMedia(event)">✕</div>
+            <div id="media-filename" onclick="renameMedia(event)">file.png</div>
+        </div>
     </div>
 
     <input type="file" id="file-input" hidden onchange="handleFile(event)" accept="image/*">
@@ -101,12 +119,14 @@
         window.haptic = haptic;
 
         let editor, isSyncing = false, isDockOpen = false;
+        let currentTargetItem = null; // 削除・リネーム対象の管理用
         const raw = document.getElementById('raw-editor');
         const previewSection = document.getElementById('preview-section');
         const saveBar = document.getElementById('save-input-bar');
         const expandBtn = document.getElementById('expand-toggle-btn');
+        const folderBtn = document.getElementById('folder-btn');
 
-        // ピンチ操作でMonaco
+        // Pinch logic
         let initialDist = 0;
         document.addEventListener('touchstart', e => { if(e.touches.length === 2) initialDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); });
         document.addEventListener('touchmove', e => {
@@ -136,25 +156,31 @@
 
         window.handleFile = (e) => {
             const f = e.target.files[0]; if(!f) return;
-            document.getElementById('ios-loader').style.display = 'flex';
+            // ファイル読み込み開始時にインジケーター表示
+            const loader = document.getElementById('ios-loader');
+            loader.style.display = 'flex';
+
             const r = new FileReader();
             r.onload = (ev) => {
                 const div = document.createElement('div');
                 div.className = 'dock-item';
-                div.innerHTML = `
-                    <img src="${ev.target.result}" onclick="openMedia('${ev.target.result}', '${f.name.replace(/'/g, "\\'")}')">
-                `;
+                const img = document.createElement('img');
+                img.src = ev.target.result;
+                img.dataset.name = f.name;
+                img.onclick = () => openMedia(img, div);
+                div.appendChild(img);
                 document.getElementById('media-items').appendChild(div);
-                document.getElementById('ios-loader').style.display = 'none';
+                loader.style.display = 'none';
                 e.target.value = '';
             };
             r.readAsDataURL(f);
         };
 
-        window.openMedia = (src, name) => { 
+        window.openMedia = (imgEl, parentDiv) => { 
+            currentTargetItem = { img: imgEl, div: parentDiv };
             const o = document.getElementById('media-overlay'); 
-            document.getElementById('expanded-media').src = src; 
-            document.getElementById('media-filename').innerText = name; 
+            document.getElementById('expanded-media').src = imgEl.src; 
+            document.getElementById('media-filename').innerText = imgEl.dataset.name; 
             o.style.display = 'flex'; 
             setTimeout(() => o.classList.add('active'), 10); 
             haptic.confirm(); 
@@ -164,7 +190,29 @@
             if(e) e.stopPropagation();
             const o = document.getElementById('media-overlay'); 
             o.classList.remove('active'); 
-            setTimeout(() => o.style.display = 'none', 300); 
+            setTimeout(() => { o.style.display = 'none'; currentTargetItem = null; }, 300); 
+        };
+
+        window.renameMedia = (e) => {
+            e.stopPropagation();
+            if(!currentTargetItem) return;
+            const oldName = currentTargetItem.img.dataset.name;
+            const newName = prompt("Rename file:", oldName);
+            if(newName && newName !== oldName) {
+                currentTargetItem.img.dataset.name = newName;
+                document.getElementById('media-filename').innerText = newName;
+                haptic.confirm();
+            }
+        };
+
+        window.deleteCurrentMedia = (e) => {
+            e.stopPropagation();
+            if(!currentTargetItem) return;
+            if(confirm("この画像を削除しますか？")) {
+                currentTargetItem.div.remove();
+                closeMedia();
+                haptic.notification('warning');
+            }
         };
 
         window.downloadMedia = (e) => {
@@ -176,20 +224,52 @@
             haptic.confirm();
         };
 
-        window.toggleDock = (e) => { e.stopPropagation(); isDockOpen = !isDockOpen; document.getElementById('file-list').classList.toggle('open', isDockOpen); haptic.confirm(); };
+        window.toggleDock = (e) => { 
+            e.stopPropagation(); 
+            isDockOpen = !isDockOpen; 
+            document.getElementById('file-list').classList.toggle('open', isDockOpen); 
+            folderBtn.innerText = isDockOpen ? '📂' : '📁';
+            haptic.confirm(); 
+        };
         
         window.toggleFullscreen = (e) => { 
             e.stopPropagation(); 
             previewSection.classList.toggle('fullscreen'); 
-            // 拡大時は←、通常時は→にアイコンを切り替え
             expandBtn.innerText = previewSection.classList.contains('fullscreen') ? '←' : '→';
             haptic.confirm(); 
         };
 
-        window.toggleUI = (id, show) => { const t = document.getElementById(id); if(show){ t.style.display='flex'; setTimeout(()=>t.classList.add('active'),10); haptic.confirm(); } else { t.classList.remove('active'); setTimeout(()=>t.style.display='none',400); } };
-        window.openSave = (e) => { e.stopPropagation(); saveBar.style.display='flex'; setTimeout(()=>saveBar.classList.add('active'),10); haptic.confirm(); };
-        window.globalTap = () => { if(isDockOpen) toggleDock({stopPropagation:()=>{}}); saveBar.classList.remove('active'); };
-        window.downloadHtml = (e) => { e.stopPropagation(); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([raw.value],{type:'text/html'})); a.download=document.getElementById('fn').value; a.click(); haptic.confirm(); };
+        window.toggleUI = (id, show) => { 
+            const t = document.getElementById(id); 
+            if(show){ 
+                t.style.display='flex'; 
+                setTimeout(()=>t.classList.add('active'),10); 
+                haptic.confirm(); 
+            } else { 
+                t.classList.remove('active'); 
+                setTimeout(()=>t.style.display='none',400); 
+            } 
+        };
+
+        window.openSave = (e) => { 
+            e.stopPropagation(); 
+            saveBar.classList.add('active'); 
+            haptic.confirm(); 
+        };
+
+        window.globalTap = () => { 
+            if(isDockOpen) toggleDock({stopPropagation:()=>{}}); 
+            saveBar.classList.remove('active'); 
+        };
+
+        window.downloadHtml = (e) => { 
+            e.stopPropagation(); 
+            const a=document.createElement('a'); 
+            a.href=URL.createObjectURL(new Blob([raw.value],{type:'text/html'})); 
+            a.download=document.getElementById('fn').value; 
+            a.click(); 
+            haptic.confirm(); 
+        };
     </script>
 </body>
 </html>
