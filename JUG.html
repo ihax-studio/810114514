@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Media Editor - iOS Style</title>
+    <title>Pro Media Editor - iOS Dock</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <style>
         :root {
@@ -33,14 +33,14 @@
         #editor-section { flex: 0.8; display: flex; padding: 5px 15px 15px 15px; z-index: 2; transition: 0.5s var(--ios-ease); }
         #raw-editor { flex: 1; border: none; padding: 20px; font-family: 'SF Mono', monospace; font-size: 14px; outline: none; background: #fff; border-radius: 20px; resize: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 
-        /* Dock */
+        /* Dock - 右側にフォルダを配置 */
         #dock-container {
             position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%);
             background: var(--bar-bg); backdrop-filter: blur(25px);
             padding: 8px 14px; border-radius: 28px; display: flex; align-items: center;
             box-shadow: var(--shadow); z-index: 3400; transition: 0.5s var(--ios-ease);
         }
-        #file-list { display: flex; gap: 10px; overflow: hidden; transition: 0.5s var(--ios-ease); }
+        #file-list { display: flex; gap: 10px; overflow: hidden; transition: 0.5s var(--ios-ease); align-items: center; }
         
         .dock-item {
             width: 50px; height: 50px; background: #fff; border-radius: 12px;
@@ -51,21 +51,21 @@
         }
         .dock-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; pointer-events: none; }
 
-        /* 削除ボタン（ーアイコン） */
+        /* 削除ボタン（左上に配置） */
         .delete-badge {
-            position: absolute; top: -8px; right: -8px;
+            position: absolute; top: -10px; left: -10px;
             width: 22px; height: 22px; background: #ff3b30; color: white;
             border-radius: 50%; display: none; align-items: center; justify-content: center;
-            font-size: 16px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 10;
+            font-size: 18px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10; border: 2px solid white;
         }
         .editing .delete-badge { display: flex; }
-        .editing .dock-item { animation: wobble 0.3s infinite ease-in-out; }
+        .editing .dock-item:not(.folder-toggle) { animation: wobble 0.25s infinite ease-in-out; }
 
         @keyframes wobble {
-            0% { transform: rotate(-1deg); }
+            0% { transform: rotate(-1.5deg); }
             50% { transform: rotate(1.5deg); }
-            100% { transform: rotate(-1deg); }
+            100% { transform: rotate(-1.5deg); }
         }
 
         /* フローティングバー */
@@ -77,13 +77,6 @@
         }
         .floating-bar.active { display: flex; opacity: 1; transform: translateX(-50%) scale(1); }
         .btn-ui { border: none; background: var(--accent-color); color: white; padding: 10px 24px; border-radius: 30px; cursor: pointer; font-weight: 600; margin: 0 4px; }
-
-        /* バツアイコン */
-        .ios-close-icon { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-right: 10px; position: relative; }
-        .ios-close-icon::before, .ios-close-icon::after { content: ''; position: absolute; width: 18px; height: 1px; background: #000; }
-        .ios-close-icon::before { transform: rotate(45deg); }
-        .ios-close-icon::after { transform: rotate(-45deg); }
-        .ios-close-icon.white::before, .ios-close-icon.white::after { background: #fff; }
 
         /* メディアビューワー */
         #media-viewer {
@@ -100,6 +93,12 @@
         #monaco-container { position: fixed; inset: 0; background: #1e1e1e; z-index: 4000; display: none; transform: scale(0.9); opacity: 0; transition: 0.5s var(--ios-ease); flex-direction: column; }
         #monaco-container.active { display: flex; transform: scale(1); opacity: 1; }
         #filename-input { border: none; padding: 10px 18px; border-radius: 20px; outline: none; background: #fff; font-size: 14px; width: 140px; margin-right: 8px; }
+        
+        .ios-close-icon { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-right: 10px; position: relative; }
+        .ios-close-icon::before, .ios-close-icon::after { content: ''; position: absolute; width: 18px; height: 1px; background: #000; }
+        .ios-close-icon::before { transform: rotate(45deg); }
+        .ios-close-icon::after { transform: rotate(-45deg); }
+        .ios-close-icon.white::before, .ios-close-icon.white::after { background: #fff; }
     </style>
 </head>
 <body onclick="exitEditingMode()">
@@ -112,9 +111,6 @@
 
     <div id="preview-section">
         <iframe id="output-frame"></iframe>
-        <div style="position: absolute; bottom: 20px; right: 20px; width: 44px; height: 44px; background: rgba(255,255,255,0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(5px); z-index: 3001;" onclick="toggleFullscreen()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-        </div>
     </div>
 
     <div id="editor-section">
@@ -122,11 +118,11 @@
     </div>
 
     <div id="dock-container" onclick="event.stopPropagation()">
-        <div class="dock-item" onclick="toggleFileList()" style="background: transparent; box-shadow: none;">📁</div>
         <div id="file-list" style="width: 0; opacity: 0;">
-            <div class="dock-item" onclick="document.getElementById('file-input').click()" style="background: #eee;">＋</div>
             <div id="media-items" style="display: flex; gap: 10px;"></div>
+            <div class="dock-item" onclick="document.getElementById('file-input').click()" style="background: #eee; margin-right: 10px;">＋</div>
         </div>
+        <div id="folder-btn" class="dock-item folder-toggle" onclick="toggleFileList()" style="background: transparent; box-shadow: none; font-size: 26px;">📁</div>
     </div>
 
     <div id="main-menu" class="floating-bar active">
@@ -185,32 +181,29 @@
 
         function toggleFileList() {
             const list = document.getElementById('file-list');
+            const folderBtn = document.getElementById('folder-btn');
             isFileListOpen = !isFileListOpen;
+            
             if (isFileListOpen) {
                 list.style.width = 'auto';
                 list.style.opacity = '1';
-                list.style.marginLeft = '10px';
+                folderBtn.innerHTML = '📂'; // 開いているときは📂
             } else {
                 list.style.width = '0';
                 list.style.opacity = '0';
-                list.style.marginLeft = '0';
+                folderBtn.innerHTML = '📁'; // 閉じているときは📁
                 exitEditingMode();
             }
             haptic();
         }
 
-        // --- メディア処理 ---
         function handleFileSelect(e) {
             const f = e.target.files[0];
             if(!f) return;
-            const name = f.name;
-            const isMedia = /\.(jpg|jpeg|png|gif|webp|mp3|wav|mp4|mov|aiff)$/i.test(name);
-            if(!isMedia) { showToast("Media Only"); return; }
-
             const r = new FileReader();
             r.onload = (ev) => {
-                files[name] = ev.target.result;
-                if(!mediaOrder.includes(name)) mediaOrder.push(name);
+                files[f.name] = ev.target.result;
+                if(!mediaOrder.includes(f.name)) mediaOrder.push(f.name);
                 renderDock();
                 haptic();
             };
@@ -236,14 +229,13 @@
                     div.innerHTML = '🎬';
                 }
 
-                // 削除バッジ
+                // 削除バッジ（左上に配置）
                 const badge = document.createElement('div');
                 badge.className = 'delete-badge';
                 badge.innerHTML = '－';
                 badge.onclick = (e) => { e.stopPropagation(); deleteMedia(name); };
                 div.appendChild(badge);
 
-                // ロングプレス処理
                 div.onmousedown = div.ontouchstart = () => {
                     longPressTimer = setTimeout(() => {
                         isEditing = true;
@@ -257,7 +249,6 @@
                     if(isEditing) return;
                     isAudio ? toggleAudio(name) : openViewer(name);
                 };
-                
                 items.appendChild(div);
             });
         }
@@ -328,14 +319,6 @@
             haptic();
         }
 
-        function toggleFullscreen() {
-            const isFull = document.getElementById('preview-section').classList.toggle('fullscreen');
-            toggleUI('main-menu', !isFull);
-            haptic();
-        }
-
-        function showToast(m) { const t = document.getElementById('toast-notification'); t.innerText = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800); }
-        
         function downloadFile() {
             const blob = new Blob([rawTextArea.value], { type: 'text/html' });
             const a = document.createElement('a');
@@ -345,6 +328,8 @@
             showToast("Saved!");
             toggleUI('save-bar', false);
         }
+
+        function showToast(m) { const t = document.getElementById('toast-notification'); t.innerText = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800); }
     </script>
 </body>
 </html>
