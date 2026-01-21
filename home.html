@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Live Editor - Smooth Transition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f0f0f2;
+            --accent-color: #000;
+            --bar-bg: rgba(242, 242, 247, 0.9);
+            --shadow: 0 15px 50px rgba(0,0,0,0.15);
+            --toast-bg: rgba(255, 255, 255, 0.75);
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            overflow: hidden; display: flex; flex-direction: column;
+        }
+
+        /* プレビューエリア */
+        #preview-section { 
+            flex: 1; background: #fff; position: relative; 
+            transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1); 
+            z-index: 5; transform-origin: center center;
+            transform: scale(0.98); border-radius: 12px; margin: 10px;
+        }
+        #preview-section.fullscreen { 
+            position: fixed; inset: 0; z-index: 3000;
+            transform: scale(1); border-radius: 0; margin: 0;
+        }
+
+        #output-frame { width: 100%; height: 100%; border: none; display: block; border-radius: inherit; }
+
+        /* フローティングバー共通設定 */
+        .floating-bar {
+            position: fixed; bottom: 30px; left: 50%; 
+            /* 初期状態: 中央揃え + 縮小 + 透明 */
+            transform: translateX(-50%) scale(0.8);
+            opacity: 0;
+            z-index: 3500; background: var(--bar-bg); padding: 10px 14px;
+            border-radius: 40px; display: none; align-items: center;
+            box-shadow: var(--shadow); backdrop-filter: blur(25px);
+            transition: transform 0.5s ease, opacity 0.5s ease;
+        }
+        
+        /* アクティブ時: 0.5s ease で Scale Up */
+        .floating-bar.active { 
+            display: flex; 
+            opacity: 1; 
+            transform: translateX(-50%) scale(1); 
+        }
+
+        .btn-ui {
+            border: none; background: var(--accent-color); color: white;
+            padding: 10px 24px; border-radius: 30px; cursor: pointer;
+            font-weight: 600; margin: 0 4px; transition: 0.2s;
+        }
+
+        /* シンプルな細いバツアイコン */
+        .ios-close-icon {
+            width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; margin-right: 10px; position: relative;
+        }
+        .ios-close-icon::before, .ios-close-icon::after {
+            content: ''; position: absolute; width: 18px; height: 1px; background: #000;
+        }
+        .ios-close-icon::before { transform: rotate(45deg); }
+        .ios-close-icon::after { transform: rotate(-45deg); }
+
+        /* 通知：iOS風 */
+        #toast-notification {
+            position: fixed; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%) scale(0.8);
+            background: var(--toast-bg); color: #000; 
+            padding: 14px 32px; border-radius: 55px; 
+            backdrop-filter: blur(20px) saturate(180%); 
+            z-index: 9999; font-weight: 500; font-size: 15px; 
+            opacity: 0; pointer-events: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border: 0.5px solid rgba(255,255,255,0.4);
+            transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+        #toast-notification.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+        /* VS Code コンテナ */
+        #monaco-container {
+            position: fixed; inset: 0; background: #1e1e1e; z-index: 4000;
+            display: none; transform: scale(0.9); opacity: 0;
+            transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1); flex-direction: column;
+        }
+        #monaco-container.active { display: flex; transform: scale(1); opacity: 1; }
+        #monaco-header { height: 60px; background: #1e1e1e; display: flex; align-items: center; justify-content: flex-end; padding: 0 20px; }
+        .ios-close-icon.white::before, .ios-close-icon.white::after { background: #fff; width: 22px; }
+
+        #filename-input { border: none; padding: 10px 18px; border-radius: 20px; outline: none; background: #fff; font-size: 14px; width: 140px; margin-right: 8px; }
+        #editor-section { flex: 1; display: flex; padding: 15px; background: #fff; border-top: 1px solid #ddd; z-index: 2; }
+        #raw-editor { flex: 1; border: none; padding: 20px; font-family: 'SF Mono', monospace; font-size: 14px; outline: none; background: #f2f2f7; border-radius: 15px; resize: none; }
+    </style>
+</head>
+<body>
+
+    <div id="toast-notification">Notification</div>
+
+    <div id="preview-section">
+        <iframe id="output-frame"></iframe>
+        <div style="position: absolute; bottom: 20px; right: 20px; width: 44px; height: 44px; background: rgba(255,255,255,0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1); backdrop-filter: blur(5px); z-index: 3001;" onclick="toggleFullscreen()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+        </div>
+    </div>
+
+    <div id="editor-section">
+        <textarea id="raw-editor" spellcheck="false"></textarea>
+    </div>
+
+    <div id="main-menu" class="floating-bar active">
+        <button class="btn-ui" onclick="toggleUI('save-bar', true)">保存</button>
+        <button class="btn-ui" onclick="toggleUI('monaco-container', true)">VS Code</button>
+    </div>
+
+    <div id="save-bar" class="floating-bar">
+        <div class="ios-close-icon" onclick="toggleUI('save-bar', false)"></div>
+        <input type="text" id="filename-input" value="index.html">
+        <button class="btn-ui" onclick="downloadFile()">💾 実行</button>
+    </div>
+
+    <div id="monaco-container">
+        <div id="monaco-header">
+            <div class="ios-close-icon white" onclick="closeAllActive()"></div>
+        </div>
+        <div id="monaco-body" style="flex:1"></div>
+    </div>
+
+    <script>
+        let editor;
+        const rawTextArea = document.getElementById('raw-editor');
+        const frame = document.getElementById('output-frame');
+        const previewSec = document.getElementById('preview-section');
+        const mainMenu = document.getElementById('main-menu');
+        const toast = document.getElementById('toast-notification');
+
+        const initialCode = `<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); font-family: sans-serif; }\n    h1 { color: #333; letter-spacing: 2px; text-shadow: 2px 2px 10px rgba(0,0,0,0.1); }\n  </style>\n</head>\n<body>\n  <h1>GRADIENT</h1>\n</body>\n</html>`;
+
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            editor = monaco.editor.create(document.getElementById('monaco-body'), {
+                value: initialCode, language: 'html', theme: 'vs-dark', fontSize: 16,
+                automaticLayout: true, minimap: { enabled: false }
+            });
+            editor.onDidChangeModelContent(() => {
+                rawTextArea.value = editor.getValue();
+                updatePreview(rawTextArea.value);
+            });
+            updatePreview(initialCode);
+            rawTextArea.value = initialCode;
+        });
+
+        function updatePreview(code) {
+            const d = frame.contentDocument;
+            d.open(); d.write(code); d.close();
+        }
+
+        function showToast(text) {
+            toast.innerText = text;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+
+        function closeAllActive() {
+            previewSec.classList.remove('fullscreen');
+            toggleUI('monaco-container', false);
+            toggleUI('save-bar', false);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            const isCmd = e.metaKey || e.ctrlKey;
+            if (isCmd) {
+                const key = e.key.toLowerCase();
+                const msgs = {c:'Copied', v:'Pasted', x:'Cut', a:'Selected All'};
+                if(msgs[key]) showToast(msgs[key]);
+            }
+            if (e.key === "Escape") closeAllActive();
+        });
+
+        function toggleFullscreen() {
+            const isFull = previewSec.classList.toggle('fullscreen');
+            showToast(isFull ? "Scale Up" : "Scale Down");
+            if (isFull) mainMenu.classList.remove('active');
+            else mainMenu.classList.add('active');
+        }
+
+        function toggleUI(id, show) {
+            const target = document.getElementById(id);
+            const others = id === 'main-menu' ? ['save-bar', 'monaco-container'] : ['main-menu', 'save-bar', 'monaco-container'].filter(x => x !== id);
+
+            if (show) {
+                // 他のUIを即座に非アクティブにする
+                others.forEach(oid => document.getElementById(oid).classList.remove('active'));
+                
+                // 表示処理
+                target.style.display = 'flex';
+                // ブラウザのレンダリング待ちをしてから Scale Up アニメーション開始
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        target.classList.add('active');
+                    });
+                });
+            } else {
+                // 非表示処理
+                target.classList.remove('active');
+                setTimeout(() => { 
+                    target.style.display = 'none'; 
+                    // 他にアクティブなUIがなく、全画面でもない場合のみメインメニューを復活
+                    if (!previewSec.classList.contains('fullscreen')) {
+                        toggleUI('main-menu', true);
+                    }
+                }, 500); // 0.5sのアニメーション時間を待ってから消去
+            }
+        }
+
+        function downloadFile() {
+            const blob = new Blob([rawTextArea.value], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = document.getElementById('filename-input').value;
+            a.click();
+            showToast("Saved Successfully");
+            toggleUI('save-bar', false);
+        }
+    </script>
+</body>
+</html>
