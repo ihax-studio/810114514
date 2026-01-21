@@ -20,21 +20,23 @@
 
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* プレビュー (標準のピンチズームはJS側でもブロック) */
+        /* プレビュー */
         #preview-section { 
             flex: 1; background: #fff; position: relative; transition: 0.6s var(--ios-ease); z-index: 10; 
             transform: scale(0.97); border-radius: 12px; margin: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
         }
         #preview-section.fullscreen { position: fixed; inset: 0; transform: scale(1); border-radius: 0; margin: 0; z-index: 8000; }
-        #output-frame { width: 100%; height: 100%; border: none; pointer-events: auto; }
+        #output-frame { width: 100%; height: 100%; border: none; }
         
-        /* 拡大/戻るボタン (左下) */
+        /* 拡大切替ボタン (右側中央) */
         #expand-toggle-btn { 
-            position: absolute; bottom: 20px; left: 20px; width: 44px; height: 44px;
-            background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
+            position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px;
+            background: rgba(255,255,255,0.6); backdrop-filter: blur(10px);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 24px; color: #000; z-index: 8010; cursor: pointer;
+            font-size: 28px; color: #000; z-index: 8010; cursor: pointer;
+            transition: 0.3s var(--ios-ease);
         }
+        #preview-section.fullscreen #expand-toggle-btn { right: 30px; top: auto; bottom: 40px; transform: none; }
 
         /* エディタ */
         #editor-section { flex: 0.8; display: flex; padding: 0 15px 15px 15px; }
@@ -62,10 +64,10 @@
         #media-overlay.active #expanded-media { transform: scale(1); }
         #expanded-media.zoomed { transform: scale(1.8) !important; }
 
-        /* 画像オーバーレイUI (配置変更) */
+        /* 画像オーバーレイUI */
         .media-ui-btn { position: absolute; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; color: #000; font-size: 40px; z-index: 9010; cursor: pointer; }
-        #media-close { top: 30px; left: 20px; } /* 左側：← (戻る) */
-        #media-download { top: 30px; right: 20px; } /* 右側：↓ (保存) */
+        #media-close { top: 30px; left: 20px; } 
+        #media-download { top: 30px; right: 20px; } 
         #media-filename { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); color: #000; font-size: 16px; border-bottom: 0.5px solid #000; padding: 2px 10px; z-index: 9010; }
 
         /* Monaco */
@@ -89,7 +91,7 @@
 <body onclick="globalTap()">
 
     <div id="preview-section">
-        <div id="expand-toggle-btn" onclick="toggleFullscreen(event)">⤢</div>
+        <div id="expand-toggle-btn" onclick="toggleFullscreen(event)">→</div>
         <iframe id="output-frame"></iframe>
     </div>
 
@@ -146,11 +148,10 @@
         const saveBar = document.getElementById('save-input-bar');
         const expandBtn = document.getElementById('expand-toggle-btn');
 
-        // 標準の拡大縮小(ピンチ)を完全にブロック
+        // 標準ズームブロック
         window.addEventListener('gesturestart', e => e.preventDefault(), {passive: false});
-        window.addEventListener('gesturechange', e => e.preventDefault(), {passive: false});
 
-        // キーボード操作 (Escで閉じる)
+        // Escキーで閉じる
         window.addEventListener('keydown', e => {
             if(e.key === "Escape") {
                 if(preview.classList.contains('fullscreen')) toggleFullscreen();
@@ -169,7 +170,7 @@
             }
         });
 
-        // 二本指ピンチ (Monaco起動/終了)
+        // ピンチ (Monaco)
         window.addEventListener('touchmove', e => {
             if (e.touches.length === 2) {
                 let d = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
@@ -213,8 +214,8 @@
             if(e) e.stopPropagation(); 
             haptic.confirm(); 
             preview.classList.toggle('fullscreen');
-            // ✕は使わず、閉じる時も←にする
-            expandBtn.innerText = preview.classList.contains('fullscreen') ? "←" : "⤢";
+            // 全画面時は左（戻る）を指す「←」、通常時は「→」
+            expandBtn.innerText = preview.classList.contains('fullscreen') ? "←" : "→";
         };
 
         window.toggleDock = (e) => {
@@ -239,7 +240,7 @@
                 const div = document.createElement('div');
                 div.className = 'dock-item';
                 div.dataset.name = f.name;
-                div.innerHTML = `<img src="${ev.target.result}"><div class="del-trigger">←</div>`; // 削除トリガーも←
+                div.innerHTML = `<img src="${ev.target.result}"><div class="del-trigger">←</div>`;
                 let sY;
                 div.ontouchstart = (ts) => { sY = ts.touches[0].pageY; ts.stopPropagation(); };
                 div.ontouchend = (te) => {
@@ -270,7 +271,7 @@
 
         window.editMediaName = (e) => {
             e.stopPropagation(); haptic.confirm();
-            let n = prompt("名前変更 (ドット不可)", e.target.innerText.split('.')[0]);
+            let n = prompt("名前変更", e.target.innerText.split('.')[0]);
             if(n) e.target.innerText = n.replace(/\./g, '') + ".png";
         };
 
