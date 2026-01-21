@@ -3,26 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>iOS Ultimate Debug Pro</title>
+    <title>iOS Ultimate Debug</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <style>
         :root {
             --ios-ease: cubic-bezier(0.2, 1, 0.3, 1);
-            --liquid: cubic-bezier(0.6, 0.1, 0.3, 1.4);
         }
 
-        /* iOS標準挙動の完全ブロック */
+        /* iOS標準ズーム・バウンスを完全に殺す */
         * { 
             touch-action: none; 
             -webkit-user-select: none; 
             overscroll-behavior: none; 
             -webkit-tap-highlight-color: transparent; 
-            font-weight: 100 !important; /* 全ての文字を細く強制 */
+            font-weight: 100 !important; 
         }
         
         body, html { 
             margin: 0; padding: 0; height: 100%; width: 100%;
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; 
+            font-family: "Helvetica Neue", Arial, sans-serif; 
             background: #f0f0f2; overflow: hidden; display: flex; flex-direction: column; 
         }
 
@@ -40,118 +39,83 @@
             border-radius: 0; margin: 0; z-index: 3000; 
         }
         
-        #output-frame { width: 100%; height: 100%; border: none; pointer-events: none; }
-        #preview-section.fullscreen #output-frame { pointer-events: auto; }
+        #output-frame { width: 100%; height: 100%; border: none; }
 
-        /* 左上の細い✕ */
+        /* 左上の極細✕ */
         #close-preview-btn {
-            position: absolute; top: 40px; left: 20px; 
+            position: absolute; top: 50px; left: 25px; 
             width: 44px; height: 44px; display: none;
             align-items: center; justify-content: center;
-            font-size: 35px; color: #000; z-index: 3002;
+            font-size: 35px; color: #000; z-index: 3005;
         }
         #preview-section.fullscreen #close-preview-btn { display: flex; }
 
-        /* Dock & Save Container */
+        /* Dock & Save Area */
         #dock-area {
             position: fixed; bottom: 30px; right: 20px;
             display: flex; align-items: center; justify-content: flex-end;
-            z-index: 3400; height: 66px;
+            z-index: 3400; min-height: 66px;
         }
 
         #dock-wrapper { 
             display: flex; align-items: center; 
-            background: rgba(242, 242, 247, 0.8); 
+            background: rgba(242, 242, 247, 0.85); 
             backdrop-filter: blur(25px); padding: 8px; 
             border-radius: 33px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
             transition: 0.5s var(--ios-ease);
         }
 
-        /* 保存ダイアログ (Dockに完全に重ねる) */
+        /* 保存バー (Dockに完全に重なる) */
         #save-input-bar { 
             position: absolute; inset: 0;
-            background: rgba(255,255,255,0.9); 
+            background: rgba(255,255,255,0.95); 
             backdrop-filter: blur(30px); 
             border-radius: 33px; 
-            display: flex; visibility: hidden; opacity: 0; 
-            transform: scale(0.85); 
+            display: none; opacity: 0; 
+            transform: scale(0.9); 
             transition: 0.4s var(--ios-ease); z-index: 3600; 
             align-items: center; gap: 10px; padding: 0 10px 0 20px;
         }
-        #save-input-bar.active { visibility: visible; opacity: 1; transform: scale(1); }
+        #save-input-bar.active { display: flex; opacity: 1; transform: scale(1); }
 
         .save-arrow-btn {
             width: 44px; height: 44px; background: #000; 
             color: #fff; border-radius: 50%; border: none;
             display: flex; align-items: center; justify-content: center;
-            font-size: 24px;
         }
 
-        /* ファイルリスト (無駄に広がらないように最大幅を制限) */
+        /* ファイルリスト */
         #file-list { 
             display: flex; gap: 8px; width: 0; opacity: 0; 
             overflow: hidden; transition: 0.5s var(--ios-ease); 
         }
-        #media-items { 
-            display: flex; gap: 8px; overflow-x: auto; 
-            max-width: 200px; /* 広がりすぎ防止 */
-        }
-        .dock-item { 
-            width: 50px; height: 50px; background: #fff; 
-            border-radius: 12px; position: relative; flex-shrink: 0; 
-            transition: 0.4s var(--ios-ease); overflow: hidden;
-        }
+        #media-items { display: flex; gap: 8px; overflow-x: auto; max-width: 180px; }
+        .dock-item { width: 50px; height: 50px; background: #fff; border-radius: 12px; position: relative; flex-shrink: 0; overflow: hidden; }
         .dock-item img { width: 100%; height: 100%; object-fit: cover; }
 
-        .del-trigger { 
-            position: absolute; inset: 0; background: #ff3b30; 
-            color: white; border-radius: 12px; display: flex; 
-            align-items: center; justify-content: center; 
-            transform: translateY(100%); transition: 0.3s var(--ios-ease); 
-            font-size: 30px;
-        }
+        .del-trigger { position: absolute; inset: 0; background: #ff3b30; color: white; display: flex; align-items: center; justify-content: center; transform: translateY(100%); transition: 0.3s var(--ios-ease); font-size: 30px; }
         .swiped .del-trigger { transform: translateY(0); }
 
         /* Monaco */
-        #monaco-container { 
-            position: fixed; inset: 0; background: #1e1e1e; 
-            z-index: 4000; display: none; transform: scale(0.95); 
-            opacity: 0; transition: 0.5s var(--ios-ease); 
-            flex-direction: column; 
-        }
-        #monaco-container.active { display: flex; transform: scale(1); opacity: 1; }
+        #monaco-container { position: fixed; inset: 0; background: #1e1e1e; z-index: 4000; display: none; opacity: 0; transition: 0.5s var(--ios-ease); flex-direction: column; }
+        #monaco-container.active { display: flex; opacity: 1; }
 
-        /* 共通設定 */
-        #left-controls { position: fixed; bottom: 30px; left: 20px; display: flex; gap: 15px; z-index: 3500; }
         .icon-btn { width: 55px; height: 55px; background: rgba(242, 242, 247, 0.8); backdrop-filter: blur(20px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 8px 25px rgba(0,0,0,0.05); }
         #raw-editor { flex:1; border:none; border-radius:20px; padding:20px; outline:none; font-family:monospace; background:#fff; font-weight: 400 !important; }
-
-        #media-viewer { position: fixed; inset: 0; backdrop-filter: blur(50px); display: none; z-index: 9000; opacity: 0; transition: 0.4s; }
-        #media-viewer.active { display: flex; opacity: 1; }
     </style>
 </head>
 <body onclick="globalTap()">
 
-    <div id="media-viewer" onclick="closeViewer()">
-        <div id="viewer-box" style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
-            <div style="position:absolute; top:50px; right:30px; font-size:40px;" onclick="closeViewer()">✕</div>
-            <img id="main-image" src="" style="max-width:85%; border-radius:10px;">
-        </div>
-    </div>
-
     <div id="preview-section">
         <div id="close-preview-btn" onclick="toggleFullscreen(event)">✕</div>
         <iframe id="output-frame"></iframe>
-        <div id="zoom-btn" style="position:absolute; bottom:20px; right:20px; width:44px; height:44px; background:rgba(255,255,255,0.7); backdrop-filter:blur(15px); border-radius:50%; display:flex; align-items:center; justify-content:center; z-index:3001;" onclick="toggleFullscreen(event)">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-        </div>
     </div>
 
     <div id="editor-section" style="flex:0.8; display:flex; padding:5px 15px 15px 15px;">
         <textarea id="raw-editor" oninput="sync('input')"></textarea>
     </div>
 
-    <div id="left-controls">
+    <div style="position:fixed; bottom:30px; left:20px; display:flex; gap:15px; z-index:3500;">
         <div class="icon-btn" onclick="openSave(event)">💾</div>
         <div class="icon-btn" onclick="toggleUI('monaco-container', true)">📝</div>
     </div>
@@ -167,15 +131,15 @@
 
         <div id="save-input-bar" onclick="event.stopPropagation()">
             <input type="text" id="fn" value="index.html" style="flex:1; border:none; outline:none; font-size:16px; background:transparent;">
-            <button class="save-arrow-btn" onclick="downloadHtml()">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <button class="save-arrow-btn" onclick="downloadHtml(event)">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
             </button>
         </div>
     </div>
 
     <div id="monaco-container">
         <div style="height:60px; display:flex; justify-content:flex-end; padding:0 25px; align-items:center;">
-            <div style="color:#fff; font-size:40px; cursor:pointer;" onclick="monacoClose()">✕</div>
+            <div style="color:#fff; font-size:40px;" onclick="monacoClose()">✕</div>
         </div>
         <div id="monaco-body" style="flex:1"></div>
     </div>
@@ -186,23 +150,37 @@
         import { haptic } from "https://esm.sh/ios-haptics";
         window.haptic = haptic;
 
-        let editor, isSyncing = false, isDockOpen = false;
-        let html = `<!DOCTYPE html><html><body style="background:#f0f0f2; height:100vh; display:flex; justify-content:center; align-items:center; margin:0;"><h1>System Online</h1></body></html>`;
+        let editor, isSyncing = false, isDockOpen = false, initDist = 0;
+        let html = `<!DOCTYPE html><html><body style="background:#f0f0f2; height:100vh; display:flex; justify-content:center; align-items:center; margin:0;"><h1>Online</h1></body></html>`;
         
         const raw = document.getElementById('raw-editor');
         const preview = document.getElementById('preview-section');
         const saveBar = document.getElementById('save-input-bar');
 
-        // iOS標準ズーム/スクロール完全ブロック
-        document.addEventListener('touchstart', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
-        document.addEventListener('touchmove', e => { if (!e.target.closest('#monaco-body') && !e.target.closest('#raw-editor')) e.preventDefault(); }, { passive: false });
+        // 二本指ジェスチャの実装
+        window.addEventListener('touchmove', e => {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                let d = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                if (initDist === 0) { initDist = d; return; }
+                let r = d / initDist;
+                
+                // ピンチアウトで拡大
+                if (e.target.closest('#preview-section') && !preview.classList.contains('fullscreen') && r > 1.2) { toggleFullscreen(); initDist = d; }
+                // ピンチインで縮小（解除）
+                if (preview.classList.contains('fullscreen') && r < 0.8) { toggleFullscreen(); initDist = d; }
+            } else if (!e.target.closest('#monaco-body') && !e.target.closest('#raw-editor')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        window.addEventListener('touchend', () => initDist = 0);
 
         window.sync = (src) => {
             if(isSyncing) return; isSyncing = true;
             html = (src === 'input') ? raw.value : editor.getValue();
             raw.value = html;
             if(editor && src !== 'monaco') editor.setValue(html);
-            const d = document.getElementById('output-frame').contentDocument;
+            const d = preview.querySelector('iframe').contentDocument;
             d.open(); d.write(html); d.close();
             isSyncing = false;
         };
@@ -219,10 +197,15 @@
         window.globalTap = () => {
             haptic();
             saveBar.classList.remove('active');
+            setTimeout(() => { if(!saveBar.classList.contains('active')) saveBar.style.display = 'none'; }, 400);
             if(isDockOpen) toggleDock();
         };
 
-        window.openSave = (e) => { e.stopPropagation(); haptic.confirm(); saveBar.classList.add('active'); };
+        window.openSave = (e) => { 
+            e.stopPropagation(); haptic.confirm(); 
+            saveBar.style.display = 'flex';
+            setTimeout(() => saveBar.classList.add('active'), 10);
+        };
 
         window.toggleFullscreen = (e) => {
             if(e) e.stopPropagation(); haptic.confirm();
@@ -238,33 +221,37 @@
             document.getElementById('folder-btn').innerHTML = isDockOpen ? '📂' : '📁';
         };
 
+        window.downloadHtml = (e) => {
+            if(e) e.stopPropagation();
+            haptic.confirm();
+            const blob = new Blob([html], {type:'text/html'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = document.getElementById('fn').value || 'index.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            saveBar.classList.remove('active');
+        };
+
         window.handleFile = (e) => {
             const f = e.target.files[0]; if(!f) return;
             const r = new FileReader();
             r.onload = (ev) => {
                 const div = document.createElement('div');
                 div.className = 'dock-item';
-                div.innerHTML = `<img src="${ev.target.result}"><div class="del-trigger" onclick="deleteFile(event, this)">✕</div>`;
-                let sX, sY;
-                div.addEventListener('touchstart', (ts) => { sX = ts.touches[0].pageX; sY = ts.touches[0].pageY; ts.stopPropagation(); });
+                div.innerHTML = `<img src="${ev.target.result}"><div class="del-trigger" onclick="this.parentElement.remove()">✕</div>`;
+                div.addEventListener('touchstart', (ts) => { div.sY = ts.touches[0].pageY; ts.stopPropagation(); });
                 div.addEventListener('touchend', (te) => {
-                    const dY = sY - te.changedTouches[0].pageY;
-                    if(dY > 30) { div.classList.add('swiped'); haptic.confirm(); }
-                    else { if(!div.classList.contains('swiped')) openViewer(ev.target.result); }
+                    if(div.sY - te.changedTouches[0].pageY > 30) div.classList.add('swiped');
                 });
                 document.getElementById('media-items').appendChild(div);
-                haptic.confirm();
             };
             r.readAsDataURL(f);
         };
 
-        window.deleteFile = (e, el) => { e.stopPropagation(); haptic.error(); el.parentElement.remove(); };
-        function openViewer(data) { haptic.confirm(); document.getElementById('main-image').src = data; document.getElementById('media-viewer').style.display = 'flex'; setTimeout(() => document.getElementById('media-viewer').classList.add('active'), 20); }
-        window.closeViewer = () => { haptic(); document.getElementById('media-viewer').classList.remove('active'); setTimeout(() => document.getElementById('media-viewer').style.display = 'none', 400); };
         window.monacoClose = () => { haptic.error(); toggleUI('monaco-container', false); };
         window.toggleUI = (id, show) => { const t = document.getElementById(id); if(show) { t.style.display = 'flex'; setTimeout(() => t.classList.add('active'), 20); } else { t.classList.remove('active'); setTimeout(() => t.style.display = 'none', 500); } };
-
-        window.downloadHtml = () => { haptic.confirm(); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([html], {type:'text/html'})); a.download = document.getElementById('fn').value; a.click(); saveBar.classList.remove('active'); };
     </script>
 </body>
 </html>
