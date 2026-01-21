@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Media Editor - Classic Restore</title>
+    <title>Pro Media Editor - iOS Style</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <style>
         :root {
@@ -37,23 +37,38 @@
         #dock-container {
             position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%);
             background: var(--bar-bg); backdrop-filter: blur(25px);
-            padding: 8px 12px; border-radius: 24px; display: flex; align-items: center;
+            padding: 8px 14px; border-radius: 28px; display: flex; align-items: center;
             box-shadow: var(--shadow); z-index: 3400; transition: 0.5s var(--ios-ease);
         }
-        #file-list { display: flex; gap: 8px; }
+        #file-list { display: flex; gap: 10px; overflow: hidden; transition: 0.5s var(--ios-ease); }
+        
         .dock-item {
             width: 50px; height: 50px; background: #fff; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.3s var(--ios-ease); overflow: hidden;
+            cursor: pointer; transition: 0.3s var(--ios-ease); overflow: visible;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05); flex-shrink: 0; font-size: 20px;
+            position: relative; user-select: none;
         }
-        .dock-item img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-        .dock-item.dragging { opacity: 0.4; transform: scale(0.8); }
+        .dock-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; pointer-events: none; }
 
-        #trash-bin { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-left: 10px; transition: 0.3s; border-radius: 12px; }
-        #trash-bin.drag-over { background: rgba(255,59,48,0.2); transform: scale(1.2); }
+        /* 削除ボタン（ーアイコン） */
+        .delete-badge {
+            position: absolute; top: -8px; right: -8px;
+            width: 22px; height: 22px; background: #ff3b30; color: white;
+            border-radius: 50%; display: none; align-items: center; justify-content: center;
+            font-size: 16px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        .editing .delete-badge { display: flex; }
+        .editing .dock-item { animation: wobble 0.3s infinite ease-in-out; }
 
-        /* フローティングバー (home.html仕様) */
+        @keyframes wobble {
+            0% { transform: rotate(-1deg); }
+            50% { transform: rotate(1.5deg); }
+            100% { transform: rotate(-1deg); }
+        }
+
+        /* フローティングバー */
         .floating-bar {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) scale(0.8);
             opacity: 0; z-index: 3500; background: var(--bar-bg); padding: 10px 14px;
@@ -87,7 +102,7 @@
         #filename-input { border: none; padding: 10px 18px; border-radius: 20px; outline: none; background: #fff; font-size: 14px; width: 140px; margin-right: 8px; }
     </style>
 </head>
-<body ondragover="event.preventDefault()">
+<body onclick="exitEditingMode()">
 
     <div id="toast-notification">Notification</div>
 
@@ -106,10 +121,12 @@
         <textarea id="raw-editor" spellcheck="false"></textarea>
     </div>
 
-    <div id="dock-container">
-        <div class="dock-item" onclick="document.getElementById('file-input').click()" style="background: #eee;">＋</div>
-        <div id="file-list"></div>
-        <div id="trash-bin" ondragover="this.classList.add('drag-over'); event.preventDefault();" ondragleave="this.classList.remove('drag-over')" ondrop="handleTrashDrop(event)">🗑️</div>
+    <div id="dock-container" onclick="event.stopPropagation()">
+        <div class="dock-item" onclick="toggleFileList()" style="background: transparent; box-shadow: none;">📁</div>
+        <div id="file-list" style="width: 0; opacity: 0;">
+            <div class="dock-item" onclick="document.getElementById('file-input').click()" style="background: #eee;">＋</div>
+            <div id="media-items" style="display: flex; gap: 10px;"></div>
+        </div>
     </div>
 
     <div id="main-menu" class="floating-bar active">
@@ -139,7 +156,9 @@
         let files = { 'index.html': `<!DOCTYPE html>\n<html>\n<body style="display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background:#f0f0f2;font-family:sans-serif;">\n<h1>Media Gallery</h1>\n</body>\n</html>` };
         let mediaOrder = [];
         let audioElements = {};
-        let draggedName = null;
+        let longPressTimer;
+        let isEditing = false;
+        let isFileListOpen = false;
 
         const rawTextArea = document.getElementById('raw-editor');
         const frame = document.getElementById('output-frame');
@@ -164,11 +183,21 @@
             d.open(); d.write(code); d.close();
         }
 
-        rawTextArea.oninput = () => {
-            files['index.html'] = rawTextArea.value;
-            editor.setValue(rawTextArea.value);
-            updatePreview(rawTextArea.value);
-        };
+        function toggleFileList() {
+            const list = document.getElementById('file-list');
+            isFileListOpen = !isFileListOpen;
+            if (isFileListOpen) {
+                list.style.width = 'auto';
+                list.style.opacity = '1';
+                list.style.marginLeft = '10px';
+            } else {
+                list.style.width = '0';
+                list.style.opacity = '0';
+                list.style.marginLeft = '0';
+                exitEditingMode();
+            }
+            haptic();
+        }
 
         // --- メディア処理 ---
         function handleFileSelect(e) {
@@ -181,21 +210,19 @@
             const r = new FileReader();
             r.onload = (ev) => {
                 files[name] = ev.target.result;
-                if(!mediaOrder.includes(name)) mediaOrder.unshift(name);
+                if(!mediaOrder.includes(name)) mediaOrder.push(name);
                 renderDock();
                 haptic();
-                showToast("Added: " + name);
             };
             r.readAsDataURL(f);
         }
 
         function renderDock() {
-            const list = document.getElementById('file-list');
-            list.innerHTML = '';
+            const items = document.getElementById('media-items');
+            items.innerHTML = '';
             mediaOrder.forEach(name => {
                 const div = document.createElement('div');
                 div.className = 'dock-item';
-                div.draggable = true;
                 
                 const isImg = /\.(jpg|jpeg|png|gif|webp)$/i.test(name);
                 const isAudio = /\.(mp3|wav|aiff)$/i.test(name);
@@ -209,22 +236,44 @@
                     div.innerHTML = '🎬';
                 }
 
-                div.onclick = () => isAudio ? toggleAudio(name) : openViewer(name);
-                
-                div.ondragstart = (e) => { draggedName = name; div.classList.add('dragging'); e.dataTransfer.setData('text', name); };
-                div.ondragend = () => div.classList.remove('dragging');
-                div.ondragover = (e) => {
-                    e.preventDefault();
-                    if(name !== draggedName) {
-                        const from = mediaOrder.indexOf(draggedName);
-                        const to = mediaOrder.indexOf(name);
-                        mediaOrder.splice(from, 1);
-                        mediaOrder.splice(to, 0, draggedName);
-                        renderDock();
-                    }
+                // 削除バッジ
+                const badge = document.createElement('div');
+                badge.className = 'delete-badge';
+                badge.innerHTML = '－';
+                badge.onclick = (e) => { e.stopPropagation(); deleteMedia(name); };
+                div.appendChild(badge);
+
+                // ロングプレス処理
+                div.onmousedown = div.ontouchstart = () => {
+                    longPressTimer = setTimeout(() => {
+                        isEditing = true;
+                        document.getElementById('dock-container').classList.add('editing');
+                        haptic(true);
+                    }, 600);
                 };
-                list.appendChild(div);
+                div.onmouseup = div.onmouseleave = div.ontouchend = () => clearTimeout(longPressTimer);
+
+                div.onclick = (e) => {
+                    if(isEditing) return;
+                    isAudio ? toggleAudio(name) : openViewer(name);
+                };
+                
+                items.appendChild(div);
             });
+        }
+
+        function deleteMedia(name) {
+            mediaOrder = mediaOrder.filter(n => n !== name);
+            if(audioElements[name]) { audioElements[name].pause(); delete audioElements[name]; }
+            delete files[name];
+            renderDock();
+            haptic(true);
+            if(mediaOrder.length === 0) exitEditingMode();
+        }
+
+        function exitEditingMode() {
+            isEditing = false;
+            document.getElementById('dock-container').classList.remove('editing');
         }
 
         function toggleAudio(name) {
@@ -234,7 +283,7 @@
             }
             const a = audioElements[name];
             if(a.paused) {
-                Object.values(audioElements).forEach(el => el.pause()); // 他を止める
+                Object.values(audioElements).forEach(el => el.pause());
                 a.play();
             } else {
                 a.pause();
@@ -267,24 +316,9 @@
             setTimeout(() => { v.style.display = 'none'; document.getElementById('viewer-content').innerHTML = ''; }, 500);
         }
 
-        function handleTrashDrop(e) {
-            e.preventDefault();
-            this.classList.remove('drag-over');
-            const name = e.dataTransfer.getData('text');
-            mediaOrder = mediaOrder.filter(n => n !== name);
-            if(audioElements[name]) { audioElements[name].pause(); delete audioElements[name]; }
-            delete files[name];
-            renderDock();
-            haptic(true);
-            showToast("Deleted");
-        }
-
-        // --- UI 操作 ---
         function toggleUI(id, show) {
             const target = document.getElementById(id);
-            const others = ['main-menu', 'save-bar', 'monaco-container'].filter(x => x !== id);
             if(show) {
-                others.forEach(oid => document.getElementById(oid).classList.remove('active'));
                 target.style.display = 'flex';
                 requestAnimationFrame(() => requestAnimationFrame(() => target.classList.add('active')));
             } else {
@@ -296,7 +330,6 @@
 
         function toggleFullscreen() {
             const isFull = document.getElementById('preview-section').classList.toggle('fullscreen');
-            showToast(isFull ? "Full Screen" : "Window");
             toggleUI('main-menu', !isFull);
             haptic();
         }
