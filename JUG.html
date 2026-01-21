@@ -7,93 +7,50 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <style>
         :root { --ios-ease: cubic-bezier(0.2, 1, 0.3, 1); }
+        * { touch-action: none; -webkit-user-select: none; box-sizing: border-box; font-family: -apple-system, "SF Pro Display", sans-serif; font-weight: 1 !important; }
+        body, html { margin: 0; padding: 0; height: 100dvh; width: 100vw; background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column; }
 
-        * { 
-            touch-action: none; -webkit-user-select: none; box-sizing: border-box;
-            font-family: -apple-system, "SF Pro Display", sans-serif; font-weight: 1 !important; 
-        }
-
-        body, html { 
-            margin: 0; padding: 0; height: 100dvh; width: 100vw; 
-            background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column; 
-        }
-
-        /* コンテナ最適化 */
-        .container-box {
-            width: calc(100% - 20px); margin: 8px auto; border-radius: 18px;
-            background: #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.05); overflow: hidden; position: relative;
-        }
-
+        /* コンテナ */
+        .container-box { width: calc(100% - 20px); margin: 8px auto; border-radius: 18px; background: #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
         #preview-section { flex: 1.2; transition: 0.5s var(--ios-ease); z-index: 10; }
         #preview-section.fullscreen { position: fixed; inset: 0; margin: 0; width: 100%; height: 100%; border-radius: 0; z-index: 8000; }
-        #output-frame { width: 100%; height: 100%; border: none; background: #fff; }
+        #output-frame { width: 100%; height: 100%; border: none; background: #fff; pointer-events: none; } /* ピンチ検知のため一時的にnone */
         
-        /* 拡大・縮小ボタン (右下→左下) */
-        #expand-toggle-btn { 
-            position: absolute; bottom: 15px; right: 15px; width: 44px; height: 44px;
-            background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-size: 24px;
-            z-index: 8010; transition: 0.4s var(--ios-ease); box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        #preview-section.fullscreen #expand-toggle-btn { right: auto; left: 15px; transform: rotate(180deg); }
+        #expand-toggle-btn { position: absolute; bottom: 15px; right: 15px; width: 44px; height: 44px; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 8010; transition: 0.4s var(--ios-ease); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        #editor-section { flex: 0.8; display: flex; margin-bottom: 85px; pointer-events: auto; }
+        #raw-editor { flex: 1; border: none; padding: 15px; outline: none; font-family: "SF Mono", monospace; background: #fff; -webkit-user-select: text; font-size: 13px; resize: none; touch-action: pan-y; }
 
-        #editor-section { flex: 0.8; display: flex; margin-bottom: 85px; }
-        #raw-editor { 
-            flex: 1; border: none; padding: 15px; outline: none; font-family: "SF Mono", monospace; 
-            background: #fff; -webkit-user-select: text; font-size: 13px; resize: none; 
-        }
+        /* 削除ボタン（明るい赤） */
+        .del-trigger { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background: #ff3b30; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold !important; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
 
-        /* 保存バー */
-        #save-input-bar { 
-            position: fixed; bottom: 25px; left: 15px; width: min(280px, 60vw); height: 50px;
-            background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: 25px;
-            display: none; opacity: 0; transform: translateY(20px) scale(0.9); transition: 0.3s var(--ios-ease); 
-            z-index: 4500; align-items: center; padding: 0 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
-        #save-input-bar.active { display: flex; opacity: 1; transform: translateY(0) scale(1); }
-        #save-input-bar input { flex: 1; border: none; outline: none; font-size: 16px; background: transparent; -webkit-user-select: text; }
+        /* Dock & アイコン */
+        #dock-area { position: fixed; bottom: 25px; right: 15px; display: flex; align-items: center; z-index: 4000; }
+        #dock-wrapper { display: flex; align-items: center; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); padding: 6px; border-radius: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        #file-list { display: flex; gap: 8px; width: 0; opacity: 0; overflow: hidden; transition: 0.4s var(--ios-ease); }
+        #file-list.open { width: auto; opacity: 1; margin-right: 10px; padding: 5px; }
+        .dock-item { width: 50px; height: 50px; background: #eee; border-radius: 12px; position: relative; flex-shrink: 0; transition: 0.3s var(--ios-ease); }
+        .dock-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+        .dock-item.removing { transform: scale(0); width: 0; opacity: 0; }
 
-        /* Loader */
+        /* 拡大オーバーレイ */
+        #media-overlay { position: fixed; inset: 0; backdrop-filter: blur(30px); background: rgba(0,0,0,0.3); z-index: 9000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; }
+        #media-overlay.active { display: flex; opacity: 1; }
+        #expanded-media { max-width: 85%; max-height: 70%; border-radius: 15px; box-shadow: 0 30px 60px rgba(0,0,0,0.3); transform: scale(0.5); transition: 0.4s var(--ios-ease); }
+        #media-overlay.active #expanded-media { transform: scale(1); }
+
+        /* その他UI */
+        #monaco-container { position: fixed; inset: 0; background: #fff; z-index: 5000; display: none; opacity: 0; transform: scale(1.05); transition: 0.4s var(--ios-ease); flex-direction: column; }
+        #monaco-container.active { display: flex; opacity: 1; transform: scale(1); }
+        #save-input-bar { position: fixed; bottom: 25px; left: 15px; width: min(280px, 60vw); height: 50px; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: 25px; display: none; opacity: 0; transform: translateY(20px); transition: 0.3s var(--ios-ease); z-index: 4500; align-items: center; padding: 0 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        #save-input-bar.active { display: flex; opacity: 1; transform: translateY(0); }
         #ios-loader { position: fixed; inset: 0; background: rgba(255,255,255,0.6); backdrop-filter: blur(8px); z-index: 9999; display: none; align-items: center; justify-content: center; }
         .spinner { width: 35px; height: 35px; border: 3px solid rgba(0,0,0,0.05); border-top: 3px solid #007aff; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Monaco 閉じるボタンは左下 */
-        #monaco-container { position: fixed; inset: 0; background: #fff; z-index: 5000; display: none; opacity: 0; transform: scale(1.05); transition: 0.4s var(--ios-ease); flex-direction: column; }
-        #monaco-container.active { display: flex; opacity: 1; transform: scale(1); }
-        #monaco-close-btn { position: absolute; bottom: 30px; left: 25px; width: 55px; height: 55px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); z-index: 5010; }
-
-        /* Dock */
-        #dock-area { position: fixed; bottom: 25px; right: 15px; display: flex; align-items: center; z-index: 4000; }
-        #dock-wrapper { display: flex; align-items: center; background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); padding: 6px; border-radius: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-        #file-list { display: flex; gap: 6px; width: 0; opacity: 0; overflow: hidden; transition: 0.4s var(--ios-ease); }
-        #file-list.open { width: auto; opacity: 1; margin-right: 10px; }
-        
-        /* ファイルアイコン & スケールアニメ */
-        .dock-item { 
-            width: 44px; height: 44px; background: #eee; border-radius: 10px; position: relative; 
-            flex-shrink: 0; overflow: hidden; transition: 0.3s var(--ios-ease); transform: scale(1);
-        }
-        .dock-item.removing { transform: scale(0); width: 0; margin: 0; opacity: 0; }
-        .dock-item img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-        
-        .del-trigger { 
-            position: absolute; inset: 0; background: #ff3b30; color: #fff; 
-            display: flex; align-items: center; justify-content: center; 
-            transform: translateY(100%); transition: 0.3s var(--ios-ease); font-size: 24px; z-index: 5;
-        }
-        .swiped .del-trigger { transform: translateY(0); }
-
-        /* プレビュー */
-        #media-overlay { position: fixed; inset: 0; backdrop-filter: blur(30px); background: rgba(255,255,255,0.2); z-index: 9000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; }
-        #media-overlay.active { display: flex; opacity: 1; }
-        #expanded-media { max-width: 85%; max-height: 70%; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); touch-action: pinch-zoom; transition: 0.3s var(--ios-ease); }
-        #media-filename { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: #fff; padding: 5px 15px; border-radius: 15px; font-size: 14px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body onclick="globalTap()">
 
-    <div id="ios-loader" onclick="haptic.error()"><div class="spinner"></div></div>
+    <div id="ios-loader"><div class="spinner"></div></div>
 
     <div id="preview-section" class="container-box">
         <div id="expand-toggle-btn" onclick="toggleFullscreen(event)">→</div>
@@ -101,12 +58,7 @@
     </div>
 
     <div id="editor-section" class="container-box">
-        <textarea id="raw-editor" oninput="sync('input')" placeholder="Type HTML..."></textarea>
-    </div>
-
-    <div id="save-input-bar" onclick="event.stopPropagation()">
-        <input type="text" id="fn" value="index.html" spellcheck="false">
-        <div style="font-size:26px; color:#007aff; margin-left:10px;" onclick="downloadHtml(event)">→</div>
+        <textarea id="raw-editor" oninput="sync('input')" placeholder="Pinch to open Monaco..."></textarea>
     </div>
 
     <div style="position:fixed; bottom:25px; left:15px; display:flex; gap:12px; z-index:4000;">
@@ -114,11 +66,16 @@
         <div style="width:50px; height:50px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);" onclick="toggleUI('monaco-container', true)">📝</div>
     </div>
 
+    <div id="save-input-bar" onclick="event.stopPropagation()">
+        <input type="text" id="fn" value="index.html" style="border:none; outline:none; flex:1; background:transparent; -webkit-user-select:text;">
+        <div style="font-size:26px; color:#007aff;" onclick="downloadHtml(event)">→</div>
+    </div>
+
     <div id="dock-area">
         <div id="dock-wrapper" onclick="event.stopPropagation()">
             <div id="file-list">
                 <div class="dock-item" onclick="document.getElementById('file-input').click()" style="display:flex; align-items:center; justify-content:center; font-size:20px;">＋</div>
-                <div id="media-items" style="display:flex; gap:6px;"></div>
+                <div id="media-items" style="display:flex; gap:8px;"></div>
             </div>
             <div onclick="toggleDock(event)" id="folder-btn" style="font-size:24px; padding:0 8px;">📁</div>
         </div>
@@ -126,14 +83,12 @@
 
     <div id="monaco-container">
         <div id="monaco-body" style="flex:1;"></div>
-        <div id="monaco-close-btn" onclick="monacoClose()">←</div>
+        <div id="monaco-close-btn" style="position:absolute; bottom:30px; left:25px; width:55px; height:55px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);" onclick="toggleUI('monaco-container', false)">←</div>
     </div>
 
     <div id="media-overlay" onclick="closeMedia()">
-        <div style="position:absolute; top:40px; left:20px; font-size:35px;" onclick="closeMedia(event)">←</div>
-        <div style="position:absolute; top:40px; right:20px; font-size:35px;" onclick="downloadMedia(event)">↓</div>
-        <img id="expanded-media" onclick="event.stopPropagation()">
-        <div id="media-filename" onclick="event.stopPropagation(); editMediaName(event)">file.png</div>
+        <img id="expanded-media">
+        <div id="media-filename" style="position:absolute; bottom:50px; background:#fff; padding:5px 15px; border-radius:15px;">file.png</div>
     </div>
 
     <input type="file" id="file-input" hidden onchange="handleFile(event)" accept="image/*">
@@ -144,19 +99,25 @@
 
         let editor, isSyncing = false, isDockOpen = false;
         const raw = document.getElementById('raw-editor');
-        const preview = document.getElementById('preview-section');
+        const previewSection = document.getElementById('preview-section');
         const saveBar = document.getElementById('save-input-bar');
-        const loader = document.getElementById('ios-loader');
 
-        // 標準ズーム禁止 (メディア以外)
-        document.addEventListener('touchmove', e => { if(e.scale !== 1 && !e.target.closest('#expanded-media')) e.preventDefault(); }, {passive: false});
+        // --- ピンチ操作でMonaco起動 ---
+        let initialDist = 0;
+        document.addEventListener('touchstart', e => { if(e.touches.length === 2) initialDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); });
+        document.addEventListener('touchmove', e => {
+            if(e.touches.length === 2 && initialDist > 0) {
+                let dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                if(dist > initialDist + 50) { toggleUI('monaco-container', true); initialDist = 0; }
+            }
+        });
 
         window.sync = (src) => {
             if(isSyncing) return; isSyncing = true;
             const val = (src === 'input') ? raw.value : editor.getValue();
             raw.value = val;
             if(editor && src !== 'monaco') editor.setValue(val);
-            const d = preview.querySelector('iframe').contentDocument;
+            const d = document.getElementById('output-frame').contentDocument;
             if(d) { d.open(); d.write(val); d.close(); }
             isSyncing = false;
         };
@@ -164,96 +125,35 @@
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
         require(['vs/editor/editor.main'], () => {
             editor = monaco.editor.create(document.getElementById('monaco-body'), { 
-                value: raw.value, language: 'html', theme: 'vs', automaticLayout: true, fontSize: 15, minimap: { enabled: false }
+                value: raw.value, language: 'html', theme: 'vs', automaticLayout: true, fontSize: 16, minimap: { enabled: false }
             });
             editor.onDidChangeModelContent(() => sync('monaco'));
-            sync('monaco');
         });
-
-        window.openSave = (e) => { e.stopPropagation(); haptic.confirm(); saveBar.style.display = 'flex'; setTimeout(() => saveBar.classList.add('active'), 10); };
-        window.downloadHtml = (e) => {
-            e.stopPropagation(); haptic.confirm();
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([raw.value], {type:'text/html'}));
-            a.download = document.getElementById('fn').value; a.click();
-            globalTap();
-        };
-
-        window.toggleDock = (e) => {
-            e?.stopPropagation(); haptic.confirm();
-            isDockOpen = !isDockOpen;
-            document.getElementById('file-list').classList.toggle('open', isDockOpen);
-            document.getElementById('folder-btn').innerText = isDockOpen ? '📂' : '📁';
-        };
 
         window.handleFile = (e) => {
             const f = e.target.files[0]; if(!f) return;
-            loader.style.display = 'flex';
+            document.getElementById('ios-loader').style.display = 'flex';
             const r = new FileReader();
             r.onload = (ev) => {
-                setTimeout(() => {
-                    const div = document.createElement('div');
-                    div.className = 'dock-item';
-                    div.dataset.name = f.name;
-                    div.innerHTML = `<img src="${ev.target.result}"><div class="del-trigger">－</div>`;
-                    
-                    let sY, startT;
-                    div.addEventListener('touchstart', (ts) => { sY = ts.touches[0].pageY; startT = Date.now(); ts.stopPropagation(); });
-                    div.addEventListener('touchend', (te) => {
-                        const diffY = sY - te.changedTouches[0].pageY;
-                        const duration = Date.now() - startT;
-                        if(diffY > 35) div.classList.add('swiped');
-                        else if(diffY < -35) div.classList.remove('swiped');
-                        else if(duration < 250 && !div.classList.contains('swiped')) {
-                            openMedia(ev.target.result, div.dataset.name);
-                        }
-                    });
-
-                    div.querySelector('.del-trigger').onclick = (ex) => {
-                        ex.stopPropagation(); haptic.notification('warning');
-                        div.classList.add('removing');
-                        setTimeout(() => div.remove(), 300);
-                    };
-
-                    document.getElementById('media-items').appendChild(div);
-                    loader.style.display = 'none';
-                    e.target.value = '';
-                }, 400);
+                const div = document.createElement('div');
+                div.className = 'dock-item';
+                div.innerHTML = `<img src="${ev.target.result}" onclick="openMedia('${ev.target.result}', '${f.name}')">
+                                 <div class="del-trigger" onclick="removeFile(event, this)">－</div>`;
+                document.getElementById('media-items').appendChild(div);
+                document.getElementById('ios-loader').style.display = 'none';
             };
             r.readAsDataURL(f);
         };
 
-        window.openMedia = (src, name) => {
-            const ov = document.getElementById('media-overlay');
-            document.getElementById('expanded-media').src = src;
-            document.getElementById('media-filename').innerText = name;
-            ov.style.display = 'flex'; setTimeout(() => ov.classList.add('active'), 10);
-            haptic.confirm();
-        };
-
-        window.toggleFullscreen = (e) => { 
-            e.stopPropagation(); haptic.confirm(); 
-            preview.classList.toggle('fullscreen');
-            document.getElementById('expand-toggle-btn').innerText = preview.classList.contains('fullscreen') ? "→" : "→"; 
-        };
-
-        window.monacoClose = () => { haptic.error(); toggleUI('monaco-container', false); };
-        window.toggleUI = (id, show) => { 
-            const t = document.getElementById(id); 
-            if(show) { t.style.display = 'flex'; setTimeout(() => t.classList.add('active'), 10); } 
-            else { t.classList.remove('active'); setTimeout(() => t.style.display = 'none', 400); } 
-        };
-
-        window.globalTap = () => { 
-            haptic(); 
-            if(isDockOpen) toggleDock();
-            saveBar.classList.remove('active');
-            setTimeout(() => { if(!saveBar.classList.contains('active')) saveBar.style.display = 'none'; }, 300);
-        };
-
-        window.closeMedia = (e) => { e?.stopPropagation(); document.getElementById('media-overlay').classList.remove('active'); setTimeout(() => document.getElementById('media-overlay').style.display = 'none', 300); };
-        window.downloadMedia = (e) => { e.stopPropagation(); haptic.confirm(); const a = document.createElement('a'); a.href = document.getElementById('expanded-media').src; a.download = document.getElementById('media-filename').innerText; a.click(); };
-        window.editMediaName = (e) => { haptic.confirm(); let n = prompt("Rename:", e.target.innerText); if(n) e.target.innerText = n; };
+        window.removeFile = (e, el) => { e.stopPropagation(); haptic.notification('warning'); const p = el.parentElement; p.classList.add('removing'); setTimeout(() => p.remove(), 300); };
+        window.openMedia = (src, name) => { const o = document.getElementById('media-overlay'); document.getElementById('expanded-media').src = src; document.getElementById('media-filename').innerText = name; o.style.display = 'flex'; setTimeout(() => o.classList.add('active'), 10); haptic.confirm(); };
+        window.closeMedia = () => { const o = document.getElementById('media-overlay'); o.classList.remove('active'); setTimeout(() => o.style.display = 'none', 300); };
+        window.toggleDock = (e) => { e.stopPropagation(); isDockOpen = !isDockOpen; document.getElementById('file-list').classList.toggle('open', isDockOpen); haptic.confirm(); };
+        window.toggleFullscreen = (e) => { e.stopPropagation(); previewSection.classList.toggle('fullscreen'); haptic.confirm(); };
+        window.toggleUI = (id, show) => { const t = document.getElementById(id); if(show){ t.style.display='flex'; setTimeout(()=>t.classList.add('active'),10); haptic.confirm(); } else { t.classList.remove('active'); setTimeout(()=>t.style.display='none',400); } };
+        window.openSave = (e) => { e.stopPropagation(); saveBar.style.display='flex'; setTimeout(()=>saveBar.classList.add('active'),10); haptic.confirm(); };
+        window.globalTap = () => { if(isDockOpen) toggleDock({stopPropagation:()=>{}}); saveBar.classList.remove('active'); };
+        window.downloadHtml = (e) => { e.stopPropagation(); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([raw.value],{type:'text/html'})); a.download=document.getElementById('fn').value; a.click(); haptic.confirm(); };
     </script>
 </body>
 </html>
