@@ -28,16 +28,6 @@
         
         .dock-item { width: 50px; height: 50px; background: #eee; border-radius: 12px; position: relative; flex-shrink: 0; }
         .dock-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: block; }
-        .dock-item.removing { transform: scale(0); width: 0; opacity: 0; transition: 0.3s var(--ios-ease); }
-
-        /* 強力な削除ボタン */
-        .del-trigger { 
-            position: absolute; top: -10px; right: -10px; width: 26px; height: 26px; 
-            background: #ff3b30 !important; color: white !important; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 20px; font-weight: bold !important; z-index: 5000; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3); pointer-events: auto;
-        }
 
         /* 拡大プレビュー UI */
         #media-overlay { position: fixed; inset: 0; backdrop-filter: blur(35px); background: rgba(0,0,0,0.5); z-index: 9000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; }
@@ -114,6 +104,7 @@
         const raw = document.getElementById('raw-editor');
         const previewSection = document.getElementById('preview-section');
         const saveBar = document.getElementById('save-input-bar');
+        const expandBtn = document.getElementById('expand-toggle-btn');
 
         // ピンチ操作でMonaco
         let initialDist = 0;
@@ -152,22 +143,12 @@
                 div.className = 'dock-item';
                 div.innerHTML = `
                     <img src="${ev.target.result}" onclick="openMedia('${ev.target.result}', '${f.name.replace(/'/g, "\\'")}')">
-                    <div class="del-trigger" onclick="removeFile(event, this)">－</div>
                 `;
                 document.getElementById('media-items').appendChild(div);
                 document.getElementById('ios-loader').style.display = 'none';
                 e.target.value = '';
             };
             r.readAsDataURL(f);
-        };
-
-        window.removeFile = (e, el) => { 
-            e.preventDefault();
-            e.stopPropagation(); 
-            haptic.notification('warning'); 
-            const p = el.closest('.dock-item'); 
-            p.classList.add('removing'); 
-            setTimeout(() => p.remove(), 300); 
         };
 
         window.openMedia = (src, name) => { 
@@ -196,7 +177,15 @@
         };
 
         window.toggleDock = (e) => { e.stopPropagation(); isDockOpen = !isDockOpen; document.getElementById('file-list').classList.toggle('open', isDockOpen); haptic.confirm(); };
-        window.toggleFullscreen = (e) => { e.stopPropagation(); previewSection.classList.toggle('fullscreen'); haptic.confirm(); };
+        
+        window.toggleFullscreen = (e) => { 
+            e.stopPropagation(); 
+            previewSection.classList.toggle('fullscreen'); 
+            // 拡大時は←、通常時は→にアイコンを切り替え
+            expandBtn.innerText = previewSection.classList.contains('fullscreen') ? '←' : '→';
+            haptic.confirm(); 
+        };
+
         window.toggleUI = (id, show) => { const t = document.getElementById(id); if(show){ t.style.display='flex'; setTimeout(()=>t.classList.add('active'),10); haptic.confirm(); } else { t.classList.remove('active'); setTimeout(()=>t.style.display='none',400); } };
         window.openSave = (e) => { e.stopPropagation(); saveBar.style.display='flex'; setTimeout(()=>saveBar.classList.add('active'),10); haptic.confirm(); };
         window.globalTap = () => { if(isDockOpen) toggleDock({stopPropagation:()=>{}}); saveBar.classList.remove('active'); };
