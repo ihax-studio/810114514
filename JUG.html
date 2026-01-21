@@ -20,15 +20,23 @@
 
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* プレビュー */
-        #preview-section { 
-            flex: 1; background: #fff; position: relative; transition: 0.6s var(--ios-ease); z-index: 10; 
-            transform: scale(0.97); border-radius: 12px; margin: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+        /* プレビューとエディタの共通マージン設定 */
+        .container-box {
+            margin: 10px 15px; /* 左右のマージンを15pxで統一 */
+            border-radius: 20px;
+            background: #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            overflow: hidden;
         }
-        #preview-section.fullscreen { position: fixed; inset: 0; transform: scale(1); border-radius: 0; margin: 0; z-index: 8000; }
+
+        /* プレビューエリア */
+        #preview-section { 
+            flex: 1; position: relative; transition: 0.6s var(--ios-ease); z-index: 10; 
+        }
+        #preview-section.fullscreen { position: fixed; inset: 0; margin: 0; border-radius: 0; z-index: 8000; }
         #output-frame { width: 100%; height: 100%; border: none; }
         
-        /* 拡大切替ボタン (右下) */
+        /* 拡大切替ボタン：右下に配置 */
         #expand-toggle-btn { 
             position: absolute; right: 20px; bottom: 20px; width: 44px; height: 44px;
             background: rgba(255,255,255,0.6); backdrop-filter: blur(10px);
@@ -36,10 +44,10 @@
             font-size: 28px; color: #000; z-index: 8010; cursor: pointer;
         }
 
-        /* エディタ */
-        #editor-section { flex: 0.8; display: flex; padding: 0 15px 15px 15px; }
+        /* エディタエリア：プレビューと同じ幅に設定 */
+        #editor-section { flex: 0.8; display: flex; margin-bottom: 20px; }
         #raw-editor { 
-            flex: 1; border: none; border-radius: 20px; padding: 20px; outline: none; 
+            flex: 1; border: none; padding: 20px; outline: none; 
             font-family: "SF Mono", monospace; background: #fff;
             -webkit-user-select: text; 
         }
@@ -64,13 +72,14 @@
 
         /* 画像オーバーレイUI */
         .media-ui-btn { position: absolute; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; color: #000; font-size: 40px; z-index: 9010; cursor: pointer; }
-        #media-close { top: 30px; left: 20px; } 
-        #media-download { top: 30px; right: 20px; } 
+        #media-close { top: 30px; left: 20px; } /* ← を左側に配置 */
+        #media-download { top: 30px; right: 20px; } /* ↓ を右側に配置 */
         #media-filename { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); color: #000; font-size: 16px; border-bottom: 0.5px solid #000; padding: 2px 10px; z-index: 9010; }
 
         /* Monaco */
         #monaco-container { position: fixed; inset: 0; background: #fff; z-index: 5000; display: none; opacity: 0; transform: scale(0.95); transition: 0.5s var(--ios-ease); flex-direction: column; }
         #monaco-container.active { display: flex; opacity: 1; transform: scale(1); }
+        #monaco-close-btn { font-size: 40px; color: #000; cursor: pointer; padding: 20px 30px; align-self: flex-start; } /* ← を左側に配置 */
 
         /* Dock */
         #dock-area { position: fixed; bottom: 30px; right: 20px; display: flex; align-items: center; z-index: 4000; }
@@ -82,7 +91,7 @@
         .dock-item { width: 44px; height: 44px; background: #fff; border-radius: 12px; position: relative; flex-shrink: 0; overflow: hidden; transition: 0.4s var(--ios-ease); }
         .dock-item img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* 削除ボタンを「－」に変更 */
+        /* 削除ボタン「－」 */
         .del-trigger { 
             position: absolute; inset: 0; background: #ff3b30; color: white; 
             display: flex; align-items: center; justify-content: center; 
@@ -94,12 +103,12 @@
 </head>
 <body onclick="globalTap()">
 
-    <div id="preview-section">
+    <div id="preview-section" class="container-box">
         <div id="expand-toggle-btn" onclick="toggleFullscreen(event)">→</div>
         <iframe id="output-frame"></iframe>
     </div>
 
-    <div id="editor-section">
+    <div id="editor-section" class="container-box">
         <textarea id="raw-editor" oninput="sync('input')" placeholder="Input HTML..."></textarea>
     </div>
 
@@ -124,9 +133,7 @@
     </div>
 
     <div id="monaco-container">
-        <div style="height:80px; display:flex; justify-content:flex-start; padding:0 30px; align-items:center;">
-            <div style="font-size:40px; color:#000; cursor:pointer;" onclick="monacoClose()">←</div>
-        </div>
+        <div id="monaco-close-btn" onclick="monacoClose()">←</div>
         <div id="monaco-body" style="flex:1;"></div>
     </div>
 
@@ -244,7 +251,6 @@
                 div.ontouchstart = (ts) => { sY = ts.touches[0].pageY; ts.stopPropagation(); };
                 div.ontouchend = (te) => {
                     const diffY = sY - te.changedTouches[0].pageY;
-                    // 上スワイプで削除ボタン表示
                     if(diffY > 30) div.classList.add('swiped');
                     else if(diffY < -30) div.classList.remove('swiped');
                     else if(!div.classList.contains('swiped')) openMedia(ev.target.result, div.dataset.name);
