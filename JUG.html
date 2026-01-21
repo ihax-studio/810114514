@@ -3,27 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS Ultimate Debug Pro</title>
+    <title>iOS Ultimate Debug</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <style>
         :root { --ios-ease: cubic-bezier(0.2, 1, 0.3, 1); }
 
-        /* iOSブロック & SF Font (Weight 100ベース) */
+        /* 全要素のフォントウェイトを1に強制 */
         * { 
             touch-action: none; 
             -webkit-user-select: none; 
             overscroll-behavior: none; 
             -webkit-tap-highlight-color: transparent; 
-            font-family: -apple-system, "SF Pro Display", "SF Compact", sans-serif; 
-            font-weight: 300; /* 基本ウェイト */
+            font-family: -apple-system, "SF Pro Display", sans-serif; 
+            font-weight: 1 !important; 
         }
-        
-        /* 指定された極細フォントクラス */
-        .w1 { font-weight: 100 !important; }
 
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* プレビューエリア */
+        /* プレビュー */
         #preview-section { 
             flex: 1; background: #fff; position: relative; transition: 0.6s var(--ios-ease); z-index: 10; 
             transform: scale(0.97); border-radius: 12px; margin: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
@@ -31,19 +28,19 @@
         #preview-section.fullscreen { position: fixed; inset: 0; transform: scale(1); border-radius: 0; margin: 0; z-index: 8000; }
         #output-frame { width: 100%; height: 100%; border: none; }
         
-        /* プレビュー左下の丸ボタン (拡大/閉じる) */
+        /* 拡大/閉じるボタン (左下) */
         #expand-toggle-btn { 
             position: absolute; bottom: 20px; left: 20px; width: 44px; height: 44px;
             background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 24px; color: #000; z-index: 8010; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-size: 24px; color: #000; z-index: 8010; cursor: pointer;
         }
 
         /* エディタ */
         #editor-section { flex: 0.8; display: flex; padding: 0 15px 15px 15px; }
         #raw-editor { 
             flex: 1; border: none; border-radius: 20px; padding: 20px; outline: none; 
-            font-family: "SF Mono", monospace; background: #fff; font-weight: 400; 
+            font-family: "SF Mono", monospace; background: #fff;
             -webkit-user-select: text; 
         }
 
@@ -55,32 +52,21 @@
             align-items: center; padding: 0 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         }
         #save-input-bar.active { display: flex; opacity: 1; transform: scale(1); }
-        #save-input-bar input { flex: 1; border: none; outline: none; font-size: 17px; background: transparent; -webkit-user-select: text; font-weight: 300; }
-        .save-arrow { font-size: 32px; color: #007aff; cursor: pointer; display: flex; align-items: center; height: 100%; padding-bottom: 4px; }
+        #save-input-bar input { flex: 1; border: none; outline: none; font-size: 17px; background: transparent; -webkit-user-select: text; }
+        .save-arrow { font-size: 28px; color: #007aff; cursor: pointer; }
 
         /* 画像拡大オーバーレイ */
-        #media-overlay { position: fixed; inset: 0; backdrop-filter: blur(40px); background: rgba(0,0,0,0.2); z-index: 9000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.4s; }
+        #media-overlay { position: fixed; inset: 0; backdrop-filter: blur(40px); background: rgba(255,255,255,0.1); z-index: 9000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.4s; }
         #media-overlay.active { display: flex; opacity: 1; }
-        #expanded-media { max-width: 100%; max-height: 100%; object-fit: contain; transform: scale(0.8); transition: 0.5s var(--ios-ease); }
+        #expanded-media { max-width: 90%; max-height: 70%; transform: scale(0.8); transition: 0.5s var(--ios-ease); border-radius: 4px; }
         #media-overlay.active #expanded-media { transform: scale(1); }
-        #expanded-media.zoomed { transform: scale(2.0) !important; }
+        #expanded-media.zoomed { transform: scale(1.8) !important; }
 
-        /* 画像オーバーレイ内ボタン配置 */
-        .media-ui-btn { 
-            position: absolute; width: 50px; height: 50px; 
-            display: flex; align-items: center; justify-content: center; 
-            color: #fff; font-size: 30px; z-index: 9005; cursor: pointer;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        #media-close { top: 40px; right: 20px; font-size: 36px; } /* 画像外右上 */
-        #media-download { top: 40px; left: 20px; font-size: 36px; } /* 画像外左上 */
-        
-        #media-filename { 
-            position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); 
-            color: rgba(255,255,255,0.9); font-size: 15px; font-weight: 200; 
-            border-bottom: 1px solid rgba(255,255,255,0.4); padding: 5px 15px; z-index: 9005;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
-        }
+        /* 画像オーバーレイUI */
+        .media-ui-btn { position: absolute; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; color: #000; font-size: 40px; z-index: 9010; cursor: pointer; }
+        #media-close { top: 30px; right: 20px; } /* 画像外右上 */
+        #media-download { top: 30px; left: 20px; } /* 画像外左上 */
+        #media-filename { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); color: #000; font-size: 16px; border-bottom: 0.5px solid #000; padding: 2px 10px; z-index: 9010; }
 
         /* Monaco */
         #monaco-container { position: fixed; inset: 0; background: #fff; z-index: 5000; display: none; opacity: 0; transform: scale(0.95); transition: 0.5s var(--ios-ease); flex-direction: column; }
@@ -92,7 +78,7 @@
         #file-list { display: flex; gap: 5px; width: 0; opacity: 0; overflow: hidden; transition: 0.5s var(--ios-ease); }
         #file-list.open { width: auto; opacity: 1; margin-right: 8px; }
 
-        .icon-btn { width: 55px; height: 55px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .icon-btn { width: 55px; height: 55px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
         .dock-item { width: 44px; height: 44px; background: #fff; border-radius: 12px; position: relative; flex-shrink: 0; overflow: hidden; transition: 0.4s var(--ios-ease); }
         .dock-item img { width: 100%; height: 100%; object-fit: cover; }
         .del-trigger { position: absolute; inset: 0; background: #ff3b30; color: white; display: flex; align-items: center; justify-content: center; transform: translateY(100%); transition: 0.3s var(--ios-ease); font-size: 20px; }
@@ -103,12 +89,12 @@
 <body onclick="globalTap()">
 
     <div id="preview-section">
-        <div id="expand-toggle-btn" class="w1" onclick="toggleFullscreen(event)">⤢</div>
+        <div id="expand-toggle-btn" onclick="toggleFullscreen(event)">⤢</div>
         <iframe id="output-frame"></iframe>
     </div>
 
     <div id="editor-section">
-        <textarea id="raw-editor" oninput="sync('input')" placeholder="Input HTML..."></textarea>
+        <textarea id="raw-editor" oninput="sync('input')" placeholder="Code here..."></textarea>
     </div>
 
     <div style="position:fixed; bottom:30px; left:20px; display:flex; gap:15px; z-index:4000;">
@@ -128,22 +114,20 @@
 
     <div id="save-input-bar" onclick="event.stopPropagation()">
         <input type="text" id="fn" value="index.html" spellcheck="false">
-        <div class="save-arrow w1" onclick="downloadHtml(event)">→</div>
+        <div class="save-arrow" onclick="downloadHtml(event)">→</div>
     </div>
 
     <div id="monaco-container">
         <div style="height:80px; display:flex; justify-content:flex-start; padding:0 30px; align-items:center;">
-            <div class="w1" style="font-size:40px; color:#000; cursor:pointer;" onclick="monacoClose()">✕</div>
+            <div style="font-size:40px; color:#000; cursor:pointer;" onclick="monacoClose()">✕</div>
         </div>
         <div id="monaco-body" style="flex:1;"></div>
     </div>
 
-    <div id="media-overlay">
-        <div id="media-download" class="media-ui-btn w1" onclick="downloadMedia(event)">↓</div>
-        <div id="media-close" class="media-ui-btn w1" onclick="closeMedia(event)">✕</div>
-        
+    <div id="media-overlay" onclick="closeMedia()">
+        <div id="media-download" class="media-ui-btn" onclick="downloadMedia(event)">↓</div>
+        <div id="media-close" class="media-ui-btn" onclick="closeMedia(event)">✕</div>
         <img id="expanded-media" onclick="event.stopPropagation(); toggleZoom(this)" src="">
-        
         <div id="media-filename" onclick="event.stopPropagation(); editMediaName(event)">image.png</div>
     </div>
 
@@ -154,7 +138,7 @@
         window.haptic = haptic;
 
         let editor, isSyncing = false, isDockOpen = false, initDist = 0;
-        let html = `<!DOCTYPE html><html><body style="margin:0; background:#fff; height:100vh; display:flex; justify-content:center; align-items:center;"><h1>System Ready</h1></body></html>`;
+        let html = `<!DOCTYPE html><html><body style="margin:0; background:#fff; height:100vh; display:flex; justify-content:center; align-items:center;"><h1>Ready</h1></body></html>`;
         let currentMediaSrc = "";
 
         const raw = document.getElementById('raw-editor');
@@ -162,43 +146,28 @@
         const saveBar = document.getElementById('save-input-bar');
         const expandBtn = document.getElementById('expand-toggle-btn');
 
-        // --- 二本指タップ検知 (プレビュー拡大用) ---
+        // 二本指タップ検知 (プレビュー拡大)
         let touchStartTime = 0;
-        preview.addEventListener('touchstart', e => {
-            if(e.touches.length === 2) { touchStartTime = Date.now(); }
-        }, {passive: false});
-        
+        preview.addEventListener('touchstart', e => { if(e.touches.length === 2) touchStartTime = Date.now(); }, {passive: false});
         preview.addEventListener('touchend', e => {
-            if(touchStartTime && (Date.now() - touchStartTime < 350) && e.touches.length === 0) {
-                // 二本指タップ成功
+            if(touchStartTime && (Date.now() - touchStartTime < 300) && e.touches.length === 0) {
                 toggleFullscreen();
                 touchStartTime = 0;
             }
         });
 
-        // --- 二本指ピンチ (Monaco起動・終了用) ---
+        // 二本指ピンチ (Monaco起動/終了)
         window.addEventListener('touchmove', e => {
             if (e.touches.length === 2) {
-                // Monaco起動 (inputエリアでピンチアウト)
                 let d = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                 if (initDist === 0) { initDist = d; return; }
                 let r = d / initDist;
-
-                if (e.target.closest('#raw-editor') && r > 1.3) {
-                    toggleUI('monaco-container', true);
-                    initDist = d;
-                }
-                // Monaco終了 (Monaco表示中にピンチイン)
-                if (document.getElementById('monaco-container').classList.contains('active') && r < 0.7) {
-                    monacoClose();
-                    initDist = d;
-                }
+                if (e.target.closest('#raw-editor') && r > 1.3) { toggleUI('monaco-container', true); initDist = d; }
+                if (document.getElementById('monaco-container').classList.contains('active') && r < 0.7) { monacoClose(); initDist = d; }
             }
         }, { passive: false });
         window.addEventListener('touchend', () => initDist = 0);
 
-
-        // --- 同期 ---
         window.sync = (src) => {
             if(isSyncing) return; isSyncing = true;
             html = (src === 'input') ? raw.value : editor.getValue();
@@ -209,7 +178,6 @@
             isSyncing = false;
         };
 
-        // --- Monaco ---
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
         require(['vs/editor/editor.main'], () => {
             editor = monaco.editor.create(document.getElementById('monaco-body'), { 
@@ -219,7 +187,6 @@
             sync('monaco');
         });
 
-        // --- UI操作 ---
         window.globalTap = () => {
             haptic();
             saveBar.classList.remove('active');
@@ -233,7 +200,6 @@
             if(e) e.stopPropagation(); 
             haptic.confirm(); 
             preview.classList.toggle('fullscreen');
-            // 拡大時はバツボタン、通常時は拡大ボタン
             expandBtn.innerText = preview.classList.contains('fullscreen') ? "✕" : "⤢";
         };
 
@@ -247,14 +213,11 @@
         window.downloadHtml = (e) => {
             e.stopPropagation(); haptic.confirm();
             const blob = new Blob([html], {type:'text/html'});
-            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url; a.download = document.getElementById('fn').value || 'index.html';
-            a.click(); URL.revokeObjectURL(url);
-            saveBar.classList.remove('active');
+            a.href = URL.createObjectURL(blob); a.download = document.getElementById('fn').value || 'index.html';
+            a.click(); saveBar.classList.remove('active');
         };
 
-        // --- ファイル & メディア ---
         window.handleFile = (e) => {
             const f = e.target.files[0]; if(!f) return;
             const r = new FileReader();
@@ -263,7 +226,6 @@
                 div.className = 'dock-item';
                 div.dataset.name = f.name;
                 div.innerHTML = `<img src="${ev.target.result}"><div class="del-trigger">✕</div>`;
-                
                 let sY;
                 div.ontouchstart = (ts) => { sY = ts.touches[0].pageY; ts.stopPropagation(); };
                 div.ontouchend = (te) => {
@@ -284,11 +246,9 @@
 
         window.openMedia = (src, name) => {
             const ov = document.getElementById('media-overlay');
-            const img = document.getElementById('expanded-media');
-            const label = document.getElementById('media-filename');
             currentMediaSrc = src;
-            img.src = src; img.classList.remove('zoomed');
-            label.innerText = name || "image.png";
+            document.getElementById('expanded-media').src = src;
+            document.getElementById('media-filename').innerText = name || "image.png";
             ov.style.display = 'flex';
             setTimeout(() => ov.classList.add('active'), 10);
             haptic.confirm();
@@ -296,35 +256,19 @@
 
         window.editMediaName = (e) => {
             e.stopPropagation(); haptic.confirm();
-            let oldName = e.target.innerText;
-            // 拡張子を除いて編集
-            let baseName = oldName.includes('.') ? oldName.split('.').slice(0, -1).join('.') : oldName;
-            
-            let newName = prompt("名前を変更 (.は使用不可)", baseName);
-            if(newName) {
-                // ドットを強制排除
-                newName = newName.replace(/\./g, '');
-                e.target.innerText = newName + ".png"; // 便宜上png固定
-            }
+            let n = prompt("名前変更 (ドット不可)", e.target.innerText.split('.')[0]);
+            if(n) e.target.innerText = n.replace(/\./g, '') + ".png";
         };
 
         window.downloadMedia = (e) => {
             e.stopPropagation(); haptic.confirm();
             const a = document.createElement('a');
-            a.href = currentMediaSrc;
-            a.download = document.getElementById('media-filename').innerText;
+            a.href = currentMediaSrc; a.download = document.getElementById('media-filename').innerText;
             a.click();
         };
 
         window.toggleZoom = (el) => { haptic.confirm(); el.classList.toggle('zoomed'); };
-        
-        window.closeMedia = (e) => {
-            if(e) e.stopPropagation();
-            const ov = document.getElementById('media-overlay');
-            ov.classList.remove('active');
-            setTimeout(() => ov.style.display = 'none', 400);
-        };
-
+        window.closeMedia = (e) => { if(e) e.stopPropagation(); const ov = document.getElementById('media-overlay'); ov.classList.remove('active'); setTimeout(() => ov.style.display = 'none', 400); };
         window.monacoClose = () => { haptic.error(); toggleUI('monaco-container', false); };
         window.toggleUI = (id, show) => { 
             const t = document.getElementById(id); 
