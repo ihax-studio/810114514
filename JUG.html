@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Live Editor - Ultra Slim</title>
+    <title>Pro Live Editor - Evolution</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <style>
         :root {
             --bg-color: #f2f2f7;
             --accent-color: #007aff;
-            --bar-bg: rgba(255, 255, 255, 0.8);
-            --shadow: 0 10px 40px rgba(0,0,0,0.1);
-            --dock-blur: blur(25px) saturate(180%);
-            --transition-ios: all 0.5s cubic-bezier(0.32, 0.72, 0, 1);
-            --font-main: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
+            --bar-bg: rgba(255, 255, 255, 0.75);
+            --dock-blur: blur(30px) saturate(180%);
+            --ios-ease: cubic-bezier(0.32, 0.72, 0, 1);
+            --shadow-soft: 0 8px 30px rgba(0,0,0,0.08);
         }
 
         body, html {
             margin: 0; padding: 0; height: 100%;
-            font-family: var(--font-main);
+            font-family: -apple-system, "SF Pro Display", sans-serif;
             background-color: var(--bg-color);
             overflow: hidden; display: flex; flex-direction: column;
             -webkit-font-smoothing: antialiased;
@@ -26,142 +25,138 @@
 
         /* プレビューエリア */
         #preview-section { 
-            flex: 1.1; background: #fff; position: relative; 
-            transition: var(--transition-ios); 
-            z-index: 5; transform: scale(0.98); border-radius: 24px; margin: 12px;
-            box-shadow: var(--shadow); overflow: hidden;
+            flex: 1; background: #fff; position: relative; 
+            transition: all 0.6s var(--ios-ease); 
+            z-index: 5; transform: scale(0.96); border-radius: 28px; margin: 10px;
+            box-shadow: var(--shadow-soft); overflow: hidden;
         }
-        #preview-section.fullscreen { 
-            position: fixed; inset: 0; z-index: 3000;
-            transform: scale(1); border-radius: 0; margin: 0;
-        }
-        #output-frame { width: 100%; height: 100%; border: none; }
+        #preview-section.fullscreen { position: fixed; inset: 0; z-index: 3000; transform: scale(1); border-radius: 0; margin: 0; }
 
         /* エディタエリア */
         #editor-section { 
-            flex: 0.9; display: flex; padding: 10px; 
-            background: transparent; z-index: 2;
+            flex: 1; display: flex; padding: 15px; transition: all 0.6s var(--ios-ease);
+            transform: scale(0.96); z-index: 10;
         }
+        #editor-section.active-scale { transform: scale(1.02); } /* HTML選択時の強調 */
+
         #raw-editor { 
-            flex: 1; border: none; padding: 20px; 
-            font-family: "SF Mono", monospace; 
-            font-size: 13px; font-weight: 200; outline: none; 
-            background: rgba(255,255,255,0.7); border-radius: 20px; resize: none;
-            transition: var(--transition-ios);
+            flex: 1; border: none; padding: 25px; 
+            font-family: "SF Mono", monospace; font-size: 13px; font-weight: 200;
+            outline: none; background: rgba(255,255,255,0.8); 
+            border-radius: 24px; resize: none; box-shadow: var(--shadow-soft);
         }
 
-        /* 1行スリムDock */
+        /* 横長スリムDock */
         #dock-container {
-            position: fixed; bottom: 85px; left: 50%;
-            transform: translateX(-50%) translateY(20px);
+            position: fixed; bottom: 90px; left: 50%;
+            transform: translateX(-50%) translateY(30px);
             background: var(--bar-bg); backdrop-filter: var(--dock-blur);
-            padding: 8px; border-radius: 22px;
-            display: flex; align-items: center; gap: 8px;
-            box-shadow: var(--shadow); z-index: 3400; transition: var(--transition-ios); 
-            opacity: 0; pointer-events: none; max-width: 92vw;
+            padding: 10px; border-radius: 26px;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.1); z-index: 3400; 
+            transition: all 0.5s var(--ios-ease); opacity: 0; pointer-events: none;
         }
         #dock-container.active { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
 
-        #file-scroll-area { display: flex; overflow-x: auto; scrollbar-width: none; gap: 8px; padding: 0 5px; }
+        #file-scroll-area { display: flex; overflow-x: auto; scrollbar-width: none; gap: 10px; padding: 0 5px; }
         #file-scroll-area::-webkit-scrollbar { display: none; }
 
         .dock-item {
-            min-width: 52px; height: 52px; background: #fff; border-radius: 14px;
+            min-width: 58px; height: 58px; background: #fff; border-radius: 16px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 9px; font-weight: 200; cursor: pointer; transition: 0.3s; flex-shrink: 0;
+            font-size: 8px; font-weight: 300; cursor: pointer; transition: 0.3s var(--ios-ease); flex-shrink: 0;
+            overflow: hidden; position: relative; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-        .dock-item:active { transform: scale(0.88); }
-        .dock-item span { font-size: 18px; margin-bottom: 2px; font-weight: 100; }
+        .dock-item:active { transform: scale(0.85); }
+        .dock-item img { width: 100%; height: 100%; object-fit: cover; }
+        .dock-item .file-label { position: absolute; bottom: 2px; background: rgba(255,255,255,0.8); width: 100%; text-align: center; zoom: 0.8; }
 
-        /* iOS風ポップアップカバー (非対応ファイル) */
-        #error-popup {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.2);
-            backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center;
-            z-index: 5000; opacity: 0; transition: var(--transition-ios);
+        /* ゴミ箱 */
+        #trash-bin {
+            min-width: 58px; height: 58px; background: rgba(255,59,48,0.1); 
+            border-radius: 16px; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; transition: 0.3s;
         }
-        #error-popup.active { display: flex; opacity: 1; }
-        .alert-box {
-            background: rgba(255,255,255,0.9); backdrop-filter: blur(20px);
-            width: 270px; border-radius: 18px; text-align: center;
-            padding: 20px; box-shadow: var(--shadow); transform: scale(0.8); transition: var(--transition-ios);
-        }
-        #error-popup.active .alert-box { transform: scale(1); }
-        .alert-title { font-weight: 600; font-size: 17px; margin-bottom: 5px; }
-        .alert-desc { font-weight: 300; font-size: 13px; color: #333; margin-bottom: 15px; }
-        .alert-btn { color: var(--accent-color); font-weight: 600; cursor: pointer; border-top: 0.5px solid #ccc; padding-top: 10px; }
+        #trash-bin.drag-over { background: rgba(255,59,48,0.3); transform: scale(1.2); }
 
-        /* 画像拡大ビューワー */
+        /* モーダル・アラート */
+        #alert-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.1); backdrop-filter: blur(10px);
+            display: none; align-items: center; justify-content: center; z-index: 6000;
+        }
+        .alert-card {
+            background: #fff; padding: 25px; border-radius: 20px; width: 260px; text-align: center;
+            transform: scale(0.8); transition: 0.4s var(--ios-ease); box-shadow: var(--shadow-soft);
+        }
+        #alert-overlay.active { display: flex; }
+        #alert-overlay.active .alert-card { transform: scale(1); }
+
+        /* 画像ビューワー */
         #image-viewer {
-            position: fixed; inset: 0; background: rgba(255,255,255,0.7);
-            backdrop-filter: blur(30px); display: none; align-items: center; justify-content: center;
-            z-index: 5500; opacity: 0; transition: var(--transition-ios); cursor: zoom-out;
+            position: fixed; inset: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(40px);
+            display: none; align-items: center; justify-content: center; z-index: 5500;
+            transition: 0.5s var(--ios-ease); opacity: 0;
         }
         #image-viewer.active { display: flex; opacity: 1; }
-        #image-viewer img { max-width: 90%; max-height: 80%; border-radius: 12px; transform: scale(0.5); transition: var(--transition-ios); box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
+        #image-viewer img { max-width: 85%; max-height: 75%; border-radius: 20px; transform: scale(0.7); transition: 0.6s var(--ios-ease); }
         #image-viewer.active img { transform: scale(1); }
 
-        /* フローティングナビ */
+        /* ナビゲーション */
         .floating-bar {
             position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-            z-index: 3500; background: var(--bar-bg); padding: 8px 20px;
-            border-radius: 30px; display: flex; align-items: center;
-            box-shadow: var(--shadow); backdrop-filter: var(--dock-blur);
-            transition: var(--transition-ios);
+            z-index: 3500; background: var(--bar-bg); padding: 8px 24px;
+            border-radius: 35px; display: flex; align-items: center; box-shadow: var(--shadow-soft);
+            backdrop-filter: var(--dock-blur); transition: 0.5s var(--ios-ease);
         }
-        .floating-bar.hidden { transform: translateX(-50%) translateY(100px); opacity: 0; }
-        .btn-ui { border: none; background: transparent; padding: 8px 15px; font-weight: 300; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .btn-ui { border: none; background: transparent; padding: 10px 18px; font-weight: 300; font-size: 14px; cursor: pointer; color: #333; }
 
-        /* Monaco */
+        /* VS Code / Monaco Screen */
         #monaco-container {
-            position: fixed; inset: 0; background: #1e1e1e; z-index: 4000;
-            display: flex; flex-direction: column; transform: translateY(100%); transition: var(--transition-ios);
+            position: fixed; inset: 0; background: #1e1e1e; z-index: 4500;
+            transform: translateY(100%); transition: 0.6s var(--ios-ease);
         }
         #monaco-container.active { transform: translateY(0); }
     </style>
 </head>
 <body ondragover="event.preventDefault()" ondrop="handleDrop(event)">
 
-    <div id="error-popup">
-        <div class="alert-box">
-            <div class="alert-title">ファイルエラー</div>
-            <div class="alert-desc">このファイルは使用できないか、<br>破損している可能性があります。</div>
-            <div class="alert-btn" onclick="closeError()">了解</div>
+    <div id="alert-overlay">
+        <div class="alert-card">
+            <div style="font-weight:600; font-size:17px;">ファイルエラー</div>
+            <div style="font-size:13px; color:#666; margin: 10px 0 20px;">このファイルは使用できないか、<br>破損しています。</div>
+            <div style="color:var(--accent-color); font-weight:600; cursor:pointer; border-top:0.5px solid #eee; padding-top:15px;" onclick="closeAlert()">了解</div>
         </div>
     </div>
 
-    <div id="image-viewer" onclick="closeImageViewer()">
+    <div id="image-viewer" onclick="this.classList.remove('active'); setTimeout(()=>this.style.display='none',500)">
         <img id="zoom-img" src="">
     </div>
 
     <div id="preview-section">
         <iframe id="output-frame"></iframe>
-        <div style="position: absolute; top: 15px; right: 15px; width: 34px; height: 34px; background: rgba(255,255,255,0.4); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(10px);" onclick="toggleFullscreen()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-        </div>
     </div>
 
     <div id="editor-section">
-        <textarea id="raw-editor" spellcheck="false" placeholder="Loading code..."></textarea>
+        <textarea id="raw-editor" spellcheck="false" placeholder="Select a file to edit..."></textarea>
     </div>
 
     <div id="dock-container">
-        <div class="dock-item" onclick="triggerFileInput()"><span>＋</span>Add</div>
+        <div class="dock-item" onclick="triggerFileInput()"><span>＋</span></div>
         <div id="file-scroll-area">
-            <div id="file-list" style="display: flex; gap: 8px;"></div>
+            <div id="file-list" style="display: flex; gap: 10px;"></div>
         </div>
-        <div class="dock-item" onclick="pasteFromClipboard()"><span>📋</span>Paste</div>
-        <div class="dock-item" ondrop="deleteFile(event)" ondragover="event.preventDefault()" style="background: rgba(255,0,0,0.05);"><span>✕</span>Del</div>
+        <div id="trash-bin" ondragover="this.classList.add('drag-over'); event.preventDefault();" ondragleave="this.classList.remove('drag-over')" ondrop="deleteFile(event)">🗑️</div>
     </div>
 
-    <div id="main-menu" class="floating-bar">
-        <div id="folder-toggle" style="font-size: 20px; cursor: pointer; margin-right: 15px; font-weight: 200;" onclick="toggleDock()">📁</div>
+    <div id="main-nav" class="floating-bar">
+        <div style="font-size:22px; cursor:pointer; margin-right:15px; font-weight:100;" onclick="toggleDock()">📁</div>
         <button class="btn-ui" onclick="toggleMonaco(true)">Editor Pro</button>
         <button class="btn-ui" onclick="downloadFile()">Export</button>
     </div>
 
     <div id="monaco-container">
-        <div style="height: 55px; display: flex; align-items: center; justify-content: flex-end; padding: 0 25px;">
-            <div style="color:white; font-size:28px; cursor:pointer; font-weight: 100;" onclick="toggleMonaco(false)">✕</div>
+        <div style="height: 60px; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px;">
+            <div style="color:white; font-size:30px; cursor:pointer; font-weight:100;" onclick="toggleMonaco(false)">✕</div>
         </div>
         <div id="monaco-body" style="flex:1"></div>
     </div>
@@ -171,50 +166,43 @@
     <script>
         const haptic = (isError = false) => {
             if(!navigator.vibrate) return;
-            isError ? navigator.vibrate([15, 30, 15]) : navigator.vibrate(10);
+            isError ? navigator.vibrate([10, 30, 10]) : navigator.vibrate(10);
         };
 
         let editor;
         const rawTextArea = document.getElementById('raw-editor');
         const frame = document.getElementById('output-frame');
-        let files = { 'index.html': `<!DOCTYPE html>\n<html>\n<body>\n <h1>Slim Editor</h1>\n <p>Drop an image or code here.</p>\n</body>\n</html>` };
+        let files = { 'index.html': `<!DOCTYPE html>\n<html>\n<body style="text-align:center; padding-top:50px; font-family:sans-serif;">\n <h1>Live Preview</h1>\n <p>Drop files into the Dock.</p>\n</body>\n</html>` };
         let currentFile = 'index.html';
 
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
         require(['vs/editor/editor.main'], function() {
             editor = monaco.editor.create(document.getElementById('monaco-body'), {
-                value: files[currentFile], language: 'html', theme: 'vs-dark', 
-                fontSize: 15, fontLigatures: true, automaticLayout: true,
-                minimap: { enabled: false }, cursorSmoothCaretAnimation: "on"
+                value: files[currentFile], language: 'html', theme: 'vs-dark',
+                fontSize: 15, automaticLayout: true, minimap: { enabled: false },
+                cursorSmoothCaretAnimation: "on"
             });
             editor.onDidChangeModelContent(() => {
                 const val = editor.getValue();
                 files[currentFile] = val;
                 rawTextArea.value = val;
-                updatePreview(val);
+                if(currentFile.endsWith('.html')) updatePreview(val);
             });
             rawTextArea.addEventListener('input', () => {
-                files[currentFile] = rawTextArea.value;
-                editor.setValue(rawTextArea.value);
-                updatePreview(rawTextArea.value);
+                const val = rawTextArea.value;
+                files[currentFile] = val;
+                editor.setValue(val);
+                if(currentFile.endsWith('.html')) updatePreview(val);
             });
-            updatePreview(files[currentFile]);
+            updatePreview(files['index.html']);
             renderDock();
         });
 
         function updatePreview(code) {
             const d = frame.contentDocument;
             d.open(); d.write(code); d.close();
-            // iframe内の画像クリックを検知
-            setTimeout(() => {
-                d.querySelectorAll('img').forEach(img => {
-                    img.style.cursor = 'zoom-in';
-                    img.onclick = () => openImageViewer(img.src);
-                });
-            }, 500);
         }
 
-        // --- File System Logic ---
         function renderDock() {
             const list = document.getElementById('file-list');
             list.innerHTML = '';
@@ -222,127 +210,113 @@
                 const div = document.createElement('div');
                 div.className = 'dock-item';
                 div.draggable = true;
+                
                 const isImg = /\.(jpg|jpeg|png|gif|svg|webp)$/i.test(name);
-                div.innerHTML = `<span>${isImg ? '🖼️' : '📄'}</span>${name.split('.').pop().toUpperCase()}`;
-                if(currentFile === name) div.style.border = '0.5px solid rgba(0,0,0,0.2)';
-                div.onclick = () => isImg ? openImageViewer(files[name], name) : switchFile(name);
+                const isCode = /\.(html|md|css|js|jsx)$/i.test(name);
+
+                if(isImg) {
+                    div.innerHTML = `<img src="${files[name]}">`;
+                } else {
+                    div.innerHTML = `<span>📄</span><div class="file-label">${name.split('.').pop().toUpperCase()}</div>`;
+                }
+
+                div.onclick = () => isImg ? openImage(files[name]) : switchFile(name);
                 div.ondragstart = (e) => { e.dataTransfer.setData('text', name); haptic(); };
                 list.appendChild(div);
             });
         }
 
         function switchFile(name) {
+            const isHTML = name.endsWith('.html');
+            const editorSec = document.getElementById('editor-section');
+            
+            // スケールアップアニメーション
+            if(isHTML) {
+                editorSec.classList.add('active-scale');
+                setTimeout(() => editorSec.classList.remove('active-scale'), 600);
+            } else {
+                // 一般ファイルのスケールアップ（エディタを前面に）
+                editorSec.style.transform = 'scale(1.05)';
+                setTimeout(() => editorSec.style.transform = 'scale(0.96)', 500);
+            }
+
             currentFile = name;
-            editor.setValue(files[name]);
-            rawTextArea.value = files[name];
-            const lang = name.endsWith('.css') ? 'css' : name.endsWith('.js') ? 'javascript' : 'html';
-            monaco.editor.setModelLanguage(editor.getModel(), lang);
+            const content = files[name];
+            editor.setValue(content);
+            rawTextArea.value = content;
+            
+            const ext = name.split('.').pop();
+            const langMap = { js: 'javascript', jsx: 'javascript', css: 'css', md: 'markdown', html: 'html' };
+            monaco.editor.setModelLanguage(editor.getModel(), langMap[ext] || 'plaintext');
+            
+            if(isHTML) updatePreview(content);
             renderDock();
             haptic();
         }
 
-        function handleFileSelect(e) {
-            const f = e.target.files[0];
-            if(f) processFile(f);
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            const f = e.dataTransfer.files[0];
-            if(f) processFile(f);
-        }
+        function handleFileSelect(e) { processFile(e.target.files[0]); }
+        function handleDrop(e) { e.preventDefault(); processFile(e.dataTransfer.files[0]); }
 
         function processFile(f) {
+            if(!f) return;
             const isImg = /\.(jpg|jpeg|png|gif|svg|webp)$/i.test(f.name);
-            const isTxt = /\.(html|css|js|txt|json)$/i.test(f.name);
+            const isTxt = /\.(html|css|js|jsx|md|txt)$/i.test(f.name);
 
-            if (!isImg && !isTxt) {
-                showError();
-                return;
-            }
+            if(!isImg && !isTxt) return showAlert();
 
             const reader = new FileReader();
-            reader.onerror = () => showError();
             reader.onload = (e) => {
                 files[f.name] = e.target.result;
                 renderDock();
-                if(!isImg) switchFile(f.name);
-                else openImageViewer(e.target.result, f.name);
+                haptic();
+                // 画像は追加しただけでは開かず、Dockからクリックで開く
             };
-
-            if (isImg) reader.readAsDataURL(f);
+            reader.onerror = () => showAlert();
+            
+            if(isImg) reader.readAsDataURL(f);
             else reader.readAsText(f);
         }
 
-        // --- UI Interactions ---
-        function openImageViewer(src, name = "") {
-            const viewer = document.getElementById('image-viewer');
-            const img = document.getElementById('zoom-img');
-            img.src = src;
-            viewer.style.display = 'flex';
-            setTimeout(() => viewer.classList.add('active'), 10);
+        function openImage(src) {
+            const v = document.getElementById('image-viewer');
+            document.getElementById('zoom-img').src = src;
+            v.style.display = 'flex';
+            setTimeout(() => v.classList.add('active'), 10);
             haptic();
         }
 
-        function closeImageViewer() {
-            const viewer = document.getElementById('image-viewer');
-            viewer.classList.remove('active');
-            setTimeout(() => viewer.style.display = 'none', 500);
-        }
-
-        function showError() {
-            const pop = document.getElementById('error-popup');
-            pop.style.display = 'flex';
-            setTimeout(() => pop.classList.add('active'), 10);
+        function deleteFile(e) {
+            e.preventDefault();
+            document.getElementById('trash-bin').classList.remove('drag-over');
+            const name = e.dataTransfer.getData('text');
+            if(name === 'index.html') return;
+            delete files[name];
+            if(currentFile === name) switchFile('index.html');
+            renderDock();
             haptic(true);
         }
 
-        function closeError() {
-            const pop = document.getElementById('error-popup');
-            pop.classList.remove('active');
-            setTimeout(() => pop.style.display = 'none', 500);
-        }
-
         function toggleDock() {
-            const d = document.getElementById('dock-container');
-            d.classList.toggle('active');
+            document.getElementById('dock-container').classList.toggle('active');
             haptic();
         }
 
         function toggleMonaco(show) {
-            const m = document.getElementById('monaco-container');
-            show ? m.classList.add('active') : m.classList.remove('active');
+            document.getElementById('monaco-container').classList.toggle('active', show);
             haptic();
         }
 
-        function toggleFullscreen() {
-            document.getElementById('preview-section').classList.toggle('fullscreen');
-            haptic();
-        }
-
-        function triggerFileInput() { document.getElementById('file-input').click(); }
-
-        function deleteFile(e) {
-            const name = e.dataTransfer.getData('text');
-            if (name === 'index.html') return;
-            delete files[name];
-            if (currentFile === name) switchFile('index.html');
-            renderDock();
+        function showAlert() {
+            const a = document.getElementById('alert-overlay');
+            a.classList.add('active');
             haptic(true);
         }
 
-        async function pasteFromClipboard() {
-            try {
-                const text = await navigator.clipboard.readText();
-                const name = `pasted_${Date.now().toString().slice(-3)}.txt`;
-                files[name] = text;
-                renderDock();
-                switchFile(name);
-            } catch(e) { showError(); }
-        }
+        function closeAlert() { document.getElementById('alert-overlay').classList.remove('active'); }
+        function triggerFileInput() { document.getElementById('file-input').click(); }
 
         function downloadFile() {
-            const blob = new Blob([files[currentFile]], { type: 'text/plain' });
+            const blob = new Blob([files[currentFile]], {type: 'text/plain'});
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = currentFile;
