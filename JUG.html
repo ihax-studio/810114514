@@ -3,19 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultimate iOS Media Editor</title>
+    <title>iOS Master Editor</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <style>
         :root {
             --bg-color: #f0f0f2;
             --ios-ease: cubic-bezier(0.25, 1, 0.5, 1);
-            --spring: cubic-bezier(0.5, 1.5, 0.5, 1);
+            --spring: cubic-bezier(0.5, 1.4, 0.5, 1);
             --bar-bg: rgba(242, 242, 247, 0.9);
-            --shadow: 0 15px 50px rgba(0,0,0,0.15);
+            --shadow: 0 15px 50px rgba(0,0,0,0.2);
         }
 
-        /* OS標準ジェスチャのブロック */
-        * { touch-action: none; -webkit-user-select: none; user-select: none; }
+        /* ネイティブ機能（ズーム・戻る）のブロック */
+        * { 
+            touch-action: none; 
+            -webkit-user-select: none; 
+            user-select: none; 
+            -webkit-tap-highlight-color: transparent;
+        }
         
         body, html {
             margin: 0; padding: 0; height: 100%;
@@ -27,25 +32,25 @@
         /* プレビューエリア */
         #preview-section { 
             flex: 1; background: #fff; position: relative; 
-            transition: transform 0.6s var(--ios-ease), border-radius 0.6s; 
+            transition: all 0.6s var(--ios-ease); 
             z-index: 5; transform: scale(0.97); border-radius: 12px; margin: 10px 10px 5px 10px;
             overflow: hidden; box-shadow: var(--shadow);
         }
-        #preview-section.fullscreen { transform: scale(1); border-radius: 0; margin: 0; z-index: 3000; }
+        #preview-section.fullscreen { 
+            position: fixed; inset: 0; transform: scale(1); border-radius: 0; margin: 0; z-index: 3000; 
+        }
         #output-frame { width: 100%; height: 100%; border: none; pointer-events: auto; }
 
-        /* エディタカード */
-        #editor-section { 
-            flex: 0.8; display: flex; padding: 5px 15px 15px 15px; 
-            z-index: 2; transition: 0.6s var(--ios-ease); 
-        }
+        /* 入力エリア (同期Input) */
+        #editor-section { flex: 0.8; display: flex; padding: 5px 15px 15px 15px; z-index: 2; transition: 0.6s var(--ios-ease); }
         #raw-editor { 
             flex: 1; border: none; padding: 20px; font-family: 'SF Mono', monospace; 
             font-size: 14px; outline: none; background: #fff; border-radius: 20px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); touch-action: pan-y;
+            -webkit-user-select: text; user-select: text;
         }
 
-        /* Dock (右下配置) */
+        /* Dock (右下) */
         #dock-wrapper {
             position: fixed; bottom: 95px; right: 20px;
             display: flex; align-items: center; justify-content: flex-end;
@@ -53,39 +58,42 @@
             padding: 8px 14px; border-radius: 30px;
             box-shadow: var(--shadow); z-index: 3400;
             transition: all 0.5s var(--spring);
-            max-width: 85vw;
         }
-
-        #file-list { display: flex; gap: 10px; overflow: hidden; transition: 0.5s var(--ios-ease); width: 0; opacity: 0; }
+        #file-list { display: flex; gap: 10px; overflow: hidden; transition: 0.5s var(--ios-ease); width: 0; opacity: 0; align-items: center; }
         #file-list.open { width: auto; opacity: 1; margin-right: 12px; }
 
         .dock-item {
             width: 50px; height: 50px; background: #fff; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
             position: relative; transition: 0.3s var(--spring); flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-size: 20px;
         }
         .dock-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
 
-        /* 削除アイコン (最前面) */
+        /* 削除アイコン (画像外・最前面) */
         .delete-badge {
-            position: absolute; top: -10px; left: -10px;
-            width: 24px; height: 24px; background: #ff3b30; color: white;
+            position: absolute; top: -14px; left: -14px; /* 画像の外側に配置 */
+            width: 28px; height: 28px; background: #ff3b30; color: white;
             border-radius: 50%; display: none; align-items: center; justify-content: center;
-            font-size: 18px; font-weight: bold; border: 2.5px solid white;
-            z-index: 9999; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            font-size: 22px; font-weight: bold; border: 2.5px solid white;
+            z-index: 999999; /* 最前列 */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         .editing .delete-badge { display: flex; }
         .editing .dock-item:not(.folder-toggle) { animation: wobble 0.25s infinite; }
 
         @keyframes wobble {
-            0% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } 100% { transform: rotate(-1.5deg); }
+            0% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } 100% { transform: rotate(-2deg); }
         }
 
-        /* フォルダボタン */
-        .folder-toggle { font-size: 28px; cursor: pointer; }
+        /* Monaco / UI Bars */
+        #monaco-container {
+            position: fixed; inset: 0; background: #1e1e1e; z-index: 4000;
+            display: none; transform: scale(0.9); opacity: 0;
+            transition: 0.6s var(--ios-ease); flex-direction: column;
+        }
+        #monaco-container.active { display: flex; transform: scale(1); opacity: 1; }
 
-        /* 各種バー */
         .floating-bar {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) scale(0.8);
             opacity: 0; z-index: 3500; background: var(--bar-bg); padding: 10px 14px;
@@ -95,38 +103,41 @@
         .floating-bar.active { display: flex; opacity: 1; transform: translateX(-50%) scale(1); }
         .btn-ui { border: none; background: #000; color: #fff; padding: 10px 24px; border-radius: 30px; font-weight: 600; margin: 0 4px; }
 
-        /* Monaco Pro View */
-        #monaco-container {
-            position: fixed; inset: 0; background: #1e1e1e; z-index: 4000;
-            display: none; transform: scale(0.9); opacity: 0;
-            transition: 0.6s var(--ios-ease); flex-direction: column;
-        }
-        #monaco-container.active { display: flex; transform: scale(1); opacity: 1; }
-
+        /* メディアプレビュー拡大 */
         #media-viewer {
-            position: fixed; inset: 0; background: rgba(255,255,255,0.7); backdrop-filter: blur(30px);
-            display: none; align-items: center; justify-content: center; z-index: 5000; opacity: 0; transition: 0.5s;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(25px);
+            display: none; align-items: center; justify-content: center; z-index: 6000; opacity: 0; transition: 0.4s;
         }
         #media-viewer.active { display: flex; opacity: 1; }
-        #media-viewer img, #media-viewer video { max-width: 85%; transform: scale(0.8); transition: 0.5s var(--spring); }
-        #media-viewer.active img, #media-viewer.active video { transform: scale(1); }
+        #viewer-box { position: relative; max-width: 90%; max-height: 80%; }
+        #viewer-box img, #viewer-box video { width: 100%; height: auto; border-radius: 12px; box-shadow: var(--shadow); }
+        
+        /* プレビュー内のバツアイコン */
+        .preview-close {
+            position: absolute; top: -40px; right: -10px; width: 32px; height: 32px;
+            background: rgba(255,255,255,0.9); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
     </style>
 </head>
-<body onclick="closeAllModes()">
+<body onclick="handleGlobalTap(event)">
 
     <div id="media-viewer" onclick="closeViewer()">
-        <div id="viewer-content"></div>
+        <div id="viewer-box" onclick="event.stopPropagation()">
+            <div class="preview-close" onclick="closeViewer()">✕</div>
+            <div id="viewer-content"></div>
+        </div>
     </div>
 
     <div id="preview-section">
         <iframe id="output-frame"></iframe>
-        <div style="position: absolute; bottom: 20px; right: 20px; width: 44px; height: 44px; background: rgba(255,255,255,0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 3001;" onclick="toggleFullscreen()">
+        <div style="position: absolute; bottom: 20px; right: 20px; width: 44px; height: 44px; background: rgba(255,255,255,0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 3001;" onclick="toggleFullscreen()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
         </div>
     </div>
 
     <div id="editor-section">
-        <textarea id="raw-editor" spellcheck="false"></textarea>
+        <textarea id="raw-editor" spellcheck="false" oninput="syncFromInput()"></textarea>
     </div>
 
     <div id="dock-wrapper" onclick="event.stopPropagation()">
@@ -134,7 +145,7 @@
             <div class="dock-item" onclick="document.getElementById('file-input').click()" style="background: #eee;">＋</div>
             <div id="media-items" style="display: flex; gap: 10px;"></div>
         </div>
-        <div id="folder-btn" class="folder-toggle" onclick="toggleDock()">📁</div>
+        <div id="folder-btn" class="dock-item folder-toggle" onclick="toggleDock()" style="background:transparent; box-shadow:none; font-size:28px;">📁</div>
     </div>
 
     <div id="main-menu" class="floating-bar active">
@@ -142,8 +153,8 @@
         <button class="btn-ui" onclick="toggleUI('monaco-container', true)">Editor Pro</button>
     </div>
 
-    <div id="save-bar" class="floating-bar">
-        <input type="text" id="filename-input" value="index.html" style="border:none; padding:10px; border-radius:20px; margin-right:8px;">
+    <div id="save-bar" class="floating-bar" onclick="event.stopPropagation()">
+        <input type="text" id="filename-input" value="index.html" style="border:none; padding:10px; border-radius:20px; margin-right:8px; outline:none; background:#fff;">
         <button class="btn-ui" onclick="downloadFile()">Download</button>
     </div>
 
@@ -161,61 +172,57 @@
 
     <script>
         const haptic = (err = false) => { if(navigator.vibrate) navigator.vibrate(err ? [10, 30, 10] : 10); };
-        let editor, isEditing = false, isDockOpen = false;
-        let files = { 'index.html': `<html><body style="background:#f0f0f2;display:flex;justify-content:center;align-items:center;height:100vh;"><h1>iOS Media Pro</h1></body></html>` };
-        let mediaOrder = [];
-        let audioElements = {};
+        let editor, isEditing = false, isDockOpen = false, isFull = false;
+        let content = `<!DOCTYPE html><html><body style="background:#f0f0f2;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;"><h1>iOS Pro System</h1></body></html>`;
+        let mediaOrder = [], audioElements = {};
 
         const rawTextArea = document.getElementById('raw-editor');
         const previewSec = document.getElementById('preview-section');
-        const editorSec = document.getElementById('editor-section');
 
-        // --- Monaco Initialization ---
+        // --- 同期 ---
+        function syncFromInput() { content = rawTextArea.value; if(editor) editor.setValue(content); updatePreview(); }
+        function syncFromMonaco() { content = editor.getValue(); rawTextArea.value = content; updatePreview(); }
+        function updatePreview() {
+            const d = document.getElementById('output-frame').contentDocument;
+            d.open(); d.write(content); d.close();
+        }
+
+        // --- Monaco ---
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
         require(['vs/editor/editor.main'], function() {
             editor = monaco.editor.create(document.getElementById('monaco-body'), {
-                value: files['index.html'], language: 'html', theme: 'vs-dark', automaticLayout: true
+                value: content, language: 'html', theme: 'vs-dark', fontSize: 16, automaticLayout: true
             });
-            editor.onDidChangeModelContent(() => {
-                files['index.html'] = editor.getValue();
-                rawTextArea.value = files['index.html'];
-                updatePreview();
-            });
-            rawTextArea.value = files['index.html'];
+            editor.onDidChangeModelContent(syncFromMonaco);
+            rawTextArea.value = content;
             updatePreview();
         });
 
-        function updatePreview() {
-            const d = document.getElementById('output-frame').contentDocument;
-            d.open(); d.write(files['index.html']); d.close();
-        }
-
-        // --- Gesture Logic (Pinch to Zoom) ---
+        // --- iOS ジェスチャ (Pinch) ---
         let initialDist = 0;
-        let currentScale = 1;
-
-        function handlePinch(e, targetType) {
+        window.addEventListener('touchmove', (e) => {
             if (e.touches.length === 2) {
                 let dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                if (initialDist === 0) {
-                    initialDist = dist;
-                } else {
-                    let diff = dist / initialDist;
-                    if (targetType === 'preview') {
-                        currentScale = Math.min(Math.max(0.5, diff), 2);
-                        previewSec.style.transform = `scale(${0.97 * currentScale})`;
-                    } else if (targetType === 'editor' && diff > 1.3) {
-                        toggleUI('monaco-container', true);
-                    }
-                }
+                if (initialDist === 0) { initialDist = dist; return; }
+                let ratio = dist / initialDist;
+                if (e.target.closest('#preview-section') && ratio > 1.2 && !isFull) toggleFullscreen();
+                if (e.target.closest('#editor-section') && ratio > 1.3) toggleUI('monaco-container', true);
+                if (e.target.closest('#monaco-container') && ratio < 0.7) toggleUI('monaco-container', false);
             }
+        }, { passive: false });
+        window.addEventListener('touchend', () => initialDist = 0);
+
+        // --- UI 操作 ---
+        function handleGlobalTap(e) {
+            // ダウンロードバー表示中に画面外をタップで閉じる
+            const saveBar = document.getElementById('save-bar');
+            if (saveBar.classList.contains('active')) {
+                toggleUI('save-bar', false);
+            }
+            exitEditingMode();
+            if(isDockOpen) toggleDock();
         }
 
-        previewSec.ontouchmove = (e) => handlePinch(e, 'preview');
-        editorSec.ontouchmove = (e) => handlePinch(e, 'editor');
-        window.ontouchend = () => { initialDist = 0; };
-
-        // --- Dock & Media ---
         function toggleDock() {
             isDockOpen = !isDockOpen;
             const list = document.getElementById('file-list');
@@ -236,55 +243,44 @@
             if(!f) return;
             const r = new FileReader();
             r.onload = (ev) => {
-                files[f.name] = ev.target.result;
-                if(!mediaOrder.includes(f.name)) mediaOrder.push(f.name);
-                renderDock();
+                const data = ev.target.result;
+                if(!mediaOrder.includes(f.name)) {
+                    mediaOrder.push(f.name);
+                    renderMediaItem(f.name, data, f.type);
+                }
                 haptic();
             };
             r.readAsDataURL(f);
         }
 
-        function renderDock() {
+        function renderMediaItem(name, data, type) {
             const items = document.getElementById('media-items');
-            items.innerHTML = '';
-            mediaOrder.forEach(name => {
-                const div = document.createElement('div');
-                div.className = 'dock-item';
-                
-                if(/\.(jpg|jpeg|png|gif|webp)$/i.test(name)) {
-                    div.innerHTML = `<img src="${files[name]}">`;
-                } else if(/\.(mp3|wav|aiff)$/i.test(name)) {
-                    const isPlaying = audioElements[name] && !audioElements[name].paused;
-                    div.innerHTML = isPlaying ? '||' : '🎵';
-                } else {
-                    div.innerHTML = '🎬';
-                }
+            const div = document.createElement('div');
+            div.className = 'dock-item';
+            div.id = `media-${name}`;
+            
+            if(type.startsWith('image')) div.innerHTML = `<img src="${data}">`;
+            else if(type.startsWith('audio')) div.innerHTML = `🎵`;
+            else div.innerHTML = `🎬`;
 
-                const badge = document.createElement('div');
-                badge.className = 'delete-badge';
-                badge.innerHTML = '－';
-                badge.onclick = (e) => { e.stopPropagation(); deleteMedia(name); };
-                div.appendChild(badge);
+            const badge = document.createElement('div');
+            badge.className = 'delete-badge';
+            badge.innerHTML = '－';
+            badge.onclick = (e) => { e.stopPropagation(); deleteMedia(name); };
+            div.appendChild(badge);
 
-                let timer;
-                div.ontouchstart = () => { timer = setTimeout(() => { isEditing = true; document.getElementById('dock-wrapper').classList.add('editing'); haptic(true); }, 600); };
-                div.ontouchend = () => clearTimeout(timer);
-
-                div.onclick = () => isEditing ? null : (/\.(mp3|wav|aiff)$/i.test(name) ? toggleAudio(name) : openViewer(name));
-                items.appendChild(div);
-            });
+            let timer;
+            div.ontouchstart = () => timer = setTimeout(() => { isEditing = true; document.getElementById('dock-wrapper').classList.add('editing'); haptic(true); }, 600);
+            div.ontouchend = () => clearTimeout(timer);
+            div.onclick = () => isEditing ? null : (type.startsWith('audio') ? toggleAudio(name, data) : openViewer(name, data, type));
+            
+            items.appendChild(div);
         }
 
         function deleteMedia(name) {
             mediaOrder = mediaOrder.filter(n => n !== name);
-            delete files[name];
-            renderDock();
+            document.getElementById(`media-${name}`).remove();
             haptic(true);
-        }
-
-        function closeAllModes() {
-            exitEditingMode();
-            if(isDockOpen) toggleDock();
         }
 
         function exitEditingMode() {
@@ -292,26 +288,10 @@
             document.getElementById('dock-wrapper').classList.remove('editing');
         }
 
-        function openViewer(name) {
-            const v = document.getElementById('media-viewer');
-            const content = document.getElementById('viewer-content');
-            content.innerHTML = /\.(mp4|mov)$/i.test(name) ? `<video src="${files[name]}" controls autoplay></video>` : `<img src="${files[name]}">`;
-            v.style.display = 'flex';
-            setTimeout(() => v.classList.add('active'), 10);
-            haptic();
-        }
-
-        function closeViewer() {
-            const v = document.getElementById('media-viewer');
-            v.classList.remove('active');
-            setTimeout(() => v.style.display = 'none', 500);
-        }
-
-        function toggleAudio(name) {
-            if(!audioElements[name]) audioElements[name] = new Audio(files[name]);
-            const a = audioElements[name];
-            a.paused ? a.play() : a.pause();
-            renderDock();
+        function toggleFullscreen() {
+            isFull = !isFull;
+            previewSec.classList.toggle('fullscreen');
+            toggleUI('main-menu', !isFull);
             haptic();
         }
 
@@ -322,27 +302,5 @@
                 setTimeout(() => target.classList.add('active'), 10);
             } else {
                 target.classList.remove('active');
-                setTimeout(() => target.style.display = 'none', 500);
-            }
-            haptic();
-        }
-
-        function toggleFullscreen() {
-            previewSec.classList.toggle('fullscreen');
-            haptic();
-        }
-
-        function downloadFile() {
-            const blob = new Blob([rawTextArea.value], { type: 'text/html' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = document.getElementById('filename-input').value;
-            a.click();
-            toggleUI('save-bar', false);
-        }
-
-        // 標準の拡大縮小を完全にブロック
-        document.addEventListener('gesturestart', (e) => e.preventDefault());
-    </script>
-</body>
-</html>
+                setTimeout(() => {
+                    target.style.display = 'none';
