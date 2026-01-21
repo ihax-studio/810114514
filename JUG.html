@@ -8,16 +8,22 @@
     <style>
         :root { --ios-ease: cubic-bezier(0.23, 1, 0.32, 1); }
         * { touch-action: none; -webkit-user-select: none; box-sizing: border-box; font-family: -apple-system, "SF Pro Display", sans-serif; font-weight: 1 !important; }
-        body, html { margin: 0; padding: 0; height: 100dvh; width: 100vw; background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* iOS スワイプ戻り防止 */
+        body, html { 
+            margin: 0; padding: 0; height: 100dvh; width: 100vw; 
+            background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column;
+            overscroll-behavior-x: none; /* 標準のワイプ戻りを抑制 */
+        }
 
         .container-box { width: calc(100% - 20px); margin: 8px auto; border-radius: 18px; background: #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
-        
         #preview-section { flex: 1.2; transition: 0.5s var(--ios-ease); z-index: 10; }
         #preview-section.fullscreen { position: fixed; inset: 0; margin: 0; width: 100%; height: 100%; border-radius: 0; z-index: 8000; }
+        
+        /* iframeの設定: CDNを使えるように sandboxを調整 */
         #output-frame { width: 100%; height: 100%; border: none; background: #fff; pointer-events: auto; }
         
         #expand-toggle-btn { position: absolute; bottom: 15px; right: 15px; width: 44px; height: 44px; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 8010; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-
         #editor-section { flex: 0.8; display: flex; margin-bottom: 85px; }
         #raw-editor { flex: 1; border: none; padding: 15px; outline: none; font-family: "SF Mono", monospace; background: #fff; -webkit-user-select: text; font-size: 13px; resize: none; touch-action: pan-y; }
 
@@ -33,7 +39,6 @@
         .folder-icon.show { transform: translateY(0); opacity: 1; }
         .folder-icon.wait { transform: translateY(40px); opacity: 0; }
 
-        /* Overlays */
         #media-overlay { position: fixed; inset: 0; backdrop-filter: blur(45px); background: rgba(255,255,255,0.2); z-index: 9000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.4s var(--ios-ease); }
         #media-overlay.active { display: flex; opacity: 1; }
         #expanded-media { max-width: 90%; max-height: 75%; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); transform: scale(0.85); transition: 0.4s var(--ios-ease); }
@@ -43,8 +48,6 @@
         .overlay-btn-left { position: absolute; top: 60px; left: 30px; font-size: 32px; color: #000; z-index: 9100; }
         .overlay-btn-right { position: absolute; top: 60px; right: 30px; font-size: 32px; color: #000; z-index: 9100; }
         
-        #delete-media-btn { width: 44px; height: 44px; background: rgba(255,255,255,0.4); backdrop-filter: blur(15px); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-
         #save-input-bar { position: fixed; bottom: 25px; left: 15px; width: min(280px, 60vw); height: 50px; background: white; border-radius: 25px; z-index: 4500; display: flex; align-items: center; padding: 0 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); opacity: 0; pointer-events: none; transform: translateY(20px) scale(0.9); transition: 0.4s var(--ios-ease); }
         #save-input-bar.active { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
 
@@ -61,7 +64,7 @@
 
     <div id="preview-section" class="container-box">
         <div id="expand-toggle-btn" onclick="toggleFullscreen(event)">→</div>
-        <iframe id="output-frame"></iframe>
+        <iframe id="output-frame" sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"></iframe>
     </div>
 
     <div id="editor-section" class="container-box">
@@ -101,8 +104,8 @@
         <div class="overlay-btn-right" onclick="downloadHtml(event)">↓</div> 
         <img id="expanded-media" onclick="handleImageClick(event)">
         <div style="position:absolute; bottom:60px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:20px;" onclick="event.stopPropagation()">
-            <div id="delete-media-btn" onclick="deleteCurrentMedia(event)">✕</div>
-            <div id="media-filename" style="background:rgba(255,255,255,0.7); backdrop-filter:blur(15px); padding:12px 24px; border-radius:25px;" onclick="renameMedia(event)">file.png</div>
+            <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.4); backdrop-filter: blur(15px); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;" onclick="deleteCurrentMedia(event)">✕</div>
+            <div style="background:rgba(255,255,255,0.7); backdrop-filter:blur(15px); padding:12px 24px; border-radius:25px; font-weight:500;" onclick="renameMedia(event)" id="media-filename">file.png</div>
         </div>
     </div>
 
@@ -117,12 +120,17 @@
         const previewSection = document.getElementById('preview-section');
         const saveBar = document.getElementById('save-input-bar');
 
-        // iOS標準ズーム防止
+        // iOS標準ズーム & ワイプ戻り防止
         document.addEventListener('touchstart', (e) => {
+            // マルチタッチ(ズーム)防止
             if (e.touches.length > 1) e.preventDefault();
+            // 画面端(20px)からのスワイプ戻り防止
+            if (e.touches[0].pageX < 20 || e.touches[0].pageX > window.innerWidth - 20) {
+                e.preventDefault();
+            }
         }, { passive: false });
 
-        // ピンチアウト検知
+        // ピンチアウト検知でMonaco起動
         let startDist = 0;
         raw.addEventListener('touchstart', e => {
             if (e.touches.length === 2) {
@@ -132,7 +140,7 @@
         raw.addEventListener('touchmove', e => {
             if (e.touches.length === 2 && startDist > 0) {
                 let dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                if (dist > startDist + 50) { 
+                if (dist > startDist + 60) { 
                     toggleUI('monaco-container', true);
                     startDist = 0;
                 }
@@ -144,7 +152,10 @@
             const val = (src === 'input') ? raw.value : editor.getValue();
             raw.value = val;
             if(editor && src !== 'monaco') editor.setValue(val);
-            document.getElementById('output-frame').srcdoc = val;
+            
+            // iframeにHTMLを流し込む。CDNスクリプトを即座に有効化
+            const frame = document.getElementById('output-frame');
+            frame.srcdoc = val;
             isSyncing = false;
         };
 
@@ -177,20 +188,12 @@
 
         window.openMedia = (imgEl, parentDiv) => { 
             currentTargetItem = { img: imgEl, div: parentDiv };
-            const o = document.getElementById('media-overlay'); 
             document.getElementById('expanded-media').src = imgEl.src;
             document.getElementById('media-filename').innerText = imgEl.dataset.name; 
+            const o = document.getElementById('media-overlay'); 
             o.style.display = 'flex'; 
             setTimeout(() => o.classList.add('active'), 10); 
             haptic.confirm(); 
-        };
-
-        window.handleImageClick = (e) => {
-            e.stopPropagation();
-            const now = Date.now();
-            if (now - lastTap < 300) { e.target.classList.toggle('zoomed'); haptic.confirm(); }
-            else if(e.target.classList.contains('zoomed')) { e.target.classList.remove('zoomed'); }
-            lastTap = now;
         };
 
         window.closeMedia = (e) => { 
@@ -211,24 +214,24 @@
 
         window.renameMedia = (e) => {
             e.stopPropagation();
+            haptic.error(); // 名前変更時も追加
             const name = prompt("Rename:", currentTargetItem.img.dataset.name);
-            if(name) { currentTargetItem.img.dataset.name = name; document.getElementById('media-filename').innerText = name; }
+            if(name) { 
+                currentTargetItem.img.dataset.name = name; 
+                document.getElementById('media-filename').innerText = name; 
+            }
         };
 
         window.toggleDock = (e) => { 
             e.stopPropagation(); 
             isDockOpen = !isDockOpen; 
             document.getElementById('file-list').classList.toggle('open', isDockOpen); 
-            
             const iClose = document.getElementById('icon-close');
             const iOpen = document.getElementById('icon-open');
-            
             if(isDockOpen) {
-                iClose.className = 'folder-icon hide';
-                iOpen.className = 'folder-icon show';
+                iClose.className = 'folder-icon hide'; iOpen.className = 'folder-icon show';
             } else {
-                iClose.className = 'folder-icon show';
-                iOpen.className = 'folder-icon wait';
+                iClose.className = 'folder-icon show'; iOpen.className = 'folder-icon wait';
             }
             haptic(); 
         };
@@ -243,11 +246,11 @@
         window.toggleUI = (id, show) => { 
             const t = document.getElementById(id); 
             if(show){ 
-                haptic.error(); // 📝ボタンはerror(3回)
+                haptic.error();
                 t.style.display='flex'; 
                 setTimeout(()=>t.classList.add('active'),10); 
             } else { 
-                haptic(); // ←ボタンはシングル
+                haptic();
                 t.classList.remove('active'); 
                 setTimeout(()=>t.style.display='none',400); 
             } 
@@ -258,7 +261,7 @@
         
         window.downloadHtml = (e) => { 
             e.stopPropagation(); 
-            haptic.error(); // ↓ボタンはerror(3回)
+            haptic.error();
             const blob = new Blob([raw.value], {type:'text/html'});
             const a = document.createElement('a'); 
             a.href = URL.createObjectURL(blob); 
