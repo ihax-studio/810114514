@@ -8,7 +8,7 @@
     <style>
         :root { --ios-ease: cubic-bezier(0.2, 1, 0.3, 1); }
 
-        /* 全要素のフォントウェイトを1に強制 */
+        /* 全要素フォントウェイト1固定 */
         * { 
             touch-action: none; 
             -webkit-user-select: none; 
@@ -20,31 +20,42 @@
 
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* プレビューとエディタの共通マージン設定 */
+        /* 共通コンテナスタイル (プレビューとエディタの幅・マージン統一) */
         .container-box {
-            margin: 10px 15px; /* 左右のマージンを15pxで統一 */
+            margin: 10px 15px;
             border-radius: 20px;
             background: #fff;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             overflow: hidden;
+            position: relative;
         }
 
         /* プレビューエリア */
         #preview-section { 
-            flex: 1; position: relative; transition: 0.6s var(--ios-ease); z-index: 10; 
+            flex: 1; transition: 0.6s var(--ios-ease); z-index: 10; 
         }
-        #preview-section.fullscreen { position: fixed; inset: 0; margin: 0; border-radius: 0; z-index: 8000; }
+        /* 全画面化時のスタイル */
+        #preview-section.fullscreen { 
+            position: fixed; inset: 0; margin: 0; border-radius: 0; z-index: 8000; 
+        }
         #output-frame { width: 100%; height: 100%; border: none; }
         
-        /* 拡大切替ボタン：右下に配置 */
+        /* 拡大/縮小ボタン */
         #expand-toggle-btn { 
-            position: absolute; right: 20px; bottom: 20px; width: 44px; height: 44px;
+            position: absolute; bottom: 20px; width: 44px; height: 44px;
             background: rgba(255,255,255,0.6); backdrop-filter: blur(10px);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
             font-size: 28px; color: #000; z-index: 8010; cursor: pointer;
+            transition: 0.4s var(--ios-ease);
+            /* 通常時は右下 */
+            right: 20px; left: auto;
+        }
+        /* 全画面時は左下に移動 */
+        #preview-section.fullscreen #expand-toggle-btn {
+            right: auto; left: 20px;
         }
 
-        /* エディタエリア：プレビューと同じ幅に設定 */
+        /* エディタエリア */
         #editor-section { flex: 0.8; display: flex; margin-bottom: 20px; }
         #raw-editor { 
             flex: 1; border: none; padding: 20px; outline: none; 
@@ -72,14 +83,14 @@
 
         /* 画像オーバーレイUI */
         .media-ui-btn { position: absolute; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; color: #000; font-size: 40px; z-index: 9010; cursor: pointer; }
-        #media-close { top: 30px; left: 20px; } /* ← を左側に配置 */
-        #media-download { top: 30px; right: 20px; } /* ↓ を右側に配置 */
+        #media-close { top: 30px; left: 20px; } /* 左：戻る */
+        #media-download { top: 30px; right: 20px; } /* 右：保存 */
         #media-filename { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); color: #000; font-size: 16px; border-bottom: 0.5px solid #000; padding: 2px 10px; z-index: 9010; }
 
         /* Monaco */
         #monaco-container { position: fixed; inset: 0; background: #fff; z-index: 5000; display: none; opacity: 0; transform: scale(0.95); transition: 0.5s var(--ios-ease); flex-direction: column; }
         #monaco-container.active { display: flex; opacity: 1; transform: scale(1); }
-        #monaco-close-btn { font-size: 40px; color: #000; cursor: pointer; padding: 20px 30px; align-self: flex-start; } /* ← を左側に配置 */
+        #monaco-close-btn { font-size: 40px; color: #000; cursor: pointer; padding: 20px 30px; align-self: flex-start; }
 
         /* Dock */
         #dock-area { position: fixed; bottom: 30px; right: 20px; display: flex; align-items: center; z-index: 4000; }
@@ -88,9 +99,17 @@
         #file-list.open { width: auto; opacity: 1; margin-right: 8px; }
 
         .icon-btn { width: 55px; height: 55px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-        .dock-item { width: 44px; height: 44px; background: #fff; border-radius: 12px; position: relative; flex-shrink: 0; overflow: hidden; transition: 0.4s var(--ios-ease); }
+        
+        /* Dock アイテム */
+        .dock-item { 
+            width: 44px; height: 44px; background: #fff; border-radius: 12px; position: relative; 
+            flex-shrink: 0; overflow: hidden; transition: 0.4s var(--ios-ease); 
+        }
         .dock-item img { width: 100%; height: 100%; object-fit: cover; }
         
+        /* 削除アニメーション用クラス */
+        .dock-item.removing { transform: scale(0); width: 0; margin: 0; opacity: 0; }
+
         /* 削除ボタン「－」 */
         .del-trigger { 
             position: absolute; inset: 0; background: #ff3b30; color: white; 
@@ -98,7 +117,6 @@
             transform: translateY(100%); transition: 0.3s var(--ios-ease); font-size: 30px; 
         }
         .swiped .del-trigger { transform: translateY(0); }
-        .removing { transform: scale(0); opacity: 0; }
     </style>
 </head>
 <body onclick="globalTap()">
@@ -159,8 +177,10 @@
         const saveBar = document.getElementById('save-input-bar');
         const expandBtn = document.getElementById('expand-toggle-btn');
 
+        // 標準ピンチズーム無効化
         window.addEventListener('gesturestart', e => e.preventDefault(), {passive: false});
 
+        // Escキー対応
         window.addEventListener('keydown', e => {
             if(e.key === "Escape") {
                 if(preview.classList.contains('fullscreen')) toggleFullscreen();
@@ -169,6 +189,7 @@
             }
         });
 
+        // 二本指タップ (プレビュー拡大)
         let touchStartTime = 0;
         preview.addEventListener('touchstart', e => { if(e.touches.length === 2) touchStartTime = Date.now(); }, {passive: false});
         preview.addEventListener('touchend', e => {
@@ -178,6 +199,7 @@
             }
         });
 
+        // ピンチ操作 (Monaco起動)
         window.addEventListener('touchmove', e => {
             if (e.touches.length === 2) {
                 let d = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
@@ -189,6 +211,7 @@
         }, { passive: false });
         window.addEventListener('touchend', () => initDist = 0);
 
+        // エディタ同期
         window.sync = (src) => {
             if(isSyncing) return; isSyncing = true;
             html = (src === 'input') ? raw.value : editor.getValue();
@@ -199,6 +222,7 @@
             isSyncing = false;
         };
 
+        // Monaco初期化
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
         require(['vs/editor/editor.main'], () => {
             editor = monaco.editor.create(document.getElementById('monaco-body'), { 
@@ -208,6 +232,7 @@
             sync('monaco');
         });
 
+        // グローバルタップ
         window.globalTap = () => {
             haptic();
             saveBar.classList.remove('active');
@@ -217,10 +242,12 @@
 
         window.openSave = (e) => { e.stopPropagation(); haptic.confirm(); saveBar.style.display = 'flex'; setTimeout(() => saveBar.classList.add('active'), 10); };
         
+        // 全画面切替
         window.toggleFullscreen = (e) => { 
             if(e) e.stopPropagation(); 
             haptic.confirm(); 
             preview.classList.toggle('fullscreen');
+            // 全画面時: 左下に移動するためテキストを←に変更
             expandBtn.innerText = preview.classList.contains('fullscreen') ? "←" : "→";
         };
 
@@ -239,6 +266,7 @@
             a.click(); saveBar.classList.remove('active');
         };
 
+        // ファイル追加と削除ロジック
         window.handleFile = (e) => {
             const f = e.target.files[0]; if(!f) return;
             const r = new FileReader();
@@ -255,10 +283,12 @@
                     else if(diffY < -30) div.classList.remove('swiped');
                     else if(!div.classList.contains('swiped')) openMedia(ev.target.result, div.dataset.name);
                 };
+                // －ボタンクリック時の削除アニメーション
                 div.querySelector('.del-trigger').onclick = (ex) => {
                     ex.stopPropagation(); haptic.notification('warning');
+                    // アイコンごと縮小して消滅させるクラスを追加
                     div.classList.add('removing');
-                    setTimeout(() => div.remove(), 400);
+                    setTimeout(() => div.remove(), 400); // アニメーション後にDOM削除
                 };
                 document.getElementById('media-items').appendChild(div);
             };
