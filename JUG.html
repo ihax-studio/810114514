@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS Ultimate Debug</title>
+    <title>iOS Ultimate Debug Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <style>
         :root { --ios-ease: cubic-bezier(0.2, 1, 0.3, 1); }
 
-        /* 徹底したiOSブロック & SF Font */
+        /* iOSブロック & SF Font */
         * { 
             touch-action: none; 
             -webkit-user-select: none; 
             overscroll-behavior: none; 
             -webkit-tap-highlight-color: transparent; 
             font-family: -apple-system, "SF Pro Display", "SF Compact", sans-serif; 
-            font-weight: 100 !important; 
+            font-weight: 200 !important; 
         }
 
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column; }
@@ -28,15 +28,13 @@
         #preview-section.fullscreen { position: fixed; inset: 0; transform: scale(1); border-radius: 0; margin: 0; z-index: 8000; }
         #output-frame { width: 100%; height: 100%; border: none; }
         
-        /* 拡大ボタン (SF Pro Symbol風) */
-        #expand-btn { position: absolute; bottom: 20px; right: 20px; font-size: 24px; color: #000; z-index: 11; opacity: 0.5; cursor: pointer; }
-        
-        /* 左下のバツボタン (SF Pro) */
-        #close-preview-btn { 
-            position: absolute; bottom: 40px; left: 30px; font-size: 30px; 
-            color: #000; z-index: 8005; display: none; 
+        /* 拡大・閉じるボタン (左下) */
+        #expand-toggle-btn { 
+            position: absolute; bottom: 20px; left: 20px; width: 44px; height: 44px;
+            background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: #000; z-index: 8010; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        #preview-section.fullscreen #close-preview-btn { display: block; }
 
         /* エディタ */
         #editor-section { flex: 0.8; display: flex; padding: 0 15px 15px 15px; }
@@ -49,20 +47,26 @@
         /* 保存バー */
         #save-input-bar { 
             position: fixed; bottom: 30px; left: 20px; width: 240px; height: 55px;
-            background: rgba(255,255,255,0.8); backdrop-filter: blur(30px); border-radius: 28px;
+            background: rgba(255,255,255,0.9); backdrop-filter: blur(30px); border-radius: 28px;
             display: none; opacity: 0; transform: scale(0.8); transition: 0.4s var(--ios-ease); z-index: 4500;
             align-items: center; padding: 0 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         }
         #save-input-bar.active { display: flex; opacity: 1; transform: scale(1); }
         #save-input-bar input { flex: 1; border: none; outline: none; font-size: 17px; background: transparent; -webkit-user-select: text; font-weight: 300 !important; }
-        .sf-arrow-right { font-size: 24px; color: #007aff; }
+        .sf-arrow-right { font-size: 28px; color: #007aff; cursor: pointer; font-weight: bold !important; }
 
-        /* メディア拡大 */
+        /* メディア拡大オーバーレイ */
         #media-overlay { position: fixed; inset: 0; backdrop-filter: blur(40px); z-index: 9000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.4s; }
         #media-overlay.active { display: flex; opacity: 1; }
         #expanded-media { max-width: 90%; max-height: 70%; transform: scale(0.8); transition: 0.5s var(--ios-ease); border-radius: 8px; }
         #media-overlay.active #expanded-media { transform: scale(1); }
         #expanded-media.zoomed { transform: scale(1.8) !important; }
+
+        /* 画像オーバーレイ内ボタン */
+        .media-btn { position: absolute; width: 44px; height: 44px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; z-index: 9001; }
+        #media-close { top: 40px; right: 30px; }
+        #media-download { top: 40px; left: 30px; }
+        #media-filename { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.8); font-size: 14px; font-weight: 200 !important; border-bottom: 1px solid rgba(255,255,255,0.3); padding: 5px 10px; }
 
         /* Monaco */
         #monaco-container { position: fixed; inset: 0; background: #fff; z-index: 5000; display: none; opacity: 0; transform: scale(0.95); transition: 0.5s var(--ios-ease); flex-direction: column; }
@@ -74,9 +78,7 @@
         #file-list { display: flex; gap: 5px; width: 0; opacity: 0; overflow: hidden; transition: 0.5s var(--ios-ease); }
         #file-list.open { width: auto; opacity: 1; margin-right: 8px; }
 
-        .icon-btn { width: 55px; height: 55px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-        
-        /* スワイプ削除トリガーの復活 */
+        .icon-btn { width: 55px; height: 55px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .dock-item { width: 44px; height: 44px; background: #fff; border-radius: 12px; position: relative; flex-shrink: 0; overflow: hidden; transition: 0.4s var(--ios-ease); }
         .dock-item img { width: 100%; height: 100%; object-fit: cover; }
         .del-trigger { position: absolute; inset: 0; background: #ff3b30; color: white; display: flex; align-items: center; justify-content: center; transform: translateY(100%); transition: 0.3s var(--ios-ease); font-size: 20px; }
@@ -87,13 +89,12 @@
 <body onclick="globalTap()">
 
     <div id="preview-section">
-        <div id="close-preview-btn" onclick="toggleFullscreen(event)">✕</div>
+        <div id="expand-toggle-btn" onclick="toggleFullscreen(event)">⤢</div>
         <iframe id="output-frame"></iframe>
-        <div id="expand-btn" onclick="toggleFullscreen(event)">􀄵</div>
     </div>
 
     <div id="editor-section">
-        <textarea id="raw-editor" oninput="sync('input')"></textarea>
+        <textarea id="raw-editor" oninput="sync('input')" placeholder="Input HTML here..."></textarea>
     </div>
 
     <div style="position:fixed; bottom:30px; left:20px; display:flex; gap:15px; z-index:4000;">
@@ -105,7 +106,7 @@
         <div id="dock-wrapper" onclick="event.stopPropagation()">
             <div id="file-list">
                 <div class="dock-item" onclick="document.getElementById('file-input').click()" style="display:flex; align-items:center; justify-content:center; font-size:20px; background:rgba(0,0,0,0.03);">＋</div>
-                <div id="media-items"></div>
+                <div id="media-items" style="display:flex; gap:5px;"></div>
             </div>
             <div onclick="toggleDock(event)" id="folder-btn" style="font-size:24px; padding:0 10px;">📁</div>
         </div>
@@ -113,7 +114,7 @@
 
     <div id="save-input-bar" onclick="event.stopPropagation()">
         <input type="text" id="fn" value="index.html" spellcheck="false">
-        <div class="sf-arrow-right" onclick="downloadHtml(event)">􀄫</div>
+        <div class="sf-arrow-right" onclick="downloadHtml(event)">→</div>
     </div>
 
     <div id="monaco-container">
@@ -124,8 +125,10 @@
     </div>
 
     <div id="media-overlay" onclick="closeMedia()">
-        <div style="position:absolute; top:15%; width:100%; text-align:center; color:#888; font-size:14px;">タップで閉じると出る</div>
+        <div id="media-close" class="media-btn">✕</div>
+        <div id="media-download" class="media-btn" onclick="downloadMedia(event)">↓</div>
         <img id="expanded-media" onclick="event.stopPropagation(); toggleZoom(this)" src="">
+        <div id="media-filename" onclick="event.stopPropagation(); editMediaName(event)">image.png</div>
     </div>
 
     <input type="file" id="file-input" hidden onchange="handleFile(event)">
@@ -136,38 +139,52 @@
 
         let editor, isSyncing = false, isDockOpen = false, initDist = 0;
         let html = `<!DOCTYPE html><html><body style="margin:0; background:#fff; height:100vh; display:flex; justify-content:center; align-items:center;"><h1>System Ready</h1></body></html>`;
-        
+        let currentMediaSrc = "";
+
         const raw = document.getElementById('raw-editor');
         const preview = document.getElementById('preview-section');
         const saveBar = document.getElementById('save-input-bar');
+        const expandBtn = document.getElementById('expand-toggle-btn');
 
-        // 二本指ジェスチャ（拡大縮小・ピンチクローズ）
+        // 二本指ジェスチャ
         window.addEventListener('touchmove', e => {
             if (e.touches.length === 2) {
                 e.preventDefault();
                 let d = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                 if (initDist === 0) { initDist = d; return; }
                 let r = d / initDist;
-                // ピンチアウトで拡大
-                if (e.target.closest('#preview-section') && !preview.classList.contains('fullscreen') && r > 1.3) { toggleFullscreen(); initDist = d; }
-                // ピンチインで縮小
-                if (preview.classList.contains('fullscreen') && r < 0.7) { toggleFullscreen(); initDist = d; }
+
+                // プレビューのピンチ操作
+                if (e.target.closest('#preview-section')) {
+                    if (!preview.classList.contains('fullscreen') && r > 1.4) { toggleFullscreen(); initDist = d; }
+                    if (preview.classList.contains('fullscreen') && r < 0.7) { toggleFullscreen(); initDist = d; }
+                }
+                // エディタ(raw)上でのピンチアウトでMonaco起動
+                if (e.target.closest('#raw-editor') && r > 1.4) {
+                    toggleUI('monaco-container', true);
+                    initDist = d;
+                }
                 // Monacoピンチクローズ
-                if (document.getElementById('monaco-container').classList.contains('active') && r < 0.7) { monacoClose(); initDist = d; }
+                if (document.getElementById('monaco-container').classList.contains('active') && r < 0.7) {
+                    monacoClose();
+                    initDist = d;
+                }
             }
         }, { passive: false });
         window.addEventListener('touchend', () => initDist = 0);
 
+        // 同期処理
         window.sync = (src) => {
             if(isSyncing) return; isSyncing = true;
             html = (src === 'input') ? raw.value : editor.getValue();
             raw.value = html;
             if(editor && src !== 'monaco') editor.setValue(html);
             const d = preview.querySelector('iframe').contentDocument;
-            d.open(); d.write(html); d.close();
+            if(d) { d.open(); d.write(html); d.close(); }
             isSyncing = false;
         };
 
+        // Monaco初期化
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
         require(['vs/editor/editor.main'], () => {
             editor = monaco.editor.create(document.getElementById('monaco-body'), { 
@@ -185,7 +202,13 @@
         };
 
         window.openSave = (e) => { e.stopPropagation(); haptic.confirm(); saveBar.style.display = 'flex'; setTimeout(() => saveBar.classList.add('active'), 10); };
-        window.toggleFullscreen = (e) => { if(e) e.stopPropagation(); haptic.confirm(); preview.classList.toggle('fullscreen'); };
+        
+        window.toggleFullscreen = (e) => { 
+            if(e) e.stopPropagation(); 
+            haptic.confirm(); 
+            preview.classList.toggle('fullscreen');
+            expandBtn.innerText = preview.classList.contains('fullscreen') ? "✕" : "⤢";
+        };
 
         window.toggleDock = (e) => {
             if(e) e.stopPropagation(); haptic.confirm();
@@ -210,16 +233,16 @@
             r.onload = (ev) => {
                 const div = document.createElement('div');
                 div.className = 'dock-item';
+                div.dataset.name = f.name;
                 div.innerHTML = `<img src="${ev.target.result}"><div class="del-trigger">✕</div>`;
                 
                 let sY;
                 div.ontouchstart = (ts) => { sY = ts.touches[0].pageY; ts.stopPropagation(); };
                 div.ontouchend = (te) => {
                     const diffY = sY - te.changedTouches[0].pageY;
-                    // 上スワイプでバツ表示、下スワイプで消す
                     if(diffY > 30) div.classList.add('swiped');
                     else if(diffY < -30) div.classList.remove('swiped');
-                    else if(!div.classList.contains('swiped')) openMedia(ev.target.result);
+                    else if(!div.classList.contains('swiped')) openMedia(ev.target.result, div.dataset.name);
                 };
                 div.querySelector('.del-trigger').onclick = (ex) => {
                     ex.stopPropagation(); haptic.notification('warning');
@@ -231,13 +254,33 @@
             r.readAsDataURL(f);
         };
 
-        window.openMedia = (src) => {
+        window.openMedia = (src, name) => {
             const ov = document.getElementById('media-overlay');
             const img = document.getElementById('expanded-media');
+            const label = document.getElementById('media-filename');
+            currentMediaSrc = src;
             img.src = src; img.classList.remove('zoomed');
+            label.innerText = name || "image.png";
             ov.style.display = 'flex';
             setTimeout(() => ov.classList.add('active'), 10);
             haptic.confirm();
+        };
+
+        window.editMediaName = (e) => {
+            haptic.confirm();
+            let newName = prompt("Enter new filename (no dots allowed):", e.target.innerText.split('.')[0]);
+            if(newName) {
+                newName = newName.replace(/\./g, '');
+                e.target.innerText = newName + ".png";
+            }
+        };
+
+        window.downloadMedia = (e) => {
+            e.stopPropagation(); haptic.confirm();
+            const a = document.createElement('a');
+            a.href = currentMediaSrc;
+            a.download = document.getElementById('media-filename').innerText;
+            a.click();
         };
 
         window.toggleZoom = (el) => { haptic.confirm(); el.classList.toggle('zoomed'); };
