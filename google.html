@@ -3,127 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS Ultimate Debug Pro + Color</title>
+    <title>iOS Ultimate Debug Pro Max</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <style>
         :root { --ios-ease: cubic-bezier(0.23, 1, 0.32, 1); }
-        * { touch-action: none; -webkit-user-select: none; box-sizing: border-box; font-family: -apple-system, "SF Pro Display", sans-serif; font-weight: 1 !important; }
+        * { touch-action: none; -webkit-user-select: none; box-sizing: border-box; font-family: -apple-system, "SF Pro Display", "SF Pro Text", sans-serif; font-weight: 400; }
         
-        /* iOS スワイプ戻り防止 */
         body, html { 
             margin: 0; padding: 0; height: 100dvh; width: 100vw; 
             background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column;
-            overscroll-behavior-x: none;
-            transition: 0.3s;
+            overscroll-behavior-x: none; transition: 0.3s;
         }
 
         /* Focus Blur Effect */
         body.focus-mode > *:not(#editor-section):not(#monaco-container) {
-            filter: blur(3px);
-            opacity: 0.8;
-            transition: 0.3s var(--ios-ease);
-            pointer-events: none;
+            filter: blur(8px); opacity: 0.6; pointer-events: none;
         }
 
-        .container-box { width: calc(100% - 20px); margin: 8px auto; border-radius: 18px; background: #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.05); overflow: hidden; position: relative; transition: 0.3s var(--ios-ease); }
-        #preview-section { flex: 1.2; transition: 0.5s var(--ios-ease); z-index: 10; }
+        .container-box { width: calc(100% - 20px); margin: 8px auto; border-radius: 20px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.04); overflow: hidden; position: relative; transition: 0.5s var(--ios-ease); }
+        #preview-section { flex: 1.2; z-index: 10; }
         #preview-section.fullscreen { position: fixed; inset: 0; margin: 0; width: 100%; height: 100%; border-radius: 0; z-index: 8000; }
         
-        #output-frame { width: 100%; height: 100%; border: none; background: #fff; pointer-events: auto; }
-        
-        /* Buttons with Hover Scale (iPad/PC) */
-        .interactive-btn { 
-            cursor: pointer; 
-            transition: transform 0.2s var(--ios-ease), background 0.2s; 
+        #output-frame { width: 100%; height: 100%; border: none; background: #fff; }
+
+        /* iOS Banner for Errors */
+        #error-banner {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px; background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px); padding: 12px 20px; border-radius: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 9999;
+            display: flex; align-items: center; gap: 12px; transition: 0.6s var(--ios-ease);
         }
-        /* Mouse/Trackpad Hover Only */
+        #error-banner.show { top: 20px; }
+        #error-banner .icon { color: #ff3b30; font-size: 20px; }
+        #error-banner .msg { font-size: 14px; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* Interactive Buttons & Hover */
+        .interactive-btn { cursor: pointer; transition: 0.3s var(--ios-ease); position: relative; }
         @media (hover: hover) {
-            .interactive-btn:hover { transform: scale(1.1); }
-            .dock-item:hover { transform: scale(1.1) translateY(-5px); }
-            #expand-toggle-btn:hover, #inspect-btn:hover { transform: scale(1.1); }
+            .interactive-btn:hover { transform: scale(1.08); background: #f0f0f5; }
+        }
+        .interactive-btn:active { transform: scale(0.92); }
+
+        #editor-section { flex: 0.8; display: flex; margin-bottom: 90px; z-index: 20; }
+        #raw-editor { flex: 1; border: none; padding: 18px; outline: none; font-family: "SF Mono", monospace; background: #fff; -webkit-user-select: text; font-size: 14px; resize: none; }
+
+        /* Save Button with Progress Circle */
+        #save-container { position: relative; width: 55px; height: 55px; }
+        #save-progress {
+            position: absolute; inset: 0; transform: rotate(-90deg);
+            opacity: 0; transition: opacity 0.2s;
+        }
+        #save-progress circle {
+            stroke: #007aff; stroke-width: 3; fill: none;
+            stroke-dasharray: 126; stroke-dashoffset: 126;
+        }
+        #save-container.pressing #save-progress { opacity: 1; }
+        #save-container.pressing #save-progress circle {
+            animation: circle-fill 0.08s linear infinite;
+        }
+        @keyframes circle-fill {
+            from { stroke-dashoffset: 126; }
+            to { stroke-dashoffset: 0; }
         }
 
-        #expand-toggle-btn { position: absolute; bottom: 15px; right: 15px; width: 44px; height: 44px; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 8010; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        /* Pressure Menu */
+        #pressure-menu {
+            position: fixed; background: rgba(255,255,255,0.8); backdrop-filter: blur(25px);
+            border-radius: 20px; padding: 8px; box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            display: none; grid-template-columns: repeat(2, 1fr); gap: 8px; z-index: 10000;
+            transform: scale(0.5); transition: 0.3s var(--ios-ease);
+        }
+        #pressure-menu.active { display: grid; transform: scale(1); }
+        .menu-item {
+            padding: 12px 20px; background: #fff; border-radius: 12px; font-size: 14px;
+            text-align: center; color: #000; font-weight: 500;
+        }
+
+        /* Standard Dock & Monaco (Previous logic kept) */
+        #dock-area { position: fixed; bottom: 25px; right: 15px; z-index: 4000; }
+        #dock-wrapper { display: flex; align-items: center; background: rgba(255,255,255,0.8); backdrop-filter: blur(25px); padding: 8px; border-radius: 32px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+        #file-list { display: flex; gap: 10px; width: 0; opacity: 0; overflow: hidden; transition: 0.4s var(--ios-ease); }
+        #file-list.open { width: auto; opacity: 1; margin-right: 10px; }
         
-        /* Inspect Button */
-        #inspect-btn { position: absolute; bottom: 15px; left: 15px; width: 44px; height: 44px; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; z-index: 8010; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.3s; color: #333; }
-        #inspect-btn.active { background: #007aff; color: white; box-shadow: 0 4px 15px rgba(0,122,255,0.4); }
+        #monaco-container { position: fixed; inset: 0; background: #fff; z-index: 5000; display: none; opacity: 0; transform: translateY(30px); transition: 0.5s var(--ios-ease); flex-direction: column; }
+        #monaco-container.active { display: flex; opacity: 1; transform: translateY(0); }
 
-        #editor-section { flex: 0.8; display: flex; margin-bottom: 85px; z-index: 20; }
-        #raw-editor { flex: 1; border: none; padding: 15px; outline: none; font-family: "SF Mono", monospace; background: #fff; -webkit-user-select: text; font-size: 13px; resize: none; touch-action: pan-y; }
-
-        /* Dock & Folder Animation */
-        #dock-area { position: fixed; bottom: 25px; right: 15px; display: flex; align-items: center; z-index: 4000; }
-        #dock-wrapper { display: flex; align-items: center; background: rgba(255,255,255,0.8); backdrop-filter: blur(25px); padding: 6px; border-radius: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); transition: transform 0.2s; }
-        
-        #file-list { display: flex; gap: 10px; width: 0; opacity: 0; overflow: hidden; transition: 0.4s var(--ios-ease); padding: 0; }
-        #file-list.open { width: auto; opacity: 1; margin-right: 10px; padding: 5px; }
-        
-        .dock-item { transition: 0.3s var(--ios-ease); cursor: pointer; }
-
-        #folder-btn-container { width: 40px; height: 30px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .folder-icon { position: absolute; transition: 0.5s var(--ios-ease); font-size: 24px; }
-        .folder-icon.hide { transform: translateY(-40px); opacity: 0; }
-        .folder-icon.show { transform: translateY(0); opacity: 1; }
-        .folder-icon.wait { transform: translateY(40px); opacity: 0; }
-
-        #media-overlay { position: fixed; inset: 0; backdrop-filter: blur(45px); background: rgba(255,255,255,0.2); z-index: 9000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.4s var(--ios-ease); }
-        #media-overlay.active { display: flex; opacity: 1; }
-        #expanded-media { max-width: 90%; max-height: 75%; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); transform: scale(0.85); transition: 0.4s var(--ios-ease); }
-        #media-overlay.active #expanded-media { transform: scale(1.1); }
-        #expanded-media.zoomed { transform: scale(1.8) !important; }
-
-        .overlay-btn-left { position: absolute; top: 60px; left: 30px; font-size: 32px; color: #000; z-index: 9100; cursor: pointer; }
-        .overlay-btn-right { position: absolute; top: 60px; right: 30px; font-size: 32px; color: #000; z-index: 9100; cursor: pointer; }
-        
-        #save-input-bar { position: fixed; bottom: 25px; left: 15px; width: min(280px, 60vw); height: 50px; background: white; border-radius: 25px; z-index: 4500; display: flex; align-items: center; padding: 0 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); opacity: 0; pointer-events: none; transform: translateY(20px) scale(0.9); transition: 0.4s var(--ios-ease); }
-        #save-input-bar.active { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
-
-        #monaco-container { position: fixed; inset: 0; background: #fff; z-index: 5000; display: none; opacity: 0; transform: scale(1.05); transition: 0.4s var(--ios-ease); flex-direction: column; }
-        #monaco-container.active { display: flex; opacity: 1; transform: scale(1); }
-        #ios-loader { position: fixed; inset: 0; background: rgba(255,255,255,0.6); backdrop-filter: blur(8px); z-index: 9999; display: none; align-items: center; justify-content: center; }
-        .spinner { width: 35px; height: 35px; border: 3px solid rgba(0,0,0,0.05); border-top: 3px solid #007aff; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Color Picker Trigger */
         #color-trigger-btn {
             width: 50px; height: 50px; background: #fff; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             transform: scale(0); opacity: 0; transition: 0.3s var(--ios-ease);
         }
         #color-trigger-btn.visible { transform: scale(1); opacity: 1; }
-        #color-preview-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.1); box-shadow: inset 0 0 4px rgba(0,0,0,0.1); }
+        #color-preview-dot { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #eee; }
     </style>
 </head>
 <body onclick="globalTap()">
 
-    <div id="ios-loader"><div class="spinner"></div></div>
+    <div id="error-banner">
+        <span class="icon">⚠️</span>
+        <span class="msg" id="error-msg">Error detected in preview</span>
+    </div>
+
+    <div id="pressure-menu">
+        <div class="menu-item interactive-btn" onclick="execCmd('undo')">← 戻る</div>
+        <div class="menu-item interactive-btn" onclick="execCmd('redo')">→ 進む</div>
+        <div class="menu-item interactive-btn" onclick="execCmd('selectAll')">全選択</div>
+        <div class="menu-item interactive-btn" onclick="execCmd('replace')">置き換え</div>
+    </div>
 
     <div id="preview-section" class="container-box">
-        <div id="expand-toggle-btn" class="interactive-btn" onclick="toggleFullscreen(event)">→</div>
-        <div id="inspect-btn" class="interactive-btn" onclick="toggleInspect(event)">✒︎</div>
+        <div id="expand-toggle-btn" class="interactive-btn" onclick="toggleFullscreen(event)" style="position:absolute; bottom:15px; right:15px; width:44px; height:44px; background:rgba(255,255,255,0.8); backdrop-filter:blur(10px); border-radius:50%; display:flex; align-items:center; justify-content:center; z-index:8010;">→</div>
+        <div id="inspect-btn" class="interactive-btn" onclick="toggleInspect(event)" style="position:absolute; bottom:15px; left:15px; width:44px; height:44px; background:rgba(255,255,255,0.8); backdrop-filter:blur(10px); border-radius:50%; display:flex; align-items:center; justify-content:center; z-index:8010;">✒︎</div>
         <iframe id="output-frame" sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"></iframe>
     </div>
 
     <div id="editor-section" class="container-box">
-        <textarea id="raw-editor" oninput="sync('input')" placeholder="Pinch out to open Monaco editor..."></textarea>
+        <textarea id="raw-editor" oninput="sync('input')" placeholder="Pinch out to open Monaco..."></textarea>
     </div>
 
     <div style="position:fixed; bottom:25px; left:15px; display:flex; gap:12px; z-index:4000;">
-        <div id="btn-save" class="interactive-btn" style="width:50px; height:50px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">💾</div>
+        <div id="save-container" class="interactive-btn">
+            <svg id="save-progress" viewBox="0 0 44 44">
+                <circle cx="22" cy="22" r="20"></circle>
+            </svg>
+            <div id="btn-save" style="width:100%; height:100%; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">💾</div>
+        </div>
         
-        <div class="interactive-btn" style="width:50px; height:50px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);" onclick="toggleUI('monaco-container', true)">📝</div>
+        <div class="interactive-btn" style="width:55px; height:55px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);" onclick="toggleUI('monaco-container', true)">📝</div>
         
         <div id="color-trigger-btn" class="interactive-btn" onclick="openNativeColorPicker(event)">
             <div id="color-preview-dot"></div>
         </div>
     </div>
 
-    <div id="save-input-bar" onclick="event.stopPropagation()">
-        <input type="text" id="fn" value="index.html" style="border:none; outline:none; flex:1; background:transparent; font-size:16px;">
-        <div class="interactive-btn" style="font-size:26px; color:#007aff; cursor:pointer;" onclick="downloadHtml(event)">→</div>
-    </div>
+    <input type="color" id="native-picker" style="position:fixed; top:-100px; left:-100px; z-index:10000;">
 
     <div id="dock-area">
         <div id="dock-wrapper" onclick="event.stopPropagation()">
@@ -131,416 +146,206 @@
                 <div class="dock-item interactive-btn" onclick="document.getElementById('file-input').click()" style="width:50px;height:50px;background:#e5e5ea;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;">＋</div>
                 <div id="media-items" style="display:flex; gap:10px;"></div>
             </div>
-            <div onclick="toggleDock(event)" id="folder-btn-container" class="interactive-btn">
-                <span id="icon-close" class="folder-icon show">📁</span>
-                <span id="icon-open" class="folder-icon wait">📂</span>
-            </div>
+            <div onclick="toggleDock(event)" id="folder-btn-container" class="interactive-btn" style="width:40px; height:30px; display:flex; align-items:center; justify-content:center;">📁</div>
         </div>
     </div>
 
     <div id="monaco-container">
         <div id="monaco-body" style="flex:1;"></div>
-        <div class="interactive-btn" style="position:absolute; bottom:30px; left:25px; width:55px; height:55px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);" onclick="toggleUI('monaco-container', false)">←</div>
+        <div class="interactive-btn" style="position:absolute; bottom:30px; left:25px; width:60px; height:60px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);" onclick="toggleUI('monaco-container', false)">←</div>
     </div>
-
-    <div id="media-overlay" onclick="closeMedia()">
-        <div class="overlay-btn-left interactive-btn" onclick="closeMedia(event)">←</div>
-        <div class="overlay-btn-right interactive-btn" onclick="downloadHtml(event)">↓</div> 
-        <img id="expanded-media" onclick="handleImageClick(event)">
-        <div style="position:absolute; bottom:60px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:20px;" onclick="event.stopPropagation()">
-            <div class="interactive-btn" style="width: 44px; height: 44px; background: rgba(255,255,255,0.4); backdrop-filter: blur(15px); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;" onclick="deleteCurrentMedia(event)">✕</div>
-            <div class="interactive-btn" style="background:rgba(255,255,255,0.7); backdrop-filter:blur(15px); padding:12px 24px; border-radius:25px; font-weight:500;" onclick="renameMedia(event)" id="media-filename">file.png</div>
-        </div>
-    </div>
-
-    <input type="file" id="file-input" hidden onchange="handleFile(event)" accept="image/*">
-    
-    <input type="color" id="native-picker" style="visibility: hidden; position: absolute; left: -9999px;">
 
     <script type="module">
         import { haptic } from "https://esm.sh/ios-haptics";
         window.haptic = haptic;
 
-        let editor, isSyncing = false, isDockOpen = false, currentTargetItem = null;
-        let isInspectMode = false;
+        let editor, isSyncing = false, isDockOpen = false, isInspectMode = false;
         const raw = document.getElementById('raw-editor');
-        const previewSection = document.getElementById('preview-section');
-        const saveBar = document.getElementById('save-input-bar');
-        const nativePicker = document.getElementById('native-picker');
+        const frame = document.getElementById('output-frame');
         const colorBtn = document.getElementById('color-trigger-btn');
         const colorDot = document.getElementById('color-preview-dot');
-        let currentHexRange = null; // Stores where the hex code is
+        const picker = document.getElementById('native-picker');
+        let currentMatch = null;
 
-        // iOS標準ズーム & ワイプ戻り防止
-        document.addEventListener('touchstart', (e) => {
-            if (e.touches.length > 1) e.preventDefault();
-            if (e.touches[0].pageX < 20 || e.touches[0].pageX > window.innerWidth - 20) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        // Selection Blur Logic & Color Detection
-        document.addEventListener('selectionchange', () => {
-            const sel = document.getSelection();
-            const activeEl = document.activeElement;
-            const isEditorActive = (activeEl === raw || activeEl.closest('.monaco-editor'));
-            
-            // Blur Effect
-            if (isEditorActive && !sel.isCollapsed) {
-                document.body.classList.add('focus-mode');
-            } else {
-                document.body.classList.remove('focus-mode');
-            }
-
-            // Color Detection for Raw Editor
-            if (activeEl === raw) {
-                detectColorAtCursor();
-            }
-        });
-        
-        // Also detect on keyup/click
-        raw.addEventListener('keyup', detectColorAtCursor);
-        raw.addEventListener('click', detectColorAtCursor);
-
-        function detectColorAtCursor() {
+        // -----------------------------------------------------
+        // 1. カラー検知 (Hex & RGB)
+        // -----------------------------------------------------
+        function detectColor() {
             const text = raw.value;
-            const cursorPos = raw.selectionStart;
+            const pos = raw.selectionStart;
             
-            // Find hex string around cursor regex: #[0-9A-Fa-f]{6}
-            // Simple approach: Expand left and right from cursor until non-hex char
-            let start = cursorPos;
-            let end = cursorPos;
+            const hexRegex = /#[0-9A-Fa-f]{6}/g;
+            const rgbRegex = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/g;
             
-            while(start > 0 && /[0-9A-Fa-f#]/.test(text[start-1])) {
-                start--;
+            let match;
+            currentMatch = null;
+
+            while ((match = hexRegex.exec(text)) !== null) {
+                if (pos >= match.index && pos <= match.index + match[0].length) {
+                    currentMatch = { type: 'hex', value: match[0], start: match.index, end: match.index + match[0].length };
+                    break;
+                }
             }
-            while(end < text.length && /[0-9A-Fa-f]/.test(text[end])) {
-                end++;
+            if (!currentMatch) {
+                while ((match = rgbRegex.exec(text)) !== null) {
+                    if (pos >= match.index && pos <= match.index + match[0].length) {
+                        currentMatch = { type: 'rgb', value: match[0], start: match.index, end: match.index + match[0].length };
+                        break;
+                    }
+                }
             }
-            
-            const potentialHex = text.substring(start, end);
-            const hexRegex = /^#[0-9A-Fa-f]{6}$/;
-            
-            if (hexRegex.test(potentialHex)) {
-                // Hex Detected!
-                currentHexRange = { start, end, value: potentialHex };
-                colorDot.style.backgroundColor = potentialHex;
+
+            if (currentMatch) {
+                colorDot.style.backgroundColor = currentMatch.value;
                 colorBtn.classList.add('visible');
-                nativePicker.value = potentialHex;
+                // pickerのvalueはhexのみ対応なので変換が必要だが、
+                // OSパレットを開くためだけなら最新の値をセットするのみ
+                if(currentMatch.type === 'hex') picker.value = currentMatch.value;
             } else {
-                // No Hex
                 colorBtn.classList.remove('visible');
-                currentHexRange = null;
             }
         }
 
+        raw.addEventListener('keyup', detectColor);
+        raw.addEventListener('click', detectColor);
+
         window.openNativeColorPicker = (e) => {
             e.stopPropagation();
-            if(currentHexRange) {
-                nativePicker.click();
-            }
+            picker.click();
         };
 
-        // When user picks a color
-        nativePicker.addEventListener('input', (e) => {
-            if (currentHexRange) {
-                const newColor = e.target.value;
-                const text = raw.value;
-                
-                // Replace text
-                const before = text.substring(0, currentHexRange.start);
-                const after = text.substring(currentHexRange.end);
-                raw.value = before + newColor + after;
-                
-                // Restore cursor position roughly
-                raw.setSelectionRange(currentHexRange.start + 7, currentHexRange.start + 7);
-                
-                // Update range data
-                currentHexRange.end = currentHexRange.start + 7;
-                currentHexRange.value = newColor;
-                colorDot.style.backgroundColor = newColor;
-                
-                sync('input');
+        picker.addEventListener('input', (e) => {
+            if (!currentMatch) return;
+            let newVal = e.target.value;
+            if (currentMatch.type === 'rgb') {
+                const r = parseInt(newVal.slice(1, 3), 16);
+                const g = parseInt(newVal.slice(3, 5), 16);
+                const b = parseInt(newVal.slice(5, 7), 16);
+                newVal = `rgb(${r}, ${g}, ${b})`;
             }
+            const text = raw.value;
+            raw.value = text.substring(0, currentMatch.start) + newVal + text.substring(currentMatch.end);
+            raw.setSelectionRange(currentMatch.start, currentMatch.start + newVal.length);
+            detectColor();
+            sync('input');
         });
 
         // -----------------------------------------------------
-        // Save Button Long Press Logic
+        // 2. リアルタイム・エラー検知
         // -----------------------------------------------------
-        const saveBtn = document.getElementById('btn-save');
-        let pressTimer;
-        let isLongPress = false;
-
-        const startPress = (e) => {
-            isLongPress = false;
-            pressTimer = setTimeout(() => {
-                isLongPress = true;
-                haptic.error(); // Strong haptic
-                if(confirm("ページを再読み込みしますか？")) {
-                    location.reload();
-                }
-            }, 800); // 800ms threshold
-        };
-
-        const cancelPress = (e) => {
-            clearTimeout(pressTimer);
-        };
-
-        const handleSaveClick = (e) => {
-            e.stopPropagation();
-            if(!isLongPress) {
-                // Normal click
-                saveBar.classList.add('active'); 
-                haptic.confirm();
-            }
-        };
-
-        // Touch events for iOS
-        saveBtn.addEventListener('touchstart', startPress, {passive: true});
-        saveBtn.addEventListener('touchend', cancelPress);
-        saveBtn.addEventListener('touchmove', cancelPress);
-        // Mouse events for PC
-        saveBtn.addEventListener('mousedown', startPress);
-        saveBtn.addEventListener('mouseup', cancelPress);
-        saveBtn.addEventListener('mouseleave', cancelPress);
-        
-        // Click handler handles the "Short Press"
-        saveBtn.addEventListener('click', handleSaveClick);
-
-
-        // -----------------------------------------------------
-        // Existing Logic Below
-        // -----------------------------------------------------
-
-        // ピンチアウト検知でMonaco起動
-        let startDist = 0;
-        raw.addEventListener('touchstart', e => {
-            if (e.touches.length === 2) {
-                startDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-            }
-        });
-        raw.addEventListener('touchmove', e => {
-            if (e.touches.length === 2 && startDist > 0) {
-                let dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                if (dist > startDist + 60) { 
-                    toggleUI('monaco-container', true);
-                    startDist = 0;
-                }
-            }
-        });
-
-        // Inspectクリックイベント受信（iframeから）
-        window.addEventListener('message', (e) => {
-            if (e.data.type === 'inspect-element') {
-                if (!isInspectMode) return;
-                
-                // 検索してハイライト
-                const targetStr = e.data.html;
-                const fullText = raw.value;
-                const idx = fullText.indexOf(targetStr);
-                
-                if (idx !== -1) {
-                    haptic.confirm();
-                    toggleInspect();
-                    
-                    raw.focus();
-                    raw.setSelectionRange(idx, idx + targetStr.length);
-                    raw.blur(); 
-                    setTimeout(() => raw.focus(), 50);
-
-                    if (editor) {
-                        const model = editor.getModel();
-                        const pos = model.getPositionAt(idx);
-                        editor.revealPositionInCenter(pos);
-                        editor.setSelection({
-                            startLineNumber: pos.lineNumber,
-                            startColumn: pos.column,
-                            endLineNumber: pos.lineNumber,
-                            endColumn: pos.column + targetStr.length
-                        });
-                    }
-                } else {
-                    haptic.error();
-                    alert("Source mapping failed: Exact string match not found.");
-                }
-            }
-        });
-
-        window.toggleInspect = (e) => {
-            if(e) e.stopPropagation();
-            isInspectMode = !isInspectMode;
-            const btn = document.getElementById('inspect-btn');
-            btn.classList.toggle('active', isInspectMode);
-            haptic.confirm();
-            
-            const frame = document.getElementById('output-frame');
-            if(frame.contentWindow) {
-                frame.contentWindow.postMessage({ type: 'toggle-inspect', value: isInspectMode }, '*');
-            }
-        };
-
         window.sync = (src) => {
-            if(isSyncing) return; isSyncing = true;
+            if (isSyncing) return; isSyncing = true;
             const val = (src === 'input') ? raw.value : editor.getValue();
-            raw.value = val;
-            if(editor && src !== 'monaco') editor.setValue(val);
+            if (editor && src !== 'monaco') editor.setValue(val);
             
-            const frame = document.getElementById('output-frame');
-            
-            const inspectScript = `
+            const errorInjection = `
                 <script>
-                    let isInspect = ${isInspectMode};
-                    window.addEventListener('message', (e) => {
-                        if(e.data.type === 'toggle-inspect') isInspect = e.data.value;
-                    });
-                    
-                    document.addEventListener('click', (e) => {
-                        if(!isInspect) return;
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        const el = e.target;
-                        let tagStr = el.outerHTML.match(/^<[^>]+>/);
-                        if(tagStr) {
-                            window.parent.postMessage({
-                                type: 'inspect-element',
-                                tagName: el.tagName,
-                                html: tagStr[0]
-                            }, '*');
-                        }
-                    }, true);
+                    window.onerror = function(msg) {
+                        window.parent.postMessage({type:'error', msg: msg}, '*');
+                    };
+                    console.error = function(msg) {
+                        window.parent.postMessage({type:'error', msg: msg}, '*');
+                    };
                 <\/script>
             `;
-
-            let finalVal = val;
-            if(val.includes('</body>')) {
-                finalVal = val.replace('</body>', inspectScript + '</body>');
-            } else {
-                finalVal = val + inspectScript;
-            }
-
-            frame.srcdoc = finalVal;
+            frame.srcdoc = errorInjection + val;
             isSyncing = false;
+            hideError();
+        };
+
+        window.addEventListener('message', (e) => {
+            if (e.data.type === 'error' && document.getElementById('preview-section').classList.contains('fullscreen')) {
+                showError(e.data.msg);
+            }
+        });
+
+        function showError(msg) {
+            const b = document.getElementById('error-banner');
+            document.getElementById('error-msg').innerText = msg;
+            b.classList.add('show');
+            haptic.error();
+            setTimeout(hideError, 4000);
+        }
+        function hideError() { document.getElementById('error-banner').classList.remove('show'); }
+
+        // -----------------------------------------------------
+        // 3. Save長押しアニメーション (0.08s)
+        // -----------------------------------------------------
+        const saveContainer = document.getElementById('save-container');
+        let saveTimer;
+        saveContainer.addEventListener('touchstart', (e) => {
+            saveContainer.classList.add('pressing');
+            saveTimer = setTimeout(() => {
+                haptic.error();
+                if(confirm("ページをリセットしてよろしいですか？")) location.reload();
+            }, 800);
+        });
+        saveContainer.addEventListener('touchend', () => {
+            saveContainer.classList.remove('pressing');
+            clearTimeout(saveTimer);
+        });
+
+        // -----------------------------------------------------
+        // 4. Pressure Menu (筆圧・感圧)
+        // -----------------------------------------------------
+        const menu = document.getElementById('pressure-menu');
+        window.addEventListener('pointermove', (e) => {
+            // Pencil筆圧 or Mac Trackpad感圧 (1.8以上)
+            const force = e.webkitForce || e.pressure * 2; // e.pressureは0-1なので2倍で疑似対応
+            if (force >= 1.8) {
+                menu.style.left = `${e.clientX - 50}px`;
+                menu.style.top = `${e.clientY - 50}px`;
+                menu.classList.add('active');
+                haptic.confirm();
+            }
+        });
+
+        window.execCmd = (cmd) => {
+            raw.focus();
+            if (cmd === 'undo') document.execCommand('undo');
+            if (cmd === 'redo') document.execCommand('redo');
+            if (cmd === 'selectAll') raw.select();
+            if (cmd === 'replace') {
+                const rep = prompt("置換後の文字列:");
+                if(rep) document.execCommand('insertText', false, rep);
+            }
+            menu.classList.remove('active');
+        };
+
+        // -----------------------------------------------------
+        // 既存機能の維持 (Monaco / Fullscreen / Dock)
+        // -----------------------------------------------------
+        window.toggleFullscreen = (e) => {
+            e.stopPropagation();
+            const ps = document.getElementById('preview-section');
+            ps.classList.toggle('fullscreen');
+            document.getElementById('expand-toggle-btn').innerText = ps.classList.contains('fullscreen') ? '←' : '→';
+            haptic.confirm();
+        };
+
+        window.toggleUI = (id, show) => {
+            const t = document.getElementById(id);
+            if(show) {
+                t.style.display='flex';
+                setTimeout(()=>t.classList.add('active'),10);
+            } else {
+                t.classList.remove('active');
+                setTimeout(()=>t.style.display='none',400);
+            }
         };
 
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
         require(['vs/editor/editor.main'], () => {
             editor = monaco.editor.create(document.getElementById('monaco-body'), { 
-                value: raw.value, language: 'html', theme: 'vs', automaticLayout: true, fontSize: 16, minimap: { enabled: false }
+                value: raw.value, language: 'html', theme: 'vs', automaticLayout: true, fontSize: 16
             });
             editor.onDidChangeModelContent(() => sync('monaco'));
-            
-            editor.onDidChangeCursorSelection((e) => {
-                if(!e.selection.isEmpty()) {
-                    document.body.classList.add('focus-mode');
-                } else {
-                    document.body.classList.remove('focus-mode');
-                }
-            });
         });
 
-        window.handleFile = (e) => {
-            const f = e.target.files[0]; if(!f) return;
-            document.getElementById('ios-loader').style.display = 'flex';
-            const r = new FileReader();
-            r.onload = (ev) => {
-                const div = document.createElement('div');
-                div.style = "width:50px; height:50px; background:#e5e5ea; border-radius:12px; overflow:hidden; flex-shrink:0;";
-                div.className = "dock-item interactive-btn";
-                const img = document.createElement('img');
-                img.src = ev.target.result; img.dataset.name = f.name;
-                img.style = "width:100%; height:100%; object-fit:cover;";
-                img.onclick = () => openMedia(img, div);
-                div.appendChild(img);
-                document.getElementById('media-items').appendChild(div);
-                document.getElementById('ios-loader').style.display = 'none';
-                e.target.value = '';
-            };
-            r.readAsDataURL(f);
-        };
-
-        window.openMedia = (imgEl, parentDiv) => { 
-            currentTargetItem = { img: imgEl, div: parentDiv };
-            document.getElementById('expanded-media').src = imgEl.src;
-            document.getElementById('media-filename').innerText = imgEl.dataset.name; 
-            const o = document.getElementById('media-overlay'); 
-            o.style.display = 'flex'; 
-            setTimeout(() => o.classList.add('active'), 10); 
-            haptic.confirm(); 
-        };
-
-        window.closeMedia = (e) => { 
-            if(e) e.stopPropagation();
-            haptic();
-            const o = document.getElementById('media-overlay'); 
-            o.classList.remove('active'); 
-            setTimeout(() => { o.style.display = 'none'; currentTargetItem = null; }, 400); 
-        };
-
-        window.deleteCurrentMedia = (e) => {
-            e.stopPropagation();
-            haptic.error();
-            if(confirm("この画像を完全に消去しますか？")) {
-                currentTargetItem.div.remove(); closeMedia();
-            }
-        };
-
-        window.renameMedia = (e) => {
-            e.stopPropagation();
-            haptic.error();
-            const name = prompt("Rename:", currentTargetItem.img.dataset.name);
-            if(name) { 
-                currentTargetItem.img.dataset.name = name; 
-                document.getElementById('media-filename').innerText = name; 
-            }
-        };
-
+        window.globalTap = () => { menu.classList.remove('active'); };
         window.toggleDock = (e) => { 
-            e.stopPropagation(); 
-            isDockOpen = !isDockOpen; 
-            document.getElementById('file-list').classList.toggle('open', isDockOpen); 
-            const iClose = document.getElementById('icon-close');
-            const iOpen = document.getElementById('icon-open');
-            if(isDockOpen) {
-                iClose.className = 'folder-icon hide'; iOpen.className = 'folder-icon show';
-            } else {
-                iClose.className = 'folder-icon show'; iOpen.className = 'folder-icon wait';
-            }
-            haptic(); 
-        };
-        
-        window.toggleFullscreen = (e) => { 
-            e.stopPropagation(); 
-            previewSection.classList.toggle('fullscreen'); 
-            document.getElementById('expand-toggle-btn').innerText = previewSection.classList.contains('fullscreen') ? '←' : '→';
-            haptic.confirm(); 
-        };
-
-        window.toggleUI = (id, show) => { 
-            const t = document.getElementById(id); 
-            if(show){ 
-                haptic.error();
-                t.style.display='flex'; 
-                setTimeout(()=>t.classList.add('active'),10); 
-            } else { 
-                haptic();
-                t.classList.remove('active'); 
-                setTimeout(()=>t.style.display='none',400); 
-            } 
-        };
-
-        // Note: openSave is now handled by handleSaveClick logic
-        window.globalTap = () => { if(isDockOpen) toggleDock({stopPropagation:()=>{}}); saveBar.classList.remove('active'); };
-        
-        window.downloadHtml = (e) => { 
-            e.stopPropagation(); 
-            haptic.error();
-            let cleanVal = raw.value; 
-            const blob = new Blob([cleanVal], {type:'text/html'});
-            const a = document.createElement('a'); 
-            a.href = URL.createObjectURL(blob); 
-            a.download = document.getElementById('fn').value || 'index.html'; 
-            a.click(); 
+            isDockOpen = !isDockOpen;
+            document.getElementById('file-list').classList.toggle('open', isDockOpen);
         };
     </script>
 </body>
