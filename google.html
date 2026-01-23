@@ -2,570 +2,546 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Events - Yes, And Workshop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>iOS Ultimate Debug Pro + Color</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root { --ios-ease: cubic-bezier(0.23, 1, 0.32, 1); }
+        * { touch-action: none; -webkit-user-select: none; box-sizing: border-box; font-family: -apple-system, "SF Pro Display", sans-serif; font-weight: 1 !important; }
+        
+        /* iOS スワイプ戻り防止 */
+        body, html { 
+            margin: 0; padding: 0; height: 100dvh; width: 100vw; 
+            background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column;
+            overscroll-behavior-x: none;
+            transition: 0.3s;
         }
 
-        body {
-
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .hero {
-            position: relative;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-align: center;
-
-        }
-
-        .floating-orbs {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
+        /* Focus Blur Effect */
+        body.focus-mode > *:not(#editor-section):not(#monaco-container) {
+            filter: blur(3px);
+            opacity: 0.8;
+            transition: 0.3s var(--ios-ease);
             pointer-events: none;
         }
 
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-            backdrop-filter: blur(10px);
-            animation: float 6s ease-in-out infinite;
+        .container-box { width: calc(100% - 20px); margin: 8px auto; border-radius: 18px; background: #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.05); overflow: hidden; position: relative; transition: 0.3s var(--ios-ease); }
+        #preview-section { flex: 1.2; transition: 0.5s var(--ios-ease); z-index: 10; }
+        #preview-section.fullscreen { position: fixed; inset: 0; margin: 0; width: 100%; height: 100%; border-radius: 0; z-index: 8000; }
+        
+        #output-frame { width: 100%; height: 100%; border: none; background: #fff; pointer-events: auto; }
+        
+        /* Buttons with Hover Scale (iPad/PC) */
+        .interactive-btn { 
+            cursor: pointer; 
+            transition: transform 0.2s var(--ios-ease), background 0.2s; 
+        }
+        /* Mouse/Trackpad Hover Only */
+        @media (hover: hover) {
+            .interactive-btn:hover { transform: scale(1.1); }
+            .dock-item:hover { transform: scale(1.1) translateY(-5px); }
+            #expand-toggle-btn:hover, #inspect-btn:hover { transform: scale(1.1); }
         }
 
-        .orb:nth-child(1) {
-            width: 60px;
-            height: 60px;
-            top: 20%;
-            left: 10%;
-            animation-delay: 0s;
+        #expand-toggle-btn { position: absolute; bottom: 15px; right: 15px; width: 44px; height: 44px; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 8010; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        /* Inspect Button */
+        #inspect-btn { position: absolute; bottom: 15px; left: 15px; width: 44px; height: 44px; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; z-index: 8010; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.3s; color: #333; }
+        #inspect-btn.active { background: #007aff; color: white; box-shadow: 0 4px 15px rgba(0,122,255,0.4); }
+
+        #editor-section { flex: 0.8; display: flex; margin-bottom: 85px; z-index: 20; }
+        #raw-editor { flex: 1; border: none; padding: 15px; outline: none; font-family: "SF Mono", monospace; background: #fff; -webkit-user-select: text; font-size: 13px; resize: none; touch-action: pan-y; }
+
+        /* Dock & Folder Animation */
+        #dock-area { position: fixed; bottom: 25px; right: 15px; display: flex; align-items: center; z-index: 4000; }
+        #dock-wrapper { display: flex; align-items: center; background: rgba(255,255,255,0.8); backdrop-filter: blur(25px); padding: 6px; border-radius: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        
+        #file-list { display: flex; gap: 10px; width: 0; opacity: 0; overflow: hidden; transition: 0.4s var(--ios-ease); padding: 0; }
+        #file-list.open { width: auto; opacity: 1; margin-right: 10px; padding: 5px; }
+        
+        .dock-item { transition: 0.3s var(--ios-ease); cursor: pointer; }
+
+        #folder-btn-container { width: 40px; height: 30px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .folder-icon { position: absolute; transition: 0.5s var(--ios-ease); font-size: 24px; }
+        .folder-icon.hide { transform: translateY(-40px); opacity: 0; }
+        .folder-icon.show { transform: translateY(0); opacity: 1; }
+        .folder-icon.wait { transform: translateY(40px); opacity: 0; }
+
+        #media-overlay { position: fixed; inset: 0; backdrop-filter: blur(45px); background: rgba(255,255,255,0.2); z-index: 9000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.4s var(--ios-ease); }
+        #media-overlay.active { display: flex; opacity: 1; }
+        #expanded-media { max-width: 90%; max-height: 75%; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); transform: scale(0.85); transition: 0.4s var(--ios-ease); }
+        #media-overlay.active #expanded-media { transform: scale(1.1); }
+        #expanded-media.zoomed { transform: scale(1.8) !important; }
+
+        .overlay-btn-left { position: absolute; top: 60px; left: 30px; font-size: 32px; color: #000; z-index: 9100; cursor: pointer; }
+        .overlay-btn-right { position: absolute; top: 60px; right: 30px; font-size: 32px; color: #000; z-index: 9100; cursor: pointer; }
+        
+        #save-input-bar { position: fixed; bottom: 25px; left: 15px; width: min(280px, 60vw); height: 50px; background: white; border-radius: 25px; z-index: 4500; display: flex; align-items: center; padding: 0 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); opacity: 0; pointer-events: none; transform: translateY(20px) scale(0.9); transition: 0.4s var(--ios-ease); }
+        #save-input-bar.active { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+
+        #monaco-container { position: fixed; inset: 0; background: #fff; z-index: 5000; display: none; opacity: 0; transform: scale(1.05); transition: 0.4s var(--ios-ease); flex-direction: column; }
+        #monaco-container.active { display: flex; opacity: 1; transform: scale(1); }
+        #ios-loader { position: fixed; inset: 0; background: rgba(255,255,255,0.6); backdrop-filter: blur(8px); z-index: 9999; display: none; align-items: center; justify-content: center; }
+        .spinner { width: 35px; height: 35px; border: 3px solid rgba(0,0,0,0.05); border-top: 3px solid #007aff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Color Picker Trigger */
+        #color-trigger-btn {
+            width: 50px; height: 50px; background: #fff; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: scale(0); opacity: 0; transition: 0.3s var(--ios-ease);
         }
-
-        .orb:nth-child(2) {
-            width: 100px;
-            height: 100px;
-            top: 60%;
-            right: 15%;
-            animation-delay: -2s;
-        }
-
-        .orb:nth-child(3) {
-            width: 80px;
-            height: 80px;
-            bottom: 30%;
-            left: 20%;
-            animation-delay: -4s;
-        }
-
-        .orb:nth-child(4) {
-            width: 40px;
-            height: 40px;
-            top: 10%;
-            right: 30%;
-            animation-delay: -1s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
-        }
-
-        .hero-content {
-            max-width: 800px;
-            padding: 0 20px;
-            z-index: 10;
-            position: relative;
-        }
-
-        .logo {
-            font-size: 3rem;
-            font-weight: 500;
-            margin-bottom: 1rem;
-            opacity: 0;
-            animation: slideUp 1s ease-out 0.5s forwards;
-           background: linear-gradient(45deg, #81b1ff, #619eff,#619eff, #ff708d, #ffb452, #00ff80,#FBBC05, #ff4aa5, #ff4aa5);
-
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .tagline {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            opacity: 0;
-            animation: slideUp 1s ease-out 1s forwards;
-            color: rgba(255,255,255,0.8);
-        }
-
-        .cta-button {
-            display: inline-block;
-            padding: 15px 40px;
-            background: linear-gradient(45deg, #4285f4, #34a853);
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            opacity: 0;
-            animation: slideUp 1s ease-out 1.5s forwards;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .cta-button:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-            background: linear-gradient(45deg, #3367d6, #2e8b57);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .event-details {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 40px;
-            margin: 50px 20px;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-            color: #333;
-        }
-
-        .event-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .event-title {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            color: #1a1a2e;
-            font-weight: 700;
-        }
-
-        .event-subtitle {
-            font-size: 1.1rem;
-            color: #666;
-            margin-bottom: 20px;
-        }
-
-        .event-meta {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-            margin-bottom: 30px;
-        }
-
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(66, 133, 244, 0.1);
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: 500;
-        }
-
-        .meta-icon {
-            width: 20px;
-            height: 20px;
-            background: #4285f4;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-        }
-
-        .location-section {
-            background: rgba(255,255,255,0.9);
-            padding: 30px;
-            border-radius: 15px;
-            margin: 30px 0;
-            text-align: center;
-        }
-
-        .location-section h3 {
-            color: #1a1a2e;
-            margin-bottom: 20px;
-            font-size: 1.8rem;
-        }
-
-        .location-details {
-            margin-bottom: 20px;
-        }
-
-        .location-details h4 {
-            color: #4285f4;
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-        }
-
-        .location-details p {
-            color: #555;
-            line-height: 1.6;
-            margin-bottom: 10px;
-        }
-
-        .map-container {
-            width: 100%;
-            height: 300px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        }
-
-        .map-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .sections {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-
-        .section {
-            background: rgba(255,255,255,0.8);
-            padding: 30px;
-            border-radius: 15px;
-            transition: transform 0.3s ease;
-        }
-
-        .section:hover {
-            transform: translateY(-5px);
-        }
-
-        .section h3 {
-            color: #1a1a2e;
-            margin-bottom: 15px;
-            font-size: 1.5rem;
-        }
-
-        .section p, .section li {
-            color: #555;
-            line-height: 1.6;
-        }
-
-        .section ul {
-            padding-left: 20px;
-        }
-
-        .section li {
-            margin-bottom: 8px;
-        }
-
-        .instructor {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-align: center;
-            padding: 40px;
-            border-radius: 15px;
-            margin: 30px 0;
-        }
-
-        .instructor h3 {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-        }
-
-        .instructor p {
-            opacity: 0.9;
-            line-height: 1.6;
-        }
-
-        .timeline {
-            background: rgba(255,255,255,0.9);
-            padding: 30px;
-            border-radius: 15px;
-            margin: 30px 0;
-        }
-
-        .timeline-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(66, 133, 244, 0.05);
-            border-radius: 10px;
-            border-left: 4px solid #4285f4;
-        }
-
-        .timeline-time {
-            font-weight: 700;
-            color: #4285f4;
-            min-width: 80px;
-        }
-
-        .timeline-content {
-            margin-left: 20px;
-        }
-
-        .sponsors {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin: 40px 0;
-            flex-wrap: wrap;
-        }
-
-        .sponsor {
-            background: rgba(255,255,255,0.9);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .sponsor h4 {
-            color: #1a1a2e;
-            margin-bottom: 10px;
-        }
-
-        .register-section {
-            text-align: center;
-            margin: 40px 0;
-        }
-
-        .register-button {
-            display: inline-block;
-            padding: 20px 50px;
-            background: linear-gradient(45deg, #4285f4, #34a853);
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-        }
-
-        .register-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-        }
-
-        @media (max-width: 768px) {
-            .logo {
-                font-size: 2rem;
-            }
-            
-            .event-title {
-                font-size: 1.8rem;
-            }
-            
-            .event-meta {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .sections {
-                grid-template-columns: 1fr;
-            }
-
-            .map-container {
-                height: 250px;
-            }
-        }
+        #color-trigger-btn.visible { transform: scale(1); opacity: 1; }
+        #color-preview-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.1); box-shadow: inset 0 0 4px rgba(0,0,0,0.1); }
     </style>
 </head>
-<body>
-    <div class="hero">
-        <div class="floating-orbs">
-            <div class="orb"></div>
-            <div class="orb"></div>
-            <div class="orb"></div>
-            <div class="orb"></div>
-        </div>
+<body onclick="globalTap()">
+
+    <div id="ios-loader"><div class="spinner"></div></div>
+
+    <div id="preview-section" class="container-box">
+        <div id="expand-toggle-btn" class="interactive-btn" onclick="toggleFullscreen(event)">→</div>
+        <div id="inspect-btn" class="interactive-btn" onclick="toggleInspect(event)">✒︎</div>
+        <iframe id="output-frame" sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"></iframe>
+    </div>
+
+    <div id="editor-section" class="container-box">
+        <textarea id="raw-editor" oninput="sync('input')" placeholder="Pinch out to open Monaco editor..."></textarea>
+    </div>
+
+    <div style="position:fixed; bottom:25px; left:15px; display:flex; gap:12px; z-index:4000;">
+        <div id="btn-save" class="interactive-btn" style="width:50px; height:50px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">💾</div>
         
-        <div class="hero-content">
-            <h1 class="logo">Google Events</h1>
-            <p class="tagline">この内容は学生や起業家向けのAlliz.jpのイベント内容の要約です。</p>
-            <a href="#event-details" class="cta-button">Discover Events</a>
+        <div class="interactive-btn" style="width:50px; height:50px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);" onclick="toggleUI('monaco-container', true)">📝</div>
+        
+        <div id="color-trigger-btn" class="interactive-btn" onclick="openNativeColorPicker(event)">
+            <div id="color-preview-dot"></div>
         </div>
     </div>
 
-    <div class="event-details" id="event-details">
-        <div class="event-header">
-            <h2 class="event-title">「Yes, And」で学ぶ即興演劇体験ワークショップ</h2>
-            <p class="event-subtitle">この内容は学生や起業家向けのAllizの要約です。</p>
-                   <p class="event-subtitle">参考文献Alliz.jp</p>
-            <div class="event-meta">
-                <div class="meta-item">
-                    <div class="meta-icon">📅</div>
-                    <span>9月2日（火）</span>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-icon">🕕</div>
-                    <span>6:30 PM - 9:40 PM</span>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-icon">📍</div>
-                    <span>Google 渋谷</span>
-                </div>
-            </div>
-        </div>
+    <div id="save-input-bar" onclick="event.stopPropagation()">
+        <input type="text" id="fn" value="index.html" style="border:none; outline:none; flex:1; background:transparent; font-size:16px;">
+        <div class="interactive-btn" style="font-size:26px; color:#007aff; cursor:pointer;" onclick="downloadHtml(event)">→</div>
+    </div>
 
-        <div class="location-section">
-            <h3>📍 会場情報</h3>
-            <div class="location-details">
-                <h4>Google 渋谷</h4>
-                <p>〒150-0002 東京都渋谷区渋谷3-21-3<br>
-                渋谷ストリーム 9-13F</p>
-                <p><strong>アクセス:</strong> JR渋谷駅 新南口より徒歩1分</p>
+    <div id="dock-area">
+        <div id="dock-wrapper" onclick="event.stopPropagation()">
+            <div id="file-list">
+                <div class="dock-item interactive-btn" onclick="document.getElementById('file-input').click()" style="width:50px;height:50px;background:#e5e5ea;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;">＋</div>
+                <div id="media-items" style="display:flex; gap:10px;"></div>
             </div>
-            <div class="map-container">
-                <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241.8054968711544!2d139.7006457757867!3d35.657163472595!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188b5334b810a5%3A0xf3ad7394ee54630d!2z44Kw44O844Kw44Or5ZCI5ZCM5Lya56S-!5e0!3m2!1sja!2sjp!4v1752802704684!5m2!1sja!2sjp" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-                    allowfullscreen="" 
-                    loading="lazy" 
-                    referrerpolicy="no-referrer-when-downgrade">
-                </iframe>
-            </div>
-        </div>
-
-        <div class="sections">
-            <div class="section">
-                <h3>🎭 イベント概要</h3>
-                <p>あなたは今、心から自分らしく人とつながれていますか？チームで、思いを遠慮なく伝え合えていますか？</p>
-                <br>
-                <p>台本も配役も決めずに、その場で物語を創造していく即興演劇（インプロ）。それは、相手を丸ごと受け入れる「Yes, And」の精神、瞬間のひらめき、そして失敗をも遊びに変えるマインドを育む、まさに内なる可能性を解き放つ機会です。</p>
-            </div>
-
-            <div class="section">
-                <h3>🎯 こんな方におすすめ</h3>
-                <ul>
-                    <li>チームに安心感や信頼関係を育てたい企業・学生</li>
-                    <li>社員の関係性改善に悩む人事などの担当者</li>
-                    <li>変化の多い今を前向きに生きたい方</li>
-                    <li>自分をもっと理解し、伝えられるようになりたい方</li>
-                    <li>自分を縛っていたものから自由になりたい方</li>
-                </ul>
-            </div>
-
-            <div class="section">
-                <h3>✨ インプロについて</h3>
-                <p style="line-height: 2;">初心者でも楽しめるシンプルなインプロゲームを通して、誰もが自然に声を出し、身体を動かし、他者と関わる楽しさを体感できます。例えば、名前を呼び合うだけのゲーム、相手の動きを真似するミラーゲーム、「Yes, And」を使って物語を膨らませるゲーム。遊びのような体験の中にこそ、深い気づきと学びが眠っています。</p>
-            </div>
-        </div>
-
-        <div class="instructor">
-            <h3>古新 舜（Shun Coney）</h3>
-            <p>映画監督 × ストーリーエバンジェリスト × 教育者</p>
-            <br>
-            <p>「Give Life to Your Story! ―物語を動かそう！―」をテーマに掲げ、映画と即興演劇（インプロ）、そして教育を融合させた活動を展開。厚生労働省推薦作品『いまダンスをするのは誰だ？』はロサンゼルスJFFLA最高賞を受賞。</p>
-        </div>
-
-        <div class="timeline">
-            <h3>📅 タイムテーブル</h3><br>
-            <div class="timeline-item">
-                <div class="timeline-time">6:00 PM</div>
-                <div class="timeline-content">受付開始（受付は18:45まで）</div>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-time">6:30 PM</div>
-                <div class="timeline-content">オープニング</div>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-time">6:45 PM</div>
-                <div class="timeline-content">ワークショップ：「人生もチームも未来志向に行動できる」</div>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-time">8:15 PM</div>
-                <div class="timeline-content">写真・軽食・ネットワーキング</div>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-time">9:25 PM</div>
-                <div class="timeline-content">クロージング</div>
-            </div>
-        </div>
-
-      <div class="sponsor">
-                <h4>主催・Google</h4>
-                <p><br>Google は、テクノロジーとイノベーションで社会課題を解決し、未来を切り拓くスタートアップの可能性を信じています。</p>
-            </div><br>
-            <div class="sponsor">
-                <h4>フード協賛</h4>
-                <p><strong>505 Tacos</strong><br>「LAスタイルのタコスを日本へ」をテーマにした本格派タコス専門店</p>
+            <div onclick="toggleDock(event)" id="folder-btn-container" class="interactive-btn">
+                <span id="icon-close" class="folder-icon show">📁</span>
+                <span id="icon-open" class="folder-icon wait">📂</span>
             </div>
         </div>
     </div>
 
-    <script>
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+    <div id="monaco-container">
+        <div id="monaco-body" style="flex:1;"></div>
+        <div class="interactive-btn" style="position:absolute; bottom:30px; left:25px; width:55px; height:55px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);" onclick="toggleUI('monaco-container', false)">←</div>
+    </div>
+
+    <div id="media-overlay" onclick="closeMedia()">
+        <div class="overlay-btn-left interactive-btn" onclick="closeMedia(event)">←</div>
+        <div class="overlay-btn-right interactive-btn" onclick="downloadHtml(event)">↓</div> 
+        <img id="expanded-media" onclick="handleImageClick(event)">
+        <div style="position:absolute; bottom:60px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:20px;" onclick="event.stopPropagation()">
+            <div class="interactive-btn" style="width: 44px; height: 44px; background: rgba(255,255,255,0.4); backdrop-filter: blur(15px); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;" onclick="deleteCurrentMedia(event)">✕</div>
+            <div class="interactive-btn" style="background:rgba(255,255,255,0.7); backdrop-filter:blur(15px); padding:12px 24px; border-radius:25px; font-weight:500;" onclick="renameMedia(event)" id="media-filename">file.png</div>
+        </div>
+    </div>
+
+    <input type="file" id="file-input" hidden onchange="handleFile(event)" accept="image/*">
+    
+    <input type="color" id="native-picker" style="visibility: hidden; position: absolute; left: -9999px;">
+
+    <script type="module">
+        import { haptic } from "https://esm.sh/ios-haptics";
+        window.haptic = haptic;
+
+        let editor, isSyncing = false, isDockOpen = false, currentTargetItem = null;
+        let isInspectMode = false;
+        const raw = document.getElementById('raw-editor');
+        const previewSection = document.getElementById('preview-section');
+        const saveBar = document.getElementById('save-input-bar');
+        const nativePicker = document.getElementById('native-picker');
+        const colorBtn = document.getElementById('color-trigger-btn');
+        const colorDot = document.getElementById('color-preview-dot');
+        let currentHexRange = null; // Stores where the hex code is
+
+        // iOS標準ズーム & ワイプ戻り防止
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) e.preventDefault();
+            if (e.touches[0].pageX < 20 || e.touches[0].pageX > window.innerWidth - 20) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
+            }
+        }, { passive: false });
 
-        // Parallax effect for floating orbs
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const orbs = document.querySelectorAll('.orb');
+        // Selection Blur Logic & Color Detection
+        document.addEventListener('selectionchange', () => {
+            const sel = document.getSelection();
+            const activeEl = document.activeElement;
+            const isEditorActive = (activeEl === raw || activeEl.closest('.monaco-editor'));
             
-            orbs.forEach((orb, index) => {
-                const speed = 0.5 + (index * 0.1);
-                orb.style.transform = `translateY(${scrolled * speed}px)`;
-            });
-        });
+            // Blur Effect
+            if (isEditorActive && !sel.isCollapsed) {
+                document.body.classList.add('focus-mode');
+            } else {
+                document.body.classList.remove('focus-mode');
+            }
 
-        // Intersection Observer for fade-in animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
+            // Color Detection for Raw Editor
+            if (activeEl === raw) {
+                detectColorAtCursor();
+            }
+        });
+        
+        // Also detect on keyup/click
+        raw.addEventListener('keyup', detectColorAtCursor);
+        raw.addEventListener('click', detectColorAtCursor);
+
+        function detectColorAtCursor() {
+            const text = raw.value;
+            const cursorPos = raw.selectionStart;
+            
+            // Find hex string around cursor regex: #[0-9A-Fa-f]{6}
+            // Simple approach: Expand left and right from cursor until non-hex char
+            let start = cursorPos;
+            let end = cursorPos;
+            
+            while(start > 0 && /[0-9A-Fa-f#]/.test(text[start-1])) {
+                start--;
+            }
+            while(end < text.length && /[0-9A-Fa-f]/.test(text[end])) {
+                end++;
+            }
+            
+            const potentialHex = text.substring(start, end);
+            const hexRegex = /^#[0-9A-Fa-f]{6}$/;
+            
+            if (hexRegex.test(potentialHex)) {
+                // Hex Detected!
+                currentHexRange = { start, end, value: potentialHex };
+                colorDot.style.backgroundColor = potentialHex;
+                colorBtn.classList.add('visible');
+                nativePicker.value = potentialHex;
+            } else {
+                // No Hex
+                colorBtn.classList.remove('visible');
+                currentHexRange = null;
+            }
+        }
+
+        window.openNativeColorPicker = (e) => {
+            e.stopPropagation();
+            if(currentHexRange) {
+                nativePicker.click();
+            }
         };
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
+        // When user picks a color
+        nativePicker.addEventListener('input', (e) => {
+            if (currentHexRange) {
+                const newColor = e.target.value;
+                const text = raw.value;
+                
+                // Replace text
+                const before = text.substring(0, currentHexRange.start);
+                const after = text.substring(currentHexRange.end);
+                raw.value = before + newColor + after;
+                
+                // Restore cursor position roughly
+                raw.setSelectionRange(currentHexRange.start + 7, currentHexRange.start + 7);
+                
+                // Update range data
+                currentHexRange.end = currentHexRange.start + 7;
+                currentHexRange.value = newColor;
+                colorDot.style.backgroundColor = newColor;
+                
+                sync('input');
+            }
+        });
+
+        // -----------------------------------------------------
+        // Save Button Long Press Logic
+        // -----------------------------------------------------
+        const saveBtn = document.getElementById('btn-save');
+        let pressTimer;
+        let isLongPress = false;
+
+        const startPress = (e) => {
+            isLongPress = false;
+            pressTimer = setTimeout(() => {
+                isLongPress = true;
+                haptic.error(); // Strong haptic
+                if(confirm("ページを再読み込みしますか？")) {
+                    location.reload();
+                }
+            }, 800); // 800ms threshold
+        };
+
+        const cancelPress = (e) => {
+            clearTimeout(pressTimer);
+        };
+
+        const handleSaveClick = (e) => {
+            e.stopPropagation();
+            if(!isLongPress) {
+                // Normal click
+                saveBar.classList.add('active'); 
+                haptic.confirm();
+            }
+        };
+
+        // Touch events for iOS
+        saveBtn.addEventListener('touchstart', startPress, {passive: true});
+        saveBtn.addEventListener('touchend', cancelPress);
+        saveBtn.addEventListener('touchmove', cancelPress);
+        // Mouse events for PC
+        saveBtn.addEventListener('mousedown', startPress);
+        saveBtn.addEventListener('mouseup', cancelPress);
+        saveBtn.addEventListener('mouseleave', cancelPress);
+        
+        // Click handler handles the "Short Press"
+        saveBtn.addEventListener('click', handleSaveClick);
+
+
+        // -----------------------------------------------------
+        // Existing Logic Below
+        // -----------------------------------------------------
+
+        // ピンチアウト検知でMonaco起動
+        let startDist = 0;
+        raw.addEventListener('touchstart', e => {
+            if (e.touches.length === 2) {
+                startDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+            }
+        });
+        raw.addEventListener('touchmove', e => {
+            if (e.touches.length === 2 && startDist > 0) {
+                let dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                if (dist > startDist + 60) { 
+                    toggleUI('monaco-container', true);
+                    startDist = 0;
+                }
+            }
+        });
+
+        // Inspectクリックイベント受信（iframeから）
+        window.addEventListener('message', (e) => {
+            if (e.data.type === 'inspect-element') {
+                if (!isInspectMode) return;
+                
+                // 検索してハイライト
+                const targetStr = e.data.html;
+                const fullText = raw.value;
+                const idx = fullText.indexOf(targetStr);
+                
+                if (idx !== -1) {
+                    haptic.confirm();
+                    toggleInspect();
+                    
+                    raw.focus();
+                    raw.setSelectionRange(idx, idx + targetStr.length);
+                    raw.blur(); 
+                    setTimeout(() => raw.focus(), 50);
+
+                    if (editor) {
+                        const model = editor.getModel();
+                        const pos = model.getPositionAt(idx);
+                        editor.revealPositionInCenter(pos);
+                        editor.setSelection({
+                            startLineNumber: pos.lineNumber,
+                            startColumn: pos.column,
+                            endLineNumber: pos.lineNumber,
+                            endColumn: pos.column + targetStr.length
+                        });
+                    }
+                } else {
+                    haptic.error();
+                    alert("Source mapping failed: Exact string match not found.");
+                }
+            }
+        });
+
+        window.toggleInspect = (e) => {
+            if(e) e.stopPropagation();
+            isInspectMode = !isInspectMode;
+            const btn = document.getElementById('inspect-btn');
+            btn.classList.toggle('active', isInspectMode);
+            haptic.confirm();
+            
+            const frame = document.getElementById('output-frame');
+            if(frame.contentWindow) {
+                frame.contentWindow.postMessage({ type: 'toggle-inspect', value: isInspectMode }, '*');
+            }
+        };
+
+        window.sync = (src) => {
+            if(isSyncing) return; isSyncing = true;
+            const val = (src === 'input') ? raw.value : editor.getValue();
+            raw.value = val;
+            if(editor && src !== 'monaco') editor.setValue(val);
+            
+            const frame = document.getElementById('output-frame');
+            
+            const inspectScript = `
+                <script>
+                    let isInspect = ${isInspectMode};
+                    window.addEventListener('message', (e) => {
+                        if(e.data.type === 'toggle-inspect') isInspect = e.data.value;
+                    });
+                    
+                    document.addEventListener('click', (e) => {
+                        if(!isInspect) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const el = e.target;
+                        let tagStr = el.outerHTML.match(/^<[^>]+>/);
+                        if(tagStr) {
+                            window.parent.postMessage({
+                                type: 'inspect-element',
+                                tagName: el.tagName,
+                                html: tagStr[0]
+                            }, '*');
+                        }
+                    }, true);
+                <\/script>
+            `;
+
+            let finalVal = val;
+            if(val.includes('</body>')) {
+                finalVal = val.replace('</body>', inspectScript + '</body>');
+            } else {
+                finalVal = val + inspectScript;
+            }
+
+            frame.srcdoc = finalVal;
+            isSyncing = false;
+        };
+
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+        require(['vs/editor/editor.main'], () => {
+            editor = monaco.editor.create(document.getElementById('monaco-body'), { 
+                value: raw.value, language: 'html', theme: 'vs', automaticLayout: true, fontSize: 16, minimap: { enabled: false }
+            });
+            editor.onDidChangeModelContent(() => sync('monaco'));
+            
+            editor.onDidChangeCursorSelection((e) => {
+                if(!e.selection.isEmpty()) {
+                    document.body.classList.add('focus-mode');
+                } else {
+                    document.body.classList.remove('focus-mode');
                 }
             });
-        }, observerOptions);
-
-        // Observe sections for animation
-        document.querySelectorAll('.section, .instructor, .timeline, .location-section').forEach(section => {
-            section.style.opacity = '0';
-            section.style.transform = 'translateY(30px)';
-            section.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-            observer.observe(section);
         });
+
+        window.handleFile = (e) => {
+            const f = e.target.files[0]; if(!f) return;
+            document.getElementById('ios-loader').style.display = 'flex';
+            const r = new FileReader();
+            r.onload = (ev) => {
+                const div = document.createElement('div');
+                div.style = "width:50px; height:50px; background:#e5e5ea; border-radius:12px; overflow:hidden; flex-shrink:0;";
+                div.className = "dock-item interactive-btn";
+                const img = document.createElement('img');
+                img.src = ev.target.result; img.dataset.name = f.name;
+                img.style = "width:100%; height:100%; object-fit:cover;";
+                img.onclick = () => openMedia(img, div);
+                div.appendChild(img);
+                document.getElementById('media-items').appendChild(div);
+                document.getElementById('ios-loader').style.display = 'none';
+                e.target.value = '';
+            };
+            r.readAsDataURL(f);
+        };
+
+        window.openMedia = (imgEl, parentDiv) => { 
+            currentTargetItem = { img: imgEl, div: parentDiv };
+            document.getElementById('expanded-media').src = imgEl.src;
+            document.getElementById('media-filename').innerText = imgEl.dataset.name; 
+            const o = document.getElementById('media-overlay'); 
+            o.style.display = 'flex'; 
+            setTimeout(() => o.classList.add('active'), 10); 
+            haptic.confirm(); 
+        };
+
+        window.closeMedia = (e) => { 
+            if(e) e.stopPropagation();
+            haptic();
+            const o = document.getElementById('media-overlay'); 
+            o.classList.remove('active'); 
+            setTimeout(() => { o.style.display = 'none'; currentTargetItem = null; }, 400); 
+        };
+
+        window.deleteCurrentMedia = (e) => {
+            e.stopPropagation();
+            haptic.error();
+            if(confirm("この画像を完全に消去しますか？")) {
+                currentTargetItem.div.remove(); closeMedia();
+            }
+        };
+
+        window.renameMedia = (e) => {
+            e.stopPropagation();
+            haptic.error();
+            const name = prompt("Rename:", currentTargetItem.img.dataset.name);
+            if(name) { 
+                currentTargetItem.img.dataset.name = name; 
+                document.getElementById('media-filename').innerText = name; 
+            }
+        };
+
+        window.toggleDock = (e) => { 
+            e.stopPropagation(); 
+            isDockOpen = !isDockOpen; 
+            document.getElementById('file-list').classList.toggle('open', isDockOpen); 
+            const iClose = document.getElementById('icon-close');
+            const iOpen = document.getElementById('icon-open');
+            if(isDockOpen) {
+                iClose.className = 'folder-icon hide'; iOpen.className = 'folder-icon show';
+            } else {
+                iClose.className = 'folder-icon show'; iOpen.className = 'folder-icon wait';
+            }
+            haptic(); 
+        };
+        
+        window.toggleFullscreen = (e) => { 
+            e.stopPropagation(); 
+            previewSection.classList.toggle('fullscreen'); 
+            document.getElementById('expand-toggle-btn').innerText = previewSection.classList.contains('fullscreen') ? '←' : '→';
+            haptic.confirm(); 
+        };
+
+        window.toggleUI = (id, show) => { 
+            const t = document.getElementById(id); 
+            if(show){ 
+                haptic.error();
+                t.style.display='flex'; 
+                setTimeout(()=>t.classList.add('active'),10); 
+            } else { 
+                haptic();
+                t.classList.remove('active'); 
+                setTimeout(()=>t.style.display='none',400); 
+            } 
+        };
+
+        // Note: openSave is now handled by handleSaveClick logic
+        window.globalTap = () => { if(isDockOpen) toggleDock({stopPropagation:()=>{}}); saveBar.classList.remove('active'); };
+        
+        window.downloadHtml = (e) => { 
+            e.stopPropagation(); 
+            haptic.error();
+            let cleanVal = raw.value; 
+            const blob = new Blob([cleanVal], {type:'text/html'});
+            const a = document.createElement('a'); 
+            a.href = URL.createObjectURL(blob); 
+            a.download = document.getElementById('fn').value || 'index.html'; 
+            a.click(); 
+        };
     </script>
 </body>
 </html>
