@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS Ultimate Debug Pro - Fully Restored</title>
+    <title>iOS Ultimate Debug Pro - Final</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <style>
         :root { --ios-ease: cubic-bezier(0.23, 1, 0.32, 1); }
@@ -14,7 +14,6 @@
             background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        /* All-over Glassmorphism with White Border */
         .glass-panel {
             background: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(25px);
@@ -31,7 +30,6 @@
         #editor-section { flex: 0.8; display: flex; margin-bottom: 85px; }
         #raw-editor { flex: 1; border: none; padding: 15px; outline: none; font-family: "SF Mono", monospace; background: transparent; -webkit-user-select: text; font-size: 13px; resize: none; touch-action: pan-y; }
 
-        /* Save Input Bar (Top Most) */
         #save-input-bar { 
             position: fixed; bottom: 25px; left: 15px; width: min(300px, 70vw); height: 50px; 
             border-radius: 25px; z-index: 9999; display: flex; align-items: center; padding: 0 15px; 
@@ -39,27 +37,23 @@
         }
         #save-input-bar.active { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
 
-        /* Dock Area */
         #dock-area { position: fixed; bottom: 25px; right: 15px; display: flex; align-items: center; z-index: 4000; }
         #dock-wrapper { display: flex; align-items: center; padding: 6px; border-radius: 30px; }
         #file-list { display: flex; gap: 10px; width: 0; opacity: 0; overflow: hidden; transition: 0.4s var(--ios-ease); }
         #file-list.open { width: auto; opacity: 1; margin-right: 10px; padding: 5px; }
         
-        /* Folder Icon Slide */
         #folder-btn-container { width: 40px; height: 30px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .folder-icon { position: absolute; transition: 0.5s var(--ios-ease); font-size: 24px; }
         .folder-icon.hide { transform: translateY(-40px); opacity: 0; }
         .folder-icon.show { transform: translateY(0); opacity: 1; }
         .folder-icon.wait { transform: translateY(40px); opacity: 0; }
 
-        /* Console Log (Slide Up) */
         #error-log-overlay { 
             position: fixed; bottom: 85px; right: 20px; width: 260px; border-radius: 18px; display: none; padding: 15px; z-index: 4001; 
             transform-origin: bottom right; animation: slideUpConsole 0.4s var(--ios-ease) forwards;
         }
         @keyframes slideUpConsole { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* Line Indicator (0.5s Fade) */
         #line-indicator { 
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.6); 
             font-size: 100px; font-weight: 200; color: #007aff; pointer-events: none; opacity: 0; z-index: 10000; 
@@ -67,7 +61,6 @@
         }
         #line-indicator.active { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
-        /* Media Overlay (Slide Down Close) */
         #media-overlay { 
             position: fixed; inset: 0; backdrop-filter: blur(40px); background: rgba(255,255,255,0.1); 
             z-index: 9000; display: none; align-items: center; justify-content: center; 
@@ -130,7 +123,6 @@
         <div style="position:absolute; top:60px; left:30px; font-size:32px; z-index:9010;" onclick="closeMedia(event)">←</div>
         <img id="expanded-media">
         <textarea id="expanded-text" class="glass-panel" onclick="event.stopPropagation()" style="width:90%; height:70%; border-radius:18px; display:none; padding:20px; outline:none; border:none; font-family:monospace;"></textarea>
-        
         <div style="position:absolute; bottom:60px; left:50%; transform:translateX(-50%); display:flex; gap:15px; align-items:center;">
             <div class="glass-panel circle-btn" onclick="deleteCurrentMedia(event)">✕</div>
             <div id="media-filename" class="glass-panel" onclick="renameMedia(event)" style="padding:12px 24px; border-radius:25px; font-weight:500;"></div>
@@ -160,7 +152,6 @@
         const saveBar = document.getElementById('save-input-bar');
         const saveBtn = document.getElementById('save-btn');
 
-        // --- Restored: Save Button (Tap vs 0.5s Long Press) ---
         const handleSaveStart = (e) => {
             e.stopPropagation(); longPressActive = false;
             saveBtn.style.transform = 'scale(1.2)';
@@ -182,7 +173,6 @@
         saveBtn.addEventListener('touchstart', handleSaveStart); saveBtn.addEventListener('touchend', handleSaveEnd);
         saveBtn.addEventListener('mousedown', handleSaveStart); saveBtn.addEventListener('mouseup', handleSaveEnd);
 
-        // --- Core Sync & Preview ---
         window.sync = (src) => {
             if(isSyncing) return; isSyncing = true;
             const val = (src === 'input') ? raw.value : editor.getValue();
@@ -216,7 +206,6 @@
             }
         }
 
-        // --- Dock & Console Restored ---
         window.handleConsoleClick = (e) => {
             e.stopPropagation();
             const total = getErrorCount();
@@ -246,27 +235,38 @@
             haptic();
         };
 
-        // --- File Management & Preview Zoom ---
         window.handleFile = (e) => {
             const f = e.target.files[0]; if(!f) return;
+            
+            // --- Restored & Added: File Validation ---
+            const isImage = f.type.startsWith('image/');
+            const isText = f.type.startsWith('text/') || /\.(js|css|json|jsx|html)$/i.test(f.name);
+            
+            if (!isImage && !isText) {
+                alert("非対応のファイル形式です。");
+                haptic.error();
+                e.target.value = '';
+                return;
+            }
+
             const r = new FileReader();
             r.onload = (ev) => {
                 const div = document.createElement('div');
                 div.style = "width:50px; height:50px; background:rgba(255,255,255,0.4); border-radius:12px; overflow:hidden; flex-shrink:0; position:relative;";
-                const type = f.type.startsWith('image/') ? 'image' : 'text';
-                const el = type==='image' ? document.createElement('img') : document.createElement('div');
-                if(type==='image') el.src = ev.target.result; else el.innerText = '📄';
-                el.dataset.name = f.name; el.dataset.type = type; el.dataset.content = type==='text' ? ev.target.result : "";
+                const type = isImage ? 'image' : 'text';
+                const el = isImage ? document.createElement('img') : document.createElement('div');
+                if(isImage) el.src = ev.target.result; else el.innerText = '📄';
+                el.dataset.name = f.name; el.dataset.type = type; el.dataset.content = isText ? ev.target.result : "";
                 el.style = "width:100%; height:100%; object-fit:cover; display:flex; align-items:center; justify-content:center; font-size:24px;";
                 div.onclick = () => openMedia(el, div);
                 div.appendChild(el); document.getElementById('media-items').appendChild(div);
             };
-            if(f.type.startsWith('image/')) r.readAsDataURL(f); else r.readAsText(f);
+            if(isImage) r.readAsDataURL(f); else r.readAsText(f);
         };
 
         window.openMedia = (el, div) => {
             currentTargetItem = { el, div };
-            haptic(); // Restored: single haptic on expand
+            haptic();
             const o = document.getElementById('media-overlay');
             const img = document.getElementById('expanded-media');
             const txt = document.getElementById('expanded-text');
@@ -287,7 +287,6 @@
         window.deleteCurrentMedia = (e) => { e.stopPropagation(); if(confirm("Delete?")) { currentTargetItem.div.remove(); closeMedia(); } };
         window.renameMedia = (e) => { e.stopPropagation(); const n=prompt("Rename:", currentTargetItem.el.dataset.name); if(n){ currentTargetItem.el.dataset.name=n; document.getElementById('media-filename').innerText=n; } };
 
-        // --- Gestures: Pinch Out Restored ---
         let startDist = 0;
         raw.addEventListener('touchstart', e => { if(e.touches.length === 2) startDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); });
         raw.addEventListener('touchmove', e => {
