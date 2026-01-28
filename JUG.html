@@ -15,7 +15,6 @@
             overscroll-behavior-x: none;
         }
 
-        /* Glassmorphism Common Style */
         .glass-panel {
             background: rgba(255, 255, 255, 0.35);
             backdrop-filter: blur(25px);
@@ -25,113 +24,53 @@
         }
 
         .container-box { width: calc(100% - 20px); margin: 8px auto; border-radius: 18px; overflow: hidden; position: relative; }
-        
         #preview-section { flex: 1.2; transition: 0.5s var(--ios-ease); z-index: 10; }
         #preview-section.fullscreen { position: fixed; inset: 0; margin: 0; width: 100%; height: 100%; border-radius: 0; z-index: 8000; }
         #output-frame { width: 100%; height: 100%; border: none; background: #fff; pointer-events: auto; }
         
-        #expand-toggle-btn { 
-            position: absolute; bottom: 15px; right: 15px; width: 44px; height: 44px; 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-size: 24px; z-index: 8010; 
-        }
-        
+        #expand-toggle-btn { position: absolute; bottom: 15px; right: 15px; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 8010; }
         #editor-section { flex: 0.8; display: flex; margin-bottom: 85px; }
         #raw-editor { flex: 1; border: none; padding: 15px; outline: none; font-family: "SF Mono", monospace; background: rgba(255,255,255,0.5); -webkit-user-select: text; font-size: 13px; resize: none; touch-action: pan-y; }
 
-        /* Dock */
+        /* Dock & Console */
         #dock-area { position: fixed; bottom: 25px; right: 15px; display: flex; align-items: center; z-index: 4000; }
         #dock-wrapper { display: flex; align-items: center; padding: 6px; border-radius: 30px; }
-        #file-list { display: flex; gap: 10px; width: 0; opacity: 0; overflow: hidden; transition: 0.4s var(--ios-ease); padding: 0; }
+        #file-list { display: flex; gap: 10px; width: 0; opacity: 0; overflow: hidden; transition: 0.4s var(--ios-ease); }
         #file-list.open { width: auto; opacity: 1; margin-right: 10px; padding: 5px; }
+        #console-status { display: flex; align-items: center; gap: 8px; padding: 0 15px; height: 30px; border-left: 1px solid rgba(0,0,0,0.1); cursor: pointer; }
         
-        #folder-btn-container { width: 40px; height: 30px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .folder-icon { position: absolute; transition: 0.5s var(--ios-ease); font-size: 24px; }
-        .folder-icon.hide { transform: translateY(-40px); opacity: 0; }
-        .folder-icon.show { transform: translateY(0); opacity: 1; }
-        .folder-icon.wait { transform: translateY(40px); opacity: 0; }
-
-        /* Console Status */
-        #console-status { display: flex; align-items: center; gap: 8px; padding: 0 15px; height: 30px; border-left: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: color 0.3s; }
-        #error-icon { width: 18px; height: 18px; display: none; object-fit: contain; }
-        #console-text { font-size: 14px; color: #333; font-weight: 500 !important; transition: color 0.3s; }
-        
-        /* Console Log Overlay (Slide Up) */
         #error-log-overlay { 
-            position: fixed; bottom: 85px; right: 20px; width: 240px; 
-            border-radius: 18px; display: none; padding: 12px; z-index: 4000; 
-            font-size: 12px; max-height: 200px; overflow-y: auto; 
-            transform-origin: bottom center;
+            position: fixed; bottom: 85px; right: 20px; width: 240px; border-radius: 18px; display: none; padding: 12px; z-index: 4000; font-size: 12px; max-height: 200px; overflow-y: auto; 
             animation: slideUpConsole 0.4s var(--ios-ease) forwards;
         }
         @keyframes slideUpConsole { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        #error-log-overlay hr { border: none; border-top: 1px solid rgba(0,0,0,0.1); margin: 8px 0; }
 
-        /* Media Overlay (Slide Down Close) */
-        #media-overlay { 
-            position: fixed; inset: 0; backdrop-filter: blur(45px); background: rgba(255,255,255,0.1); 
-            z-index: 9000; display: none; align-items: center; justify-content: center; 
-            opacity: 0; transform: translateY(0); transition: 0.5s var(--ios-ease); 
-        }
+        /* Media Overlay */
+        #media-overlay { position: fixed; inset: 0; backdrop-filter: blur(45px); background: rgba(255,255,255,0.1); z-index: 9000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.5s var(--ios-ease); }
         #media-overlay.active { opacity: 1; transform: translateY(0); }
         #media-overlay.closing { opacity: 0; transform: translateY(100%); }
+        #expanded-media { width: auto; height: auto; max-width: 90vw; max-height: 70vh; object-fit: contain; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); background: #fff; display: none; transition: transform 0.4s var(--ios-ease); }
+        #expanded-media.zoomed { transform: scale(2) !important; }
+        #media-filename { max-width: 65vw; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        #expanded-media { 
-            width: auto; height: auto; max-width: 90vw; max-height: 70vh; object-fit: contain; 
-            border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); background: #fff; display: none; 
-            transition: transform 0.4s var(--ios-ease);
-        }
-        #expanded-text { 
-            width: 90%; height: 70%; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
-            background: #fff; display: none; padding: 20px; border: none; outline: none; 
-            font-family: "SF Mono", monospace; font-size: 14px; -webkit-user-select: text; resize: none;
-        }
-
-        #expanded-media.zoomed { transform: scale(2) !important; cursor: zoom-out; transition: transform 0.3s ease; }
-
-        /* Filename Container */
-        #filename-container {
-            position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
-            display: flex; align-items: center; gap: 15px; width: 100%; justify-content: center; pointer-events: none;
-        }
-        #media-filename {
-            pointer-events: auto; padding: 12px 24px; border-radius: 25px; font-weight: 500;
-            max-width: 65vw; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-
-        /* Line Indicator (Center Fade) */
-        #line-indicator {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
-            font-size: 80px; font-weight: 100; color: #333;
-            background: rgba(255,255,255,0.6); backdrop-filter: blur(30px);
-            padding: 20px 50px; border-radius: 40px; pointer-events: none;
-            opacity: 0; z-index: 9999;
-            transition: all 0.5s var(--ios-ease);
-        }
+        /* Line Indicator */
+        #line-indicator { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); font-size: 80px; font-weight: 100; color: #333; background: rgba(255,255,255,0.6); backdrop-filter: blur(30px); padding: 20px 50px; border-radius: 40px; pointer-events: none; opacity: 0; z-index: 9999; transition: 0.5s var(--ios-ease); }
         #line-indicator.active { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
-        /* Buttons & Save Bar */
-        .circle-btn {
-            width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-size: 22px; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        
+        /* Controls */
+        .circle-btn { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
         #save-input-bar { position: fixed; bottom: 25px; left: 15px; width: min(280px, 60vw); height: 50px; border-radius: 25px; z-index: 4500; display: flex; align-items: center; padding: 0 15px; opacity: 0; pointer-events: none; transform: translateY(20px) scale(0.9); transition: 0.4s var(--ios-ease); }
         #save-input-bar.active { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
-
+        
         #monaco-container { position: fixed; inset: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); z-index: 5000; display: none; opacity: 0; transform: scale(1.05); transition: 0.4s var(--ios-ease); flex-direction: column; }
         #monaco-container.active { display: flex; opacity: 1; transform: scale(1); }
-        
-        #ios-loader { position: fixed; inset: 0; background: rgba(255,255,255,0.4); backdrop-filter: blur(15px); z-index: 9999; display: none; align-items: center; justify-content: center; }
-        .spinner { width: 35px; height: 35px; border: 3px solid rgba(0,0,0,0.1); border-top: 3px solid #007aff; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body onclick="globalTap()">
 
     <div id="ios-loader"><div class="spinner"></div></div>
     <div id="error-log-overlay" class="glass-panel"></div>
-    <div id="line-indicator">22</div>
+    <div id="line-indicator"></div>
 
     <div id="preview-section" class="container-box glass-panel">
         <div id="expand-toggle-btn" class="glass-panel" onclick="toggleFullscreen(event)">→</div>
@@ -158,34 +97,29 @@
                 <div class="dock-item" onclick="document.getElementById('file-input').click()" style="width:50px;height:50px;background:rgba(255,255,255,0.4);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;">＋</div>
                 <div id="media-items" style="display:flex; gap:10px;"></div>
             </div>
-            
-            <div onclick="toggleDock(event)" id="folder-btn-container">
-                <span id="icon-close" class="folder-icon show">📁</span>
-                <span id="icon-open" class="folder-icon wait">📂</span>
+            <div onclick="toggleDock(event)" id="folder-btn-container" style="width:40px;height:30px;display:flex;justify-content:center;align-items:center;">
+                <span id="icon-close" class="folder-icon show" style="font-size:24px;">📁</span>
             </div>
-
             <div id="console-status" onclick="handleConsoleClick(event)">
-                <img src="NFC_Error@2x.png" id="error-icon" alt="Error">
+                <img src="NFC_Error@2x.png" id="error-icon" alt="Error" style="width:18px;display:none;">
                 <span id="console-text">Source</span>
             </div>
         </div>
     </div>
 
     <div id="media-overlay" onclick="closeMedia()">
-        <div class="overlay-btn-left" style="position:absolute; top:60px; left:30px; font-size:32px;" onclick="closeMedia(event)">←</div>
-        
+        <div style="position:absolute; top:60px; left:30px; font-size:32px;" onclick="closeMedia(event)">←</div>
         <img id="expanded-media">
-        <textarea id="expanded-text" onclick="event.stopPropagation()"></textarea>
-
-        <div id="filename-container" onclick="event.stopPropagation()">
-            <div class="glass-panel" style="width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; pointer-events: auto;" onclick="deleteCurrentMedia(event)">✕</div>
-            <div id="media-filename" class="glass-panel" onclick="renameMedia(event)">file.name</div>
+        <textarea id="expanded-text" class="glass-panel" onclick="event.stopPropagation()" style="width:90%;height:70%;border-radius:16px;display:none;padding:20px;"></textarea>
+        <div id="filename-container" style="position:absolute;bottom:60px;left:50%;transform:translateX(-50%);display:flex;gap:15px;align-items:center;">
+            <div class="glass-panel" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;" onclick="deleteCurrentMedia(event)">✕</div>
+            <div id="media-filename" class="glass-panel" onclick="renameMedia(event)" style="padding:12px 24px;border-radius:25px;"></div>
         </div>
     </div>
 
     <div id="monaco-container">
         <div id="monaco-body" style="flex:1;"></div>
-        <div class="glass-panel" style="position:absolute; bottom:30px; left:25px; width:55px; height:55px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px;" onclick="toggleUI('monaco-container', false)">←</div>
+        <div class="glass-panel circle-btn" style="position:absolute; bottom:30px; left:25px;" onclick="toggleUI('monaco-container', false)">←</div>
     </div>
 
     <input type="file" id="file-input" hidden onchange="handleFile(event)" accept="image/*,text/*,.js,.css,.json,.jsx">
@@ -196,349 +130,178 @@
         import { haptic } from "https://esm.sh/ios-haptics";
         window.haptic = haptic;
         document.getElementById("hapticConfirm").onclick = haptic.confirm;
-        
         document.getElementById("hapticError").onclick = () => {
             const delay = 220;
-            const sequence = [0, 1, 2, 4, 5, 6];
-            sequence.forEach(i => setTimeout(() => haptic.error(), i * delay));
+            [0, 1, 2, 4, 5, 6].forEach(i => setTimeout(() => haptic.error(), i * delay));
         };
 
         let editor, isSyncing = false, isDockOpen = false, currentTargetItem = null, runtimeErrors = [];
         let isSourceMode = false;
-        let saveTimer; // Save button timer
+        let saveTimer;
+        let longPressActive = false;
         const raw = document.getElementById('raw-editor');
-        const previewSection = document.getElementById('preview-section');
         const saveBar = document.getElementById('save-input-bar');
-
-        // --- Save Button Long Press Logic ---
         const saveBtn = document.getElementById('save-btn');
-        const handleSaveStart = (e) => {
+
+        // --- Save Button: Click & Long Press Coexistence ---
+        const handleStart = (e) => {
             e.stopPropagation();
+            longPressActive = false;
             saveBtn.style.transform = 'scale(1.2)';
-            haptic.confirm();
             saveTimer = setTimeout(() => {
+                longPressActive = true;
                 haptic.error();
                 if(confirm("全て削除しますか？")) {
                     raw.value = "";
                     if(editor) editor.setValue("");
                     sync('input');
-                    // メディアも消すならここに追加
                     document.getElementById('media-items').innerHTML = "";
                 }
                 saveBtn.style.transform = 'scale(1)';
-            }, 600); // 0.6s to be safe
+            }, 500);
         };
-        const handleSaveEnd = (e) => {
+        const handleEnd = (e) => {
             clearTimeout(saveTimer);
             saveBtn.style.transform = 'scale(1)';
-            // Short tap logic -> open input bar
-            if(e.type === 'touchend' || e.type === 'mouseup') {
-                // If it wasn't a long press (timer cleared), open save bar
+            // 長押しが発動していなければ通常の保存バー表示
+            if(!longPressActive && (e.type === 'touchend' || e.type === 'mouseup')) {
+                openSave(e);
             }
         };
+        saveBtn.addEventListener('touchstart', handleStart);
+        saveBtn.addEventListener('touchend', handleEnd);
+        saveBtn.addEventListener('mousedown', handleStart);
+        saveBtn.addEventListener('mouseup', handleEnd);
 
-        // Long press handling manually
-        saveBtn.addEventListener('touchstart', handleSaveStart);
-        saveBtn.addEventListener('touchend', handleSaveEnd);
-        saveBtn.addEventListener('mousedown', handleSaveStart);
-        saveBtn.addEventListener('mouseup', handleSaveEnd);
-
-        window.openSave = (e) => { 
-            // openSave is now triggered only if timer didn't fire logic handled in start/end but here for click fallback
-            // But we need to separate click from long press.
-            // Simplified: if scale is 1, it means short press.
-            if(saveBtn.style.transform === 'scale(1)') {
-                saveBar.classList.add('active'); 
-                haptic.confirm(); 
-            }
-        };
-
-        // --- Line Indicator ---
-        function showLineIndicator(line) {
-            const el = document.getElementById('line-indicator');
-            el.innerText = line;
-            el.classList.remove('active');
-            void el.offsetWidth; // Force reflow
-            el.classList.add('active');
-            
-            // Auto hide after 1.5s
-            setTimeout(() => {
-                el.classList.remove('active');
-            }, 1500);
-        }
-
-        // --- Console / Source Logic ---
-        window.handleConsoleClick = (e) => {
+        window.openSave = (e) => {
             e.stopPropagation();
-            const totalErrors = getErrorCount();
-            if (totalErrors > 0) {
-                document.getElementById("hapticConfirm").click();
-                const logOverlay = document.getElementById('error-log-overlay');
-                // Slide Up Logic
-                if (logOverlay.style.display === 'block') {
-                    logOverlay.style.animation = 'none'; // reset
-                    logOverlay.style.display = 'none';
-                } else {
-                    logOverlay.style.display = 'block';
-                    logOverlay.style.animation = 'slideUpConsole 0.4s var(--ios-ease) forwards';
-                }
-            } else {
-                isSourceMode = !isSourceMode;
-                updateConsoleUI();
-                if (isSourceMode) {
-                    document.getElementById("hapticError").click();
-                } else {
-                    haptic();
-                }
-            }
-        };
-
-        function getErrorCount() {
-            if (!editor) return 0;
-            return monaco.editor.getModelMarkers({ owner: 'html' }).length + runtimeErrors.length;
-        }
-
-        function updateConsoleUI() {
-            const total = getErrorCount();
-            const icon = document.getElementById('error-icon');
-            const text = document.getElementById('console-text');
-            const logOverlay = document.getElementById('error-log-overlay');
-
-            if (total > 0) {
-                isSourceMode = false;
-                icon.style.display = 'block';
-                text.innerText = `Console (${total})`;
-                text.style.color = '#ff3b30';
-                
-                const mLogs = markers.map(m => `Line ${m.startLineNumber}: ${m.message}`);
-                const rLogs = runtimeErrors.map(e => `Runtime: ${e}`);
-                logOverlay.innerHTML = [...mLogs, ...rLogs].join('<hr>');
-            } else {
-                icon.style.display = 'none';
-                logOverlay.style.display = 'none';
-                text.innerText = 'Source';
-                text.style.color = isSourceMode ? '#007aff' : '#333';
-            }
-        }
-
-        function deactivateSourceMode() {
-            if (isSourceMode) {
-                isSourceMode = false;
-                updateConsoleUI();
-            }
-        }
-
-        // --- File System & Media ---
-        window.handleFile = (e) => {
-            const f = e.target.files[0]; if(!f) return;
-            document.getElementById('ios-loader').style.display = 'flex';
-            const r = new FileReader();
-            
-            const isImage = f.type.startsWith('image/');
-            r.onload = (ev) => {
-                const div = document.createElement('div');
-                div.style = "width:50px; height:50px; background:rgba(255,255,255,0.4); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; position:relative;";
-                
-                const label = document.createElement('span');
-                label.style = "position:absolute; bottom: -18px; font-size:9px; width:100%; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#8e8e93;";
-                label.innerText = f.name;
-
-                if (isImage) {
-                    const img = document.createElement('img');
-                    img.src = ev.target.result; img.dataset.name = f.name; img.dataset.type = "image";
-                    img.style = "width:100%; height:100%; object-fit:cover;";
-                    img.onclick = () => openMedia(img, div);
-                    div.appendChild(img);
-                } else {
-                    const ext = f.name.split('.').pop().toLowerCase();
-                    const icon = ext === 'css' ? '📑' : '📄';
-                    div.style.fontSize = "24px";
-                    div.innerText = icon;
-                    div.dataset.content = ev.target.result;
-                    div.dataset.name = f.name;
-                    div.dataset.type = "text";
-                    div.onclick = () => openMedia(div, div);
-                }
-                div.appendChild(label);
-                document.getElementById('media-items').appendChild(div);
-                document.getElementById('ios-loader').style.display = 'none';
-                e.target.value = '';
-            };
-            if (isImage) r.readAsDataURL(f); else r.readAsText(f);
-        };
-
-        let lastTapTime = 0;
-        window.openMedia = (target, parentDiv) => {
             deactivateSourceMode();
-            currentTargetItem = { el: target, div: parentDiv };
-            const type = target.dataset.type;
-            const overlay = document.getElementById('media-overlay');
-            const imgView = document.getElementById('expanded-media');
-            const textView = document.getElementById('expanded-text');
-            const nameLabel = document.getElementById('media-filename');
-
-            overlay.classList.remove('closing');
-            overlay.style.display = 'flex';
-            setTimeout(() => overlay.classList.add('active'), 10);
-            
-            nameLabel.innerText = target.dataset.name;
-            imgView.classList.remove('zoomed');
-
-            if (type === 'image') {
-                imgView.src = target.src;
-                imgView.style.display = 'block';
-                textView.style.display = 'none';
-                imgView.onclick = (e) => {
-                    e.stopPropagation();
-                    const currentTime = new Date().getTime();
-                    const tapLength = currentTime - lastTapTime;
-                    if (tapLength < 300 && tapLength > 0) {
-                        imgView.classList.toggle('zoomed');
-                        haptic();
-                    }
-                    lastTapTime = currentTime;
-                };
-            } else {
-                textView.value = target.dataset.content;
-                imgView.style.display = 'none';
-                textView.style.display = 'block';
-                textView.oninput = () => { target.dataset.content = textView.value; };
-            }
+            saveBar.classList.add('active');
             haptic.confirm();
         };
 
-        window.closeMedia = (e) => {
-            if(e) e.stopPropagation();
-            haptic();
-            const o = document.getElementById('media-overlay');
-            o.classList.add('closing');
-            o.classList.remove('active');
-            setTimeout(() => { o.style.display = 'none'; o.classList.remove('closing'); }, 500);
-        };
-
-        window.renameMedia = (e) => {
-            e.stopPropagation(); haptic.error();
-            const currentName = currentTargetItem.el.dataset.name;
-            const name = prompt("Rename File:", currentName);
-            if(name) {
-                currentTargetItem.el.dataset.name = name;
-                document.getElementById('media-filename').innerText = name;
-                currentTargetItem.div.querySelector('span').innerText = name;
-            }
-        };
-
-        window.deleteCurrentMedia = (e) => {
-            e.stopPropagation(); haptic.error();
-            if(confirm("Delete this file?")) { currentTargetItem.div.remove(); closeMedia(); }
-        };
-
-        // --- Core Sync ---
+        // --- Sync & Console Logic ---
         window.sync = (src) => {
             if(isSyncing) return; isSyncing = true;
             const val = (src === 'input') ? raw.value : editor.getValue();
             raw.value = val;
             if(editor && src !== 'monaco') editor.setValue(val);
-            
             runtimeErrors = [];
-            const injectedScript = `
-                <script>
-                    window.onerror=(m,u,l)=>window.parent.postMessage({t:'e',m:m+'(L'+l+')'},'*');
-                    window.addEventListener('error',e=>{if(e.target.tagName==='SCRIPT'||e.target.tagName==='LINK')window.parent.postMessage({t:'e',m:'Load Error: '+(e.target.src||e.target.href)},'*');},true);
-                    
-                    document.addEventListener('click', function(e) {
-                        window.parent.postMessage({
-                            t: 'click', 
-                            tag: e.target.tagName.toLowerCase(),
-                            id: e.target.id,
-                            cls: e.target.className
-                        }, '*');
-                    }, true);
-                <\/script>
-            `;
-            
-            const frame = document.getElementById('output-frame');
-            frame.srcdoc = injectedScript + val;
+            const script = `<script>
+                window.onerror=(m,u,l)=>window.parent.postMessage({t:'e',m:m+'(L'+l+')'},'*');
+                document.addEventListener('click', e => window.parent.postMessage({t:'click',tag:e.target.tagName.toLowerCase(),id:e.target.id,cls:e.target.className}, '*'), true);
+            <\/script>`;
+            document.getElementById('output-frame').srcdoc = script + val;
             isSyncing = false;
             setTimeout(updateConsoleUI, 500);
         };
 
-        window.addEventListener('message', e => { 
-            if(e.data.t === 'e'){ 
-                runtimeErrors.push(e.data.m); 
-                updateConsoleUI(); 
+        window.handleConsoleClick = (e) => {
+            e.stopPropagation();
+            const total = getErrorCount();
+            if (total > 0) {
+                haptic.confirm();
+                const log = document.getElementById('error-log-overlay');
+                log.style.display = log.style.display === 'block' ? 'none' : 'block';
+            } else {
+                isSourceMode = !isSourceMode;
+                updateConsoleUI();
+                if (isSourceMode) document.getElementById("hapticError").click(); else haptic();
             }
-            else if(e.data.t === 'click') {
-                if(isSourceMode) {
-                    jumpToCss(e.data);
-                }
-            }
-        });
+        };
 
-        function jumpToCss(data) {
-            if(!editor) return;
-            let searchStr = "";
-            if(data.id) searchStr = "#" + data.id;
-            else if(data.cls) searchStr = "." + data.cls.split(' ')[0];
-            else searchStr = data.tag;
+        function getErrorCount() {
+            return (editor ? monaco.editor.getModelMarkers({ owner: 'html' }).length : 0) + runtimeErrors.length;
+        }
 
-            if(searchStr) {
-                const matches = editor.getModel().findMatches(searchStr, false, false, false, null, true);
-                if(matches.length > 0) {
-                    const line = matches[0].range.startLineNumber;
-                    editor.revealLineInCenter(line);
-                    editor.setPosition({lineNumber: line, column: 1});
-                    editor.focus();
-                    
-                    toggleUI('monaco-container', true);
-                    showLineIndicator(line); // Show Floating Number
-                    haptic.confirm();
-                }
+        function updateConsoleUI() {
+            const total = getErrorCount();
+            const text = document.getElementById('console-text');
+            const icon = document.getElementById('error-icon');
+            if (total > 0) {
+                isSourceMode = false; icon.style.display = 'block'; text.innerText = `Console (${total})`; text.style.color = '#ff3b30';
+            } else {
+                icon.style.display = 'none'; text.innerText = 'Source'; text.style.color = isSourceMode ? '#007aff' : '#333';
             }
         }
 
+        window.addEventListener('message', e => {
+            if(e.data.t === 'e') { runtimeErrors.push(e.data.m); updateConsoleUI(); }
+            if(e.data.t === 'click' && isSourceMode) jumpToCss(e.data);
+        });
+
+        function jumpToCss(data) {
+            let s = data.id ? "#"+data.id : (data.cls ? "."+data.cls.split(' ')[0] : data.tag);
+            const m = editor.getModel().findMatches(s, false, false, false, null, true);
+            if(m.length > 0) {
+                const l = m[0].range.startLineNumber;
+                editor.revealLineInCenter(l); editor.setPosition({lineNumber: l, column: 1}); editor.focus();
+                toggleUI('monaco-container', true);
+                const ind = document.getElementById('line-indicator');
+                ind.innerText = l; ind.classList.add('active'); setTimeout(()=>ind.classList.remove('active'), 1500);
+                haptic.confirm();
+            }
+        }
+
+        // --- Basic UI ---
         window.toggleFullscreen = (e) => {
-            e.stopPropagation();
-            deactivateSourceMode();
-            const frame = document.getElementById('output-frame');
-            frame.srcdoc = ""; 
             previewSection.classList.toggle('fullscreen');
             document.getElementById('expand-toggle-btn').innerText = previewSection.classList.contains('fullscreen') ? '←' : '→';
             haptic.confirm();
-            setTimeout(() => sync('input'), 50);
-        };
-
-        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
-        require(['vs/editor/editor.main'], () => {
-            editor = monaco.editor.create(document.getElementById('monaco-body'), { 
-                value: raw.value, language: 'html', theme: 'vs', automaticLayout: true, fontSize: 16, minimap: { enabled: false }
-            });
-            editor.onDidChangeModelContent(() => sync('monaco'));
-            editor.onDidChangeModelDecorations(() => updateConsoleUI());
-        });
-
-        window.toggleDock = (e) => {
-            e.stopPropagation(); deactivateSourceMode();
-            isDockOpen = !isDockOpen;
-            document.getElementById('file-list').classList.toggle('open', isDockOpen);
-            document.getElementById('icon-close').className = isDockOpen ? 'folder-icon hide' : 'folder-icon show';
-            document.getElementById('icon-open').className = isDockOpen ? 'folder-icon show' : 'folder-icon wait';
-            haptic();
         };
 
         window.toggleUI = (id, show) => {
-            deactivateSourceMode();
             const t = document.getElementById(id);
             if(show){ haptic.error(); t.style.display='flex'; setTimeout(()=>t.classList.add('active'),10); }
             else { haptic(); t.classList.remove('active'); setTimeout(()=>t.style.display='none',400); }
         };
 
-        window.globalTap = () => { if(isDockOpen) toggleDock({stopPropagation:()=>{}}); saveBar.classList.remove('active'); document.getElementById('error-log-overlay').style.display='none'; };
-        window.downloadHtml = (e) => { e.stopPropagation(); haptic.error(); const b=new Blob([raw.value],{type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=document.getElementById('fn').value||'index.html'; a.click(); };
+        window.closeMedia = () => {
+            const o = document.getElementById('media-overlay');
+            o.classList.add('closing'); haptic();
+            setTimeout(() => { o.style.display='none'; o.classList.remove('active','closing'); }, 500);
+        };
+
+        window.globalTap = () => { saveBar.classList.remove('active'); document.getElementById('error-log-overlay').style.display='none'; };
+        function deactivateSourceMode() { isSourceMode = false; updateConsoleUI(); }
+
+        // --- Files ---
+        window.handleFile = (e) => {
+            const f = e.target.files[0]; if(!f) return;
+            const r = new FileReader();
+            r.onload = (ev) => {
+                const div = document.createElement('div');
+                div.style = "width:50px;height:50px;background:rgba(255,255,255,0.4);border-radius:12px;overflow:hidden;flex-shrink:0;position:relative;";
+                const type = f.type.startsWith('image/') ? 'image' : 'text';
+                const el = type==='image' ? document.createElement('img') : document.createElement('div');
+                if(type==='image') el.src = ev.target.result; else el.innerText = '📄';
+                el.dataset.name = f.name; el.dataset.type = type; el.dataset.content = type==='text' ? ev.target.result : "";
+                el.style = "width:100%;height:100%;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:24px;";
+                div.onclick = () => openMedia(el, div);
+                div.appendChild(el); document.getElementById('media-items').appendChild(div);
+            };
+            if(f.type.startsWith('image/')) r.readAsDataURL(f); else r.readAsText(f);
+        };
+
+        window.openMedia = (el, div) => {
+            currentTargetItem = { el, div };
+            const o = document.getElementById('media-overlay');
+            const img = document.getElementById('expanded-media');
+            const txt = document.getElementById('expanded-text');
+            document.getElementById('media-filename').innerText = el.dataset.name;
+            if(el.dataset.type === 'image') { img.src = el.src; img.style.display='block'; txt.style.display='none'; }
+            else { txt.value = el.dataset.content; img.style.display='none'; txt.style.display='block'; }
+            o.style.display='flex'; setTimeout(()=>o.classList.add('active'),10); haptic.confirm();
+        };
+
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+        require(['vs/editor/editor.main'], () => {
+            editor = monaco.editor.create(document.getElementById('monaco-body'), { value: raw.value, language: 'html', theme: 'vs', automaticLayout: true, fontSize: 16, minimap: { enabled: false }});
+            editor.onDidChangeModelContent(() => sync('monaco'));
+        });
         
-        document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); if (e.touches[0].pageX < 20 || e.touches[0].pageX > window.innerWidth - 20) e.preventDefault(); }, { passive: false });
-        let sD = 0;
-        raw.addEventListener('touchstart', e => { if(e.touches.length===2) sD=Math.hypot(e.touches[0].pageX-e.touches[1].pageX, e.touches[0].pageY-e.touches[1].pageY); });
-        raw.addEventListener('touchmove', e => { if(e.touches.length===2 && sD>0) { let d=Math.hypot(e.touches[0].pageX-e.touches[1].pageX, e.touches[0].pageY-e.touches[1].pageY); if(d>sD+60){ toggleUI('monaco-container',true); sD=0; } } });
+        window.downloadHtml = (e) => { const b=new Blob([raw.value],{type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=document.getElementById('fn').value||'index.html'; a.click(); haptic.error(); };
+        window.toggleDock = (e) => { isDockOpen = !isDockOpen; document.getElementById('file-list').classList.toggle('open', isDockOpen); haptic(); };
     </script>
 </body>
 </html>
