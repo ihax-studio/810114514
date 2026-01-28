@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>iOS Ultimate Debug Pro - Final Restored</title>
+    <title>iOS Ultimate Debug Pro - Fully Restored</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <style>
         :root { --ios-ease: cubic-bezier(0.23, 1, 0.32, 1); }
@@ -14,12 +14,12 @@
             background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        /* Glassmorphism Styles - All white borders & blur */
+        /* All-over Glassmorphism with White Border */
         .glass-panel {
             background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1.5px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1.5px solid rgba(255, 255, 255, 0.6);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
         }
 
@@ -31,7 +31,7 @@
         #editor-section { flex: 0.8; display: flex; margin-bottom: 85px; }
         #raw-editor { flex: 1; border: none; padding: 15px; outline: none; font-family: "SF Mono", monospace; background: transparent; -webkit-user-select: text; font-size: 13px; resize: none; touch-action: pan-y; }
 
-        /* Save Input Bar (Front Most) */
+        /* Save Input Bar (Top Most) */
         #save-input-bar { 
             position: fixed; bottom: 25px; left: 15px; width: min(300px, 70vw); height: 50px; 
             border-radius: 25px; z-index: 9999; display: flex; align-items: center; padding: 0 15px; 
@@ -39,30 +39,31 @@
         }
         #save-input-bar.active { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
 
-        /* Dock & Console */
+        /* Dock Area */
         #dock-area { position: fixed; bottom: 25px; right: 15px; display: flex; align-items: center; z-index: 4000; }
         #dock-wrapper { display: flex; align-items: center; padding: 6px; border-radius: 30px; }
         #file-list { display: flex; gap: 10px; width: 0; opacity: 0; overflow: hidden; transition: 0.4s var(--ios-ease); }
         #file-list.open { width: auto; opacity: 1; margin-right: 10px; padding: 5px; }
         
+        /* Folder Icon Slide */
         #folder-btn-container { width: 40px; height: 30px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .folder-icon { position: absolute; transition: 0.5s var(--ios-ease); font-size: 24px; }
         .folder-icon.hide { transform: translateY(-40px); opacity: 0; }
         .folder-icon.show { transform: translateY(0); opacity: 1; }
         .folder-icon.wait { transform: translateY(40px); opacity: 0; }
 
-        /* Console Slide Up */
+        /* Console Log (Slide Up) */
         #error-log-overlay { 
             position: fixed; bottom: 85px; right: 20px; width: 260px; border-radius: 18px; display: none; padding: 15px; z-index: 4001; 
-            transform-origin: bottom right; animation: slideUp 0.4s var(--ios-ease) forwards;
+            transform-origin: bottom right; animation: slideUpConsole 0.4s var(--ios-ease) forwards;
         }
-        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideUpConsole { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* Line Indicator (Center Fade) */
+        /* Line Indicator (0.5s Fade) */
         #line-indicator { 
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5); 
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.6); 
             font-size: 100px; font-weight: 200; color: #007aff; pointer-events: none; opacity: 0; z-index: 10000; 
-            transition: 0.5s var(--ios-ease); 
+            transition: opacity 0.5s ease, transform 0.5s var(--ios-ease); 
         }
         #line-indicator.active { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
@@ -70,15 +71,16 @@
         #media-overlay { 
             position: fixed; inset: 0; backdrop-filter: blur(40px); background: rgba(255,255,255,0.1); 
             z-index: 9000; display: none; align-items: center; justify-content: center; 
-            transition: 0.5s var(--ios-ease); 
+            opacity: 0; transition: transform 0.5s var(--ios-ease), opacity 0.5s ease; 
         }
-        #media-overlay.active { display: flex; opacity: 1; }
+        #media-overlay.active { display: flex; opacity: 1; transform: translateY(0); }
         #media-overlay.closing { transform: translateY(100%); opacity: 0; }
 
         #expanded-media { width: auto; height: auto; max-width: 85vw; max-height: 65vh; object-fit: contain; border-radius: 14px; box-shadow: 0 30px 60px rgba(0,0,0,0.2); background: #fff; transition: transform 0.4s var(--ios-ease); }
-        #expanded-media.zoomed { transform: scale(2); }
+        #expanded-media.zoomed { transform: scale(2.2); }
 
         .circle-btn { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; }
+        
         #monaco-container { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 9500; display: none; opacity: 0; transform: scale(1.02); transition: 0.4s var(--ios-ease); flex-direction: column; }
         #monaco-container.active { display: flex; opacity: 1; transform: scale(1); }
     </style>
@@ -89,12 +91,12 @@
     <div id="error-log-overlay" class="glass-panel"></div>
 
     <div id="preview-section" class="container-box glass-panel">
-        <div id="expand-toggle-btn" class="glass-panel circle-btn" style="position:absolute; bottom:15px; right:15px; width:44px; height:44px;" onclick="toggleFullscreen(event)">→</div>
+        <div id="expand-toggle-btn" class="glass-panel circle-btn" style="position:absolute; bottom:15px; right:15px; width:44px; height:44px; z-index:8010;" onclick="toggleFullscreen(event)">→</div>
         <iframe id="output-frame" sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"></iframe>
     </div>
 
     <div id="editor-section" class="container-box glass-panel">
-        <textarea id="raw-editor" oninput="sync('input')" placeholder="Pinch out to open Monaco..."></textarea>
+        <textarea id="raw-editor" oninput="sync('input')" placeholder="Pinch out to expand..."></textarea>
     </div>
 
     <div style="position:fixed; bottom:25px; left:15px; display:flex; gap:12px; z-index:4000;">
@@ -131,7 +133,7 @@
         
         <div style="position:absolute; bottom:60px; left:50%; transform:translateX(-50%); display:flex; gap:15px; align-items:center;">
             <div class="glass-panel circle-btn" onclick="deleteCurrentMedia(event)">✕</div>
-            <div id="media-filename" class="glass-panel" onclick="renameMedia(event)" style="padding:12px 24px; border-radius:25px; font-weight:500;">name.png</div>
+            <div id="media-filename" class="glass-panel" onclick="renameMedia(event)" style="padding:12px 24px; border-radius:25px; font-weight:500;"></div>
         </div>
     </div>
 
@@ -149,8 +151,7 @@
         window.haptic = haptic;
         document.getElementById("hapticConfirm").onclick = haptic.confirm;
         document.getElementById("hapticError").onclick = () => {
-            const delay = 220;
-            [0, 1, 2, 4, 5, 6].forEach(i => setTimeout(() => haptic.error(), i * delay));
+            const d = 220; [0,1,2,4,5,6].forEach(i => setTimeout(() => haptic.error(), i*d));
         };
 
         let editor, isSyncing = false, isDockOpen = false, currentTargetItem = null, runtimeErrors = [];
@@ -159,8 +160,8 @@
         const saveBar = document.getElementById('save-input-bar');
         const saveBtn = document.getElementById('save-btn');
 
-        // --- Save Button logic ---
-        const handleStart = (e) => {
+        // --- Restored: Save Button (Tap vs 0.5s Long Press) ---
+        const handleSaveStart = (e) => {
             e.stopPropagation(); longPressActive = false;
             saveBtn.style.transform = 'scale(1.2)';
             saveTimer = setTimeout(() => {
@@ -172,16 +173,16 @@
                 saveBtn.style.transform = 'scale(1)';
             }, 500);
         };
-        const handleEnd = (e) => {
+        const handleSaveEnd = (e) => {
             clearTimeout(saveTimer); saveBtn.style.transform = 'scale(1)';
             if(!longPressActive && (e.type === 'touchend' || e.type === 'mouseup')) {
                 saveBar.classList.add('active'); haptic.confirm();
             }
         };
-        saveBtn.addEventListener('touchstart', handleStart); saveBtn.addEventListener('touchend', handleEnd);
-        saveBtn.addEventListener('mousedown', handleStart); saveBtn.addEventListener('mouseup', handleEnd);
+        saveBtn.addEventListener('touchstart', handleSaveStart); saveBtn.addEventListener('touchend', handleSaveEnd);
+        saveBtn.addEventListener('mousedown', handleSaveStart); saveBtn.addEventListener('mouseup', handleSaveEnd);
 
-        // --- Core Functions & Sync ---
+        // --- Core Sync & Preview ---
         window.sync = (src) => {
             if(isSyncing) return; isSyncing = true;
             const val = (src === 'input') ? raw.value : editor.getValue();
@@ -197,10 +198,10 @@
 
         window.addEventListener('message', e => {
             if(e.data.t === 'e') { runtimeErrors.push(e.data.m); updateConsoleUI(); }
-            if(e.data.t === 'click' && isSourceMode) jumpToCss(e.data);
+            if(e.data.t === 'click' && isSourceMode) jumpToCode(e.data);
         });
 
-        function jumpToCss(data) {
+        function jumpToCode(data) {
             if(!editor) return;
             let s = data.id ? "#"+data.id : (data.cls ? "."+data.cls.split(' ')[0] : data.tag);
             const m = editor.getModel().findMatches(s, false, false, false, null, true);
@@ -209,13 +210,13 @@
                 editor.revealLineInCenter(l); editor.setPosition({lineNumber: l, column: 1});
                 toggleUI('monaco-container', true);
                 const ind = document.getElementById('line-indicator');
-                ind.innerText = l; ind.classList.add('active'); 
-                setTimeout(()=>ind.classList.remove('active'), 1200);
+                ind.innerText = l; ind.classList.add('active');
+                setTimeout(() => ind.classList.remove('active'), 1200);
                 haptic.confirm();
             }
         }
 
-        // --- Dock & Console ---
+        // --- Dock & Console Restored ---
         window.handleConsoleClick = (e) => {
             e.stopPropagation();
             const total = getErrorCount();
@@ -233,7 +234,7 @@
             const total = getErrorCount();
             const text = document.getElementById('console-text');
             const icon = document.getElementById('error-icon');
-            if (total > 0) { isSourceMode = false; icon.style.display = 'block'; text.innerText = `Console (${total})`; text.style.color = '#ff3b30'; }
+            if (total > 0) { icon.style.display = 'block'; text.innerText = `Console (${total})`; text.style.color = '#ff3b30'; }
             else { icon.style.display = 'none'; text.innerText = 'Source'; text.style.color = isSourceMode ? '#007aff' : '#333'; }
         }
 
@@ -245,7 +246,7 @@
             haptic();
         };
 
-        // --- File Management ---
+        // --- File Management & Preview Zoom ---
         window.handleFile = (e) => {
             const f = e.target.files[0]; if(!f) return;
             const r = new FileReader();
@@ -265,6 +266,7 @@
 
         window.openMedia = (el, div) => {
             currentTargetItem = { el, div };
+            haptic(); // Restored: single haptic on expand
             const o = document.getElementById('media-overlay');
             const img = document.getElementById('expanded-media');
             const txt = document.getElementById('expanded-text');
@@ -273,29 +275,32 @@
                 img.src = el.src; img.style.display='block'; txt.style.display='none'; 
                 img.onclick = (e) => { e.stopPropagation(); const now = Date.now(); if(now-lastTap<300){ img.classList.toggle('zoomed'); haptic(); } lastTap=now; };
             } else { txt.value = el.dataset.content; img.style.display='none'; txt.style.display='block'; }
-            o.style.display='flex'; setTimeout(()=>o.classList.add('active'),10); haptic.confirm();
+            o.style.display='flex'; setTimeout(() => o.classList.add('active'), 10);
         };
+
         window.closeMedia = () => {
             const o = document.getElementById('media-overlay');
             o.classList.add('closing'); haptic();
             setTimeout(() => { o.style.display='none'; o.classList.remove('active','closing'); }, 500);
         };
+
         window.deleteCurrentMedia = (e) => { e.stopPropagation(); if(confirm("Delete?")) { currentTargetItem.div.remove(); closeMedia(); } };
         window.renameMedia = (e) => { e.stopPropagation(); const n=prompt("Rename:", currentTargetItem.el.dataset.name); if(n){ currentTargetItem.el.dataset.name=n; document.getElementById('media-filename').innerText=n; } };
 
-        // --- Gestures & UI ---
+        // --- Gestures: Pinch Out Restored ---
         let startDist = 0;
         raw.addEventListener('touchstart', e => { if(e.touches.length === 2) startDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); });
         raw.addEventListener('touchmove', e => {
             if(e.touches.length === 2 && startDist > 0) {
-                let currentDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                if(currentDist > startDist + 80) { toggleUI('monaco-container', true); startDist = 0; }
+                let d = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+                if(d > startDist + 80) { toggleUI('monaco-container', true); startDist = 0; }
             }
         });
 
         window.toggleFullscreen = (e) => {
-            e.stopPropagation(); document.getElementById('preview-section').classList.toggle('fullscreen');
-            document.getElementById('expand-toggle-btn').innerText = document.getElementById('preview-section').classList.contains('fullscreen') ? '←' : '→';
+            e.stopPropagation(); const ps = document.getElementById('preview-section');
+            ps.classList.toggle('fullscreen');
+            document.getElementById('expand-toggle-btn').innerText = ps.classList.contains('fullscreen') ? '←' : '→';
             haptic.confirm(); sync('input');
         };
 
@@ -305,7 +310,7 @@
             else { haptic(); t.classList.remove('active'); setTimeout(()=>t.style.display='none',400); }
         };
 
-        window.globalTap = () => { saveBar.classList.remove('active'); document.getElementById('error-log-overlay').style.display='none'; isSourceMode=false; updateConsoleUI(); };
+        window.globalTap = () => { saveBar.classList.remove('active'); document.getElementById('error-log-overlay').style.display='none'; };
         window.downloadHtml = (e) => { e.stopPropagation(); const b=new Blob([raw.value],{type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=document.getElementById('fn').value||'index.html'; a.click(); haptic.error(); };
 
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
