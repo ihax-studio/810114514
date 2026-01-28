@@ -37,34 +37,50 @@
         .folder-icon.wait { transform: translateY(40px); opacity: 0; }
 
         /* Console Status */
-        #console-status { display: flex; align-items: center; gap: 8px; padding: 0 15px; height: 30px; border-left: 1px solid rgba(0,0,0,0.08); cursor: pointer; }
+        #console-status { display: flex; align-items: center; gap: 8px; padding: 0 15px; height: 30px; border-left: 1px solid rgba(0,0,0,0.08); cursor: pointer; transition: color 0.3s; }
         #error-icon { width: 18px; height: 18px; display: none; object-fit: contain; }
-        #console-text { font-size: 14px; color: #333; font-weight: 500 !important; }
-
-        #error-log-overlay { position: fixed; bottom: 85px; right: 20px; width: 240px; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: 18px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); display: none; padding: 12px; z-index: 4000; font-size: 12px; max-height: 200px; overflow-y: auto; }
+        #console-text { font-size: 14px; color: #333; font-weight: 500 !important; transition: color 0.3s; }
+        
+        /* Console Log Overlay with Animation */
+        #error-log-overlay { 
+            position: fixed; bottom: 85px; right: 20px; width: 240px; 
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); 
+            border-radius: 18px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
+            display: none; padding: 12px; z-index: 4000; font-size: 12px; 
+            max-height: 200px; overflow-y: auto; 
+            transform-origin: bottom right; animation: popScale 0.3s var(--ios-ease) forwards;
+        }
+        @keyframes popScale { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         #error-log-overlay hr { border: none; border-top: 1px solid rgba(0,0,0,0.1); margin: 8px 0; }
 
         /* Media Overlay & Filename Styles */
         #media-overlay { position: fixed; inset: 0; backdrop-filter: blur(45px); background: rgba(255,255,255,0.2); z-index: 9000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.4s var(--ios-ease); }
         #media-overlay.active { display: flex; opacity: 1; }
         
-        /* プレビュー本体 (Scaleアニメーション用) */
-        #expanded-media, #expanded-text { 
-            max-width: 90%; max-height: 70%; width: 90%; height: 70%; 
+        /* 画像は自身のサイズに合わせて枠を変える */
+        #expanded-media { 
+            width: auto; height: auto; 
+            max-width: 90vw; max-height: 70vh; 
+            object-fit: contain; 
             border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
             background: #fff; display: none; 
-            transform: scale(0.85); transition: 0.4s var(--ios-ease); /* 初期状態 */
+            transform: scale(0.85); transition: transform 0.4s var(--ios-ease);
         }
-        #media-overlay.active #expanded-media, 
-        #media-overlay.active #expanded-text { transform: scale(1); } /* 表示時 */
+        
+        /* テキストエディタ用は固定比率に近い形を維持 */
+        #expanded-text { 
+            width: 90%; height: 70%; 
+            border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+            background: #fff; display: none; 
+            transform: scale(0.85); transition: transform 0.4s var(--ios-ease);
+            padding: 20px; border: none; outline: none; font-family: "SF Mono", monospace; font-size: 14px; -webkit-user-select: text; resize: none;
+        }
 
-        /* 画像ダブルタップ拡大用 */
+        #media-overlay.active #expanded-media, 
+        #media-overlay.active #expanded-text { transform: scale(1); }
         #expanded-media.zoomed { transform: scale(2) !important; cursor: zoom-out; transition: transform 0.3s ease; }
 
-        #expanded-text { padding: 20px; border: none; outline: none; font-family: "SF Mono", monospace; font-size: 14px; -webkit-user-select: text; resize: none; }
-        #expanded-media { object-fit: contain; }
-
-        /* ファイル名表示エリア (要件: 中央揃え, 最大65%, タップ変更) */
+        /* Filename Container */
         #filename-container {
             position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
             display: flex; align-items: center; gap: 15px; width: 100%; justify-content: center; pointer-events: none;
@@ -73,9 +89,8 @@
             pointer-events: auto;
             background: rgba(255,255,255,0.7); backdrop-filter: blur(15px);
             padding: 12px 24px; border-radius: 25px; font-weight: 500;
-            max-width: 65vw; /* 画面幅の65%制限 */
-            text-align: center;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* はみ出し対策 */
+            max-width: 65vw; text-align: center;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
@@ -127,7 +142,7 @@
 
             <div id="console-status" onclick="handleConsoleClick(event)">
                 <img src="NFC_Error@2x.png" id="error-icon" alt="Error">
-                <span id="console-text">Console</span>
+                <span id="console-text">Source</span>
             </div>
         </div>
     </div>
@@ -140,7 +155,6 @@
 
         <div id="filename-container" onclick="event.stopPropagation()">
             <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.4); backdrop-filter: blur(15px); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; pointer-events: auto;" onclick="deleteCurrentMedia(event)">✕</div>
-            
             <div id="media-filename" onclick="renameMedia(event)">file.name</div>
         </div>
     </div>
@@ -152,48 +166,88 @@
 
     <input type="file" id="file-input" hidden onchange="handleFile(event)" accept="image/*,text/*,.js,.css,.json,.jsx">
     <button id="hapticConfirm" style="display:none;"></button>
+    <button id="hapticError" style="display:none;"></button>
 
     <script type="module">
         import { haptic } from "https://esm.sh/ios-haptics";
         window.haptic = haptic;
         document.getElementById("hapticConfirm").onclick = haptic.confirm;
+        
+        // Custom 6-pulse sequence for Source Mode
+        document.getElementById("hapticError").onclick = () => {
+            const delay = 220;
+            const sequence = [0, 1, 2, 4, 5, 6];
+            sequence.forEach(i => {
+                setTimeout(() => haptic.error(), i * delay);
+            });
+        };
 
         let editor, isSyncing = false, isDockOpen = false, currentTargetItem = null, runtimeErrors = [];
+        let isSourceMode = false; // Source Mode State
         const raw = document.getElementById('raw-editor');
         const previewSection = document.getElementById('preview-section');
         const saveBar = document.getElementById('save-input-bar');
 
-        // --- Console Logic ---
+        // --- Console / Source Click Logic ---
         window.handleConsoleClick = (e) => {
             e.stopPropagation();
-            document.getElementById("hapticConfirm").click();
-            const markers = monaco.editor.getModelMarkers({ owner: 'html' });
-            if (markers.length > 0 || runtimeErrors.length > 0) {
+            const totalErrors = getErrorCount();
+
+            if (totalErrors > 0) {
+                // エラー時はログ表示 (既存機能)
+                document.getElementById("hapticConfirm").click(); // 2回ハプティック(既存)
                 const logOverlay = document.getElementById('error-log-overlay');
                 logOverlay.style.display = logOverlay.style.display === 'block' ? 'none' : 'block';
+            } else {
+                // エラーなし時はSourceモード切替
+                isSourceMode = !isSourceMode;
+                updateConsoleUI();
+                
+                if (isSourceMode) {
+                    document.getElementById("hapticError").click(); // 6回ハプティック
+                } else {
+                    haptic(); // 解除時はシングル
+                }
             }
         };
 
-        function updateErrorStatus() {
-            if (!editor) return;
-            const markers = monaco.editor.getModelMarkers({ owner: 'html' });
-            const total = markers.length + runtimeErrors.length;
+        function getErrorCount() {
+            if (!editor) return 0;
+            return monaco.editor.getModelMarkers({ owner: 'html' }).length + runtimeErrors.length;
+        }
+
+        function updateConsoleUI() {
+            const total = getErrorCount();
             const icon = document.getElementById('error-icon');
             const text = document.getElementById('console-text');
             const logOverlay = document.getElementById('error-log-overlay');
 
             if (total > 0) {
+                // Error Mode
+                isSourceMode = false; // エラーが出たらSourceモード強制解除
                 icon.style.display = 'block';
                 text.innerText = `Console (${total})`;
                 text.style.color = '#ff3b30';
+                
+                // Update Logs
+                const markers = monaco.editor.getModelMarkers({ owner: 'html' });
                 const mLogs = markers.map(m => `Line ${m.startLineNumber}: ${m.message}`);
                 const rLogs = runtimeErrors.map(e => `Runtime: ${e}`);
                 logOverlay.innerHTML = [...mLogs, ...rLogs].join('<hr>');
             } else {
+                // Clean / Source Mode
                 icon.style.display = 'none';
-                text.innerText = 'Console';
-                text.style.color = '#333';
                 logOverlay.style.display = 'none';
+                text.innerText = 'Source';
+                text.style.color = isSourceMode ? '#007aff' : '#333';
+            }
+        }
+
+        // --- Source Mode Deactivation Helper ---
+        function deactivateSourceMode() {
+            if (isSourceMode) {
+                isSourceMode = false;
+                updateConsoleUI();
             }
         }
 
@@ -236,10 +290,10 @@
             if (isImage) r.readAsDataURL(f); else r.readAsText(f);
         };
 
-        // --- Open Media / Double Tap Logic ---
+        // --- Media & Double Tap ---
         let lastTapTime = 0;
-        
         window.openMedia = (target, parentDiv) => {
+            deactivateSourceMode(); // 他のアクションでSource解除
             currentTargetItem = { el: target, div: parentDiv };
             const type = target.dataset.type;
             const overlay = document.getElementById('media-overlay');
@@ -249,35 +303,28 @@
 
             overlay.style.display = 'flex';
             nameLabel.innerText = target.dataset.name;
-
-            // Reset Zoom
             imgView.classList.remove('zoomed');
 
             if (type === 'image') {
                 imgView.src = target.src;
                 imgView.style.display = 'block';
                 textView.style.display = 'none';
-                
-                // 画像のみダブルタップ検知を設定
                 imgView.onclick = (e) => {
                     e.stopPropagation();
                     const currentTime = new Date().getTime();
                     const tapLength = currentTime - lastTapTime;
                     if (tapLength < 300 && tapLength > 0) {
-                        // Double Tap
                         imgView.classList.toggle('zoomed');
                         haptic();
                     }
                     lastTapTime = currentTime;
                 };
-
             } else {
                 textView.value = target.dataset.content;
                 imgView.style.display = 'none';
                 textView.style.display = 'block';
                 textView.oninput = () => { target.dataset.content = textView.value; };
             }
-
             setTimeout(() => overlay.classList.add('active'), 10);
             haptic.confirm();
         };
@@ -291,24 +338,22 @@
         };
 
         window.renameMedia = (e) => {
-            e.stopPropagation();
-            haptic.error();
+            e.stopPropagation(); haptic.error();
             const currentName = currentTargetItem.el.dataset.name;
             const name = prompt("Rename File:", currentName);
             if(name) {
                 currentTargetItem.el.dataset.name = name;
                 document.getElementById('media-filename').innerText = name;
-                // Update small label in dock
                 currentTargetItem.div.querySelector('span').innerText = name;
             }
         };
 
         window.deleteCurrentMedia = (e) => {
             e.stopPropagation(); haptic.error();
-            if(confirm("このファイルを消去しますか？")) { currentTargetItem.div.remove(); closeMedia(); }
+            if(confirm("Delete this file?")) { currentTargetItem.div.remove(); closeMedia(); }
         };
 
-        // --- Sync & Fullscreen ---
+        // --- Core Sync & Inspector ---
         window.sync = (src) => {
             if(isSyncing) return; isSyncing = true;
             const val = (src === 'input') ? raw.value : editor.getValue();
@@ -316,17 +361,74 @@
             if(editor && src !== 'monaco') editor.setValue(val);
             
             runtimeErrors = [];
-            const errorScript = `<script>window.onerror=(m,u,l)=>window.parent.postMessage({t:'e',m:m+'(L'+l+')'},'*');window.addEventListener('error',e=>{if(e.target.tagName==='SCRIPT'||e.target.tagName==='LINK')window.parent.postMessage({t:'e',m:'Load Error: '+(e.target.src||e.target.href)},'*');},true);<\/script>`;
+            
+            // Inspector Script + Error Capture
+            const injectedScript = `
+                <script>
+                    window.onerror=(m,u,l)=>window.parent.postMessage({t:'e',m:m+'(L'+l+')'},'*');
+                    window.addEventListener('error',e=>{if(e.target.tagName==='SCRIPT'||e.target.tagName==='LINK')window.parent.postMessage({t:'e',m:'Load Error: '+(e.target.src||e.target.href)},'*');},true);
+                    
+                    // Click Listener for Source Mode
+                    document.addEventListener('click', function(e) {
+                        // Notify parent of click details
+                        window.parent.postMessage({
+                            t: 'click', 
+                            tag: e.target.tagName.toLowerCase(),
+                            id: e.target.id,
+                            cls: e.target.className
+                        }, '*');
+                    }, true);
+                <\/script>
+            `;
+            
             const frame = document.getElementById('output-frame');
-            frame.srcdoc = errorScript + val;
+            frame.srcdoc = injectedScript + val;
             isSyncing = false;
-            setTimeout(updateErrorStatus, 500);
+            setTimeout(updateConsoleUI, 500);
         };
 
-        window.addEventListener('message', e => { if(e.data.t==='e'){ runtimeErrors.push(e.data.m); updateErrorStatus(); } });
+        // Receive Messages from Iframe
+        window.addEventListener('message', e => { 
+            if(e.data.t === 'e'){ 
+                runtimeErrors.push(e.data.m); 
+                updateConsoleUI(); 
+            }
+            else if(e.data.t === 'click') {
+                // Only jump if Source Mode is Active
+                if(isSourceMode) {
+                    jumpToCss(e.data);
+                }
+            }
+        });
+
+        // Jump to CSS Logic
+        function jumpToCss(data) {
+            if(!editor) return;
+            
+            // Construct search string priority: ID > Class > Tag
+            let searchStr = "";
+            if(data.id) searchStr = "#" + data.id;
+            else if(data.cls) searchStr = "." + data.cls.split(' ')[0]; // First class
+            else searchStr = data.tag;
+
+            if(searchStr) {
+                const matches = editor.getModel().findMatches(searchStr, false, false, false, null, true);
+                if(matches.length > 0) {
+                    // Jump to first match
+                    editor.revealLineInCenter(matches[0].range.startLineNumber);
+                    editor.setPosition({lineNumber: matches[0].range.startLineNumber, column: 1});
+                    editor.focus();
+                    
+                    // Toggle UI to show editor
+                    toggleUI('monaco-container', true);
+                    haptic.confirm();
+                }
+            }
+        }
 
         window.toggleFullscreen = (e) => {
             e.stopPropagation();
+            deactivateSourceMode(); // 解除
             const frame = document.getElementById('output-frame');
             frame.srcdoc = ""; 
             previewSection.classList.toggle('fullscreen');
@@ -341,11 +443,13 @@
                 value: raw.value, language: 'html', theme: 'vs', automaticLayout: true, fontSize: 16, minimap: { enabled: false }
             });
             editor.onDidChangeModelContent(() => sync('monaco'));
-            editor.onDidChangeModelDecorations(() => updateErrorStatus());
+            editor.onDidChangeModelDecorations(() => updateConsoleUI());
         });
 
         window.toggleDock = (e) => {
-            e.stopPropagation(); isDockOpen = !isDockOpen;
+            e.stopPropagation(); 
+            deactivateSourceMode(); // 解除
+            isDockOpen = !isDockOpen;
             document.getElementById('file-list').classList.toggle('open', isDockOpen);
             document.getElementById('icon-close').className = isDockOpen ? 'folder-icon hide' : 'folder-icon show';
             document.getElementById('icon-open').className = isDockOpen ? 'folder-icon show' : 'folder-icon wait';
@@ -353,12 +457,13 @@
         };
 
         window.toggleUI = (id, show) => {
+            deactivateSourceMode(); // 解除
             const t = document.getElementById(id);
             if(show){ haptic.error(); t.style.display='flex'; setTimeout(()=>t.classList.add('active'),10); }
             else { haptic(); t.classList.remove('active'); setTimeout(()=>t.style.display='none',400); }
         };
 
-        window.openSave = (e) => { e.stopPropagation(); saveBar.classList.add('active'); haptic.confirm(); };
+        window.openSave = (e) => { e.stopPropagation(); deactivateSourceMode(); saveBar.classList.add('active'); haptic.confirm(); };
         window.globalTap = () => { if(isDockOpen) toggleDock({stopPropagation:()=>{}}); saveBar.classList.remove('active'); document.getElementById('error-log-overlay').style.display='none'; };
         window.downloadHtml = (e) => { e.stopPropagation(); haptic.error(); const b=new Blob([raw.value],{type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=document.getElementById('fn').value||'index.html'; a.click(); };
         
