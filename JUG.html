@@ -9,25 +9,22 @@
         :root { --ios-ease: cubic-bezier(0.23, 1, 0.32, 1); }
         * { touch-action: none; -webkit-user-select: none; box-sizing: border-box; font-family: -apple-system, "SF Pro Display", sans-serif; font-weight: 1 !important; }
         
-        /* iOS スワイプ戻り防止 */
         body, html { 
             margin: 0; padding: 0; height: 100dvh; width: 100vw; 
             background: #f2f2f7; overflow: hidden; display: flex; flex-direction: column;
-            overscroll-behavior-x: none; /* 標準のワイプ戻りを抑制 */
+            overscroll-behavior-x: none;
         }
 
         .container-box { width: calc(100% - 20px); margin: 8px auto; border-radius: 18px; background: #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
         #preview-section { flex: 1.2; transition: 0.5s var(--ios-ease); z-index: 10; }
         #preview-section.fullscreen { position: fixed; inset: 0; margin: 0; width: 100%; height: 100%; border-radius: 0; z-index: 8000; }
-        
-        /* iframeの設定: CDNを使えるように sandboxを調整 */
         #output-frame { width: 100%; height: 100%; border: none; background: #fff; pointer-events: auto; }
         
         #expand-toggle-btn { position: absolute; bottom: 15px; right: 15px; width: 44px; height: 44px; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 8010; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         #editor-section { flex: 0.8; display: flex; margin-bottom: 85px; }
         #raw-editor { flex: 1; border: none; padding: 15px; outline: none; font-family: "SF Mono", monospace; background: #fff; -webkit-user-select: text; font-size: 13px; resize: none; touch-action: pan-y; }
 
-        /* Dock & Folder Animation */
+        /* Dock */
         #dock-area { position: fixed; bottom: 25px; right: 15px; display: flex; align-items: center; z-index: 4000; }
         #dock-wrapper { display: flex; align-items: center; background: rgba(255,255,255,0.8); backdrop-filter: blur(25px); padding: 6px; border-radius: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
         #file-list { display: flex; gap: 10px; width: 0; opacity: 0; overflow: hidden; transition: 0.4s var(--ios-ease); padding: 0; }
@@ -39,15 +36,21 @@
         .folder-icon.show { transform: translateY(0); opacity: 1; }
         .folder-icon.wait { transform: translateY(40px); opacity: 0; }
 
+        /* Console */
+        #console-status { display: flex; align-items: center; gap: 8px; padding: 0 15px; height: 30px; border-left: 1px solid rgba(0,0,0,0.08); cursor: pointer; }
+        #error-icon { width: 18px; height: 18px; display: none; object-fit: contain; }
+        #console-text { font-size: 14px; color: #333; font-weight: 500 !important; }
+
+        #error-log-overlay { position: fixed; bottom: 85px; right: 20px; width: 240px; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: 18px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); display: none; padding: 12px; z-index: 4000; font-size: 12px; max-height: 200px; overflow-y: auto; }
+        #error-log-overlay hr { border: none; border-top: 1px solid rgba(0,0,0,0.1); margin: 8px 0; }
+
+        /* Media / Text Editor Overlay */
         #media-overlay { position: fixed; inset: 0; backdrop-filter: blur(45px); background: rgba(255,255,255,0.2); z-index: 9000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.4s var(--ios-ease); }
         #media-overlay.active { display: flex; opacity: 1; }
-        #expanded-media { max-width: 90%; max-height: 75%; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); transform: scale(0.85); transition: 0.4s var(--ios-ease); }
-        #media-overlay.active #expanded-media { transform: scale(1.1); }
-        #expanded-media.zoomed { transform: scale(1.8) !important; }
+        #expanded-media, #expanded-text { max-width: 90%; max-height: 70%; width: 90%; height: 70%; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); background: #fff; display: none; }
+        #expanded-text { padding: 20px; border: none; outline: none; font-family: "SF Mono", monospace; font-size: 14px; -webkit-user-select: text; resize: none; }
+        #expanded-media { object-fit: contain; }
 
-        .overlay-btn-left { position: absolute; top: 60px; left: 30px; font-size: 32px; color: #000; z-index: 9100; }
-        .overlay-btn-right { position: absolute; top: 60px; right: 30px; font-size: 32px; color: #000; z-index: 9100; }
-        
         #save-input-bar { position: fixed; bottom: 25px; left: 15px; width: min(280px, 60vw); height: 50px; background: white; border-radius: 25px; z-index: 4500; display: flex; align-items: center; padding: 0 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); opacity: 0; pointer-events: none; transform: translateY(20px) scale(0.9); transition: 0.4s var(--ios-ease); }
         #save-input-bar.active { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
 
@@ -61,6 +64,7 @@
 <body onclick="globalTap()">
 
     <div id="ios-loader"><div class="spinner"></div></div>
+    <div id="error-log-overlay"></div>
 
     <div id="preview-section" class="container-box">
         <div id="expand-toggle-btn" onclick="toggleFullscreen(event)">→</div>
@@ -87,10 +91,28 @@
                 <div class="dock-item" onclick="document.getElementById('file-input').click()" style="width:50px;height:50px;background:#e5e5ea;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;">＋</div>
                 <div id="media-items" style="display:flex; gap:10px;"></div>
             </div>
+            
             <div onclick="toggleDock(event)" id="folder-btn-container">
                 <span id="icon-close" class="folder-icon show">📁</span>
                 <span id="icon-open" class="folder-icon wait">📂</span>
             </div>
+
+            <div id="console-status" onclick="handleConsoleClick(event)">
+                <img src="NFC_Error@2x.png" id="error-icon" alt="Error">
+                <span id="console-text">Console</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="media-overlay" onclick="closeMedia()">
+        <div class="overlay-btn-left" style="position:absolute; top:60px; left:30px; font-size:32px;" onclick="closeMedia(event)">←</div>
+        
+        <img id="expanded-media">
+        <textarea id="expanded-text" onclick="event.stopPropagation()"></textarea>
+
+        <div style="position:absolute; bottom:60px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:20px;" onclick="event.stopPropagation()">
+            <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.4); backdrop-filter: blur(15px); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;" onclick="deleteCurrentMedia(event)">✕</div>
+            <div style="background:rgba(255,255,255,0.7); backdrop-filter:blur(15px); padding:12px 24px; border-radius:25px; font-weight:500;" id="media-filename">file.name</div>
         </div>
     </div>
 
@@ -99,64 +121,162 @@
         <div style="position:absolute; bottom:30px; left:25px; width:55px; height:55px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);" onclick="toggleUI('monaco-container', false)">←</div>
     </div>
 
-    <div id="media-overlay" onclick="closeMedia()">
-        <div class="overlay-btn-left" onclick="closeMedia(event)">←</div>
-        <div class="overlay-btn-right" onclick="downloadHtml(event)">↓</div> 
-        <img id="expanded-media" onclick="handleImageClick(event)">
-        <div style="position:absolute; bottom:60px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:20px;" onclick="event.stopPropagation()">
-            <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.4); backdrop-filter: blur(15px); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;" onclick="deleteCurrentMedia(event)">✕</div>
-            <div style="background:rgba(255,255,255,0.7); backdrop-filter:blur(15px); padding:12px 24px; border-radius:25px; font-weight:500;" onclick="renameMedia(event)" id="media-filename">file.png</div>
-        </div>
-    </div>
-
-    <input type="file" id="file-input" hidden onchange="handleFile(event)" accept="image/*">
+    <input type="file" id="file-input" hidden onchange="handleFile(event)" accept="image/*,text/*,.js,.css,.json,.jsx">
+    <button id="hapticConfirm" style="display:none;"></button>
 
     <script type="module">
         import { haptic } from "https://esm.sh/ios-haptics";
         window.haptic = haptic;
+        document.getElementById("hapticConfirm").onclick = haptic.confirm;
 
-        let editor, isSyncing = false, isDockOpen = false, currentTargetItem = null, lastTap = 0;
+        let editor, isSyncing = false, isDockOpen = false, currentTargetItem = null, runtimeErrors = [];
         const raw = document.getElementById('raw-editor');
         const previewSection = document.getElementById('preview-section');
         const saveBar = document.getElementById('save-input-bar');
 
-        // iOS標準ズーム & ワイプ戻り防止
-        document.addEventListener('touchstart', (e) => {
-            // マルチタッチ(ズーム)防止
-            if (e.touches.length > 1) e.preventDefault();
-            // 画面端(20px)からのスワイプ戻り防止
-            if (e.touches[0].pageX < 20 || e.touches[0].pageX > window.innerWidth - 20) {
-                e.preventDefault();
+        // --- Console Logic ---
+        window.handleConsoleClick = (e) => {
+            e.stopPropagation();
+            // ハプティック起動
+            document.getElementById("hapticConfirm").click();
+            
+            const markers = monaco.editor.getModelMarkers({ owner: 'html' });
+            if (markers.length > 0 || runtimeErrors.length > 0) {
+                const logOverlay = document.getElementById('error-log-overlay');
+                logOverlay.style.display = logOverlay.style.display === 'block' ? 'none' : 'block';
             }
-        }, { passive: false });
+        };
 
-        // ピンチアウト検知でMonaco起動
-        let startDist = 0;
-        raw.addEventListener('touchstart', e => {
-            if (e.touches.length === 2) {
-                startDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+        function updateErrorStatus() {
+            if (!editor) return;
+            const markers = monaco.editor.getModelMarkers({ owner: 'html' });
+            const total = markers.length + runtimeErrors.length;
+            const icon = document.getElementById('error-icon');
+            const text = document.getElementById('console-text');
+            const logOverlay = document.getElementById('error-log-overlay');
+
+            if (total > 0) {
+                icon.style.display = 'block';
+                text.innerText = `Console (${total})`;
+                text.style.color = '#ff3b30';
+                const mLogs = markers.map(m => `Line ${m.startLineNumber}: ${m.message}`);
+                const rLogs = runtimeErrors.map(e => `Runtime: ${e}`);
+                logOverlay.innerHTML = [...mLogs, ...rLogs].join('<hr>');
+            } else {
+                icon.style.display = 'none';
+                text.innerText = 'Console';
+                text.style.color = '#333';
+                logOverlay.style.display = 'none';
             }
-        });
-        raw.addEventListener('touchmove', e => {
-            if (e.touches.length === 2 && startDist > 0) {
-                let dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                if (dist > startDist + 60) { 
-                    toggleUI('monaco-container', true);
-                    startDist = 0;
+        }
+
+        // --- File System (Image & Text) ---
+        window.handleFile = (e) => {
+            const f = e.target.files[0]; if(!f) return;
+            document.getElementById('ios-loader').style.display = 'flex';
+            const r = new FileReader();
+            
+            const isImage = f.type.startsWith('image/');
+            r.onload = (ev) => {
+                const div = document.createElement('div');
+                div.style = "width:50px; height:50px; background:#e5e5ea; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; position:relative;";
+                
+                const label = document.createElement('span');
+                label.style = "position:absolute; bottom: -18px; font-size:9px; width:100%; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#8e8e93;";
+                label.innerText = f.name;
+
+                if (isImage) {
+                    const img = document.createElement('img');
+                    img.src = ev.target.result; img.dataset.name = f.name; img.dataset.type = "image";
+                    img.style = "width:100%; height:100%; object-fit:cover;";
+                    img.onclick = () => openMedia(img, div);
+                    div.appendChild(img);
+                } else {
+                    const ext = f.name.split('.').pop().toLowerCase();
+                    const icon = ext === 'css' ? '📑' : '📄';
+                    div.style.fontSize = "24px";
+                    div.innerText = icon;
+                    div.dataset.content = ev.target.result;
+                    div.dataset.name = f.name;
+                    div.dataset.type = "text";
+                    div.onclick = () => openMedia(div, div);
                 }
-            }
-        });
+                
+                div.appendChild(label);
+                document.getElementById('media-items').appendChild(div);
+                document.getElementById('ios-loader').style.display = 'none';
+                e.target.value = '';
+            };
 
+            if (isImage) r.readAsDataURL(f);
+            else r.readAsText(f);
+        };
+
+        window.openMedia = (target, parentDiv) => {
+            currentTargetItem = { el: target, div: parentDiv };
+            const type = target.dataset.type;
+            const overlay = document.getElementById('media-overlay');
+            const imgView = document.getElementById('expanded-media');
+            const textView = document.getElementById('expanded-text');
+            const nameLabel = document.getElementById('media-filename');
+
+            overlay.style.display = 'flex';
+            nameLabel.innerText = target.dataset.name;
+
+            if (type === 'image') {
+                imgView.src = target.src;
+                imgView.style.display = 'block';
+                textView.style.display = 'none';
+            } else {
+                textView.value = target.dataset.content;
+                imgView.style.display = 'none';
+                textView.style.display = 'block';
+                // 編集時の自動保存
+                textView.oninput = () => { target.dataset.content = textView.value; };
+            }
+
+            setTimeout(() => overlay.classList.add('active'), 10);
+            haptic.confirm();
+        };
+
+        window.closeMedia = (e) => {
+            if(e) e.stopPropagation();
+            haptic();
+            const o = document.getElementById('media-overlay');
+            o.classList.remove('active');
+            setTimeout(() => { o.style.display = 'none'; }, 400);
+        };
+
+        window.deleteCurrentMedia = (e) => {
+            e.stopPropagation(); haptic.error();
+            if(confirm("このファイルを消去しますか？")) { currentTargetItem.div.remove(); closeMedia(); }
+        };
+
+        // --- Core Logic (Sync, Fullscreen, Monaco) ---
         window.sync = (src) => {
             if(isSyncing) return; isSyncing = true;
             const val = (src === 'input') ? raw.value : editor.getValue();
             raw.value = val;
             if(editor && src !== 'monaco') editor.setValue(val);
-            
-            // iframeにHTMLを流し込む。CDNスクリプトを即座に有効化
+
+            runtimeErrors = [];
+            const errorScript = `<script>window.onerror=(m,u,l)=>window.parent.postMessage({t:'e',m:m+'(L'+l+')'},'*');window.addEventListener('error',e=>{if(e.target.tagName==='SCRIPT'||e.target.tagName==='LINK')window.parent.postMessage({t:'e',m:'Load Error: '+(e.target.src||e.target.href)},'*');},true);<\/script>`;
             const frame = document.getElementById('output-frame');
-            frame.srcdoc = val;
+            frame.srcdoc = errorScript + val;
             isSyncing = false;
+            setTimeout(updateErrorStatus, 500);
+        };
+
+        window.addEventListener('message', e => { if(e.data.t==='e'){ runtimeErrors.push(e.data.m); updateErrorStatus(); } });
+
+        window.toggleFullscreen = (e) => {
+            e.stopPropagation();
+            const frame = document.getElementById('output-frame');
+            frame.srcdoc = ""; // 一旦空に
+            previewSection.classList.toggle('fullscreen');
+            document.getElementById('expand-toggle-btn').innerText = previewSection.classList.contains('fullscreen') ? '←' : '→';
+            haptic.confirm();
+            setTimeout(() => sync('input'), 50);
         };
 
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
@@ -165,109 +285,32 @@
                 value: raw.value, language: 'html', theme: 'vs', automaticLayout: true, fontSize: 16, minimap: { enabled: false }
             });
             editor.onDidChangeModelContent(() => sync('monaco'));
+            editor.onDidChangeModelDecorations(() => updateErrorStatus());
         });
 
-        window.handleFile = (e) => {
-            const f = e.target.files[0]; if(!f) return;
-            document.getElementById('ios-loader').style.display = 'flex';
-            const r = new FileReader();
-            r.onload = (ev) => {
-                const div = document.createElement('div');
-                div.style = "width:50px; height:50px; background:#e5e5ea; border-radius:12px; overflow:hidden; flex-shrink:0;";
-                const img = document.createElement('img');
-                img.src = ev.target.result; img.dataset.name = f.name;
-                img.style = "width:100%; height:100%; object-fit:cover;";
-                img.onclick = () => openMedia(img, div);
-                div.appendChild(img);
-                document.getElementById('media-items').appendChild(div);
-                document.getElementById('ios-loader').style.display = 'none';
-                e.target.value = '';
-            };
-            r.readAsDataURL(f);
-        };
-
-        window.openMedia = (imgEl, parentDiv) => { 
-            currentTargetItem = { img: imgEl, div: parentDiv };
-            document.getElementById('expanded-media').src = imgEl.src;
-            document.getElementById('media-filename').innerText = imgEl.dataset.name; 
-            const o = document.getElementById('media-overlay'); 
-            o.style.display = 'flex'; 
-            setTimeout(() => o.classList.add('active'), 10); 
-            haptic.confirm(); 
-        };
-
-        window.closeMedia = (e) => { 
-            if(e) e.stopPropagation();
+        window.toggleDock = (e) => {
+            e.stopPropagation(); isDockOpen = !isDockOpen;
+            document.getElementById('file-list').classList.toggle('open', isDockOpen);
+            document.getElementById('icon-close').className = isDockOpen ? 'folder-icon hide' : 'folder-icon show';
+            document.getElementById('icon-open').className = isDockOpen ? 'folder-icon show' : 'folder-icon wait';
             haptic();
-            const o = document.getElementById('media-overlay'); 
-            o.classList.remove('active'); 
-            setTimeout(() => { o.style.display = 'none'; currentTargetItem = null; }, 400); 
         };
 
-        window.deleteCurrentMedia = (e) => {
-            e.stopPropagation();
-            haptic.error();
-            if(confirm("この画像を完全に消去しますか？")) {
-                currentTargetItem.div.remove(); closeMedia();
-            }
-        };
-
-        window.renameMedia = (e) => {
-            e.stopPropagation();
-            haptic.error(); // 名前変更時も追加
-            const name = prompt("Rename:", currentTargetItem.img.dataset.name);
-            if(name) { 
-                currentTargetItem.img.dataset.name = name; 
-                document.getElementById('media-filename').innerText = name; 
-            }
-        };
-
-        window.toggleDock = (e) => { 
-            e.stopPropagation(); 
-            isDockOpen = !isDockOpen; 
-            document.getElementById('file-list').classList.toggle('open', isDockOpen); 
-            const iClose = document.getElementById('icon-close');
-            const iOpen = document.getElementById('icon-open');
-            if(isDockOpen) {
-                iClose.className = 'folder-icon hide'; iOpen.className = 'folder-icon show';
-            } else {
-                iClose.className = 'folder-icon show'; iOpen.className = 'folder-icon wait';
-            }
-            haptic(); 
-        };
-        
-        window.toggleFullscreen = (e) => { 
-            e.stopPropagation(); 
-            previewSection.classList.toggle('fullscreen'); 
-            document.getElementById('expand-toggle-btn').innerText = previewSection.classList.contains('fullscreen') ? '←' : '→';
-            haptic.confirm(); 
-        };
-
-        window.toggleUI = (id, show) => { 
-            const t = document.getElementById(id); 
-            if(show){ 
-                haptic.error();
-                t.style.display='flex'; 
-                setTimeout(()=>t.classList.add('active'),10); 
-            } else { 
-                haptic();
-                t.classList.remove('active'); 
-                setTimeout(()=>t.style.display='none',400); 
-            } 
+        window.toggleUI = (id, show) => {
+            const t = document.getElementById(id);
+            if(show){ haptic.error(); t.style.display='flex'; setTimeout(()=>t.classList.add('active'),10); }
+            else { haptic(); t.classList.remove('active'); setTimeout(()=>t.style.display='none',400); }
         };
 
         window.openSave = (e) => { e.stopPropagation(); saveBar.classList.add('active'); haptic.confirm(); };
-        window.globalTap = () => { if(isDockOpen) toggleDock({stopPropagation:()=>{}}); saveBar.classList.remove('active'); };
+        window.globalTap = () => { if(isDockOpen) toggleDock({stopPropagation:()=>{}}); saveBar.classList.remove('active'); document.getElementById('error-log-overlay').style.display='none'; };
+        window.downloadHtml = (e) => { e.stopPropagation(); haptic.error(); const b=new Blob([raw.value],{type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=document.getElementById('fn').value||'index.html'; a.click(); };
         
-        window.downloadHtml = (e) => { 
-            e.stopPropagation(); 
-            haptic.error();
-            const blob = new Blob([raw.value], {type:'text/html'});
-            const a = document.createElement('a'); 
-            a.href = URL.createObjectURL(blob); 
-            a.download = document.getElementById('fn').value || 'index.html'; 
-            a.click(); 
-        };
+        // Touch events
+        document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); if (e.touches[0].pageX < 20 || e.touches[0].pageX > window.innerWidth - 20) e.preventDefault(); }, { passive: false });
+        let sD = 0;
+        raw.addEventListener('touchstart', e => { if(e.touches.length===2) sD=Math.hypot(e.touches[0].pageX-e.touches[1].pageX, e.touches[0].pageY-e.touches[1].pageY); });
+        raw.addEventListener('touchmove', e => { if(e.touches.length===2 && sD>0) { let d=Math.hypot(e.touches[0].pageX-e.touches[1].pageX, e.touches[0].pageY-e.touches[1].pageY); if(d>sD+60){ toggleUI('monaco-container',true); sD=0; } } });
     </script>
 </body>
 </html>
