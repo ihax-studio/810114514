@@ -2,416 +2,326 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
-    <title>Apple 新宿 アニメーション</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>iOS WebAuthn Advanced Concept</title>
     <style>
         :root {
-            --title-appear-delay: 0.5s;
-            --bubble-appear-delay: 0.8s;
-            --blue-color: #007aff;
-            --white-color: #ffffff;
-            --dark-text-color: #1d1d1f;
+            --sf-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+            --glass: rgba(255, 255, 255, 0.2);
+            --glass-heavy: rgba(255, 255, 255, 0.4);
         }
 
-        html {
-            overscroll-behavior-x: contain;
-        }
-
-        body {
-            font-weight: 600;
-            margin: 0;
-            font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f5f5f7;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px 20px;
-            box-sizing: border-box;
-            user-select: none;
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; font-family: var(--sf-font); color: white;
+            background: #000;
+            touch-action: pan-x pan-y;
             -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            touch-action: pan-y;
             -webkit-touch-callout: none;
-            transform: scale(0.8);
-            opacity: 0;
-            animation: pageZoomIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            -webkit-user-drag: none;
         }
 
+        /* 画像の長押し保存をブロック */
         img {
-            pointer-events: none;
-        }
-
-        .animation-container {
-            position: relative;
-            width: 100%;
-            max-width: 1000px;
-            border-radius: 18px;
-            overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            /* PCでは16:10 */
-            aspect-ratio: 16 / 10;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 40px;
-        }
-
-        .hero-embed {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-            transform: scale(1.2);
-            animation: zoomOut 1.2s ease-out forwards;
-            z-index: 1;
-        }
-        
-        .main-title {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-            opacity: 0;
-            transform: translateY(80px);
-            animation: slideUpFadeIn 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-            animation-delay: var(--title-appear-delay);
-        }
-
-        .main-title h1 {
-            transform: translateY(60px);
-            font-size: 3.5rem;
-            font-weight: 700;
-            color: #ffffff;
-            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
-            margin: 0;
-        }
-
-        .bubbles-container {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 25px;
-            width: 100%;
-            max-width: 1000px;
-            perspective: 1000px;
-        }
-
-        .bubble {
-            padding: 25px;
-            border-radius: 24px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            opacity: 0;
-            transform: translateY(0);
-            animation: slideUpFadeIn 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-            animation-delay: var(--bubble-appear-delay);
-            flex: 1;
-            box-sizing: border-box;
-            min-width: 280px;
-            /* ダークモードの回転と傾きを滑らかにする */
-            transition: background-color 0.2s linear, color 0.2s linear, border-radius 0.2s linear, transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-            cursor: default;
-        }
-        
-        #time-trigger-div, #secret-trigger-div {
-            cursor: pointer;
-        }
-
-        .bubble-left {
-            background-color: var(--white-color);
-            color: var(--dark-text-color);
-        }
-        .bubble-left img {
-            width: 70px;
-            margin-bottom: 15px;
-        }
-        
-        .bubble-right {
-            background-color: var(--blue-color);
-            color: var(--white-color);
-            animation-delay: calc(var(--bubble-appear-delay) + 0.15s);
-        }
-        .bubble-right .profile-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 20px;
-        }
-        .bubble-right p {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin: 0 0 8px 0;
-            display: flex;
-            align-items: center;
-            pointer-events: none;
-        }
-        
-        #secret-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 99999;
-            opacity: 0;
-            pointer-events: none;
-            user-select: none;
-            -webkit-user-select: none;
             -webkit-touch-callout: none;
-            transform: scale(0.8);
-            transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-        #secret-overlay.visible {
-            opacity: 1;
-            pointer-events: auto;
-            transform: scale(1);
-        }
-        #secret-overlay img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            -webkit-user-select: none;
+            user-select: none;
             pointer-events: none;
         }
 
-        #time-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            z-index: 50000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s ease;
-            cursor: pointer;
-        }
-        #time-overlay.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        #time-display {
-            font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-            font-weight: 100;
-            font-size: 8rem;
-            color: white;
-            text-shadow: 0 2px 15px rgba(0,0,0,0.5);
-        }
-        
-        @keyframes pageZoomIn {
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-        
-        .apply-tap-animation {
-            animation: tap-pop 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        
-        @keyframes tap-pop {
-            50% { transform: scale(1.05); }
+        /* ピンチズームをブロック */
+        * {
+            touch-action: manipulation;
         }
 
-        @keyframes zoomOut {
-            from { transform: scale(1.2); }
-            to { transform: scale(1); }
+
+        #bg-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            transition: filter 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s ease;
         }
 
-        @keyframes slideUpFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+        /* 認証後の背景変化 */
+        .authenticated #bg-container { filter: blur(40px) brightness(0.7); transform: scale(1.1); }
 
-        /* スマホ向け（狭画面）のスタイル */
-        @media (max-width: 768px) {
-            body { padding: 20px 10px; }
-            .animation-container {
-                /* スマホでは16:23 */
-                aspect-ratio: 16 / 23;
-                margin-bottom: 30px;
-            }
-            .main-title h1 { font-size: 2.5rem; }
-            .bubbles-container { flex-direction: column; gap: 20px; align-items: center; }
-            .bubble { width: 100%; max-width: 400px; }
-            #time-display { font-size: 5rem; }
+        /* ロック画面 */
+        #lock-screen {
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            height: 100%; padding-top: 80px; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .authenticated #lock-screen { opacity: 0; pointer-events: none; transform: translateY(-50px); }
+
+        /* 時計カスタマイズ */
+        #time-container { position: relative; cursor: pointer; transition: transform 0.2s ease; }
+        #time-container:active { transform: scale(0.98); }
+        #time { font-size: 90px; font-weight: 700; letter-spacing: -2px; }
+        #date { font-size: 20px; font-weight: 500; text-align: center; }
+
+        /* 編集パネル (吹き出し) */
+        #edit-panel {
+            position: absolute; top: 180px; background: var(--glass-heavy);
+            -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+            padding: 20px; border-radius: 30px; display: none; flex-direction: column;
+            gap: 15px; width: 280px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: popIn 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.28);
+        }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+        /* 計算機 (Quick Look) */
+        #calc-modal {
+            position: fixed; top: 50%; left: 50%; width: 85%; height: 80%;
+            background: rgba(20, 20, 20, 0.95); -webkit-backdrop-filter: blur(30px);
+            transform: translate(-50%, -50%) scale(0.5); opacity: 0;
+            border-radius: 40px; display: none; z-index: 1000; overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-direction: column; padding: 20px;
+        }
+        #calc-modal.open { display: flex; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+        /* ホーム画面 */
+        #home-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.8s ease;
+        }
+        .authenticated #home-screen { display: flex; opacity: 1; }
+
+        .icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; width: 90%; max-width: 400px; }
+        .icon { 
+            width: 65px; height: 65px; border-radius: 15px; background: var(--glass);
+            background-size: cover; cursor: pointer; transition: transform 0.2s ease;
+        }
+        .icon:active { transform: scale(0.9); }
+        .icon:nth-child(1) { grid-column: 2 / 4; } /* 計算機アイコン */
+
+        /* グラフ表示用 */
+        #graph-canvas { width: 100%; height: 100%; display: none; background: #000; }
+        .graph-mode *:not(#graph-canvas, .close-calc) { opacity: 0; transition: 0.3s; }
+        
+        .calc-btn {
+            background: #333; border: none; color: white; border-radius: 50%;
+            font-size: 1.2rem; aspect-ratio: 1/1; cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .calc-btn:active { background: #666; transform: scale(0.95); }
+        .calc-display { font-size: 3rem; text-align: right; margin: 20px; min-height: 1.2em; }
+
+        /* スライダー */
+        input[type="range"] { width: 100%; accent-color: #007AFF; }
     </style>
 </head>
 <body>
 
-<div class="animation-container">
-    <iframe src="SL.html" class="hero-embed" title="Embedded background content"></iframe>
-    <div class="main-title">
-        <h1>スロット</h1>
+<div id="bg-container"></div>
+
+<div id="lock-screen">
+    <div id="time-container">
+        <div id="date"></div>
+        <div id="time"></div>
     </div>
-</div>
-
-<div class="bubbles-container">
-    <div class="bubble bubble-left" id="time-trigger-div">
-        <img src="aaaaa.png" alt="アナログ時計のアイコン">
-        <h2>お馴染みのデザイン</h2>
-        <p style="color: #0084ff;">やりますねぇ!!</p>
+    <div id="edit-panel">
+        <label>Font Family</label>
+        <select id="font-select">
+            <option value="var(--sf-font)">SF Pro (Default)</option>
+            <option value="'Helvetica Neue', sans-serif">Helvetica</option>
+            <option value="'Georgia', serif">Serif Modern</option>
+            <option value="'Courier New', monospace">Mono</option>
+        </select>
+        <label>Weight</label>
+        <input type="range" id="weight-slider" min="100" max="900" step="100" value="700">
+        <button id="close-edit" style="margin-top:10px; border-radius:10px; border:none; padding:8px;">Done</button>
     </div>
-
-    <div class="bubble bubble-right" id="secret-trigger-div">
-        <img src="AppIcon.png" alt="プロフィールアイコン" class="profile-icon">
-        <p style="font-size:1.5rem;">いや、見ろよ見ろよ!!</p>
-        <p>見とけよ見とけよ〜!!</p>
-    </div>
-</div>
-<hr style="height: 2px; color: black;">
-<h3>他にも様々な魅力を体験シよう</h3>
-
-<div id="secret-overlay">
-    <img src="ClickAfter.png" alt="Secret Image">
-</div>
-<div id="time-overlay">
-    <div id="time-display"></div>
+    <button id="auth-trigger" style="margin-top:40px; background:var(--glass); border:none; padding:15px 30px; border-radius:25px; color:white; font-weight:600; -webkit-backdrop-filter:blur(10px);">生体認証する</button>
 </div>
 
-<audio id="mac-sound" src="mac.wav" loop></audio>
+<div id="home-screen">
+    <div class="icon-grid" id="grid"></div>
+</div>
+
+<div id="calc-modal">
+    <button class="close-calc" style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:24px;">×</button>
+    <div class="calc-display" id="calc-out">0</div>
+    <div style="grid-template-columns:repeat(4, 1fr); display:grid; gap:10px; flex-grow:1;" id="calc-btns">
+        </div>
+    <canvas id="graph-canvas"></canvas>
+</div>
 
 <script type="module">
-  import { haptic } from "https://esm.sh/ios-haptics";
-  
-  document.addEventListener('DOMContentLoaded', () => {
+    import { haptic } from "https://esm.sh/ios-haptics";
 
-    const allDivs = document.querySelectorAll('div:not(#secret-overlay):not(#time-overlay):not(#time-display)');
-    const bubbleLeft = document.querySelector('.bubble-left');
-    const bubbleRight = document.querySelector('.bubble-right');
-    const timeTriggerDiv = document.getElementById('time-trigger-div');
-    const secretTriggerDiv = document.getElementById('secret-trigger-div');
-    const secretOverlay = document.getElementById('secret-overlay');
-    const timeOverlay = document.getElementById('time-overlay');
-    const timeDisplay = document.getElementById('time-display');
-    const macSound = document.getElementById('mac-sound');
+    // --- 設定とキャッシュ ---
+    const timeEl = document.getElementById('time');
+    const weightSlider = document.getElementById('weight-slider');
+    const fontSelect = document.getElementById('font-select');
     
-    const playHapticPattern = () => {
-      haptic.error();
-      const baseDelay = 1000;
-      const rapidDelay = 50;
-      for (let i = 0; i < 6; i++) {
-        setTimeout(() => haptic.error(), baseDelay + i * rapidDelay);
-      }
-    };
-    
-    document.addEventListener('contextmenu', event => event.preventDefault());
+    const savedFont = localStorage.getItem('lock-font') || 'var(--sf-font)';
+    const savedWeight = localStorage.getItem('lock-weight') || '700';
+    timeEl.style.fontFamily = savedFont;
+    timeEl.style.fontWeight = savedWeight;
+    fontSelect.value = savedFont;
+    weightSlider.value = savedWeight;
 
-    allDivs.forEach(div => {
-      div.addEventListener('click', () => {
-        playHapticPattern();
-        if (!div.classList.contains('apply-tap-animation')) {
-            div.classList.add('apply-tap-animation');
-            setTimeout(() => {
-                div.classList.remove('apply-tap-animation');
-            }, 300);
-        }
-      });
-    });
-    
-    timeTriggerDiv.addEventListener('click', (event) => {
-        event.stopPropagation();
+    // --- 時計更新 ---
+    function updateClock() {
         const now = new Date();
-        const hours = now.getHours();
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        timeDisplay.textContent = `${hours}:${minutes}`;
-        timeOverlay.classList.add('visible');
-    });
+        const days = ['日', '月', '火', '水', '木', '金', '土'];
+        document.getElementById('date').textContent = `${now.getMonth() + 1}月${now.getDate()}日 ${days[now.getDay()]}曜日`;
+        timeEl.textContent = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-    timeOverlay.addEventListener('click', () => {
-        timeOverlay.classList.remove('visible');
-    });
+    // --- 背景更新 ---
+    const hour = new Date().getHours();
+    const bg = document.getElementById('bg-container');
+    bg.style.background = (hour >= 5 && hour < 17) ? "linear-gradient(180deg, #2193b0, #6dd5ed)" : "linear-gradient(180deg, #0f2027, #2c5364)";
 
-    secretTriggerDiv.addEventListener('click', (event) => {
-        event.stopPropagation();
-        secretOverlay.classList.add('visible');
-        if(macSound.paused) {
-            macSound.play().catch(e => console.error("Audio play failed:", e));
-        }
-    });
+    // --- 長押し・強押し検知 ---
+    let pressTimer;
+    const timeContainer = document.getElementById('time-container');
+    const editPanel = document.getElementById('edit-panel');
 
-    // --- ダークモード検知 & 傾き機能 ---
-    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    let isDarkMode = darkModeMediaQuery.matches;
-    let animationFrameId = null;
-
-    const handleDarkModeChange = (matches) => {
-        isDarkMode = matches;
-        // JSで直接transformを制御
-        if (isDarkMode) {
-            bubbleLeft.style.transform = 'rotate(180deg)';
-            bubbleRight.style.transform = 'rotate(180deg)';
-        } else {
-            bubbleLeft.style.transform = '';
-            bubbleRight.style.transform = '';
-        }
+    const triggerEdit = () => {
+        haptic.impact('heavy');
+        editPanel.style.display = 'flex';
     };
 
-    darkModeMediaQuery.addEventListener('change', e => handleDarkModeChange(e.matches));
-    handleDarkModeChange(isDarkMode); // 初期状態をセット
+    timeContainer.onpointerdown = (e) => {
+        pressTimer = setTimeout(triggerEdit, 800);
+        // Trackpad/Pencilの圧力を監視
+        if (e.pressure > 0.5) { // 簡易的な圧力判定
+            if(e.pressure >= 0.8) triggerEdit();
+        }
+    };
+    timeContainer.onpointerup = () => clearTimeout(pressTimer);
 
-    const handleOrientation = (event) => {
-        if (animationFrameId) cancelAnimationFrame(animationFrameId);
-        animationFrameId = requestAnimationFrame(() => {
-            // 色と角丸の変更 (常時)
-            const gammaProgress = Math.min(Math.abs(event.gamma) / 90, 1);
-            const whiteToBlue_R = 255 - 255 * gammaProgress, whiteToBlue_G = 255 - 133 * gammaProgress;
-            const blueToWhite_R = 255 * gammaProgress, blueToWhite_G = 122 + 133 * gammaProgress;
-            const darkToWhite = 29 + 226 * gammaProgress;
-            const whiteToDark = 255 - 226 * gammaProgress;
-            const newBorderRadius = 24 - 16 * gammaProgress;
-
-            bubbleLeft.style.backgroundColor = `rgb(${whiteToBlue_R}, ${whiteToBlue_G}, 255)`;
-            bubbleLeft.style.color = `rgb(${darkToWhite}, ${darkToWhite}, ${darkToWhite + 2})`;
-            bubbleRight.style.backgroundColor = `rgb(${blueToWhite_R}, ${blueToWhite_G}, 255)`;
-            bubbleRight.style.color = `rgb(${whiteToDark}, ${whiteToDark}, ${whiteToDark})`;
-            bubbleLeft.style.borderRadius = `${newBorderRadius}px`;
-            bubbleRight.style.borderRadius = `${newBorderRadius}px`;
-
-            // 要素の3D傾き (ダークモードのみ)
-            if (isDarkMode) {
-                const rotateX = (event.beta || 0) * -0.2;
-                const rotateY = (event.gamma || 0) * 0.2;
-                // 180度回転に加えて傾きを適用
-                const transformStyle = `rotate(180deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                bubbleLeft.style.transform = transformStyle;
-                bubbleRight.style.transform = transformStyle;
-            }
-        });
+    fontSelect.onchange = (e) => {
+        timeEl.style.fontFamily = e.target.value;
+        localStorage.setItem('lock-font', e.target.value);
+        haptic.selection();
     };
 
-    // ページ読み込み時に傾き検知を開始
-    if (window.DeviceOrientationEvent) {
-        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-            document.body.addEventListener('click', function requestPermission() {
-                DeviceOrientationEvent.requestPermission().then(state => {
-                    if (state === 'granted') {
-                        window.addEventListener('deviceorientation', handleOrientation);
-                    }
-                }).catch(console.error);
-                document.body.removeEventListener('click', requestPermission);
-            }, { once: true }); // イベントリスナーを一度だけ実行
+    weightSlider.oninput = (e) => {
+        timeEl.style.fontWeight = e.target.value;
+        localStorage.setItem('lock-weight', e.target.value);
+    };
+
+    document.getElementById('close-edit').onclick = () => {
+        editPanel.style.display = 'none';
+        haptic.notification('success');
+    };
+
+    // --- 計算機ロジック ---
+    const calcModal = document.getElementById('calc-modal');
+    const calcOut = document.getElementById('calc-out');
+    const canvas = document.getElementById('graph-canvas');
+    let calcInput = "";
+
+    const openCalc = () => {
+        haptic.impact('medium');
+        calcModal.style.display = 'flex';
+        setTimeout(() => calcModal.classList.add('open'), 10);
+    };
+
+    const closeCalc = () => {
+        calcModal.classList.remove('open');
+        setTimeout(() => {
+            calcModal.style.display = 'none';
+            calcModal.classList.remove('graph-mode');
+            canvas.style.display = 'none';
+        }, 500);
+        haptic.notification('success');
+    };
+
+    const buttons = [
+        'C', 'log', '!', '÷',
+        '7', '8', '9', '×',
+        '4', '5', '6', '-',
+        '1', '2', '3', '+',
+        'y=', '0', '.', '='
+    ];
+
+    const btnContainer = document.getElementById('calc-btns');
+    buttons.forEach(b => {
+        const btn = document.createElement('button');
+        btn.className = 'calc-btn';
+        btn.textContent = b;
+        btn.onclick = () => handleCalc(b);
+        btnContainer.appendChild(btn);
+    });
+
+    function handleCalc(val) {
+        haptic.impact('light');
+        if (val === 'C') {
+            calcInput = "";
+            calcOut.textContent = "0";
+        } else if (val === '=') {
+            try {
+                // セキュリティのため簡易的なEval（本番はmath.js推奨）
+                const res = eval(calcInput.replace('×','*').replace('÷','/'));
+                calcOut.textContent = res;
+                calcOut.style.transform = "scale(1.2)";
+                setTimeout(() => calcOut.style.transform = "scale(1)", 200);
+            } catch { calcOut.textContent = "Error"; }
+        } else if (val === 'y=') {
+            drawGraph(calcInput);
         } else {
-            window.addEventListener('deviceorientation', handleOrientation);
+            calcInput += val;
+            calcOut.textContent = calcInput;
         }
     }
-  });
-</script>
 
+    function drawGraph(formula) {
+        calcModal.classList.add('graph-mode');
+        canvas.style.display = 'block';
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#007AFF';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        // 簡易グラフ描画ロジック
+        for (let x = 0; x < canvas.width; x++) {
+            let relX = (x - canvas.width/2) / 20;
+            let relY = Math.sin(relX); // デモ用。本来はformulaをパース
+            let y = canvas.height/2 - relY * 20;
+            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    }
+
+    document.querySelector('.close-calc').onclick = closeCalc;
+
+    // --- アイコン生成 ---
+    const grid = document.getElementById('grid');
+    for (let i = 1; i <= 12; i++) {
+        const div = document.createElement('div');
+        div.className = 'icon';
+        div.style.backgroundColor = 'rgba(255,255,255,0.1)';
+        if (i === 1) div.onclick = openCalc;
+        else div.onclick = () => haptic.impact('light');
+        grid.appendChild(div);
+    }
+
+    // --- 認証 ---
+    document.getElementById("auth-trigger").onclick = async () => {
+        try {
+            const publicKey = {
+                challenge: crypto.getRandomValues(new Uint8Array(32)),
+                rp: { name: "WebAuthn Demo" },
+                user: { id: crypto.getRandomValues(new Uint8Array(16)), name: "u", displayName: "U" },
+                pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+                authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" }
+            };
+            await navigator.credentials.create({ publicKey });
+            document.body.classList.add("authenticated");
+            haptic.notification('success');
+        } catch (e) {
+            haptic.notification('error');
+        }
+    };
+</script>
 </body>
 </html>
