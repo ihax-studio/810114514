@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real Button Pro - Hyper</title>
+    <title>Real Button Pro - Hyper v2</title>
     <style>
         body {
             display: flex;
@@ -12,18 +12,35 @@
             height: 100vh;
             background-color: #e0e0e0;
             margin: 0;
-            gap: 20px;
+            gap: 12px; /* ボタン増量に伴い間隔を微調整 */
+            transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
             font-family: sans-serif;
             overflow: hidden;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: pan-y;
+            -webkit-touch-callout: none;
+            -webkit-user-drag: none;
+        }
+
+        img {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        * {
+            touch-action: manipulation;
         }
 
         .push-button {
-            width: 90px;
-            height: 90px;
+            width: 70px; /* 5つ並ぶため少し小型化 */
+            height: 70px;
             border: none;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #555;
             background: linear-gradient(145deg, #f0f0f0, #cacaca);
@@ -31,18 +48,16 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: transform 0.1s;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             user-select: none;
             outline: none;
         }
 
-        /* アクティブ時（クリック・キー押下共通） */
         .push-button.active, .push-button:active {
             box-shadow: inset 4px 4px 8px #bebebe, inset -4px -4px 8px #ffffff;
             transform: scale(0.92);
         }
 
-        /* 右下アイコンのコンテナ（スライド演出用） */
         #file-opener-wrapper {
             position: fixed;
             bottom: 20px;
@@ -54,19 +69,18 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
             cursor: pointer;
             z-index: 1000;
-            overflow: hidden; /* 中身を隠す */
+            overflow: hidden;
         }
 
         #icon-shifter {
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             font-size: 28px;
-            line-height: 60px; /* アイコンを中央に */
+            line-height: 60px;
         }
 
-        /* 展開時にアイコンを下から上へスライド */
         #file-opener-wrapper.open #icon-shifter {
             transform: translateY(-60px);
         }
@@ -84,7 +98,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 25px;
+            gap: 15px; /* ボタン増量に合わせて調整 */
             box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
             transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 999;
@@ -93,11 +107,11 @@
         #control-panel.open { bottom: 0; }
 
         .assign-btn {
-            width: 55px; height: 55px;
-            border-radius: 15px; border: 2px solid #ddd;
+            width: 50px; height: 50px;
+            border-radius: 12px; border: 2px solid #ddd;
             background: white; font-weight: bold;
             cursor: pointer; display: flex; flex-direction: column;
-            font-size: 12px; justify-content: center; align-items: center;
+            font-size: 10px; justify-content: center; align-items: center;
         }
 
         #file-input { display: none; }
@@ -108,6 +122,8 @@
     <button class="push-button" id="btn-aa">aa</button>
     <button class="push-button" id="btn-bb">bb</button>
     <button class="push-button" id="btn-cc">cc</button>
+    <button class="push-button" id="btn-dd">dd</button>
+    <button class="push-button" id="btn-ee">ee</button>
 
     <div id="file-opener-wrapper">
         <div id="icon-shifter">
@@ -122,24 +138,27 @@
         <button class="assign-btn" onclick="assignFile('aa')">aa<span>SET</span></button>
         <button class="assign-btn" onclick="assignFile('bb')">bb<span>SET</span></button>
         <button class="assign-btn" onclick="assignFile('cc')">cc<span>SET</span></button>
+        <button class="assign-btn" onclick="assignFile('dd')">dd<span>SET</span></button>
+        <button class="assign-btn" onclick="assignFile('ee')">ee<span>SET</span></button>
     </div>
 
     <script type="module">
         import { haptic } from "https://esm.sh/ios-haptics";
 
-        const sounds = { aa: 'aa.mp3', bb: 'bb.mp3', cc: 'cc.mp3' };
-        const buttons = {
-            aa: document.getElementById('btn-aa'),
-            bb: document.getElementById('btn-bb'),
-            cc: document.getElementById('btn-cc')
-        };
+        // soundsにddとeeを追加
+        const sounds = { aa: 'aa.mp3', bb: 'bb.mp3', cc: 'cc.mp3', dd: 'dd.mp3', ee: 'ee.mp3' };
+        
+        const btnIds = ['aa', 'bb', 'cc', 'dd', 'ee'];
+        const buttons = {};
+        btnIds.forEach(id => {
+            buttons[id] = document.getElementById(`btn-${id}`);
+        });
 
-        // --- 音声再生 & 強力触覚 ---
         function playOverlapping(key) {
+            if (!sounds[key]) return;
             const audio = new Audio(sounds[key]);
             audio.play();
             
-            // 視覚的フィードバック
             buttons[key].classList.add('active');
             setTimeout(() => buttons[key].classList.remove('active'), 100);
 
@@ -149,29 +168,34 @@
             }
         }
 
-        // クリックイベント
-        Object.keys(buttons).forEach(key => {
+        // 全ボタンにクリックイベント登録
+        btnIds.forEach(key => {
             buttons[key].onmousedown = () => playOverlapping(key);
+            // タッチデバイス対応
+            buttons[key].ontouchstart = (e) => {
+                e.preventDefault();
+                playOverlapping(key);
+            };
         });
 
-        // --- キーボード操作（連打・長押し対応） ---
+        // キーボード操作拡張
         window.onkeydown = (e) => {
             const k = e.key.toLowerCase();
             if (k === 'a') playOverlapping('aa');
             if (k === 'b') playOverlapping('bb');
             if (k === 'c') playOverlapping('cc');
+            if (k === 'd') playOverlapping('dd');
+            if (k === 'e') playOverlapping('ee');
         };
 
-        // --- スライドUI & アイコン切り替え ---
         const wrapper = document.getElementById('file-opener-wrapper');
         const panel = document.getElementById('control-panel');
         const fileInput = document.getElementById('file-input');
         let isPanelOpen = false;
 
         wrapper.onclick = () => {
-            haptic(); // 📁タップ時の触覚
+            haptic();
             isPanelOpen = !isPanelOpen;
-            
             if (isPanelOpen) {
                 wrapper.classList.add('open');
                 panel.classList.add('open');
@@ -181,14 +205,12 @@
             }
         };
 
-        // 割り当て
         window.assignFile = (target) => {
-            haptic.confirm(); // SETボタンタップ時の触覚
+            haptic.confirm();
             fileInput.onchange = (e) => {
                 const file = e.target.files[0];
                 if (file) {
                     sounds[target] = URL.createObjectURL(file);
-                    // 完了時にパネルを閉じる
                     isPanelOpen = false;
                     wrapper.classList.remove('open');
                     panel.classList.remove('open');
