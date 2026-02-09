@@ -3,85 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>iOS WebAuthn Advanced Concept</title>
+    <title>iOS Ultimate OS Concept</title>
     <style>
         :root {
             --sf-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
-            --glass: rgba(255, 255, 255, 0.2);
-            --glass-heavy: rgba(255, 255, 255, 0.4);
+            --glass: rgba(255, 255, 255, 0.1);
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden; font-family: var(--sf-font); color: white;
             background: #000;
-            touch-action: pan-x pan-y;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            touch-action: pan-y;
-            -webkit-touch-callout: none;
-            -webkit-user-drag: none;
         }
 
-        /* 画像の長押し保存をブロック */
-        img {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-            pointer-events: none;
-        }
-
-        /* ピンチズームをブロック */
-        * {
-            touch-action: manipulation;
-        }
-
-
+        /* ソーラーグラディエント背景 */
         #bg-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            transition: filter 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s ease;
+            transition: filter 0.8s ease, transform 0.8s ease;
         }
 
-        /* 認証後の背景変化 */
-        .authenticated #bg-container { filter: blur(40px) brightness(0.7); transform: scale(1.1); }
-
-        /* ロック画面 */
+        /* --- ロック画面 --- */
         #lock-screen {
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-            height: 100%; padding-top: 80px; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column; align-items: center; padding-top: 80px;
+            height: 100%; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .authenticated #lock-screen { opacity: 0; pointer-events: none; transform: translateY(-50px); }
+        .authenticated #lock-screen { opacity: 0; pointer-events: none; transform: scale(1.1); }
+        .authenticated #bg-container { filter: blur(30px) brightness(0.8); }
 
-        /* 時計カスタマイズ */
-        #time-container { position: relative; cursor: pointer; transition: transform 0.2s ease; }
-        #time-container:active { transform: scale(0.98); }
-        #time { font-size: 90px; font-weight: 700; letter-spacing: -2px; }
-        #date { font-size: 20px; font-weight: 500; text-align: center; }
+        #time { font-size: 90px; font-weight: 700; letter-spacing: -2px; cursor: pointer; }
+        #date { font-size: 20px; font-weight: 500; }
 
-        /* 編集パネル (吹き出し) */
-        #edit-panel {
-            position: absolute; top: 180px; background: var(--glass-heavy);
-            -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
-            padding: 20px; border-radius: 30px; display: none; flex-direction: column;
-            gap: 15px; width: 280px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            animation: popIn 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.28);
-        }
-        @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-
-        /* 計算機 (Quick Look) */
-        #calc-modal {
-            position: fixed; top: 50%; left: 50%; width: 85%; height: 80%;
-            background: rgba(20, 20, 20, 0.95); -webkit-backdrop-filter: blur(30px);
-            transform: translate(-50%, -50%) scale(0.5); opacity: 0;
-            border-radius: 40px; display: none; z-index: 1000; overflow: hidden;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            flex-direction: column; padding: 20px;
-        }
-        #calc-modal.open { display: flex; opacity: 1; transform: translate(-50%, -50%) scale(1); }
-
-        /* ホーム画面 */
+        /* --- ホーム画面 (2-3-2-3-2 レイアウト) --- */
         #home-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: none; justify-content: center; align-items: center;
@@ -89,28 +41,77 @@
         }
         .authenticated #home-screen { display: flex; opacity: 1; }
 
-        .icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; width: 90%; max-width: 400px; }
-        .icon { 
-            width: 65px; height: 65px; border-radius: 15px; background: var(--glass);
-            background-size: cover; cursor: pointer; transition: transform 0.2s ease;
+        .icon-grid {
+            display: grid; grid-template-columns: repeat(6, 1fr);
+            gap: 30px 15px; width: 90%; max-width: 400px;
         }
-        .icon:active { transform: scale(0.9); }
-        .icon:nth-child(1) { grid-column: 2 / 4; } /* 計算機アイコン */
+        .icon {
+            width: 65px; height: 65px; border-radius: 16px; background: var(--glass);
+            background-size: cover; cursor: pointer; transition: transform 0.2s;
+            justify-self: center; position: relative;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        }
+        .icon:active { transform: scale(0.85); }
+        .icon::after {
+            content: attr(data-label); position: absolute; bottom: -22px;
+            left: 50%; transform: translateX(-50%); font-size: 11px; white-space: nowrap;
+        }
 
-        /* グラフ表示用 */
-        #graph-canvas { width: 100%; height: 100%; display: none; background: #000; }
-        .graph-mode *:not(#graph-canvas, .close-calc) { opacity: 0; transition: 0.3s; }
-        
+        /* 2-3-2-3-2 配置ロジック */
+        .icon:nth-child(1) { grid-column: 2 / 4; } /* i2 */
+        .icon:nth-child(2) { grid-column: 4 / 6; } /* i1 */
+        .icon:nth-child(3), .icon:nth-child(4), .icon:nth-child(5) { grid-column: span 2; }
+        .icon:nth-child(6) { grid-column: 2 / 4; }
+        .icon:nth-child(7) { grid-column: 4 / 6; }
+        .icon:nth-child(8), .icon:nth-child(9), .icon:nth-child(10) { grid-column: span 2; }
+        .icon:nth-child(11) { grid-column: 2 / 4; }
+        .icon:nth-child(12) { grid-column: 4 / 6; }
+
+        /* --- アプリ共通スタイル（背景色なし、Blurのみ） --- */
+        .app-modal {
+            position: fixed; top: 50%; left: 50%; width: 90%; height: 85%;
+            transform: translate(-50%, -50%) scale(0.8); opacity: 0;
+            backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+            border-radius: 40px; display: none; z-index: 1000; flex-direction: column;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1.2);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .app-modal.open { display: flex; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+        .close-btn {
+            position: absolute; top: 20px; right: 25px; background: rgba(255,255,255,0.2);
+            border: none; color: white; width: 30px; height: 30px; border-radius: 50%;
+            font-size: 20px; cursor: pointer; z-index: 10;
+        }
+
+        /* 計算機 UI */
+        .calc-display { font-size: 4rem; text-align: right; padding: 40px 20px; flex-grow: 0; }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 20px; }
         .calc-btn {
-            background: #333; border: none; color: white; border-radius: 50%;
-            font-size: 1.2rem; aspect-ratio: 1/1; cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
+            aspect-ratio: 1; border-radius: 50%; border: none; background: rgba(255,255,255,0.1);
+            color: white; font-size: 1.5rem; cursor: pointer; transition: background 0.2s;
         }
-        .calc-btn:active { background: #666; transform: scale(0.95); }
-        .calc-display { font-size: 3rem; text-align: right; margin: 20px; min-height: 1.2em; }
+        .calc-btn:active { background: rgba(255,255,255,0.3); }
 
-        /* スライダー */
-        input[type="range"] { width: 100%; accent-color: #007AFF; }
+        /* 設定 UI */
+        .settings-list { padding: 40px 20px; display: flex; flex-direction: column; gap: 20px; }
+        .setting-item { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; }
+        .reset-btn { color: #ff3b30; font-weight: bold; text-align: center; cursor: pointer; }
+
+        /* 時計 UI */
+        #analog-clock {
+            width: 70vmin; height: 70vmin; border-radius: 50%; border: 3px solid white;
+            position: relative; margin: auto;
+        }
+        .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: 50% 100%; border-radius: 5px; }
+        .hour { width: 6px; height: 25%; background: white; }
+        .minute { width: 4px; height: 35%; background: white; }
+        .second { width: 2px; height: 40%; background: #ff3b30; }
+
+        /* i5 iframe 連携 (wide.htmlのロジック) */
+        .popup-iframe { width: 100%; height: 100%; border: none; border-radius: 40px; }
+
+        #graph-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; }
     </style>
 </head>
 <body>
@@ -118,208 +119,204 @@
 <div id="bg-container"></div>
 
 <div id="lock-screen">
-    <div id="time-container">
-        <div id="date"></div>
-        <div id="time"></div>
-    </div>
-    <div id="edit-panel">
-        <label>Font Family</label>
-        <select id="font-select">
-            <option value="var(--sf-font)">SF Pro (Default)</option>
-            <option value="'Helvetica Neue', sans-serif">Helvetica</option>
-            <option value="'Georgia', serif">Serif Modern</option>
-            <option value="'Courier New', monospace">Mono</option>
-        </select>
-        <label>Weight</label>
-        <input type="range" id="weight-slider" min="100" max="900" step="100" value="700">
-        <button id="close-edit" style="margin-top:10px; border-radius:10px; border:none; padding:8px;">Done</button>
-    </div>
-    <button id="auth-trigger" style="margin-top:40px; background:var(--glass); border:none; padding:15px 30px; border-radius:25px; color:white; font-weight:600; -webkit-backdrop-filter:blur(10px);">生体認証する</button>
+    <div id="date"></div>
+    <div id="time">00:00</div>
+    <button id="auth-trigger" style="margin-top:auto; margin-bottom:100px; padding:15px 40px; border-radius:30px; border:none; background:var(--glass); color:white; backdrop-filter:blur(10px);">FaceID / TouchID</button>
 </div>
 
 <div id="home-screen">
     <div class="icon-grid" id="grid"></div>
 </div>
 
-<div id="calc-modal">
-    <button class="close-calc" style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:24px;">×</button>
+<div id="app-i1" class="app-modal">
+    <button class="close-btn" onclick="closeApp('app-i1')">×</button>
     <div class="calc-display" id="calc-out">0</div>
-    <div style="grid-template-columns:repeat(4, 1fr); display:grid; gap:10px; flex-grow:1;" id="calc-btns">
-        </div>
+    <div class="calc-grid" id="calc-btns"></div>
     <canvas id="graph-canvas"></canvas>
+</div>
+
+<div id="app-i2" class="app-modal">
+    <button class="close-btn" onclick="closeApp('app-i2')">×</button>
+    <div class="settings-list">
+        <h2>設定</h2>
+        <div class="setting-item">
+            <label>フォント</label>
+            <select id="font-select" style="width:100%">
+                <option value="var(--sf-font)">SF Pro</option>
+                <option value="'Helvetica Neue'">Helvetica</option>
+                <option value="monospace">Monospace</option>
+            </select>
+        </div>
+        <div class="setting-item">
+            <label>太さ</label>
+            <input type="range" id="weight-slider" min="100" max="900" step="100" style="width:100%">
+        </div>
+        <div class="setting-item reset-btn" onclick="resetAll()">すべての設定をリセット</div>
+    </div>
+</div>
+
+<div id="app-i3" class="app-modal">
+    <button class="close-btn" onclick="closeApp('app-i3')">×</button>
+    <div id="analog-clock">
+        <div id="h-hand" class="hand hour"></div>
+        <div id="m-hand" class="hand minute"></div>
+        <div id="s-hand" class="hand second"></div>
+    </div>
+    <div id="digital-clock" style="text-align:center; font-size:2rem; margin-top:20px;">00:00:00</div>
+</div>
+
+<div id="app-i5" class="app-modal">
+    <button class="close-btn" onclick="closeApp('app-i5')">×</button>
+    <iframe src="https://www.google.com/webhp?embedded=true" id="popupIframe" class="popup-iframe"></iframe>
 </div>
 
 <script type="module">
     import { haptic } from "https://esm.sh/ios-haptics";
+    window.haptic = haptic;
 
-    // --- 設定とキャッシュ ---
+    // --- 背景 (Solar Gradient) ---
+    function updateSky() {
+        const hour = new Date().getHours();
+        const bg = document.getElementById('bg-container');
+        let colors = (hour >= 5 && hour < 17) 
+            ? "linear-gradient(180deg, #2193b0 0%, #6dd5ed 100%)" 
+            : "linear-gradient(180deg, #0f2027 0%, #2c5364 100%)";
+        bg.style.background = colors;
+    }
+    updateSky();
+
+    // --- キャッシュ & 設定反映 ---
     const timeEl = document.getElementById('time');
     const weightSlider = document.getElementById('weight-slider');
     const fontSelect = document.getElementById('font-select');
-    
-    const savedFont = localStorage.getItem('lock-font') || 'var(--sf-font)';
-    const savedWeight = localStorage.getItem('lock-weight') || '700';
-    timeEl.style.fontFamily = savedFont;
-    timeEl.style.fontWeight = savedWeight;
-    fontSelect.value = savedFont;
-    weightSlider.value = savedWeight;
+
+    function loadConfig() {
+        const f = localStorage.getItem('ios-font') || 'var(--sf-font)';
+        const w = localStorage.getItem('ios-weight') || '700';
+        timeEl.style.fontFamily = f;
+        timeEl.style.fontWeight = w;
+        fontSelect.value = f;
+        weightSlider.value = w;
+    }
+    loadConfig();
+
+    window.resetAll = () => {
+        haptic();
+        localStorage.clear();
+        location.reload();
+    };
+
+    fontSelect.onchange = () => {
+        localStorage.setItem('ios-font', fontSelect.value);
+        loadConfig();
+        haptic();
+    };
+
+    weightSlider.oninput = () => {
+        localStorage.setItem('ios-weight', weightSlider.value);
+        loadConfig();
+    };
 
     // --- 時計更新 ---
     function updateClock() {
         const now = new Date();
-        const days = ['日', '月', '火', '水', '木', '金', '土'];
-        document.getElementById('date').textContent = `${now.getMonth() + 1}月${now.getDate()}日 ${days[now.getDay()]}曜日`;
-        timeEl.textContent = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+        const h = now.getHours();
+        const m = now.getMinutes();
+        const s = now.getSeconds();
+        timeEl.textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+        document.getElementById('date').textContent = now.toLocaleDateString('ja-JP', {month:'long', day:'numeric', weekday:'short'});
+        
+        // App3 針
+        document.getElementById('h-hand').style.transform = `rotate(${h * 30 + m / 2}deg)`;
+        document.getElementById('m-hand').style.transform = `rotate(${m * 6}deg)`;
+        document.getElementById('s-hand').style.transform = `rotate(${s * 6}deg)`;
+        document.getElementById('digital-clock').textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
     }
     setInterval(updateClock, 1000);
     updateClock();
 
-    // --- 背景更新 ---
-    const hour = new Date().getHours();
-    const bg = document.getElementById('bg-container');
-    bg.style.background = (hour >= 5 && hour < 17) ? "linear-gradient(180deg, #2193b0, #6dd5ed)" : "linear-gradient(180deg, #0f2027, #2c5364)";
-
-    // --- 長押し・強押し検知 ---
-    let pressTimer;
-    const timeContainer = document.getElementById('time-container');
-    const editPanel = document.getElementById('edit-panel');
-
-    const triggerEdit = () => {
-        haptic.impact('heavy');
-        editPanel.style.display = 'flex';
-    };
-
-    timeContainer.onpointerdown = (e) => {
-        pressTimer = setTimeout(triggerEdit, 800);
-        // Trackpad/Pencilの圧力を監視
-        if (e.pressure > 0.5) { // 簡易的な圧力判定
-            if(e.pressure >= 0.8) triggerEdit();
-        }
-    };
-    timeContainer.onpointerup = () => clearTimeout(pressTimer);
-
-    fontSelect.onchange = (e) => {
-        timeEl.style.fontFamily = e.target.value;
-        localStorage.setItem('lock-font', e.target.value);
-        haptic.selection();
-    };
-
-    weightSlider.oninput = (e) => {
-        timeEl.style.fontWeight = e.target.value;
-        localStorage.setItem('lock-weight', e.target.value);
-    };
-
-    document.getElementById('close-edit').onclick = () => {
-        editPanel.style.display = 'none';
-        haptic.notification('success');
-    };
-
-    // --- 計算機ロジック ---
-    const calcModal = document.getElementById('calc-modal');
-    const calcOut = document.getElementById('calc-out');
-    const canvas = document.getElementById('graph-canvas');
-    let calcInput = "";
-
-    const openCalc = () => {
-        haptic.impact('medium');
-        calcModal.style.display = 'flex';
-        setTimeout(() => calcModal.classList.add('open'), 10);
-    };
-
-    const closeCalc = () => {
-        calcModal.classList.remove('open');
-        setTimeout(() => {
-            calcModal.style.display = 'none';
-            calcModal.classList.remove('graph-mode');
-            canvas.style.display = 'none';
-        }, 500);
-        haptic.notification('success');
-    };
-
-    const buttons = [
-        'C', 'log', '!', '÷',
-        '7', '8', '9', '×',
-        '4', '5', '6', '-',
-        '1', '2', '3', '+',
-        'y=', '0', '.', '='
+    // --- アイコン配置 (2-3-2-3-2) ---
+    const grid = document.getElementById('grid');
+    const apps = [
+        {id: 'i2', label: '設定'}, {id: 'i1', label: '計算機'},
+        {id: 'i3', label: '時計'}, {id: 'i4', label: '写真'}, {id: 'i5', label: 'ウェブ'},
+        {id: 'i6', label: 'メール'}, {id: 'i7', label: 'マップ'},
+        {id: 'i8', label: '音楽'}, {id: 'i9', label: '天気'}, {id: 'i10', label: 'メモ'},
+        {id: 'i11', label: '電話'}, {id: 'i12', label: 'Safari'}
     ];
 
-    const btnContainer = document.getElementById('calc-btns');
-    buttons.forEach(b => {
+    apps.forEach(app => {
+        const div = document.createElement('div');
+        div.className = 'icon';
+        div.dataset.label = app.label;
+        div.style.backgroundImage = `url('${app.id}.png')`;
+        div.onclick = () => {
+            haptic();
+            openApp(`app-${app.id}`);
+        };
+        grid.appendChild(div);
+    });
+
+    // --- アプリ起動 (ズームアニメーション) ---
+    window.openApp = (appId) => {
+        const app = document.getElementById(appId);
+        if(!app) return;
+        app.style.display = 'flex';
+        setTimeout(() => app.classList.add('open'), 10);
+    };
+
+    window.closeApp = (appId) => {
+        haptic();
+        const app = document.getElementById(appId);
+        app.classList.remove('open');
+        setTimeout(() => app.style.display = 'none', 500);
+    };
+
+    // --- 計算機エンジン ---
+    const calcOut = document.getElementById('calc-out');
+    let calcStr = "";
+    const btns = ['C','log','!','÷','7','8','9','×','4','5','6','-','1','2','3','+','∫','Σ','y=','='];
+    const bContainer = document.getElementById('calc-btns');
+
+    btns.forEach(b => {
         const btn = document.createElement('button');
         btn.className = 'calc-btn';
         btn.textContent = b;
-        btn.onclick = () => handleCalc(b);
-        btnContainer.appendChild(btn);
+        btn.onclick = () => {
+            haptic();
+            if(b === 'C') calcStr = "";
+            else if(b === '=') {
+                try { calcStr = eval(calcStr.replace('×','*').replace('÷','/')).toString(); } 
+                catch { calcStr = "Error"; }
+            } else if(b === 'y=') {
+                document.getElementById('graph-canvas').style.display = 'block';
+                // 簡易グラフ描画
+                const ctx = document.getElementById('graph-canvas').getContext('2d');
+                ctx.clearRect(0,0,300,500); ctx.strokeStyle="white"; ctx.beginPath();
+                for(let i=0; i<100; i++) ctx.lineTo(i*3, 250 - Math.sin(i/5)*50); ctx.stroke();
+            }
+            else calcStr += b;
+            calcOut.textContent = calcStr || "0";
+        };
+        bContainer.appendChild(btn);
     });
 
-    function handleCalc(val) {
-        haptic.impact('light');
-        if (val === 'C') {
-            calcInput = "";
-            calcOut.textContent = "0";
-        } else if (val === '=') {
-            try {
-                // セキュリティのため簡易的なEval（本番はmath.js推奨）
-                const res = eval(calcInput.replace('×','*').replace('÷','/'));
-                calcOut.textContent = res;
-                calcOut.style.transform = "scale(1.2)";
-                setTimeout(() => calcOut.style.transform = "scale(1)", 200);
-            } catch { calcOut.textContent = "Error"; }
-        } else if (val === 'y=') {
-            drawGraph(calcInput);
-        } else {
-            calcInput += val;
-            calcOut.textContent = calcInput;
-        }
-    }
-
-    function drawGraph(formula) {
-        calcModal.classList.add('graph-mode');
-        canvas.style.display = 'block';
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = '#007AFF';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        // 簡易グラフ描画ロジック
-        for (let x = 0; x < canvas.width; x++) {
-            let relX = (x - canvas.width/2) / 20;
-            let relY = Math.sin(relX); // デモ用。本来はformulaをパース
-            let y = canvas.height/2 - relY * 20;
-            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-    }
-
-    document.querySelector('.close-calc').onclick = closeCalc;
-
-    // --- アイコン生成 ---
-    const grid = document.getElementById('grid');
-    for (let i = 1; i <= 12; i++) {
-        const div = document.createElement('div');
-        div.className = 'icon';
-        div.style.backgroundColor = 'rgba(255,255,255,0.1)';
-        if (i === 1) div.onclick = openCalc;
-        else div.onclick = () => haptic.impact('light');
-        grid.appendChild(div);
-    }
-
     // --- 認証 ---
-    document.getElementById("auth-trigger").onclick = async () => {
+    document.getElementById('auth-trigger').onclick = async () => {
         try {
-            const publicKey = {
-                challenge: crypto.getRandomValues(new Uint8Array(32)),
-                rp: { name: "WebAuthn Demo" },
-                user: { id: crypto.getRandomValues(new Uint8Array(16)), name: "u", displayName: "U" },
-                pubKeyCredParams: [{ type: "public-key", alg: -7 }],
-                authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" }
-            };
-            await navigator.credentials.create({ publicKey });
-            document.body.classList.add("authenticated");
-            haptic.notification('success');
-        } catch (e) {
-            haptic.notification('error');
+            await navigator.credentials.create({
+                publicKey: {
+                    challenge: crypto.getRandomValues(new Uint8Array(32)),
+                    rp: { name: "iOS Web" },
+                    user: { id: new Uint8Array(16), name: "u", displayName: "User" },
+                    pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+                    authenticatorSelection: { userVerification: "required" }
+                }
+            });
+            document.body.classList.add('authenticated');
+            haptic();
+        } catch(e) {
+            haptic(); // 失敗時のバイブ
         }
     };
 </script>
