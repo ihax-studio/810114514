@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Button Pro - Hyper</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #e0e0e0;
+            margin: 0;
+            gap: 20px;
+            font-family: sans-serif;
+            overflow: hidden;
+        }
+
+        .push-button {
+            width: 90px;
+            height: 90px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            color: #555;
+            background: linear-gradient(145deg, #f0f0f0, #cacaca);
+            box-shadow: 6px 6px 12px #bebebe, -6px -6px 12px #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.1s;
+            user-select: none;
+            outline: none;
+        }
+
+        /* アクティブ時（クリック・キー押下共通） */
+        .push-button.active, .push-button:active {
+            box-shadow: inset 4px 4px 8px #bebebe, inset -4px -4px 8px #ffffff;
+            transform: scale(0.92);
+        }
+
+        /* 右下アイコンのコンテナ（スライド演出用） */
+        #file-opener-wrapper {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            cursor: pointer;
+            z-index: 1000;
+            overflow: hidden; /* 中身を隠す */
+        }
+
+        #icon-shifter {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 28px;
+            line-height: 60px; /* アイコンを中央に */
+        }
+
+        /* 展開時にアイコンを下から上へスライド */
+        #file-opener-wrapper.open #icon-shifter {
+            transform: translateY(-60px);
+        }
+
+        #control-panel {
+            position: fixed;
+            bottom: -150px;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+        }
+
+        #control-panel.open { bottom: 0; }
+
+        .assign-btn {
+            width: 55px; height: 55px;
+            border-radius: 15px; border: 2px solid #ddd;
+            background: white; font-weight: bold;
+            cursor: pointer; display: flex; flex-direction: column;
+            font-size: 12px; justify-content: center; align-items: center;
+        }
+
+        #file-input { display: none; }
+    </style>
+</head>
+<body>
+
+    <button class="push-button" id="btn-aa">aa</button>
+    <button class="push-button" id="btn-bb">bb</button>
+    <button class="push-button" id="btn-cc">cc</button>
+
+    <div id="file-opener-wrapper">
+        <div id="icon-shifter">
+            <div>📁</div>
+            <div>📂</div>
+        </div>
+    </div>
+    
+    <input type="file" id="file-input" accept=".mp3,.wav,.aiff">
+
+    <div id="control-panel">
+        <button class="assign-btn" onclick="assignFile('aa')">aa<span>SET</span></button>
+        <button class="assign-btn" onclick="assignFile('bb')">bb<span>SET</span></button>
+        <button class="assign-btn" onclick="assignFile('cc')">cc<span>SET</span></button>
+    </div>
+
+    <script type="module">
+        import { haptic } from "https://esm.sh/ios-haptics";
+
+        const sounds = { aa: 'aa.mp3', bb: 'bb.mp3', cc: 'cc.mp3' };
+        const buttons = {
+            aa: document.getElementById('btn-aa'),
+            bb: document.getElementById('btn-bb'),
+            cc: document.getElementById('btn-cc')
+        };
+
+        // --- 音声再生 & 強力触覚 ---
+        function playOverlapping(key) {
+            const audio = new Audio(sounds[key]);
+            audio.play();
+            
+            // 視覚的フィードバック
+            buttons[key].classList.add('active');
+            setTimeout(() => buttons[key].classList.remove('active'), 100);
+
+            const delay = 22;
+            for (let i = 0; i < 1100; i++) {
+                setTimeout(() => haptic.error(), i * delay);
+            }
+        }
+
+        // クリックイベント
+        Object.keys(buttons).forEach(key => {
+            buttons[key].onmousedown = () => playOverlapping(key);
+        });
+
+        // --- キーボード操作（連打・長押し対応） ---
+        window.onkeydown = (e) => {
+            const k = e.key.toLowerCase();
+            if (k === 'a') playOverlapping('aa');
+            if (k === 'b') playOverlapping('bb');
+            if (k === 'c') playOverlapping('cc');
+        };
+
+        // --- スライドUI & アイコン切り替え ---
+        const wrapper = document.getElementById('file-opener-wrapper');
+        const panel = document.getElementById('control-panel');
+        const fileInput = document.getElementById('file-input');
+        let isPanelOpen = false;
+
+        wrapper.onclick = () => {
+            haptic(); // 📁タップ時の触覚
+            isPanelOpen = !isPanelOpen;
+            
+            if (isPanelOpen) {
+                wrapper.classList.add('open');
+                panel.classList.add('open');
+            } else {
+                wrapper.classList.remove('open');
+                panel.classList.remove('open');
+            }
+        };
+
+        // 割り当て
+        window.assignFile = (target) => {
+            haptic.confirm(); // SETボタンタップ時の触覚
+            fileInput.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    sounds[target] = URL.createObjectURL(file);
+                    // 完了時にパネルを閉じる
+                    isPanelOpen = false;
+                    wrapper.classList.remove('open');
+                    panel.classList.remove('open');
+                }
+            };
+            fileInput.click();
+        };
+    </script>
+</body>
+</html>
