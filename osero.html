@@ -1,325 +1,500 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>5x5 オセロ</title>
-  <link rel="stylesheet" href="osero.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>カードエディタ UI 統合MAX (Fullscreen & Search)</title>
+<link rel="apple-touch-icon" sizes="180x180" href="icon-191.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-191.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+<link rel="manifest" href="manifest.json">
+<script src="sw.js"></script>
+<meta name="theme-color" content="#fff">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-191.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-191.png">
+<link rel="shortcut icon" href="icon-191.png">
+<link rel="stylesheet" href="style.css"/>
 
-</head>
-<body>
-    <div id="introImage"></div><!--最初の画像-->
-<h2 id="status">白のターンだゾ😍</h2>
-<table id="board"></table>
-
-<img id="winnerImage" src="" width="200">
-
-<button id="retryButton">やり直す</button>
-
-<div id="oseroView"></div>
-
-<audio id="errorSound" src="mac.wav"></audio>
-<audio id="placeSound" src="wrong.mp3"></audio>
-
-<!-- !ボタン → やり直す へのボタン -->
-<div id="retryShowBtn" class="floating-retry-btn">
-  <div class="retry-btn-inner">!</div>
-</div>
-<script>
-let retryBtnTimer = null;
-const retryShowBtn = document.getElementById('retryShowBtn');
-const retryInner = retryShowBtn.querySelector('.retry-btn-inner');
-
-// 初期0.5秒後に ! をフェードイン
-window.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    retryShowBtn.classList.add('show');
-  }, 500);
-});
-// ! を押したら → やり直す表示
-retryShowBtn.onclick = () => {
-  // すでにwideなら無視
-  if (retryShowBtn.classList.contains('wide')) return;
-
-  retryShowBtn.classList.add('wide');
-  retryInner.textContent = 'やり直す';
-  retryInner.classList.add('fade-in');
-
-  // 一度押されたらズームアニメへ
-  retryShowBtn.onclick = () => {
-    // ✅ 0.5秒でscale+blurアニメ（JSで確実に）
-    document.body.style.transform = 'scale(1.5)';
-    document.body.style.filter = 'blur(10px)';
-
-    // ✅ 遷移タイミングも確実に同期
-    setTimeout(() => {
-      window.location.href = '810.html';
-    }, 550);
-  };
-
-  // 1.7秒後に「!」へ戻す
-  if (retryBtnTimer) clearTimeout(retryBtnTimer);
-  retryBtnTimer = setTimeout(() => {
-    retryShowBtn.classList.remove('wide');
-    retryInner.classList.remove('fade-in');
-    retryInner.textContent = '!';
-    retryShowBtn.onclick = originalClick;
-  }, 1700);
-};
-
-// originalClick関数も同様にJS制御
-const originalClick = () => {
-  retryShowBtn.classList.add('wide');
-  retryInner.textContent = 'やり直す';
-  retryInner.classList.add('fade-in');
-
-  retryShowBtn.onclick = () => {
-    document.body.style.transform = 'scale(1.5)';
-    document.body.style.filter = 'blur(10px)';
-
-    setTimeout(() => {
-      window.location.href = '810.html';
-    }, 650);
-  };
-
-  if (retryBtnTimer) clearTimeout(retryBtnTimer);
-  retryBtnTimer = setTimeout(() => {
-    retryShowBtn.classList.remove('wide');
-    retryInner.classList.remove('fade-in');
-    retryInner.textContent = '!';
-    retryShowBtn.onclick = originalClick;
-  }, 1700);
-};
-
-</script>
-
-
-<script>
-  const SIZE = 5;
-  const EMPTY = '';
-  const WHITE = 'b1.png';
-  const BLACK = 'b8.png';
-
-  let currentPlayer = WHITE;
-  let isProcessing = false;
-
-  const board = Array.from({ length: SIZE }, () => Array(SIZE).fill(EMPTY));
-  const boardElement = document.getElementById('board');
-  const statusText = document.getElementById('status');
-  const errorSound = document.getElementById('errorSound');
-  const placeSound = document.getElementById('placeSound');
-  const winnerImage = document.getElementById('winnerImage');
-  const retryButton = document.getElementById('retryButton');
-  const oseroView = document.getElementById('oseroView');
-
-  const directions = [
-    [-1, 0], [1, 0], [0, -1], [0, 1],
-    [-1, -1], [1, 1], [-1, 1], [1, -1]
-  ];
-
-  const mid = Math.floor(SIZE / 2);
-  board[mid][mid] = WHITE;
-  board[mid - 1][mid - 1] = WHITE;
-  board[mid - 1][mid] = BLACK;
-  board[mid][mid - 1] = BLACK;
-
-  function drawBoard() {
-    boardElement.innerHTML = '';
-    let validMovesExist = false;
-
-    for (let i = 0; i < SIZE; i++) {
-      const row = document.createElement('tr');
-      for (let j = 0; j < SIZE; j++) {
-        const cell = document.createElement('td');
-        cell.dataset.row = i;
-        cell.dataset.col = j;
-
-        if (isValidMove(i, j, currentPlayer)) {
-          cell.classList.add('valid');
-          validMovesExist = true;
-        }
-
-        const piece = board[i][j];
-        if (piece) {
-  const wrapper = document.createElement('div');
-  wrapper.className = 'piece-wrapper';
-
-  const img = document.createElement('img');
-  img.src = piece;
-  img.className = 'piece';
-
-  // ターンに応じて回転（X軸またはY軸）
-  const rotation = currentPlayer === WHITE ? 'rotateY(0deg)' : 'rotateY(180deg)';
-  img.style.transform = rotation;
-
-  wrapper.appendChild(img);
-  cell.appendChild(wrapper);
+<style>
+/* === フルスクリーン＆UI最前面化のための追加スタイル === */
+:root {
+    --card-w-pc: 100vw;
+    --card-h-pc: 100vh;
+    --card-max-w: 100vw;
+    --card-max-h: 100vh;
+    --card-w-mb: 100vw;
+    --card-h-mb: 100vh;
+    --card-w-mb-horiz: 100vw;
+    --card-h-mb-horiz: 100vh;
 }
 
+html, body {
+    overflow: hidden; /* 画面スクロールを防ぐ */
+}
 
+/* カードコンテナを画面いっぱいに */
+.card-container {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    border-radius: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    max-height: none !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+}
 
-        cell.addEventListener('click', handleClick);
-        row.appendChild(cell);
-      }
-      boardElement.appendChild(row);
-    }
+.card {
+    border-radius: 0 !important;
+    border: none !important;
+}
 
+iframe#preview, #editor, #plainInput {
+    border-radius: 0 !important;
+}
 
-    // ステータス表示＆反転
-    statusText.textContent = currentPlayer === WHITE ? "MURのターンだゾ😍" : "田所のターンだゾ😰";
-    statusText.style.transform = currentPlayer === BLACK ? "rotate(180deg)" : "rotate(0deg)";
+/* Dockボタン類をカードの外（最前面）に配置し直すための調整 */
+.btn-group {
+    position: fixed !important;
+    bottom: 40px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 1500;
+}
 
-  // 3D風回転と奥行き変化
-  const angle = currentPlayer === WHITE ? 15 : -15;
-  const depth = currentPlayer === WHITE ? 'scale(1.05)' : 'scale(0.95)';
-  boardElement.style.transform = `perspective(900px) rotateX(${angle}deg) ${depth}`;
+.btn-group.rotated #visionSaveBtn {
+    display: inline-flex;
+}
 
-    if (!validMovesExist && !isProcessing) {
-      showWinner();
-    }
+.island-row { z-index: 1500; }
+.dynamic-island { z-index: 2000; }
+.dynamic-island.expanded { z-index: 5001; }
+#blackOverlay { z-index: 1800; }
+.style-editor-panel { z-index: 3000; }
+
+/* === 新規：検索ウィンドウのスタイル === */
+.search-overlay {
+    position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+    z-index: 6000; transition: top 0.4s cubic-bezier(0.4, 2, 0.5, 1);
+    background: rgba(255,255,255,0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+    padding: 12px 20px; border-radius: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    display: flex; gap: 10px; align-items: center; border: 1px solid rgba(255,255,255,0.5);
+}
+.search-overlay.active { top: 80px; }
+.search-overlay input {
+    border: none; background: rgba(0,0,0,0.05); padding: 10px 18px; border-radius: 20px;
+    outline: none; font-size: 16px; width: 200px; font-family: inherit;
+}
+.search-overlay input:focus { background: rgba(0,0,0,0.1); }
+.search-overlay #searchNextBtn {
+    border: none; background: #007aff; color: #fff; padding: 10px 18px;
+    border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 15px;
+    transition: transform 0.2s, background 0.2s;
+}
+.search-overlay #searchNextBtn:active { transform: scale(0.95); background: #005bb5; }
+.search-overlay #searchCloseBtn {
+    border: none; background: #ff3b30; color: #fff; border-radius: 50%; width: 34px; height: 34px;
+    padding: 0; display:flex; align-items:center; justify-content:center; font-size: 18px; cursor: pointer;
+    transition: transform 0.2s; font-weight: bold;
+}
+.search-overlay #searchCloseBtn:active { transform: scale(0.9); }
+</style>
+</head>
+<body>
+<div class="island-row" id="islandRow">
+<button class="file-btn" id="fileBtn" title="ファイル選択"><span><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3v4a1 1 0 0 0 1 1h4m-2 13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/></svg></span></button>
+<button class="center-btn" id="centerBtn">html</button>
+<input type="file" id="fileInput" accept=".html,.css,.js,.json,.py,.swift,.plist,.xml,.tsx,.txt,.text,text/*">
+</div>
+
+<div class="swipe-outer" id="swipeOuter">
+<div class="swipe-list" id="swipe-list">
+<div class="swipe-item">html<div class="gray-bar"></div></div>
+<div class="swipe-item">txt<div class="gray-bar"></div></div>
+<div class="swipe-item">CSS<div class="gray-bar"></div></div>
+<div class="swipe-item">Js<div class="gray-bar"></div></div>
+<div class="swipe-item">JSON<div class="gray-bar"></div></div>
+<div class="swipe-item">Py<div class="gray-bar"></div></div>
+<div class="swipe-item">swift<div class="gray-bar"></div></div>
+<div class="swipe-item">plist<div class="gray-bar"></div></div>
+<div class="swipe-item">xml<div class="gray-bar"></div></div>
+<div class="swipe-item">tsx<div class="gray-bar"></div></div>
+<div class="swipe-item">text<div class="gray-bar"></div></div>
+<div class="swipe-item">C(.h)<div class="gray-bar"></div></div>
+<div class="swipe-item">php<div class="gray-bar"></div></div>
+</div>
+<div class="center-bar"><div class="center-bar-dot" id="center-bar-dot"></div></div>
+<div class="tap-hint" id="tapHint">タップして決定</div>
+</div>
+
+<div class="center-row">
+<div class="card-container" id="cardContainer">
+<div class="card card-front"><iframe id="preview" title="Preview"></iframe></div>
+<div class="card card-back"><div id="editor"></div><textarea id="plainInput" style="display:none;" placeholder="HTMLを入力"></textarea></div>
+</div>
+</div>
+
+<div class="btn-group" id="btnGroup">
+<div class="edit-gear-combo">
+<button id="visionEditBtn" class="glass-btn" title="編集"><img src="edit.png" id="editIcon" alt="編集"></button>
+<button id="visionGearBtn" class="glass-btn" title="設定">
+    <img src="gear.png" id="gearIcon" alt="設定" style="display:none;">
+    <span id="selectModeIcon" style="font-family:'SF Pro Display', sans-serif; font-size:22px; font-weight:bold; display:inline-block; margin:0 4px;">→</span>
+</button>
+<button id="visionSaveBtn" class="glass-btn" title="保存" style="display:none;"><img src="save.png" alt="保存"></button>
+</div>
+<button id="visionShareBtn" class="glass-btn" style="margin-left:16px;min-width:56px;"><img src="share.png" alt="共有"></button>
+</div>
+
+<div class="style-editor-panel" id="stylePanel">
+<button id="closeStyleBtn" class="style-close-btn">×</button>
+<div id="styleEditor"></div>
+</div>
+
+<div class="dynamic-island" id="island" style="display:none;">
+<span class="gear-label" id="gearLabel"></span>
+<div class="island-grid" id="islandGrid">
+<button class="island-btn" style="font-size:25px;" id="diBackBtn">←</button>
+<button class="island-btn" id="diBBtn" data-img="B.png"><img src="B.png" class="btn-img"></button>
+<button class="island-btn" id="diCBtn" data-img="C.png"><img src="C.png" class="btn-img"></button>
+<button class="island-btn" id="diSearchBtn" title="検索"><span style="font-size:24px;">🔍</span></button>
+<button class="island-btn" id="diEBtn" data-img="E.png"><img src="E.png" class="btn-img"></button>
+<button class="island-btn" id="diFBtn" title="Editor切替"><span style="font-size:20px; font-weight:bold;">T</span></button>
+</div>
+</div>
+
+<div class="black-overlay" id="blackOverlay"></div>
+
+<div class="search-overlay" id="searchOverlay">
+    <input type="text" id="searchInput" placeholder="コード内の要素を検索...">
+    <button id="searchNextBtn">次へ</button>
+    <button id="searchCloseBtn">×</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+<script type="module">
+let haptic={fire:()=>{},confirm:()=>{},error:()=>{},ultraBurst:()=>{},staggered:()=>{},evenBurst:()=>{},toggle:()=>{}};
+(async()=>{
+  const isApple=/(iPhone|iPad|iPod|Macintosh|Apple)/.test(navigator.userAgent)||navigator.userAgent.includes('Vision');
+  if(isApple){
+    try{
+      const mod=await import('https://esm.sh/ios-haptics');
+      haptic.fire=()=>mod.haptic(); haptic.confirm=()=>mod.haptic.confirm(); haptic.error=()=>mod.haptic.error();
+      haptic.ultraBurst=()=>{for(let i=0;i<5;i++)setTimeout(()=>mod.haptic.error(),i*30)};
+      haptic.staggered=()=>{mod.haptic.error();for(let i=0;i<6;i++)setTimeout(()=>mod.haptic.error(),1000+i*40)};
+      haptic.evenBurst=()=>{for(let i=0;i<5;i++)setTimeout(()=>mod.haptic.error(),i*200)};
+      haptic.toggle=()=>mod.haptic.confirm();
+    }catch(e){}
   }
+})();
 
-  function isValidMove(x, y, player) {
-    if (board[x][y] !== EMPTY) return false;
-    const opponent = player === WHITE ? BLACK : WHITE;
+// visionOS検出
+(function(){
+  const ua=navigator.userAgent;
+  const isVisionOS=ua.toLowerCase().includes("vision")||/visionos/i.test(ua);
+  if(isVisionOS) document.body.classList.add("visionos");
+})();
 
-    for (const [dx, dy] of directions) {
-      let nx = x + dx, ny = y + dy, hasOpponent = false;
-      while (nx >= 0 && ny >= 0 && nx < SIZE && ny < SIZE) {
-        if (board[nx][ny] === opponent) {
-          hasOpponent = true;
-        } else if (board[nx][ny] === player && hasOpponent) {
-          return true;
-        } else {
-          break;
-        }
-        nx += dx; ny += dy;
-      }
-    }
-    return false;
+let swipeOuter=document.getElementById("swipeOuter"),swipeList=document.getElementById("swipe-list"),centerBtn=document.getElementById("centerBtn"),fileBtn=document.getElementById("fileBtn"),fileInput=document.getElementById("fileInput"),islandRow=document.getElementById("islandRow"),centerBarDot=document.getElementById("center-bar-dot"),visionSaveBtn=document.getElementById("visionSaveBtn"),cardContainer=document.getElementById("cardContainer"),btnGroup=document.getElementById("btnGroup");
+let swipeItems=Array.from(swipeList.querySelectorAll(".swipe-item"));
+let lastExt='html',isDragging=false,dragStartX=0,dragScroll=0,snapTimer=null,ticking=false,knownExt=['html','css','tsx','js','json','py','swift','plist','xml','txt','text','php'],keyMap={h:'html',c:'css',j:'js',o:'json',p:'py',l:'plist',m:'html',s:'swift',x:'xml',t:'txt'};
+
+function getClosestIndex(){let c=swipeOuter.getBoundingClientRect().left+swipeOuter.offsetWidth/2,idx=0,d=1e9;swipeItems.forEach((item,i)=>{let r=item.getBoundingClientRect(),ic=r.left+r.width/2,dis=Math.abs(c-ic);if(dis<d){idx=i;d=dis;}});return idx;}
+function updateSwipeSelected(){let i=getClosestIndex();swipeItems.forEach((item,j)=>{item.classList.toggle('selected',j===i);});moveCenterBar(i);}
+function scrollToSwipe(idx,behavior='smooth'){let item=swipeItems[idx];if(!item)return;let c=swipeOuter.offsetWidth/2,s=item.offsetLeft+(item.offsetWidth/2)-c;swipeList.scrollTo({left:s,behavior});}
+function moveCenterBar(idx){let item=swipeItems[idx];if(!item)return;let ir=item.getBoundingClientRect(),or=swipeOuter.getBoundingClientRect(),off=(ir.left+ir.width/2)-(or.left+or.width/2);centerBarDot.style.transform=`translateX(${off}px)`;}
+function debounceSnap(){clearTimeout(snapTimer);snapTimer=setTimeout(()=>{let i=getClosestIndex();scrollToSwipe(i);},150);}
+function setupSwipePadding(){if(swipeItems.length===0)return;let f=swipeItems[0],l=swipeItems[swipeItems.length-1],w=swipeOuter.offsetWidth,pl=(w-f.offsetWidth)/2,pr=(w-l.offsetWidth)/2;swipeList.style.padding=`38px ${pr}px 50px ${pl}px`;}
+function handleSwipeDragStart(e){isDragging=true;swipeList.style.cursor='grabbing';swipeList.style.scrollBehavior='auto';dragStartX=(e.touches?e.touches[0].pageX:e.pageX)-swipeList.offsetLeft;dragScroll=swipeList.scrollLeft;clearTimeout(snapTimer);}
+function handleSwipeDragMove(e){if(!isDragging)return;e.preventDefault();let x=(e.touches?e.touches[0].pageX:e.pageX)-swipeList.offsetLeft,walk=x-dragStartX;swipeList.scrollLeft=dragScroll-walk;}
+function handleSwipeDragEnd(){if(!isDragging)return;isDragging=false;swipeList.style.cursor='grab';swipeList.style.scrollBehavior='smooth';debounceSnap();}
+function handleSwipeScroll(){if(!ticking){window.requestAnimationFrame(()=>{updateSwipeSelected();ticking=false;});ticking=true;}if(!isDragging){debounceSnap();}}
+function showSwipeSelector(){centerBtn.classList.add('hide');fileBtn.classList.add('hide');setTimeout(()=>{islandRow.classList.add('slideup');setTimeout(()=>{swipeOuter.classList.add('active');setTimeout(()=>{setupSwipePadding();let ci=swipeItems.findIndex(i=>i.textContent.toLowerCase().includes(lastExt));scrollToSwipe(ci>-1?ci:0,'auto');setTimeout(updateSwipeSelected,120);},25);},290);},170);}
+function closeSwipeSetExt(ext){swipeOuter.classList.remove('active');setTimeout(()=>{islandRow.classList.remove('slideup');lastExt=ext.toLowerCase();centerBtn.textContent=ext;fileBtn.classList.remove('hide');centerBtn.classList.remove('hide');setMonacoLanguage(ext.toLowerCase());},340);}
+function setMonacoLanguage(ext){if(!window.editorInstance)return;let l={html:'html',css:'css',js:'javascript',json:'json',py:'python',swift:'swift',plist:'xml',xml:'xml',tsx:'typescript',txt:'plaintext',text:'plaintext',php:'php'}[ext]||'plaintext';let val=window.editorInstance.getValue();monaco.editor.setModelLanguage(window.editorInstance.getModel(),l);if(val)window.editorInstance.setValue(val);}
+
+swipeList.addEventListener('mousedown',handleSwipeDragStart);swipeList.addEventListener('mousemove',handleSwipeDragMove);document.addEventListener('mouseup',handleSwipeDragEnd);swipeList.addEventListener('mouseleave',handleSwipeDragEnd);swipeList.addEventListener('touchstart',handleSwipeDragStart,{passive:true});swipeList.addEventListener('touchmove',handleSwipeDragMove,{passive:false});swipeList.addEventListener('touchend',handleSwipeDragEnd);swipeList.addEventListener('scroll',handleSwipeScroll);window.addEventListener('resize',()=>{setupSwipePadding();let i=getClosestIndex();scrollToSwipe(i,'auto');moveCenterBar(i);});
+centerBtn.addEventListener('click',showSwipeSelector);
+fileBtn.addEventListener('click',()=>{fileInput.value='';fileInput.click();});
+fileInput.addEventListener('change',function(){if(!this.files||!this.files[0])return;let n=this.files[0].name,m=n.match(/\.([^.]+)$/),ext=m?m[1].toLowerCase():'';if(knownExt.includes(ext)){lastExt=ext;centerBtn.textContent=ext;setMonacoLanguage(ext);}else{centerBtn.textContent='File';}});
+window.addEventListener('DOMContentLoaded',()=>{swipeOuter.classList.remove('active');setupSwipePadding();centerBtn.textContent=lastExt;});
+swipeList.addEventListener('click',function(e){let item=e.target.closest('.swipe-item');let idx=-1;if(item)idx=swipeItems.indexOf(item);if(idx<0)idx=getClosestIndex();let ext=swipeItems[idx].textContent.replace(/[\(\)\.]/g,'').replace(/[^a-zA-Z]/g,'').toLowerCase();if(ext==='ch')ext='c';closeSwipeSetExt(ext);haptic.confirm();setMonacoLanguage(ext);});
+swipeOuter.addEventListener('click',function(e){if(e.target===swipeOuter){let idx=getClosestIndex(),ext=swipeItems[idx].textContent.replace(/[\(\)\.]/g,'').replace(/[^a-zA-Z]/g,'').toLowerCase();if(ext==='ch')ext='c';closeSwipeSetExt(ext);haptic.confirm();setMonacoLanguage(ext);}});
+document.addEventListener('keydown',function(e){if(!swipeOuter.classList.contains('active'))return;if(e.key==='Enter'||e.key==='Return'){let idx=getClosestIndex();let ext=swipeItems[idx].textContent.replace(/[\(\)\.]/g,'').replace(/[^a-zA-Z]/g,'').toLowerCase();if(ext==='ch')ext='c';closeSwipeSetExt(ext);haptic.confirm();setMonacoLanguage(ext);}});
+
+let editorInstance,styleEditorInstance;
+let isRotated=false,plainInputMode=false,isSelectMode=false;
+let htmlContent="<html>\n<head></head>\n<body>\n  <h1 style=\"color:blue;\">Hello</h1>\n</body>\n</html>";
+let cssContent="body { font-family: sans-serif; padding: 20px; }";
+
+const preview=document.getElementById("preview"),stylePanel=document.getElementById("stylePanel"),plainInput=document.getElementById("plainInput"),closeStyleBtn=document.getElementById("closeStyleBtn"),visionEditBtn=document.getElementById("visionEditBtn"),visionGearBtn=document.getElementById("visionGearBtn"),visionShareBtn=document.getElementById("visionShareBtn"),editIcon=document.getElementById("editIcon");
+const gearIcon=document.getElementById("gearIcon"),selectModeIcon=document.getElementById("selectModeIcon");
+
+require.config({paths:{'vs':'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs'}});
+require(["vs/editor/editor.main"],()=>{
+  editorInstance=monaco.editor.create(document.getElementById("editor"),{value:htmlContent,language:"html",theme:"vs-dark",automaticLayout:true,minimap:{enabled:false},scrollbar:{vertical:'hidden',horizontal:'hidden'}});
+  styleEditorInstance=monaco.editor.create(document.getElementById("styleEditor"),{value:cssContent,language:"css",theme:"vs-light",automaticLayout:true,minimap:{enabled:false},scrollbar:{vertical:'hidden',horizontal:'hidden'}});
+  editorInstance.onDidChangeModelContent(updatePreview);
+  styleEditorInstance.onDidChangeModelContent(updatePreview);
+  plainInput.value=htmlContent;
+  plainInput.addEventListener("input",()=>{htmlContent=plainInput.value;editorInstance.setValue(htmlContent);updatePreview()});
+  updatePreview();
+  window.editorInstance=editorInstance;
+});
+
+function getPreviewContent(){
+  const val=plainInputMode?plainInput.value:editorInstance?editorInstance.getValue():htmlContent;
+  const styleBlock="<style>\n"+(styleEditorInstance?styleEditorInstance.getValue():"")+"\n</style>";
+  let content = val.replace(/<\/head>/,styleBlock+"\n</head>").replace(/<body([^>]*)>/,'<body$1 style="background:none!important;">');
+  
+  if(isSelectMode && !isRotated) {
+    const injectScript = `
+    <script>
+      document.addEventListener('click', function(e) {
+        e.preventDefault(); e.stopPropagation();
+        const clone = e.target.cloneNode(false);
+        const outer = clone.outerHTML;
+        const startTag = outer.substring(0, outer.indexOf('>') + 1);
+        window.parent.postMessage({type: 'elementSelected', searchStr: startTag}, '*');
+      }, true);
+      const style = document.createElement('style');
+      style.innerHTML = '*:hover { outline: 2px solid #ffcd00 !important; cursor: pointer !important; transition: outline 0.1s; }';
+      document.head.appendChild(style);
+    <\/script>
+    `;
+    content = content.replace(/<\/body>/, injectScript + "\n</body>");
   }
+  return content;
+}
+function updatePreview(){preview.srcdoc=getPreviewContent()}
 
-  function handleClick(e) {
-    if (isProcessing) return;
-
-    const cell = e.currentTarget;
-    const row = parseInt(cell.dataset.row);
-    const col = parseInt(cell.dataset.col);
-
-    if (!isValidMove(row, col, currentPlayer)) {
-      errorSound.currentTime = 0;
-      errorSound.play();
-      cell.classList.add('shake');
-      setTimeout(() => cell.classList.remove('shake'), 550);
-      return;
-    }
-
-    // 即座に置く
-    board[row][col] = currentPlayer;
-    drawBoard();
-
-    placeSound.currentTime = 0;
-    placeSound.play();
-
-    isProcessing = true;
-// カーテン消去は 0.05秒後に開始（変更不要）
-setTimeout(() => {
-  curtain.classList.add('hide'); // ← hide追加で1秒かけてスライドアップ
-}, 50);
-
-    setTimeout(() => {
-      flipPieces(row, col, currentPlayer);
-      currentPlayer = currentPlayer === WHITE ? BLACK : WHITE;
-      isProcessing = false;
-      drawBoard();
-    }, 220);
+function setRotationState(rotated){
+  isRotated=rotated;
+  cardContainer.classList.toggle("rotated",isRotated);
+  btnGroup.classList.toggle("rotated",isRotated); // Dockの表示制御用
+  
+  if(isRotated){
+    editIcon.src="check.png"; editIcon.alt="完了";
+    visionSaveBtn.style.display="inline-flex";
+    gearIcon.style.display="inline";
+    selectModeIcon.style.display="none";
+  }else{
+    editIcon.src="edit.png"; editIcon.alt="編集";
+    visionSaveBtn.style.display="none";
+    gearIcon.style.display="none";
+    selectModeIcon.style.display="inline-block";
+    isSelectMode=false;
+    selectModeIcon.style.color="#09304a";
   }
+  updatePreview();
+}
 
-  function flipPieces(x, y, player) {
-    const opponent = player === WHITE ? BLACK : WHITE;
+visionEditBtn.addEventListener("click",()=>{haptic.fire();setRotationState(!isRotated)});
 
-    for (const [dx, dy] of directions) {
-      let nx = x + dx, ny = y + dy;
-      const toFlip = [];
-
-      while (nx >= 0 && ny >= 0 && nx < SIZE && ny < SIZE) {
-        if (board[nx][ny] === opponent) {
-          toFlip.push([nx, ny]);
-        } else if (board[nx][ny] === player) {
-          for (const [fx, fy] of toFlip) {
-            board[fx][fy] = player;
-          }
-          break;
-        } else {
-          break;
-        }
-        nx += dx; ny += dy;
-      }
-    }
-  }
-
-  function showWinner() {
-    let whiteCount = 0, blackCount = 0;
-    for (let row of board) {
-      for (let cell of row) {
-        if (cell === WHITE) whiteCount++;
-        if (cell === BLACK) blackCount++;
-      }
-    }
-
-    const winner = whiteCount > blackCount ? 'white' : 'black';
-    winnerImage.src = `${winner}.png`;
-    winnerImage.style.animation = 'slideUp 0.7s cubic-bezier(.77,0,.18,1);';
-
-    retryButton.style.display = 'inline-block';
-    setTimeout(() => retryButton.style.opacity = 1, 100);
-  }
-
-  retryButton.addEventListener('click', () => {
-    oseroView.style.top = '0'; // スライドダウン
-    setTimeout(() => {
-      // osero.htmlへ実際に遷移（必要なら）
-      window.location.href = 'osero.html';
-    }, 1100);
-  });
-
-  drawBoard();
-</script><audio id="bgm" src="bg.mp3" loop></audio>
-<div id="blackCurtain"></div>
-<audio id="bgm" src="bg.mp3" loop></audio>
-
-<script>window.addEventListener('DOMContentLoaded', () => {
-  const curtain = document.getElementById('blackCurtain');
-
-  // ✅ カーテンを1秒かけて上にスライドさせて消す
-  setTimeout(() => {
-    curtain.classList.add('hide');
-  }, 150); // ちょっと遅らせて自然に
-
-  // ✅ 背景スケールを少し遅らせて実行（optional）
-  setTimeout(() => {
-    document.body.style.transition = '0.4s cubic-bezier(.77,0,.18,1)';
-    document.body.style.transform = 'scale(1.1)';
-  }, 400); // curtainの後に動かすことで自然
-
-  // ✅ board表示のスケール（例：scale(0.8→1)）
-  setTimeout(() => {
-    const board = document.getElementById('board');
-    board.style.transition = '0.7s cubic-bezier(.77,0,.18,1)';
-    board.style.transform = 'scale(1)';
-  }, 1000);
-
-
-  // 4. BGM再生
-  const bgm = document.getElementById('bgm');
-  if (bgm) {
-    bgm.volume = 0.5;
-    bgm.play().catch(e => console.warn('BGM再生失敗:', e));
+visionGearBtn.addEventListener("click",()=>{
+  haptic.confirm();
+  if(isRotated){
+    const island=document.getElementById("island");
+    island.style.display="";
+    setTimeout(()=>{island.classList.add("expanded");},10);
+    document.getElementById("blackOverlay").classList.add("active");
+  } else {
+    isSelectMode = !isSelectMode;
+    selectModeIcon.style.color = isSelectMode ? "#ff4e00" : "#09304a";
+    updatePreview();
   }
 });
 
+// 要素選択時の動作
+window.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'elementSelected') {
+    const searchStr = event.data.searchStr;
+    isSelectMode = false; selectModeIcon.style.color = "#09304a";
+    setRotationState(true);
+    setTimeout(() => {
+      if(!plainInputMode && editorInstance) {
+        const model = editorInstance.getModel();
+        const matches = model.findMatches(searchStr, false, false, false, null, true);
+        if (matches && matches.length > 0) {
+          const match = matches[0];
+          editorInstance.revealLineInCenter(match.range.startLineNumber);
+          editorInstance.setPosition({ lineNumber: match.range.startLineNumber, column: match.range.startColumn });
+          editorInstance.focus();
+        }
+      }
+    }, 800);
+  }
+});
+
+// ドラッグ＆ドロップ対応
+document.addEventListener("dragover", e => e.preventDefault());
+document.addEventListener("drop", e => {
+  e.preventDefault();
+  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    const file = e.dataTransfer.files[0];
+    const reader = new FileReader();
+    reader.onload = ev => {
+      htmlContent = ev.target.result;
+      if (plainInputMode) { plainInput.value = htmlContent; plainInput.dispatchEvent(new Event("input")); } 
+      else { editorInstance.setValue(htmlContent); }
+      const ext = file.name.split('.').pop().toLowerCase();
+      if(knownExt.includes(ext)) closeSwipeSetExt(ext);
+      updatePreview();
+    };
+    reader.readAsText(file, "utf-8");
+  }
+});
+
+visionShareBtn.addEventListener("click",async()=>{
+  haptic.confirm();
+  let code=editorInstance?editorInstance.getValue():"";
+  if(!!navigator.share){
+    try{ await navigator.share({title:"Vision UIカード",text:code,url:location.href}); }catch{}
+  }else{
+    let ta=document.createElement("textarea");ta.value=code;document.body.appendChild(ta);
+    ta.select();document.execCommand("copy");document.body.removeChild(ta);
+    alert("コードをコピーしました。");
+  }
+});
+
+function showSwipeSelectorForSave(){
+  showSwipeSelector();
+  function onSelectExtForSave(ext){
+    if(!ext) return;
+    let filename=prompt("保存するファイル名", "untitled");
+    if(!filename) return;
+    const code=editorInstance?editorInstance.getValue():"";
+    let type="text/plain";
+    if(ext==="html")type="text/html"; else if(ext==="css")type="text/css"; else if(ext==="js")type="text/javascript"; else if(ext==="json")type="application/json"; else if(ext==="xml")type="application/xml"; else if(ext==="py")type="text/x-python"; else if(ext==="swift")type="text/swift"; else if(ext==="plist")type="application/xml"; else if(ext==="tsx")type="text/typescript-jsx"; else if(ext==="php")type="application/x-httpd-php";
+    const a=document.createElement("a");
+    const blob=new Blob([code],{type});
+    a.href=URL.createObjectURL(blob);
+    a.download=filename+"."+ext;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+    closeSwipeSetExt(ext);
+  }
+  const handler=function(e){
+    let item=e.target.closest('.swipe-item');let idx=-1;
+    if(item)idx=swipeItems.indexOf(item);
+    if(idx<0)idx=getClosestIndex();
+    let ext=swipeItems[idx].textContent.replace(/[\(\)\.]/g,'').replace(/[^a-zA-Z]/g,'').toLowerCase();
+    if(ext==='ch')ext='c';
+    e.preventDefault();
+    swipeList.removeEventListener('click',handler);
+    document.removeEventListener('keydown',keyHandler);
+    onSelectExtForSave(ext);
+  };
+  const keyHandler=function(e){
+    if(e.key==='Enter'||e.key==='Return'){
+      let idx=getClosestIndex();
+      let ext=swipeItems[idx].textContent.replace(/[\(\)\.]/g,'').replace(/[^a-zA-Z]/g,'').toLowerCase();
+      if(ext==='ch')ext='c';
+      swipeList.removeEventListener('click',handler);
+      document.removeEventListener('keydown',keyHandler);
+      onSelectExtForSave(ext);
+    }
+  }
+  swipeList.addEventListener('click',handler);
+  document.addEventListener('keydown',keyHandler);
+}
+visionSaveBtn.addEventListener("click",()=>{haptic.ultraBurst();showSwipeSelectorForSave()});
+
+const diIsland=document.getElementById("island"), diOverlay=document.getElementById("blackOverlay");
+const diBackBtn=document.getElementById("diBackBtn"), diCBtn=document.getElementById("diCBtn"), diBBtn=document.getElementById("diBBtn"), diEBtn=document.getElementById("diEBtn"), diFBtn=document.getElementById("diFBtn"), diSearchBtn=document.getElementById("diSearchBtn");
+
+function closeIsland(){
+  diIsland.classList.remove("expanded", "slider-active");
+  setTimeout(()=>{diIsland.style.display="none"; diOverlay.classList.remove("active");},350);
+}
+
+diBackBtn.addEventListener("click",e=>{haptic.ultraBurst();e.stopPropagation();closeIsland();});
+diCBtn.addEventListener("click",e=>{
+  haptic.ultraBurst();e.stopPropagation();closeIsland();
+  setTimeout(()=>{stylePanel.classList.add("active");cardContainer.classList.add("style-open");setTimeout(()=>{styleEditorInstance.layout();},200);},350);
+});
+diBBtn.addEventListener("click",e=>{haptic.ultraBurst();e.stopPropagation();closeIsland();setTimeout(()=>visionSaveBtn.click(),350);});
+diEBtn.addEventListener("click",e=>{haptic.ultraBurst();e.stopPropagation();closeIsland();});
+
+// Editor切り替えボタン
+diFBtn.addEventListener("click",e=>{
+  haptic.ultraBurst();e.stopPropagation();closeIsland();
+  setTimeout(()=>{
+    plainInputMode = !plainInputMode;
+    if(plainInputMode){
+      document.getElementById("editor").style.display = "none";
+      plainInput.style.display = "block";
+      if(editorInstance) plainInput.value = editorInstance.getValue();
+    } else {
+      document.getElementById("editor").style.display = "block";
+      plainInput.style.display = "none";
+      if(editorInstance) editorInstance.setValue(plainInput.value);
+    }
+    updatePreview();
+  },350);
+});
+
+// === 検索関連の機能 ===
+const searchOverlay = document.getElementById("searchOverlay");
+const searchInput = document.getElementById("searchInput");
+const searchNextBtn = document.getElementById("searchNextBtn");
+const searchCloseBtn = document.getElementById("searchCloseBtn");
+let searchIndex = 0;
+let lastSearchStr = "";
+
+diSearchBtn.addEventListener("click", e => {
+  haptic.ultraBurst(); e.stopPropagation(); closeIsland();
+  setTimeout(() => { searchOverlay.classList.add("active"); searchInput.focus(); }, 350);
+});
+
+searchCloseBtn.addEventListener("click", () => searchOverlay.classList.remove("active"));
+
+function performSearch() {
+  const str = searchInput.value;
+  if(!str) return;
+  if(str !== lastSearchStr) { searchIndex = 0; lastSearchStr = str; }
+  
+  if(!isRotated) setRotationState(true);
+  
+  setTimeout(() => {
+    if(!plainInputMode && editorInstance) {
+      const model = editorInstance.getModel();
+      const matches = model.findMatches(str, false, false, false, null, true);
+      if(matches && matches.length > 0) {
+        const match = matches[searchIndex % matches.length];
+        editorInstance.revealLineInCenter(match.range.startLineNumber);
+        editorInstance.setSelection(match.range);
+        editorInstance.focus();
+        searchIndex++;
+      } else {
+        alert("見つかりませんでした");
+      }
+    } else if(plainInputMode) {
+      const text = plainInput.value;
+      const idx = text.indexOf(str, searchIndex);
+      if(idx !== -1) {
+        plainInput.focus();
+        plainInput.setSelectionRange(idx, idx + str.length);
+        searchIndex = idx + str.length;
+      } else {
+        searchIndex = 0;
+        alert("見つかりませんでした");
+      }
+    }
+  }, isRotated ? 50 : 800);
+}
+
+searchNextBtn.addEventListener("click", performSearch);
+searchInput.addEventListener("keydown", e => { if(e.key === 'Enter') performSearch(); });
+
+closeStyleBtn.addEventListener("click",()=>{stylePanel.classList.remove("active");cardContainer.classList.remove("style-open");});
+
+let expanded=false;
+diIsland.addEventListener("click",()=>{expanded=!expanded; diIsland.classList.toggle("expanded",expanded);});
+
 </script>
-
-
-
-</body></html>
+</body>
+</html>
