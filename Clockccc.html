@@ -3,217 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Clock iOS 26 - Slide Edition</title>
+    <title>Clock iOS 26 - Locked & Toggle</title>
     <style>
         :root {
-            /* SF Proを最優先。Appleデバイスで確実に機能する指定 */
             --ios-font: "SF Pro Display", "SF Pro Text", -apple-system, system-ui, sans-serif;
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin: 0; padding: 0;
+            display: flex; justify-content: center; align-items: center;
             height: 100vh;
-                background: linear-gradient(135deg,#ff4e00,#ea38ff,#5ca7ff);
+            background: linear-gradient(135deg,#ff4e00,#ea38ff,#5ca7ff);
             color: #fff;
             font-family: var(--ios-font);
             flex-direction: column;
             overflow: hidden;
             -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
+            user-select: none; -webkit-user-select: none;
+            touch-action: none;
         }
 
         #analog-clock {
             position: relative;
-            width: 70vmin;
-            height: 70vmin;
+            width: 70vmin; height: 70vmin;
             border-radius: 50%;
-            background-color: transparent;
-            /* ご指定のシャドウ設定 */
-            box-shadow: 
-                inset 1px -.8px .5px rgb(255 255 255 / 64%),
-                inset -1.8px 1.5px 1px rgb(255 255 255 / 55%);
-            
+            box-shadow: inset 1px -.8px .5px rgb(255 255 255 / 64%), inset -1.8px 1.5px 1px rgb(255 255 255 / 55%);
             margin-bottom: 60px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
         }
 
         #analog-clock::after {
-            content: '';
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: #fff;
-            border-radius: 50%;
-            z-index: 10;
+            content: ''; position: absolute;
+            width: 8px; height: 8px; background: #fff; border-radius: 50%; z-index: 10;
         }
+
+        #timer-knob {
+            position: absolute;
+            top: -12px;
+            width: 24px; height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            z-index: 25;
+            cursor: pointer;
+            transform-origin: center calc(35vmin + 12px);
+            transition: scale 0.2s;
+            transform: rotate(0deg);
+        }
+        #timer-knob:active { scale: 1.3; }
 
         .hand {
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            transform-origin: 50% 100%;
-            translate: -50% 0;
+            position: absolute; bottom: 50%; left: 50%;
+            transform-origin: 50% 100%; translate: -50% 0;
             border-radius: 10px;
         }
+        .hour { width: 8px; height: 22%; background: rgba(255,255,255,0.5); z-index: 3; }
+        .minute { width: 5px; height: 35%; background: rgba(255,255,255,0.7); z-index: 4; }
+        .second { width: 2px; height: 40%; background: #FFFFFF80; z-index: 5; transition: transform 0.2s cubic-bezier(0.1, 2.7, 0.58, 1); }
 
-        .hour {      box-shadow: 
-                inset .4px -1px .1px rgb(255 255 255 / 88%),
-                inset -.5px 1.5px 1px rgb(255 255 255 / 77%); width: 8px; height: 22%; background-color:  rgba(255, 255, 255, 0.5);  z-index: 3; }
-        .minute { width: 5px; height: 35%; background-color:  rgba(255, 255, 255, 0.7);  z-index: 4; }
-        .second { 
-            width: 2px; height: 40%; background-color: #FFFFFF80; z-index: 5;
-            transition: transform 0.2s cubic-bezier(0.1, 2.7, 0.58, 1);
+        #digital-display { text-align: center; pointer-events: none; }
+        #mode-label {
+            font-size: 0.9rem; font-weight: 500; text-transform: uppercase;
+            letter-spacing: 0.2em; margin-bottom: 5px; opacity: 0.7;
+            height: 1.2em;
         }
 
-        /* デジタル時計のレイアウト */
-        #digital-clock {
-            display: flex;
-            font-size: 4.5rem;
-            font-weight: 200;
-            letter-spacing: -0.02em;font-family:"SF Pro Display", "SF Pro Text", -apple-system, system-ui, sans-serif;
-            overflow: hidden;
-            height: 1.2em; /* 数字1つ分の高さに固定 */
+        #digital-clock {font-family: "SF Pro Display", "SF Pro Text", -apple-system, system-ui, sans-serif;
+            display: flex; font-size: 4.5rem; font-weight: 200;
+            letter-spacing: -0.02em; height: 1.2em; overflow: hidden;
         }
 
         .digit-container {
-            position: relative;
-            display: inline-block;
-            height: 1.2em;
-            width: 0.65em; /* フォント幅に合わせて調整 */
-            text-align: center;
+            position: relative; display: inline-block;
+            height: 1.2em; width: 0.65em; text-align: center;
         }
+        .separator { width: 0.3em; text-align: center; }
 
-        .separator {
-            width: 0.3em;
-            text-align: center;
-        }
-
-        /* スライドアニメーション */
         .digit {
-            position: absolute;
-            width: 100%;
-            left: 0;
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: absolute; width: 100%; left: 0;
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
         }
-
-        .digit.old { transform: translateY(-100%); }
-        .digit.new { transform: translateY(0); }
-        .digit.hidden { transform: translateY(100%); }
+        .digit.old { transform: translateY(-120%); } 
+        .digit.new { transform: translateY(0); }     
+        .digit.hidden { transform: translateY(120%); }
 
     </style>
 </head>
-<body onclick="triggerHaptic()">
+<body id="main-body">
+
     <div id="analog-clock">
+        <div id="timer-knob"></div>
         <div class="hand hour" id="hour-hand"></div>
         <div class="hand minute" id="minute-hand"></div>
         <div class="hand second" id="second-hand"></div>
     </div>
 
-    <div id="digital-clock">
-        <div class="digit-container" id="h1"></div>
-        <div class="digit-container" id="h2"></div>
-        <div class="separator">:</div>
-        <div class="digit-container" id="m1"></div>
-        <div class="digit-container" id="m2"></div>
-        <div class="separator">:</div>
-        <div class="digit-container" id="s1"></div>
-        <div class="digit-container" id="s2"></div>
+    <div id="digital-display">
+        <div id="mode-label">CLOCK</div>
+        <div id="digital-clock">
+            <div class="digit-container" id="d1"></div>
+            <div class="digit-container" id="d2"></div>
+            <div class="separator">:</div>
+            <div class="digit-container" id="d3"></div>
+            <div class="digit-container" id="d4"></div>
+            <div class="separator">:</div>
+            <div class="digit-container" id="d5"></div>
+            <div class="digit-container" id="d6"></div>
+        </div>
     </div>
 
     <script>
+        let isTimerActive = false;
+        let isPeekTime = false;
+        let timerSeconds = 0;
+        let timerInterval = null;
+        let peekTimeout = null;
+        let isDragging = false;
+        let currentMins = 0;
+
+        const knob = document.getElementById('timer-knob');
+        const modeLabel = document.getElementById('mode-label');
+
         function triggerHaptic() {
-            if (window.navigator && window.navigator.vibrate) {
-                window.navigator.vibrate(10);
-            }
+            if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(8);
         }
 
-        // 各桁の数字を更新・アニメーションさせる関数
         function updateDigit(id, newValue) {
             const container = document.getElementById(id);
             const currentValue = container.getAttribute('data-value');
-
             if (currentValue !== newValue) {
-                // 新しい数字の要素を作成
                 const newDigit = document.createElement('div');
-                newDigit.className = 'digit new hidden'; // 最初は下に隠す
+                newDigit.className = 'digit new hidden';
                 newDigit.textContent = newValue;
                 container.appendChild(newDigit);
 
-                // 古い数字を上にスライド
                 const oldDigit = container.querySelector('.digit.new:not(.hidden)');
-                if (oldDigit) {
-                    oldDigit.classList.replace('new', 'old');
-                }
+                if (oldDigit) oldDigit.classList.replace('new', 'old');
 
-                // 数ミリ秒後にスライド開始
+                setTimeout(() => { newDigit.classList.remove('hidden'); }, 20);
                 setTimeout(() => {
-                    newDigit.classList.remove('hidden');
-                }, 10);
-
-                // アニメーションが終わったら古い要素を消す
-                setTimeout(() => {
-                    const olds = container.querySelectorAll('.old');
-                    olds.forEach(el => el.remove());
-                }, 450);
-
+                    container.querySelectorAll('.old').forEach(el => el.remove());
+                }, 550);
                 container.setAttribute('data-value', newValue);
             }
         }
 
-        function updateClock() {
+        function renderDisplay(h, m, s, label) {
+            if (modeLabel.textContent !== label) {
+                modeLabel.textContent = label;
+            }
+            const str = String(h).padStart(2, '0') + String(m).padStart(2, '0') + String(s).padStart(2, '0');
+            ['d1','d2','d3','d4','d5','d6'].forEach((id, i) => updateDigit(id, str[i]));
+        }
+
+        function updateSystemClock() {
             const now = new Date();
-            // JST（日本標準時）
             const jst = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+            const hr = jst.getHours(), min = jst.getMinutes(), sec = jst.getSeconds();
 
-            const h = String(jst.getHours()).padStart(2, '0');
-            const m = String(jst.getMinutes()).padStart(2, '0');
-            const s = String(jst.getSeconds()).padStart(2, '0');
-
-            // アナログ時計の回転
-            const hr = jst.getHours();
-            const min = jst.getMinutes();
-            const sec = jst.getSeconds();
             document.getElementById('hour-hand').style.transform = `rotate(${(hr % 12 * 30) + (min / 2)}deg)`;
             document.getElementById('minute-hand').style.transform = `rotate(${(min * 6) + (sec / 10)}deg)`;
             document.getElementById('second-hand').style.transform = `rotate(${sec * 6}deg)`;
 
-            // デジタル時計の各桁をスライド更新
-            updateDigit('h1', h[0]);
-            updateDigit('h2', h[1]);
-            updateDigit('m1', m[0]);
-            updateDigit('m2', m[1]);
-            updateDigit('s1', s[0]);
-            updateDigit('s2', s[1]);
+            if (!isTimerActive || isPeekTime) {
+                renderDisplay(hr, min, sec, "CLOCK");
+            }
         }
 
-        // 初期表示用
-        function initClock() {
-            const now = new Date();
-            const jst = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
-            const time = [
-                String(jst.getHours()).padStart(2, '0'),
-                String(jst.getMinutes()).padStart(2, '0'),
-                String(jst.getSeconds()).padStart(2, '0')
-            ].join('');
+        function startTimer(mins) {
+            isTimerActive = true;
+            timerSeconds = mins * 60;
             
-            const ids = ['h1', 'h2', 'm1', 'm2', 's1', 's2'];
-            ids.forEach((id, i) => {
-                const container = document.getElementById(id);
-                container.innerHTML = `<div class="digit new">${time[i]}</div>`;
-                container.setAttribute('data-value', time[i]);
-            });
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (isTimerActive && !isPeekTime) {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        renderDisplay(0, Math.floor(timerSeconds / 60), timerSeconds % 60, "TIMER");
+                        if (!isDragging) {
+                            knob.style.transform = `rotate(${(timerSeconds / 60) * 6}deg)`;
+                        }
+                    } else {
+                        stopTimer();
+                    }
+                }
+            }, 1000);
         }
 
-        initClock();
-        setInterval(updateClock, 1000);
+        function stopTimer() {
+            isTimerActive = false;
+            isPeekTime = false;
+            clearInterval(timerInterval);
+            knob.style.transform = `rotate(0deg)`;
+            currentMins = 0;
+            updateSystemClock();
+        }
+
+        function handleDrag(e) {
+            if (!isDragging) return;
+            const rect = document.getElementById('analog-clock').getBoundingClientRect();
+            const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+            const x = e.touches ? e.touches[0].clientX : e.clientX;
+            const y = e.touches ? e.touches[0].clientY : e.clientY;
+
+            let angle = Math.atan2(y - cy, x - cx) * 180 / Math.PI + 90;
+            angle = (angle + 360) % 360;
+            
+            // 0分〜59分の範囲にロック（12時を超えて反対側へ行かせない）
+            if (angle > 354 && angle < 359) angle = 354; 
+            if (angle > 180 && angle < 300 && currentMins < 10) angle = 0; // 急激な戻り防止
+            if (angle < 180 && angle > 60 && currentMins > 50) angle = 354; // 急激な進み防止
+
+            const mins = Math.floor(angle / 6);
+            if (mins >= 0 && mins < 60) {
+                if (Math.floor(currentMins) !== mins) triggerHaptic();
+                currentMins = angle / 6;
+                knob.style.transform = `rotate(${angle}deg)`;
+                startTimer(mins);
+            }
+        }
+
+        // 盤面タップイベント
+        document.getElementById('main-body').addEventListener('click', (e) => {
+            if (e.target === knob || isDragging) return;
+            
+            if (isTimerActive) {
+                if (!isPeekTime) {
+                    // Peek開始（時刻を表示）
+                    isPeekTime = true;
+                    updateSystemClock();
+                    clearTimeout(peekTimeout);
+                    peekTimeout = setTimeout(() => { isPeekTime = false; }, 10000);
+                } else {
+                    // すでにPeek中なら、即座にタイマーに戻る
+                    isPeekTime = false;
+                    clearTimeout(peekTimeout);
+                    const m = Math.floor(timerSeconds / 60);
+                    const s = timerSeconds % 60;
+                    renderDisplay(0, m, s, "TIMER");
+                }
+            }
+        });
+
+        knob.addEventListener('mousedown', () => isDragging = true);
+        window.addEventListener('mousemove', handleDrag);
+        window.addEventListener('mouseup', () => isDragging = false);
+        knob.addEventListener('touchstart', (e) => { isDragging = true; e.preventDefault(); });
+        window.addEventListener('touchmove', handleDrag);
+        window.addEventListener('touchend', () => isDragging = false);
+
+        setInterval(updateSystemClock, 1000);
+        updateSystemClock();
     </script>
 </body>
-</html> 
+</html>
