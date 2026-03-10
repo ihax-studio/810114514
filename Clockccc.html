@@ -2,9 +2,14 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>時計アプリ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Clock iOS 26 - Slide Edition</title>
     <style>
+        :root {
+            /* SF Proを最優先。Appleデバイスで確実に機能する指定 */
+            --ios-font: "SF Pro Display", "SF Pro Text", -apple-system, system-ui, sans-serif;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -12,92 +17,203 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: black;
-            color: white;
-            font-family: 'Arial', sans-serif;
+            background-color: #000;
+            color: #fff;
+            font-family: var(--ios-font);
             flex-direction: column;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
         }
+
         #analog-clock {
             position: relative;
-            width: 80vmin;
-            height: 80vmin;
+            width: 70vmin;
+            height: 70vmin;
             border-radius: 50%;
             background-color: transparent;
-            border: 5px solid white;
-            margin-bottom: 20px;
+            /* ご指定のシャドウ設定 */
+            box-shadow: 
+                inset 1px -.8px .5px rgb(255 255 255 / 64%),
+                inset -1.8px 1.5px 1px rgb(255 255 255 / 55%);
+            
+            margin-bottom: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        #analog-clock .hand {
+
+        #analog-clock::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            z-index: 10;
+        }
+
+        .hand {
             position: absolute;
             bottom: 50%;
             left: 50%;
             transform-origin: 50% 100%;
-            transition: all 0.5s ease-in-out;
-        }
-        #analog-clock .hour {
-            width: 4px;
-            height: 30%;
-            background-color: white;
-            transform-origin: 50% 100%;
-        }
-        #analog-clock .minute {
-            width: 3px;
-            height: 40%;
-            background-color: white;
-            transform-origin: 50% 100%;
-        }
-        #analog-clock .second {
-            width: 2px;
-            height: 45%;
-            background-color: red;
-            transform-origin: 50% 100%;
+            translate: -50% 0;
+            border-radius: 10px;
         }
 
-        #digital-clock {
-            font-size: 3rem;
-            font-weight: bold;
+        .hour {      box-shadow: 
+                inset .4px -1px .1px rgb(255 255 255 / 88%),
+                inset -.5px 1.5px 1px rgb(255 255 255 / 77%); width: 8px; height: 22%; background-color:  rgba(255, 255, 255, 0.5);  z-index: 3; }
+        .minute { width: 5px; height: 35%; background-color:  rgba(255, 255, 255, 0.7);  z-index: 4; }
+        .second { 
+            width: 2px; height: 40%; background-color: #FFFFFF80; z-index: 5;
+            transition: transform 0.2s cubic-bezier(0.1, 2.7, 0.58, 1);
         }
+
+        /* デジタル時計のレイアウト */
+        #digital-clock {
+            display: flex;
+            font-size: 4.5rem;
+            font-weight: 200;
+            letter-spacing: -0.02em;font-family:"SF Pro Display", "SF Pro Text", -apple-system, system-ui, sans-serif;
+            overflow: hidden;
+            height: 1.2em; /* 数字1つ分の高さに固定 */
+        }
+
+        .digit-container {
+            position: relative;
+            display: inline-block;
+            height: 1.2em;
+            width: 0.65em; /* フォント幅に合わせて調整 */
+            text-align: center;
+        }
+
+        .separator {
+            width: 0.3em;
+            text-align: center;
+        }
+
+        /* スライドアニメーション */
+        .digit {
+            position: absolute;
+            width: 100%;
+            left: 0;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .digit.old { transform: translateY(-100%); }
+        .digit.new { transform: translateY(0); }
+        .digit.hidden { transform: translateY(100%); }
+
     </style>
 </head>
-<body>
+<body onclick="triggerHaptic()">
     <div id="analog-clock">
         <div class="hand hour" id="hour-hand"></div>
         <div class="hand minute" id="minute-hand"></div>
         <div class="hand second" id="second-hand"></div>
     </div>
-    <div id="digital-clock"></div>
+
+    <div id="digital-clock">
+        <div class="digit-container" id="h1"></div>
+        <div class="digit-container" id="h2"></div>
+        <div class="separator">:</div>
+        <div class="digit-container" id="m1"></div>
+        <div class="digit-container" id="m2"></div>
+        <div class="separator">:</div>
+        <div class="digit-container" id="s1"></div>
+        <div class="digit-container" id="s2"></div>
+    </div>
 
     <script>
-        function updateClock() {
-            const now = new Date();
-            const japanTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
-
-            // アナログ時計
-            const hours = japanTime.getHours() % 12; // 12時間制
-            const minutes = japanTime.getMinutes();
-            const seconds = japanTime.getSeconds();
-
-            const hourDeg = (hours * 30) + (minutes / 2); // 時針の角度
-            const minuteDeg = minutes * 6; // 分針の角度
-            const secondDeg = seconds * 6; // 秒針の角度
-
-            document.getElementById('hour-hand').style.transform = `rotate(${hourDeg}deg)`;
-            document.getElementById('minute-hand').style.transform = `rotate(${minuteDeg}deg)`;
-            document.getElementById('second-hand').style.transform = `rotate(${secondDeg}deg)`;
-
-            // デジタル時計
-            const timeString = japanTime.toLocaleTimeString('ja-JP', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-            });
-            document.getElementById('digital-clock').textContent = timeString;
+        function triggerHaptic() {
+            if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(10);
+            }
         }
 
-        setInterval(updateClock, 1000); // 1秒ごとに更新
+        // 各桁の数字を更新・アニメーションさせる関数
+        function updateDigit(id, newValue) {
+            const container = document.getElementById(id);
+            const currentValue = container.getAttribute('data-value');
 
-        // 初回の呼び出し
-        updateClock();
+            if (currentValue !== newValue) {
+                // 新しい数字の要素を作成
+                const newDigit = document.createElement('div');
+                newDigit.className = 'digit new hidden'; // 最初は下に隠す
+                newDigit.textContent = newValue;
+                container.appendChild(newDigit);
+
+                // 古い数字を上にスライド
+                const oldDigit = container.querySelector('.digit.new:not(.hidden)');
+                if (oldDigit) {
+                    oldDigit.classList.replace('new', 'old');
+                }
+
+                // 数ミリ秒後にスライド開始
+                setTimeout(() => {
+                    newDigit.classList.remove('hidden');
+                }, 10);
+
+                // アニメーションが終わったら古い要素を消す
+                setTimeout(() => {
+                    const olds = container.querySelectorAll('.old');
+                    olds.forEach(el => el.remove());
+                }, 450);
+
+                container.setAttribute('data-value', newValue);
+            }
+        }
+
+        function updateClock() {
+            const now = new Date();
+            // JST（日本標準時）
+            const jst = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+
+            const h = String(jst.getHours()).padStart(2, '0');
+            const m = String(jst.getMinutes()).padStart(2, '0');
+            const s = String(jst.getSeconds()).padStart(2, '0');
+
+            // アナログ時計の回転
+            const hr = jst.getHours();
+            const min = jst.getMinutes();
+            const sec = jst.getSeconds();
+            document.getElementById('hour-hand').style.transform = `rotate(${(hr % 12 * 30) + (min / 2)}deg)`;
+            document.getElementById('minute-hand').style.transform = `rotate(${(min * 6) + (sec / 10)}deg)`;
+            document.getElementById('second-hand').style.transform = `rotate(${sec * 6}deg)`;
+
+            // デジタル時計の各桁をスライド更新
+            updateDigit('h1', h[0]);
+            updateDigit('h2', h[1]);
+            updateDigit('m1', m[0]);
+            updateDigit('m2', m[1]);
+            updateDigit('s1', s[0]);
+            updateDigit('s2', s[1]);
+        }
+
+        // 初期表示用
+        function initClock() {
+            const now = new Date();
+            const jst = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+            const time = [
+                String(jst.getHours()).padStart(2, '0'),
+                String(jst.getMinutes()).padStart(2, '0'),
+                String(jst.getSeconds()).padStart(2, '0')
+            ].join('');
+            
+            const ids = ['h1', 'h2', 'm1', 'm2', 's1', 's2'];
+            ids.forEach((id, i) => {
+                const container = document.getElementById(id);
+                container.innerHTML = `<div class="digit new">${time[i]}</div>`;
+                container.setAttribute('data-value', time[i]);
+            });
+        }
+
+        initClock();
+        setInterval(updateClock, 1000);
     </script>
 </body>
-</html>
+</html> 
