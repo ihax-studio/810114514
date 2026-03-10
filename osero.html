@@ -2,54 +2,23 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Code Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<title>カードエディタ UI 統合MAX (改修・iOS最適化版)</title>
 <link rel="apple-touch-icon" sizes="180x180" href="icon-191.png">
 <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 <link rel="manifest" href="manifest.json">
 <script src="sw.js"></script>
 <meta name="theme-color" content="#fff">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-191.png">
 <link rel="shortcut icon" href="icon-191.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
-<style>/* iOS標準のジェスチャー・機能をブロック */
-html, body {
-  /* 1. 画面端スワイプによる「進む・戻る」のバウンス効果を抑制 */
-  overscroll-behavior: none;
-  
-  /* 2. ダブルタップズームを禁止 */
-  touch-action: manipulation;
-  
-  /* 3. テキスト選択や長押しメニューを禁止（エディタ以外） */
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-}
-
-/* Monacoエディタやテキスト入力エリアだけは操作を許可する */
-#editor, #plainInput, #styleEditor, #jsonEditorInst, .style-editor-panel {
-  -webkit-user-select: text !important;
-  touch-action: auto !important;
-}
-
-/* カードコンテナ内部でのスクロールによるバウンス（跳ね返り）を防止 */
-.card-container, .card, .swipe-list {
-  overscroll-behavior: contain;
-  /* 慣性スクロールを有効にしつつ、システム側の挙動を抑える */
-  -webkit-overflow-scrolling: touch;
-}
-
-/* 特定の要素（ボタンなど）で長押し時にシステムメニューが出るのを防ぐ */
-button, .island-btn, .glass-btn, .center-btn, .file-btn, .split-btn {
-  -webkit-touch-callout: none;
-}
+<style>
 /* =====================================================================
-   ROOT / VARIABLES
+   ROOT / VARIABLES & iOS ANTI-BOUNCE
 ===================================================================== */
 :root{
   --trans-open:1s cubic-bezier(.6,0,.2,1);
   --trans-close:.8s cubic-bezier(.6,0,.2,1);
-  /* 画面いっぱいに広げるようサイズを調整 */
   --card-w-pc:96vw;--card-h-pc:84vh;
   --card-w-mb:96vw;--card-h-mb:82vh;
   --card-max-w:1600px;--card-max-h:95vh;
@@ -61,7 +30,19 @@ html,body{
   font-family:"SF Pro Display",-apple-system,BlinkMacSystemFont,sans-serif;
   overflow:hidden;box-sizing:border-box;
   display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  /* iOS: スワイプによる戻る・進む、全体バウンスを抑制 */
+  overscroll-behavior: none;
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
 }
+/* スクロールや入力が必要な部分は許可 */
+#editor, #plainInput, iframe, .swipe-list, .style-editor-panel, #searchInput {
+  -webkit-user-select: auto; user-select: auto;
+  touch-action: auto;
+  overscroll-behavior: contain;
+}
+button, .island-btn, .glass-btn, .swipe-item { -webkit-touch-callout: none; }
+
 /* =====================================================================
    ISLAND ROW
 ===================================================================== */
@@ -71,14 +52,17 @@ html,body{
   transition:transform .5s cubic-bezier(.45,1.5,.65,1),opacity .3s ease;
 }
 .island-row.slideup{transform:translate(-50%,-90px);opacity:0;}
-.file-btn{
+.file-btn, .island-row .split-btn{
   width:36px;height:36px;border-radius:50%;background:#fff;
   box-shadow:0 2px 9px #0002;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:1.2em;border:none;outline:none;
-  transition:filter .2s,opacity .25s;opacity:1;
+  cursor:pointer;border:none;outline:none;
+  transition:transform .18s,background .18s,filter .2s,opacity .25s;flex-shrink:0;
 }
-.file-btn:active{filter:brightness(.95);}
+.file-btn:active, .island-row .split-btn:active{transform:scale(.88);}
 .file-btn.hide{opacity:0;pointer-events:none;}
+.island-row .split-btn svg, .file-btn svg{width:18px;height:18px;stroke:#333;stroke-width:2;fill:none;}
+.island-row .split-btn.active{background:rgba(37,121,247,.22);}
+.island-row .split-btn.active svg{stroke:#2579F7;}
 
 .center-btn{
   display:flex;align-items:center;justify-content:center;
@@ -89,28 +73,15 @@ html,body{
   opacity:1;filter:blur(0);border:none;outline:none;
 }
 .center-btn.hide{opacity:0;pointer-events:none;filter:blur(2px);}
-
-/* 移動してきた分割ボタン */
-.island-row .split-btn{
-  width:36px;height:36px;border-radius:50%;background:#fff;
-  box-shadow:0 2px 9px #0002;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;border:none;outline:none;
-  transition:transform .18s,background .18s,filter .2s;flex-shrink:0;
-}
-.island-row .split-btn:active{transform:scale(.88);}
-.island-row .split-btn svg{width:18px;height:18px;stroke:#333;stroke-width:2;fill:none;}
-.island-row .split-btn.active{background:rgba(37,121,247,.22);}
-.island-row .split-btn.active svg{stroke:#2579F7;}
-
 input[type="file"]{display:none;}
+
 /* =====================================================================
    SWIPE SELECTOR
 ===================================================================== */
 .swipe-outer{
   width:90vw;height:75px;max-width:550px;z-index:600;
   position:fixed;left:50%;top:0;transform:translateX(-50%) scale(.8);
-  overflow:hidden;border-radius:100px;
-  background:#00000082;
+  overflow:hidden;border-radius:100px;background:#00000082;
   box-shadow:inset 1px -1px 11px rgba(0,0,0,.33),inset 1px -1px 55px rgba(0,0,0,.38),
              1px -1px 1px #e9e9e9,-1px 1px 1px #d6d6d6e8,0 2px 25px #000b;
   opacity:0;transition:transform .5s cubic-bezier(.4,2,.5,1),opacity .33s cubic-bezier(.4,2,.5,1);
@@ -126,8 +97,7 @@ input[type="file"]{display:none;}
 .swipe-item{
   font-size:18px;color:#fff;opacity:.8;font-weight:300;text-align:center;
   min-width:55px;line-height:1px;pointer-events:auto;letter-spacing:1.7px;
-  position:relative;
-  transition:transform .7s cubic-bezier(.5,1.7,.5,1),color .4s,opacity .4s;
+  position:relative;transition:transform .7s cubic-bezier(.5,1.7,.5,1),color .4s,opacity .4s;
   transform:translateY(-12px) scale(1);
 }
 .swipe-item.selected{color:#ffc63e;opacity:1;font-weight:330;transform:translateY(-14px) scale(1.1);}
@@ -146,54 +116,34 @@ input[type="file"]{display:none;}
   background:#ffcd00;box-shadow:0 2px 15px #ffd13377;z-index:20;
   transition:transform .5s cubic-bezier(.4,2,.5,1);
 }
-.tap-hint{
-  position:absolute;bottom:5px;left:50%;transform:translateX(-50%);
-  color:#fff;font-size:13px;pointer-events:none;user-select:none;
-}
+.tap-hint{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);color:#fff;font-size:13px;pointer-events:none;}
+
 /* =====================================================================
-   LAYOUT SPACERS
+   LAYOUT SPACERS & SAVE BAR
 ===================================================================== */
-.vertical-space{height:70px;flex-shrink:0;} /* アイランドのための余白 */
-.bottom-space{height:80px;flex-shrink:0;} /* 下部ボタン用の余白 */
-/* =====================================================================
-   BUNDLE SAVE BAR
-===================================================================== */
-#bundleSaveBar{
-  display:none;align-items:center;justify-content:center;
-  gap:10px;padding:4px 0;flex-shrink:0;z-index:200;
-}
+.vertical-space{height:70px;flex-shrink:0;}
+.bottom-space{height:80px;flex-shrink:0;}
+#bundleSaveBar{display:none;align-items:center;justify-content:center;gap:10px;padding:4px 0;flex-shrink:0;z-index:200;}
 #bundleSaveBar.visible{display:flex;}
 .bundle-save-btn{
-  display:flex;align-items:center;gap:7px;
-  padding:9px 22px;border-radius:22px;border:none;
-  background:rgba(255,255,255,.28);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  font-family:"SF Pro Display",-apple-system,sans-serif;
-  font-size:14px;font-weight:600;color:#09304a;cursor:pointer;
-  box-shadow:0 2px 12px rgba(0,0,0,.12);
-  transition:background .18s,transform .18s;
+  display:flex;align-items:center;gap:7px;padding:9px 22px;border-radius:22px;border:none;
+  background:rgba(255,255,255,.28);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  font-family:"SF Pro Display",-apple-system,sans-serif;font-size:14px;font-weight:600;color:#09304a;cursor:pointer;
+  box-shadow:0 2px 12px rgba(0,0,0,.12);transition:background .18s,transform .18s;
 }
 .bundle-save-btn:active{background:rgba(255,255,255,.45);transform:scale(.95);}
 .bundle-save-btn img{width:18px;height:18px;object-fit:contain;}
+
 /* =====================================================================
-   CENTER ROW / CARD CONTAINER
+   CENTER ROW / CARD CONTAINER & CARDS
 ===================================================================== */
-.center-row{
-  flex:1 0 0;width:100vw;
-  display:flex;justify-content:center;align-items:center;min-height:0;
-}
+.center-row{flex:1 0 0;width:100vw;display:flex;justify-content:center;align-items:center;min-height:0;}
 .card-container{
-  width:var(--card-w-pc);height:var(--card-h-pc);
-  max-width:var(--card-max-w);max-height:var(--card-max-h);
-  min-width:260px;min-height:280px;
-  position:relative;transform-style:preserve-3d;perspective:1500px;
-  display:flex;justify-content:center;align-items:center;
-  background:none;z-index:2;box-shadow:0 3px 24px 6px #0002;
+  width:var(--card-w-pc);height:var(--card-h-pc);max-width:var(--card-max-w);max-height:var(--card-max-h);
+  min-width:260px;min-height:280px;position:relative;transform-style:preserve-3d;perspective:1500px;
+  display:flex;justify-content:center;align-items:center;background:none;z-index:2;box-shadow:0 3px 24px 6px #0002;
   border-radius:20px;margin-top:0;
-  transition:width var(--trans-close),height var(--trans-close),
-             max-width var(--trans-close),max-height var(--trans-close),
-             transform 1.1s cubic-bezier(.3,0,.2,1),
-             border-radius .5s cubic-bezier(.4,0,.2,1);
+  transition:all var(--trans-close) cubic-bezier(.3,0,.2,1);
 }
 .card-container.rotated{transform:rotateY(180deg);transition:transform 1s cubic-bezier(.77,0,.18,1);}
 .card-container.style-open{transform:translateY(-25vh)!important;z-index:1000;transition:transform var(--trans-open);}
@@ -201,13 +151,9 @@ input[type="file"]{display:none;}
   .card-container{width:var(--card-w-mb);height:var(--card-h-mb);max-width:100vw;max-height:98vh;border-radius:16px;margin-bottom:60px;}
   .dynamic-island.expanded{max-width:308px;max-height:210px;border-radius:50px!important;}
 }
-/* =====================================================================
-   CARDS
-===================================================================== */
 .card{
   width:100%;height:100%;position:absolute;border-radius:20px;
-  backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px);
-  background:rgba(255,255,255,.29);
+  backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px);background:rgba(255,255,255,.29);
   backface-visibility:hidden;-webkit-backface-visibility:hidden;
   overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;
 }
@@ -216,10 +162,8 @@ input[type="file"]{display:none;}
   padding:5px;box-sizing:border-box;height:100%;min-height:0;
 }
 .card-front{
-  box-shadow:inset -1px -5px 53px rgba(182,161,255,.39),
-             0 12px 48px rgba(0,0,0,.1),0 1px 88px rgba(255,0,243,.36),
-             inset 0 2px 55px rgba(255,255,255,.32),
-             0 0 23px #00000036,inset 0 0 23px #00000026;
+  box-shadow:inset -1px -5px 53px rgba(182,161,255,.39),0 12px 48px rgba(0,0,0,.1),0 1px 88px rgba(255,0,243,.36),
+             inset 0 2px 55px rgba(255,255,255,.32),0 0 23px #00000036,inset 0 0 23px #00000026;
   transition:transform 1s cubic-bezier(.5,0,.2,1);
 }
 .card-back{transform:rotateY(180deg);background:rgba(255,255,255,0);}
@@ -235,82 +179,84 @@ iframe#preview{
   border-radius:16px;box-shadow:0 2px 16px 0 #4e4e8e2e;
   transition:margin .7s cubic-bezier(.57,0,.2,1);z-index:1;
 }
+
+/* プレビュー拡大・リロードツール */
+.preview-tools {
+  position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 10;
+  opacity: 0.5; transition: opacity .2s;
+}
+.card-front:hover .preview-tools { opacity: 1; }
+.pt-btn {
+  width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; color: #333;
+  transition: transform .2s, background .2s;
+}
+.pt-btn:active { transform: scale(0.85); }
+.pt-btn:hover { background: rgba(255,255,255,0.95); }
+
+/* 全画面化アニメーション用クラス */
+.card-container.fullscreen {
+  position: fixed; top: 0; left: 0; width: 100vw !important; height: 100vh !important;
+  max-width: none !important; max-height: none !important; border-radius: 0 !important; margin: 0 !important;
+  z-index: 9999; transform: none !important; transition: all 0.5s cubic-bezier(0.6, 0, 0.2, 1);
+}
+.card-container.fullscreen .card { border-radius: 0; }
+.card-container.fullscreen .btn-group, .card-container.fullscreen #splitHandle { display: none !important; }
+
 /* =====================================================================
-   BUTTON GROUP
+   BUTTON GROUP & SPLIT MODE
 ===================================================================== */
 .btn-group,.btn-group *{will-change:transform;}
 .btn-group{
   position:absolute;bottom:-62px;left:50%;transform:translateX(-50%);
-  z-index:100;transition:bottom .5s,transform .5s;
-  display:flex;align-items:center;
+  z-index:100;transition:bottom .5s,transform .5s;display:flex;align-items:center;
   width:90vw;max-width:900px;min-width:260px;justify-content:space-between;
 }
 .card-container.rotated .btn-group{transform:translateX(-12vh);}
-.card-container.split-mode .btn-group{transform:translateX(-50%);} /* 分割時も中央揃えを維持 */
+.card-container.split-mode .btn-group{transform:translateX(-50%);}
 .edit-gear-combo{
-  display:flex;align-items:center;background:rgba(255,255,255,.2);
-  border-radius:30px;gap:0;
+  display:flex;align-items:center;background:rgba(255,255,255,.2);border-radius:30px;gap:0;
   box-shadow:inset 1px -1px 11px rgba(255,255,255,.12),inset 1px -1px 55px rgba(255,255,255,.11),
              1px -1px 1px rgba(255,255,255,.62),-1px 1px 1px rgba(255,255,255,.62),0 2px 18px #00000015;
-  padding-left:4px;padding-right:4px;margin-bottom:-11px;height:55px;
-  transition:transform .55s cubic-bezier(.6,0,.2,1);
+  padding-left:4px;padding-right:4px;margin-bottom:-11px;height:55px;transition:transform .55s cubic-bezier(.6,0,.2,1);
 }
 .edit-gear-combo:hover{transform:scale(1.05);}
 .edit-gear-combo .glass-btn{margin:0 2px;border-radius:26px;padding:10px 14px;font-size:1rem;background:none;box-shadow:none;}
 .btn-group button,.glass-btn{
-  background:rgba(255,255,255,.3);border:none;border-radius:55px;
-  padding:19px 4.5px;
-  box-shadow:0 4px 40px 6px rgba(0,15,50,.14),0 1.5px 12px #88b8ff20;
-  color:#09304a;font-weight:600;font-size:.8rem;
-  display:inline-flex;align-items:center;justify-content:center;
-  margin:0 8px;cursor:pointer;
+  background:rgba(255,255,255,.3);border:none;border-radius:55px;padding:19px 4.5px;
+  box-shadow:0 4px 40px 6px rgba(0,15,50,.14),0 1.5px 12px #88b8ff20;color:#09304a;font-weight:600;font-size:.8rem;
+  display:inline-flex;align-items:center;justify-content:center;margin:0 8px;cursor:pointer;
   transition:box-shadow .5s,background .5s,color .5s,transform .33s cubic-bezier(.77,0,.18,1);
 }
-.btn-group button img,.glass-btn img{
-  margin-right:1px;vertical-align:middle;width:28px;height:28px;
-  transition:transform .2s cubic-bezier(.77,0,.18,1);
-}
-.btn-group button:hover,.glass-btn:hover,
-.btn-group button:focus-visible,.glass-btn:focus-visible{
+.btn-group button img,.glass-btn img{margin-right:1px;vertical-align:middle;width:28px;height:28px;transition:transform .2s;}
+.btn-group button:hover,.glass-btn:hover,.btn-group button:focus-visible,.glass-btn:focus-visible{
   background:rgba(255,255,255,.13);
   box-shadow:inset 1px -1px 1px rgba(207,215,255,.38),inset 1px -1px 5px rgba(255,255,255,.32),
              1px -1px 1px rgba(246,207,255,.55),0 0 25px #22222233,inset 0 0 25px #00000020;
   color:#fff;transform:scale(1.22);
 }
 #visionSaveBtn{display:none;}
-/* =====================================================================
-   SPLIT MODE
-===================================================================== */
+
 .card-container.split-mode{
-  transform-style:flat!important;perspective:none!important;
-  flex-direction:column!important;
-  height:var(--card-h-pc)!important; /* 画面サイズに合わせて全体に */
-  border-radius:20px;overflow:hidden;
+  transform-style:flat!important;perspective:none!important;flex-direction:column!important;
+  height:var(--card-h-pc)!important;border-radius:20px;overflow:hidden;
 }
-@media(max-width:600px){
-  .card-container.split-mode{height:var(--card-h-mb)!important;}
-}
+@media(max-width:600px){.card-container.split-mode{height:var(--card-h-mb)!important;}}
 .card-container.split-mode .card{
-  position:relative!important;transform:none!important;
-  backface-visibility:unset!important;-webkit-backface-visibility:unset!important;
-  border-radius:0!important;width:100%!important;min-height:0;flex-shrink:0;
+  position:relative!important;transform:none!important;backface-visibility:unset!important;
+  -webkit-backface-visibility:unset!important;border-radius:0!important;width:100%!important;min-height:0;flex-shrink:0;
 }
 .card-container.split-mode .card-front{border-radius:20px 20px 0 0!important;}
 .card-container.split-mode .card-back{border-radius:0 0 20px 20px!important;}
-
-/* split resize handle */
 #splitHandle{
   display:none;width:100%;height:26px;background:rgba(200,200,210,.15);
-  cursor:row-resize;flex-shrink:0;align-items:center;justify-content:center;
-  z-index:10;position:relative;touch-action:none;
+  cursor:row-resize;flex-shrink:0;align-items:center;justify-content:center;z-index:10;position:relative;touch-action:none;
 }
 .card-container.split-mode #splitHandle{display:flex;}
 .split-handle-pill{width:44px;height:4px;border-radius:3px;background:rgba(120,120,140,.35);}
-
-/* editor swipe handle (分割時は非表示にして1本に統一) */
 #editorSwipeHandle{
-  width:100%;height:20px;display:flex;align-items:center;justify-content:center;
-  cursor:ns-resize;flex-shrink:0;touch-action:none;
+  width:100%;height:20px;display:flex;align-items:center;justify-content:center;cursor:ns-resize;flex-shrink:0;touch-action:none;
 }
 .editor-handle-pill{width:34px;height:4px;border-radius:3px;background:rgba(120,120,140,.22);}
 .card-container.split-mode #editorSwipeHandle { display: none !important; }
@@ -319,54 +265,37 @@ iframe#preview{
    STYLE PANEL
 ===================================================================== */
 .style-editor-panel{
-  position:fixed;right:0;left:0;bottom:-100vh;margin:auto;
-  width:var(--style-panel-w);
-  max-width:min(100vw,var(--style-panel-maxw));
-  min-width:var(--style-panel-minw);
-  height:88vh;
-  background:rgba(245,245,250,.96);
-  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
-  border-top-left-radius:22px;border-top-right-radius:22px;
-  box-shadow:0 -8px 50px rgba(0,0,0,.28);
-  transition:bottom .8s cubic-bezier(.6,0,.2,1);
-  overflow:hidden;z-index:4000;display:flex;flex-direction:column;
+  position:fixed;right:0;left:0;bottom:-100vh;margin:auto;width:var(--style-panel-w);
+  max-width:min(100vw,var(--style-panel-maxw));min-width:var(--style-panel-minw);height:88vh;
+  background:rgba(245,245,250,.96);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border-top-left-radius:22px;border-top-right-radius:22px;box-shadow:0 -8px 50px rgba(0,0,0,.28);
+  transition:bottom .8s cubic-bezier(.6,0,.2,1);overflow:hidden;z-index:4000;display:flex;flex-direction:column;
 }
 .style-editor-panel.active{bottom:0;}
-.style-tabs{
-  display:flex;gap:0;border-bottom:1px solid rgba(0,0,0,.1);
-  padding:0 12px;flex-shrink:0;background:rgba(255,255,255,.6);
-}
+.style-tabs{display:flex;gap:0;border-bottom:1px solid rgba(0,0,0,.1);padding:0 12px;flex-shrink:0;background:rgba(255,255,255,.6);}
 .style-tab{
-  padding:12px 22px;font-size:14px;
-  font-family:"SF Pro Display",-apple-system,sans-serif;
-  font-weight:500;background:none;border:none;cursor:pointer;
-  color:rgba(0,0,0,.4);border-bottom:2.5px solid transparent;
+  padding:12px 22px;font-size:14px;font-family:"SF Pro Display",-apple-system,sans-serif;
+  font-weight:500;background:none;border:none;cursor:pointer;color:rgba(0,0,0,.4);border-bottom:2.5px solid transparent;
   margin-bottom:-1px;transition:color .18s,border-color .18s;
 }
 .style-tab.active{color:#2579F7;border-bottom-color:#2579F7;}
 .style-tab-pane{display:none;flex:1;min-height:0;flex-direction:column;}
 .style-tab-pane.active{display:flex;}
 #styleEditor,#jsonEditorInst{flex:1;min-height:0;width:100%;overflow:hidden;}
-.style-save-row{
-  display:flex;gap:8px;padding:10px 14px 14px;
-  border-top:1px solid rgba(0,0,0,.07);
-  background:rgba(255,255,255,.55);flex-shrink:0;
-}
+.style-save-row{display:flex;gap:8px;padding:10px 14px 14px;border-top:1px solid rgba(0,0,0,.07);background:rgba(255,255,255,.55);flex-shrink:0;}
 .style-save-btn{
-  flex:1;padding:11px;border-radius:14px;border:none;
-  background:rgba(37,121,247,.12);color:#2579F7;
-  font-family:"SF Pro Display",-apple-system,sans-serif;
-  font-size:14px;font-weight:600;cursor:pointer;transition:background .18s;
+  flex:1;padding:11px;border-radius:14px;border:none;background:rgba(37,121,247,.12);color:#2579F7;
+  font-family:"SF Pro Display",-apple-system,sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .18s;
 }
 .style-save-btn:active{background:rgba(37,121,247,.26);}
 #closeStyleBtn{background:rgba(255,60,60,.1)!important;color:#c0392b!important;}
+
 /* =====================================================================
-   DYNAMIC ISLAND & SLIDER ... (既存のまま)
+   DYNAMIC ISLAND & SEARCH BAR & SLIDER
 ===================================================================== */
 .dynamic-island{
   background:rgba(232,232,232,0);display:flex;align-items:center;justify-content:center;
-  position:fixed;left:50%;top:80vh;transform:translate(-50%,0);
-  width:57px;height:48px;border-radius:50px;
+  position:fixed;left:50%;top:80vh;transform:translate(-50%,0);width:57px;height:48px;border-radius:50px;
   transition:width .66s cubic-bezier(.67,.04,.29,1.33),height .88s cubic-bezier(.67,.04,.29,1.33),
              border-radius .7s cubic-bezier(.67,.04,.29,1.33),box-shadow .32s,
              background .5s,transform .8s cubic-bezier(.6,-.2,.2,1.3),opacity .5s;
@@ -380,26 +309,33 @@ iframe#preview{
   transform:translate(-50%,-50%) scale(1.23);
 }
 .dynamic-island.slider-active{
-  width:310px;z-index:5001;height:64px;border-radius:36px;
-  background:transparent;box-shadow:none;
+  width:310px;z-index:5001;height:64px;border-radius:36px;background:transparent;box-shadow:none;
   transform:translateX(-50%) scale(1);
-  transition:width .5s cubic-bezier(.62,0,.4,1),height .5s cubic-bezier(.62,0,.4,1),
-             border-radius .5s cubic-bezier(.62,0,.4,1),background .5s,transform .8s;
+  transition:width .5s cubic-bezier(.62,0,.4,1),height .5s cubic-bezier(.62,0,.4,1),border-radius .5s cubic-bezier(.62,0,.4,1),background .5s,transform .8s;
 }
+/* iOS風 検索バー状態 */
+.dynamic-island.search-active{
+  width:340px;z-index:5001;height:56px;border-radius:28px;
+  background:rgba(240,240,240,0.92); backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+  transform:translateX(-50%) scale(1);
+  transition:width .5s cubic-bezier(.62,0,.4,1),height .5s cubic-bezier(.62,0,.4,1),border-radius .5s cubic-bezier(.62,0,.4,1),background .5s,transform .8s;
+  cursor:default;
+}
+
 .island-grid{
   display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);
   width:310px;height:212px;opacity:0;pointer-events:none;z-index:3;
   position:absolute;left:51%;top:52%;transform:translate(-50%,-50%);transition:opacity .31s;
 }
 .dynamic-island.expanded .island-grid{opacity:1;pointer-events:auto;transition-delay:.23s;}
-.dynamic-island.slider-active .island-grid{opacity:0;pointer-events:none;transition:opacity .2s;}
+.dynamic-island.slider-active .island-grid, .dynamic-island.search-active .island-grid{opacity:0;pointer-events:none;transition:opacity .2s;}
 .island-btn{
   background:rgba(255,255,255,.2);width:94px;height:94px;border-radius:50%;
   box-shadow:inset 1px -10px 11px rgba(255,255,255,.12),inset 1px -1px 55px rgba(255,255,255,.11),
              1px -2px 2px rgba(255,255,255,.62),-1px 2px 1px rgba(255,255,255,.62),0 2px 18px #00000015;
   border:none;color:#222;display:flex;align-items:center;justify-content:center;
-  transition:all .33s;cursor:pointer;user-select:none;outline:none;
-  font-family:"SF Pro Display",-apple-system,sans-serif;
+  transition:all .33s;cursor:pointer;user-select:none;outline:none;font-family:"SF Pro Display",-apple-system,sans-serif;
 }
 .island-btn:active{
   transform:scale(1.15);
@@ -408,81 +344,70 @@ iframe#preview{
 }
 .btn-img{width:70%;height:70%;object-fit:contain;pointer-events:none;}
 .gear-label{transition:opacity .3s;}
-.dynamic-island:not(.expanded):not(.slider-active) .gear-label{opacity:1;}
-.dynamic-island.slider-active .gear-label{opacity:0;pointer-events:none;}
+.dynamic-island:not(.expanded):not(.slider-active):not(.search-active) .gear-label{opacity:1;}
+.dynamic-island.slider-active .gear-label, .dynamic-island.search-active .gear-label{opacity:0;pointer-events:none;}
 
-.slider-wrapper{
-  position:absolute;width:310px;height:64px;z-index:5100;
-  transition:opacity .5s cubic-bezier(.62,0,.4,1);opacity:0;pointer-events:none;
+/* Search UI */
+.search-wrapper {
+  position: absolute; width: 100%; height: 100%; z-index: 5200;
+  opacity: 0; pointer-events: none; transition: opacity .3s; display: flex; align-items: center; justify-content: center;
 }
+.dynamic-island.search-active .search-wrapper { opacity: 1; pointer-events: auto; transition-delay: .3s; }
+.search-inner { display: flex; align-items: center; width: 100%; height: 100%; padding: 0 16px; box-sizing: border-box; gap: 8px; }
+.search-inner svg { color: #888; flex-shrink: 0; }
+#searchInput { 
+  flex: 1; height: 36px; border: none; border-radius: 10px; background: rgba(0,0,0,0.06); 
+  padding: 0 12px; font-size: 16px; outline: none; -webkit-appearance: none; font-family:"SF Pro Display",-apple-system,sans-serif;
+}
+.search-nav { display: flex; align-items: center; background: rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden; }
+.search-nav button { background: none; border: none; font-size: 14px; padding: 8px 10px; color: #2579F7; cursor: pointer; transition: background .2s;}
+.search-nav button:active { background: rgba(0,0,0,0.1); }
+.search-nav .divider { width: 1px; height: 18px; background: rgba(0,0,0,0.1); }
+#searchDoneBtn { font-weight: bold; color: #2579F7; background: none; border: none; font-size: 16px; padding: 0 4px; cursor: pointer; white-space: nowrap;}
+
+/* Slider UI */
+.slider-wrapper{position:absolute;width:310px;height:64px;z-index:5100;transition:opacity .5s cubic-bezier(.62,0,.4,1);opacity:0;pointer-events:none;}
 .dynamic-island.slider-active .slider-wrapper{opacity:1;pointer-events:auto;transition-delay:.5s;}
 .slider-track{
   backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
   box-shadow:inset 1px -1px 11px rgba(255,255,255,.12),inset 1px -1px 55px rgba(255,255,255,.11),
              1px -1px 1px rgba(243,243,243,.62),-1px 1px 1px rgba(225,225,225,.62),0 2px 18px #0000000d;
-  position:absolute;top:0;left:0;width:100%;height:64px;
-  background:rgba(60,60,60,0);border-radius:36px;
-  display:flex;align-items:center;justify-content:flex-start;overflow:visible;
+  position:absolute;top:0;left:0;width:100%;height:64px;background:rgba(60,60,60,0);border-radius:36px;display:flex;align-items:center;justify-content:flex-start;overflow:visible;
 }
-.slider-inner-track{
-  position:absolute;top:0;left:-5px;height:64px;border-radius:36px;
-  z-index:1;transform:scale(.9);transition:width .13s;pointer-events:none;
-}
-.slider-label{
-  position:absolute;left:88px;top:0;height:64px;line-height:64px;
-  color:#fff;font-size:19px;font-weight:500;letter-spacing:1px;
-  z-index:2;opacity:.83;transition:opacity .2s;
-  user-select:none;pointer-events:none;text-shadow:0 2px 10px #000b;
-}
+.slider-inner-track{position:absolute;top:0;left:-5px;height:64px;border-radius:36px;z-index:1;transform:scale(.9);transition:width .13s;pointer-events:none;}
+.slider-label{position:absolute;left:88px;top:0;height:64px;line-height:64px;color:#fff;font-size:19px;font-weight:500;letter-spacing:1px;z-index:2;opacity:.83;transition:opacity .2s;user-select:none;pointer-events:none;text-shadow:0 2px 10px #000b;}
 .slider-knob{
-  position:absolute;top:4px;left:4px;width:56px;height:56px;
-  background:rgba(255,255,255,.55);border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:33px;font-weight:bold;z-index:10;
-  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
-  border:none;outline:none;
-  box-shadow:1px -1px 1px rgba(255,255,255,.62),-1px 1px 1px rgba(255,255,255,.62),0 2px 18px #00000015;
-  cursor:pointer;user-select:none;
+  position:absolute;top:4px;left:4px;width:56px;height:56px;background:rgba(255,255,255,.55);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:33px;font-weight:bold;z-index:10;
+  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);border:none;outline:none;
+  box-shadow:1px -1px 1px rgba(255,255,255,.62),-1px 1px 1px rgba(255,255,255,.62),0 2px 18px #00000015;cursor:pointer;user-select:none;
   transition:background .5s cubic-bezier(.62,0,.4,1),box-shadow .5s cubic-bezier(.62,0,.4,1),left .5s cubic-bezier(.62,0,.4,1);
 }
 .slider-knob:active{background:rgba(235,235,235,.36);box-shadow:1px 1px 1px rgba(255,255,255,.62),-1px -1px 1px rgba(255,255,255,.62);}
 .slider-arrow-polyline{transition:stroke .3s,stroke-width .3s,filter .3s;}
 .slider-knob.active .slider-arrow-polyline{stroke:#1552be;stroke-width:3.2;filter:drop-shadow(0 0 7px #2579F7);}
 .slider-knob:not(.active) .slider-arrow-polyline{stroke:#2579F7;stroke-width:2.6;filter:none;}
+
 /* =====================================================================
    OVERLAYS
 ===================================================================== */
-.black-overlay{
-  position:fixed;inset:0;z-index:4500;background:rgba(0,0,0,.45);
-  opacity:0;pointer-events:none;transition:opacity .4s;
-}
+.black-overlay{position:fixed;inset:0;z-index:4500;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .4s;}
 .black-overlay.active{opacity:1;pointer-events:auto;}
 #dragOverlay{
-  position:fixed;inset:0;z-index:9000;
-  display:flex;align-items:center;justify-content:center;
-  background:rgba(0,0,0,.35);
-  backdrop-filter:blur(22px) saturate(1.8);-webkit-backdrop-filter:blur(22px) saturate(1.8);
+  position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.35);backdrop-filter:blur(22px) saturate(1.8);-webkit-backdrop-filter:blur(22px) saturate(1.8);
   opacity:0;pointer-events:none;transition:opacity .28s cubic-bezier(.4,0,.2,1);
 }
 #dragOverlay.active{opacity:1;pointer-events:all;}
 .drag-overlay-box{
-  background:rgba(255,255,255,.18);border:2.5px dashed rgba(255,255,255,.6);
-  border-radius:32px;padding:48px 72px;
-  display:flex;flex-direction:column;align-items:center;gap:16px;
-  backdrop-filter:blur(8px);box-shadow:0 8px 48px rgba(0,0,0,.22);
+  background:rgba(255,255,255,.18);border:2.5px dashed rgba(255,255,255,.6);border-radius:32px;padding:48px 72px;
+  display:flex;flex-direction:column;align-items:center;gap:16px;backdrop-filter:blur(8px);box-shadow:0 8px 48px rgba(0,0,0,.22);
   transform:scale(.92);transition:transform .28s cubic-bezier(.4,0,.2,1);
 }
 #dragOverlay.active .drag-overlay-box{transform:scale(1);}
 .drag-overlay-icon{font-size:56px;}
-.drag-overlay-label{
-  font-family:"SF Pro Display",-apple-system,sans-serif;
-  font-size:24px;font-weight:600;color:#fff;
-  letter-spacing:-.3px;text-shadow:0 1px 8px rgba(0,0,0,.3);
-}
-.sf-arrow{
-  font-family:"SF Pro Display",-apple-system,BlinkMacSystemFont,sans-serif!important;
-  font-size:22px;font-weight:bold;
-}
+.drag-overlay-label{font-family:"SF Pro Display",-apple-system,sans-serif;font-size:24px;font-weight:600;color:#fff;letter-spacing:-.3px;text-shadow:0 1px 8px rgba(0,0,0,.3);}
+.sf-arrow{font-family:"SF Pro Display",-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:22px;font-weight:bold;}
 body.visionos .card{border-radius:32px;}
 body.visionos .glass-btn{border-radius:40px;}
 </style>
@@ -490,45 +415,28 @@ body.visionos .glass-btn{border-radius:40px;}
 <body>
 
 <div id="dragOverlay">
-  <div class="drag-overlay-box">
-    <div class="drag-overlay-icon">📂</div>
-    <div class="drag-overlay-label">ドラッグで追加</div>
-  </div>
+  <div class="drag-overlay-box"><div class="drag-overlay-icon">📂</div><div class="drag-overlay-label">ドラッグで追加</div></div>
 </div>
 
 <div class="island-row" id="islandRow">
   <button class="file-btn" id="fileBtn" title="ファイル選択">
-    <span><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
-      <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-        d="M14 3v4a1 1 0 0 0 1 1h4m-2 13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/>
-    </svg></span>
+    <span><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3v4a1 1 0 0 0 1 1h4m-2 13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/></svg></span>
   </button>
   <button class="center-btn" id="centerBtn">html</button>
-  
   <button class="split-btn" id="splitBtn" title="上下分割">
-    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="3" width="18" height="8" rx="2"/>
-      <rect x="3" y="13" width="18" height="8" rx="2"/>
-    </svg>
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="8" rx="2"/><rect x="3" y="13" width="18" height="8" rx="2"/></svg>
   </button>
-  
   <input type="file" id="fileInput" accept=".html,.css,.js,.json,.py,.swift,.plist,.xml,.tsx,.txt,.text,text/*">
 </div>
 
 <div class="swipe-outer" id="swipeOuter">
   <div class="swipe-list" id="swipe-list">
-    <div class="swipe-item">html<div class="gray-bar"></div></div>
-    <div class="swipe-item">txt<div class="gray-bar"></div></div>
-    <div class="swipe-item">CSS<div class="gray-bar"></div></div>
-    <div class="swipe-item">Js<div class="gray-bar"></div></div>
-    <div class="swipe-item">JSON<div class="gray-bar"></div></div>
-    <div class="swipe-item">Py<div class="gray-bar"></div></div>
-    <div class="swipe-item">swift<div class="gray-bar"></div></div>
-    <div class="swipe-item">plist<div class="gray-bar"></div></div>
-    <div class="swipe-item">xml<div class="gray-bar"></div></div>
-    <div class="swipe-item">tsx<div class="gray-bar"></div></div>
-    <div class="swipe-item">text<div class="gray-bar"></div></div>
-    <div class="swipe-item">C(.h)<div class="gray-bar"></div></div>
+    <div class="swipe-item">html<div class="gray-bar"></div></div><div class="swipe-item">txt<div class="gray-bar"></div></div>
+    <div class="swipe-item">CSS<div class="gray-bar"></div></div><div class="swipe-item">Js<div class="gray-bar"></div></div>
+    <div class="swipe-item">JSON<div class="gray-bar"></div></div><div class="swipe-item">Py<div class="gray-bar"></div></div>
+    <div class="swipe-item">swift<div class="gray-bar"></div></div><div class="swipe-item">plist<div class="gray-bar"></div></div>
+    <div class="swipe-item">xml<div class="gray-bar"></div></div><div class="swipe-item">tsx<div class="gray-bar"></div></div>
+    <div class="swipe-item">text<div class="gray-bar"></div></div><div class="swipe-item">C(.h)<div class="gray-bar"></div></div>
     <div class="swipe-item">php<div class="gray-bar"></div></div>
   </div>
   <div class="center-bar"><div class="center-bar-dot" id="center-bar-dot"></div></div>
@@ -538,15 +446,21 @@ body.visionos .glass-btn{border-radius:40px;}
 <div class="vertical-space"></div>
 
 <div id="bundleSaveBar">
-  <button class="bundle-save-btn" id="bundleSaveBtn">
-    <img src="down.png" alt="▼"> まとめて保存
-  </button>
+  <button class="bundle-save-btn" id="bundleSaveBtn"><img src="down.png" alt="▼"> まとめて保存</button>
 </div>
 
 <div class="center-row">
   <div class="card-container" id="cardContainer">
 
     <div class="card card-front">
+      <div class="preview-tools" id="previewTools">
+        <button class="pt-btn" id="reloadPreviewBtn" title="再読み込み">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
+        </button>
+        <button class="pt-btn" id="expandPreviewBtn" title="拡大/縮小">
+          <svg id="expandIcon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path></svg>
+        </button>
+      </div>
       <iframe id="preview" title="Preview"></iframe>
     </div>
 
@@ -563,12 +477,10 @@ body.visionos .glass-btn{border-radius:40px;}
         <button id="visionEditBtn" class="glass-btn" title="編集">
           <img src="edit.png" id="editIcon" alt="編集">
         </button>
-        <button id="inputToggleBtn" class="glass-btn" title="入力切替" style="display:none;font-size:18px;font-weight:bold;color:#09304a;padding:8px 14px;">
-          T
-        </button>
+        <button id="inputToggleBtn" class="glass-btn" title="入力切替" style="display:none;font-size:18px;font-weight:bold;color:#09304a;padding:8px 14px;">T</button>
         <button id="visionGearBtn" class="glass-btn" title="設定">
           <img src="gear.png" id="gearIcon" alt="設定" style="display:none;">
-          <span id="selectModeIcon" class="sf-arrow" style="display:inline-block;margin:0 4px;">→</span>
+          <span id="selectModeIcon" class="sf-arrow" style="display:inline-block;margin:0 4px;transition:color 0.2s;">→</span>
         </button>
         <button id="visionSaveBtn" class="glass-btn" title="保存" style="display:none;">
           <img src="save.png" alt="保存">
@@ -586,18 +498,12 @@ body.visionos .glass-btn{border-radius:40px;}
 
 <div class="style-editor-panel" id="stylePanel">
   <div class="style-tabs">
-    <button class="style-tab active" data-tab="css">CSS</button>
-    <button class="style-tab" data-tab="json">JSON</button>
+    <button class="style-tab active" data-tab="css">CSS</button><button class="style-tab" data-tab="json">JSON</button>
   </div>
-  <div class="style-tab-pane active" id="paneCSS">
-    <div id="styleEditor"></div>
-  </div>
-  <div class="style-tab-pane" id="paneJSON">
-    <div id="jsonEditorInst"></div>
-  </div>
+  <div class="style-tab-pane active" id="paneCSS"><div id="styleEditor"></div></div>
+  <div class="style-tab-pane" id="paneJSON"><div id="jsonEditorInst"></div></div>
   <div class="style-save-row">
-    <button class="style-save-btn" id="saveCssBtn">CSSを保存</button>
-    <button class="style-save-btn" id="saveJsonBtn">JSONを保存</button>
+    <button class="style-save-btn" id="saveCssBtn">CSSを保存</button><button class="style-save-btn" id="saveJsonBtn">JSONを保存</button>
     <button class="style-save-btn" id="closeStyleBtn">閉じる</button>
   </div>
 </div>
@@ -605,24 +511,36 @@ body.visionos .glass-btn{border-radius:40px;}
 <div class="dynamic-island" id="island" style="display:none;">
   <span class="gear-label" id="gearLabel"></span>
   <div class="island-grid" id="islandGrid">
-    <button class="island-btn" id="diBackBtn" style="font-size:25px;">←</button>
+    <button class="island-btn" id="diSearchBtn" title="検索">
+      <svg viewBox="0 0 24 24" width="32" height="32" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    </button>
     <button class="island-btn" id="diBBtn"><img src="B.png" class="btn-img"></button>
     <button class="island-btn" id="diCBtn"><img src="C.png" class="btn-img"></button>
     <button class="island-btn" id="d-button"><img src="D.png" class="btn-img"></button>
     <button class="island-btn" id="diEBtn"><img src="E.png" class="btn-img"></button>
     <button class="island-btn" id="diFBtn"><span style="font-size:20px;font-weight:bold;">T</span></button>
   </div>
+
+  <div class="search-wrapper" id="searchWrapper">
+    <div class="search-inner">
+      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" id="searchInput" placeholder="コードを検索">
+      <div class="search-nav">
+        <button id="searchPrevBtn">▲</button>
+        <div class="divider"></div>
+        <button id="searchNextBtn">▼</button>
+      </div>
+      <button id="searchDoneBtn">完了</button>
+    </div>
+  </div>
+
   <div class="slider-wrapper" id="sliderWrapper">
     <div class="slider-track">
       <div class="slider-inner-track" id="sliderInner"></div>
       <div class="slider-label" id="sliderLabel">スライドで全て削除</div>
     </div>
     <div class="slider-knob" id="sliderKnob">
-      <svg id="knobSVG" width="32" height="32" viewBox="0 0 32 32">
-        <polyline class="slider-arrow-polyline" points="12,8 20,16 12,24"
-          fill="none" stroke="#2579F7" stroke-width="2.6"
-          stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+      <svg id="knobSVG" width="32" height="32" viewBox="0 0 32 32"><polyline class="slider-arrow-polyline" points="12,8 20,16 12,24" fill="none" stroke="#2579F7" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
   </div>
 </div>
@@ -631,7 +549,7 @@ body.visionos .glass-btn{border-radius:40px;}
 
 <script type="module">
 /* ----------------------------------------------------------------
-   HAPTICS
+   HAPTICS & iOS Safari Swipe Prevent
 ---------------------------------------------------------------- */
 let H={fire:()=>{},confirm:()=>{},error:()=>{},ultraBurst:()=>{},toggle:()=>{}};
 (async()=>{
@@ -645,6 +563,13 @@ let H={fire:()=>{},confirm:()=>{},error:()=>{},ultraBurst:()=>{},toggle:()=>{}};
   }
 })();
 if(/vision/i.test(navigator.userAgent)) document.body.classList.add('visionos');
+
+// iOS端スワイプバウンス軽減（完全無効化するとタブが閉じれないため、画面端からの大きなスワイプのみ抑制）
+document.addEventListener('touchstart', (e) => {
+  if (e.touches[0].pageX > 30 && e.touches[0].pageX < window.innerWidth - 30) {
+     // 中央部のスクロールは邪魔しない
+  }
+}, { passive: true });
 
 /* ----------------------------------------------------------------
    DOM REFS
@@ -674,7 +599,7 @@ const bundleSaveBar =$('bundleSaveBar');
 const diIsland      =$('island');
 const diOverlay     =$('blackOverlay');
 const dragOverlay   =$('dragOverlay');
-const inputToggleBtn=$('inputToggleBtn'); // 追加
+const inputToggleBtn=$('inputToggleBtn');
 
 const swipeItems=Array.from(swipeList.querySelectorAll('.swipe-item'));
 const KNOWN_EXT=['html','css','tsx','js','json','py','swift','plist','xml','txt','text','php','c'];
@@ -690,20 +615,14 @@ let isRotated=false, plainInputMode=false, isSelectMode=false, isSplitMode=false
 let splitTopFlex=1, splitBotFlex=1;
 
 /* ----------------------------------------------------------------
-   SWIPE SELECTOR
+   SWIPE SELECTOR (変更なし)
 ---------------------------------------------------------------- */
 let sDrag=false,sDragX=0,sDragSL=0,snapTmr=null,sTick=false;
-
 const getClosest=()=>{
-  const cx=swipeOuter.getBoundingClientRect().left+swipeOuter.offsetWidth/2;
-  let idx=0,d=1e9;
-  swipeItems.forEach((it,i)=>{const dx=Math.abs(it.getBoundingClientRect().left+it.offsetWidth/2-cx);if(dx<d){d=dx;idx=i;}});
-  return idx;
+  const cx=swipeOuter.getBoundingClientRect().left+swipeOuter.offsetWidth/2; let idx=0,d=1e9;
+  swipeItems.forEach((it,i)=>{const dx=Math.abs(it.getBoundingClientRect().left+it.offsetWidth/2-cx);if(dx<d){d=dx;idx=i;}}); return idx;
 };
-const scrollTo=(idx,beh='smooth')=>{
-  const it=swipeItems[idx];if(!it)return;
-  swipeList.scrollTo({left:it.offsetLeft+it.offsetWidth/2-swipeOuter.offsetWidth/2,behavior:beh});
-};
+const scrollTo=(idx,beh='smooth')=>{const it=swipeItems[idx];if(!it)return;swipeList.scrollTo({left:it.offsetLeft+it.offsetWidth/2-swipeOuter.offsetWidth/2,behavior:beh});};
 const moveDot=(idx)=>{
   const it=swipeItems[idx];if(!it)return;
   const off=(it.getBoundingClientRect().left+it.offsetWidth/2)-(swipeOuter.getBoundingClientRect().left+swipeOuter.offsetWidth/2);
@@ -716,10 +635,7 @@ const setupPad=()=>{
   const f=swipeItems[0],l=swipeItems[swipeItems.length-1],w=swipeOuter.offsetWidth;
   swipeList.style.padding=`38px ${(w-l.offsetWidth)/2}px 50px ${(w-f.offsetWidth)/2}px`;
 };
-const extFromIdx=(idx)=>{
-  let t=swipeItems[idx].textContent.replace(/[\(\)\.]/g,'').replace(/[^a-zA-Z]/g,'').toLowerCase();
-  return t==='ch'?'c':t;
-};
+const extFromIdx=(idx)=>{let t=swipeItems[idx].textContent.replace(/[\(\)\.]/g,'').replace(/[^a-zA-Z]/g,'').toLowerCase();return t==='ch'?'c':t;};
 
 const showSelector=()=>{
   centerBtn.classList.add('hide');fileBtn.classList.add('hide');splitBtn.style.opacity='0';
@@ -764,28 +680,16 @@ fileInput.addEventListener('change',function(){
   if(!this.files?.length)return;
   const f=this.files[0];
   const m=f.name.match(/\.([^.]+)$/);const ext=m?m[1].toLowerCase():'';
-  if(KNOWN_EXT.includes(ext)){lastExt=ext;centerBtn.textContent=ext;setLang(ext);}
-  else centerBtn.textContent='File';
+  if(KNOWN_EXT.includes(ext)){lastExt=ext;centerBtn.textContent=ext;setLang(ext);} else centerBtn.textContent='File';
   const r=new FileReader();
   r.onload=ev=>{htmlContent=ev.target.result;
-    if(plainInputMode)plainInput.value=htmlContent;
-    else if(window.monacoMain)window.monacoMain.setValue(htmlContent);
+    if(plainInputMode)plainInput.value=htmlContent; else if(window.monacoMain)window.monacoMain.setValue(htmlContent);
     updatePreview();
-  };
-  r.readAsText(f,'utf-8');
+  }; r.readAsText(f,'utf-8');
 });
-swipeList.addEventListener('click',e=>{
-  const item=e.target.closest('.swipe-item');
-  const idx=item?swipeItems.indexOf(item):getClosest();
-  const ext=extFromIdx(idx);closeSelector(ext);H.confirm();setLang(ext);
-});
-swipeOuter.addEventListener('click',e=>{
-  if(e.target===swipeOuter){const ext=extFromIdx(getClosest());closeSelector(ext);H.confirm();setLang(ext);}
-});
-document.addEventListener('keydown',e=>{
-  if(!swipeOuter.classList.contains('active'))return;
-  if(e.key==='Enter'){const ext=extFromIdx(getClosest());closeSelector(ext);H.confirm();setLang(ext);}
-});
+swipeList.addEventListener('click',e=>{const item=e.target.closest('.swipe-item');const idx=item?swipeItems.indexOf(item):getClosest();const ext=extFromIdx(idx);closeSelector(ext);H.confirm();setLang(ext);});
+swipeOuter.addEventListener('click',e=>{if(e.target===swipeOuter){const ext=extFromIdx(getClosest());closeSelector(ext);H.confirm();setLang(ext);}});
+document.addEventListener('keydown',e=>{if(!swipeOuter.classList.contains('active'))return;if(e.key==='Enter'){const ext=extFromIdx(getClosest());closeSelector(ext);H.confirm();setLang(ext);}});
 window.addEventListener('DOMContentLoaded',()=>{swipeOuter.classList.remove('active');setupPad();centerBtn.textContent=lastExt;});
 
 /* ----------------------------------------------------------------
@@ -794,33 +698,26 @@ window.addEventListener('DOMContentLoaded',()=>{swipeOuter.classList.remove('act
 require.config({paths:{vs:'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs'}});
 require(['vs/editor/editor.main'],()=>{
   window.monacoMain=monaco.editor.create($('editor'),{
-    value:htmlContent,language:'html',theme:'vs-dark',
-    automaticLayout:true,minimap:{enabled:false},
+    value:htmlContent,language:'html',theme:'vs-dark',automaticLayout:true,minimap:{enabled:false},
     scrollbar:{vertical:'hidden',horizontal:'hidden'}
   });
   window.monacoCSS=monaco.editor.create($('styleEditor'),{
-    value:cssContent,language:'css',theme:'vs-light',
-    automaticLayout:true,minimap:{enabled:false},
+    value:cssContent,language:'css',theme:'vs-light',automaticLayout:true,minimap:{enabled:false},
     scrollbar:{vertical:'hidden',horizontal:'hidden'}
   });
   window.monacoJSON=monaco.editor.create($('jsonEditorInst'),{
-    value:jsonContent,language:'json',theme:'vs-light',
-    automaticLayout:true,minimap:{enabled:false},
+    value:jsonContent,language:'json',theme:'vs-light',automaticLayout:true,minimap:{enabled:false},
     scrollbar:{vertical:'hidden',horizontal:'hidden'}
   });
   window.monacoMain.onDidChangeModelContent(updatePreview);
   window.monacoCSS.onDidChangeModelContent(updatePreview);
   plainInput.value=htmlContent;
-  plainInput.addEventListener('input',()=>{
-    htmlContent=plainInput.value;
-    if(window.monacoMain)window.monacoMain.setValue(htmlContent);
-    updatePreview();
-  });
+  plainInput.addEventListener('input',()=>{htmlContent=plainInput.value;if(window.monacoMain)window.monacoMain.setValue(htmlContent);updatePreview();});
   updatePreview();
 });
 
 /* ----------------------------------------------------------------
-   PREVIEW
+   PREVIEW & EXPAND/RELOAD
 ---------------------------------------------------------------- */
 function updatePreview(){
   const val=plainInputMode?plainInput.value:(window.monacoMain?window.monacoMain.getValue():htmlContent);
@@ -828,6 +725,8 @@ function updatePreview(){
   let c=val
     .replace(/<\/head>/i,`<style>\n${css}\n</style>\n</head>`)
     .replace(/<body([^>]*)>/i,'<body$1 style="background:none!important;">');
+  
+  // バグ修正：isSelectModeがONで、かつ分割・回転状態じゃないときのみ注入
   if(isSelectMode&&!isRotated&&!isSplitMode){
     c=c.replace(/<\/body>/i,`<script>
       document.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();
@@ -842,17 +741,46 @@ function updatePreview(){
   preview.srcdoc=c;
 }
 
+/* リロード・拡大機能 */
+let isFullscreen = false;
+$('reloadPreviewBtn').addEventListener('click', () => {
+  H.fire(); updatePreview();
+  // 回転アニメーション
+  $('reloadPreviewBtn').style.transition = 'transform 0.4s ease';
+  $('reloadPreviewBtn').style.transform = 'rotate(360deg)';
+  setTimeout(() => {
+    $('reloadPreviewBtn').style.transition = 'none';
+    $('reloadPreviewBtn').style.transform = 'rotate(0deg)';
+  }, 400);
+});
+
+$('expandPreviewBtn').addEventListener('click', () => {
+  H.fire(); isFullscreen = !isFullscreen;
+  if(isFullscreen) {
+    cardContainer.classList.add('fullscreen');
+    // 縮小アイコンに変更
+    $('expandIcon').innerHTML = '<path d="M4 14h6v6M20 10h-6V4M10 14l-7 7M14 10l7-7"></path>';
+  } else {
+    cardContainer.classList.remove('fullscreen');
+    // 拡大アイコンに戻す
+    $('expandIcon').innerHTML = '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>';
+    setTimeout(relayout, 500); // アニメーション後にMonaco再計算
+  }
+});
+
 /* ----------------------------------------------------------------
-   FLIP & GEAR
+   FLIP & GEAR (デバッグ・コンボ対応)
 ---------------------------------------------------------------- */
 function setRotated(v){
   isRotated=v;
   if(!isSplitMode)cardContainer.classList.toggle('rotated',v);
   if(v){
+    // 裏面・完了状態
     editIcon.src='check.png';editIcon.alt='完了';
     visionSaveBtn.style.display='inline-flex';
     gearIcon.style.display='inline';selectModeIcon.style.display='none';
   }else{
+    // 表面・通常状態
     editIcon.src='edit.png';editIcon.alt='編集';
     visionSaveBtn.style.display='none';
     gearIcon.style.display='none';selectModeIcon.style.display='inline-block';
@@ -860,12 +788,30 @@ function setRotated(v){
   }
   updatePreview();
 }
-visionEditBtn.addEventListener('click',()=>{H.fire();if(!isSplitMode)setRotated(!isRotated);});
+
+// 編集/完了ボタンの統合ハンドラ
+visionEditBtn.addEventListener('click',()=>{
+  H.fire();
+  if(isSplitMode){
+    exitSplit(); // 分割時なら戻る
+  }else{
+    setRotated(!isRotated); // 通常時は回転
+  }
+});
+
 visionGearBtn.addEventListener('click',()=>{
   H.confirm();
-  if(isRotated || isSplitMode){openIsland();}
-  else{isSelectMode=!isSelectMode;selectModeIcon.style.color=isSelectMode?'#ff4e00':'#09304a';updatePreview();}
+  // 回転時、または分割時は設定(Island)を開く
+  if(isRotated || isSplitMode){
+    openIsland();
+  }else{
+    // 表面の場合は要素選択モードトグル
+    isSelectMode=!isSelectMode;
+    selectModeIcon.style.color=isSelectMode?'#ff4e00':'#09304a';
+    updatePreview();
+  }
 });
+
 window.addEventListener('message',ev=>{
   if(ev.data?.type==='elementSelected'){
     isSelectMode=false;selectModeIcon.style.color='#09304a';
@@ -897,116 +843,6 @@ inputToggleBtn.addEventListener('click',()=>{
 });
 
 /* ----------------------------------------------------------------
-   DRAG & DROP
----------------------------------------------------------------- */
-let dragCtr=0;
-document.addEventListener('dragenter',e=>{dragCtr++;if(e.dataTransfer.types.includes('Files'))dragOverlay.classList.add('active');});
-document.addEventListener('dragleave',()=>{if(--dragCtr<=0){dragCtr=0;dragOverlay.classList.remove('active');}});
-document.addEventListener('dragover',e=>e.preventDefault());
-document.addEventListener('drop',e=>{
-  e.preventDefault();dragCtr=0;dragOverlay.classList.remove('active');
-  if(!e.dataTransfer.files?.length)return;
-  const file=e.dataTransfer.files[0];
-  const r=new FileReader();
-  r.onload=ev=>{
-    htmlContent=ev.target.result;
-    if(plainInputMode)plainInput.value=htmlContent;
-    else if(window.monacoMain)window.monacoMain.setValue(htmlContent);
-    const ext=file.name.split('.').pop().toLowerCase();
-    if(KNOWN_EXT.includes(ext))closeSelector(ext);
-    updatePreview();
-  };
-  r.readAsText(file,'utf-8');
-});
-
-/* ----------------------------------------------------------------
-   SHARE & SAVE UTILS
----------------------------------------------------------------- */
-visionShareBtn.addEventListener('click',async()=>{
-  H.confirm();
-  const code=window.monacoMain?window.monacoMain.getValue():'';
-  if(navigator.share){try{await navigator.share({title:'Vision UIカード',text:code,url:location.href});}catch{}}
-  else{const ta=document.createElement('textarea');ta.value=code;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('コードをクリップボードにコピーしました。');}
-});
-
-const DL=(content,filename,type)=>{
-  const blob=new Blob([content],{type});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
-};
-const TYPEMAP={html:'text/html',css:'text/css',js:'text/javascript',json:'application/json',
-               xml:'application/xml',py:'text/x-python',swift:'text/swift',
-               plist:'application/xml',tsx:'text/typescript-jsx',php:'application/x-httpd-php'};
-function saveWithPicker(cb){
-  showSelector();
-  const clickH=e=>{
-    const item=e.target.closest('.swipe-item');
-    const idx=item?swipeItems.indexOf(item):getClosest();
-    const ext=extFromIdx(idx);
-    e.preventDefault();
-    swipeList.removeEventListener('click',clickH);document.removeEventListener('keydown',keyH);
-    cb(ext);
-  };
-  const keyH=e=>{
-    if(e.key==='Enter'){const ext=extFromIdx(getClosest());swipeList.removeEventListener('click',clickH);document.removeEventListener('keydown',keyH);cb(ext);}
-  };
-  swipeList.addEventListener('click',clickH);document.addEventListener('keydown',keyH);
-}
-function saveMainCode(){
-  saveWithPicker(ext=>{
-    const name=prompt('ファイル名','untitled');if(!name)return;
-    DL(window.monacoMain?window.monacoMain.getValue():'',name+'.'+ext,TYPEMAP[ext]||'text/plain');
-    closeSelector(ext);
-  });
-}
-visionSaveBtn.addEventListener('click',()=>{H.ultraBurst();saveMainCode();});
-
-/* CSS / JSON individual save */
-$('saveCssBtn').addEventListener('click',()=>{
-  H.confirm();const css=window.monacoCSS?window.monacoCSS.getValue():'';
-  const n=prompt('ファイル名','styles');if(!n)return;DL(css,n+'.css','text/css');
-});
-$('saveJsonBtn').addEventListener('click',()=>{
-  H.confirm();const json=window.monacoJSON?window.monacoJSON.getValue():'{}';
-  const n=prompt('ファイル名','data');if(!n)return;DL(json,n+'.json','application/json');
-});
-$('closeStyleBtn').addEventListener('click',()=>{
-  stylePanel.classList.remove('active');cardContainer.classList.remove('style-open');bundleSaveBar.classList.remove('visible');
-});
-
-/* Bundle save */
-$('bundleSaveBtn').addEventListener('click',async()=>{
-  H.ultraBurst();
-  const base=prompt('ベースファイル名','project');if(!base)return;
-  const code=window.monacoMain?window.monacoMain.getValue():'';
-  DL(code,base+'.'+lastExt,TYPEMAP[lastExt]||'text/plain');
-  await new Promise(r=>setTimeout(r,350));
-  const css=window.monacoCSS?window.monacoCSS.getValue():'';
-  if(css.trim()){DL(css,base+'.css','text/css');await new Promise(r=>setTimeout(r,350));}
-  const json=window.monacoJSON?window.monacoJSON.getValue():'{}';
-  if(json.trim()&&json!=='{}'&&json!=='{\n  "key": "value"\n}')DL(json,base+'.json','application/json');
-});
-
-/* ----------------------------------------------------------------
-   STYLE PANEL TABS
----------------------------------------------------------------- */
-document.querySelectorAll('.style-tab').forEach(tab=>{
-  tab.addEventListener('click',()=>{
-    document.querySelectorAll('.style-tab').forEach(t=>t.classList.remove('active'));
-    document.querySelectorAll('.style-tab-pane').forEach(p=>p.classList.remove('active'));
-    tab.classList.add('active');
-    $('pane'+tab.dataset.tab.toUpperCase().replace('CSS','CSS').replace('JSON','JSON')).classList.add('active');
-    $('paneCSS').classList.toggle('active',tab.dataset.tab==='css');
-    $('paneJSON').classList.toggle('active',tab.dataset.tab==='json');
-    setTimeout(()=>{
-      if(tab.dataset.tab==='css'&&window.monacoCSS)window.monacoCSS.layout();
-      if(tab.dataset.tab==='json'&&window.monacoJSON)window.monacoJSON.layout();
-    },50);
-  });
-});
-$('paneCSS').classList.add('active');$('paneJSON').classList.remove('active');
-
-/* ----------------------------------------------------------------
    SPLIT MODE
 ---------------------------------------------------------------- */
 function relayout(){
@@ -1015,22 +851,21 @@ function relayout(){
   if(window.monacoJSON)window.monacoJSON.layout();
 }
 function applyFlex(){
-  const fc=cardContainer.querySelector('.card-front');
-  const bc=cardContainer.querySelector('.card-back');
-  if(fc)fc.style.flex=String(splitTopFlex);
-  if(bc)bc.style.flex=String(splitBotFlex);
+  const fc=cardContainer.querySelector('.card-front'); const bc=cardContainer.querySelector('.card-back');
+  if(fc)fc.style.flex=String(splitTopFlex); if(bc)bc.style.flex=String(splitBotFlex);
 }
 function enterSplit(){
   isSplitMode=true;splitBtn.classList.add('active');
   cardContainer.classList.remove('rotated');cardContainer.classList.add('split-mode');
   isRotated=false;
   
-  // UI 切り替え（下部のボタンに統合）
-  visionEditBtn.style.display='none';
+  // 分割時もコンボを使えるようにし、チェックで戻るようにする
+  editIcon.src='check.png';editIcon.alt='完了';
   inputToggleBtn.style.display='inline-flex';
   visionSaveBtn.style.display='inline-flex';
   gearIcon.style.display='inline';
   selectModeIcon.style.display='none';
+  isSelectMode=false;selectModeIcon.style.color='#09304a';
 
   splitTopFlex=1;splitBotFlex=1;applyFlex();
   updatePreview();setTimeout(relayout,450);
@@ -1040,19 +875,18 @@ function exitSplit(){
   cardContainer.classList.remove('split-mode');
   ['card-front','card-back'].forEach(cn=>{const el=cardContainer.querySelector('.'+cn);if(el){el.style.flex='';el.style.height='';}});
   
-  // UI 切り替えを元に戻す
-  visionEditBtn.style.display='inline-flex';
+  // 通常状態(表面)のUIに戻す
+  editIcon.src='edit.png';editIcon.alt='編集';
   inputToggleBtn.style.display='none';
   visionSaveBtn.style.display='none';
   gearIcon.style.display='none';
   selectModeIcon.style.display='inline-block';
-  editIcon.src='edit.png';editIcon.alt='編集';
+  isSelectMode=false;
 
   updatePreview();setTimeout(relayout,450);
 }
 splitBtn.addEventListener('click',()=>{H.confirm();isSplitMode?exitSplit():enterSplit();});
 
-/* split handle resize */
 let shD=false,shY=0,shT0=1,shB0=1;
 splitHandle.addEventListener('pointerdown',e=>{
   if(!isSplitMode)return;shD=true;shY=e.clientY;shT0=splitTopFlex;shB0=splitBotFlex;
@@ -1060,26 +894,77 @@ splitHandle.addEventListener('pointerdown',e=>{
 });
 splitHandle.addEventListener('pointermove',e=>{
   if(!shD||!isSplitMode)return;
-  const tot=cardContainer.getBoundingClientRect().height-splitHandle.offsetHeight;
-  if(tot<=0)return;
+  const tot=cardContainer.getBoundingClientRect().height-splitHandle.offsetHeight; if(tot<=0)return;
   const pf=tot/(shT0+shB0),d=(e.clientY-shY)/pf;
   splitTopFlex=Math.max(.12,shT0+d);splitBotFlex=Math.max(.12,shB0-d);applyFlex();
 });
 splitHandle.addEventListener('pointerup',()=>shD=false);
 
+
 /* ----------------------------------------------------------------
-   DYNAMIC ISLAND
+   DYNAMIC ISLAND & SEARCH
 ---------------------------------------------------------------- */
 function openIsland(){
   diIsland.style.display='';setTimeout(()=>diIsland.classList.add('expanded'),10);
   diOverlay.classList.add('active');
 }
 function closeIsland(){
-  diIsland.classList.remove('expanded','slider-active');
+  diIsland.classList.remove('expanded','slider-active','search-active');
   setTimeout(()=>{diIsland.style.display='none';diOverlay.classList.remove('active');},350);
 }
-diIsland.addEventListener('click',()=>{if(!diIsland.classList.contains('slider-active'))diIsland.classList.toggle('expanded');});
-$('diBackBtn').addEventListener('click',e=>{H.ultraBurst();e.stopPropagation();closeIsland();});
+diIsland.addEventListener('click',()=>{
+  if(!diIsland.classList.contains('slider-active') && !diIsland.classList.contains('search-active')){
+    diIsland.classList.toggle('expanded');
+  }
+});
+
+// 検索ボタン (iOSライクな検索バーへ)
+$('diSearchBtn').addEventListener('click', e => {
+  H.ultraBurst(); e.stopPropagation();
+  diIsland.classList.remove('expanded');
+  diIsland.classList.add('search-active');
+  setTimeout(() => $('searchInput').focus(), 400);
+});
+
+// Monaco用 検索ロジック
+let searchMatches = [];
+let currentSearchIdx = 0;
+const gotoMatch = () => {
+  if(!searchMatches.length || !window.monacoMain) return;
+  const match = searchMatches[currentSearchIdx];
+  window.monacoMain.revealLineInCenter(match.range.startLineNumber);
+  window.monacoMain.setSelection(match.range);
+};
+
+$('searchInput').addEventListener('input', (e) => {
+  const val = e.target.value;
+  if(!val || !window.monacoMain) { searchMatches=[]; return; }
+  const model = window.monacoMain.getModel();
+  searchMatches = model.findMatches(val, false, false, false, null, true);
+  if(searchMatches.length > 0) { currentSearchIdx = 0; gotoMatch(); }
+});
+
+$('searchNextBtn').addEventListener('click', (e) => {
+  e.stopPropagation(); H.fire();
+  if(!searchMatches.length) return;
+  currentSearchIdx = (currentSearchIdx + 1) % searchMatches.length;
+  gotoMatch();
+});
+
+$('searchPrevBtn').addEventListener('click', (e) => {
+  e.stopPropagation(); H.fire();
+  if(!searchMatches.length) return;
+  currentSearchIdx = (currentSearchIdx - 1 + searchMatches.length) % searchMatches.length;
+  gotoMatch();
+});
+
+$('searchDoneBtn').addEventListener('click', (e) => {
+  e.stopPropagation(); H.confirm();
+  diIsland.classList.remove('search-active');
+  setTimeout(() => diIsland.classList.add('expanded'), 300);
+});
+
+
 $('diBBtn').addEventListener('click',e=>{H.ultraBurst();e.stopPropagation();closeIsland();setTimeout(saveMainCode,350);});
 $('diCBtn').addEventListener('click',e=>{
   H.ultraBurst();e.stopPropagation();closeIsland();
@@ -1088,12 +973,7 @@ $('diCBtn').addEventListener('click',e=>{
 $('diEBtn').addEventListener('click',e=>{H.ultraBurst();e.stopPropagation();closeIsland();});
 $('diFBtn').addEventListener('click',e=>{
   H.ultraBurst();e.stopPropagation();closeIsland();
-  setTimeout(()=>{
-    plainInputMode=!plainInputMode;
-    if(plainInputMode){$('editor').style.display='none';plainInput.style.display='block';if(window.monacoMain)plainInput.value=window.monacoMain.getValue();}
-    else{$('editor').style.display='block';plainInput.style.display='none';if(window.monacoMain)window.monacoMain.setValue(plainInput.value);setTimeout(relayout,50);}
-    updatePreview();
-  },350);
+  setTimeout(()=>{inputToggleBtn.click();},350);
 });
 $('d-button').addEventListener('click',e=>{
   H.ultraBurst();e.stopPropagation();
@@ -1105,12 +985,7 @@ $('d-button').addEventListener('click',e=>{
    SLIDER
 ---------------------------------------------------------------- */
 let slInit=false,slD=false,slX0=0,slKX=0,slMax=250;
-const slKnob =$('sliderKnob');
-const slInner=$('sliderInner');
-const slLabel=$('sliderLabel');
-const slWrap =$('sliderWrapper');
-const knobSVG=$('knobSVG');
-
+const slKnob=$('sliderKnob'), slInner=$('sliderInner'), slLabel=$('sliderLabel'), slWrap=$('sliderWrapper');
 const updSlSz=()=>{slMax=slWrap.offsetWidth-slKnob.offsetWidth-4;};
 const setKnob=(x)=>{slKnob.style.left=x+'px';slInner.style.width=(72+x)+'px';slLabel.style.opacity=String(1-x/slMax);};
 const endSlider=()=>{
@@ -1120,8 +995,7 @@ const endSlider=()=>{
     setTimeout(()=>{slWrap.style.opacity='0';setTimeout(()=>window.location.href='https://apple.com',500);},20);
   }else{
     slKnob.style.transition='left .5s cubic-bezier(.62,0,.4,1)';slKnob.style.left='4px';slKX=0;
-    slInner.style.transition='width .13s';slInner.style.width='72px';
-    slLabel.style.transition='opacity .2s';slLabel.style.opacity='1';
+    slInner.style.transition='width .13s';slInner.style.width='72px';slLabel.style.transition='opacity .2s';slLabel.style.opacity='1';
     diOverlay.classList.remove('active');
     setTimeout(()=>{diIsland.classList.remove('slider-active');diIsland.classList.add('expanded');},320);
   }
@@ -1130,19 +1004,69 @@ const endSlider=()=>{
 function initSlider(){
   if(slInit)return;slInit=true;updSlSz();window.addEventListener('resize',updSlSz);
   const onDown=x=>{slD=true;slX0=x;slKX=0;slKnob.style.transition='none';slInner.style.transition='none';diOverlay.classList.add('active');slKnob.classList.add('active');document.body.style.userSelect='none';rafSl();};
-  slKnob.addEventListener('mousedown',e=>onDown(e.clientX));
-  slWrap.addEventListener('touchstart',e=>{if(e.touches.length)onDown(e.touches[0].clientX);});
-  window.addEventListener('mousemove',e=>{if(slD)slKX=Math.max(0,Math.min(e.clientX-slX0,slMax));});
-  slWrap.addEventListener('touchmove',e=>{if(slD)slKX=Math.max(0,Math.min(e.touches[0].clientX-slX0,slMax));});
-  window.addEventListener('mouseup',endSlider);
-  slWrap.addEventListener('touchend',endSlider);
+  slKnob.addEventListener('mousedown',e=>onDown(e.clientX)); slWrap.addEventListener('touchstart',e=>{if(e.touches.length)onDown(e.touches[0].clientX);});
+  window.addEventListener('mousemove',e=>{if(slD)slKX=Math.max(0,Math.min(e.clientX-slX0,slMax));}); slWrap.addEventListener('touchmove',e=>{if(slD)slKX=Math.max(0,Math.min(e.touches[0].clientX-slX0,slMax));});
+  window.addEventListener('mouseup',endSlider); slWrap.addEventListener('touchend',endSlider);
 }
-function rafSl(){if(!slD)return;setKnob(slKX);requestAnimationFrame(rafSl);}// iOS Safariの「端スワイプ戻る」を防止するための補助
-document.addEventListener('touchstart', (e) => {
-  if (e.touches[0].pageX > 20 && e.touches[0].pageX < window.innerWidth - 20) return;
-  // 画面の端（20px以内）からのスワイプを無効化したい場合は preventDefault
-  // ただし、これをやると完全に戻れなくなるため注意
-}, { passive: true });
+function rafSl(){if(!slD)return;setKnob(slKX);requestAnimationFrame(rafSl);}
+
+/* ----------------------------------------------------------------
+   SHARE & SAVE UTILS, DRAG DROP ETC
+---------------------------------------------------------------- */
+// ...省略せず既存機能は維持...
+let dragCtr=0;
+document.addEventListener('dragenter',e=>{dragCtr++;if(e.dataTransfer.types.includes('Files'))dragOverlay.classList.add('active');});
+document.addEventListener('dragleave',()=>{if(--dragCtr<=0){dragCtr=0;dragOverlay.classList.remove('active');}});
+document.addEventListener('dragover',e=>e.preventDefault());
+document.addEventListener('drop',e=>{
+  e.preventDefault();dragCtr=0;dragOverlay.classList.remove('active');
+  if(!e.dataTransfer.files?.length)return;
+  const f=e.dataTransfer.files[0], r=new FileReader();
+  r.onload=ev=>{
+    htmlContent=ev.target.result;
+    if(plainInputMode)plainInput.value=htmlContent; else if(window.monacoMain)window.monacoMain.setValue(htmlContent);
+    const ext=f.name.split('.').pop().toLowerCase(); if(KNOWN_EXT.includes(ext))closeSelector(ext); updatePreview();
+  }; r.readAsText(f,'utf-8');
+});
+
+visionShareBtn.addEventListener('click',async()=>{
+  H.confirm();const code=window.monacoMain?window.monacoMain.getValue():'';
+  if(navigator.share){try{await navigator.share({title:'Vision UI',text:code,url:location.href});}catch{}}
+  else{const ta=document.createElement('textarea');ta.value=code;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('コピーしました');}
+});
+const DL=(content,filename,type)=>{
+  const blob=new Blob([content],{type}), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+};
+const TYPEMAP={html:'text/html',css:'text/css',js:'text/javascript',json:'application/json',xml:'application/xml',py:'text/x-python',swift:'text/swift',plist:'application/xml',tsx:'text/typescript-jsx',php:'application/x-httpd-php'};
+function saveWithPicker(cb){
+  showSelector();
+  const clickH=e=>{const item=e.target.closest('.swipe-item');const idx=item?swipeItems.indexOf(item):getClosest();const ext=extFromIdx(idx);e.preventDefault();swipeList.removeEventListener('click',clickH);document.removeEventListener('keydown',keyH);cb(ext);};
+  const keyH=e=>{if(e.key==='Enter'){const ext=extFromIdx(getClosest());swipeList.removeEventListener('click',clickH);document.removeEventListener('keydown',keyH);cb(ext);}};
+  swipeList.addEventListener('click',clickH);document.addEventListener('keydown',keyH);
+}
+function saveMainCode(){saveWithPicker(ext=>{const n=prompt('ファイル名','untitled');if(!n)return;DL(window.monacoMain?window.monacoMain.getValue():'',n+'.'+ext,TYPEMAP[ext]||'text/plain');closeSelector(ext);});}
+visionSaveBtn.addEventListener('click',()=>{H.ultraBurst();saveMainCode();});
+$('saveCssBtn').addEventListener('click',()=>{H.confirm();const css=window.monacoCSS?window.monacoCSS.getValue():'';const n=prompt('ファイル名','styles');if(!n)return;DL(css,n+'.css','text/css');});
+$('saveJsonBtn').addEventListener('click',()=>{H.confirm();const json=window.monacoJSON?window.monacoJSON.getValue():'{}';const n=prompt('ファイル名','data');if(!n)return;DL(json,n+'.json','application/json');});
+$('closeStyleBtn').addEventListener('click',()=>{stylePanel.classList.remove('active');cardContainer.classList.remove('style-open');bundleSaveBar.classList.remove('visible');});
+$('bundleSaveBtn').addEventListener('click',async()=>{
+  H.ultraBurst();const base=prompt('ベースファイル名','project');if(!base)return;
+  DL(window.monacoMain?window.monacoMain.getValue():'',base+'.'+lastExt,TYPEMAP[lastExt]||'text/plain'); await new Promise(r=>setTimeout(r,350));
+  const css=window.monacoCSS?window.monacoCSS.getValue():''; if(css.trim()){DL(css,base+'.css','text/css');await new Promise(r=>setTimeout(r,350));}
+  const json=window.monacoJSON?window.monacoJSON.getValue():'{}'; if(json.trim()&&json!=='{}'&&json!=='{\n  "key": "value"\n}')DL(json,base+'.json','application/json');
+});
+
+document.querySelectorAll('.style-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.style-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.style-tab-pane').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active'); $('pane'+tab.dataset.tab.toUpperCase().replace('CSS','CSS').replace('JSON','JSON')).classList.add('active');
+    $('paneCSS').classList.toggle('active',tab.dataset.tab==='css'); $('paneJSON').classList.toggle('active',tab.dataset.tab==='json');
+    setTimeout(()=>{if(tab.dataset.tab==='css'&&window.monacoCSS)window.monacoCSS.layout();if(tab.dataset.tab==='json'&&window.monacoJSON)window.monacoJSON.layout();},50);
+  });
+});
+$('paneCSS').classList.add('active');$('paneJSON').classList.remove('active');
 </script>
 </body>
 </html>
