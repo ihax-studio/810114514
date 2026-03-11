@@ -1,280 +1,136 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-    <meta charset="utf-8">
-    <title>Vision Translate & Solve v2</title>
-    <meta name="description" content="A redesigned and debugged WebXR tool for Vision Pro.">
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contactless System Prototype</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
+        :root { --container-width: 85vmin; }
         body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; background-color: #121212; color: white; font-family: sans-serif;
         }
-        .overlay-ui {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px;
-            border-radius: 24px;
-            background-color: rgba(255, 255, 255, 0.15);
-            -webkit-backdrop-filter: blur(20px);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            color: white;
-            text-align: center;
-            width: 90%;
-            max-width: 500px;
-            box-sizing: border-box;
+
+        /* 3x3 グリッド設定 */
+        .container {
+            width: var(--container-width);
+            height: var(--container-width);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            padding: 15px;
+            background: #222;
+            border-radius: 15px;
         }
-        #main-controls {
-            display: none; /* Initially hidden */
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            width: 100%;
-        }
-        #ar-starter {
-            display: block; /* Initially visible */
-        }
-        .primary-button {
-            padding: 14px 30px;
-            font-size: 17px;
-            font-weight: 600;
-            color: #333;
-            background-color: rgba(255, 255, 255, 0.9);
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: transform 0.1s ease;
-        }
-        .primary-button:active {
-            transform: scale(0.95);
-        }
-        .primary-button:disabled {
-            background-color: #555;
-            color: #999;
-            cursor: not-allowed;
-        }
-        #language-select {
-            padding: 8px 12px;
+
+        .icon-box {
+            background-color: #4a90e2; /* デフォルト：青 */
             border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background-color: rgba(0, 0, 0, 0.3);
-            color: white;
-            font-size: 15px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 0.8rem; font-weight: bold; transition: all 0.4s ease;
         }
-        #status {
-            min-height: 24px;
-            font-size: 16px;
-            font-weight: 500;
+
+        /* 1番目のブロック（左上）の「赤」状態 */
+        #gate-01.status-red {
+            background-color: #ff4757 !important;
+            box-shadow: 0 0 20px #ff4757;
         }
+
+        /* カメラのプレビュー（右下に配置） */
+        #video-preview {
+            position: fixed; bottom: 10px; right: 10px;
+            width: 120px; height: 120px; object-fit: cover;
+            border: 2px solid #444; border-radius: 50%; z-index: 100;
+        }
+
+        .log-area { margin-top: 15px; color: #aaa; font-size: 0.9rem; }
     </style>
 </head>
 <body>
-    <div id="ui-container" class="overlay-ui">
-        <div id="status">Ready to start AR session</div>
-        <div id="ar-starter">
-            <button id="enter-ar-button" class="primary-button">Start AR</button>
-        </div>
-        <div id="main-controls">
-            <button id="scan-button" class="primary-button">Scan</button>
-            <select id="language-select">
-                <option value="jpn">to Japanese (日本語)</option>
-                <option value="eng">to English</option>
-                <option value="spa">to Spanish</option>
-                <option value="fra">to French</option>
-                <option value="deu">to German</option>
-                <option value="chi_sim">to Chinese (Simp)</option>
-            </select>
-        </div>
-    </div>
 
-    <a-scene vr-mode-ui="enabled: false">
-        <a-camera>
-            <a-cursor></a-cursor>
-        </a-camera>
-        <a-entity id="result-text" text="align: center; color: white; width: 3;" position="0 0 -2" visible="false"></a-entity>
-        <a-entity id="graph-entity" position="0 0.2 -2.5" visible="false"></a-entity>
-    </a-scene>
+    <div style="margin-bottom:10px;">SYSTEM MONITOR</div>
+    
+    <div id="grid-container" class="container">
+        </div>
+
+    <div class="log-area" id="status-log">スキャン待機中...</div>
+
+    <video id="video-preview" autoplay playsinline></video>
+    <canvas id="hidden-canvas" style="display:none;"></canvas>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sceneEl = document.querySelector('a-scene');
-            const statusEl = document.getElementById('status');
-            
-            const arStarterEl = document.getElementById('ar-starter');
-            const enterArButton = document.getElementById('enter-ar-button');
-            
-            const mainControlsEl = document.getElementById('main-controls');
-            const scanButton = document.getElementById('scan-button');
-            const languageSelect = document.getElementById('language-select');
-            
-            const resultTextEl = document.getElementById('result-text');
-            const graphEntityEl = document.getElementById('graph-entity');
+        const container = document.getElementById('grid-container');
+        const video = document.getElementById('video-preview');
+        const canvas = document.getElementById('hidden-canvas');
+        const context = canvas.getContext('2d');
+        const logArea = document.getElementById('status-log');
+        
+        let lastReadTime = 0;
+        const TARGET_KEY = "UNLOCK-GATE-01"; // 反応させる鍵の文字列
 
-            let tesseractWorker;
-            let isScanning = false;
+        // 1. 3x3グリッド生成
+        for (let i = 0; i < 9; i++) {
+            const div = document.createElement('div');
+            div.classList.add('icon-box');
+            if (i === 0) {
+                div.id = 'gate-01'; // 1番目のブロック
+                div.innerText = "GATE 1";
+            } else {
+                div.innerText = "NODE " + (i + 1);
+            }
+            container.appendChild(div);
+        }
 
-            // --- AR Session Management ---
-            enterArButton.addEventListener('click', async () => {
-                statusEl.textContent = 'Requesting AR session...';
-                try {
-                    // A-Frame's enterVR() will trigger the WebXR session request
-                    await sceneEl.enterVR();
-                } catch (err) {
-                    statusEl.textContent = 'AR session failed to start.';
-                    console.error(err);
-                }
-            });
+        const gateBlock = document.getElementById('gate-01');
 
-            sceneEl.addEventListener('enter-vr', () => {
-                statusEl.textContent = 'AR Session Started. Initializing models...';
-                arStarterEl.style.display = 'none';
-                mainControlsEl.style.display = 'flex';
-                scanButton.disabled = true;
-                initializeTesseract();
-            });
+        // 2. カメラ起動
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment" } 
+                });
+                video.srcObject = stream;
+                requestAnimationFrame(tick);
+            } catch (err) {
+                logArea.innerText = "カメラエラー: " + err.message;
+            }
+        }
 
-            sceneEl.addEventListener('exit-vr', () => {
-                statusEl.textContent = 'Ready to start AR session';
-                arStarterEl.style.display = 'block';
-                mainControlsEl.style.display = 'none';
-            });
+        // 3. ループ処理
+        function tick() {
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
 
-            // --- Core Logic ---
-            async function initializeTesseract() {
-                const langs = 'eng+jpn+spa+fra+deu+chi_sim';
-                tesseractWorker = await Tesseract.createWorker(langs, 1, {
-                    logger: m => {
-                        if (m.status === 'recognizing text') {
-                            statusEl.textContent = `Recognizing... ${Math.round(m.progress * 100)}%`;
-                        } else if (m.status.startsWith('loading language')) {
-                            statusEl.textContent = `Loading model: ${m.status.split(' ')[2]}...`;
+                if (code) {
+                    const currentTime = Date.now();
+                    // 2秒間のインターバルを置いて判定
+                    if (currentTime - lastReadTime > 2000) {
+                        if (code.data === TARGET_KEY) {
+                            toggleColor();
+                            logArea.innerText = "認証成功: " + code.data;
+                            lastReadTime = currentTime;
+                        } else {
+                            logArea.innerText = "不明なコード: " + code.data;
                         }
                     }
-                });
-                statusEl.textContent = 'Ready to scan.';
-                scanButton.disabled = false;
-            }
-
-            scanButton.addEventListener('click', async () => {
-                if (isScanning || !tesseractWorker) return;
-
-                isScanning = true;
-                scanButton.disabled = true;
-                statusEl.textContent = 'Scanning...';
-                
-                resultTextEl.setAttribute('visible', 'false');
-                graphEntityEl.setAttribute('visible', 'false');
-                while (graphEntityEl.firstChild) {
-                    graphEntityEl.removeChild(graphEntityEl.firstChild);
-                }
-
-                try {
-                    const screenshot = sceneEl.components.screenshot.getCanvas('perspective');
-                    const selectedLang = languageSelect.value;
-                    const { data: { text } } = await tesseractWorker.recognize(screenshot, { lang: selectedLang });
-                    
-                    if (text.trim()) {
-                        statusEl.textContent = `Found: "${text.trim()}"`;
-                        await processOcrResult(text.trim());
-                    } else {
-                        statusEl.textContent = 'No text found. Try again.';
-                    }
-
-                } catch (error) {
-                    console.error('Scan failed:', error);
-                    statusEl.textContent = 'Error: Could not recognize text.';
-                } finally {
-                    isScanning = false;
-                    scanButton.disabled = false;
-                }
-            });
-
-            async function processOcrResult(text) {
-                if (/^y\s*=/i.test(text)) {
-                    drawGraph(text);
-                } else if (/[0-9]/.test(text) && /[\+\-\*\/\(\)\^!Clog]/.test(text)) {
-                    try {
-                        let mathText = text.replace(/(\d+)\s*C\s*(\d+)/g, 'combinations($1, $2)');
-                        mathText = mathText.replace(/(\d+)!/g, '($1)!');
-                        const result = math.evaluate(mathText);
-                        displayResult(`${text} = ${result}`);
-                    } catch (e) {
-                        await translateText(text);
-                    }
-                }
-                else {
-                    await translateText(text);
                 }
             }
+            requestAnimationFrame(tick);
+        }
 
-            function displayResult(displayText) {
-                resultTextEl.setAttribute('text', { value: displayText });
-                resultTextEl.setAttribute('visible', 'true');
-            }
+        // 4. 色の切り替え（青 ↔ 赤）
+        function toggleColor() {
+            gateBlock.classList.toggle('status-red');
+        }
 
-            async function translateText(text) {
-                statusEl.textContent = 'Translating...';
-                const langMap = {'jpn': 'ja', 'eng': 'en', 'spa': 'es', 'fra': 'fr', 'deu': 'de', 'chi_sim': 'zh'};
-                const targetLangCode = langMap[languageSelect.value] || 'ja';
-
-                try {
-                    const res = await fetch("https://libretranslate.de/translate", {
-                        method: "POST",
-                        body: JSON.stringify({ q: text, source: "auto", target: targetLangCode }),
-                        headers: { "Content-Type": "application/json" }
-                    });
-                    if (!res.ok) throw new Error(`API error: ${res.statusText}`);
-                    const { translatedText } = await res.json();
-                    statusEl.textContent = 'Translation complete.';
-                    displayResult(`${text}\n\n${translatedText}`);
-                } catch (error) {
-                    console.error('Translation failed:', error);
-                    statusEl.textContent = 'Error: Translation failed.';
-                    displayResult(`Could not translate:\n${text}`);
-                }
-            }
-
-            function drawGraph(expression) {
-                statusEl.textContent = 'Drawing graph...';
-                try {
-                    const expr = expression.replace(/^y\s*=\s*/i, '');
-                    const code = math.parse(expr).compile();
-                    const range = 10, segments = 50;
-                    const geometry = new THREE.PlaneGeometry(range, range, segments, segments);
-                    
-                    for (let i = 0; i < geometry.attributes.position.array.length; i += 3) {
-                        const x = geometry.attributes.position.array[i];
-                        let y = 0;
-                        try { y = code.evaluate({ x: x }); } catch (e) {}
-                        geometry.attributes.position.array[i+1] = (isFinite(y) && Math.abs(y) < range * 2) ? y : 0;
-                    }
-                    geometry.attributes.position.needsUpdate = true;
-                    geometry.computeVertexNormals();
-
-                    const material = new THREE.MeshStandardMaterial({ color: 0x007AFF, side: THREE.DoubleSide, wireframe: true });
-                    const mesh = new THREE.Mesh(geometry, material);
-                    mesh.rotation.x = -Math.PI / 2;
-
-                    graphEntityEl.setObject3D('mesh', mesh);
-                    graphEntityEl.setAttribute('visible', 'true');
-                    statusEl.textContent = 'Graph drawn successfully.';
-                } catch (error) {
-                    console.error('Graph drawing failed:', error);
-                    statusEl.textContent = 'Error: Could not draw graph.';
-                    displayResult(`Invalid function:\n${expression}`);
-                }
-            }
-        });
+        startCamera();
     </script>
 </body>
 </html>
