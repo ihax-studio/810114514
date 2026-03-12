@@ -3,150 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>High-Speed Multi Gate iOS12</title>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <title>Liquid Glass Interface</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --red: #ff0000; --yellow: #ffcc00; }
+        * { -webkit-box-sizing: border-box; box-sizing: border-box; }
+
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --ios-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @-webkit-keyframes pageIn {
+            from { -webkit-transform: scale(0.1); transform: scale(0.1); opacity: 0; }
+            to   { -webkit-transform: scale(1);   transform: scale(1);   opacity: 1; }
+        }
+        @keyframes pageIn {
+            from { -webkit-transform: scale(0.1); transform: scale(0.1); opacity: 0; }
+            to   { -webkit-transform: scale(1);   transform: scale(1);   opacity: 1; }
+        }
+
+        @-webkit-keyframes gradientBG {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes gradientBG {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         body {
-            margin: 0; background-color: #000; color: white;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-            overflow: hidden; touch-action: none;
+            background: linear-gradient(135deg, #ff4e00, #ea38ff, #5ca7ff);
+            background-size: 400% 400%;
+            -webkit-animation: gradientBG 15s ease infinite, pageIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation: gradientBG 15s ease infinite, pageIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            height: 100vh;
+            margin: 0;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-justify-content: center;
+            justify-content: center;
+            -webkit-align-items: center;
+            align-items: center;
+            font-family: -apple-system, sans-serif;
+            overflow: hidden;
         }
-        .grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-            width: 90vw; height: 90vw; max-width: 450px; max-height: 450px;
+
+        .glass-panel {
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            border-radius: 40px;
+            padding: 40px 30px;
+            padding-left: 4px;
+            width: 320px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow:
+                inset 1px -1px 11px rgba(255,255,255,.12),
+                inset 1px -1px 55px rgba(255,255,255,.11),
+                1px -1px 1px rgba(255,255,255,.62),
+                -1px 1px 1px rgba(255,255,255,.62),
+                0 10px 30px rgba(0,0,0,0.2);
         }
-        .node {
-            background: #1a1a1a; border: 1px solid #333; border-radius: 12px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            font-size: 11px; font-weight: bold;
-            transition: all 0.5s ease;
-            -webkit-transition: all 0.5s ease; /* iOS12対策 */
+
+        .qr-wrapper {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 25px;
+            margin-bottom: 15px;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-justify-content: center;
+            justify-content: center;
         }
-        /* 反応時：赤 + 拡大 */
-        .node.active {
-            background-color: var(--red) !important;
-            box-shadow: 0 0 40px var(--red);
-            border-color: #fff;
-            transform: scale(1.15);
-            -webkit-transform: scale(1.15);
-            z-index: 10;
+
+        #qrcode {
+            -webkit-transition: -webkit-transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease;
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease;
+            -webkit-transform: scale(0);
+            transform: scale(0);
+            opacity: 0;
         }
-        /* 出しっぱなし警告：黄 */
-        .node.warning {
-            background-color: var(--yellow) !important;
-            box-shadow: 0 0 20px var(--yellow);
-            color: #000;
-            transform: scale(1.0);
-            -webkit-transform: scale(1.0);
+        #qrcode.active {
+            -webkit-transform: scale(1);
+            transform: scale(1);
+            opacity: 1;
         }
-        #video-preview {
-            position: fixed; bottom: 15px; right: 15px;
-            width: 85px; height: 85px; border-radius: 50%; 
-            border: 2px solid #555; object-fit: cover;
-            background: #000;
+
+        .text-clip {
+            height: 1.5em;
+            overflow: hidden;
+            margin-bottom: 20px;
         }
-        .status-text { margin-bottom: 20px; font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; }
+        #gate-label {
+            color: white;
+            font-weight: bold;
+            font-family: monospace;
+            -webkit-transform: translateY(100%);
+            transform: translateY(100%);
+            -webkit-transition: -webkit-transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        #gate-label.show {
+            -webkit-transform: translateY(0);
+            transform: translateY(0);
+        }
+
+        .controls {
+            display: -webkit-flex;
+            display: flex;
+            -webkit-flex-direction: column;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        select {
+            background: black;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            -webkit-transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            opacity: 1;
+            -webkit-transform: translateY(0);
+            transform: translateY(0);
+            -webkit-appearance: none;
+            appearance: none;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            color: white;
+            outline: none;
+            -webkit-transition: -webkit-transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            font-size: 14px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        input::-webkit-input-placeholder { color: rgba(255,255,255,0.5); }
+        input::placeholder { color: rgba(255,255,255,0.5); }
+
+        .is-typing select {
+            opacity: 0;
+            -webkit-transform: translateY(20px);
+            transform: translateY(20px);
+            pointer-events: none;
+        }
+        .is-typing input {
+            -webkit-transform: translateY(-45px);
+            transform: translateY(-45px);
+        }
+
+        .reload-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-top: 15px;
+            cursor: pointer;
+            color: white;
+            font-size: 20px;
+            -webkit-transition: -webkit-transform 0.3s;
+            transition: transform 0.3s;
+            -webkit-appearance: none;
+            outline: none;
+        }
+        .reload-btn:active {
+            -webkit-transform: rotate(180deg) scale(0.9);
+            transform: rotate(180deg) scale(0.9);
+        }
     </style>
 </head>
 <body>
 
-    <div id="log" class="status-text">SYSTEM READY</div>
-    
-    <div id="grid-container" class="grid"></div>
+<div class="glass-panel" id="panel">
+    <div class="qr-wrapper">
+        <div id="qrcode"></div>
+    </div>
 
-    <video id="video-preview" autoplay playsinline webkit-playsinline muted></video>
-    <canvas id="hidden-canvas" style="display:none;"></canvas>
+    <div class="text-clip">
+        <div id="gate-label">UNLOCK-GATE-01</div>
+    </div>
 
-    <script>
-        var video = document.getElementById('video-preview');
-        var canvas = document.getElementById('hidden-canvas');
-        var ctx = canvas.getContext('2d', { willReadFrequently: true });
-        var log = document.getElementById('log');
-        var gridContainer = document.getElementById('grid-container');
+    <div class="controls" id="controls-area">
+        <select id="gate-selector"></select>
+        <input type="text" id="custom-input" placeholder="Custom Text...">
+        <button class="reload-btn" id="reload-btn">↻</button>
+    </div>
+</div>
 
-        var nodeStates = {};
-        var NODE_COUNT = 9;
+<script>
+    var qrcodeElement = document.getElementById("qrcode");
+    var gateLabel     = document.getElementById("gate-label");
+    var gateSelector  = document.getElementById("gate-selector");
+    var controlsArea  = document.getElementById("controls-area");
+    var customInput   = document.getElementById("custom-input");
+    var reloadBtn     = document.getElementById("reload-btn");
 
-        // 初期化：ノード生成
-        for (var i = 1; i <= NODE_COUNT; i++) {
-            var id = "UNLOCK-GATE-0" + i;
-            var div = document.createElement('div');
-            div.id = id;
-            div.className = 'node';
-            div.innerHTML = '<span>GATE</span>' + i;
-            gridContainer.appendChild(div);
+    var qr = new QRCode(qrcodeElement, {
+        width: 160,
+        height: 160,
+        colorDark:  "#ffffff",
+        colorLight: "rgba(0,0,0,0)",
+        correctLevel: QRCode.CorrectLevel.H
+    });
 
-            nodeStates[id] = {
-                el: div,
-                triggered: false,
-                time: 0,
-                present: false
-            };
+    // Gate options
+    for (var i = 1; i <= 9; i++) {
+        var val = "UNLOCK-GATE-0" + i;
+        var opt = document.createElement("option");
+        opt.value     = val;
+        opt.innerText = val;
+        gateSelector.appendChild(opt);
+    }
+
+    function updateContent(text) {
+        if (!text) return;
+
+        qrcodeElement.classList.remove('active');
+        gateLabel.classList.remove('show');
+
+        setTimeout(function() {
+            qr.makeCode(text);
+            gateLabel.innerText = text;
+            qrcodeElement.classList.add('active');
+            gateLabel.classList.add('show');
+        }, 200);
+    }
+
+    function handleInput(val) {
+        if (val.length > 0) {
+            controlsArea.classList.add('is-typing');
+            updateContent(val);
+        } else {
+            controlsArea.classList.remove('is-typing');
+            updateContent(gateSelector.value);
         }
+    }
 
-        function start() {
-            navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment", width: 480, height: 480 } 
-            }).then(function(stream) {
-                video.srcObject = stream;
-                // iOS12対策: 再生が確実に開始されるように
-                video.play();
-                requestAnimationFrame(tick);
-            }).catch(function(err) {
-                log.innerText = "CAMERA ERROR";
-            });
-        }
+    function triggerReload() {
+        document.body.style.animation = 'none';
+        void document.body.offsetWidth; // reflow
+        document.body.style.webkitAnimation = 'pageIn 0.5s cubic-bezier(0.2,0.8,0.2,1) forwards';
+        document.body.style.animation        = 'pageIn 0.5s cubic-bezier(0.2,0.8,0.2,1) forwards';
 
-        function tick() {
-            if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                canvas.width = 320; canvas.height = 320;
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                var code = jsQR(imgData.data, imgData.width, imgData.height);
+        var currentVal = customInput.value || gateSelector.value;
+        updateContent(currentVal);
+    }
 
-                var now = Date.now();
-                var foundId = null;
+    // event listeners (iOS12 compatible)
+    gateSelector.onchange = function() { updateContent(this.value); };
+    customInput.oninput   = function() { handleInput(this.value); };
+    reloadBtn.onclick     = function() { triggerReload(); };
 
-                if (code && nodeStates[code.data]) {
-                    foundId = code.data;
-                    var state = nodeStates[foundId];
+    window.onload = function() { updateContent("UNLOCK-GATE-01"); };
+</script>
 
-                    if (!state.triggered) {
-                        // 瞬時に赤・拡大
-                        state.el.classList.add('active');
-                        log.innerText = "ACCESS: GATE " + foundId.slice(-2);
-                        log.style.color = "#ff4444";
-                        state.triggered = true;
-                        state.time = now;
-                    } else if (now - state.time > 3000) {
-                        // 3秒経過で警告
-                        state.el.classList.remove('active');
-                        state.el.classList.add('warning');
-                        log.innerText = "RE-SCAN REQUIRED";
-                        log.style.color = "#ffcc00";
-                    }
-                    state.present = true;
-                }
-
-                // 全ノードのスキャン状態チェック
-                for (var key in nodeStates) {
-                    var s = nodeStates[key];
-                    if (foundId !== key && s.present) {
-                        // 画面から消えたらリセット
-                        s.el.classList.remove('active', 'warning');
-                        s.triggered = false;
-                        s.present = false;
-                        log.innerText = "SYSTEM READY";
-                        log.style.color = "#fff";
-                    }
-                }
-            }
-            requestAnimationFrame(tick);
-        }
-
-        start();
-    </script>
 </body>
 </html>
