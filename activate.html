@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquid Glass Interface</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --ios-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        /* ページ読み込み時のスケールアニメーション */
+        @keyframes pageIn {
+            from { transform: scale(0.1); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        body {
+            /* 指定のグラデーション背景 */
+            background: linear-gradient(135deg, #ff4e00, #ea38ff, #5ca7ff);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite, pageIn 0.5s var(--ios-ease) forwards;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: -apple-system, sans-serif;
+            overflow: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass-panel {
+            backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            border-radius: 40px;
+            padding: 40px 30px;
+            padding-left: 4px;
+            width: 320px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                inset 1px -1px 11px rgba(255,255,255,.12),
+                inset 1px -1px 55px rgba(255,255,255,.11),
+                1px -1px 1px rgba(255,255,255,.62),
+                -1px 1px 1px rgba(255,255,255,.62),
+                0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* QRコード表示エリア */
+        .qr-wrapper {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 25px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+        }
+
+        #qrcode {
+            transition: transform 0.5s var(--ios-ease), opacity 0.4s ease;
+            transform: scale(0);
+            opacity: 0;
+        }
+        #qrcode.active {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        /* テキストスライドアップ */
+        .text-clip {
+            height: 1.5em;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        #gate-label {
+            color: white; /* コード(テキスト)は白色 */
+            font-weight: bold;
+            font-family: monospace;
+            transform: translateY(100%);
+            transition: transform 0.5s var(--ios-ease);
+        }
+        #gate-label.show { transform: translateY(0); }
+
+        /* 入力エリアの動的挙動 */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        select {
+            background: black; /* 選択肢は黒色 */
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            transition: all 0.3s var(--ios-ease);
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            color: white;
+            outline: none;
+            transition: transform 0.3s var(--ios-ease);
+        }
+
+        /* カスタム入力時のクラス */
+        .is-typing select {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+        }
+        .is-typing input {
+            transform: translateY(-45px); /* ちょい上に上がる */
+        }
+
+        /* リロードボタン */
+        .reload-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-top: 15px;
+            cursor: pointer;
+            color: white;
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+        .reload-btn:active { transform: rotate(180deg) scale(0.9); }
+
+    </style>
+</head>
+<body>
+
+<div class="glass-panel" id="panel">
+    <div class="qr-wrapper">
+        <div id="qrcode"></div>
+    </div>
+
+    <div class="text-clip">
+        <div id="gate-label">UNLOCK-GATE-01</div>
+    </div>
+
+    <div class="controls" id="controls-area">
+        <select id="gate-selector" onchange="updateContent(this.value)">
+            </select>
+        <input type="text" id="custom-input" placeholder="Custom Text..." oninput="handleInput(this.value)">
+        <button class="reload-btn" onclick="triggerReload()">↻</button>
+    </div>
+</div>
+
+<script>
+    const qrcodeElement = document.getElementById("qrcode");
+    const gateLabel = document.getElementById("gate-label");
+    const gateSelector = document.getElementById("gate-selector");
+    const controlsArea = document.getElementById("controls-area");
+    const customInput = document.getElementById("custom-input");
+
+    const qr = new QRCode(qrcodeElement, {
+        width: 160,
+        height: 160,
+        colorDark: "#ffffff",
+        colorLight: "rgba(0,0,0,0)",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // 選択肢生成
+    for (let i = 1; i <= 9; i++) {
+        let val = `UNLOCK-GATE-0${i}`;
+        let opt = document.createElement("option");
+        opt.value = val;
+        opt.innerText = val;
+        gateSelector.appendChild(opt);
+    }
+
+    function updateContent(text) {
+        if (!text) return;
+        
+        // アニメーションリセット
+        qrcodeElement.classList.remove('active');
+        gateLabel.classList.remove('show');
+
+        setTimeout(() => {
+            qr.makeCode(text);
+            gateLabel.innerText = text;
+            qrcodeElement.classList.add('active');
+            gateLabel.classList.add('show');
+        }, 200);
+    }
+
+    function handleInput(val) {
+        if (val.length > 0) {
+            controlsArea.classList.add('is-typing');
+            updateContent(val);
+        } else {
+            controlsArea.classList.remove('is-typing');
+            updateContent(gateSelector.value);
+        }
+    }
+
+    function triggerReload() {
+        // body全体を再度スケールさせる演出
+        document.body.style.animation = 'none';
+        void document.body.offsetWidth; // reflow
+        document.body.style.animation = 'pageIn 0.5s var(--ios-ease) forwards';
+        
+        const currentVal = customInput.value || gateSelector.value;
+        updateContent(currentVal);
+    }
+
+    // 初回起動
+    window.onload = () => updateContent("UNLOCK-GATE-01");
+</script>
+
+</body>
+</html>
