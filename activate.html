@@ -2,230 +2,410 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liquid Glass Interface</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>High-Speed Multi Gate</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
+        * { -webkit-box-sizing: border-box; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --ios-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+            --red: #ff3b3b;
+            --yellow: #ffd60a;
+            --glass: rgba(255,255,255,0.08);
+            --glass-border: rgba(255,255,255,0.18);
+            --ease: cubic-bezier(0.2, 0.8, 0.2, 1.0);
         }
 
-        /* ページ読み込み時のスケールアニメーション */
-        @keyframes pageIn {
-            from { transform: scale(0.1); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+        @-webkit-keyframes gradBG {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-
-        body {
-            /* 指定のグラデーション背景 */
-            background: linear-gradient(135deg, #ff4e00, #ea38ff, #5ca7ff);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite, pageIn 0.5s var(--ios-ease) forwards;
-            height: 100vh;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: -apple-system, sans-serif;
-            overflow: hidden;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+        @keyframes gradBG {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
-        .glass-panel {
-            backdrop-filter: blur(20px);
-            background: var(--glass-bg);
-            border-radius: 40px;
-            padding: 40px 30px;
-            padding-left: 4px;
-            width: 320px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 
-                inset 1px -1px 11px rgba(255,255,255,.12),
-                inset 1px -1px 55px rgba(255,255,255,.11),
-                1px -1px 1px rgba(255,255,255,.62),
-                -1px 1px 1px rgba(255,255,255,.62),
-                0 10px 30px rgba(0,0,0,0.2);
+        @-webkit-keyframes pulseGlow {
+            0%, 100% { opacity: 0.5; }
+            50%       { opacity: 1.0; }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.5; }
+            50%       { opacity: 1.0; }
         }
 
-        /* QRコード表示エリア */
-        .qr-wrapper {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 25px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: center;
+        @-webkit-keyframes scanLine {
+            0%   { -webkit-transform: translateY(0px); transform: translateY(0px); opacity: 0.8; }
+            100% { -webkit-transform: translateY(70px); transform: translateY(70px); opacity: 0; }
+        }
+        @keyframes scanLine {
+            0%   { -webkit-transform: translateY(0px); transform: translateY(0px); opacity: 0.8; }
+            100% { -webkit-transform: translateY(70px); transform: translateY(70px); opacity: 0; }
         }
 
-        #qrcode {
-            transition: transform 0.5s var(--ios-ease), opacity 0.4s ease;
-            transform: scale(0);
-            opacity: 0;
-        }
-        #qrcode.active {
-            transform: scale(1);
-            opacity: 1;
+        html, body {
+            margin: 0; padding: 0; height: 100%; overflow: hidden;
         }
 
-        /* テキストスライドアップ */
-        .text-clip {
-            height: 1.5em;
-            overflow: hidden;
-            margin-bottom: 20px;
+        body {
+            background: linear-gradient(135deg, #0a0015, #001030, #001a10, #100010);
+            background-size: 400% 400%;
+            -webkit-animation: gradBG 18s ease infinite;
+            animation: gradBG 18s ease infinite;
+            color: white;
+            display: -webkit-flex; display: flex;
+            -webkit-flex-direction: column; flex-direction: column;
+            -webkit-align-items: center; align-items: center;
+            -webkit-justify-content: center; justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            touch-action: none;
+            height: 100vh;
         }
-        #gate-label {
-            color: white; /* コード(テキスト)は白色 */
-            font-weight: bold;
-            font-family: monospace;
-            transform: translateY(100%);
-            transition: transform 0.5s var(--ios-ease);
-        }
-        #gate-label.show { transform: translateY(0); }
 
-        /* 入力エリアの動的挙動 */
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        /* ── Ambient blobs ── */
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(60px);
+            -webkit-filter: blur(60px);
+            pointer-events: none;
+            -webkit-animation: pulseGlow 6s ease-in-out infinite;
+            animation: pulseGlow 6s ease-in-out infinite;
+        }
+        .blob-1 { width:300px; height:300px; background:rgba(100,0,220,0.25); top:-80px; left:-80px; -webkit-animation-delay:0s; animation-delay:0s; }
+        .blob-2 { width:250px; height:250px; background:rgba(0,180,120,0.2); bottom:-60px; right:-60px; -webkit-animation-delay:3s; animation-delay:3s; }
+        .blob-3 { width:200px; height:200px; background:rgba(0,100,200,0.2); top:40%; left:50%; -webkit-animation-delay:1.5s; animation-delay:1.5s; }
+
+        /* ── Main glass panel ── */
+        .main-panel {
             position: relative;
+            width: 92vw; max-width: 420px;
+            padding: 18px;
+            border-radius: 36px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.18);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            backdrop-filter: blur(28px) saturate(180%);
+            box-shadow:
+                inset 1px 1px 0 rgba(255,255,255,0.2),
+                inset -1px -1px 0 rgba(0,0,0,0.1),
+                0 20px 60px rgba(0,0,0,0.5),
+                0 0 0 1px rgba(255,255,255,0.05);
         }
 
-        select {
-            background: black; /* 選択肢は黒色 */
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 12px;
-            transition: all 0.3s var(--ios-ease);
-            opacity: 1;
-            transform: translateY(0);
+        /* ── Status bar ── */
+        .status-bar {
+            display: -webkit-flex; display: flex;
+            -webkit-align-items: center; align-items: center;
+            -webkit-justify-content: space-between; justify-content: space-between;
+            margin-bottom: 14px;
+            padding: 10px 16px;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.1);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #30d158;
+            box-shadow: 0 0 8px #30d158;
+            -webkit-animation: pulseGlow 2s ease-in-out infinite;
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+        #log {
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 1.5px; text-transform: uppercase;
+            color: rgba(255,255,255,0.9);
+            -webkit-transition: color 0.3s ease;
+            transition: color 0.3s ease;
+        }
+        .scan-indicator {
+            font-size: 10px; color: rgba(255,255,255,0.4);
+            letter-spacing: 0.5px;
         }
 
-        input {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 12px;
-            padding: 12px;
-            color: white;
-            outline: none;
-            transition: transform 0.3s var(--ios-ease);
+        /* ── Grid ── */
+        .grid {
+            display: -webkit-flex; display: flex;
+            -webkit-flex-wrap: wrap; flex-wrap: wrap;
+            gap: 8px;
+            width: 100%;
         }
 
-        /* カスタム入力時のクラス */
-        .is-typing select {
-            opacity: 0;
-            transform: translateY(20px);
+        .node {
+            width: calc(33.333% - 6px);
+            aspect-ratio: 1;
+            /* iOS12 fallback for aspect-ratio */
+            min-height: 80px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 18px;
+            display: -webkit-flex; display: flex;
+            -webkit-flex-direction: column; flex-direction: column;
+            -webkit-align-items: center; align-items: center;
+            -webkit-justify-content: center; justify-content: center;
+            font-size: 10px; font-weight: 700;
+            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.5);
+            -webkit-transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1.0);
+            transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1.0);
+            position: relative;
+            overflow: hidden;
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.12),
+                0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .node-num {
+            font-size: 20px; font-weight: 800;
+            line-height: 1;
+            color: rgba(255,255,255,0.7);
+            -webkit-transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1.0);
+            transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1.0);
+        }
+
+        .node-label {
+            font-size: 8px; font-weight: 600;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.35);
+            margin-top: 2px;
+            -webkit-transition: all 0.35s ease;
+            transition: all 0.35s ease;
+        }
+
+        /* Shimmer overlay */
+        .node::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%);
+            border-radius: 18px 18px 0 0;
             pointer-events: none;
         }
-        .is-typing input {
-            transform: translateY(-45px); /* ちょい上に上がる */
+
+        /* Scan line on active */
+        .node::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            opacity: 0;
+            -webkit-transition: opacity 0.2s ease;
+            transition: opacity 0.2s ease;
         }
 
-        /* リロードボタン */
-        .reload-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
+        /* ── Active: Red glow + scale ── */
+        .node.active {
+            background: linear-gradient(135deg, rgba(255,59,59,0.85), rgba(255,100,80,0.7)) !important;
+            border-color: rgba(255,120,100,0.6) !important;
+            -webkit-transform: scale(1.12);
+            transform: scale(1.12);
+            z-index: 10;
+            box-shadow:
+                0 0 0 1px rgba(255,80,60,0.4),
+                0 0 20px rgba(255,59,59,0.6),
+                0 0 50px rgba(255,59,59,0.3),
+                inset 0 1px 0 rgba(255,200,180,0.3) !important;
+            color: rgba(255,255,255,0.95) !important;
+        }
+        .node.active .node-num  { color: #fff; font-size: 22px; }
+        .node.active .node-label { color: rgba(255,255,255,0.8); letter-spacing: 1.5px; }
+        .node.active::after { opacity: 1; -webkit-animation: scanLine 0.8s ease-out infinite; animation: scanLine 0.8s ease-out infinite; }
+
+        /* ── Warning: Yellow ── */
+        .node.warning {
+            background: linear-gradient(135deg, rgba(255,214,10,0.85), rgba(255,180,0,0.7)) !important;
+            border-color: rgba(255,220,50,0.5) !important;
+            -webkit-transform: scale(1.0);
+            transform: scale(1.0);
+            box-shadow:
+                0 0 20px rgba(255,214,10,0.5),
+                inset 0 1px 0 rgba(255,255,200,0.3) !important;
+            color: rgba(0,0,0,0.8) !important;
+        }
+        .node.warning .node-num  { color: rgba(0,0,0,0.7); }
+        .node.warning .node-label { color: rgba(0,0,0,0.5); }
+
+        /* ── Camera preview ── */
+        #video-preview {
+            position: fixed;
+            bottom: 18px; right: 18px;
+            width: 72px; height: 72px;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            margin-top: 15px;
-            cursor: pointer;
-            color: white;
-            font-size: 20px;
-            transition: transform 0.3s;
+            object-fit: cover;
+            background: #000;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.05),
+                0 8px 24px rgba(0,0,0,0.5);
+            -webkit-transition: all 0.3s ease;
+            transition: all 0.3s ease;
         }
-        .reload-btn:active { transform: rotate(180deg) scale(0.9); }
+        /* Ring animation when scanning */
+        #video-preview.scanning {
+            border-color: rgba(48,209,88,0.8);
+            box-shadow:
+                0 0 0 1px rgba(48,209,88,0.3),
+                0 0 16px rgba(48,209,88,0.4),
+                0 8px 24px rgba(0,0,0,0.5);
+        }
 
+        /* ── Footer decoration ── */
+        .footer-label {
+            margin-top: 12px;
+            text-align: center;
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.2);
+            font-weight: 600;
+        }
+
+        /* hidden canvas */
+        #hidden-canvas { display: none; }
     </style>
 </head>
 <body>
 
-<div class="glass-panel" id="panel">
-    <div class="qr-wrapper">
-        <div id="qrcode"></div>
+    <!-- ambient blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="main-panel">
+        <div class="status-bar">
+            <div class="status-dot" id="status-dot"></div>
+            <div id="log">SYSTEM READY</div>
+            <div class="scan-indicator">QR SCAN</div>
+        </div>
+
+        <div id="grid-container" class="grid"></div>
+
+        <div class="footer-label">MULTI GATE ACCESS SYSTEM</div>
     </div>
 
-    <div class="text-clip">
-        <div id="gate-label">UNLOCK-GATE-01</div>
-    </div>
+    <video id="video-preview" autoplay playsinline webkit-playsinline muted></video>
+    <canvas id="hidden-canvas"></canvas>
 
-    <div class="controls" id="controls-area">
-        <select id="gate-selector" onchange="updateContent(this.value)">
-            </select>
-        <input type="text" id="custom-input" placeholder="Custom Text..." oninput="handleInput(this.value)">
-        <button class="reload-btn" onclick="triggerReload()">↻</button>
-    </div>
-</div>
+    <script>
+        var video   = document.getElementById('video-preview');
+        var canvas  = document.getElementById('hidden-canvas');
+        var ctx     = canvas.getContext('2d', { willReadFrequently: true });
+        var log     = document.getElementById('log');
+        var dot     = document.getElementById('status-dot');
+        var grid    = document.getElementById('grid-container');
 
-<script>
-    const qrcodeElement = document.getElementById("qrcode");
-    const gateLabel = document.getElementById("gate-label");
-    const gateSelector = document.getElementById("gate-selector");
-    const controlsArea = document.getElementById("controls-area");
-    const customInput = document.getElementById("custom-input");
+        var nodeStates = {};
+        var NODE_COUNT = 9;
+        var lastFound  = null;
 
-    const qr = new QRCode(qrcodeElement, {
-        width: 160,
-        height: 160,
-        colorDark: "#ffffff",
-        colorLight: "rgba(0,0,0,0)",
-        correctLevel: QRCode.CorrectLevel.H
-    });
+        // Build nodes
+        for (var i = 1; i <= NODE_COUNT; i++) {
+            var id  = "UNLOCK-GATE-0" + i;
+            var div = document.createElement('div');
+            div.id  = id;
+            div.className = 'node';
+            div.innerHTML =
+                '<span class="node-num">' + i + '</span>' +
+                '<span class="node-label">GATE</span>';
+            grid.appendChild(div);
 
-    // 選択肢生成
-    for (let i = 1; i <= 9; i++) {
-        let val = `UNLOCK-GATE-0${i}`;
-        let opt = document.createElement("option");
-        opt.value = val;
-        opt.innerText = val;
-        gateSelector.appendChild(opt);
-    }
-
-    function updateContent(text) {
-        if (!text) return;
-        
-        // アニメーションリセット
-        qrcodeElement.classList.remove('active');
-        gateLabel.classList.remove('show');
-
-        setTimeout(() => {
-            qr.makeCode(text);
-            gateLabel.innerText = text;
-            qrcodeElement.classList.add('active');
-            gateLabel.classList.add('show');
-        }, 200);
-    }
-
-    function handleInput(val) {
-        if (val.length > 0) {
-            controlsArea.classList.add('is-typing');
-            updateContent(val);
-        } else {
-            controlsArea.classList.remove('is-typing');
-            updateContent(gateSelector.value);
+            nodeStates[id] = {
+                el:        div,
+                triggered: false,
+                time:      0,
+                present:   false
+            };
         }
-    }
 
-    function triggerReload() {
-        // body全体を再度スケールさせる演出
-        document.body.style.animation = 'none';
-        void document.body.offsetWidth; // reflow
-        document.body.style.animation = 'pageIn 0.5s var(--ios-ease) forwards';
-        
-        const currentVal = customInput.value || gateSelector.value;
-        updateContent(currentVal);
-    }
+        function start() {
+            navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: 480, height: 480 }
+            }).then(function(stream) {
+                video.srcObject = stream;
+                video.play();
+                requestAnimationFrame(tick);
+            }).catch(function(err) {
+                log.innerText = 'CAMERA ERROR';
+                log.style.color = '#ff3b3b';
+            });
+        }
 
-    // 初回起動
-    window.onload = () => updateContent("UNLOCK-GATE-01");
-</script>
+        function tick() {
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.width = 320; canvas.height = 320;
+                ctx.drawImage(video, 0, 0, 320, 320);
+                var imgData = ctx.getImageData(0, 0, 320, 320);
+                var code    = jsQR(imgData.data, imgData.width, imgData.height, {
+                    inversionAttempts: 'dontInvert'
+                });
 
+                var now     = Date.now();
+                var foundId = null;
+
+                if (code && nodeStates[code.data]) {
+                    foundId = code.data;
+                    var state = nodeStates[foundId];
+
+                    if (!state.triggered) {
+                        // instant red flash
+                        state.el.classList.remove('warning');
+                        state.el.classList.add('active');
+                        log.innerText = 'ACCESS: GATE ' + foundId.slice(-2);
+                        log.style.color = '#ff6060';
+                        dot.style.background = '#ff3b3b';
+                        dot.style.boxShadow  = '0 0 8px #ff3b3b';
+                        video.classList.add('scanning');
+                        state.triggered = true;
+                        state.time      = now;
+                    } else if (now - state.time > 3000) {
+                        // 3s warning
+                        state.el.classList.remove('active');
+                        state.el.classList.add('warning');
+                        log.innerText = 'RE-SCAN REQUIRED';
+                        log.style.color = '#ffd60a';
+                        dot.style.background = '#ffd60a';
+                        dot.style.boxShadow  = '0 0 8px #ffd60a';
+                    }
+                    state.present = true;
+                }
+
+                // reset nodes that left frame
+                for (var key in nodeStates) {
+                    var s = nodeStates[key];
+                    if (key !== foundId && s.present) {
+                        s.el.classList.remove('active', 'warning');
+                        s.triggered = false;
+                        s.present   = false;
+                    }
+                }
+
+                // reset status if nothing active
+                if (!foundId) {
+                    var anyActive = false;
+                    for (var k in nodeStates) {
+                        if (nodeStates[k].triggered) { anyActive = true; break; }
+                    }
+                    if (!anyActive) {
+                        log.innerText   = 'SYSTEM READY';
+                        log.style.color = 'rgba(255,255,255,0.9)';
+                        dot.style.background = '#30d158';
+                        dot.style.boxShadow  = '0 0 8px #30d158';
+                        video.classList.remove('scanning');
+                    }
+                }
+            }
+            requestAnimationFrame(tick);
+        }
+
+        start();
+    </script>
 </body>
 </html>
