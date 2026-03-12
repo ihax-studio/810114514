@@ -3,85 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Speed QR Logic</title>
+    <title>High-Speed Gate System</title>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
-        :root { --container-width: 85vmin; }
         body {
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            min-height: 100vh; margin: 0; background-color: #000; color: white; font-family: 'Courier New', monospace;
+            margin: 0; background-color: #000; color: white;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; font-family: 'Consolas', monospace; overflow: hidden;
         }
-
-        .container {
-            width: var(--container-width); height: var(--container-width);
+        /* 3x3グリッド */
+        .grid {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-            padding: 15px; background: #111; border-radius: 15px;
+            width: 90vw; height: 90vw; max-width: 500px; max-height: 500px;
         }
-
-        .icon-box {
-            background-color: #222; border-radius: 8px;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 0.8rem; transition: 0.1s; border: 1px solid #333;
+        .node {
+            background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
         }
-
-        /* 認証成功：緑（瞬時に反応） */
-        .status-ok {
-            background-color: #00ff41 !important;
-            box-shadow: 0 0 30px #00ff41;
-            color: #000;
+        /* 反応した瞬間の赤（最優先） */
+        #gate-01.active {
+            background-color: #ff0000 !important;
+            box-shadow: 0 0 50px #ff0000;
+            border-color: #ff4444;
+            color: white;
         }
-
-        /* 警告：出しっぱなしの時 */
-        .status-warning {
+        /* 居座り警告の黄色 */
+        #gate-01.warning {
             background-color: #ffcc00 !important;
             box-shadow: 0 0 30px #ffcc00;
             color: #000;
         }
-
         #video-preview {
             position: fixed; bottom: 10px; right: 10px;
-            width: 100px; height: 100px; object-fit: cover;
-            border-radius: 50%; border: 2px solid #555;
+            width: 80px; height: 80px; border-radius: 50%; border: 2px solid #333;
         }
-
-        .log-area {
-            margin-top: 20px; font-size: 1.2rem; font-weight: bold;
-            height: 1.5em; text-align: center;
+        .status-text {
+            margin-bottom: 15px; font-size: 1.2rem; font-weight: bold; height: 1.2em;
         }
     </style>
 </head>
 <body>
 
-    <div id="grid-container" class="container"></div>
-    <div class="log-area" id="status-log">SCAN READY</div>
+    <div id="log" class="status-text">SYSTEM READY</div>
+    
+    <div class="grid">
+        <div id="gate-01" class="node">GATE 1</div>
+        <div class="node">NODE 2</div> <div class="node">NODE 3</div>
+        <div class="node">NODE 4</div> <div class="node">NODE 5</div> <div class="node">NODE 6</div>
+        <div class="node">NODE 7</div> <div class="node">NODE 8</div> <div class="node">NODE 9</div>
+    </div>
+
     <video id="video-preview" autoplay playsinline></video>
     <canvas id="hidden-canvas" style="display:none;"></canvas>
 
     <script>
-        const container = document.getElementById('grid-container');
         const video = document.getElementById('video-preview');
         const canvas = document.getElementById('hidden-canvas');
-        const context = canvas.getContext('2d', { alpha: false });
-        const logArea = document.getElementById('status-log');
-        
-        const TARGET_KEY = "UNLOCK-GATE-01";
-        
-        // 状態管理
-        let isCodePresent = false;    // 今QRが見えているか
-        let hasTriggered = false;     // 今回の登場で既に反応したか
-        let triggerTime = 0;          // 反応した時刻
-        
-        // グリッド生成
-        for (let i = 0; i < 9; i++) {
-            const div = document.createElement('div');
-            div.classList.add('icon-box');
-            div.id = 'node-' + i;
-            div.innerText = (i === 0) ? "GATE 1" : "NODE " + (i + 1);
-            container.appendChild(div);
-        }
-        const gate = document.getElementById('node-00');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const gate = document.getElementById('gate-01');
+        const log = document.getElementById('log');
 
-        async function startCamera() {
+        const KEY = "UNLOCK-GATE-01";
+        
+        let hasTriggered = false; // 一度反応したか
+        let triggerTime = 0;      // 反応した時刻
+        let isCodePresent = false; // 今画面にあるか
+
+        async function init() {
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: "environment", width: 400, height: 400 } 
             });
@@ -91,66 +79,44 @@
 
         function tick() {
             if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                canvas.height = 250; 
-                canvas.width = 250;
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                canvas.width = 300; canvas.height = 300;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imgData.data, imgData.width, imgData.height);
 
-                const now = Date.now();
-
-                if (code && code.data === TARGET_KEY) {
-                    // --- QRコードを検知中 ---
+                if (code && code.data === KEY) {
+                    const now = Date.now();
+                    
                     if (!hasTriggered) {
-                        // 【初検知：爆速反応】
-                        executeTrigger(now);
-                    } else {
-                        // 【検知継続中：3秒経過チェック】
-                        if (now - triggerTime > 3000) {
-                            showWarning();
-                        }
+                        // 【0秒反応】瞬時に赤にする
+                        gate.classList.add('active');
+                        log.innerText = "ACCESS GRANTED";
+                        log.style.color = "#ff0000";
+                        hasTriggered = true;
+                        triggerTime = now;
+                    } else if (now - triggerTime > 3000) {
+                        // 【3秒経過】出しっぱなしなら警告
+                        gate.classList.remove('active');
+                        gate.classList.add('warning');
+                        log.innerText = "REMOVE QR CODE";
+                        log.style.color = "#ffcc00";
                     }
                     isCodePresent = true;
                 } else {
-                    // --- QRコードが画面にない ---
+                    // 【リセット】画面からQRが消えたら全リセット
                     if (isCodePresent) {
-                        // 今まであったQRが消えた瞬間にリセット
-                        resetSystem();
+                        gate.classList.remove('active', 'warning');
+                        log.innerText = "SYSTEM READY";
+                        log.style.color = "#fff";
+                        hasTriggered = false;
+                        isCodePresent = false;
                     }
                 }
             }
             requestAnimationFrame(tick);
         }
 
-        // 瞬時の反応処理
-        function executeTrigger(now) {
-            hasTriggered = true;
-            triggerTime = now;
-            gate.classList.add('status-ok');
-            logArea.innerText = "CHECK OK: AUTHENTICATED";
-            logArea.style.color = "#00ff41";
-            if (navigator.vibrate) navigator.vibrate(100);
-        }
-
-        // 出しっぱなし警告
-        function showWarning() {
-            gate.classList.remove('status-ok');
-            gate.classList.add('status-warning');
-            logArea.innerText = "RE-SCAN REQUIRED (MOVE AWAY)";
-            logArea.style.color = "#ffcc00";
-        }
-
-        // 完全リセット（画面から消えたら実行）
-        function resetSystem() {
-            isCodePresent = false;
-            hasTriggered = false;
-            triggerTime = 0;
-            gate.classList.remove('status-ok', 'status-warning');
-            logArea.innerText = "SCAN READY";
-            logArea.style.color = "#fff";
-        }
-
-        startCamera();
+        init();
     </script>
 </body>
 </html>
