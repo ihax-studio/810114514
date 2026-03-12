@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Speed Gate System</title>
+    <title>Multi-Gate High-Speed System</title>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
         body {
@@ -11,47 +11,40 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100vh; font-family: 'Consolas', monospace; overflow: hidden;
         }
-        /* 3x3グリッド */
         .grid {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
             width: 90vw; height: 90vw; max-width: 500px; max-height: 500px;
         }
         .node {
             background: #1a1a1a; border: 1px solid #333; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center; font-size: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            font-size: 10px; transition: background 0.05s;
         }
-        /* 反応した瞬間の赤（最優先） */
-        #gate-01.active {
+        /* 認証成功：赤 */
+        .node.active {
             background-color: #ff0000 !important;
-            box-shadow: 0 0 50px #ff0000;
-            border-color: #ff4444;
-            color: white;
+            box-shadow: 0 0 40px #ff0000;
+            color: white; border-color: #fff;
         }
-        /* 居座り警告の黄色 */
-        #gate-01.warning {
+        /* 出しっぱなし警告：黄 */
+        .node.warning {
             background-color: #ffcc00 !important;
-            box-shadow: 0 0 30px #ffcc00;
+            box-shadow: 0 0 20px #ffcc00;
             color: #000;
         }
         #video-preview {
             position: fixed; bottom: 10px; right: 10px;
-            width: 80px; height: 80px; border-radius: 50%; border: 2px solid #333;
+            width: 80px; height: 80px; border-radius: 50%; border: 2px solid #444; object-fit: cover;
         }
-        .status-text {
-            margin-bottom: 15px; font-size: 1.2rem; font-weight: bold; height: 1.2em;
-        }
+        .status-text { margin-bottom: 15px; font-size: 1.1rem; font-weight: bold; height: 1.2em; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
     <div id="log" class="status-text">SYSTEM READY</div>
     
-    <div class="grid">
-        <div id="gate-01" class="node">GATE 1</div>
-        <div class="node">NODE 2</div> <div class="node">NODE 3</div>
-        <div class="node">NODE 4</div> <div class="node">NODE 5</div> <div class="node">NODE 6</div>
-        <div class="node">NODE 7</div> <div class="node">NODE 8</div> <div class="node">NODE 9</div>
-    </div>
+    <div id="grid-container" class="grid">
+        </div>
 
     <video id="video-preview" autoplay playsinline></video>
     <canvas id="hidden-canvas" style="display:none;"></canvas>
@@ -60,60 +53,96 @@
         const video = document.getElementById('video-preview');
         const canvas = document.getElementById('hidden-canvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        const gate = document.getElementById('gate-01');
         const log = document.getElementById('log');
+        const gridContainer = document.getElementById('grid-container');
 
-        const KEY = "UNLOCK-GATE-01";
-        
-        let hasTriggered = false; // 一度反応したか
-        let triggerTime = 0;      // 反応した時刻
-        let isCodePresent = false; // 今画面にあるか
+        // 各ノードの状態管理
+        const nodeStates = {};
+        const NODE_COUNT = 9;
+
+        // 1. ノードの生成と初期化
+        for (let i = 1; i <= NODE_COUNT; i++) {
+            const id = `UNLOCK-GATE-0${i}`;
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = 'node';
+            div.innerHTML = `<span>GATE</span><strong>0${i}</strong>`;
+            gridContainer.appendChild(div);
+
+            nodeStates[id] = {
+                element: div,
+                hasTriggered: false,
+                triggerTime: 0,
+                isPresent: false
+            };
+        }
 
         async function init() {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment", width: 400, height: 400 } 
-            });
-            video.srcObject = stream;
-            requestAnimationFrame(tick);
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment", width: 480, height: 480 } 
+                });
+                video.srcObject = stream;
+                requestAnimationFrame(tick);
+            } catch (e) {
+                log.innerText = "CAMERA ERROR";
+            }
         }
 
         function tick() {
             if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                // 解析解像度を300pxに絞って速度を稼ぐ
                 canvas.width = 300; canvas.height = 300;
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 const code = jsQR(imgData.data, imgData.width, imgData.height);
 
-                if (code && code.data === KEY) {
-                    const now = Date.now();
-                    
-                    if (!hasTriggered) {
-                        // 【0秒反応】瞬時に赤にする
-                        gate.classList.add('active');
-                        log.innerText = "ACCESS GRANTED";
+                const now = Date.now();
+                let foundThisFrame = null;
+
+                if (code && nodeStates[code.data]) {
+                    foundThisFrame = code.data;
+                    const state = nodeStates[foundThisFrame];
+
+                    if (!state.hasTriggered) {
+                        // 【超高速反応】マッチした瞬間に赤点灯
+                        resetAllVisuals(); // 他の警告などを一旦クリア
+                        state.element.classList.add('active');
+                        log.innerText = `MATCHED: ${foundThisFrame}`;
                         log.style.color = "#ff0000";
-                        hasTriggered = true;
-                        triggerTime = now;
-                    } else if (now - triggerTime > 3000) {
-                        // 【3秒経過】出しっぱなしなら警告
-                        gate.classList.remove('active');
-                        gate.classList.add('warning');
-                        log.innerText = "REMOVE QR CODE";
+                        state.hasTriggered = true;
+                        state.triggerTime = now;
+                    } else if (now - state.triggerTime > 3000) {
+                        // 【居座り防止】3秒出しっぱなしなら黄色
+                        state.element.classList.remove('active');
+                        state.element.classList.add('warning');
+                        log.innerText = "MOVE AWAY / RE-SCAN";
                         log.style.color = "#ffcc00";
                     }
-                    isCodePresent = true;
-                } else {
-                    // 【リセット】画面からQRが消えたら全リセット
-                    if (isCodePresent) {
-                        gate.classList.remove('active', 'warning');
+                    state.isPresent = true;
+                }
+
+                // すべてのノードに対して、画面から消えたかチェック
+                for (const id in nodeStates) {
+                    const state = nodeStates[id];
+                    // 画面に映っていない場合、または別のQRが映った場合
+                    if (foundThisFrame !== id && state.isPresent) {
+                        // 消えた瞬間にリセットして再スキャンを可能にする
+                        state.element.classList.remove('active', 'warning');
+                        state.hasTriggered = false;
+                        state.isPresent = false;
                         log.innerText = "SYSTEM READY";
                         log.style.color = "#fff";
-                        hasTriggered = false;
-                        isCodePresent = false;
                     }
                 }
             }
             requestAnimationFrame(tick);
+        }
+
+        function resetAllVisuals() {
+            for (const id in nodeStates) {
+                nodeStates[id].element.classList.remove('active', 'warning');
+            }
         }
 
         init();
