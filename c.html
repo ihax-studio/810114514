@@ -6,752 +6,528 @@
 <title>⚗️ 酸化還元マスター</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#07111f;--s0:rgba(255,255,255,0.03);--s1:rgba(255,255,255,0.07);
-  --s2:rgba(255,255,255,0.13);--border:rgba(255,255,255,0.09);
-  --border2:rgba(255,255,255,0.16);--red:#ff4d6d;--blue:#38bdf8;
-  --green:#4ade80;--amber:#fbbf24;--purple:#a78bfa;--cyan:#22d3ee;
-  --text:#f0f4ff;--dim:rgba(240,244,255,0.55);--dim2:rgba(240,244,255,0.32);
-  --r:18px;--r2:12px;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;
-  -webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}
-html,body{height:100%;}
-body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;
-  min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
-
-/* AMBIENT */
-.glow{position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:radial-gradient(ellipse 55% 40% at 10% 10%,rgba(56,189,248,.08),transparent),
-             radial-gradient(ellipse 50% 45% at 90% 90%,rgba(255,77,109,.06),transparent),
-             radial-gradient(ellipse 60% 50% at 50% 50%,rgba(74,222,128,.03),transparent);}
-
-/* HEADER */
-.hdr{position:sticky;top:0;z-index:50;background:rgba(7,17,31,.88);
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border-bottom:1px solid var(--border);padding:14px 18px 0;}
+:root{--bg:#07111f;--s0:rgba(255,255,255,.03);--s1:rgba(255,255,255,.07);--b:rgba(255,255,255,.09);--b2:rgba(255,255,255,.16);--red:#ff4d6d;--blue:#38bdf8;--green:#4ade80;--amber:#fbbf24;--purple:#a78bfa;--cyan:#22d3ee;--text:#f0f4ff;--dim:rgba(240,244,255,.55);--dim2:rgba(240,244,255,.32);--r:18px;--r2:12px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}
+html,body{height:100%;overscroll-behavior:none;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+.glow{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 55% 40% at 10% 10%,rgba(56,189,248,.08),transparent),radial-gradient(ellipse 50% 45% at 90% 90%,rgba(255,77,109,.06),transparent);}
+#ld{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .5s;}
+#ld.out{opacity:0;pointer-events:none;}
+#sdld{position:fixed;inset:0;z-index:998;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;}
+#sdld.on{display:flex;}
+.mac-svg{width:110px;height:110px;filter:drop-shadow(0 0 16px rgba(56,189,248,.3));}
+.ld-txt{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--dim);letter-spacing:.08em;animation:pulse 1.4s infinite;}
+.ld-bar{width:160px;height:3px;background:var(--s1);border-radius:2px;overflow:hidden;}
+.ld-fill{width:0%;height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:2px;transition:width .25s;}
+.hdr{position:sticky;top:0;z-index:50;background:rgba(7,17,31,.9);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--b);padding:14px 18px 0;}
 .hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;}
-.logo{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;
-  background:linear-gradient(110deg,var(--blue) 0%,var(--green) 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.spill{background:var(--s1);border:1px solid var(--border2);border-radius:50px;
-  padding:3px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;
-  color:var(--amber);display:none;}
-.spill.on{display:block;}
-
-/* TABS */
+.logo{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;background:linear-gradient(110deg,var(--blue),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.pill{background:var(--s1);border:1px solid var(--b2);border-radius:50px;padding:3px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--amber);}
 .tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px;}
 .tabs::-webkit-scrollbar{display:none;}
-.tab{flex-shrink:0;padding:8px 13px;font-size:12px;font-weight:500;color:var(--dim);
-  cursor:pointer;border:none;background:transparent;border-radius:10px 10px 0 0;
-  transition:all .18s;white-space:nowrap;font-family:'Noto Sans JP',sans-serif;}
+.tab{flex-shrink:0;padding:8px 13px;font-size:12px;font-weight:500;color:var(--dim);cursor:pointer;border:none;background:transparent;border-radius:10px 10px 0 0;transition:color .15s,background .15s;white-space:nowrap;font-family:'Noto Sans JP',sans-serif;-webkit-appearance:none;}
 .tab.on{color:var(--text);background:var(--s1);}
-
-/* MAIN */
-.main{position:relative;z-index:1;padding:18px 15px 50px;max-width:600px;margin:0 auto;}
-.main>div{animation:popIn .18s ease;}
-
-/* UTILITIES */
-.sec-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--dim2);
-  letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px;
-  display:flex;align-items:center;gap:8px;}
-.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
-
-.card{background:var(--s0);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;}
-
-/* PROGRESS */
-.prog-bar{height:3px;background:var(--s1);border-radius:2px;margin-bottom:14px;overflow:hidden;}
-.prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--green));transition:width .35s ease;}
-.counter{text-align:center;font-size:11px;color:var(--dim2);margin-bottom:11px;
-  font-family:'JetBrains Mono',monospace;}
-
-/* FLASHCARD */
-.flip-scene{perspective:900px;height:210px;margin-bottom:14px;cursor:pointer;}
-.flip-card{width:100%;height:100%;transform-style:preserve-3d;
-  transition:transform .48s cubic-bezier(.4,0,.2,1);position:relative;}
-.flip-card.flipped{transform:rotateY(180deg);}
-.flip-face{position:absolute;inset:0;backface-visibility:hidden;
-  -webkit-backface-visibility:hidden;border-radius:var(--r);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:22px;border:1px solid var(--border2);gap:10px;}
-.flip-front{background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(74,222,128,.07));}
-.flip-back{background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(167,139,250,.07));transform:rotateY(180deg);}
-.flip-hint{font-size:10px;color:var(--dim2);position:absolute;bottom:11px;right:13px;}
-
-.badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:50px;letter-spacing:.04em;}
-.badge.ox{background:rgba(255,77,109,.18);color:var(--red);border:1px solid rgba(255,77,109,.28);}
-.badge.re{background:rgba(56,189,248,.18);color:var(--blue);border:1px solid rgba(56,189,248,.28);}
-
-.fq{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;text-align:center;line-height:1.45;}
-.fq-sub{font-size:12px;color:var(--dim);text-align:center;}
-.fa{font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700;text-align:center;color:var(--amber);line-height:1.45;}
-.fhint{font-size:12px;color:var(--dim);text-align:center;}
-
-.nav-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-
-/* BUTTONS */
-.btn{padding:13px;border-radius:14px;font-family:'Noto Sans JP',sans-serif;
-  font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .13s;text-align:center;}
+.main{position:relative;z-index:1;padding:18px 15px 60px;max-width:600px;margin:0 auto;}
+.pgb{height:3px;background:var(--s1);border-radius:2px;margin-bottom:14px;overflow:hidden;}
+.pgf{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--green));transition:width .35s;}
+.cnt{text-align:center;font-size:11px;color:var(--dim2);margin-bottom:11px;font-family:'JetBrains Mono',monospace;}
+.flip-s{perspective:900px;height:200px;margin-bottom:14px;cursor:pointer;}
+.flip-c{width:100%;height:100%;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.4,0,.2,1);position:relative;}
+.flip-c.flipped{transform:rotateY(180deg);}
+.flip-f{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;border:1px solid var(--b2);gap:9px;}
+.ff{background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(74,222,128,.07));}
+.fb{background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(167,139,250,.07));transform:rotateY(180deg);}
+.fhnt{font-size:10px;color:var(--dim2);position:absolute;bottom:10px;right:12px;}
+.bdg{font-size:10px;font-weight:700;padding:3px 10px;border-radius:50px;letter-spacing:.04em;}
+.bdg.ox{background:rgba(255,77,109,.18);color:var(--red);border:1px solid rgba(255,77,109,.28);}
+.bdg.re{background:rgba(56,189,248,.18);color:var(--blue);border:1px solid rgba(56,189,248,.28);}
+.fq{font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:700;text-align:center;line-height:1.4;}
+.fqs{font-size:12px;color:var(--dim);text-align:center;}
+.fa{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;text-align:center;color:var(--amber);line-height:1.4;}
+.fhi{font-size:11px;color:var(--dim);text-align:center;line-height:1.6;}
+.nbts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.sr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.sb{background:var(--s0);border:1px solid var(--b);border-radius:var(--r2);padding:11px 6px;text-align:center;}
+.sn{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;}
+.sl{font-size:10px;color:var(--dim);margin-top:2px;}
+.btn{padding:13px;border-radius:14px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:transform .1s;text-align:center;-webkit-appearance:none;display:block;}
 .btn:active{transform:scale(.96);}
-.btn-ghost{background:var(--s1);border:1px solid var(--border2);color:var(--text);}
-.btn-blue{background:linear-gradient(135deg,var(--blue),var(--cyan));color:#000;}
-.btn-green{background:linear-gradient(135deg,var(--green),#22c55e);color:#000;}
-.btn-red{background:linear-gradient(135deg,var(--red),#fb7185);color:#fff;}
-.btn-amber{background:linear-gradient(135deg,var(--amber),#f59e0b);color:#000;}
-.btn-full{width:100%;}
-
-/* STATS */
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
-.stat-box{background:var(--s0);border:1px solid var(--border);border-radius:var(--r2);padding:11px 6px;text-align:center;}
-.stat-num{font-family:'JetBrains Mono',monospace;font-size:21px;font-weight:700;}
-.stat-lbl{font-size:10px;color:var(--dim);margin-top:2px;}
-
-/* QUIZ */
-.quiz-card{background:var(--s0);border:1px solid var(--border2);border-radius:var(--r);padding:20px 18px;margin-bottom:14px;}
-.quiz-prog{font-size:11px;color:var(--dim2);margin-bottom:11px;font-family:'JetBrains Mono',monospace;}
-.quiz-q{font-size:14px;line-height:1.8;margin-bottom:10px;}
-.quiz-eq{font-family:'JetBrains Mono',monospace;font-size:13px;
-  background:rgba(255,255,255,0.04);border:1px solid var(--border);
-  border-radius:10px;padding:11px 13px;margin:10px 0;line-height:1.9;overflow-x:auto;white-space:nowrap;}
-.choices{display:flex;flex-direction:column;gap:8px;}
-.choice{padding:13px 15px;background:var(--s1);border:1px solid var(--border2);
-  border-radius:13px;cursor:pointer;font-family:'JetBrains Mono',monospace;
-  font-size:12.5px;line-height:1.6;transition:all .13s;text-align:left;color:var(--text);}
-.choice:active{transform:scale(.98);}
-.choice.correct{background:rgba(74,222,128,.15);border-color:var(--green);color:var(--green);}
-.choice.wrong{background:rgba(255,77,109,.1);border-color:rgba(255,77,109,.4);color:rgba(255,110,130,.9);}
-.choice.disabled{pointer-events:none;}
-.explain{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);
-  border-radius:13px;padding:13px 15px;margin-top:11px;font-size:13px;
-  line-height:1.75;color:var(--amber);display:none;}
-.explain.on{display:block;}
-.next-wrap{margin-top:12px;display:none;}
-
-/* HALF REACTIONS */
-.half-cat{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
-  color:var(--dim2);margin:18px 0 9px;padding-left:3px;}
-.half-row{background:var(--s0);border:1px solid var(--border);border-radius:13px;
-  padding:13px 44px 13px 15px;margin-bottom:8px;position:relative;
-  transition:background .2s,border-color .2s;}
-.half-row.ox{border-left:3px solid var(--red);}
-.half-row.re{border-left:3px solid var(--blue);}
-.half-row.mkd{background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.28);}
-.half-eq{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.8;overflow-x:auto;white-space:nowrap;}
-.half-cond{font-size:10px;color:var(--dim2);margin-top:3px;}
-.mark-btn{position:absolute;top:50%;right:11px;transform:translateY(-50%);
-  width:28px;height:28px;background:transparent;border:none;cursor:pointer;
-  font-size:17px;opacity:.35;transition:all .2s;display:flex;align-items:center;justify-content:center;}
-.mark-btn.mkd{opacity:1;}
-
-/* GUIDE */
-.step-card{background:var(--s0);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:9px;}
-.step-hdr{display:flex;align-items:center;gap:11px;padding:15px 17px;cursor:pointer;}
-.step-num{width:31px;height:31px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;flex-shrink:0;}
-.step-ttl{font-size:14px;font-weight:700;flex:1;line-height:1.4;}
-.step-arr{color:var(--dim);font-size:11px;transition:transform .2s;}
-.step-card.open .step-arr{transform:rotate(90deg);}
-.step-body{padding:0 17px;max-height:0;overflow:hidden;transition:max-height .32s ease,padding .28s;}
-.step-card.open .step-body{max-height:900px;padding-bottom:17px;}
-.step-desc{font-size:13px;line-height:1.85;color:var(--dim);margin-bottom:10px;}
-.step-eq{font-family:'JetBrains Mono',monospace;font-size:12.5px;
-  background:rgba(255,255,255,0.04);border:1px solid var(--border);
-  border-radius:9px;padding:10px 12px;overflow-x:auto;white-space:nowrap;margin:6px 0;line-height:1.8;}
-.step-ex-lbl{font-size:10px;color:var(--dim2);margin-bottom:3px;margin-top:10px;}
-.tip{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);
-  border-radius:11px;padding:11px 13px;margin-top:9px;font-size:12.5px;color:#c4b5fd;line-height:1.75;}
-.tip::before{content:'💡 ';}
-
-/* ADVANCED */
-.adv-card{background:var(--s0);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;margin-bottom:10px;}
-.adv-hdr{padding:15px 17px;cursor:pointer;display:flex;gap:11px;align-items:flex-start;}
+.bg{background:var(--s1);border:1px solid var(--b2);color:var(--text);}
+.bb{background:linear-gradient(135deg,var(--blue),var(--cyan));color:#000;}
+.bw{width:100%;}
+.qcard{background:var(--s0);border:1px solid var(--b2);border-radius:var(--r);padding:20px 18px;margin-bottom:14px;}
+.qprog{font-size:11px;color:var(--dim2);margin-bottom:11px;font-family:'JetBrains Mono',monospace;}
+.qq{font-size:14px;line-height:1.8;margin-bottom:10px;}
+.chs{display:flex;flex-direction:column;gap:8px;}
+.ch{padding:13px 15px;background:var(--s1);border:1px solid var(--b2);border-radius:13px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;transition:all .12s;text-align:left;color:var(--text);-webkit-appearance:none;display:block;width:100%;}
+.ch:active{transform:scale(.98);}
+.ch.ok{background:rgba(74,222,128,.15);border-color:var(--green);color:var(--green);}
+.ch.ng{background:rgba(255,77,109,.1);border-color:rgba(255,77,109,.4);color:rgba(255,110,130,.9);}
+.ch.dis{pointer-events:none;}
+.exp{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);border-radius:13px;padding:13px 15px;margin-top:11px;font-size:13px;line-height:1.75;color:var(--amber);display:none;}
+.exp.on{display:block;}
+.hcat{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--dim2);margin:18px 0 9px;padding-left:3px;}
+.hrow{background:var(--s0);border:1px solid var(--b);border-radius:13px;padding:13px 44px 13px 15px;margin-bottom:8px;position:relative;}
+.hrow.hox{border-left:3px solid var(--red);}
+.hrow.hre{border-left:3px solid var(--blue);}
+.hrow.mkd{background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.28);}
+.heq{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;overflow-x:auto;white-space:nowrap;}
+.hcnd{font-size:10px;color:var(--dim2);margin-top:3px;}
+.mkb{position:absolute;top:50%;right:11px;transform:translateY(-50%);width:28px;height:28px;background:transparent;border:none;cursor:pointer;font-size:17px;opacity:.35;transition:all .2s;display:flex;align-items:center;justify-content:center;-webkit-appearance:none;}
+.mkb.mkd{opacity:1;}
+.sec-t{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--dim2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.sec-t::after{content:'';flex:1;height:1px;background:var(--b);}
+.card{background:var(--s0);border:1px solid var(--b);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;}
+.scard{background:var(--s0);border:1px solid var(--b);border-radius:var(--r);overflow:hidden;margin-bottom:9px;}
+.shdr{display:flex;align-items:center;gap:11px;padding:15px 17px;cursor:pointer;}
+.snum2{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;flex-shrink:0;}
+.sttl{font-size:14px;font-weight:700;flex:1;line-height:1.4;}
+.sarr{color:var(--dim);font-size:11px;transition:transform .2s;}
+.scard.open .sarr{transform:rotate(90deg);}
+.sbdy{padding:0 17px;max-height:0;overflow:hidden;transition:max-height .32s ease,padding .28s;}
+.scard.open .sbdy{max-height:1200px;padding-bottom:17px;}
+.sdesc{font-size:13px;line-height:1.85;color:var(--dim);margin-bottom:10px;}
+.seq{font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(255,255,255,.04);border:1px solid var(--b);border-radius:9px;padding:10px 12px;overflow-x:auto;white-space:nowrap;margin:6px 0;line-height:1.8;}
+.selbl{font-size:10px;color:var(--dim2);margin-bottom:3px;margin-top:10px;}
+.tip{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);border-radius:11px;padding:11px 13px;margin-top:9px;font-size:12px;color:#c4b5fd;line-height:1.75;}
+.acard{background:var(--s0);border:1px solid var(--b2);border-radius:var(--r);overflow:hidden;margin-bottom:10px;}
+.ahdr{padding:15px 17px;cursor:pointer;display:flex;gap:11px;align-items:flex-start;}
 .lv{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;margin-top:2px;letter-spacing:.04em;}
-.lv.basic{background:rgba(74,222,128,.14);color:var(--green);border:1px solid rgba(74,222,128,.24);}
-.lv.march{background:rgba(167,139,250,.18);color:var(--purple);border:1px solid rgba(167,139,250,.28);}
-.lv.shibaura{background:rgba(251,191,36,.18);color:var(--amber);border:1px solid rgba(251,191,36,.28);}
-.adv-ttl{font-size:13.5px;font-weight:700;flex:1;line-height:1.5;}
-.adv-body{padding:0 17px;max-height:0;overflow:hidden;transition:max-height .38s ease,padding .28s;}
-.adv-card.open .adv-body{max-height:1400px;padding-bottom:17px;}
-.adv-prob{font-size:13px;line-height:1.85;color:var(--dim);border-left:3px solid var(--border2);padding-left:12px;margin-bottom:13px;}
-.adv-steps{display:flex;flex-direction:column;gap:7px;}
-.adv-step{background:rgba(255,255,255,0.03);border-radius:11px;padding:11px 13px;}
-.adv-slbl{font-size:10px;font-weight:700;color:var(--dim2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;}
-.adv-seq{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.75;color:var(--text);overflow-x:auto;white-space:nowrap;}
-.adv-seq.hl{color:var(--green);}
-.adv-note{font-size:11px;color:var(--dim2);margin-top:4px;}
-.reveal{width:100%;padding:11px;background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.22);
-  border-radius:11px;color:var(--blue);font-family:'Noto Sans JP',sans-serif;
-  font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;margin-bottom:11px;}
-.reveal:active{transform:scale(.98);}
-.ans-sec{display:none;}
-.ans-sec.on{display:block;}
-
-/* WARN BOX */
-.warn-box{background:rgba(255,77,109,.05);border:1px solid rgba(255,77,109,.2);
-  border-radius:var(--r);padding:15px 17px;margin-top:12px;}
-.warn-box p{font-size:12.5px;line-height:1.85;color:#fca5a5;}
-
-/* END SCREEN */
-.end-wrap{text-align:center;padding:36px 16px;}
-.end-pct{font-family:'Syne',sans-serif;font-size:56px;font-weight:800;line-height:1;
-  background:linear-gradient(120deg,var(--amber),var(--green));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.end-score{font-size:18px;font-weight:700;margin:10px 0 4px;}
-.end-msg{color:var(--dim);margin-bottom:26px;font-size:14px;}
-
-/* ANIMATIONS */
-@keyframes popIn{from{transform:scale(.88);opacity:0;}to{transform:scale(1);opacity:1;}}
-@keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-7px);}40%,80%{transform:translateX(7px);}}
-@keyframes glowG{0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,0);}50%{box-shadow:0 0 18px 4px rgba(74,222,128,.28);}}
-.pop{animation:popIn .28s cubic-bezier(.34,1.56,.64,1);}
-.shake{animation:shake .38s ease;}
+.lv.b{background:rgba(74,222,128,.14);color:var(--green);border:1px solid rgba(74,222,128,.24);}
+.lv.m{background:rgba(167,139,250,.18);color:var(--purple);border:1px solid rgba(167,139,250,.28);}
+.lv.s{background:rgba(251,191,36,.18);color:var(--amber);border:1px solid rgba(251,191,36,.28);}
+.attl{font-size:13px;font-weight:700;flex:1;line-height:1.5;}
+.abdy{padding:0 17px;max-height:0;overflow:hidden;transition:max-height .38s ease,padding .28s;}
+.acard.open .abdy{max-height:2000px;padding-bottom:17px;}
+.aprob{font-size:13px;line-height:1.85;color:var(--dim);border-left:3px solid var(--b2);padding-left:12px;margin-bottom:13px;}
+.astep{background:rgba(255,255,255,.03);border-radius:11px;padding:11px 13px;margin-bottom:7px;}
+.aslbl{font-size:10px;font-weight:700;color:var(--dim2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;}
+.aseq{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.75;overflow-x:auto;white-space:nowrap;}
+.aseq.hl{color:var(--green);}
+.anote{font-size:11px;color:var(--dim2);margin-top:4px;}
+.rvl{width:100%;padding:11px;background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.22);border-radius:11px;color:var(--blue);font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;margin-bottom:11px;-webkit-appearance:none;}
+.rvl:active{transform:scale(.98);}
+.asec{display:none;}
+.asec.on{display:block;}
+.warn{background:rgba(255,77,109,.05);border:1px solid rgba(255,77,109,.2);border-radius:var(--r);padding:15px 17px;margin-top:12px;}
+.warn p{font-size:12px;line-height:1.85;color:#fca5a5;}
+.end{text-align:center;padding:36px 16px;}
+.epct{font-family:'Syne',sans-serif;font-size:56px;font-weight:800;line-height:1;background:linear-gradient(120deg,var(--amber),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.escore{font-size:18px;font-weight:700;margin:10px 0 4px;}
+.emsg{color:var(--dim);margin-bottom:26px;font-size:14px;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+@keyframes popIn{from{transform:scale(.9);opacity:0;}to{transform:scale(1);opacity:1;}}
+.main>div{animation:popIn .18s ease;}
 </style>
 </head>
 <body>
 <div class="glow"></div>
 
-<!-- HEADER -->
-<div class="hdr">
-  <div class="hdr-top">
-    <div class="logo">⚗️ 酸化還元マスター</div>
-    <div class="spill" id="spill">0/0</div>
-  </div>
-  <div class="tabs" id="tabBar">
-    <button class="tab on" onclick="gTab('flash',this)">📝 暗記</button>
-    <button class="tab" onclick="gTab('quiz',this)">⚡ クイズ</button>
-    <button class="tab" onclick="gTab('half',this)">🔬 半反応式</button>
-    <button class="tab" onclick="gTab('guide',this)">📖 解き方</button>
-    <button class="tab" onclick="gTab('adv',this)">🎓 応用</button>
-  </div>
+<!-- Loading -->
+<div id="ld">
+<svg class="mac-svg" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ddeeff"/><stop offset="100%" stop-color="#aaccee"/></linearGradient><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#5588aa"/><stop offset="100%" stop-color="#336688"/></linearGradient></defs>
+<rect x="15" y="8" width="80" height="68" rx="8" fill="url(#g1)" stroke="#7aaccc" stroke-width="1.5"/>
+<rect x="23" y="16" width="64" height="44" rx="4" fill="#0d1b2a" stroke="#2a4a6a"/>
+<rect x="25" y="18" width="60" height="40" rx="3" fill="#0a1520"/>
+<rect x="25" y="18" width="60" height="8" rx="3" fill="#102030"/>
+<text x="38" y="25" font-size="5" fill="#38bdf8" font-family="monospace">⚗ LOADING...</text>
+<ellipse cx="43" cy="34" rx="4" ry="4" fill="#38bdf8"/>
+<ellipse cx="67" cy="34" rx="4" ry="4" fill="#38bdf8"/>
+<path d="M38 46 Q55 56 72 46" stroke="#4ade80" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+<rect x="32" y="80" width="46" height="5" rx="2" fill="#7aaccc" stroke="#5a8cac"/>
+<rect x="27" y="85" width="56" height="14" rx="4" fill="url(#g2)"/>
+<rect x="44" y="89" width="22" height="5" rx="2.5" fill="#224466"/>
+<rect x="38" y="99" width="34" height="7" rx="3.5" fill="url(#g2)"/>
+<rect x="24" y="103" width="62" height="5" rx="2.5" fill="#224466"/>
+</svg>
+<div class="ld-txt" id="ldtxt">読み込み中...</div>
+<div class="ld-bar"><div class="ld-fill" id="ldfill"></div></div>
 </div>
 
+<!-- Sad Mac -->
+<div id="sdld">
+<svg width="110" height="110" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="sg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3a2222"/><stop offset="100%" stop-color="#221414"/></linearGradient></defs>
+<rect x="15" y="8" width="80" height="68" rx="8" fill="url(#sg1)" stroke="#5a2222" stroke-width="1.5"/>
+<rect x="23" y="16" width="64" height="44" rx="4" fill="#180808"/>
+<rect x="25" y="18" width="60" height="40" rx="3" fill="#100505"/>
+<rect x="25" y="18" width="60" height="8" rx="3" fill="#220808"/>
+<text x="32" y="25" font-size="5" fill="#ff4d6d" font-family="monospace">SAD MAC - ERROR</text>
+<rect x="39" y="31" rx="1" width="8" height="8" fill="#ff4d6d"/>
+<rect x="63" y="31" rx="1" width="8" height="8" fill="#ff4d6d"/>
+<path d="M38 50 Q55 43 72 50" stroke="#ff4d6d" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+<rect x="32" y="80" width="46" height="5" rx="2" fill="#5a2222"/>
+<rect x="27" y="85" width="56" height="14" rx="4" fill="#3a1414"/>
+<rect x="44" y="89" width="22" height="5" rx="2.5" fill="#220808"/>
+<rect x="38" y="99" width="34" height="7" rx="3.5" fill="#3a1414"/>
+<rect x="24" y="103" width="62" height="5" rx="2.5" fill="#220808"/>
+</svg>
+<div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--red)">SAD MAC — フォントエラー</div>
+<div style="font-size:12px;color:var(--dim);text-align:center;max-width:240px;line-height:1.7">フォント読み込みに失敗しましたが<br>アプリは動作します</div>
+<button onclick="dismissSad()" style="padding:12px 28px;background:linear-gradient(135deg,#38bdf8,#22d3ee);border:none;border-radius:13px;color:#000;font-family:sans-serif;font-size:14px;font-weight:700;cursor:pointer;">続ける →</button>
+</div>
+
+<!-- App -->
+<div class="hdr">
+<div class="hdr-top">
+<div class="logo">⚗️ 酸化還元マスター</div>
+<div class="pill" id="pill" style="display:none">0/0</div>
+</div>
+<div class="tabs">
+<button class="tab on" id="t0" onclick="gTab('flash',0)">📝 暗記</button>
+<button class="tab" id="t1" onclick="gTab('quiz',1)">⚡ クイズ</button>
+<button class="tab" id="t2" onclick="gTab('half',2)">🔬 半反応式</button>
+<button class="tab" id="t3" onclick="gTab('guide',3)">📖 解き方</button>
+<button class="tab" id="t4" onclick="gTab('adv',4)">🎓 応用</button>
+</div>
+</div>
 <div class="main" id="main"></div>
 
-<!-- Haptic import -->
-<script type="module">
-import{haptic}from'https://cdn.skypack.dev/ios-haptics';
-window._hap=haptic;
-</script>
-
 <script>
-/* ── HAPTIC ── */
-function h(){try{window._hap?.()}catch(e){}}
-function hC(){try{window._hap?.confirm()}catch(e){}}
-function hE(){try{window._hap?.error()}catch(e){}}
-function hBurst(){for(let i=0;i<5;i++)setTimeout(hE,i*30);}
-function hSeq(){[0,1,2,4,5,6].forEach(i=>setTimeout(hE,i*220));}
+/* ═══ HAPTIC — safe wrapper, never throws ═══ */
+(function(){
+  try{
+    var s=document.createElement('script');
+    s.type='module';
+    s.innerHTML="try{import('https://cdn.skypack.dev/ios-haptics').then(function(m){window._hap=m.haptic;}).catch(function(){});}catch(e){}";
+    document.head.appendChild(s);
+  }catch(e){}
+})();
+function h(){try{if(window._hap)window._hap();}catch(e){}}
+function hC(){try{if(window._hap)window._hap.confirm();}catch(e){}}
+function hE(){try{if(window._hap)window._hap.error();}catch(e){}}
+function hBurst(){try{for(var i=0;i<5;i++){(function(i){setTimeout(function(){hE();},i*30);})(i);}}catch(e){}}
+function hSeq(){try{[0,1,2,4,5,6].forEach(function(i){setTimeout(function(){hE();},i*220);});}catch(e){}}
+document.addEventListener('click',function(e){try{var t=e.target;if(t&&t.closest&&t.closest('button,.ch,.flip-s,.rvl,.shdr,.ahdr,.mkb'))return;h();}catch(e2){}});
 
-// Body tap → light haptic
-document.addEventListener('click',e=>{
-  if(e.target.closest('button,.choice,.flip-scene,.reveal,.step-hdr,.adv-hdr,.mark-btn'))return;
-  h();
-});
-
-/* ── MARKER / localStorage ── */
-let markSet=new Set(JSON.parse(localStorage.getItem('ox-marks')||'[]'));
-function toggleMark(id,btn){
-  hC();
-  if(markSet.has(id)){markSet.delete(id);}else{markSet.add(id);}
-  localStorage.setItem('ox-marks',JSON.stringify([...markSet]));
-  applyMarks();
-}
-function applyMarks(){
-  markSet.forEach(id=>{
-    const row=document.getElementById('row-'+id);
-    const btn=row?.querySelector('.mark-btn');
-    if(row)row.classList.add('mkd');
-    if(btn){btn.classList.add('mkd');btn.textContent='★';}
-  });
-  document.querySelectorAll('.half-row:not(.mkd)').forEach(row=>{
-    const btn=row.querySelector('.mark-btn');
-    if(btn&&!markSet.has(row.id.replace('row-',''))){btn.textContent='☆';}
-  });
+/* ═══ MARKS ═══ */
+var marks={};
+try{marks=JSON.parse(localStorage.getItem('ox-mk')||'{}');}catch(e){}
+function saveMk(){try{localStorage.setItem('ox-mk',JSON.stringify(marks));}catch(e){}}
+function toggleMk(id){hC();marks[id]=!marks[id];saveMk();applyMk();}
+function applyMk(){
+  try{
+    Object.keys(marks).forEach(function(id){
+      var row=document.getElementById('r-'+id);var btn=document.getElementById('mb-'+id);
+      if(row)row.classList.toggle('mkd',!!marks[id]);
+      if(btn){btn.textContent=marks[id]?'★':'☆';btn.classList.toggle('mkd',!!marks[id]);}
+    });
+  }catch(e){}
 }
 
-/* ════ DATA ════ */
-
-/* フラッシュカード — 物質変化 */
-const FLASH=[
-  // 酸化剤
-  {id:'f1',role:'酸化剤',q:'MnO<sub>4</sub><sup>−</sup>（酸性）',a:'Mn<sup>2+</sup>',hint:'過マンガン酸イオン → マンガン(II)イオン'},
-  {id:'f2',role:'酸化剤',q:'MnO<sub>4</sub><sup>−</sup>（中性・塩基性）',a:'MnO<sub>2</sub>',hint:'過マンガン酸イオン → 酸化マンガン(IV)　黒色沈殿！'},
-  {id:'f3',role:'酸化剤',q:'Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup>（酸性）',a:'2Cr<sup>3+</sup>',hint:'ニクロム酸イオン → クロム(III)イオン'},
-  {id:'f4',role:'酸化剤',q:'Cl<sub>2</sub>',a:'2Cl<sup>−</sup>',hint:'塩素 → 塩化物イオン'},
-  {id:'f5',role:'酸化剤',q:'H<sub>2</sub>SO<sub>4</sub>（熱濃硫酸）',a:'SO<sub>2</sub>',hint:'熱濃硫酸 → 二酸化硫黄'},
-  {id:'f6',role:'酸化剤',q:'HNO<sub>3</sub>（濃硝酸）',a:'NO<sub>2</sub>',hint:'濃硝酸 → 二酸化窒素（窒素2つ！）'},
-  {id:'f7',role:'酸化剤',q:'HNO<sub>3</sub>（希硝酸）',a:'NO',hint:'希硝酸 → 一酸化窒素（窒素1つ！）'},
-  {id:'f8',role:'酸化剤',q:'SO<sub>2</sub>（酸化剤として）',a:'S',hint:'二酸化硫黄 → 硫黄'},
-  {id:'f9',role:'酸化剤',q:'H<sub>2</sub>O<sub>2</sub>（中性・塩基性）',a:'2OH<sup>−</sup>',hint:'過酸化水素 → 水酸化物イオン'},
-  {id:'f10',role:'酸化剤',q:'H<sub>2</sub>O<sub>2</sub>（酸性）',a:'2H<sub>2</sub>O',hint:'過酸化水素 → 水'},
-  // 還元剤
-  {id:'f11',role:'還元剤',q:'H<sub>2</sub>',a:'2H<sup>+</sup>',hint:'水素 → 水素イオン'},
-  {id:'f12',role:'還元剤',q:'Na',a:'Na<sup>+</sup>',hint:'ナトリウム → ナトリウムイオン'},
-  {id:'f13',role:'還元剤',q:'Cu',a:'Cu<sup>2+</sup>',hint:'銅 → 銅(II)イオン'},
-  {id:'f14',role:'還元剤',q:'2I<sup>−</sup>',a:'I<sub>2</sub>',hint:'ヨウ化物イオン → ヨウ素（2個→1分子！）'},
-  {id:'f15',role:'還元剤',q:'Fe<sup>2+</sup>',a:'Fe<sup>3+</sup>',hint:'鉄(II)イオン → 鉄(III)イオン'},
-  {id:'f16',role:'還元剤',q:'Sn<sup>2+</sup>',a:'Sn<sup>4+</sup>',hint:'スズ(II) → スズ(IV)イオン'},
-  {id:'f17',role:'還元剤',q:'H<sub>2</sub>S',a:'S',hint:'硫化水素 → 硫黄'},
-  {id:'f18',role:'還元剤',q:'(COOH)<sub>2</sub>（シュウ酸）',a:'2CO<sub>2</sub>',hint:'シュウ酸 → 二酸化炭素'},
-  {id:'f19',role:'還元剤',q:'SO<sub>2</sub>（還元剤として）',a:'SO<sub>4</sub><sup>2−</sup>',hint:'二酸化硫黄 → 硫酸イオン'},
-  {id:'f20',role:'還元剤',q:'H<sub>2</sub>O<sub>2</sub>（還元剤として）',a:'O<sub>2</sub>',hint:'過酸化水素 → 酸素'},
+/* ═══ DATA ═══ */
+var FL=[
+  {id:'f1',r:'ox',q:'MnO₄⁻（酸性）',a:'Mn²⁺',h:'過マンガン酸イオン→マンガン(II)イオン 酸化数+7→+2'},
+  {id:'f2',r:'ox',q:'MnO₄⁻（中性・塩基性）',a:'MnO₂',h:'過マンガン酸イオン→酸化マンガン(IV) 黒色沈殿！ +7→+4'},
+  {id:'f3',r:'ox',q:'Cr₂O₇²⁻（酸性）',a:'2Cr³⁺',h:'ニクロム酸イオン（橙赤）→クロム(III)(緑) +6→+3'},
+  {id:'f4',r:'ox',q:'Cl₂',a:'2Cl⁻',h:'塩素→塩化物イオン 0→−1'},
+  {id:'f5',r:'ox',q:'H₂SO₄（熱濃硫酸）',a:'SO₂',h:'熱濃硫酸→二酸化硫黄 S: +6→+4'},
+  {id:'f6',r:'ox',q:'HNO₃（濃硝酸）',a:'NO₂',h:'濃硝酸→二酸化窒素（赤褐色）N: +5→+4'},
+  {id:'f7',r:'ox',q:'HNO₃（希硝酸）',a:'NO',h:'希硝酸→一酸化窒素（無色）N: +5→+2'},
+  {id:'f8',r:'ox',q:'SO₂（酸化剤）',a:'S',h:'二酸化硫黄→硫黄 S: +4→0'},
+  {id:'f9',r:'ox',q:'H₂O₂（中性・塩基性）',a:'2OH⁻',h:'過酸化水素→水酸化物イオン O: −1→−2'},
+  {id:'f10',r:'ox',q:'H₂O₂（酸性）',a:'2H₂O',h:'過酸化水素→水 O: −1→−2'},
+  {id:'f11',r:'re',q:'H₂',a:'2H⁺',h:'水素→水素イオン H: 0→+1'},
+  {id:'f12',r:'re',q:'Na',a:'Na⁺',h:'ナトリウム→ナトリウムイオン Na: 0→+1'},
+  {id:'f13',r:'re',q:'Cu',a:'Cu²⁺',h:'銅→銅(II)イオン Cu: 0→+2'},
+  {id:'f14',r:'re',q:'2I⁻',a:'I₂',h:'ヨウ化物イオン→ヨウ素 I: −1→0'},
+  {id:'f15',r:'re',q:'Fe²⁺',a:'Fe³⁺',h:'鉄(II)→鉄(III)イオン Fe: +2→+3'},
+  {id:'f16',r:'re',q:'Sn²⁺',a:'Sn⁴⁺',h:'スズ(II)→スズ(IV)イオン Sn: +2→+4'},
+  {id:'f17',r:'re',q:'H₂S',a:'S',h:'硫化水素→硫黄 S: −2→0'},
+  {id:'f18',r:'re',q:'(COOH)₂ シュウ酸',a:'2CO₂',h:'シュウ酸→二酸化炭素 C: +3→+4'},
+  {id:'f19',r:'re',q:'SO₂（還元剤）',a:'SO₄²⁻',h:'二酸化硫黄→硫酸イオン S: +4→+6'},
+  {id:'f20',r:'re',q:'H₂O₂（還元剤）',a:'O₂',h:'過酸化水素→酸素 O: −1→0'},
+];
+var HL=[
+  {id:'h1',r:'ox',cd:'酸性',eq:'MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O',d:'過MnO₄⁻（酸性）Mn:+7→+2 e⁻=5'},
+  {id:'h2',r:'ox',cd:'中性・塩基性',eq:'MnO₄⁻ + 2H₂O + 3e⁻ → MnO₂ + 4OH⁻',d:'過MnO₄⁻（中性塩基性）Mn:+7→+4 e⁻=3'},
+  {id:'h3',r:'ox',cd:'酸性',eq:'Cr₂O₇²⁻ + 14H⁺ + 6e⁻ → 2Cr³⁺ + 7H₂O',d:'ニクロム酸（酸性）Cr:+6→+3×2 e⁻=6'},
+  {id:'h4',r:'ox',cd:'',eq:'Cl₂ + 2e⁻ → 2Cl⁻',d:'塩素 Cl:0→−1 e⁻=2'},
+  {id:'h5',r:'ox',cd:'',eq:'H₂SO₄ + 2H⁺ + 2e⁻ → SO₂ + 2H₂O',d:'熱濃硫酸 S:+6→+4 e⁻=2'},
+  {id:'h6',r:'ox',cd:'',eq:'HNO₃ + H⁺ + e⁻ → NO₂ + H₂O',d:'濃硝酸 N:+5→+4 e⁻=1'},
+  {id:'h7',r:'ox',cd:'',eq:'HNO₃ + 3H⁺ + 3e⁻ → NO + 2H₂O',d:'希硝酸 N:+5→+2 e⁻=3'},
+  {id:'h8',r:'ox',cd:'',eq:'SO₂ + 4H⁺ + 4e⁻ → S + 2H₂O',d:'SO₂（酸化剤）S:+4→0 e⁻=4'},
+  {id:'h9',r:'ox',cd:'中性・塩基性',eq:'H₂O₂ + 2e⁻ → 2OH⁻',d:'H₂O₂（酸化剤・中塩）O:−1→−2 e⁻=2'},
+  {id:'h10',r:'ox',cd:'酸性',eq:'H₂O₂ + 2H⁺ + 2e⁻ → 2H₂O',d:'H₂O₂（酸化剤・酸性）O:−1→−2 e⁻=2'},
+  {id:'h11',r:'re',cd:'',eq:'H₂ → 2H⁺ + 2e⁻',d:'水素 H:0→+1 e⁻=2'},
+  {id:'h12',r:'re',cd:'',eq:'Na → Na⁺ + e⁻',d:'Na Na:0→+1 e⁻=1'},
+  {id:'h13',r:'re',cd:'',eq:'Cu → Cu²⁺ + 2e⁻',d:'銅 Cu:0→+2 e⁻=2'},
+  {id:'h14',r:'re',cd:'',eq:'Fe²⁺ → Fe³⁺ + e⁻',d:'鉄(II) Fe:+2→+3 e⁻=1'},
+  {id:'h15',r:'re',cd:'',eq:'Sn²⁺ → Sn⁴⁺ + 2e⁻',d:'Sn(II) Sn:+2→+4 e⁻=2'},
+  {id:'h16',r:'re',cd:'',eq:'H₂S → S + 2H⁺ + 2e⁻',d:'硫化水素 S:−2→0 e⁻=2'},
+  {id:'h17',r:'re',cd:'',eq:'(COOH)₂ → 2CO₂ + 2H⁺ + 2e⁻',d:'シュウ酸 C:+3→+4 e⁻=2'},
+  {id:'h18',r:'re',cd:'',eq:'SO₂ + 2H₂O → SO₄²⁻ + 4H⁺ + 2e⁻',d:'SO₂（還元剤）S:+4→+6 e⁻=2'},
+  {id:'h19',r:'re',cd:'',eq:'H₂O₂ → O₂ + 2H⁺ + 2e⁻',d:'H₂O₂（還元剤）O:−1→0 e⁻=2'},
+  {id:'h20',r:'re',cd:'',eq:'2I⁻ → I₂ + 2e⁻',d:'ヨウ化物 I:−1→0 e⁻=2'},
+];
+var QZ=[
+  {q:'酸性条件でKMnO₄が酸化剤として働くとき生成する物質は？',o:['MnO₂（黒沈殿）','Mn²⁺（ほぼ無色）','Mn³⁺','MnO₄²⁻'],a:1,e:'酸性ではMnO₄⁻→Mn²⁺。中性・塩基性はMnO₂（黒色沈殿）。条件で変わる超頻出！'},
+  {q:'中性・塩基性でMnO₄⁻が酸化剤として働くとき、e⁻の数は？',o:['2個','3個','4個','5個'],a:1,e:'中塩：MnO₄⁻+2H₂O+3e⁻→MnO₂+4OH⁻ で3個。酸性は5個。「中塩=3、酸=5」！'},
+  {q:'濃硝酸が酸化剤として働くとき生成する気体は？',o:['NO（無色）','N₂O','NO₂（赤褐色）','N₂'],a:2,e:'濃硝酸→NO₂（赤褐色）。希硝酸→NO（無色）。「濃→二酸化、希→一酸化」必須暗記！'},
+  {q:'希硝酸の半反応式でe⁻の係数は？',o:['1個','2個','3個','5個'],a:2,e:'HNO₃+3H⁺+3e⁻→NO+2H₂O。濃=1e⁻、希=3e⁻。N酸化数：濃+5→+4(差1)、希+5→+2(差3)。'},
+  {q:'Cr₂O₇²⁻の半反応式でe⁻の係数は？',o:['4個','5個','6個','8個'],a:2,e:'Cr₂O₇²⁻+14H⁺+6e⁻→2Cr³⁺+7H₂O。Cr1個:+6→+3で3個×2=6個！'},
+  {q:'Fe²⁺が還元剤として働くとき失うe⁻の数は？',o:['1個','2個','3個','4個'],a:0,e:'Fe²⁺→Fe³⁺+e⁻。酸化数+2→+3で差=1個。'},
+  {q:'シュウ酸(COOH)₂が還元剤として働くとき生成するのは？',o:['CO','CO₂（2分子）','C','H₂CO₃'],a:1,e:'(COOH)₂→2CO₂+2H⁺+2e⁻。C酸化数+3→+4で2e⁻放出。'},
+  {q:'SO₂が還元剤として働くとき生成するイオンは？',o:['SO₃²⁻','S²⁻','SO₄²⁻','S'],a:2,e:'SO₂+2H₂O→SO₄²⁻+4H⁺+2e⁻。S酸化数+4→+6。'},
+  {q:'H₂O₂が還元剤として働くとき生成するのは？',o:['H₂O','2OH⁻','O₂','O³⁻'],a:2,e:'H₂O₂→O₂+2H⁺+2e⁻（還元剤）。酸化剤はH₂O₂+2H⁺+2e⁻→2H₂O。同じ物質で役割が逆！'},
+  {q:'熱濃硫酸の半反応式として正しいのは？',o:['H₂SO₄+2H⁺+2e⁻→SO₂+2H₂O','H₂SO₄+4H⁺+4e⁻→S+4H₂O','H₂SO₄+e⁻→SO₃²⁻+H₂O','H₂SO₄→H₂S+2O₂'],a:0,e:'H₂SO₄+2H⁺+2e⁻→SO₂+2H₂O。S酸化数+6→+4でe⁻=2個。'},
+  {q:'半反応式のステップ②「水」とは？',o:['H₂OでOの数をそろえる','H₂Oで割り簡略化','水溶液確認','pHを求める'],a:0,e:'左右でOが違う場合、H₂Oを加えてOの数をそろえる。O差分だけH₂O追加！'},
+  {q:'酸化剤にも還元剤にもなれる物質の組合せは？',o:['SO₂ と H₂O₂','MnO₄⁻ と Cl₂','Fe²⁺ と Na','H₂SO₄ と HNO₃'],a:0,e:'SO₂（S:+4中間値）とH₂O₂（O:−1中間値）は相手次第でどちらにもなれる！超頻出。'},
+  {q:'Cl₂の半反応式として正しいのは？',o:['Cl₂+e⁻→2Cl⁻','Cl₂+2e⁻→2Cl⁻','Cl₂→2Cl⁻+2e⁻','Cl₂+2H⁺+2e⁻→2HCl'],a:1,e:'Cl₂+2e⁻→2Cl⁻。Cl酸化数0→−1、2個分でe⁻=2個。'},
+  {q:'イオン反応式でe⁻が消える理由は？',o:['書かなくていい','酸化剤受取=還元剤放出にそろえて足すと相殺','e⁻は瞬時に消える','保存されない'],a:1,e:'LCMでe⁻をそろえ2式を足すと左右に同数のe⁻→相殺して消える！これが本質。'},
+  {q:'MnO₄⁻の半反応式（酸性）でH₂Oの係数は？',o:['2個','3個','4個','8個'],a:2,e:'MnO₄⁻→Mn²⁺でO:4個差→右辺にH₂O 4個。H₂Oの係数=Oの差分。'},
+  {q:'Cr₂O₇²⁻の半反応式でH⁺の係数は？',o:['6個','7個','12個','14個'],a:3,e:'O:7個差→H₂O 7個→H⁺=7×2=14個！'},
+  {q:'酸化数が増加するとき、その物質は？',o:['還元剤（e⁻を失う）','酸化剤（e⁻を得る）','触媒','中和剤'],a:0,e:'酸化数増加→酸化される→e⁻を失う→還元剤。「増加=還元剤」逆は酸化剤。必須！'},
+  {q:'【MARCH】KMnO₄+H₂O₂（硫酸酸性）でe⁻をそろえる最小公倍数は？',o:['5個','10個','15個','6個'],a:1,e:'KMnO₄:5e⁻、H₂O₂（還元剤）:2e⁻。LCM(5,2)=10。KMnO₄×2、H₂O₂×5！'},
+  {q:'【法政】Cuと希硝酸の反応で生成する気体は？',o:['N₂','NO₂（赤褐色）','NO（無色）','NH₃'],a:2,e:'希硝酸→NO（無色）。濃硝酸→NO₂（赤褐色）。「希→NO、濃→NO₂」鉄板暗記！'},
+  {q:'【芝浦】K₂Cr₂O₇+H₂O₂（硫酸酸性）でe⁻のLCMは？',o:['3個','4個','6個','12個'],a:2,e:'Cr₂O₇²⁻:6e⁻、H₂O₂（還元剤）:2e⁻。LCM(6,2)=6。Cr₂O₇²⁻×1、H₂O₂×3！'},
+  {q:'【芝浦】Sn²⁺+2Fe³⁺→Sn⁴⁺+2Fe²⁺ でFe³⁺の役割は？',o:['還元剤（e⁻放出）','酸化剤（e⁻受取）','触媒','役割なし'],a:1,e:'Fe³⁺+e⁻→Fe²⁺。電子を受け取る=酸化剤。酸化数+3→+2（下がる=還元される=酸化剤）。'},
+];
+var GD=[
+  {n:'①',col:'#38bdf8',t:'【暗記】反応前後の物質変化',d:'反応前後の物質を完全に暗記する。これが全ての出発点。',
+   ex:[['酸性MnO₄⁻→','Mn²⁺（+7→+2）'],['中性塩基性MnO₄⁻→','MnO₂（黒色沈殿、+7→+4）'],['濃HNO₃→','NO₂（赤褐色、N:+5→+4）'],['希HNO₃→','NO（無色、N:+5→+2）'],['熱濃H₂SO₄→','SO₂（S:+6→+4）']],
+   tip:'SO₂とH₂O₂は相手次第で酸化剤にも還元剤にもなれる！MnO₄⁻は条件で生成物が変わる。超頻出。'},
+  {n:'②',col:'#4ade80',t:'【水】OをH₂Oでそろえる',d:'左右でO（酸素）の数が合わない→O差分だけH₂Oを追加してOをそろえる。',
+   ex:[['O差4個の場合','右辺にH₂O 4個追加'],['MnO₄⁻→Mn²⁺の場合','MnO₄⁻→Mn²⁺ + 4H₂O …②'],['Cr₂O₇²⁻→2Cr³⁺','Cr₂O₇²⁻→2Cr³⁺ + 7H₂O']],
+   tip:'H₂Oの係数=O原子の差分。ここが次のH⁺の数を決定する。'},
+  {n:'③',col:'#fbbf24',t:'【H⁺】HをH⁺でそろえる',d:'②で加えたH₂Oの分だけH（水素）が増える→反対の辺にH⁺を加えてHをそろえる。',
+   ex:[['H₂O 4個→H:8個','左辺にH⁺ 8個追加'],['MnO₄⁻+8H⁺→Mn²⁺+4H₂O …③','H₂Oの数×2=H⁺の数！']],
+   tip:'H₂Oの係数×2=H⁺の係数。この関係を体に覚えさせる。'},
+  {n:'④',col:'#a78bfa',t:'【e⁻】電荷をe⁻でそろえる',d:'③の式で両辺の電荷合計を計算→差分のe⁻を電荷の大きい辺に加える。',
+   ex:[['③式の左辺電荷','(−1)+(+8)=+7'],['③式の右辺電荷','(+2)+(0)=+2'],['差=7−2=5→左辺にe⁻を5個','MnO₄⁻+8H⁺+5e⁻→Mn²⁺+4H₂O ✓完成']],
+   tip:'完成後は左右の電荷が必ず一致することを確認！一致しなければミスあり。'},
+  {n:'⑤',col:'#22d3ee',t:'【組合せ】イオン反応式へ',d:'酸化剤・還元剤の半反応式のe⁻の数をLCMでそろえてから足す。e⁻が消えたら完成！',
+   ex:[['酸化剤(I)','MnO₄⁻+8H⁺+5e⁻→Mn²⁺+4H₂O'],['還元剤(II)','(COOH)₂→2CO₂+2H⁺+2e⁻'],['LCM(5,2)=10','(I)×2+(II)×5 → e⁻=10個相殺！'],['完成','2MnO₄⁻+5(COOH)₂+6H⁺→2Mn²⁺+10CO₂+8H₂O']],
+   tip:'e⁻は必ず消える。消えなければ係数ミスを確認！'},
+  {n:'⑥',col:'#fb7185',t:'【化学式化】イオン→化学反応式',d:'イオン反応式を化学反応式に変換。陽イオンを加えてイオン式を化学式に書き換える。',
+   ex:[['Step A：陽イオン追加','K⁺ 2個を両辺に追加'],['Step B：化学式化','K⁺+Cr₂O₇²⁻→K₂Cr₂O₇、Mn²⁺+SO₄²⁻→MnSO₄'],['Step C：整理','係数を最小整数比に']],
+   tip:'強電解質はイオン式→分子式。弱電解質・沈殿・気体はそのまま分子式で書く。'},
+];
+var AV=[
+  {id:'a1',lv:'b',t:'KMnO₄ + シュウ酸（硫酸酸性）',p:'硫酸酸性下でKMnO₄にシュウ酸(COOH)₂を加えた。イオン反応式と化学反応式を書け。',
+   s:[{l:'① KMnO₄の半反応式',e:'MnO₄⁻+8H⁺+5e⁻→Mn²⁺+4H₂O …(I)',n:'',hl:false},
+      {l:'② (COOH)₂の半反応式',e:'(COOH)₂→2CO₂+2H⁺+2e⁻ …(II)',n:'シュウ酸は還元剤',hl:false},
+      {l:'③ e⁻をそろえる',e:'LCM(5,2)=10 → (I)×2, (II)×5',n:'e⁻=10個に統一',hl:false},
+      {l:'④ イオン反応式',e:'2MnO₄⁻+5(COOH)₂+6H⁺→2Mn²⁺+10CO₂+8H₂O',n:'H⁺:16-10=6個残る',hl:true},
+      {l:'⑤ 化学反応式',e:'2KMnO₄+5(COOH)₂+3H₂SO₄→2MnSO₄+K₂SO₄+10CO₂+8H₂O',n:'K⁺→K₂SO₄, Mn²⁺→MnSO₄',hl:true}]},
+  {id:'a2',lv:'m',t:'KMnO₄ + H₂O₂（硫酸酸性）★',p:'硫酸酸性下でKMnO₄水溶液にH₂O₂（還元剤として）を加えた。イオン反応式を書け。',
+   s:[{l:'① KMnO₄',e:'MnO₄⁻+8H⁺+5e⁻→Mn²⁺+4H₂O …(I)',n:'',hl:false},
+      {l:'② H₂O₂（還元剤）',e:'H₂O₂→O₂+2H⁺+2e⁻ …(II)',n:'H₂O₂が還元剤→O₂生成',hl:false},
+      {l:'③ LCM(5,2)=10',e:'(I)×2, (II)×5 → e⁻=10個',n:'',hl:false},
+      {l:'④ イオン反応式',e:'2MnO₄⁻+5H₂O₂+6H⁺→2Mn²⁺+5O₂+8H₂O',n:'H⁺:16-10=6個残る',hl:true}]},
+  {id:'a3',lv:'m',t:'K₂Cr₂O₇ + H₂O₂（硫酸酸性）★★',p:'硫酸酸性下でK₂Cr₂O₇にH₂O₂（還元剤）を加えた。イオン反応式を書け。',
+   s:[{l:'① Cr₂O₇²⁻',e:'Cr₂O₇²⁻+14H⁺+6e⁻→2Cr³⁺+7H₂O …(I)',n:'Cr:+6→+3×2=e⁻6個',hl:false},
+      {l:'② H₂O₂（還元剤）',e:'H₂O₂→O₂+2H⁺+2e⁻ …(II)',n:'',hl:false},
+      {l:'③ LCM(6,2)=6',e:'(I)×1, (II)×3 → e⁻=6個',n:'',hl:false},
+      {l:'④ イオン反応式',e:'Cr₂O₇²⁻+3H₂O₂+8H⁺→2Cr³⁺+3O₂+7H₂O',n:'H⁺:14-6=8個残る',hl:true}]},
+  {id:'a4',lv:'s',t:'Cu + 濃硝酸 → 化学反応式（芝浦類題）',p:'銅Cuに濃硝酸HNO₃を加えた。化学反応式を完成させよ。',
+   s:[{l:'① HNO₃（濃・酸化剤）',e:'HNO₃+H⁺+e⁻→NO₂+H₂O …(I)',n:'濃硝酸→NO₂ N:+5→+4',hl:false},
+      {l:'② Cu（還元剤）',e:'Cu→Cu²⁺+2e⁻ …(II)',n:'',hl:false},
+      {l:'③ LCM(1,2)=2',e:'(I)×2, (II)×1 → e⁻=2個',n:'',hl:false},
+      {l:'④ 化学反応式',e:'Cu+4HNO₃(濃)→Cu(NO₃)₂+2NO₂↑+2H₂O',n:'H⁺2個+HNO₃2個=HNO₃計4個',hl:true}]},
+  {id:'a5',lv:'s',t:'Cu + 希硝酸 → 化学反応式 ★★（芝浦2019類題）',p:'銅Cuに希硝酸を加えた。化学反応式を完成させよ。',
+   s:[{l:'① HNO₃（希・酸化剤）',e:'HNO₃+3H⁺+3e⁻→NO+2H₂O …(I)',n:'希硝酸→NO N:+5→+2',hl:false},
+      {l:'② Cu（還元剤）',e:'Cu→Cu²⁺+2e⁻ …(II)',n:'',hl:false},
+      {l:'③ LCM(3,2)=6',e:'(I)×2, (II)×3 → e⁻=6個',n:'',hl:false},
+      {l:'④ 化学反応式',e:'3Cu+8HNO₃(希)→3Cu(NO₃)₂+2NO↑+4H₂O',n:'H⁺6個+HNO₃2個=HNO₃計8個',hl:true}]},
+  {id:'a6',lv:'s',t:'Sn²⁺ + Fe³⁺ イオン反応式（芝浦類題）',p:'Sn²⁺にFe³⁺を加えた。酸化剤・還元剤を判断し、イオン反応式を書け。',
+   s:[{l:'判断',e:'Fe³⁺:e⁻受取→酸化剤、Sn²⁺:e⁻放出→還元剤',n:'酸化数:Fe+3→+2（下がる）、Sn+2→+4（上がる）',hl:false},
+      {l:'① Fe³⁺（酸化剤）',e:'Fe³⁺+e⁻→Fe²⁺ …(I)',n:'',hl:false},
+      {l:'② Sn²⁺（還元剤）',e:'Sn²⁺→Sn⁴⁺+2e⁻ …(II)',n:'',hl:false},
+      {l:'③ LCM(1,2)=2',e:'(I)×2, (II)×1 → e⁻=2個',n:'',hl:false},
+      {l:'④ イオン反応式',e:'Sn²⁺+2Fe³⁺→Sn⁴⁺+2Fe²⁺',n:'',hl:true}]},
 ];
 
-/* 半反応式 全リスト */
-const HALF=[
-  {id:'h1',role:'酸化剤',cond:'酸性',
-   eq:'MnO<sub>4</sub><sup>−</sup> + 8H<sup>+</sup> + 5e<sup>−</sup> → Mn<sup>2+</sup> + 4H<sub>2</sub>O',
-   desc:'過マンガン酸イオン（酸性）'},
-  {id:'h2',role:'酸化剤',cond:'中性・塩基性',
-   eq:'MnO<sub>4</sub><sup>−</sup> + 2H<sub>2</sub>O + 3e<sup>−</sup> → MnO<sub>2</sub> + 4OH<sup>−</sup>',
-   desc:'過マンガン酸イオン（中性・塩基性）'},
-  {id:'h3',role:'酸化剤',cond:'酸性',
-   eq:'Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup> + 14H<sup>+</sup> + 6e<sup>−</sup> → 2Cr<sup>3+</sup> + 7H<sub>2</sub>O',
-   desc:'ニクロム酸イオン（酸性）'},
-  {id:'h4',role:'酸化剤',cond:'',
-   eq:'Cl<sub>2</sub> + 2e<sup>−</sup> → 2Cl<sup>−</sup>',
-   desc:'塩素'},
-  {id:'h5',role:'酸化剤',cond:'',
-   eq:'H<sub>2</sub>SO<sub>4</sub> + 2H<sup>+</sup> + 2e<sup>−</sup> → SO<sub>2</sub> + 2H<sub>2</sub>O',
-   desc:'熱濃硫酸'},
-  {id:'h6',role:'酸化剤',cond:'',
-   eq:'HNO<sub>3</sub> + H<sup>+</sup> + e<sup>−</sup> → NO<sub>2</sub> + H<sub>2</sub>O',
-   desc:'濃硝酸'},
-  {id:'h7',role:'酸化剤',cond:'',
-   eq:'HNO<sub>3</sub> + 3H<sup>+</sup> + 3e<sup>−</sup> → NO + 2H<sub>2</sub>O',
-   desc:'希硝酸'},
-  {id:'h8',role:'酸化剤',cond:'',
-   eq:'SO<sub>2</sub> + 4H<sup>+</sup> + 4e<sup>−</sup> → S + 2H<sub>2</sub>O',
-   desc:'二酸化硫黄（酸化剤）'},
-  {id:'h9',role:'酸化剤',cond:'中性・塩基性',
-   eq:'H<sub>2</sub>O<sub>2</sub> + 2e<sup>−</sup> → 2OH<sup>−</sup>',
-   desc:'過酸化水素（酸化剤・中性塩基性）'},
-  {id:'h10',role:'酸化剤',cond:'酸性',
-   eq:'H<sub>2</sub>O<sub>2</sub> + 2H<sup>+</sup> + 2e<sup>−</sup> → 2H<sub>2</sub>O',
-   desc:'過酸化水素（酸化剤・酸性）'},
-  {id:'h11',role:'還元剤',cond:'',
-   eq:'H<sub>2</sub> → 2H<sup>+</sup> + 2e<sup>−</sup>',
-   desc:'水素'},
-  {id:'h12',role:'還元剤',cond:'',
-   eq:'Na → Na<sup>+</sup> + e<sup>−</sup>',
-   desc:'ナトリウム'},
-  {id:'h13',role:'還元剤',cond:'',
-   eq:'Fe<sup>2+</sup> → Fe<sup>3+</sup> + e<sup>−</sup>',
-   desc:'鉄(II)イオン'},
-  {id:'h14',role:'還元剤',cond:'',
-   eq:'Sn<sup>2+</sup> → Sn<sup>4+</sup> + 2e<sup>−</sup>',
-   desc:'スズ(II)イオン'},
-  {id:'h15',role:'還元剤',cond:'',
-   eq:'H<sub>2</sub>S → S + 2H<sup>+</sup> + 2e<sup>−</sup>',
-   desc:'硫化水素'},
-  {id:'h16',role:'還元剤',cond:'',
-   eq:'(COOH)<sub>2</sub> → 2CO<sub>2</sub> + 2H<sup>+</sup> + 2e<sup>−</sup>',
-   desc:'シュウ酸'},
-  {id:'h17',role:'還元剤',cond:'',
-   eq:'SO<sub>2</sub> + 2H<sub>2</sub>O → SO<sub>4</sub><sup>2−</sup> + 4H<sup>+</sup> + 2e<sup>−</sup>',
-   desc:'二酸化硫黄（還元剤）'},
-  {id:'h18',role:'還元剤',cond:'',
-   eq:'H<sub>2</sub>O<sub>2</sub> → O<sub>2</sub> + 2H<sup>+</sup> + 2e<sup>−</sup>',
-   desc:'過酸化水素（還元剤）'},
-];
+/* ═══ STATE ═══ */
+var ct='flash',fi=0,ff=false,qi=0,qs=0,qd=false,qsh=[];
+function initQ(){qsh=QZ.slice().sort(function(){return Math.random()-.5;});qi=0;qs=0;qd=false;}
 
-/* クイズ問題 */
-const QUIZ=[
-  {q:'酸性条件下でKMnO₄（過マンガン酸カリウム）が酸化剤として働くとき、生成する物質は？',
-   opts:['MnO₂（酸化マンガン(IV)）','Mn²⁺（マンガン(II)イオン）','Mn³⁺','MnO₄²⁻'],
-   ans:1,exp:'酸性ではMnO₄⁻→Mn²⁺。中性・塩基性ではMnO₂（黒色沈殿）。条件で生成物が変わる超頻出ポイント！'},
-  {q:'中性・塩基性条件でMnO₄⁻が酸化剤として働くとき、移動する電子数（e⁻の係数）は？',
-   opts:['2個','3個','4個','5個'],
-   ans:1,exp:'中性・塩基性：MnO₄⁻+2H₂O+3e⁻→MnO₂+4OH⁻ で3個。酸性：5個。覚え方「中塩＝3、酸＝5」！'},
-  {q:'濃硝酸が酸化剤として働くとき生成する気体は？',
-   opts:['NO（一酸化窒素）','N₂O','NO₂（二酸化窒素）','N₂'],
-   ans:2,exp:'濃硝酸→NO₂、希硝酸→NO。「濃→二酸化（NO₂）、希→一酸化（NO）」！Nの酸化数は濃で+4、希で+2。'},
-  {q:'希硝酸が酸化剤として働くとき、半反応式のe⁻の係数は？',
-   opts:['1個','2個','3個','4個'],
-   ans:2,exp:'HNO₃+3H⁺+3e⁻→NO+2H₂O。濃硝酸は1e⁻、希硝酸は3e⁻。N原子の酸化数変化：濃は+5→+4（1個）、希は+5→+2（3個）。'},
-  {q:'Cr₂O₇²⁻（ニクロム酸イオン）の半反応式で移動する電子数は？',
-   opts:['4個','5個','6個','8個'],
-   ans:2,exp:'Cr₂O₇²⁻+14H⁺+6e⁻→2Cr³⁺+7H₂O。Cr1個あたり酸化数+6→+3で3個、Crが2個あるので3×2＝6個！'},
-  {q:'Fe²⁺が還元剤として働くとき、失う電子数は？',
-   opts:['e⁻ を1個','e⁻ を2個','e⁻ を3個','e⁻ を失わない'],
-   ans:0,exp:'Fe²⁺→Fe³⁺+e⁻。酸化数+2→+3で1個。鉄(II)が鉄(III)に酸化されるとき電子1つを放出する。'},
-  {q:'シュウ酸(COOH)₂が還元剤として働くとき生成するのは？',
-   opts:['CO（一酸化炭素）','CO₂（二酸化炭素）','C','H₂CO₃'],
-   ans:1,exp:'(COOH)₂→2CO₂+2H⁺+2e⁻。シュウ酸が酸化されてCO₂が2分子生成。酸化数C：+3→+4で電子2個放出。'},
-  {q:'SO₂が還元剤として働くとき生成するイオンは？',
-   opts:['SO₃²⁻（亜硫酸イオン）','S²⁻','SO₄²⁻（硫酸イオン）','S（硫黄）'],
-   ans:2,exp:'SO₂+2H₂O→SO₄²⁻+4H⁺+2e⁻。硫黄の酸化数+4→+6で電子2個放出。SO₂は酸化剤でも還元剤でもなれる！'},
-  {q:'H₂O₂が還元剤として働くとき生成するのは？',
-   opts:['H₂O','2OH⁻','O₂','O³⁻'],
-   ans:2,exp:'H₂O₂→O₂+2H⁺+2e⁻（還元剤）。酸化剤のときはH₂O₂+2H⁺+2e⁻→2H₂O。同じH₂O₂で役割が逆！'},
-  {q:'熱濃硫酸（H₂SO₄）の半反応式として正しいのは？',
-   opts:['H₂SO₄+2H⁺+2e⁻→SO₂+2H₂O','H₂SO₄+4H⁺+4e⁻→S+4H₂O','H₂SO₄+e⁻→SO₃²⁻+H₂O','H₂SO₄+2e⁻→SO₃+H₂O'],
-   ans:0,exp:'熱濃硫酸はH₂SO₄+2H⁺+2e⁻→SO₂+2H₂O。生成物はSO₂（二酸化硫黄）。S酸化数+6→+4で2e⁻受取。'},
-  {q:'半反応式のステップ②「水」とは何をすること？',
-   opts:['両辺にH₂Oを足してOの数をそろえる','両辺をH₂Oで割り簡略化する','水溶液中で反応することを確認する','溶液のpHを求める'],
-   ans:0,exp:'ステップ②：左右でOの数が違う→H₂Oで合わせる。OがX個多い側にH₂O X個追加！これが次のH⁺の数を決める。'},
-  {q:'MnO₄⁻の半反応式でH⁺の係数が8になる理由は？',
-   opts:['右辺にH₂Oを4個加えたのでH:4×2=8個→H⁺を8個','電荷を合わせるためH⁺=8','Mnの酸化数が7だから','e⁻=5より計算'],
-   ans:0,exp:'①MnO₄⁻→Mn²⁺（暗記）②右辺にH₂O4個追加→O4個そろう③右辺H:4×2=8個→左辺にH⁺8個追加！順番が重要。'},
-  {q:'酸化剤にも還元剤にもなれる物質の組合せは？',
-   opts:['SO₂ と H₂O₂','MnO₄⁻ と Cl₂','Fe²⁺ と Na','H₂SO₄ と HNO₃'],
-   ans:0,exp:'SO₂とH₂O₂は相手によって酸化剤・還元剤のどちらにもなれる！試験の超頻出。S酸化数+4（中間）→上下どちらにも変化可能。'},
-  {q:'Cl₂の半反応式として正しいのは？',
-   opts:['Cl₂+e⁻→2Cl⁻','Cl₂+2e⁻→2Cl⁻','Cl₂→2Cl⁻+2e⁻','Cl₂+2H⁺+2e⁻→2HCl'],
-   ans:1,exp:'Cl₂+2e⁻→2Cl⁻。Cl酸化数0→−1、Cl2個分で電子2個受取。塩素は電気陰性度が高く電子を引きつけやすい。'},
-  {q:'イオン反応式を作るとき e⁻ が消えるのはなぜか？',
-   opts:['e⁻は反応式に書く必要がないから','酸化剤が受け取るe⁻数＝還元剤が放出するe⁻数になるよう係数を合わせて足すとe⁻が相殺されるから','溶液中でe⁻は瞬時に消えるから','e⁻は保存されないから'],
-   ans:1,exp:'e⁻の最小公倍数で係数を揃えて2式を足し合わせると、左辺と右辺に同数のe⁻が現れ相殺して消える。これが酸化還元の本質！'},
-  // MARCH/芝浦レベル
-  {q:'【MARCH】KMnO₄とH₂O₂を硫酸酸性で反応させるとき、e⁻の数を何個にそろえる？',
-   opts:['5個','10個','15個','6個'],
-   ans:1,exp:'KMnO₄の半反応式：5e⁻、H₂O₂（還元剤）：2e⁻。LCM(5,2)=10。KMnO₄×2、H₂O₂×5でe⁻を10個に！'},
-  {q:'【MARCH】KMnO₄とシュウ酸(COOH)₂を硫酸酸性で反応させたイオン反応式は？',
-   opts:['2MnO₄⁻+5(COOH)₂+6H⁺→2Mn²⁺+10CO₂+8H₂O','2MnO₄⁻+5(COOH)₂+16H⁺→2Mn²⁺+10CO₂+8H₂O','MnO₄⁻+(COOH)₂+8H⁺→Mn²⁺+2CO₂+4H₂O','2MnO₄⁻+5(COOH)₂→2Mn²⁺+10CO₂+8H₂O'],
-   ans:0,exp:'①×2：2MnO₄⁻+16H⁺+10e⁻→2Mn²⁺+8H₂O、②×5：5(COOH)₂→10CO₂+10H⁺+10e⁻。足すとH⁺:16-10=6個が残る！'},
-  {q:'【法政】Cuと希硝酸が反応するとき生成する気体は？',
-   opts:['N₂','NO₂（二酸化窒素）','NO（一酸化窒素）','NH₃'],
-   ans:2,exp:'希硝酸+Cu→Cu²⁺+NO↑+H₂O（希硝酸なのでNO！）。濃硝酸ならNO₂。必須：「希→NO、濃→NO₂」。'},
-  {q:'【芝浦】K₂Cr₂O₇とH₂O₂を硫酸酸性で反応させるとき、e⁻の最小公倍数は？',
-   opts:['3個','4個','6個','12個'],
-   ans:2,exp:'Cr₂O₇²⁻の半反応式：6e⁻、H₂O₂（還元剤）：2e⁻。LCM(6,2)=6。Cr₂O₇²⁻×1、H₂O₂×3でe⁻を6個に！'},
-  {q:'【芝浦】Sn²⁺+2Fe³⁺→Sn⁴⁺+2Fe²⁺ の反応で、Fe³⁺の役割は？',
-   opts:['還元剤（電子を放出）','酸化剤（電子を受け取る）','触媒','役割なし'],
-   ans:1,exp:'Fe³⁺+e⁻→Fe²⁺なのでFe³⁺は電子を受け取る酸化剤。Sn²⁺は電子を2個放出する還元剤。Fe³⁺の酸化数+3→+2（下がる＝還元される＝酸化剤）。'},
-];
-
-/* 解き方ガイド */
-const GUIDE=[
-  {n:'①',color:'#38bdf8',title:'【暗記】反応前後の物質',
-   desc:'反応前・反応後の物質を暗記する。これが半反応式作りのスタートライン。まず「何が何になるか」を覚えること。',
-   exs:[
-     {l:'酸性でのMnO₄⁻',e:'MnO₄⁻ → Mn²⁺'},
-     {l:'中性・塩基性でのMnO₄⁻',e:'MnO₄⁻ → MnO₂'},
-     {l:'濃硝酸HNO₃',e:'HNO₃ → NO₂'},
-     {l:'希硝酸HNO₃',e:'HNO₃ → NO'},
-   ],
-   tip:'SO₂とH₂O₂は相手によって酸化剤にも還元剤にもなれる！MnO₄⁻は条件（酸性/中性塩基性）で生成物が変わる。これらは試験の超頻出。'},
-  {n:'②',color:'#4ade80',title:'【水】OをH₂Oでそろえる',
-   desc:'反応前後でO（酸素）の数が合わない場合、H₂Oを加えてOの数を合わせる。O多い側にH₂Oを加える。',
-   exs:[
-     {l:'MnO₄⁻の場合：左辺にO=4個',e:'MnO₄⁻ → Mn²⁺　（右辺にOが0個）'},
-     {l:'差は4個 → 右辺にH₂Oを4個',e:'MnO₄⁻ → Mn²⁺ + 4H₂O　…②'},
-   ],
-   tip:'Oの数の差だけH₂Oを加える。H₂O 1個にO 1個入り。この段階でH₂Oの係数が確定する。'},
-  {n:'③',color:'#fbbf24',title:'【H⁺】HをH⁺でそろえる',
-   desc:'②で加えたH₂Oによって増えたH（水素）の分だけ、反対の辺にH⁺を加える。酸性条件の式ではH⁺を使う。',
-   exs:[
-     {l:'H₂Oを4個加えた → H: 4×2=8個',e:'右辺のH原子: 8個'},
-     {l:'左辺にH⁺を8個追加',e:'MnO₄⁻ + 8H⁺ → Mn²⁺ + 4H₂O　…③'},
-   ],
-   tip:'H₂O の数 × 2 = H⁺ の数。この関係を頭に入れておこう。中性・塩基性の場合はOH⁻を使うことがある。'},
-  {n:'④',color:'#a78bfa',title:'【e⁻】電荷をe⁻でそろえる',
-   desc:'③の式の両辺の電荷の合計を計算し、差分の電子e⁻を加えて電荷を一致させる。',
-   exs:[
-     {l:'③式の左辺の電荷',e:'(−1) + (+8) = +7'},
-     {l:'③式の右辺の電荷',e:'(+2) + (0) = +2'},
-     {l:'差は +7−(+2)=5 → 左辺にe⁻を5個追加',e:'MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O ✓ 完成！'},
-   ],
-   tip:'左辺が電荷大きい → 左にe⁻追加。右辺が大きい → 右に追加。完成後は左右の電荷が必ず等しいことを確認！'},
-  {n:'⑤',color:'#22d3ee',title:'【組合せ】イオン反応式へ',
-   desc:'酸化剤・還元剤それぞれの半反応式を用意し、e⁻の数をLCM（最小公倍数）でそろえてから足し合わせる。e⁻が消えればOK！',
-   exs:[
-     {l:'酸化剤の半反応式',e:'MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O　…(I)'},
-     {l:'還元剤の半反応式',e:'(COOH)₂ → 2CO₂ + 2H⁺ + 2e⁻　…(II)'},
-     {l:'LCM(5,2)=10 → (I)×2, (II)×5',e:'e⁻が左辺右辺に10個ずつ → 消える！'},
-     {l:'イオン反応式（完成）',e:'2MnO₄⁻ + 5(COOH)₂ + 6H⁺ → 2Mn²⁺ + 10CO₂ + 8H₂O'},
-   ],
-   tip:'e⁻は必ず消える。消えなければ計算ミス！H⁺は (I)×2で16個 − (II)×5で10個 = 6個残る。'},
-  {n:'⑥',color:'#fb7185',title:'【化学反応式化】イオン→化学式',
-   desc:'イオン反応式を化学反応式に変換する3ステップ。陽イオンを加えてイオン→化学式に書き換え。',
-   exs:[
-     {l:'Step A：両辺に陽イオンを追加',e:'Cr₂O₇²⁻のペア陽イオン → K⁺ 2個を両辺に'},
-     {l:'Step B：イオン式→化学式に',e:'K⁺+Cr₂O₇²⁻ → K₂Cr₂O₇、H⁺+NO₃⁻ → HNO₃ など'},
-     {l:'Step C：整理',e:'左右のイオン・H₂Oを整理して係数を最小整数比に'},
-   ],
-   tip:'化学反応式では強電解質をイオン式→分子式に。弱電解質はそのまま分子式で書く。'},
-];
-
-/* 応用問題 */
-const ADV=[
-  {id:'a1',lv:'basic',title:'KMnO₄ + シュウ酸（硫酸酸性）',
-   prob:'硫酸酸性下でKMnO₄水溶液にシュウ酸(COOH)₂水溶液を加えた。イオン反応式および化学反応式を書け。',
-   steps:[
-     {l:'① KMnO₄の半反応式',e:'MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O　…(I)',n:''},
-     {l:'② (COOH)₂の半反応式',e:'(COOH)₂ → 2CO₂ + 2H⁺ + 2e⁻　…(II)',n:'シュウ酸は還元剤'},
-     {l:'③ e⁻をそろえる',e:'(I)×2　　(II)×5　　→ e⁻を10個に統一',n:'LCM(5,2) = 10'},
-     {l:'④ イオン反応式',e:'2MnO₄⁻ + 5(COOH)₂ + 6H⁺ → 2Mn²⁺ + 10CO₂ + 8H₂O',n:'H⁺: 左16 − 右10 = 6個残る',hl:true},
-     {l:'⑤ 化学反応式（完成）',e:'2KMnO₄ + 5(COOH)₂ + 3H₂SO₄ → 2MnSO₄ + K₂SO₄ + 10CO₂ + 8H₂O',n:'K⁺→K₂SO₄、Mn²⁺→MnSO₄、H⁺→H₂SO₄として整理',hl:true},
-   ]},
-  {id:'a2',lv:'march',title:'KMnO₄ + H₂O₂（硫酸酸性）★',
-   prob:'硫酸酸性下でKMnO₄水溶液に過酸化水素H₂O₂（還元剤）を加えた。イオン反応式を書け。',
-   steps:[
-     {l:'① KMnO₄の半反応式',e:'MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O　…(I)',n:''},
-     {l:'② H₂O₂（還元剤）の半反応式',e:'H₂O₂ → O₂ + 2H⁺ + 2e⁻　…(II)',n:'H₂O₂が還元剤→O₂生成'},
-     {l:'③ e⁻をそろえる',e:'(I)×2　　(II)×5　　→ e⁻を10個に統一',n:'LCM(5,2) = 10'},
-     {l:'④ イオン反応式（完成）',e:'2MnO₄⁻ + 5H₂O₂ + 6H⁺ → 2Mn²⁺ + 5O₂ + 8H₂O',n:'H⁺: 16 − 10 = 6個残る',hl:true},
-   ]},
-  {id:'a3',lv:'march',title:'K₂Cr₂O₇ + H₂O₂（硫酸酸性）★★',
-   prob:'硫酸酸性下でニクロム酸カリウムK₂Cr₂O₇水溶液に過酸化水素H₂O₂（還元剤として）を加えた。イオン反応式を書け。',
-   steps:[
-     {l:'① Cr₂O₇²⁻の半反応式',e:'Cr₂O₇²⁻ + 14H⁺ + 6e⁻ → 2Cr³⁺ + 7H₂O　…(I)',n:'Cr: +6→+3, e⁻が6個'},
-     {l:'② H₂O₂（還元剤）の半反応式',e:'H₂O₂ → O₂ + 2H⁺ + 2e⁻　…(II)',n:''},
-     {l:'③ e⁻をそろえる',e:'(I)×1　　(II)×3　　→ e⁻を6個に統一',n:'LCM(6,2) = 6'},
-     {l:'④ イオン反応式（完成）',e:'Cr₂O₇²⁻ + 3H₂O₂ + 8H⁺ → 2Cr³⁺ + 3O₂ + 7H₂O',n:'H⁺: 14 − 6 = 8個残る',hl:true},
-   ]},
-  {id:'a4',lv:'shibaura',title:'Sn²⁺ + Fe³⁺ イオン反応式',
-   prob:'Sn²⁺水溶液にFe³⁺を加えた。どちらが酸化剤か判断し、イオン反応式を書け。',
-   steps:[
-     {l:'酸化剤・還元剤の判断',e:'Fe³⁺は酸化数+3（Feの最高ではない）→もっと低い+2になれる → 電子を受け取る → 酸化剤',n:'Sn²⁺は酸化数+2から+4になれる → 電子を放出 → 還元剤'},
-     {l:'① Fe³⁺の半反応式（酸化剤）',e:'Fe³⁺ + e⁻ → Fe²⁺　…(I)',n:''},
-     {l:'② Sn²⁺の半反応式（還元剤）',e:'Sn²⁺ → Sn⁴⁺ + 2e⁻　…(II)',n:''},
-     {l:'③ e⁻をそろえる',e:'(I)×2　　(II)×1　　→ e⁻を2個に統一',n:''},
-     {l:'④ イオン反応式（完成）',e:'Sn²⁺ + 2Fe³⁺ → Sn⁴⁺ + 2Fe²⁺',n:'',hl:true},
-   ]},
-  {id:'a5',lv:'march',title:'Cu + 濃硝酸 → 化学反応式',
-   prob:'銅Cuに濃硝酸を加えた。化学反応式を完成させよ。',
-   steps:[
-     {l:'① HNO₃（濃硝酸・酸化剤）の半反応式',e:'HNO₃ + H⁺ + e⁻ → NO₂ + H₂O　…(I)',n:'濃硝酸→NO₂'},
-     {l:'② Cu（還元剤）の半反応式',e:'Cu → Cu²⁺ + 2e⁻　…(II)',n:''},
-     {l:'③ e⁻をそろえる',e:'(I)×2　　(II)×1　　→ e⁻を2個に統一',n:''},
-     {l:'④ イオン反応式',e:'Cu + 2HNO₃ + 2H⁺ → Cu²⁺ + 2NO₂ + 2H₂O',n:'左辺のH⁺をHNO₃に統合'},
-     {l:'⑤ 化学反応式（完成）',e:'Cu + 4HNO₃(濃) → Cu(NO₃)₂ + 2NO₂↑ + 2H₂O',n:'Cu²⁺+2NO₃⁻→Cu(NO₃)₂',hl:true},
-   ]},
-  {id:'a6',lv:'shibaura',title:'Cu + 希硝酸 → 化学反応式 ★★',
-   prob:'銅Cuに希硝酸を加えた。化学反応式を完成させよ。（芝浦大2019年類題）',
-   steps:[
-     {l:'① HNO₃（希硝酸・酸化剤）の半反応式',e:'HNO₃ + 3H⁺ + 3e⁻ → NO + 2H₂O　…(I)',n:'希硝酸→NO'},
-     {l:'② Cu（還元剤）の半反応式',e:'Cu → Cu²⁺ + 2e⁻　…(II)',n:''},
-     {l:'③ e⁻をそろえる',e:'(I)×2　　(II)×3　　→ e⁻を6個に統一',n:'LCM(3,2) = 6'},
-     {l:'④ イオン反応式',e:'3Cu + 2HNO₃ + 6H⁺ → 3Cu²⁺ + 2NO + 4H₂O',n:'H⁺を含む項をHNO₃に統合'},
-     {l:'⑤ 化学反応式（完成）',e:'3Cu + 8HNO₃(希) → 3Cu(NO₃)₂ + 2NO↑ + 4H₂O',n:'H⁺6個+HNO₃2個=HNO₃計8個',hl:true},
-   ]},
-];
-
-/* ════ STATE ════ */
-let curTab='flash',flashIdx=0,flashFlipped=false;
-let quizIdx=0,quizScore=0,quizAnswered=false,shuffledQ=[];
-
-/* ════ RENDERS ════ */
-
-/* ── FLASH ── */
+/* ═══ RENDER FUNCTIONS ═══ */
 function rFlash(){
-  const c=FLASH[flashIdx];
-  const isOx=c.role==='酸化剤';
-  const pct=((flashIdx+1)/FLASH.length*100).toFixed(0);
-  return`<div>
-<div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
-<div class="counter">${flashIdx+1} / ${FLASH.length}</div>
-<div class="flip-scene" onclick="doFlip()">
-  <div class="flip-card" id="fc">
-    <div class="flip-face flip-front">
-      <div class="badge ${isOx?'ox':'re'}">${c.role}</div>
-      <div class="fq">${c.q}</div>
-      <div class="fq-sub">→ 変化後の物質は？</div>
-      <div class="flip-hint">タップで答え ▼</div>
-    </div>
-    <div class="flip-face flip-back">
-      <div class="badge ${isOx?'ox':'re'}">${c.role}</div>
-      <div class="fa">${c.a}</div>
-      <div class="fhint">${c.hint}</div>
-      <div class="flip-hint">タップで戻る ▲</div>
-    </div>
-  </div>
-</div>
-<div class="nav-btns">
-  <button class="btn btn-ghost" onclick="prevCard()">← 前へ</button>
-  <button class="btn btn-blue" onclick="nextCard()">次へ →</button>
-</div>
-<div class="stats-row">
-  <div class="stat-box"><div class="stat-num" style="color:var(--red)">${FLASH.filter(x=>x.role==='酸化剤').length}</div><div class="stat-lbl">酸化剤</div></div>
-  <div class="stat-box"><div class="stat-num" style="color:var(--blue)">${FLASH.filter(x=>x.role==='還元剤').length}</div><div class="stat-lbl">還元剤</div></div>
-  <div class="stat-box"><div class="stat-num" style="color:var(--green)">${FLASH.length}</div><div class="stat-lbl">合計</div></div>
-</div>
-<div class="warn-box">
-  <p><b>⚠️ 要注意！</b><br>
-  • SO₂ と H₂O₂ は相手次第で<b>酸化剤にも還元剤にもなる</b><br>
-  • MnO₄⁻ は酸性→Mn²⁺、中性塩基性→MnO₂ と<b>条件で生成物が違う</b><br>
-  • 濃硝酸→NO₂、希硝酸→NO（←間違えやすい！）</p>
-</div>
-</div>`;
+  var c=FL[fi],pct=((fi+1)/FL.length*100).toFixed(0),isox=c.r==='ox';
+  return '<div><div class="pgb"><div class="pgf" style="width:'+pct+'%"></div></div>'+
+  '<div class="cnt">'+(fi+1)+'/'+FL.length+'</div>'+
+  '<div class="flip-s" id="fsc" onclick="doFlip()">'+
+  '<div class="flip-c" id="fc">'+
+  '<div class="flip-f ff"><div class="bdg '+(isox?'ox':'re')+'">'+(isox?'酸化剤':'還元剤')+'</div>'+
+  '<div class="fq">'+c.q+'</div><div class="fqs">→ 変化後の物質は？</div><div class="fhnt">タップで答え ▼</div></div>'+
+  '<div class="flip-f fb"><div class="bdg '+(isox?'ox':'re')+'">'+(isox?'酸化剤':'還元剤')+'</div>'+
+  '<div class="fa">'+c.a+'</div><div class="fhi">'+c.h+'</div><div class="fhnt">タップで戻る ▲</div></div>'+
+  '</div></div>'+
+  '<div class="nbts"><button class="btn bg" onclick="prevF()">← 前へ</button>'+
+  '<button class="btn bb" onclick="nextF()">次へ →</button></div>'+
+  '<div class="sr">'+
+  '<div class="sb"><div class="sn" style="color:var(--red)">'+FL.filter(function(x){return x.r==='ox';}).length+'</div><div class="sl">酸化剤</div></div>'+
+  '<div class="sb"><div class="sn" style="color:var(--blue)">'+FL.filter(function(x){return x.r==='re';}).length+'</div><div class="sl">還元剤</div></div>'+
+  '<div class="sb"><div class="sn" style="color:var(--green)">'+FL.length+'</div><div class="sl">合計</div></div>'+
+  '</div>'+
+  '<div class="warn"><p><b>⚠️ 必須暗記ポイント</b><br>'+
+  '• <b>SO₂・H₂O₂</b> は相手によって酸化剤にも還元剤にもなれる<br>'+
+  '• <b>MnO₄⁻</b>：酸性→Mn²⁺、中性塩基性→MnO₂（条件で生成物が違う！）<br>'+
+  '• <b>濃HNO₃→NO₂</b>、<b>希HNO₃→NO</b><br>'+
+  '• 酸化数<b>増加→還元剤</b>（e⁻を失う）、<b>減少→酸化剤</b>（e⁻を得る）</p></div></div>';
 }
-
-function doFlip(){hC();flashFlipped=!flashFlipped;document.getElementById('fc')?.classList.toggle('flipped');}
-function nextCard(){hC();flashIdx=(flashIdx+1)%FLASH.length;flashFlipped=false;render();}
-function prevCard(){hC();flashIdx=(flashIdx-1+FLASH.length)%FLASH.length;flashFlipped=false;render();}
-
-/* ── QUIZ ── */
-function initQ(){shuffledQ=[...QUIZ].sort(()=>Math.random()-.5);quizIdx=0;quizScore=0;quizAnswered=false;}
+function doFlip(){hC();ff=!ff;var el=document.getElementById('fc');if(el)el.classList.toggle('flipped');}
+function nextF(){hC();fi=(fi+1)%FL.length;ff=false;render();}
+function prevF(){hC();fi=(fi-1+FL.length)%FL.length;ff=false;render();}
 
 function rQuiz(){
-  if(!shuffledQ.length)initQ();
-  if(quizIdx>=shuffledQ.length)return rEnd();
-  const q=shuffledQ[quizIdx];
-  const pct=(quizIdx/shuffledQ.length*100).toFixed(0);
-  const sp=document.getElementById('spill');
-  if(sp){sp.className='spill on';sp.textContent=`${quizScore}/${quizIdx}`;}
-  return`<div>
-<div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
-<div class="quiz-card">
-  <div class="quiz-prog">${quizIdx+1} / ${shuffledQ.length}問目</div>
-  <div class="quiz-q">${q.q}</div>
-  <div class="choices" id="ch">
-    ${q.opts.map((o,i)=>`<button class="choice" onclick="ansQ(${i})">${o}</button>`).join('')}
-  </div>
-  <div class="explain" id="exp">${q.exp}</div>
-  <div class="next-wrap" id="nw"><button class="btn btn-blue btn-full" onclick="nextQ()">次の問題 →</button></div>
-</div>
-</div>`;
+  if(!qsh.length)initQ();
+  if(qi>=qsh.length)return rEnd();
+  var q=qsh[qi],pct=(qi/qsh.length*100).toFixed(0);
+  var pl=document.getElementById('pill');if(pl){pl.style.display='block';pl.textContent=qs+'/'+qi;}
+  return '<div><div class="pgb"><div class="pgf" style="width:'+pct+'%"></div></div>'+
+  '<div class="qcard"><div class="qprog">'+(qi+1)+'/'+qsh.length+'問目</div>'+
+  '<div class="qq">'+q.q+'</div>'+
+  '<div class="chs" id="chs">'+q.o.map(function(o,i){return '<button class="ch" onclick="ansQ('+i+')">'+o+'</button>';}).join('')+'</div>'+
+  '<div class="exp" id="exp">'+q.e+'</div>'+
+  '<div id="nw" style="display:none;margin-top:12px"><button class="btn bb bw" onclick="nextQ()">次の問題 →</button></div>'+
+  '</div></div>';
 }
-
 function ansQ(idx){
-  if(quizAnswered)return;quizAnswered=true;
-  const q=shuffledQ[quizIdx];
-  const btns=document.querySelectorAll('.choice');
-  btns.forEach(b=>{b.classList.add('disabled');b.style.pointerEvents='none';});
-  if(idx===q.ans){btns[idx].classList.add('correct');hBurst();quizScore++;}
-  else{btns[idx].classList.add('wrong');btns[q.ans].classList.add('correct');hSeq();}
-  document.getElementById('exp').classList.add('on');
-  document.getElementById('nw').style.display='block';
-  const sp=document.getElementById('spill');if(sp)sp.textContent=`${quizScore}/${quizIdx+1}`;
+  if(qd)return;qd=true;
+  var q=qsh[qi],btns=document.querySelectorAll('.ch');
+  btns.forEach(function(b){b.classList.add('dis');});
+  if(idx===q.a){btns[idx].classList.add('ok');hBurst();qs++;}
+  else{btns[idx].classList.add('ng');if(btns[q.a])btns[q.a].classList.add('ok');hSeq();}
+  var ex=document.getElementById('exp');if(ex)ex.classList.add('on');
+  var nw=document.getElementById('nw');if(nw)nw.style.display='block';
+  var pl=document.getElementById('pill');if(pl)pl.textContent=qs+'/'+(qi+1);
 }
-
-function nextQ(){hC();quizIdx++;quizAnswered=false;render();}
-
+function nextQ(){hC();qi++;qd=false;render();}
 function rEnd(){
-  const pct=Math.round(quizScore/shuffledQ.length*100);
-  const msg=pct>=90?'🏆 完璧！芝浦・MARCH合格圏！':pct>=70?'🎯 よくできた！もう一周しよう':pct>=50?'📚 惜しい！もう少し！':'💪 基礎から復習しよう';
-  return`<div class="end-wrap">
-  <div class="end-pct">${pct}%</div>
-  <div class="end-score">${quizScore} / ${shuffledQ.length}問正解</div>
-  <div class="end-msg">${msg}</div>
-  <button class="btn btn-blue btn-full" onclick="restartQ()" style="margin-bottom:10px">もう一度チャレンジ！</button>
-  <button class="btn btn-ghost btn-full" onclick="gTab('half',document.querySelectorAll('.tab')[2])">半反応式一覧を見る</button>
-</div>`;
+  var pct=Math.round(qs/qsh.length*100);
+  var msg=pct>=90?'🏆 完璧！芝浦・MARCH合格圏！':pct>=70?'🎯 よくできた！もう一周！':pct>=50?'📚 惜しい！あと少し！':'💪 基礎から復習しよう';
+  return '<div class="end"><div class="epct">'+pct+'%</div>'+
+  '<div class="escore">'+qs+'/'+qsh.length+'問正解</div>'+
+  '<div class="emsg">'+msg+'</div>'+
+  '<button class="btn bb bw" onclick="restartQ()" style="margin-bottom:10px">もう一度！</button>'+
+  '<button class="btn bg bw" onclick="gTab(\'half\',2)">半反応式一覧を見る</button></div>';
 }
 function restartQ(){hC();initQ();render();}
 
-/* ── HALF ── */
 function rHalf(){
-  const ox=HALF.filter(x=>x.role==='酸化剤');
-  const re=HALF.filter(x=>x.role==='還元剤');
-  const row=it=>{
-    const mk=markSet.has(it.id);
-    return`<div class="half-row ${it.role==='酸化剤'?'ox':'re'}${mk?' mkd':''}" id="row-${it.id}">
-  <button class="mark-btn${mk?' mkd':''}" onclick="toggleMark('${it.id}',this)">${mk?'★':'☆'}</button>
-  <div class="half-eq">${it.eq}</div>
-  ${it.cond?`<div class="half-cond">📍 ${it.cond}</div>`:''}
-  <div class="half-cond">${it.desc}</div>
-</div>`;
-  };
-  return`<div>
-<div class="half-cat">🔴 酸化剤の半反応式 (${ox.length}個)</div>
-${ox.map(row).join('')}
-<div class="half-cat" style="margin-top:20px">🔵 還元剤の半反応式 (${re.length}個)</div>
-${re.map(row).join('')}
-<div style="text-align:center;margin-top:18px;font-size:11px;color:var(--dim2)">☆ をタップしてマーク → 自動保存（localStorage）</div>
-</div>`;
-}
-
-/* ── GUIDE ── */
-function rGuide(){
-  const sc=(g,i)=>`<div class="step-card" id="sg-${i}">
-  <div class="step-hdr" onclick="togStep(${i})">
-    <div class="step-num" style="background:${g.color}22;color:${g.color}">${g.n}</div>
-    <div class="step-ttl">${g.title}</div>
-    <div class="step-arr">▶</div>
-  </div>
-  <div class="step-body">
-    <p class="step-desc">${g.desc}</p>
-    ${g.exs.map(ex=>`<div class="step-ex-lbl">${ex.l}</div><div class="step-eq">${ex.e}</div>`).join('')}
-    <div class="tip">${g.tip}</div>
-  </div>
-</div>`;
-  return`<div>
-<div class="sec-title">📐 半反応式の作り方（4ステップ）</div>
-${GUIDE.slice(0,4).map((g,i)=>sc(g,i)).join('')}
-<div class="sec-title" style="margin-top:20px">🔗 イオン→化学反応式（2ステップ）</div>
-${GUIDE.slice(4).map((g,i)=>sc(g,i+4)).join('')}
-</div>`;
-}
-function togStep(i){hC();document.getElementById('sg-'+i)?.classList.toggle('open');}
-
-/* ── ADVANCED ── */
-function rAdv(){
-  const lmap={basic:'基礎',march:'MARCH',shibaura:'芝浦'};
-  const ac=(p,i)=>`<div class="adv-card" id="ac-${i}">
-  <div class="adv-hdr" onclick="togAdv(${i})">
-    <div class="lv ${p.lv}">${lmap[p.lv]}</div>
-    <div class="adv-ttl">${p.title}</div>
-  </div>
-  <div class="adv-body">
-    <div class="adv-prob">${p.prob}</div>
-    <button class="reveal" onclick="revAdv(${i},this)">👁 解答ステップを見る</button>
-    <div class="ans-sec" id="as-${i}">
-      <div class="adv-steps">
-        ${p.steps.map(s=>`<div class="adv-step">
-          <div class="adv-slbl">${s.l}</div>
-          <div class="adv-seq${s.hl?' hl':''}">${s.e}</div>
-          ${s.n?`<div class="adv-note">💬 ${s.n}</div>`:''}
-        </div>`).join('')}
-      </div>
-    </div>
-  </div>
-</div>`;
-  return`<div>
-<div class="sec-title">🎓 応用問題 MARCH / 芝浦 / 法政 レベル</div>
-${ADV.map((p,i)=>ac(p,i)).join('')}
-<div class="card" style="background:rgba(167,139,250,.05);border-color:rgba(167,139,250,.2);margin-top:4px">
-  <p style="font-size:12.5px;line-height:1.9;color:#c4b5fd">
-    <b>🧠 芝浦・法政・MARCH理系 出題傾向</b><br>
-    ✓ 半反応式→イオン反応式→化学反応式の変換<br>
-    ✓ 酸化数変化から酸化剤・還元剤の特定<br>
-    ✓ MnO₄⁻、Cr₂O₇²⁻の条件別反応<br>
-    ✓ SO₂・H₂O₂の両性（頻出！）<br>
-    ✓ Cu+硝酸（濃・希）の反応式<br>
-    ✓ 電子数の最小公倍数計算（LCM）<br>
-    ✓ 化学量論的計算（何mol反応するか）
-  </p>
-</div>
-</div>`;
-}
-function togAdv(i){hC();document.getElementById('ac-'+i)?.classList.toggle('open');}
-function revAdv(i,btn){hC();btn.style.display='none';document.getElementById('as-'+i)?.classList.add('on');}
-
-/* ════ TAB / RENDER ════ */
-function render(){
-  const m=document.getElementById('main');
-  if(curTab==='flash')m.innerHTML=rFlash();
-  else if(curTab==='quiz')m.innerHTML=rQuiz();
-  else if(curTab==='half'){m.innerHTML=rHalf();applyMarks();}
-  else if(curTab==='guide')m.innerHTML=rGuide();
-  else if(curTab==='adv')m.innerHTML=rAdv();
-  // hide score pill on non-quiz tabs
-  const sp=document.getElementById('spill');
-  if(sp)sp.className=curTab==='quiz'?'spill on':'spill';
-}
-
-function gTab(name,btn){
-  hC();curTab=name;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
-  if(btn)btn.classList.add('on');
-  render();
-}
-
-/* SWIPE for flashcard */
-let sx=0,sy=0;
-document.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
-document.addEventListener('touchend',e=>{
-  if(curTab!=='flash')return;
-  const dx=e.changedTouches[0].clientX-sx;
-  const dy=e.changedTouches[0].clientY-sy;
-  if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>55){
-    if(dx<0)nextCard();else prevCard();
+  function row(it){
+    var mk=!!marks[it.id];
+    return '<div class="hrow h'+it.r+(mk?' mkd':'')+'" id="r-'+it.id+'">'+
+    '<button class="mkb'+(mk?' mkd':'')+'" id="mb-'+it.id+'" onclick="toggleMk(\''+it.id+'\')">'+(mk?'★':'☆')+'</button>'+
+    '<div class="heq">'+it.eq+'</div>'+(it.cd?'<div class="hcnd">📍 '+it.cd+'</div>':'')+
+    '<div class="hcnd">'+it.d+'</div></div>';
   }
+  var ox=HL.filter(function(x){return x.r==='ox';}),re=HL.filter(function(x){return x.r==='re';});
+  return '<div>'+
+  '<div class="hcat">🔴 酸化剤の半反応式 ('+ox.length+'個)</div>'+ox.map(row).join('')+
+  '<div class="hcat" style="margin-top:20px">🔵 還元剤の半反応式 ('+re.length+'個)</div>'+re.map(row).join('')+
+  '<div style="text-align:center;margin-top:16px;font-size:11px;color:var(--dim2)">☆ タップでマーク → 自動保存</div></div>';
+}
+
+function rGuide(){
+  return '<div>'+
+  GD.map(function(g,i){
+    return '<div class="scard" id="sg'+i+'">'+
+    '<div class="shdr" onclick="togS('+i+')">'+
+    '<div class="snum2" style="background:'+g.col+'22;color:'+g.col+'">'+g.n+'</div>'+
+    '<div class="sttl">'+g.t+'</div><div class="sarr">▶</div></div>'+
+    '<div class="sbdy"><p class="sdesc">'+g.d+'</p>'+
+    g.ex.map(function(e){return '<div class="selbl">'+e[0]+'</div><div class="seq">'+e[1]+'</div>';}).join('')+
+    '<div class="tip">'+g.tip+'</div></div></div>';
+  }).join('')+'</div>';
+}
+function togS(i){hC();var el=document.getElementById('sg'+i);if(el)el.classList.toggle('open');}
+
+function rAdv(){
+  var lm={b:'基礎',m:'MARCH',s:'芝浦'};
+  return '<div><div class="sec-t">🎓 応用問題</div>'+
+  AV.map(function(p,i){
+    return '<div class="acard" id="ac'+i+'">'+
+    '<div class="ahdr" onclick="togA('+i+')"><div class="lv '+p.lv+'">'+lm[p.lv]+'</div>'+
+    '<div class="attl">'+p.t+'</div></div>'+
+    '<div class="abdy"><div class="aprob">'+p.p+'</div>'+
+    '<button class="rvl" onclick="revA('+i+',this)">👁 解答ステップを見る</button>'+
+    '<div class="asec" id="as'+i+'">'+
+    p.s.map(function(s){
+      return '<div class="astep"><div class="aslbl">'+s.l+'</div>'+
+      '<div class="aseq'+(s.hl?' hl':'')+'" style="white-space:pre-wrap">'+s.e+'</div>'+
+      (s.n?'<div class="anote">💬 '+s.n+'</div>':'')+
+      '</div>';
+    }).join('')+'</div></div></div>';
+  }).join('')+
+  '<div class="card" style="background:rgba(167,139,250,.05);border-color:rgba(167,139,250,.2);margin-top:4px">'+
+  '<p style="font-size:12px;line-height:1.9;color:#c4b5fd">'+
+  '<b>🧠 芝浦・法政・MARCH理系 出題傾向</b><br>'+
+  '✓ 半反応式→イオン反応式→化学反応式の変換<br>✓ 酸化数変化から酸化剤・還元剤の特定<br>'+
+  '✓ MnO₄⁻、Cr₂O₇²⁻の条件別反応<br>✓ SO₂・H₂O₂の両性（頻出！）<br>'+
+  '✓ Cu+硝酸（濃・希）の反応式<br>✓ e⁻のLCM計算</p></div></div>';
+}
+function togA(i){hC();var el=document.getElementById('ac'+i);if(el)el.classList.toggle('open');}
+function revA(i,btn){hC();btn.style.display='none';var el=document.getElementById('as'+i);if(el)el.classList.add('on');}
+
+/* ═══ TAB / RENDER ═══ */
+function render(){
+  try{
+    var m=document.getElementById('main');if(!m)return;
+    if(ct==='flash')m.innerHTML=rFlash();
+    else if(ct==='quiz')m.innerHTML=rQuiz();
+    else if(ct==='half')m.innerHTML=rHalf();
+    else if(ct==='guide')m.innerHTML=rGuide();
+    else if(ct==='adv')m.innerHTML=rAdv();
+    var pl=document.getElementById('pill');if(pl&&ct!=='quiz')pl.style.display='none';
+  }catch(e){}
+}
+function gTab(name,idx){
+  try{
+    hC();ct=name;
+    for(var i=0;i<5;i++){var t=document.getElementById('t'+i);if(t)t.classList.remove('on');}
+    var a=document.getElementById('t'+idx);if(a)a.classList.add('on');
+    render();
+  }catch(e){}
+}
+
+/* SWIPE */
+var sx=0,sy=0;
+document.addEventListener('touchstart',function(e){try{sx=e.touches[0].clientX;sy=e.touches[0].clientY;}catch(e2){}},{passive:true});
+document.addEventListener('touchend',function(e){
+  try{if(ct!=='flash')return;var dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>55){if(dx<0)nextF();else prevF();}}catch(e2){}
 },{passive:true});
 
-/* INIT */
-initQ();
-render();
+function dismissSad(){try{hC();var el=document.getElementById('sdld');if(el){el.classList.remove('on');el.style.display='none';}}catch(e){}}
+
+/* ═══ LOADING ═══ */
+(function(){
+  try{
+    initQ();
+    var fill=document.getElementById('ldfill'),txt=document.getElementById('ldtxt'),p=0;
+    var msgs=['読み込み中...','データ準備中...','もうすぐ完了...'];
+    var t=setInterval(function(){
+      try{
+        p+=Math.random()*18+10;if(p>100)p=100;
+        if(fill)fill.style.width=p+'%';
+        if(txt)txt.textContent=msgs[Math.min(Math.floor(p/35),2)];
+        if(p>=100){
+          clearInterval(t);
+          setTimeout(function(){
+            try{
+              var ld=document.getElementById('ld');
+              if(ld){ld.classList.add('out');setTimeout(function(){try{ld.style.display='none';}catch(e){}},500);}
+              render();
+            }catch(e){}
+          },200);
+        }
+      }catch(e){clearInterval(t);}
+    },70);
+    /* Font timeout → show sad mac */
+    setTimeout(function(){
+      try{
+        var test=document.createElement('span');
+        test.style.fontFamily='Syne';test.textContent='A';
+        document.body.appendChild(test);
+        var w=test.offsetWidth;document.body.removeChild(test);
+      }catch(e){}
+    },4000);
+  }catch(e){try{render();}catch(e2){}}
+})();
 </script>
 </body>
 </html>
