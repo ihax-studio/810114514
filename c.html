@@ -185,21 +185,39 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
 <div class="main" id="main"></div>
 
 <script>
-/* ═══ HAPTIC — safe wrapper, never throws ═══ */
+/* ═══ HAPTIC — iOS 18 safe, 1 fire per tap, never throws ═══ */
+/* ES Module import for ios-haptics (stable inline module) */
 (function(){
   try{
     var s=document.createElement('script');
     s.type='module';
-    s.innerHTML="try{import('https://cdn.skypack.dev/ios-haptics').then(function(m){window._hap=m.haptic;}).catch(function(){});}catch(e){}";
+    s.textContent="import{haptic}from'https://cdn.skypack.dev/ios-haptics';window._hap=haptic;";
     document.head.appendChild(s);
   }catch(e){}
 })();
-function h(){try{if(window._hap)window._hap();}catch(e){}}
-function hC(){try{if(window._hap)window._hap.confirm();}catch(e){}}
-function hE(){try{if(window._hap)window._hap.error();}catch(e){}}
-function hBurst(){try{for(var i=0;i<5;i++){(function(i){setTimeout(function(){hE();},i*30);})(i);}}catch(e){}}
-function hSeq(){try{[0,1,2,4,5,6].forEach(function(i){setTimeout(function(){hE();},i*220);});}catch(e){}}
-document.addEventListener('click',function(e){try{var t=e.target;if(t&&t.closest&&t.closest('button,.ch,.flip-s,.rvl,.shdr,.ahdr,.mkb'))return;h();}catch(e2){}});
+
+/* Timestamp gate: 150 ms window prevents any double-fire on iOS 18 */
+var _hapT=0;
+function _fire(t){
+  var now=Date.now();
+  if(now-_hapT<150)return; /* 同一タップの重複をブロック */
+  _hapT=now;
+  try{
+    if(!window._hap)return;
+    if(t==='c')window._hap.confirm();      /* 正解 */
+    else if(t==='e')window._hap.error();   /* 不正解 */
+    else window._hap();                     /* その他 */
+  }catch(e){}
+}
+function h(){_fire('');}    /* その他タップ */
+function hC(){_fire('c');}  /* 正解・確定 */
+function hE(){_fire('e');}  /* 不正解・エラー */
+/* hBurst / hSeq は廃止 → hC / hE に統一（iOS 18 連続hapticバグ回避） */
+
+/* グローバルクリックリスナー：ボタン系以外の要素に h() を当てる */
+document.addEventListener('click',function(e){
+  try{var t=e.target;if(t&&t.closest&&t.closest('button,.ch,.flip-s,.rvl,.shdr,.ahdr,.mkb'))return;h();}catch(e2){}
+});
 
 /* ═══ MARKS ═══ */
 var marks={};
@@ -389,8 +407,8 @@ function ansQ(idx){
   if(qd)return;qd=true;
   var q=qsh[qi],btns=document.querySelectorAll('.ch');
   btns.forEach(function(b){b.classList.add('dis');});
-  if(idx===q.a){btns[idx].classList.add('ok');hBurst();qs++;}
-  else{btns[idx].classList.add('ng');if(btns[q.a])btns[q.a].classList.add('ok');hSeq();}
+  if(idx===q.a){btns[idx].classList.add('ok');hC();qs++;}    /* 正解 → confirm */
+  else{btns[idx].classList.add('ng');if(btns[q.a])btns[q.a].classList.add('ok');hE();} /* 不正解 → error */
   var ex=document.getElementById('exp');if(ex)ex.classList.add('on');
   var nw=document.getElementById('nw');if(nw)nw.style.display='block';
   var pl=document.getElementById('pill');if(pl)pl.textContent=qs+'/'+(qi+1);
