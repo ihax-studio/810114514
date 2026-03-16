@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <!-- three.jsを読み込む -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js"
+      }
+    }
+  </script>
+  <!-- index.jsを読み込む -->
+  <script type="module" src="index.js"></script>
+</head>
+<body>
+
+  <canvas id="myCanvas"></canvas>
+  <div id="scoreDisplay" style="
+  position:absolute; top:20px; left:20px; font-size:24px; color:#fff;
+  background: rgba(0,0,0,0.5); padding:10px; border-radius:8px;
+">Score: 0</div>
+</body>
+</html>
