@@ -1,850 +1,160 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>英語究極参考書</title>
-<style>
-:root {
-  --g1:#5b6ef5;--g2:#9b59f5;--g3:#f059b5;
-  --glass:rgba(255,255,255,0.18);
-  --glass2:rgba(255,255,255,0.88);
-  --border:rgba(255,255,255,0.35);
-  --blur:blur(22px);
-  --r:18px;--r-sm:12px;
-  --text:#1a1035;--sub:#5a5370;
-  --accent:#5b6ef5;--accent2:#9b59f5;--accent3:#f059b5;
-  --green:#22c55e;--orange:#f59e0b;--red:#ef4444;
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{
-  font-family:-apple-system,'Hiragino Sans',sans-serif;
-  background:linear-gradient(145deg,#667eea 0%,#764ba2 40%,#f093fb 100%);
-  min-height:100vh;min-height:100dvh;
-  padding-bottom:calc(80px + env(safe-area-inset-bottom));
-  color:var(--text);overflow-x:hidden;
-}
-/* HEADER */
-.hdr{
-  position:sticky;top:0;z-index:100;
-  padding:calc(12px + env(safe-area-inset-top)) 18px 10px;
-  background:rgba(255,255,255,0.12);
-  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
-  border-bottom:1px solid var(--border);
-}
-.hdr-row{display:flex;align-items:center;justify-content:space-between}
-.hdr h1{font-size:20px;font-weight:800;color:#fff;letter-spacing:-0.5px}
-.hdr h1 span{opacity:.7;font-weight:400;font-size:13px;margin-left:6px}
-.score-chip{background:rgba(255,255,255,0.25);color:#fff;font-size:12px;font-weight:700;padding:4px 12px;border-radius:100px;border:1px solid var(--border)}
-/* TABS */
-.tabs{
-  display:flex;gap:8px;padding:10px 16px;
-  overflow-x:auto;scrollbar-width:none;
-}
-.tabs::-webkit-scrollbar{display:none}
-.tab{
-  flex-shrink:0;padding:8px 18px;border-radius:100px;
-  border:1px solid var(--border);
-  background:rgba(255,255,255,0.15);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  color:rgba(255,255,255,0.85);font-size:13px;font-weight:600;
-  cursor:pointer;transition:all .2s;
-}
-.tab.on{background:#fff;color:var(--accent)}
-/* SECTIONS */
-.sec{display:none;padding:0 14px}
-.sec.on{display:block}
-/* CARD */
-.card{background:var(--glass2);border-radius:var(--r);padding:18px;margin-bottom:10px;box-shadow:0 4px 24px rgba(0,0,0,.09)}
-.card-glass{background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:10px}
-/* GRAMMAR */
-.g-tag{display:inline-block;background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;margin-bottom:10px}
-.g-level{font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;display:inline-block;margin-left:6px}
-.lv-a{background:var(--green);color:#fff}
-.lv-b{background:var(--orange);color:#fff}
-.lv-c{background:var(--red);color:#fff}
-.g-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:6px}
-.g-body{font-size:14px;color:var(--sub);line-height:1.75}
-.ex{background:rgba(91,110,245,.08);border-left:3px solid var(--accent);padding:10px 14px;border-radius:0 12px 12px 0;margin:10px 0;font-size:14px}
-.ex-e{font-weight:600;color:var(--text)}
-.ex-j{color:var(--sub);font-size:13px;margin-top:3px}
-.ex-tip{font-size:12px;color:var(--accent2);margin-top:4px;font-style:italic}
-.acc{background:rgba(155,89,245,.08);border-left:3px solid var(--accent2);padding:10px 14px;border-radius:0 12px 12px 0;margin:8px 0;font-size:13px;color:var(--sub)}
-.acc b{color:var(--accent2)}
-/* Accordion */
-.acc-item{border:1px solid rgba(91,110,245,.15);border-radius:var(--r-sm);margin-bottom:8px;overflow:hidden}
-.acc-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--glass2);cursor:pointer;font-weight:600;font-size:15px}
-.acc-body{display:none;padding:0 16px 16px;background:var(--glass2);font-size:14px;color:var(--sub);line-height:1.75;border-top:1px solid rgba(91,110,245,.08)}
-.acc-body.op{display:block}
-.arr{transition:transform .2s;color:var(--sub)}
-.arr.op{transform:rotate(180deg)}
-/* VOCAB */
-.v-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.v-card{background:var(--glass2);border-radius:var(--r-sm);padding:14px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 2px 12px rgba(0,0,0,.07)}
-.v-card:active{transform:scale(.96);box-shadow:none}
-.v-word{font-size:16px;font-weight:800;color:var(--text)}
-.v-pos{font-size:9px;font-weight:700;padding:1px 7px;border-radius:100px;display:inline-block;margin:3px 0}
-.pos-n{background:#dbeafe;color:#1d4ed8}
-.pos-v{background:#dcfce7;color:#15803d}
-.pos-adj{background:#fef9c3;color:#a16207}
-.pos-adv{background:#fce7f3;color:#9d174d}
-.pos-prep{background:#ede9fe;color:#6d28d9}
-.v-mean{font-size:13px;color:var(--sub)}
-/* Filter pills */
-.filter-row{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
-.filter-row::-webkit-scrollbar{display:none}
-.f-pill{flex-shrink:0;padding:6px 14px;border-radius:100px;font-size:12px;font-weight:600;border:1.5px solid rgba(91,110,245,.3);background:#fff;color:var(--sub);cursor:pointer;transition:all .15s}
-.f-pill.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-/* MODAL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:500;align-items:flex-end}
-.overlay.op{display:flex}
-.modal{width:100%;max-height:82vh;overflow-y:auto;background:rgba(255,255,255,.97);backdrop-filter:blur(30px);border-radius:28px 28px 0 0;padding:20px 20px calc(32px + env(safe-area-inset-bottom));animation:up .3s cubic-bezier(.34,1.56,.64,1)}
-@keyframes up{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-handle{width:40px;height:4px;background:#e0e0e0;border-radius:100px;margin:0 auto 18px}
-.m-word{font-size:32px;font-weight:800;color:var(--text)}
-.m-pron{font-size:14px;color:var(--sub);margin:4px 0 12px}
-.m-sec{margin-top:16px}
-.m-sec-t{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
-.m-mean-main{font-size:18px;font-weight:600;color:var(--text);margin-bottom:6px}
-.m-derivs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.m-drv{background:rgba(91,110,245,.1);color:var(--accent);font-size:12px;padding:3px 10px;border-radius:100px}
-.m-ex-box{background:rgba(91,110,245,.07);border-radius:12px;padding:12px;margin-top:6px;font-size:13px}
-.m-ex-e{font-weight:600;color:var(--text)}
-.m-ex-j{color:var(--sub);margin-top:4px}
-.m-idioms{margin-top:6px}
-.m-idiom{padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px}
-.m-idiom:last-child{border:none}
-.m-idiom-e{font-weight:600;color:var(--text)}
-.m-idiom-j{color:var(--sub);font-size:12px}
-/* PAST EXAM */
-.exam-hero{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;border-radius:var(--r);padding:18px;margin-bottom:12px}
-.exam-hero h2{font-size:19px;font-weight:800;margin-bottom:4px}
-.exam-hero p{font-size:13px;opacity:.8}
-.exam-tabs{display:flex;gap:8px;margin-bottom:14px}
-.e-tab{flex:1;padding:10px;border-radius:var(--r-sm);background:rgba(255,255,255,.2);color:#fff;font-weight:600;font-size:13px;cursor:pointer;text-align:center;border:1px solid var(--border);transition:all .15s}
-.e-tab.on{background:#fff;color:var(--accent)}
-.ans-tbl{width:100%;border-collapse:collapse;font-size:13px}
-.ans-tbl th{background:rgba(91,110,245,.1);padding:8px 6px;text-align:center;font-size:11px;font-weight:700;color:var(--sub)}
-.ans-tbl td{padding:8px 6px;text-align:center;border-bottom:1px solid #f4f4f6}
-.ans-tbl tr:hover td{background:rgba(91,110,245,.04)}
-.badge-pt{background:var(--accent);color:#fff;font-size:9px;padding:1px 5px;border-radius:100px;margin-left:3px}
-.badge-star{background:var(--accent3);color:#fff;font-size:9px;padding:1px 5px;border-radius:100px;margin-left:3px}
-.sec-break{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;font-weight:700;font-size:12px;padding:4px 10px}
-.q-section{margin-top:18px}
-.q-box{background:rgba(91,110,245,.06);border-radius:var(--r-sm);padding:14px;margin-bottom:10px}
-.q-box h3{font-size:14px;font-weight:700;margin-bottom:6px;color:var(--text)}
-.q-box p{font-size:13px;color:var(--sub);line-height:1.6}
-/* UNIV */
-.uni-hero{border-radius:var(--r);overflow:hidden;margin-bottom:12px;position:relative}
-.uni-hero-inner{padding:22px 20px;color:#fff;position:relative;z-index:1}
-.uni-hero-inner h2{font-size:21px;font-weight:800}
-.uni-hero-inner p{font-size:13px;opacity:.8;margin-top:4px}
-.shibaura .uni-hero{background:linear-gradient(135deg,#1e40af,#3b82f6)}
-.hosei .uni-hero{background:linear-gradient(135deg,#9f1239,#ec4899)}
-.trend-item{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid rgba(91,110,245,.1);font-size:14px}
-.t-icon{font-size:20px;flex-shrink:0;width:28px;text-align:center}
-.t-text b{color:var(--text);display:block;margin-bottom:2px}
-.t-text span{color:var(--sub);font-size:13px}
-.method-box{background:linear-gradient(135deg,rgba(91,110,245,.1),rgba(155,89,245,.1));border-radius:var(--r-sm);padding:14px;margin-top:10px}
-.method-box h4{font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:8px}
-.method-box li{font-size:13px;color:var(--sub);margin-bottom:5px;padding-left:16px;position:relative}
-.method-box li::before{content:"✓";position:absolute;left:0;color:var(--green)}
-/* SEARCH BAR */
-.srch-bar{
-  position:fixed;bottom:0;left:0;right:0;z-index:400;
-  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
-  background:rgba(255,255,255,0.2);
-  backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
-  border-top:1px solid var(--border);
-}
-.srch-inner{display:flex;gap:10px;align-items:center}
-.srch-inp{
-  flex:1;background:rgba(255,255,255,.95);
-  border:1.5px solid rgba(91,110,245,.2);
-  border-radius:100px;padding:12px 20px;
-  font-size:15px;outline:none;
-  box-shadow:0 4px 20px rgba(0,0,0,.1);
-  transition:border-color .2s;
-}
-.srch-inp:focus{border-color:var(--accent)}
-.srch-inp::placeholder{color:#bbb}
-.srch-btn{
-  width:46px;height:46px;border-radius:100px;
-  background:#fff;border:none;font-size:20px;cursor:pointer;
-  box-shadow:0 4px 15px rgba(0,0,0,.15);flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-}
-/* SEARCH RESULTS */
-.srch-res{
-  position:fixed;bottom:calc(72px + env(safe-area-inset-bottom));
-  left:14px;right:14px;max-height:55vh;overflow-y:auto;
-  background:rgba(255,255,255,.97);backdrop-filter:blur(20px);
-  border-radius:20px;box-shadow:0 -8px 40px rgba(0,0,0,.18);
-  z-index:390;display:none;
-}
-.srch-res.op{display:block}
-.srch-res-hd{padding:12px 16px 6px;font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.5px}
-.srch-res-item{padding:12px 16px;border-bottom:1px solid #f4f4f6;cursor:pointer;display:flex;gap:10px;align-items:center}
-.srch-res-item:last-child{border:none}
-.srch-res-item:active{background:rgba(91,110,245,.05)}
-.sri-word{font-size:15px;font-weight:700;color:var(--text)}
-.sri-mean{font-size:13px;color:var(--sub)}
-.srch-empty{padding:20px;text-align:center;color:var(--sub);font-size:14px}
-/* SECTION HEADERS */
-.s-hdr{display:flex;justify-content:space-between;align-items:center;margin:16px 0 10px}
-.s-hdr h2{font-size:18px;font-weight:800;color:#fff}
-.s-hdr span{font-size:12px;color:rgba(255,255,255,.7)}
-/* Progress */
-.prog-bar{height:6px;background:rgba(255,255,255,.2);border-radius:100px;margin-top:8px;overflow:hidden}
-.prog-fill{height:100%;background:#fff;border-radius:100px;transition:width .4s}
-/* Utility */
-.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
-.gap-btn{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.chip{display:inline-block;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;background:rgba(91,110,245,.1);color:var(--accent)}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Minimal Translator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400&display=swap');
+        
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #ffffff;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+        }
+
+        /* 翻訳結果の表示アニメーション */
+        #result-container {
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            transform: translateY(10px) scale(0.98);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #result-container.show {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .input-shadow {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        /* インタラクション: scaleのみに限定 */
+        .scale-btn {
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+        .scale-btn:hover {
+            transform: scale(1.05);
+        }
+        .scale-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 入力欄専用のfocus時scale */
+        #translate-input:focus {
+            transform: scale(1.02);
+        }
+    </style>
 </head>
-<body>
+<body class="flex flex-col items-center justify-center">
 
-<header class="hdr">
-  <div class="hdr-row">
-    <h1>英語究極参考書 <span>Phase 1</span></h1>
-    <div class="score-chip">目標 80点+</div>
-  </div>
-</header>
-
-<nav class="tabs">
-  <button class="tab on" onclick="switchTab('grammar',this)">📚 文法</button>
-  <button class="tab" onclick="switchTab('vocab',this)">🔤 単語</button>
-  <button class="tab" onclick="switchTab('exam',this)">📝 共通テスト</button>
-  <button class="tab" onclick="switchTab('univ',this)">🏫 大学対策</button>
-</nav>
-
-<!-- ===== GRAMMAR ===== -->
-<section id="grammar" class="sec on">
-  <div class="s-hdr"><h2>文法マスター</h2><span>基礎→MARCH対応</span></div>
-
-  <!-- Be動詞 -->
-  <div class="card">
-    <div><span class="g-tag">超基礎</span><span class="g-level lv-a">基礎A</span></div>
-    <div class="g-title">Be動詞 ── 「イコール」の魔法の言葉</div>
-    <div class="g-body">
-      <b>一言で言うと：</b>「＝」です。<br><br>
-      数学の「＝」と完全に同じ感覚。<br>
-      「I am a student」は「私 ＝ 学生」。それだけ！
-    </div>
-    <div class="ex"><span class="ex-e">I am hungry.</span><span class="ex-j">私は空腹だ。（私 ＝ 腹ペコ状態）</span><span class="ex-tip">💡 am / is / are は全部「＝」。主語によって変わるだけ</span></div>
-    <div class="ex"><span class="ex-e">She <b>is</b> a doctor. / They <b>are</b> students.</span><span class="ex-j">彼女は医者だ。／彼らは学生だ。</span></div>
-    <div class="acc"><b>変化表：</b> I→am ／ He/She/It→is ／ You/We/They→are</div>
-  </div>
-
-  <!-- There is/are -->
-  <div class="card">
-    <div><span class="g-tag">超基礎</span><span class="g-level lv-a">基礎A</span></div>
-    <div class="g-title">There is / There are ── 「〜がある」の合言葉</div>
-    <div class="g-body">「何かが存在する」ことを伝えるときのテンプレ。<br>「猫が1匹→There is」「猫が複数→There are」。</div>
-    <div class="ex"><span class="ex-e">There <b>is</b> a cat on the table.</span><span class="ex-j">テーブルの上に猫がいる。（1匹）</span></div>
-    <div class="ex"><span class="ex-e">There <b>are</b> many stars in the sky.</span><span class="ex-j">空にたくさんの星がある。（複数）</span></div>
-    <div class="acc"><b>💡 コツ：</b>「〜にXがある」＝ There is/are X + 場所。 主語はXの方！</div>
-  </div>
-
-  <!-- a/the -->
-  <div class="card">
-    <div><span class="g-tag">超基礎</span><span class="g-level lv-a">基礎A</span></div>
-    <div class="g-title">冠詞 a / the ── 「どの」「その」の温度感</div>
-    <div class="g-body">
-      <b>a</b> ＝「あるひとつの〜」（初登場・どれでもいい1個）<br>
-      <b>the</b> ＝「その〜」（お互いに「どれか分かってる」もの）
-    </div>
-    <div class="ex"><span class="ex-e">I have <b>a</b> dog. The dog is cute.</span><span class="ex-j">犬を（1匹）飼っている。その犬はかわいい。</span><span class="ex-tip">💡 最初に出てきたらa、2回目以降はthe</span></div>
-    <div class="acc"><b>the を使う場面：</b> ①世界に1つ（the sun／the moon）②さっき話題に出た ③「あれでしょ」と分かり合えるもの</div>
-  </div>
-
-  <!-- 現在時制 -->
-  <div class="acc-item">
-    <div class="acc-head" onclick="toggleAcc(this)"><span>⏰ 時制① 現在形・現在進行形 <span class="g-level lv-a">基礎A</span></span><span class="arr">▾</span></div>
-    <div class="acc-body">
-      <b>現在形</b>＝習慣・真実・事実（いつもそうなこと）<br>
-      <b>現在進行形</b>＝「今まさに〜している最中」
-      <div class="ex"><span class="ex-e">She <b>plays</b> tennis every Sunday.</span><span class="ex-j">彼女は毎週日曜にテニスをする。（習慣）</span></div>
-      <div class="ex"><span class="ex-e">She <b>is playing</b> tennis now.</span><span class="ex-j">彼女は今テニスをしている最中だ。</span></div>
-      <div class="acc"><b>公式：</b> be動詞 + 動詞-ing ＝ 今やってる最中</div>
-    </div>
-  </div>
-
-  <!-- 過去形 -->
-  <div class="acc-item">
-    <div class="acc-head" onclick="toggleAcc(this)"><span>🕰 時制② 過去形・過去進行形 <span class="g-level lv-a">基礎A</span></span><span class="arr">▾</span></div>
-    <div class="acc-body">
-      <b>過去形</b>：動詞の末尾に-edをつける（規則変化）か、不規則変化
-      <div class="ex"><span class="ex-e">I <b>studied</b> last night.</span><span class="ex-j">昨夜勉強した。</span></div>
-      <div class="ex"><span class="ex-e">I <b>was studying</b> when she called.</span><span class="ex-j">彼女が電話してきたとき、勉強していた最中だった。</span><span class="ex-tip">💡 「〜していた最中」= was/were + -ing</span></div>
-    </div>
-  </div>
-
-  <!-- 現在完了 -->
-  <div class="acc-item">
-    <div class="acc-head" onclick="toggleAcc(this)"><span>✅ 現在完了 have/has + 過去分詞 <span class="g-level lv-b">基礎B</span></span><span class="arr">▾</span></div>
-    <div class="acc-body">
-      <b>「過去〜現在まで続く何か」</b>を表す。過去形との違いが超重要！
-      <div class="ex"><span class="ex-e">I <b>have lived</b> here for 3 years.</span><span class="ex-j">（今も住んでいる）ここに3年間住んでいる。</span></div>
-      <div class="ex"><span class="ex-e">I <b>lived</b> here for 3 years.</span><span class="ex-j">（今は住んでいない可能性あり）ここに3年住んでいた。</span></div>
-      <div class="acc">
-        <b>用法4つ：</b><br>
-        ① 経験「〜したことがある」ever/never/before<br>
-        ② 継続「ずっと〜している」for/since<br>
-        ③ 完了「〜してしまった」already/just/yet<br>
-        ④ 結果「〜して（今は）〜だ」
-      </div>
-    </div>
-  </div>
-
-  <!-- 不定詞 -->
-  <div class="acc-item">
-    <div class="acc-head" onclick="toggleAcc(this)"><span>🎯 不定詞 to + 動詞の原形 <span class="g-level lv-b">基礎B</span></span><span class="arr">▾</span></div>
-    <div class="acc-body">
-      <b>「これからすること・したいこと」</b>のイメージ。3つの使い方がある。
-      <div class="ex"><span class="ex-e">I want <b>to travel</b> abroad.</span><span class="ex-j">海外旅行したい。（名詞的用法：主語・目的語になる）</span></div>
-      <div class="ex"><span class="ex-e">I need money <b>to buy</b> a new phone.</span><span class="ex-j">新しいスマホを買うためのお金が必要。（副詞的：目的）</span></div>
-      <div class="ex"><span class="ex-e">I have a lot of homework <b>to do</b>.</span><span class="ex-j">やるべき宿題がたくさんある。（形容詞的：前の名詞を修飾）</span></div>
-    </div>
-  </div>
-
-  <!-- 分詞・関係詞 -->
-  <div class="acc-item">
-    <div class="acc-head" onclick="toggleAcc(this)"><span>🔗 関係代名詞 who/which/that <span class="g-level lv-b">基礎B</span></span><span class="arr">▾</span></div>
-    <div class="acc-body">
-      <b>「名詞を後ろから説明する」</b>ための接続詞。「〜する（した）〔名詞〕」
-      <div class="ex"><span class="ex-e">The boy <b>who plays guitar</b> is my friend.</span><span class="ex-j">ギターを弾いている（その）男の子は友達だ。</span></div>
-      <div class="ex"><span class="ex-e">This is the book <b>that I read last week</b>.</span><span class="ex-j">これが先週読んだ本だ。</span></div>
-      <div class="acc"><b>使い分け：</b> 人→who ／ 物・動物→which ／ どちらも→that</div>
-    </div>
-  </div>
-
-  <!-- 仮定法 -->
-  <div class="acc-item">
-    <div class="acc-head" onclick="toggleAcc(this)"><span>💭 仮定法 「もし〜なら…なのに」 <span class="g-level lv-c">発展</span></span><span class="arr">▾</span></div>
-    <div class="acc-body">
-      <b>現実と違うことを想像する</b>ときに使う。時制を1段過去にズラすのがポイント。
-      <div class="ex"><span class="ex-e">If I <b>were</b> rich, I <b>would buy</b> a yacht.</span><span class="ex-j">（今は金持ちじゃないが）もし金持ちだったらヨットを買うのに。</span></div>
-      <div class="ex"><span class="ex-e">If I <b>had studied</b> harder, I <b>would have passed</b>.</span><span class="ex-j">（過去に）もっと勉強していたら合格していたのに。</span></div>
-      <div class="acc"><b>公式：</b> 仮定法過去 → If + 過去形, would/could + 原形<br>仮定法過去完了 → If + had+p.p., would have + p.p.</div>
-    </div>
-  </div>
-
-  <!-- 分詞構文 -->
-  <div class="acc-item">
-    <div class="acc-head" onclick="toggleAcc(this)"><span>🧩 分詞構文 <span class="g-level lv-c">発展</span></span><span class="arr">▾</span></div>
-    <div class="acc-body">
-      接続詞を省いて分詞で副詞節を作る。読解では「〜して、〜しながら、〜なので」と訳す。
-      <div class="ex"><span class="ex-e"><b>Walking</b> home, I met her.</span><span class="ex-j">家に帰りながら、彼女に会った。</span></div>
-      <div class="ex"><span class="ex-e"><b>Having finished</b> homework, he watched TV.</span><span class="ex-j">宿題を終えてから、彼はテレビを見た。</span></div>
-      <div class="acc"><b>共通テストの読解で頻出！</b> 「Being + 形容詞/過去分詞」はBeingが省略されることも。</div>
-    </div>
-  </div>
-
-  <!-- 比較 -->
-  <div class="acc-item">
-    <div class="acc-head" onclick="toggleAcc(this)"><span>📊 比較表現（比較級・最上級・同等比較） <span class="g-level lv-b">基礎B</span></span><span class="arr">▾</span></div>
-    <div class="acc-body">
-      <div class="ex"><span class="ex-e">He is <b>taller than</b> me.</span><span class="ex-j">彼は私より背が高い。（比較級：-er than / more ～ than）</span></div>
-      <div class="ex"><span class="ex-e">She is <b>the tallest</b> in the class.</span><span class="ex-j">彼女はクラスで一番背が高い。（最上級：the -est / the most ～）</span></div>
-      <div class="ex"><span class="ex-e">I am <b>as tall as</b> you.</span><span class="ex-j">私はあなたと同じくらいの背丈だ。（同等比較：as ～ as）</span></div>
-      <div class="acc"><b>重要熟語：</b> no more than（〜にすぎない）/ no less than（〜もの）/ the more A, the more B（AすればするほどBだ）</div>
-    </div>
-  </div>
-
-  <!-- 助動詞 -->
-  <div class="acc-item">
-    <div class="acc-head" onclick="toggleAcc(this)"><span>🎛 助動詞のニュアンス <span class="g-level lv-b">基礎B</span></span><span class="arr">▾</span></div>
-    <div class="acc-body">
-      <div class="acc">
-        <b>can</b> ＝ 能力「〜できる」・可能性「〜かも」<br>
-        <b>may</b> ＝ 許可「〜してもいい」・推量「〜かもしれない」（50%）<br>
-        <b>must</b> ＝ 義務「〜しなければ」・強い確信「〜に違いない」（90%）<br>
-        <b>should</b> ＝ 義務「〜すべき」・当然「〜はずだ」<br>
-        <b>would</b> ＝ 過去の習慣・丁寧な依頼・仮定法
-      </div>
-      <div class="ex"><span class="ex-e">He <b>must be</b> tired.</span><span class="ex-j">彼は疲れているに違いない。（推量・確信）</span></div>
-      <div class="ex"><span class="ex-e">You <b>must not</b> smoke here.</span><span class="ex-j">ここでタバコを吸ってはいけない。（禁止）</span></div>
-    </div>
-  </div>
-
-  <!-- 受動態 -->
-  <div class="acc-item">
-    <div class="acc-head" onclick="toggleAcc(this)"><span>🔄 受動態「〜される」 <span class="g-level lv-a">基礎A</span></span><span class="arr">▾</span></div>
-    <div class="acc-body">
-      <b>「される」</b>を表す。be動詞 + 過去分詞（p.p.）が公式。
-      <div class="ex"><span class="ex-e">English <b>is spoken</b> all over the world.</span><span class="ex-j">英語は世界中で話されている。</span></div>
-      <div class="ex"><span class="ex-e">This temple <b>was built</b> 500 years ago.</span><span class="ex-j">このお寺は500年前に建てられた。</span></div>
-      <div class="acc"><b>注意：</b> by 〜 (〜によって)は省略されることが多い。共通テストではbyなしの受動態が頻出。</div>
-    </div>
-  </div>
-
-  <div class="card-glass mt12">
-    <div style="color:#fff;font-size:13px;line-height:1.8">
-      📌 <b>次フェーズで追加予定：</b><br>
-      ・強調構文 It is A that B<br>
-      ・倒置・省略・同格<br>
-      ・動名詞 vs 不定詞の使い分け<br>
-      ・名詞構文・無生物主語<br>
-      ・間接話法・話法の転換
-    </div>
-  </div>
-</section>
-
-<!-- ===== VOCAB ===== -->
-<section id="vocab" class="sec">
-  <div class="s-hdr"><h2>英単語</h2><span id="vocab-count">0語収録</span></div>
-  <div class="filter-row" id="v-filters">
-    <button class="f-pill on" onclick="filterVocab('all',this)">すべて</button>
-    <button class="f-pill" onclick="filterVocab('n',this)">名詞</button>
-    <button class="f-pill" onclick="filterVocab('v',this)">動詞</button>
-    <button class="f-pill" onclick="filterVocab('adj',this)">形容詞</button>
-    <button class="f-pill" onclick="filterVocab('adv',this)">副詞</button>
-    <button class="f-pill" onclick="filterVocab('lv1',this)">★基礎</button>
-    <button class="f-pill" onclick="filterVocab('lv2',this)">★★中級</button>
-    <button class="f-pill" onclick="filterVocab('lv3',this)">★★★発展</button>
-  </div>
-  <div class="v-grid" id="v-grid"></div>
-</section>
-
-<!-- ===== EXAM ===== -->
-<section id="exam" class="sec">
-  <div class="exam-hero">
-    <h2>📝 共通テスト リーディング</h2>
-    <p>2024年度 本試験・追試験 解答一覧＋解説</p>
-  </div>
-
-  <div class="exam-tabs">
-    <button class="e-tab on" onclick="switchExam('hon',this)">2024 本試験</button>
-    <button class="e-tab" onclick="switchExam('tsu',this)">2024 追試験</button>
-  </div>
-
-  <div id="exam-hon">
-    <div class="card">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:12px">📊 解答一覧（リーディング100点）</h3>
-      <table class="ans-tbl">
-        <thead><tr><th>問題</th><th>問</th><th>解答番号</th><th>正解</th><th>配点</th></tr></thead>
-        <tbody>
-          <tr class="sec-break"><td colspan="5">第1問（10点）A</td></tr>
-          <tr><td>第1問A</td><td>問1</td><td>1</td><td><b>4</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問2</td><td>2</td><td><b>1</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第1問 B</td></tr>
-          <tr><td>第1問B</td><td>問1</td><td>3</td><td><b>4</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問2</td><td>4</td><td><b>3</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問3</td><td>5</td><td><b>1</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第2問（20点）A</td></tr>
-          <tr><td>第2問A</td><td>問1</td><td>6</td><td><b>1</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問2</td><td>7</td><td><b>2</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問3</td><td>8</td><td><b>1</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問4</td><td>9</td><td><b>4</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問5</td><td>10</td><td><b>2</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第2問 B</td></tr>
-          <tr><td>第2問B</td><td>問1</td><td>11</td><td><b>1</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問2</td><td>12</td><td><b>1</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問3</td><td>13</td><td><b>1</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問4</td><td>14</td><td><b>3</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問5</td><td>15</td><td><b>2</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第3問（15点）A</td></tr>
-          <tr><td>第3問A</td><td>問1</td><td>16</td><td><b>2</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問2</td><td>17</td><td><b>2</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第3問 B</td></tr>
-          <tr><td>第3問B</td><td rowspan="4">問1</td><td>18</td><td><b>1</b></td><td rowspan="4">3<span class="badge-star">*</span></td></tr>
-          <tr><td></td><td>19</td><td><b>2</b></td></tr>
-          <tr><td></td><td>20</td><td><b>3</b></td></tr>
-          <tr><td></td><td>21</td><td><b>4</b></td></tr>
-          <tr><td></td><td>問2</td><td>22</td><td><b>3</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問3</td><td>23</td><td><b>2</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第4問（16点）</td></tr>
-          <tr><td>第4問</td><td>問1</td><td>24</td><td><b>3</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問2</td><td>25</td><td><b>4</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問3</td><td>26</td><td><b>4</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問4</td><td>27</td><td><b>5</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td></td><td>28</td><td><b>4</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問5</td><td>29</td><td><b>3</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第5問（15点）</td></tr>
-          <tr><td>第5問</td><td rowspan="2">問1</td><td>30</td><td><b>4</b></td><td rowspan="2">3<span class="badge-star">*</span></td></tr>
-          <tr><td></td><td>31</td><td><b>5</b></td></tr>
-          <tr><td></td><td rowspan="3">問2</td><td>32</td><td><b>1</b></td><td rowspan="3">3<span class="badge-star">*</span></td></tr>
-          <tr><td></td><td>33</td><td><b>2</b></td></tr>
-          <tr><td></td><td>34</td><td><b>2</b></td></tr>
-          <tr><td></td><td>問3</td><td>35</td><td><b>1</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問4</td><td>36</td><td><b>2</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問5</td><td>37</td><td><b>3</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td></td><td>38</td><td><b>2</b></td><td>—</td></tr>
-          <tr class="sec-break"><td colspan="5">第6問（24点）A</td></tr>
-          <tr><td>第6問A</td><td rowspan="2">問1</td><td>39</td><td><b>6</b></td><td rowspan="2">3<span class="badge-star">*</span></td></tr>
-          <tr><td></td><td>40</td><td><b>2</b></td></tr>
-          <tr><td></td><td>問2</td><td>41</td><td><b>1</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問3</td><td>42</td><td><b>3</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問4</td><td>43</td><td><b>1</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第6問 B</td></tr>
-          <tr><td>第6問B</td><td>問1</td><td>44</td><td><b>4</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td></td><td>45</td><td><b>4</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問2</td><td>46</td><td><b>3</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td rowspan="2">問3</td><td>47</td><td><b>2-3</b></td><td rowspan="2">3<span class="badge-star">*</span></td></tr>
-          <tr><td></td><td>（順不同）</td><td></td></tr>
-          <tr><td></td><td>問4</td><td>48</td><td><b>3</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問5</td><td>49</td><td><b>5</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-        </tbody>
-      </table>
-      <p style="font-size:11px;color:var(--sub);margin-top:10px">※＊は全部正解の場合のみ点を与える。　※ハイフンでつながれた正解は順序を問わない。</p>
-    </div>
-
-    <div class="card">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:12px">📖 問題の概要と解き方のコツ</h3>
-      <div class="q-section">
-        <div class="q-box">
-          <h3>第1問A ハイキングコースのチラシ</h3>
-          <p>チラシのキーワード「cross the Jaybird Bridge」→スタート地点への道案内→正解②</p>
-          <p style="margin-top:6px">両コースに共通する動物遭遇のチャンス→右コースdeer・eagles、左コースbirds・cattle→④</p>
+    <div id="tap-overlay" class="absolute inset-0 flex items-center justify-center p-8 z-0">
+        <div id="result-container" class="text-center w-full max-w-2xl">
+            <h1 id="translated-text" class="text-3xl md:text-5xl font-light text-gray-800 leading-tight break-words">
+                </h1>
         </div>
-        <div class="q-box">
-          <h3>第1問B ボランティア募集</h3>
-          <p>「many volunteers become pet owners」→問1の答え①（affection）。Cat Homeは"temporary home"で"People can look for a cat to adopt"→問2は③。</p>
+    </div>
+
+    <div class="fixed bottom-12 w-full max-w-md px-6 flex items-center gap-4 z-20">
+        
+        <div id="btn-search" class="scale-btn text-gray-400 hover:text-gray-600">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
         </div>
-        <div class="q-box">
-          <h3>第2問B P-to-Pポイント制度</h3>
-          <p>2日間フリーパス＝1,000点→問1②。「週次メール」→問3③。政府の希望：倍増→②。</p>
+
+        <div class="relative flex-1">
+            <input type="text" id="translate-input" 
+                placeholder="Text here..." 
+                class="w-full py-4 px-8 rounded-full border-none bg-white input-shadow text-center text-lg outline-none transition-transform duration-200 focus:ring-2 focus:ring-gray-100">
         </div>
-        <div class="q-box">
-          <h3>第5問 Everlasting Journey（要約）</h3>
-          <p>主人公Keitaは計画性が低く（can be at a loss）冒険好き（welcomes adventurous）。Shinjiの描写：最初は頼もしく、後に苛立ち、最後に共感。仏像エピソード＝異なる側面を受け入れる象徴。</p>
+
+        <div id="btn-ai" class="scale-btn text-gray-400 hover:text-gray-600">
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8Z"/><path d="M12 12L16 10"/><path d="M12 12L8 14"/></svg>
         </div>
-        <div class="q-box">
-          <h3>第6問 Belief Perseverance（信念固執）</h3>
-          <p>「positive or negative outcomes」→問1②。3段落：Semmelweis事件の社会的結果→②。4段落：専門家の意見を活用→④。実践：新情報を即座に否定しないこと。</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="exam-tsu" style="display:none">
-    <div class="card">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:12px">📊 解答一覧（2024 追試験）</h3>
-      <table class="ans-tbl">
-        <thead><tr><th>問題</th><th>問</th><th>解答番号</th><th>正解</th><th>配点</th></tr></thead>
-        <tbody>
-          <tr class="sec-break"><td colspan="5">第1問（10点）A</td></tr>
-          <tr><td>第1問A</td><td>問1</td><td>1</td><td><b>2</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問2</td><td>2</td><td><b>4</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第1問 B</td></tr>
-          <tr><td>第1問B</td><td>問1</td><td>3</td><td><b>1</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問2</td><td>4</td><td><b>3</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問3</td><td>5</td><td><b>2</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第2問（20点）A</td></tr>
-          <tr><td>第2問A</td><td>問1</td><td>6</td><td><b>1</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問2</td><td>7</td><td><b>2</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問3</td><td>8</td><td><b>4</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問4</td><td>9</td><td><b>3</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問5</td><td>10</td><td><b>4</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第2問 B</td></tr>
-          <tr><td>第2問B</td><td>問1</td><td>11</td><td><b>2</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問2</td><td>12</td><td><b>4</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問3</td><td>13</td><td><b>1</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問4</td><td>14</td><td><b>2</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問5</td><td>15</td><td><b>3</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第3問（15点）A</td></tr>
-          <tr><td>第3問A</td><td>問1</td><td>16</td><td><b>1</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問2</td><td>17</td><td><b>4</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第3問 B</td></tr>
-          <tr><td>第3問B</td><td rowspan="4">問1</td><td>18</td><td><b>3</b></td><td rowspan="4">3<span class="badge-star">*</span></td></tr>
-          <tr><td></td><td>19</td><td><b>5</b></td></tr>
-          <tr><td></td><td>20</td><td><b>6</b></td></tr>
-          <tr><td></td><td>21</td><td><b>7</b></td></tr>
-          <tr><td></td><td>問2</td><td>22</td><td><b>3</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問3</td><td>23</td><td><b>2</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第4問（16点）</td></tr>
-          <tr><td>第4問</td><td>問1</td><td>24</td><td><b>2</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問2</td><td>25</td><td><b>1</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問3</td><td>26</td><td><b>2</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問4</td><td>27</td><td><b>2</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td></td><td>28</td><td><b>1</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問5</td><td>29</td><td><b>4</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第5問（15点）</td></tr>
-          <tr><td>第5問</td><td rowspan="2">問1</td><td>30-31</td><td><b>1-4</b></td><td>3<span class="badge-star">*</span></td></tr>
-          <tr><td></td><td rowspan="3">問2</td><td>32</td><td><b>5</b></td><td rowspan="3">3<span class="badge-star">*</span></td></tr>
-          <tr><td></td><td>33</td><td><b>3</b></td></tr>
-          <tr><td></td><td>34</td><td><b>1</b></td></tr>
-          <tr><td></td><td>問3</td><td>35</td><td><b>4</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問4</td><td>36</td><td><b>2</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問5</td><td>37</td><td><b>3</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td></td><td>38</td><td><b>3</b></td><td>—</td></tr>
-          <tr class="sec-break"><td colspan="5">第6問（24点）A</td></tr>
-          <tr><td>第6問A</td><td rowspan="2">問1</td><td>39</td><td><b>2</b></td><td rowspan="2">3<span class="badge-star">*</span></td></tr>
-          <tr><td></td><td>40</td><td><b>2</b></td></tr>
-          <tr><td></td><td>問2</td><td>41</td><td><b>4</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問3</td><td>42</td><td><b>1</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問4</td><td>43</td><td><b>2</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr class="sec-break"><td colspan="5">第6問 B</td></tr>
-          <tr><td>第6問B</td><td>問1</td><td>44</td><td><b>3</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td></td><td>45</td><td><b>3</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td rowspan="2">問2</td><td>46</td><td><b>2</b></td><td rowspan="2">3<span class="badge-star">*</span></td></tr>
-          <tr><td></td><td>47</td><td><b>4</b></td></tr>
-          <tr><td></td><td>問3</td><td>48</td><td><b>1</b></td><td>3<span class="badge-pt">pt</span></td></tr>
-          <tr><td></td><td>問5</td><td>49</td><td><b>3</b></td><td>2<span class="badge-pt">pt</span></td></tr>
-        </tbody>
-      </table>
     </div>
 
-    <div class="card">
-      <h3 style="font-size:15px;font-weight:700;margin-bottom:10px">📖 追試験 問題概要</h3>
-      <div class="q-box">
-        <h3>第1問A International Night（学校イベントチラシ）</h3>
-        <p>TELS学生は入場無料→学生証提示→②。イベント内容：文化のジェスチャーを学べる→①。</p>
-      </div>
-      <div class="q-box">
-        <h3>第5問 Maki's Kitchen（短編小説）</h3>
-        <p>Makiが友人2人の才能を見出す話。Maki年齢：高校卒業19歳→20年後→約39歳=late 30s。Kasumi→ワークショップ提案(successful business idea)。Takuya→コーヒー豆を知名度アップ(made the product known)。</p>
-      </div>
-      <div class="q-box">
-        <h3>第6問A Perceptions of Time</h3>
-        <p>心理的時間の話。回顧的タイミング vs 予測的タイミング。感情が時間知覚に影響。年齢とともに時間は速く感じる。大きな環境変化で再び遅くなることもある。</p>
-      </div>
-      <div class="q-box">
-        <h3>第6問B Chili Peppers</h3>
-        <p>capsaicinの特性・健康効果（鎮痛・代謝促進・抗菌）。wasabiは揮発性化合物で鼻にくる。Slide3エラー：Bは「give you more energy」だがこれは代謝加速の副次効果であって直接の効果ではない→Dの削除が正解。</p>
-      </div>
-    </div>
-  </div>
-</section>
+    <script type="module">
+        import { haptic } from 'https://esm.sh/ios-haptics';
 
-<!-- ===== UNIV ===== -->
-<section id="univ" class="sec">
-  <div class="s-hdr"><h2>大学別対策</h2><span>傾向と戦略</span></div>
+        const input = document.getElementById('translate-input');
+        const resultContainer = document.getElementById('result-container');
+        const translatedDisplay = document.getElementById('translated-text');
+        const overlay = document.getElementById('tap-overlay');
 
-  <!-- 芝浦 -->
-  <div class="shibaura">
-    <div class="uni-hero">
-      <div class="uni-hero-inner">
-        <h2>🏗 芝浦工業大学</h2>
-        <p>デザイン工学部 英語対策</p>
-      </div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="trend-item"><div class="t-icon">📄</div><div class="t-text"><b>試験時間・配点</b><span>英語：60〜90分／配点：100〜150点（年度による）</span></div></div>
-    <div class="trend-item"><div class="t-icon">📰</div><div class="t-text"><b>長文読解が主力（60〜70%）</b><span>科学・技術・環境・社会問題テーマが多い。工学系らしく「論理展開を追う力」が重要。段落ごとの要旨把握が鍵。</span></div></div>
-    <div class="trend-item"><div class="t-icon">🔤</div><div class="t-text"><b>語彙・文法問題</b><span>四択空所補充形式。前置詞・熟語・接続詞の使い分けが頻出。「in spite of vs despite」「although vs however」などの区別を徹底。</span></div></div>
-    <div class="trend-item"><div class="t-icon">✏️</div><div class="t-text"><b>英作文（和文英訳）</b><span>年度によって出題あり。シンプルな構文で正確に書くことが高評価。仮定法・比較表現が使えると有利。</span></div></div>
-    <div class="trend-item"><div class="t-icon">🎯</div><div class="t-text"><b>難易度レベル</b><span>共通テスト＋α。英検2級〜準1級の語彙力があれば対応可。記号選択中心で部分点なし。</span></div></div>
-    <div class="method-box">
-      <h4>🗺 攻略ロードマップ</h4>
-      <ul>
-        <li>英検2級語彙を完全習得（本アプリの★★★まで）</li>
-        <li>パラグラフリーディング練習（1段落1文要約）</li>
-        <li>接続詞・前置詞の使い分け完全マスター</li>
-        <li>過去問3年分を時間計測で演習</li>
-        <li>科学系・環境系の英語記事を週2本読む習慣</li>
-      </ul>
-    </div>
-  </div>
+        // ハプティクス関数の最適化（過剰なループによるフリーズ防止のため回数を調整可能）
+        const triggerBurst = () => {
+            const delay = 22;
+            const count = 50; // 1100回はブラウザがクラッシュする可能性があるため、デモ用に50回程度が推奨されます
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => haptic.error(), i * delay);
+            }
+        };
 
-  <!-- 法政 -->
-  <div class="hosei">
-    <div class="uni-hero">
-      <div class="uni-hero-inner">
-        <h2>⚖️ 法政大学</h2>
-        <p>デザイン工学部 英語対策</p>
-      </div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="trend-item"><div class="t-icon">📄</div><div class="t-text"><b>試験時間・配点</b><span>英語：60分／配点：100点（T日程・A方式で異なる）</span></div></div>
-    <div class="trend-item"><div class="t-icon">📰</div><div class="t-text"><b>長文中心の構成</b><span>社会問題・テクノロジー・文化比較テーマが頻出。内容一致・同義語選択・空所補充が中心。</span></div></div>
-    <div class="trend-item"><div class="t-icon">🔤</div><div class="t-text"><b>語彙問題の難度</b><span>芝浦より若干難しい語彙が出る傾向。準1級レベルの単語も散見される。文脈から類推する力を鍛える。</span></div></div>
-    <div class="trend-item"><div class="t-icon">📐</div><div class="t-text"><b>文法・語法問題</b><span>動詞の語法（他動詞vs自動詞）、SVOCパターン識別が頻出。仮定法・関係詞の複雑な形。</span></div></div>
-    <div class="trend-item"><div class="t-icon">🎯</div><div class="t-text"><b>得点戦略</b><span>長文内容一致で落とさない→語彙問題2〜3問ミスは許容→文法全問正解を目指す。</span></div></div>
-    <div class="method-box">
-      <h4>🗺 攻略ロードマップ</h4>
-      <ul>
-        <li>英検準1級頻出語彙の先取り学習</li>
-        <li>同義語・反意語の対応表を作る</li>
-        <li>内容一致問題：「言い換え」に敏感になる練習</li>
-        <li>SVOCパターン別の動詞リストを暗記</li>
-        <li>T日程（共通テスト利用）も視野に入れる</li>
-      </ul>
-    </div>
-  </div>
+        let debounceTimer;
+        input.addEventListener('input', (e) => {
+            const text = e.target.value.trim();
+            
+            clearTimeout(debounceTimer);
+            if (!text) {
+                hideResult();
+                return;
+            }
 
-  <div class="card">
-    <h3 style="font-size:15px;font-weight:700;margin-bottom:10px">🔗 共通テストとの繋がり</h3>
-    <p style="font-size:14px;color:var(--sub);line-height:1.75">
-      共通テストで<b>80点以上</b>取れれば、芝浦・法政の英語問題の<b>7割以上</b>に対応できます。<br><br>
-      共通テストを軸にしながら、大学別の「頻出語彙」「特有の問題形式」を上乗せするのが最効率。<br><br>
-      <b>優先順位：</b> 共通テスト80点固め → 芝浦/法政過去問演習 → 英検準1級語彙補強
-    </p>
-  </div>
-</section>
+            debounceTimer = setTimeout(async () => {
+                try {
+                    const isJapanese = /[ぁ-んァ-ヶー一-龠]/.test(text);
+                    const langPair = isJapanese ? 'ja|en' : 'en|ja';
+                    
+                    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`);
+                    const data = await res.json();
+                    
+                    showResult(data.responseData.translatedText);
+                } catch (err) {
+                    console.error("Translation error:", err);
+                }
+            }, 400);
+        });
 
-<!-- VOCAB MODAL -->
-<div class="overlay" id="v-modal" onclick="closeModal(event)">
-  <div class="modal" id="modal-content">
-    <div class="modal-handle"></div>
-    <div id="modal-body"></div>
-  </div>
-</div>
+        const showResult = (text) => {
+            translatedDisplay.innerText = text;
+            resultContainer.classList.add('show');
+        };
 
-<!-- SEARCH BAR -->
-<div class="srch-res" id="srch-res"></div>
-<div class="srch-bar">
-  <div class="srch-inner">
-    <input class="srch-inp" id="srch-inp" placeholder="🔍 英単語を検索..." oninput="onSearch(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
-    <button class="srch-btn" onclick="clearSearch()">✕</button>
-  </div>
-</div>
+        const hideResult = () => {
+            resultContainer.classList.remove('show');
+        };
 
-<script>
-// ── HAPTICS ──
-function haptic(){try{if(window.navigator.vibrate)window.navigator.vibrate(5)}catch(e){}}
-function hapticConfirm(){try{if(window.navigator.vibrate)window.navigator.vibrate([5,50,5])}catch(e){}}
+        // 各ボタンのアクション
+        document.getElementById('btn-search').onclick = () => {
+            triggerBurst();
+            const query = input.value || "Google";
+            window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+        };
 
-// ── VOCABULARY DATA ──
-const VOCAB=[
-  // Level 1 基礎
-  {w:"ability",pos:"n",lv:"lv1",mean:"能力、才能",pron:"/əˈbɪlɪti/",full:"〜する能力・才能。「able（できる）」の名詞形。",derivs:["able (adj)","unable (adj)","ably (adv)"],ex:{e:"She has the ability to speak three languages.",j:"彼女は3ヶ国語を話す能力がある。"},idioms:[{e:"to the best of one's ability",j:"能力の限りを尽くして"}]},
-  {w:"access",pos:"n",lv:"lv1",mean:"アクセス、利用・接近する権利",pron:"/ˈækses/",full:"何かに近づく・使う手段や権利。動詞でも使う（〜にアクセスする）。",derivs:["accessible (adj)","inaccessible (adj)"],ex:{e:"Everyone should have access to education.",j:"誰もが教育を受ける権利を持つべきだ。"},idioms:[{e:"gain access to",j:"〜へのアクセスを得る"}]},
-  {w:"achieve",pos:"v",lv:"lv1",mean:"達成する、成し遂げる",pron:"/əˈtʃiːv/",full:"努力・頑張りの結果として何かを実現すること。",derivs:["achievement (n)","achievable (adj)"],ex:{e:"She achieved her goal of becoming a doctor.",j:"彼女は医者になるという目標を達成した。"},idioms:[{e:"achieve a goal",j:"目標を達成する"}]},
-  {w:"affect",pos:"v",lv:"lv1",mean:"影響を与える",pron:"/əˈfekt/",full:"何かに影響を及ぼす動作。「effect（効果・名詞）」と混同注意！",derivs:["effect (n)","affection (n)","affected (adj)"],ex:{e:"Climate change affects everyone on Earth.",j:"気候変動は地球上の全員に影響を与える。"},idioms:[{e:"adversely affect",j:"悪影響を与える"}]},
-  {w:"allow",pos:"v",lv:"lv1",mean:"許可する、可能にする",pron:"/əˈlaʊ/",full:"「させてあげる」イメージ。人・状況が何かを可能にするとき使う。",derivs:["allowance (n)"],ex:{e:"The law allows people to vote at 18.",j:"法律は18歳での投票を認めている。"},idioms:[{e:"allow A to do",j:"Aが〜することを許可する"}]},
-  {w:"announce",pos:"v",lv:"lv1",mean:"発表する、告知する",pron:"/əˈnaʊns/",full:"公式に情報を知らせること。",derivs:["announcement (n)","announcer (n)"],ex:{e:"The school announced new rules.",j:"学校は新しいルールを発表した。"},idioms:[{e:"make an announcement",j:"発表する"}]},
-  {w:"appear",pos:"v",lv:"lv1",mean:"現れる、〜に見える",pron:"/əˈpɪr/",full:"「姿を現す」または「〜のように見える（seem）」の2つの意味。",derivs:["appearance (n)","disappear (v)"],ex:{e:"She appeared nervous before the test.",j:"彼女はテスト前に緊張しているように見えた。"},idioms:[{e:"appear to be",j:"〜のように見える"}]},
-  {w:"apply",pos:"v",lv:"lv1",mean:"応募する、適用する",pron:"/əˈplaɪ/",full:"「当てはめる」の感覚。就職・入学の応募にも、ルールの適用にも使う。",derivs:["application (n)","applicant (n)"],ex:{e:"I will apply for this job.",j:"この仕事に応募します。"},idioms:[{e:"apply for",j:"〜に応募する"},{e:"apply to",j:"〜に適用される"}]},
-  // Level 2 中級
-  {w:"benefit",pos:"n",lv:"lv2",mean:"利点、恩恵、利益",pron:"/ˈbenɪfɪt/",full:"「良い影響・メリット」のこと。動詞（恩恵を受ける）としても使える。",derivs:["beneficial (adj)","beneficiary (n)"],ex:{e:"Regular exercise has many health benefits.",j:"定期的な運動には多くの健康上の利点がある。"},idioms:[{e:"benefit from",j:"〜から恩恵を受ける"},{e:"for the benefit of",j:"〜のために"}]},
-  {w:"confirm",pos:"v",lv:"lv2",mean:"確認する、確かめる",pron:"/kənˈfɜːrm/",full:"既に疑っていること・伝えた情報を「確かです」と証明すること。",derivs:["confirmation (n)","confirmed (adj)"],ex:{e:"Please confirm your reservation by email.",j:"メールで予約を確認してください。"},idioms:[{e:"confirm a reservation",j:"予約を確認する"}]},
-  {w:"consequence",pos:"n",lv:"lv2",mean:"結果、影響、重要性",pron:"/ˈkɒnsɪkwəns/",full:"何かの後に起きる「結果」。特に悪い結果・重大な影響を示すことが多い。",derivs:["consequently (adv)","consequential (adj)"],ex:{e:"Pollution has serious consequences for health.",j:"汚染は健康に深刻な影響をもたらす。"},idioms:[{e:"as a consequence",j:"その結果として"}]},
-  {w:"contribute",pos:"v",lv:"lv2",mean:"貢献する、寄付する、一因となる",pron:"/kənˈtrɪbjuːt/",full:"全体の一部になって力を足すイメージ。contribute to〜で「〜に貢献する・〜の原因になる」。",derivs:["contribution (n)","contributor (n)"],ex:{e:"Exercise contributes to good health.",j:"運動は健康に貢献する。"},idioms:[{e:"contribute to",j:"〜に貢献する・〜の一因になる"}]},
-  {w:"demonstrate",pos:"v",lv:"lv2",mean:"実演する、証明する、示す",pron:"/ˈdemənstreɪt/",full:"「見せて証明する」イメージ。デモンストレーション（demo）の動詞形。",derivs:["demonstration (n)","demonstrator (n)"],ex:{e:"The teacher demonstrated how to solve the problem.",j:"先生は問題の解き方を実演した。"},idioms:[{e:"demonstrate that",j:"〜ということを証明する"}]},
-  {w:"distinguish",pos:"v",lv:"lv2",mean:"区別する、識別する",pron:"/dɪˈstɪŋɡwɪʃ/",full:"2つ以上のものの違いを見分けること。",derivs:["distinguished (adj)","distinguishable (adj)"],ex:{e:"Can you distinguish these two colors?",j:"この2色を区別できますか？"},idioms:[{e:"distinguish A from B",j:"AとBを区別する"}]},
-  {w:"enormous",pos:"adj",lv:"lv2",mean:"巨大な、膨大な",pron:"/ɪˈnɔːrməs/",full:"サイズ・量が「信じられないほど大きい」こと。",derivs:["enormously (adv)"],ex:{e:"The company made an enormous profit.",j:"その会社は巨大な利益を上げた。"},idioms:[]},
-  {w:"examine",pos:"v",lv:"lv2",mean:"調べる、検査する、試験する",pron:"/ɪɡˈzæmɪn/",full:"詳しく見ること・医師が診察することにも使う。exam（試験）の動詞形。",derivs:["examination (n)","examiner (n)"],ex:{e:"The doctor examined the patient carefully.",j:"医師は患者を注意深く診察した。"},idioms:[]},
-  {w:"expand",pos:"v",lv:"lv2",mean:"拡張する、広げる、膨らむ",pron:"/ɪkˈspænd/",full:"サイズ・範囲・規模を大きくすること。",derivs:["expansion (n)","expandable (adj)"],ex:{e:"The company is expanding its business overseas.",j:"その会社は海外事業を拡大している。"},idioms:[{e:"expand on",j:"〜について詳しく述べる"}]},
-  // Level 3 発展
-  {w:"acknowledge",pos:"v",lv:"lv3",mean:"認める、承認する、感謝する",pron:"/əkˈnɒlɪdʒ/",full:"事実・功績・感謝を公式に認めること。",derivs:["acknowledgment (n)"],ex:{e:"He acknowledged his mistake publicly.",j:"彼は公に自分の過ちを認めた。"},idioms:[{e:"acknowledge that",j:"〜ということを認める"}]},
-  {w:"anticipate",pos:"v",lv:"lv3",mean:"予想する、期待する、先回りする",pron:"/ænˈtɪsɪpeɪt/",full:"「前もって予期する」こと。expectより「積極的に心構えをする」ニュアンスが強い。",derivs:["anticipation (n)","anticipated (adj)"],ex:{e:"We anticipate a large crowd at the event.",j:"イベントには大勢の人が来ると予想している。"},idioms:[]},
-  {w:"bias",pos:"n",lv:"lv3",mean:"偏見、先入観、偏り",pron:"/ˈbaɪəs/",full:"公平でない考え方・一方的な判断の傾向。",derivs:["biased (adj)","unbiased (adj)"],ex:{e:"Confirmation bias leads people to seek only supporting evidence.",j:"確証バイアスは人々が支持する証拠だけを探す傾向をもたらす。"},idioms:[{e:"have a bias toward",j:"〜に偏りがある"}]},
-  {w:"elaborate",pos:"adj",lv:"lv3",mean:"精巧な、詳細な／（v）詳しく説明する",pron:"/ɪˈlæbərɪt/",full:"adj「手が込んだ・細部まで作り込まれた」v「詳しく述べる」の2用法。",derivs:["elaboration (n)","elaborately (adv)"],ex:{e:"Could you elaborate on your point?",j:"あなたの主張をもっと詳しく説明してもらえますか？"},idioms:[{e:"elaborate on",j:"〜について詳しく述べる"}]},
-  {w:"facilitate",pos:"v",lv:"lv3",mean:"促進する、容易にする",pron:"/fəˈsɪlɪteɪt/",full:"何かがより簡単に・スムーズに進むようにすること。",derivs:["facilitation (n)","facility (n)"],ex:{e:"Technology facilitates communication worldwide.",j:"技術は世界規模のコミュニケーションを促進する。"},idioms:[]},
-  {w:"perceive",pos:"v",lv:"lv3",mean:"知覚する、理解する、〜とみなす",pron:"/pəˈsiːv/",full:"感覚・理解で何かを「受け取る」こと。perceptionの動詞形。",derivs:["perception (n)","perceived (adj)"],ex:{e:"Time is perceived differently depending on our mood.",j:"時間の感覚は気分によって異なる。"},idioms:[{e:"perceive A as B",j:"AをBとみなす"}]},
-  {w:"persist",pos:"v",lv:"lv3",mean:"持続する、こだわり続ける",pron:"/pəˈsɪst/",full:"困難があっても続けること・やめないこと。",derivs:["persistence (n)","persistent (adj)"],ex:{e:"If you persist, you will succeed.",j:"粘り強く続ければ成功する。"},idioms:[{e:"persist in",j:"〜に固執する"}]},
-  {w:"sustainable",pos:"adj",lv:"lv3",mean:"持続可能な、環境に優しい",pron:"/səˈsteɪnəbl/",full:"長期間続けられる状態・環境を壊さない開発や行動のこと。",derivs:["sustainability (n)","sustain (v)"],ex:{e:"Sustainable energy sources include solar and wind power.",j:"持続可能なエネルギー源には太陽光と風力が含まれる。"},idioms:[{e:"sustainable development",j:"持続可能な発展"}]},
-  // Verbs commonly tested
-  {w:"decline",pos:"v",lv:"lv2",mean:"断る、減少する",pron:"/dɪˈklaɪn/",full:"「NO」と言うこと・数・量が減ること。2つの意味が頻出。",derivs:[],ex:{e:"Sales declined sharply last year.",j:"昨年、売上が急激に減少した。"},idioms:[]},
-  {w:"indicate",pos:"v",lv:"lv2",mean:"示す、指し示す、暗示する",pron:"/ˈɪndɪkeɪt/",full:"データや状況が「〜を示している」場合に使う。",derivs:["indication (n)","indicator (n)"],ex:{e:"Studies indicate that sleep is vital for health.",j:"研究は睡眠が健康に不可欠であることを示している。"},idioms:[]},
-  {w:"maintain",pos:"v",lv:"lv2",mean:"維持する、主張する",pron:"/meɪnˈteɪn/",full:"状態をそのまま保つこと。意見を「主張し続ける」意味もある。",derivs:["maintenance (n)"],ex:{e:"We must maintain our environment for future generations.",j:"私たちは将来の世代のために環境を維持しなければならない。"},idioms:[]},
-  {w:"obtain",pos:"v",lv:"lv2",mean:"入手する、得る",pron:"/əbˈteɪn/",full:"努力して手に入れること。getよりフォーマルな表現。",derivs:["obtainable (adj)"],ex:{e:"You can obtain a visa at the embassy.",j:"大使館でビザを取得できる。"},idioms:[]},
-  {w:"propose",pos:"v",lv:"lv2",mean:"提案する、プロポーズする",pron:"/prəˈpoʊz/",full:"アイデアや計画を公式に提出すること。",derivs:["proposal (n)"],ex:{e:"She proposed a new marketing strategy.",j:"彼女は新しいマーケティング戦略を提案した。"},idioms:[]},
-  {w:"reduce",pos:"v",lv:"lv1",mean:"減らす、低下させる",pron:"/rɪˈdjuːs/",full:"数量・強度などを小さくすること。",derivs:["reduction (n)","reductive (adj)"],ex:{e:"We need to reduce carbon emissions.",j:"炭素排出量を削減する必要がある。"},idioms:[{e:"reduce to",j:"〜に減らす・〜にしてしまう"}]},
-  {w:"reject",pos:"v",lv:"lv2",mean:"拒絶する、却下する",pron:"/rɪˈdʒekt/",full:"提案・申し込み・人を受け入れないこと。",derivs:["rejection (n)"],ex:{e:"Her proposal was rejected by the committee.",j:"彼女の提案は委員会に却下された。"},idioms:[]},
-  // Adjectives
-  {w:"accurate",pos:"adj",lv:"lv2",mean:"正確な",pron:"/ˈækjərɪt/",full:"間違いがない・事実に忠実なこと。",derivs:["accuracy (n)","accurately (adv)","inaccurate (adj)"],ex:{e:"The weather forecast was accurate.",j:"天気予報は正確だった。"},idioms:[]},
-  {w:"appropriate",pos:"adj",lv:"lv2",mean:"適切な、ふさわしい",pron:"/əˈproʊpriɪt/",full:"状況に合っている・正しいこと。反対語はinappropriate。",derivs:["appropriately (adv)","appropriateness (n)"],ex:{e:"Wear appropriate clothing for the interview.",j:"面接にふさわしい服装をしてください。"},idioms:[]},
-  {w:"crucial",pos:"adj",lv:"lv3",mean:"極めて重要な、決定的な",pron:"/ˈkruːʃəl/",full:"「これがないとダメ」という決定的な重要さ。importantより強い。",derivs:["crucially (adv)"],ex:{e:"It is crucial to take care of your health.",j:"健康を大切にすることは極めて重要だ。"},idioms:[]},
-  {w:"evident",pos:"adj",lv:"lv2",mean:"明らかな、明白な",pron:"/ˈevɪdənt/",full:"見ただけで明らかな事実・状況。evidenceの形容詞形。",derivs:["evidently (adv)","evidence (n)"],ex:{e:"It is evident that she worked hard.",j:"彼女が一生懸命働いたことは明らかだ。"},idioms:[]},
-  {w:"inevitable",pos:"adj",lv:"lv3",mean:"避けられない、必然的な",pron:"/ɪnˈevɪtəbl/",full:"どうやっても起こる・防げないこと。",derivs:["inevitably (adv)","inevitability (n)"],ex:{e:"Change is inevitable in modern society.",j:"現代社会において変化は避けられない。"},idioms:[]},
-  {w:"significant",pos:"adj",lv:"lv2",mean:"重要な、かなりの、意味のある",pron:"/sɪɡˈnɪfɪkənt/",full:"量・重要性・意味が「無視できないほど大きい」こと。",derivs:["significantly (adv)","significance (n)"],ex:{e:"There has been a significant increase in prices.",j:"価格に著しい上昇があった。"},idioms:[]},
-  // Adverbs
-  {w:"consequently",pos:"adv",lv:"lv2",mean:"その結果として",pron:"/ˈkɒnsɪkwəntli/",full:"原因→結果をつなぐ接続副詞。therefore / as a result と同義。",derivs:["consequent (adj)"],ex:{e:"He didn't study. Consequently, he failed.",j:"彼は勉強しなかった。その結果、落第した。"},idioms:[]},
-  {w:"gradually",pos:"adv",lv:"lv1",mean:"徐々に、少しずつ",pron:"/ˈɡrædʒuəli/",full:"急ではなく、ゆっくりと変化する様子。",derivs:["gradual (adj)"],ex:{e:"The situation gradually improved.",j:"状況は徐々に改善した。"},idioms:[]},
-  {w:"remarkably",pos:"adv",lv:"lv2",mean:"著しく、驚くほど",pron:"/rɪˈmɑːrkəbli/",full:"普通の予想を超えた程度。",derivs:["remarkable (adj)"],ex:{e:"She recovered remarkably quickly.",j:"彼女は驚くほど素早く回復した。"},idioms:[]},
-];
+        document.getElementById('btn-ai').onclick = () => {
+            triggerBurst();
+            window.open('https://gemini.google.com/', '_blank');
+        };
 
-// ── RENDER VOCAB ──
-function posClass(pos){return{n:'pos-n',v:'pos-v',adj:'pos-adj',adv:'pos-adv',prep:'pos-prep'}[pos]||'pos-n'}
-function posLabel(pos){return{n:'名詞',v:'動詞',adj:'形容詞',adv:'副詞',prep:'前置詞'}[pos]||pos}
+        input.onclick = () => {
+            triggerBurst();
+        };
 
-let currentFilter='all';
-function renderVocab(filter){
-  currentFilter=filter;
-  const grid=document.getElementById('v-grid');
-  const words=VOCAB.filter(w=>filter==='all'||w.pos===filter||w.lv===filter);
-  grid.innerHTML=words.map(w=>`
-    <div class="v-card" onclick="showWord('${w.w}')">
-      <div class="v-word">${w.w}</div>
-      <span class="v-pos ${posClass(w.pos)}">${posLabel(w.pos)}</span>
-      <div class="v-mean">${w.mean}</div>
-    </div>`).join('');
-  document.getElementById('vocab-count').textContent=`${VOCAB.length}語収録`;
-}
-renderVocab('all');
-
-function filterVocab(f,btn){
-  haptic();
-  document.querySelectorAll('#v-filters .f-pill').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  renderVocab(f);
-}
-
-// ── WORD MODAL ──
-function showWord(word){
-  haptic();
-  const w=VOCAB.find(x=>x.w===word);
-  if(!w)return;
-  const body=document.getElementById('modal-body');
-  body.innerHTML=`
-    <div class="m-word">${w.w}</div>
-    <div class="m-pron">${w.pron||''} · <span class="v-pos ${posClass(w.pos)}">${posLabel(w.pos)}</span></div>
-    <div class="m-sec"><div class="m-sec-t">意味</div><div class="m-mean-main">${w.mean}</div><p style="font-size:13px;color:var(--sub);margin-top:6px">${w.full||''}</p></div>
-    ${w.derivs&&w.derivs.length?`<div class="m-sec"><div class="m-sec-t">派生語</div><div class="m-derivs">${w.derivs.map(d=>`<span class="m-drv">${d}</span>`).join('')}</div></div>`:''}
-    ${w.ex?`<div class="m-sec"><div class="m-sec-t">例文</div><div class="m-ex-box"><div class="m-ex-e">${w.ex.e}</div><div class="m-ex-j">${w.ex.j}</div></div></div>`:''}
-    ${w.idioms&&w.idioms.length?`<div class="m-sec"><div class="m-sec-t">頻出表現</div><div class="m-idioms">${w.idioms.map(i=>`<div class="m-idiom"><div class="m-idiom-e">${i.e}</div><div class="m-idiom-j">${i.j}</div></div>`).join('')}</div></div>`:''}
-  `;
-  document.getElementById('v-modal').classList.add('op');
-}
-function closeModal(e){
-  if(e.target===document.getElementById('v-modal'))document.getElementById('v-modal').classList.remove('op');
-}
-
-// ── SEARCH ──
-function onSearch(q){
-  const res=document.getElementById('srch-res');
-  if(!q.trim()){res.classList.remove('op');return;}
-  const hits=VOCAB.filter(w=>w.w.toLowerCase().includes(q.toLowerCase())||w.mean.includes(q));
-  if(!hits.length){
-    res.innerHTML='<div class="srch-empty">見つかりませんでした 😢</div>';
-    res.classList.add('op');return;
-  }
-  res.innerHTML=`<div class="srch-res-hd">検索結果 ${hits.length}件</div>`+
-    hits.slice(0,12).map(w=>`
-      <div class="srch-res-item" onclick="showWord('${w.w}');clearSearch()">
-        <div><div class="sri-word">${w.w}</div><div class="sri-mean">${w.mean}</div></div>
-      </div>`).join('');
-  res.classList.add('op');
-}
-function clearSearch(){
-  haptic();
-  document.getElementById('srch-inp').value='';
-  document.getElementById('srch-res').classList.remove('op');
-}
-
-// ── TABS ──
-function switchTab(id,btn){
-  haptic();
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
-  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
-  btn.classList.add('on');
-  document.getElementById(id).classList.add('on');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-// ── EXAM TABS ──
-function switchExam(id,btn){
-  haptic();
-  document.querySelectorAll('.e-tab').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  document.getElementById('exam-hon').style.display=id==='hon'?'block':'none';
-  document.getElementById('exam-tsu').style.display=id==='tsu'?'block':'none';
-}
-
-// ── ACCORDION ──
-function toggleAcc(head){
-  haptic();
-  const body=head.nextElementSibling;
-  const arr=head.querySelector('.arr');
-  body.classList.toggle('op');
-  arr.classList.toggle('op');
-}
-</script>
+        // 背景タップで結果を隠す
+        overlay.onclick = (e) => {
+            if (resultContainer.classList.contains('show')) {
+                haptic.impact('light');
+                hideResult();
+                input.value = ''; // 入力をクリア
+            }
+        };
+    </script>
 </body>
 </html>
