@@ -1,197 +1,640 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Minimal Translator - Multi-line</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400&display=swap');
-        
-        body {
-            font-family: 'Noto Sans JP', sans-serif;
-            background-color: #ffffff;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-            margin: 0;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>英検準1級 完全攻略</title>
+<script type="importmap">{"imports":{"ios-haptics":"https://esm.sh/ios-haptics"}}</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#f7f6f3;--card:#fff;--text:#1a1a1a;--sub:#888;--line:#ebebeb;
+  --green:#27a06a;--yellow:#d97706;--red:#dc2626;--blue:#2563eb;--purple:#7c3aed;
+  --shadow:0 2px 16px rgba(0,0,0,.07);--shadow-lg:0 8px 40px rgba(0,0,0,.13);
+}
+html,body{height:100%;height:100dvh;overflow:hidden;}
+body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);display:flex;flex-direction:column;}
 
-        /* 翻訳結果の表示アニメーション */
-        #result-container {
-            transition: transform 0.4s ease, opacity 0.4s ease;
-            transform: translateY(10px) scale(0.98);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 10;
-        }
+/* NAV */
+.nav-bar{display:flex;gap:0;background:var(–card);border-bottom:1px solid var(–line);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.nav-bar::-webkit-scrollbar{display:none;}
+.nav-btn{flex-shrink:0;padding:11px 14px;border:none;background:none;font-family:inherit;font-size:12px;font-weight:600;color:var(–sub);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+.nav-btn.active{color:var(–blue);border-bottom-color:var(–blue);}
 
-        #result-container.show {
-            transform: translateY(0) scale(1);
-            opacity: 1;
-            pointer-events: auto;
-        }
+/* PROGRESS */
+.prog-row{display:flex;align-items:center;gap:8px;padding:8px 16px 6px;flex-shrink:0;}
+.prog-bar{flex:1;height:4px;background:var(–line);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(–blue),var(–purple));border-radius:2px;transition:width .4s ease;}
+.prog-txt{font-size:11px;font-weight:600;color:var(–sub);min-width:52px;text-align:right;}
 
-        .input-shadow {
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        }
+/* STATS CHIPS */
+.stats-row{display:flex;gap:6px;padding:0 16px 8px;flex-shrink:0;}
+.chip{background:var(–card);border-radius:10px;padding:5px 10px;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;box-shadow:var(–shadow);}
 
-        .scale-btn {
-            transition: transform 0.2s ease;
-            cursor: pointer;
-        }
-        .scale-btn:hover {
-            transform: scale(1.05);
-        }
-        .scale-btn:active {
-            transform: scale(0.95);
-        }
+/* CARD AREA */
+.card-area{flex:1;display:flex;align-items:center;justify-content:center;padding:8px 16px;position:relative;overflow:hidden;min-height:0;}
 
-        /* テキストエリアの動的な高さ変化をアニメーション化 */
-        #translate-input {
-            transition: height 0.3s ease, transform 0.2s ease;
-            resize: none; /* 手動リサイズ無効 */
-            min-height: 60px;
-            max-height: 40vh; /* 画面の40%まで伸びる */
-            line-height: 1.5;
-        }
+/* TRANS OVERLAY */
+.trans-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:28px;background:rgba(247,246,243,.96);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40;}
+.trans-overlay.show{opacity:1;pointer-events:auto;}
+.trans-result{text-align:center;font-size:clamp(20px,5.5vw,38px);font-weight:300;color:var(–text);line-height:1.5;letter-spacing:-.01em;}
+.trans-sub{font-size:13px;color:var(–sub);margin-top:10px;}
 
-        #translate-input:focus {
-            transform: scale(1.01);
-        }
+/* FLASHCARD */
+.fc-wrap{width:100%;max-width:440px;perspective:1200px;cursor:pointer;-webkit-user-select:none;user-select:none;}
+.fc{width:100%;min-height:320px;position:relative;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1);}
+.fc.flipped{transform:rotateY(180deg);}
+.fc-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:24px;padding:24px 22px 20px;display:flex;flex-direction:column;box-shadow:var(–shadow-lg);background:var(–card);}
+.fc-back{transform:rotateY(180deg);}
 
-        /* コンテナを常に下部に固定し、中身が伸びると上に押し上がるように */
-        .bottom-container {
-            position: fixed;
-            bottom: 3rem;
-            width: 100%;
-            display: flex;
-            align-items: flex-end; /* 下揃えにすることで、伸びた時に上へ広がる */
-            justify-content: center;
-            z-index: 20;
-        }
-    </style>
+/* front */
+.fc-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:auto;}
+.lv-badge{font-size:10px;font-weight:700;letter-spacing:.07em;padding:3px 9px;border-radius:20px;}
+.lv1{background:#dcfce7;color:#166534;}.lv2{background:#fef9c3;color:#854d0e;}.lv3{background:#fce7f3;color:#9d174d;}.lv-idiom{background:#ede9fe;color:#5b21b6;}.lv-gram{background:#e0f2fe;color:#075985;}
+.cat-badge{font-size:10px;color:var(–sub);font-weight:500;}
+.fc-word{font-size:clamp(28px,7vw,44px);font-weight:600;color:var(–text);letter-spacing:-.02em;margin:16px 0 4px;line-height:1.1;}
+.fc-pron{font-size:13px;color:var(–sub);font-weight:300;margin-bottom:6px;}
+.pos-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;}
+.pos-n{background:#eff6ff;color:#1d4ed8;}.pos-v{background:#f0fdf4;color:#166534;}.pos-adj{background:#fffbeb;color:#b45309;}.pos-adv{background:#fff1f2;color:#be123c;}.pos-other{background:#f5f3ff;color:#6d28d9;}
+.fc-hint{font-size:11px;color:var(–sub);margin-top:auto;text-align:center;opacity:.4;padding-top:12px;}
+
+/* back */
+.fc-mean{font-size:20px;font-weight:700;color:var(–text);margin-bottom:6px;}
+.fc-full{font-size:12px;color:#555;line-height:1.7;margin-bottom:10px;}
+.fc-ex{background:#f5f5f2;border-radius:12px;padding:10px 12px;margin-bottom:10px;}
+.fc-ex-e{font-size:13px;color:var(–text);line-height:1.6;}
+.fc-ex-j{font-size:11px;color:var(–sub);margin-top:3px;}
+.fc-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;}
+.tag{background:#f0f0ee;border-radius:7px;padding:2px 8px;font-size:10px;color:#555;}
+.fc-idioms-list{font-size:11px;line-height:1.9;color:var(–sub);}
+.fc-idiom-e{font-style:italic;color:#333;}
+
+/* ACTIONS */
+.actions{display:flex;gap:8px;padding:10px 16px 8px;flex-shrink:0;}
+.act-btn{flex:1;padding:11px 4px;border:none;border-radius:14px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:transform .15s,opacity .15s;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.act-btn:active{transform:scale(.91);}
+.act-btn.forgot{background:#fef2f2;color:var(–red);}
+.act-btn.hard{background:#fffbeb;color:var(–yellow);}
+.act-btn.good{background:#f0fdf4;color:var(–green);}
+.act-btn span{font-size:18px;}
+
+/* TRANS BAR */
+.trans-bar{padding:8px 14px 24px;flex-shrink:0;}
+.trans-inner{display:flex;align-items:flex-end;gap:8px;background:var(–card);border-radius:24px;padding:8px 8px 8px 14px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+#translate-input{flex:1;border:none;outline:none;background:transparent;font-family:inherit;font-size:15px;color:var(–text);resize:none;min-height:34px;max-height:28dvh;line-height:1.5;overflow-y:auto;}
+#translate-input::placeholder{color:#bbb;}
+.tbar-btn{flex-shrink:0;width:38px;height:38px;border-radius:50%;border:none;background:#f0f0ee;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(–sub);transition:transform .15s,background .15s;}
+.tbar-btn:active{transform:scale(.88);}
+.tbar-btn.go{background:var(–blue);color:#fff;}
+
+/* LIST VIEW (grammar/idioms tab) */
+.list-scroll{flex:1;overflow-y:auto;padding:10px 16px 8px;display:none;min-height:0;}
+.list-scroll.active{display:block;}
+.list-item{background:var(–card);border-radius:16px;padding:14px 16px;margin-bottom:8px;box-shadow:var(–shadow);}
+.list-word{font-size:16px;font-weight:700;color:var(–text);margin-bottom:3px;}
+.list-mean{font-size:13px;color:var(–sub);margin-bottom:6px;}
+.list-note{font-size:12px;color:#555;line-height:1.7;background:#f5f5f2;border-radius:10px;padding:8px 10px;margin-top:6px;}
+.list-ex{font-size:12px;color:#666;font-style:italic;margin-top:5px;}
+.section-head{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(–sub);padding:10px 0 6px;}
+
+/* swap animations */
+.fc-wrap.out{animation:cardOut .22s ease forwards;}
+.fc-wrap.in{animation:cardIn .22s ease forwards;}
+@keyframes cardOut{to{opacity:0;transform:scale(.93) translateY(18px);}}
+@keyframes cardIn{from{opacity:0;transform:scale(.93) translateY(-18px);}to{opacity:1;transform:none;}}
+
+/* complete screen */
+.complete-card{width:100%;max-width:440px;background:var(–card);border-radius:24px;padding:36px 24px;text-align:center;box-shadow:var(–shadow-lg);}
+</style>
+
 </head>
-<body class="flex flex-col items-center justify-center">
+<body>
 
-    <div id="tap-overlay" class="absolute inset-0 flex items-center justify-center p-8 z-0">
-        <div id="result-container" class="text-center w-full max-w-2xl">
-            <h1 id="translated-text" class="text-2xl md:text-4xl font-light text-gray-800 leading-tight break-words">
-            </h1>
-        </div>
+<!-- NAV -->
+
+<div class="nav-bar">
+  <button class="nav-btn active" id="tab-flash" onclick="switchTab('flash')">🃏 単語カード</button>
+  <button class="nav-btn" id="tab-idiom" onclick="switchTab('idiom')">💬 イディオム</button>
+  <button class="nav-btn" id="tab-gram" onclick="switchTab('gram')">📐 文法・表現</button>
+  <button class="nav-btn" id="tab-para" onclick="switchTab('para')">✍️ 言い換え</button>
+</div>
+
+<!-- PROGRESS -->
+
+<div class="prog-row">
+  <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="prog-txt" id="prog-txt">0 / 0</div>
+</div>
+
+<!-- STATS -->
+
+<div class="stats-row" id="stats-row">
+  <div class="chip"><span style="color:var(--green)">✓</span><span id="s-good" style="color:var(--green)">0</span></div>
+  <div class="chip"><span style="color:var(--yellow)">△</span><span id="s-hard" style="color:var(--yellow)">0</span></div>
+  <div class="chip"><span style="color:var(--red)">✗</span><span id="s-forgot" style="color:var(--red)">0</span></div>
+  <div class="chip" style="margin-left:auto;cursor:pointer" onclick="shuffleDeck()">🔀 シャッフル</div>
+</div>
+
+<!-- CARD AREA -->
+
+<div class="card-area" id="card-area">
+  <!-- trans overlay -->
+  <div class="trans-overlay" id="trans-overlay" onclick="closeTrans()">
+    <div>
+      <div class="trans-result" id="trans-result"></div>
+      <div class="trans-sub" id="trans-sub"></div>
     </div>
-
-    <div class="bottom-container px-6 gap-4">
-        
-        <div id="btn-search" class="scale-btn text-gray-400 hover:text-gray-600 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+  </div>
+  <!-- flashcard -->
+  <div class="fc-wrap" id="fc-wrap">
+    <div class="fc" id="fc" onclick="flipCard()">
+      <div class="fc-face fc-front" id="fc-front">
+        <div class="fc-meta">
+          <span class="lv-badge lv1" id="fc-lv">Lv1</span>
+          <span class="cat-badge" id="fc-cat"></span>
         </div>
-
-        <div class="relative flex-1 max-w-md">
-            <textarea id="translate-input" 
-                placeholder="Text here..." 
-                spellcheck="true"
-                rows="1"
-                class="w-full py-4 px-8 rounded-[30px] border-none bg-white input-shadow text-center text-lg outline-none focus:ring-2 focus:ring-gray-100 block overflow-y-auto"></textarea>
-        </div>
-
-        <div id="btn-ai" class="scale-btn text-gray-400 hover:text-gray-600 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8Z"/><path d="M12 12L16 10"/><path d="M12 12L8 14"/></svg>
-        </div>
+        <div class="fc-word" id="fc-word">—</div>
+        <div class="fc-pron" id="fc-pron"></div>
+        <span class="pos-badge pos-v" id="fc-pos">動詞</span>
+        <div class="fc-hint">タップして意味を確認 →</div>
+      </div>
+      <div class="fc-face fc-back" id="fc-back">
+        <div class="fc-mean" id="fc-mean"></div>
+        <div class="fc-full" id="fc-full"></div>
+        <div class="fc-ex" id="fc-ex"></div>
+        <div class="fc-tags" id="fc-tags"></div>
+        <div class="fc-idioms-list" id="fc-idioms"></div>
+      </div>
     </div>
+  </div>
+</div>
 
-    <script type="module">
-        import { haptic } from 'https://esm.sh/ios-haptics';
+<!-- LIST VIEWS -->
 
-        const input = document.getElementById('translate-input');
-        const resultContainer = document.getElementById('result-container');
-        const translatedDisplay = document.getElementById('translated-text');
-        const overlay = document.getElementById('tap-overlay');
+<div class="list-scroll" id="list-idiom"></div>
+<div class="list-scroll" id="list-gram"></div>
+<div class="list-scroll" id="list-para"></div>
 
-        const triggerBurst = () => {
-            const delay = 22;
-            const count = 30; // 負荷軽減のため少し調整
-            for (let i = 0; i < count; i++) {
-                setTimeout(() => haptic.error(), i * delay);
-            }
-        };
+<!-- ACTION BUTTONS -->
 
-        // テキストエリアの高さを自動調整する関数
-        const autoResize = () => {
-            input.style.height = 'auto';
-            input.style.height = input.scrollHeight + 'px';
-        };
+<div class="actions" id="actions" style="display:none">
+  <button class="act-btn forgot" onclick="rate('forgot')"><span>😰</span>忘れた</button>
+  <button class="act-btn hard" onclick="rate('hard')"><span>🤔</span>難しい</button>
+  <button class="act-btn good" onclick="rate('good')"><span>✨</span>覚えた！</button>
+</div>
 
-        let debounceTimer;
-        input.addEventListener('input', (e) => {
-            autoResize(); // 入力ごとに高さを調整（スライドアップ）
+<!-- TRANSLATOR -->
 
-            const text = e.target.value.trim();
-            clearTimeout(debounceTimer);
-            
-            if (!text) {
-                hideResult();
-                return;
-            }
+<div class="trans-bar">
+  <div class="trans-inner">
+    <button class="tbar-btn" id="btn-search" title="Google検索">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    </button>
+    <textarea id="translate-input" placeholder="翻訳 / Translate..." rows="1" spellcheck="true"></textarea>
+    <button class="tbar-btn go" id="btn-go" title="翻訳">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+</div>
 
-            debounceTimer = setTimeout(async () => {
-                try {
-                    const isJapanese = /[ぁ-んァ-ヶー一-龠]/.test(text);
-                    const langPair = isJapanese ? 'ja|en' : 'en|ja';
-                    
-                    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`);
-                    const data = await res.json();
-                    
-                    showResult(data.responseData.translatedText);
-                } catch (err) {
-                    console.error("Translation error:", err);
-                }
-            }, 500);
-        });
+<script type="module">
+import { haptic } from 'ios-haptics';
 
-        // Enterキー（Return）でハプティクスを発動
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                // 日本語変換確定時のEnterと区別するためisComposingは使わない（またはお好みで）
-                haptic.impact('medium');
-            }
-        });
+/* ═══════════════════════════════════════════
+   DATA — 全単語・イディオム・文法・言い換え
+═══════════════════════════════════════════ */
+const VOCAB = [
+  /* ── LV1 基礎動詞 ── */
+  {w:"achieve",pos:"v",lv:"lv1",cat:"動詞",mean:"達成する・成し遂げる",pron:"/əˈtʃiːv/",full:"努力の結果として実現すること。achievement（名）・achievable（形）。",ex:{e:"She achieved her goal of becoming a doctor.",j:"彼女は医者になる目標を達成した。"},tags:["achievement (n)","achievable (adj)"],idioms:[{e:"achieve a goal",j:"目標を達成する"}]},
+  {w:"affect",pos:"v",lv:"lv1",cat:"動詞",mean:"影響を与える",pron:"/əˈfekt/",full:"⚠️ effect（名詞）と混同注意！affect=動詞、effect=名詞。",ex:{e:"Climate change affects everyone on Earth.",j:"気候変動は地球上の全員に影響を与える。"},tags:["effect (n)","affection (n)","affected (adj)"],idioms:[{e:"adversely affect",j:"悪影響を与える"}]},
+  {w:"allow",pos:"v",lv:"lv1",cat:"動詞",mean:"許可する・可能にする",pron:"/əˈlaʊ/",full:"「させてあげる」イメージ。allow A to do = Aが〜するのを許可する。",ex:{e:"The law allows people to vote at 18.",j:"法律は18歳での投票を認めている。"},tags:["allowance (n)"],idioms:[{e:"allow A to do",j:"Aが〜することを許可する"}]},
+  {w:"apply",pos:"v",lv:"lv1",cat:"動詞",mean:"応募する・適用する",pron:"/əˈplaɪ/",full:"「当てはめる」感覚。apply for=応募、apply to=〜に適用される。",ex:{e:"I applied for this job last week.",j:"先週この仕事に応募した。"},tags:["application (n)","applicant (n)"],idioms:[{e:"apply for",j:"〜に応募する"},{e:"apply to",j:"〜に適用される"}]},
+  {w:"reduce",pos:"v",lv:"lv1",cat:"動詞",mean:"減らす・低下させる",pron:"/rɪˈdjuːs/",full:"数量・強度などを小さくすること。reduction（名詞）。",ex:{e:"We need to reduce carbon emissions.",j:"炭素排出量を削減する必要がある。"},tags:["reduction (n)","reductive (adj)"],idioms:[{e:"reduce A to B",j:"AをBにまで減らす"}]},
+  {w:"require",pos:"v",lv:"lv1",cat:"動詞",mean:"必要とする・要求する",pron:"/rɪˈkwaɪər/",full:"requirement（名詞）。require A to do = Aに〜することを求める。",ex:{e:"The job requires strong communication skills.",j:"その仕事は高いコミュニケーション能力を必要とする。"},tags:["requirement (n)","required (adj)"],idioms:[]},
+  {w:"involve",pos:"v",lv:"lv1",cat:"動詞",mean:"含む・巻き込む・〜を伴う",pron:"/ɪnˈvɒlv/",full:"involve doing = 〜することを含む。involved（形）= 複雑な。",ex:{e:"The project involves a lot of research.",j:"そのプロジェクトは多くのリサーチを伴う。"},tags:["involvement (n)","involved (adj)"],idioms:[{e:"be involved in",j:"〜に関わっている"}]},
+  /* ── LV2 中級動詞 ── */
+  {w:"demonstrate",pos:"v",lv:"lv2",cat:"動詞",mean:"実演する・証明する・示す",pron:"/ˈdemənstreɪt/",full:"「見せて証明する」イメージ。demonstrate that = 〜ということを示す。",ex:{e:"The study demonstrates that sleep is vital.",j:"その研究は睡眠が不可欠であることを示す。"},tags:["demonstration (n)","demonstrator (n)"],idioms:[{e:"demonstrate that",j:"〜ということを証明する"}]},
+  {w:"indicate",pos:"v",lv:"lv2",cat:"動詞",mean:"示す・指し示す・暗示する",pron:"/ˈɪndɪkeɪt/",full:"データや状況が「〜を示している」場合に使う。indication（名）。",ex:{e:"Studies indicate that sleep is vital for health.",j:"研究は睡眠が健康に不可欠であることを示している。"},tags:["indication (n)","indicator (n)"],idioms:[]},
+  {w:"maintain",pos:"v",lv:"lv2",cat:"動詞",mean:"維持する・主張する",pron:"/meɪnˈteɪn/",full:"状態を保つことと、意見を「主張し続ける」両方の意味。",ex:{e:"We must maintain our environment for future generations.",j:"将来の世代のために環境を維持しなければならない。"},tags:["maintenance (n)"],idioms:[]},
+  {w:"contribute",pos:"v",lv:"lv2",cat:"動詞",mean:"貢献する・一因となる・寄付する",pron:"/kənˈtrɪbjuːt/",full:"contribute to 〜 = 〜に貢献する・〜の原因になる。",ex:{e:"Exercise contributes to good health.",j:"運動は健康に貢献する。"},tags:["contribution (n)","contributor (n)"],idioms:[{e:"contribute to",j:"〜に貢献する・〜の一因になる"}]},
+  {w:"obtain",pos:"v",lv:"lv2",cat:"動詞",mean:"入手する・得る",pron:"/əbˈteɪn/",full:"努力して手に入れること。getよりフォーマル。obtainable（形）。",ex:{e:"You can obtain a visa at the embassy.",j:"大使館でビザを取得できる。"},tags:["obtainable (adj)"],idioms:[]},
+  {w:"propose",pos:"v",lv:"lv2",cat:"動詞",mean:"提案する・提唱する",pron:"/prəˈpoʊz/",full:"アイデアや計画を公式に提出すること。proposal（名）。",ex:{e:"She proposed a new marketing strategy.",j:"彼女は新しいマーケティング戦略を提案した。"},tags:["proposal (n)"],idioms:[]},
+  {w:"decline",pos:"v",lv:"lv2",cat:"動詞",mean:"断る・減少する",pron:"/dɪˈklaɪn/",full:"2つの意味が頻出。「NO」と言うことと数・量が減ること。",ex:{e:"Sales declined sharply last year.",j:"昨年、売上が急激に減少した。"},tags:[],idioms:[]},
+  {w:"distinguish",pos:"v",lv:"lv2",cat:"動詞",mean:"区別する・識別する",pron:"/dɪˈstɪŋɡwɪʃ/",full:"distinguish A from B = AとBを区別する。",ex:{e:"Can you distinguish these two colors?",j:"この2色を区別できますか？"},tags:["distinguished (adj)"],idioms:[{e:"distinguish A from B",j:"AとBを区別する"}]},
+  {w:"expand",pos:"v",lv:"lv2",cat:"動詞",mean:"拡張する・広げる",pron:"/ɪkˈspænd/",full:"サイズ・範囲・規模を大きくすること。expand on = 〜について詳しく述べる。",ex:{e:"The company is expanding its business overseas.",j:"その会社は海外事業を拡大している。"},tags:["expansion (n)"],idioms:[{e:"expand on",j:"〜について詳しく述べる"}]},
+  /* ── LV3 上級動詞 ── */
+  {w:"acknowledge",pos:"v",lv:"lv3",cat:"動詞",mean:"認める・承認する・感謝する",pron:"/əkˈnɒlɪdʒ/",full:"事実・功績を公式に認めること。acknowledge that = 〜ということを認める。",ex:{e:"He acknowledged his mistake publicly.",j:"彼は公に自分の過ちを認めた。"},tags:["acknowledgment (n)"],idioms:[{e:"acknowledge that",j:"〜ということを認める"}]},
+  {w:"anticipate",pos:"v",lv:"lv3",cat:"動詞",mean:"予想する・期待する・先回りする",pron:"/ænˈtɪsɪpeɪt/",full:"expectより「積極的に心構えをする」ニュアンスが強い。",ex:{e:"We anticipate a large crowd at the event.",j:"イベントには大勢の人が来ると予想している。"},tags:["anticipation (n)"],idioms:[]},
+  {w:"facilitate",pos:"v",lv:"lv3",cat:"動詞",mean:"促進する・容易にする",pron:"/fəˈsɪlɪteɪt/",full:"何かがよりスムーズに進むようにすること。facility（施設）と同語根。",ex:{e:"Technology facilitates communication worldwide.",j:"技術は世界規模のコミュニケーションを促進する。"},tags:["facilitation (n)","facility (n)"],idioms:[]},
+  {w:"perceive",pos:"v",lv:"lv3",cat:"動詞",mean:"知覚する・〜とみなす",pron:"/pəˈsiːv/",full:"perceive A as B = AをBとみなす。perception（名）。",ex:{e:"Time is perceived differently depending on mood.",j:"時間の感覚は気分によって異なる。"},tags:["perception (n)","perceived (adj)"],idioms:[{e:"perceive A as B",j:"AをBとみなす"}]},
+  {w:"persist",pos:"v",lv:"lv3",cat:"動詞",mean:"持続する・こだわり続ける",pron:"/pəˈsɪst/",full:"困難があっても続けること。persist in = 〜に固執する。",ex:{e:"If you persist, you will succeed.",j:"粘り強く続ければ成功する。"},tags:["persistence (n)","persistent (adj)"],idioms:[{e:"persist in",j:"〜に固執する"}]},
+  {w:"tackle",pos:"v",lv:"lv3",cat:"動詞",mean:"取り組む・対処する",pron:"/ˈtækəl/",full:"困難な問題に積極的に立ち向かうこと。address / cope withの同義語。",ex:{e:"The government must tackle climate change.",j:"政府は気候変動に取り組まなければならない。"},tags:[],idioms:[{e:"tackle a problem",j:"問題に取り組む"}]},
+  /* ── 名詞 ── */
+  {w:"benefit",pos:"n",lv:"lv2",cat:"名詞",mean:"利点・恩恵・利益",pron:"/ˈbenɪfɪt/",full:"「良い影響・メリット」。benefit from = 〜から恩恵を受ける。動詞にもなる。",ex:{e:"Regular exercise has many health benefits.",j:"定期的な運動には多くの健康上の利点がある。"},tags:["beneficial (adj)","beneficiary (n)"],idioms:[{e:"benefit from",j:"〜から恩恵を受ける"}]},
+  {w:"consequence",pos:"n",lv:"lv2",cat:"名詞",mean:"結果・影響・重要性",pron:"/ˈkɒnsɪkwəns/",full:"特に悪い結果・重大な影響を示すことが多い。as a consequence = その結果として。",ex:{e:"Pollution has serious consequences for health.",j:"汚染は健康に深刻な影響をもたらす。"},tags:["consequently (adv)","consequential (adj)"],idioms:[{e:"as a consequence",j:"その結果として"}]},
+  {w:"bias",pos:"n",lv:"lv3",cat:"名詞",mean:"偏見・先入観・偏り",pron:"/ˈbaɪəs/",full:"公平でない一方的な判断の傾向。biased（形）= 偏った。",ex:{e:"Confirmation bias makes people seek only supporting evidence.",j:"確証バイアスは支持する証拠だけを探す傾向をもたらす。"},tags:["biased (adj)","unbiased (adj)"],idioms:[{e:"have a bias toward",j:"〜に偏りがある"}]},
+  {w:"access",pos:"n",lv:"lv1",cat:"名詞",mean:"アクセス・利用する権利",pron:"/ˈækses/",full:"何かに近づく・使う手段や権利。動詞でも使う（〜にアクセスする）。",ex:{e:"Everyone should have access to education.",j:"誰もが教育を受ける権利を持つべきだ。"},tags:["accessible (adj)"],idioms:[{e:"gain access to",j:"〜へのアクセスを得る"}]},
+  /* ── 形容詞 ── */
+  {w:"significant",pos:"adj",lv:"lv2",cat:"形容詞",mean:"重要な・かなりの・意味のある",pron:"/sɪɡˈnɪfɪkənt/",full:"量・重要性が「無視できないほど大きい」こと。significantly（副）。",ex:{e:"There has been a significant increase in prices.",j:"価格に著しい上昇があった。"},tags:["significantly (adv)","significance (n)"],idioms:[]},
+  {w:"crucial",pos:"adj",lv:"lv3",cat:"形容詞",mean:"極めて重要な・決定的な",pron:"/ˈkruːʃəl/",full:"「これがないとダメ」という決定的な重要さ。importantより強い。",ex:{e:"It is crucial to take care of your health.",j:"健康を大切にすることは極めて重要だ。"},tags:["crucially (adv)"],idioms:[]},
+  {w:"inevitable",pos:"adj",lv:"lv3",cat:"形容詞",mean:"避けられない・必然的な",pron:"/ɪnˈevɪtəbl/",full:"どうやっても起こる・防げないこと。inevitably（副）。",ex:{e:"Change is inevitable in modern society.",j:"現代社会において変化は避けられない。"},tags:["inevitably (adv)","inevitability (n)"],idioms:[]},
+  {w:"sustainable",pos:"adj",lv:"lv3",cat:"形容詞",mean:"持続可能な・環境に優しい",pron:"/səˈsteɪnəbl/",full:"長期間続けられる状態・環境を壊さない行動のこと。",ex:{e:"Sustainable energy includes solar and wind power.",j:"持続可能なエネルギーには太陽光と風力が含まれる。"},tags:["sustainability (n)","sustain (v)"],idioms:[{e:"sustainable development",j:"持続可能な発展"}]},
+  {w:"detrimental",pos:"adj",lv:"lv3",cat:"形容詞",mean:"有害な・悪影響を与える",pron:"/ˌdetrɪˈmentəl/",full:"harmful / badのフォーマル版。detrimental to 〜 = 〜に有害な。",ex:{e:"Smoking is detrimental to your health.",j:"喫煙は健康に有害だ。"},tags:["detrimentally (adv)"],idioms:[{e:"detrimental to",j:"〜に有害な"}]},
+  {w:"elaborate",pos:"adj",lv:"lv3",cat:"形容詞",mean:"精巧な・詳細な / 詳しく説明する（動詞）",pron:"/ɪˈlæbərɪt/",full:"adj「手が込んだ」v「詳しく述べる（elaborate on）」の2用法。",ex:{e:"Could you elaborate on your point?",j:"あなたの主張をもっと詳しく説明してもらえますか？"},tags:["elaboration (n)"],idioms:[{e:"elaborate on",j:"〜について詳しく述べる"}]},
+  {w:"accurate",pos:"adj",lv:"lv2",cat:"形容詞",mean:"正確な",pron:"/ˈækjərɪt/",full:"間違いがない・事実に忠実なこと。inaccurate（反）。",ex:{e:"The weather forecast was accurate.",j:"天気予報は正確だった。"},tags:["accuracy (n)","inaccurate (adj)"],idioms:[]},
+  {w:"appropriate",pos:"adj",lv:"lv2",cat:"形容詞",mean:"適切な・ふさわしい",pron:"/əˈproʊpriɪt/",full:"状況に合っている・正しいこと。inappropriate（反）。",ex:{e:"Wear appropriate clothing for the interview.",j:"面接にふさわしい服装をしてください。"},tags:["appropriately (adv)"],idioms:[]},
+  {w:"enormous",pos:"adj",lv:"lv2",cat:"形容詞",mean:"巨大な・膨大な",pron:"/ɪˈnɔːrməs/",full:"サイズ・量が「信じられないほど大きい」こと。enormously（副）。",ex:{e:"The company made an enormous profit.",j:"その会社は巨大な利益を上げた。"},tags:["enormously (adv)"],idioms:[]},
+  {w:"numerous",pos:"adj",lv:"lv2",cat:"形容詞",mean:"多数の・たくさんの",pron:"/ˈnjuːmərəs/",full:"many / a lot ofのフォーマル版。学術文で多用。",ex:{e:"There are numerous reasons to exercise.",j:"運動をする理由はたくさんある。"},tags:[],idioms:[]},
+  /* ── 準1級特出語 ── */
+  {w:"evade",pos:"v",lv:"lv3",cat:"準1級",mean:"逃れる・回避する",pron:"/ɪˈveɪd/",full:"police/arrest文脈で頻出。evasion（名）= 回避・脱税。",ex:{e:"The criminals evaded the police for three weeks.",j:"犯人たちは3週間警察から逃れた。"},tags:["evasion (n)","evasive (adj)"],idioms:[]},
+  {w:"compress",pos:"v",lv:"lv3",cat:"準1級",mean:"圧縮する・凝縮する",pron:"/kəmˈpres/",full:"情報・時間・データを小さくまとめること。",ex:{e:"He compressed all events into one day.",j:"彼はすべての出来事を1日に凝縮した。"},tags:["compression (n)"],idioms:[]},
+  {w:"autonomy",pos:"n",lv:"lv3",cat:"準1級",mean:"自律性・自治権",pron:"/ɔːˈtɒnəmi/",full:"autonomous（形）= 自律的な。astronomy（天文学）と混同注意！",ex:{e:"The company gave salespeople autonomy over their work.",j:"会社は営業員に仕事の自律性を与えた。"},tags:["autonomous (adj)"],idioms:[]},
+  {w:"rivalry",pos:"n",lv:"lv3",cat:"準1級",mean:"ライバル関係・競争",pron:"/ˈraɪvəlri/",full:"rival → rivalry。強い競争関係を示す。",ex:{e:"The rivalry between the teams is very strong.",j:"両チーム間のライバル関係は非常に強い。"},tags:["rival (n/v)"],idioms:[]},
+  {w:"cosmopolitan",pos:"adj",lv:"lv3",cat:"準1級",mean:"国際的な・世界主義の",pron:"/ˌkɒzməˈpɒlɪtən/",full:"cosmos（世界）+ polis（都市）。多文化が混在する都市を形容。",ex:{e:"New York is known for its cosmopolitan culture.",j:"ニューヨークは国際的な文化で知られている。"},tags:[],idioms:[]},
+  {w:"tentative",pos:"adj",lv:"lv3",cat:"準1級",mean:"仮の・暫定的な",pron:"/ˈtentətɪv/",full:"tentative plan = 仮の計画。attentive（注意深い）と混同注意！",ex:{e:"I have tentative plans to visit Spain.",j:"スペインを訪問する仮の予定がある。"},tags:[],idioms:[]},
+  {w:"anatomy",pos:"n",lv:"lv3",cat:"準1級",mean:"解剖学・（物事の）構造",pron:"/əˈnætəmi/",full:"医学文脈だけでなく「〜の詳細な構造」比喩的にも使う。",ex:{e:"Medical students must study human anatomy.",j:"医学生は人体解剖学を学ばなければならない。"},tags:["anatomical (adj)"],idioms:[]},
+  {w:"impede",pos:"v",lv:"lv3",cat:"準1級",mean:"妨げる・邪魔する",pron:"/ɪmˈpiːd/",full:"hinder / obstruct の同義語。progress / development を目的語に取ることが多い。",ex:{e:"Bad weather impeded the rescue operation.",j:"悪天候が救助活動を妨げた。"},tags:["impediment (n)"],idioms:[]},
+  {w:"disrupt",pos:"v",lv:"lv3",cat:"準1級",mean:"混乱させる・分断する",pron:"/dɪsˈrʌpt/",full:"disruption（名）= 混乱。テクノロジーが既存業界を「ディスラプトする」という文脈でも頻出。",ex:{e:"The storm disrupted power supplies across the city.",j:"嵐が市内全域の電力供給を混乱させた。"},tags:["disruption (n)","disruptive (adj)"],idioms:[]},
+  {w:"eradicate",pos:"v",lv:"lv3",cat:"準1級",mean:"根絶する・撲滅する",pron:"/ɪˈrædɪkeɪt/",full:"病気・貧困・差別などを「完全に取り除く」ときに使う。",ex:{e:"Scientists are working to eradicate malaria.",j:"科学者たちはマラリアの根絶に取り組んでいる。"},tags:["eradication (n)"],idioms:[]},
+  /* ── 副詞・接続詞 ── */
+  {w:"consequently",pos:"adv",lv:"lv2",cat:"接続副詞",mean:"その結果として",pron:"/ˈkɒnsɪkwəntli/",full:"therefore / as a result と同義。原因→結果の流れを示す。",ex:{e:"He didn't study. Consequently, he failed.",j:"彼は勉強しなかった。その結果、落第した。"},tags:["consequent (adj)"],idioms:[]},
+  {w:"nevertheless",pos:"adv",lv:"lv2",cat:"接続副詞",mean:"それにもかかわらず",pron:"/ˌnevəðəˈles/",full:"however / yet と同義。逆接を示す。接続副詞として文頭に使う。",ex:{e:"It was raining. Nevertheless, they continued.",j:"雨が降っていた。それにもかかわらず彼らは続けた。"},tags:[],idioms:[]},
+  {w:"furthermore",pos:"adv",lv:"lv2",cat:"接続副詞",mean:"さらに・加えて",pron:"/ˈfɜːðəmɔːr/",full:"moreover / in addition と同義。追加情報を提示する。",ex:{e:"The plan is expensive. Furthermore, it is risky.",j:"そのプランは費用がかかる。さらに、リスクも高い。"},tags:[],idioms:[]},
+  {w:"gradually",pos:"adv",lv:"lv1",cat:"副詞",mean:"徐々に・少しずつ",pron:"/ˈɡrædʒuəli/",full:"急ではなく、ゆっくりと変化する様子。gradual（形）。",ex:{e:"The situation gradually improved.",j:"状況は徐々に改善した。"},tags:["gradual (adj)"],idioms:[]},
+];
 
-        const showResult = (text) => {
-            translatedDisplay.innerText = text;
-            resultContainer.classList.add('show');
-        };
+const IDIOMS = [
+  {w:"beat around the bush",mean:"遠回しに言う",note:"直訳：茂みの周りを打つ。率直に言わず回りくどいこと。",ex:"Stop beating around the bush and tell me what happened.",exj:"回りくどいことを言わずに何が起きたか教えて。",lv:"lv1"},
+  {w:"take the bull by the horns",mean:"勇気を出して困難に向かう",note:"直訳：雄牛を角をつかんで捕まえる。",ex:"It's time to take the bull by the horns and confront the issue.",exj:"勇気を出してその問題に立ち向かう時だ。",lv:"lv1"},
+  {w:"rack one's brains",mean:"知恵を絞る",note:"rack = ひどく苦しめる。全力で考えるさま。",ex:"I racked my brains but couldn't find the answer.",exj:"必死に考えたが答えが見つからなかった。",lv:"lv1"},
+  {w:"spill the beans",mean:"秘密をもらす",note:"意図せず（または意図的に）秘密を話してしまうこと。",ex:"Who spilled the beans about the surprise party?",exj:"誰がサプライズパーティーの秘密をもらしたの？",lv:"lv1"},
+  {w:"hit the nail on the head",mean:"的中する・正確に要点をつく",note:"nail = 釘。釘を正確に打つ = ズバリ当たっている。",ex:"Your analysis hit the nail on the head.",exj:"あなたの分析はまさに的を射ている。",lv:"lv1"},
+  {w:"bury one's head in the sand",mean:"困難から目をそらす",note:"ダチョウが危険を避けるために砂に頭を埋めるという俗説から。",ex:"You can't bury your head in the sand forever.",exj:"いつまでも現実から目を背けているわけにはいかない。",lv:"lv1"},
+  {w:"break the ice",mean:"場を和ませる・話の口火を切る",note:"緊張した雰囲気を「砕く」イメージ。初対面でよく使う。",ex:"He told a joke to break the ice at the meeting.",exj:"彼は会議の場を和ませるためにジョークを言った。",lv:"lv1"},
+  {w:"face the music",mean:"責任を取って批判・結果を受け入れる",note:"音楽=批判・現実。正面から向き合うこと。",ex:"It's time to face the music for your actions.",exj:"自分の行動の結果を受け入れるときだ。",lv:"lv1"},
+  {w:"make ends meet",mean:"収支を合わせる・やりくりする",note:"両端(収入と支出)をつなげる = 家計をやりくりする。",ex:"Many families struggle to make ends meet.",exj:"多くの家庭が家計のやりくりに苦労している。",lv:"lv1"},
+  {w:"hold water",mean:"論理が通る・完璧である",note:"直訳：水を保つ。穴のない論理・主張のこと。",ex:"I don't think that argument holds water.",exj:"その主張は論理が通っていないと思う。",lv:"lv1"},
+  {w:"in a nutshell",mean:"つまり・簡単に言えば",note:"ナッツの殻の中に収まる = 要点だけをコンパクトに。",ex:"In a nutshell, the project failed due to poor planning.",exj:"つまり、そのプロジェクトは計画の甘さで失敗した。",lv:"lv1"},
+  {w:"bear fruit",mean:"実を結ぶ・成果が出る",note:"努力や投資が良い結果をもたらすこと。",ex:"Their hard work finally bore fruit.",exj:"彼らの努力はついに実を結んだ。",lv:"lv1"},
+  {w:"hit the ceiling",mean:"かんかんに怒る",note:"= hit the roof。天井を突き抜けるほど激怒すること。",ex:"My father hit the ceiling when he heard the news.",exj:"父はその知らせを聞いてかんかんに怒った。",lv:"lv2"},
+  {w:"come in handy",mean:"役に立つ・便利である",note:"handy = 便利な。ちょうど必要なときに役立つ状況で使う。",ex:"A Swiss army knife always comes in handy.",exj:"スイスアーミーナイフはいつも役に立つ。",lv:"lv2"},
+  {w:"pull one's leg",mean:"人をからかう・冗談を言う",note:"真剣なふりをして冗談を言うこと。",ex:"Don't worry — I was just pulling your leg.",exj:"心配しないで。ただからかっていただけだよ。",lv:"lv2"},
+  {w:"burn the midnight oil",mean:"夜遅くまで勉強する・働く",note:"ランプの油が切れるほど夜更かしすること。",ex:"She burned the midnight oil preparing for the exam.",exj:"彼女は試験の準備のために夜遅くまで勉強した。",lv:"lv2"},
+  {w:"ring a bell",mean:"記憶を呼び起こす・ピンとくる",note:"That rings a bell. = 聞き覚えがある。",ex:"Does that name ring a bell?",exj:"その名前に聞き覚えはありますか？",lv:"lv2"},
+  {w:"take a rain check",mean:"また今度にする（丁寧な断り）",note:"アメリカの野球の雨天中止チケット（rain check）から。",ex:"I'll take a rain check on dinner tonight.",exj:"今夜のディナーはまた今度にしますね。",lv:"lv2"},
+  {w:"speak of the devil",mean:"噂をすれば（影）",note:"噂をしていた人がちょうど現れたときに使う。",ex:"Speak of the devil — here comes Tom!",exj:"噂をすれば — トムが来た！",lv:"lv2"},
+  {w:"for the life of me",mean:"どうしても（〜できない）",note:"否定文で使う。I can't for the life of me remember.",ex:"I can't for the life of me find my keys.",exj:"どうしても鍵が見つからない。",lv:"lv3"},
+  {w:"never say die",mean:"あきらめるな",note:"困難な状況でも諦めないという姿勢。",ex:"Never say die — there's still time to win.",exj:"あきらめるな — まだ勝てる時間がある。",lv:"lv3"},
+  {w:"step into one's shoes",mean:"〜の後任になる・立場に立つ",note:"誰かの仕事・役割を引き継ぐこと。",ex:"She stepped into her manager's shoes after his retirement.",exj:"彼の引退後、彼女がマネージャーの後任になった。",lv:"lv3"},
+  {w:"throw one's weight around",mean:"権力を乱用する・いばりちらす",note:"自分の影響力・権威を誇示すること。",ex:"The new director likes to throw his weight around.",exj:"新しいディレクターは権力を振りかざすのが好きだ。",lv:"lv3"},
+];
 
-        const hideResult = () => {
-            resultContainer.classList.remove('show');
-        };
+const GRAMMAR = [
+  {head:"仮定法過去",note:"現在の事実に反する仮定。If + S + 過去形, S + would/could/might + 動詞原形。",ex:"If I were you, I would accept the offer.",exj:"もし私があなたなら、そのオファーを受けるだろう。",tip:"be動詞は主語に関わらず were を使う（口語ではwasも）"},
+  {head:"仮定法過去完了",note:"過去の事実に反する仮定。If + S + had + pp, S + would have + pp。",ex:"If she had studied harder, she would have passed.",exj:"もし彼女がもっと勉強していたら、合格していただろう。",tip:"had+過去分詞 がキーシグナル。過去の後悔・反省を述べる。"},
+  {head:"関係代名詞 whose",note:"先行詞の所有関係を示す。名詞の前に置く。",ex:"I know a scientist whose research is groundbreaking.",exj:"私は画期的な研究をしている科学者を知っている。",tip:"whose + 名詞 のセットで使う。先行詞は人・物どちらでもOK。"},
+  {head:"分詞構文",note:"接続詞+主語を省略した副詞的用法。現在分詞Vingまたは過去分詞pp。",ex:"Having finished the report, she went home.",exj:"レポートを終えて、彼女は帰宅した。",tip:"主節と同じ主語のとき使える。時間・理由・条件・譲歩などを表す。"},
+  {head:"強調構文 It is … that",note:"文の一部を強調するために使う構文。",ex:"It was John that broke the window, not Mary.",exj:"窓を割ったのはメアリーではなくジョンだ。",tip:"It is/was [強調したい語] that/who … の形。"},
+  {head:"比較 the 比較級, the 比較級",note:"「〜すればするほど、ますます〜」の構文。",ex:"The harder you work, the more you achieve.",exj:"より一生懸命働けば、より多くを達成できる。",tip:"両方に the + 比較級。日本語の「〜ばするほど」にあたる。"},
+  {head:"付加疑問文",note:"文末に短い疑問を付け加える。肯定文→否定の疑問、否定文→肯定の疑問。",ex:"You've been to Paris, haven't you?",exj:"パリに行ったことがありますよね？",tip:"動詞の時制・助動詞に合わせてtagを作る。"},
+  {head:"不定詞の意味上の主語",note:"for + 名詞/代名詞 + to 動詞原形。",ex:"It is important for students to review regularly.",exj:"生徒たちが定期的に復習することは重要だ。",tip:"for whom が明示されるのが特徴。"},
+  {head:"〜しているのに気づいた (notice/find + O + doing)",note:"知覚動詞 + 目的語 + 現在分詞 or 原形不定詞。",ex:"She noticed him waiting outside the door.",exj:"彼女はドアの外で彼が待っているのに気づいた。",tip:"notice / see / hear / feel + O + Ving（進行中）/ 原形（全体）"},
+  {head:"使役動詞 make / have / let",note:"make = 強制、have = 依頼・当然、let = 許可。",ex:"The teacher made students memorize 50 words.",exj:"先生は生徒に50語を暗記させた。",tip:"目的語の後は原形不定詞（to なし）。"},
+  {head:"倒置（否定の副詞が文頭）",note:"Never / Rarely / Not only などが文頭に来ると倒置が起きる。",ex:"Never have I seen such a beautiful sunset.",exj:"これほど美しい夕日を見たことがない。",tip:"助動詞+主語+動詞の語順になる。フォーマルな書き言葉で頻出。"},
+  {head:"接続副詞の使い方",note:"Therefore / However / Moreover / Nevertheless / Consequently は文と文をつなぐ副詞。",ex:"The plan was expensive; however, it was approved.",exj:"そのプランは費用がかかった。しかし承認された。",tip:"セミコロン+接続副詞+コンマ、または文頭でピリオドの後に使う。"},
+];
 
-        document.getElementById('btn-search').onclick = () => {
-            triggerBurst();
-            const query = input.value || "Google";
-            window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
-        };
+const PARAPHRASE = [
+  {orig:"say / think",better:["claim","assert","maintain","argue"],note:"意見・主張を述べる動詞のフォーマル版。英作文で差がつく。",ex:"Researchers claim that sleep is vital."},
+  {orig:"show",better:["illustrate","indicate","demonstrate","reveal"],note:"データや研究結果を「示す」場合のフォーマル表現。",ex:"The data illustrates a clear trend."},
+  {orig:"solve / deal with",better:["address","tackle","cope with","resolve"],note:"問題に「取り組む・対処する」フォーマル表現。",ex:"We must address climate change urgently."},
+  {orig:"bad / harmful",better:["detrimental","adverse","unfavorable","damaging"],note:"悪影響・有害な状態のフォーマル表現。",ex:"Excessive stress is detrimental to health."},
+  {orig:"good / helpful",better:["beneficial","advantageous","effective","constructive"],note:"利点・有益であることのフォーマル表現。",ex:"Regular exercise is beneficial for the body."},
+  {orig:"many / a lot of",better:["numerous","a wide range of","a variety of","a great number of"],note:"数が多いことのフォーマル表現。学術文で必須。",ex:"There are numerous advantages to this approach."},
+  {orig:"But",better:["However","Nevertheless","On the other hand","Nonetheless"],note:"逆接の接続副詞。文頭で使う場合はコンマを付ける。",ex:"The plan is costly; however, it is effective."},
+  {orig:"Because / So",better:["Due to the fact that","Therefore","Consequently","As a result"],note:"原因・結果を示す接続表現のフォーマル版。",ex:"Consequently, the project was cancelled."},
+  {orig:"Also",better:["Furthermore","In addition","Moreover","Additionally"],note:"追加情報を加える接続副詞。段落の展開で必須。",ex:"Furthermore, the cost was significantly reduced."},
+  {orig:"happen",better:["occur","take place","arise","emerge"],note:"出来事が「起こる」場合のフォーマル表現。",ex:"The accident occurred near the intersection."},
+  {orig:"use",better:["utilize","employ","implement","apply"],note:"何かを「使う」フォーマル表現。文脈により使い分け。",ex:"The company utilizes renewable energy sources."},
+  {orig:"change",better:["transform","alter","modify","shift"],note:"変化の程度により使い分ける。transformは大きな変化。",ex:"Technology has transformed the way we communicate."},
+];
 
-        document.getElementById('btn-ai').onclick = () => {
-            triggerBurst();
-            window.open('https://gemini.google.com/', '_blank');
-        };
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+let currentTab = 'flash';
+let deck = shuffle([...VOCAB]);
+let idx = 0;
+let flipped = false;
+let stats = {good:0, hard:0, forgot:0};
+let transTimer = null;
 
-        input.onclick = () => {
-            triggerBurst();
-        };
+/* ═══════════════════════════════════════════
+   FLASHCARD
+═══════════════════════════════════════════ */
+function render() {
+  if (idx >= deck.length) { showComplete(); return; }
+  const w = deck[idx];
+  flipped = false;
+  document.getElementById('fc').classList.remove('flipped');
+  document.getElementById('actions').style.display = 'none';
 
-        overlay.onclick = (e) => {
-            if (resultContainer.classList.contains('show')) {
-                haptic.impact('light');
-                hideResult();
-                input.value = ''; 
-                autoResize(); // 高さをリセット
-            }
-        };
+  // front
+  const lvMap = {lv1:'Lv1 基礎',lv2:'Lv2 中級',lv3:'Lv3 上級'};
+  const lvEl = document.getElementById('fc-lv');
+  lvEl.textContent = lvMap[w.lv] || w.lv;
+  lvEl.className = 'lv-badge ' + w.lv;
+  document.getElementById('fc-cat').textContent = w.cat || '';
+  document.getElementById('fc-word').textContent = w.w;
+  document.getElementById('fc-pron').textContent = w.pron || '';
+  const posEl = document.getElementById('fc-pos');
+  const posLabels = {n:'名詞',v:'動詞',adj:'形容詞',adv:'副詞'};
+  posEl.textContent = posLabels[w.pos] || w.pos;
+  posEl.className = 'pos-badge pos-' + (w.pos || 'other');
 
-        // 初期化
-        autoResize();
-    </script>
+  // back
+  document.getElementById('fc-mean').textContent = w.mean;
+  document.getElementById('fc-full').textContent = w.full || '';
+  document.getElementById('fc-ex').innerHTML = w.ex
+    ? `<div class="fc-ex-e">${w.ex.e}</div><div class="fc-ex-j">${w.ex.j}</div>`
+    : '';
+  document.getElementById('fc-tags').innerHTML = (w.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('');
+  document.getElementById('fc-idioms').innerHTML = (w.idioms||[]).map(i=>`<div class="fc-idiom-e">${i.e}</div><div style="color:var(--sub)">${i.j}</div>`).join('');
+
+  // progress
+  const pct = Math.round(idx / deck.length * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-txt').textContent = idx + ' / ' + deck.length;
+}
+
+window.flipCard = function() {
+  flipped = !flipped;
+  document.getElementById('fc').classList.toggle('flipped', flipped);
+  haptic();
+  document.getElementById('actions').style.display = flipped ? 'flex' : 'none';
+};
+
+window.rate = function(type) {
+  haptic.confirm();
+  stats[type]++;
+  document.getElementById('s-good').textContent = stats.good;
+  document.getElementById('s-hard').textContent = stats.hard;
+  document.getElementById('s-forgot').textContent = stats.forgot;
+  if (type === 'forgot') deck.push({...deck[idx]});
+  else if (type === 'hard') deck.splice(Math.min(idx+4, deck.length), 0, {...deck[idx]});
+  idx++;
+  animNext();
+};
+
+function animNext() {
+  const wrap = document.getElementById('fc-wrap');
+  wrap.classList.add('out');
+  setTimeout(() => {
+    wrap.classList.remove('out');
+    render();
+    void wrap.offsetWidth;
+    wrap.classList.add('in');
+    setTimeout(() => wrap.classList.remove('in'), 260);
+  }, 200);
+}
+
+function showComplete() {
+  document.getElementById('actions').style.display = 'none';
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('prog-txt').textContent = deck.length + ' / ' + deck.length;
+  document.getElementById('card-area').innerHTML = `
+    <div class="trans-overlay" id="trans-overlay" onclick="closeTrans()" style="z-index:40;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:28px;background:rgba(247,246,243,.96);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s;">
+      <div><div class="trans-result" id="trans-result"></div><div class="trans-sub" id="trans-sub"></div></div>
+    </div>
+    <div class="complete-card">
+      <div style="font-size:54px;margin-bottom:12px">🎉</div>
+      <div style="font-size:20px;font-weight:700;margin-bottom:6px">デッキ完了！</div>
+      <div style="font-size:13px;color:var(--sub);margin-bottom:20px">覚えた:${stats.good}　難しい:${stats.hard}　忘れた:${stats.forgot}</div>
+      <button onclick="window.restartDeck()" style="background:var(--blue);color:#fff;border:none;border-radius:12px;padding:11px 26px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">🔀 もう一度</button>
+    </div>`;
+}
+
+window.restartDeck = function() {
+  deck = shuffle([...VOCAB]);
+  idx = 0; stats = {good:0,hard:0,forgot:0};
+  document.getElementById('s-good').textContent = 0;
+  document.getElementById('s-hard').textContent = 0;
+  document.getElementById('s-forgot').textContent = 0;
+  // restore card area
+  document.getElementById('card-area').innerHTML = `
+    <div class="trans-overlay" id="trans-overlay" onclick="closeTrans()">
+      <div><div class="trans-result" id="trans-result"></div><div class="trans-sub" id="trans-sub"></div></div>
+    </div>
+    <div class="fc-wrap" id="fc-wrap">
+      <div class="fc" id="fc" onclick="flipCard()">
+        <div class="fc-face fc-front" id="fc-front">
+          <div class="fc-meta"><span class="lv-badge lv1" id="fc-lv"></span><span class="cat-badge" id="fc-cat"></span></div>
+          <div class="fc-word" id="fc-word"></div>
+          <div class="fc-pron" id="fc-pron"></div>
+          <span class="pos-badge pos-v" id="fc-pos"></span>
+          <div class="fc-hint">タップして意味を確認 →</div>
+        </div>
+        <div class="fc-face fc-back" id="fc-back">
+          <div class="fc-mean" id="fc-mean"></div>
+          <div class="fc-full" id="fc-full"></div>
+          <div class="fc-ex" id="fc-ex"></div>
+          <div class="fc-tags" id="fc-tags"></div>
+          <div class="fc-idioms-list" id="fc-idioms"></div>
+        </div>
+      </div>
+    </div>`;
+  render();
+  attachSwipe();
+};
+
+window.shuffleDeck = function() {
+  haptic.confirm();
+  deck = shuffle([...VOCAB]);
+  idx = 0;
+  render();
+};
+
+/* ═══════════════════════════════════════════
+   LIST VIEWS
+═══════════════════════════════════════════ */
+function buildIdiomList() {
+  const el = document.getElementById('list-idiom');
+  el.innerHTML = '<div class="section-head">イディオム一覧 (' + IDIOMS.length + '個)</div>' +
+    IDIOMS.map(d => `
+      <div class="list-item">
+        <div class="list-word">${d.w}</div>
+        <div class="list-mean" style="color:var(--blue);font-weight:600">${d.mean}</div>
+        <div class="list-note">${d.note}</div>
+        <div class="list-ex">"${d.ex}"<br><span style="color:var(--sub)">${d.exj}</span></div>
+      </div>`).join('');
+}
+
+function buildGramList() {
+  const el = document.getElementById('list-gram');
+  el.innerHTML = '<div class="section-head">重要文法 (' + GRAMMAR.length + '項目)</div>' +
+    GRAMMAR.map(d => `
+      <div class="list-item">
+        <div class="list-word">${d.head}</div>
+        <div class="list-note">${d.note}<br><span style="color:var(--yellow);font-size:11px">💡 ${d.tip}</span></div>
+        <div class="list-ex">"${d.ex}"<br><span style="color:var(--sub)">${d.exj}</span></div>
+      </div>`).join('');
+}
+
+function buildParaList() {
+  const el = document.getElementById('list-para');
+  el.innerHTML = '<div class="section-head">言い換え表現 (ライティング必須)</div>' +
+    PARAPHRASE.map(d => `
+      <div class="list-item">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="font-size:13px;color:var(--sub);background:#f0f0ee;padding:3px 10px;border-radius:20px">${d.orig}</div>
+          <span style="color:var(--sub)">→</span>
+          ${d.better.map(b=>`<div style="background:var(--blue);color:#fff;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600">${b}</div>`).join('')}
+        </div>
+        <div class="list-note" style="margin-top:8px">${d.note}</div>
+        <div class="list-ex">"${d.ex}"</div>
+      </div>`).join('');
+}
+
+/* ═══════════════════════════════════════════
+   TAB SWITCH
+═══════════════════════════════════════════ */
+window.switchTab = function(tab) {
+  haptic();
+  currentTab = tab;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+
+  const isFlash = tab === 'flash';
+  document.getElementById('card-area').style.display = isFlash ? 'flex' : 'none';
+  document.getElementById('stats-row').style.display = isFlash ? 'flex' : 'none';
+  document.getElementById('actions').style.display = isFlash && flipped ? 'flex' : 'none';
+  document.getElementById('prog-row') && (document.querySelector('.prog-row').style.display = isFlash ? 'flex' : 'none');
+
+  ['idiom','gram','para'].forEach(t => {
+    const el = document.getElementById('list-' + t);
+    el.classList.toggle('active', t === tab);
+  });
+};
+
+/* ═══════════════════════════════════════════
+   TRANSLATOR
+═══════════════════════════════════════════ */
+const input = document.getElementById('translate-input');
+
+const autoResize = () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, window.innerHeight * 0.28) + 'px';
+};
+
+input.addEventListener('input', e => {
+  autoResize();
+  const text = e.target.value.trim();
+  clearTimeout(transTimer);
+  if (!text) { closeTrans(); return; }
+  transTimer = setTimeout(() => doTranslate(text), 480);
+});
+
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+    e.preventDefault();
+    haptic();
+    const text = input.value.trim();
+    if (text) doTranslate(text);
+  }
+});
+
+input.addEventListener('focus', () => haptic());
+
+async function doTranslate(text) {
+  try {
+    const isJa = /[ぁ-んァ-ヶー一-龠]/.test(text);
+    const pair = isJa ? 'ja|en' : 'en|ja';
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${pair}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const translated = data.responseData?.translatedText;
+    if (translated && translated !== 'N/A') {
+      showTrans(translated, isJa ? 'JA → EN' : 'EN → JA');
+    }
+  } catch (err) {
+    console.error('Translation error:', err);
+  }
+}
+
+function showTrans(text, label) {
+  const ov = document.getElementById('trans-overlay');
+  const res = document.getElementById('trans-result');
+  const sub = document.getElementById('trans-sub');
+  if (!ov || !res) return;
+  res.textContent = text;
+  if (sub) sub.textContent = label || '';
+  ov.classList.add('show');
+  haptic.confirm();
+}
+
+window.closeTrans = function() {
+  const ov = document.getElementById('trans-overlay');
+  if (ov) ov.classList.remove('show');
+  haptic();
+  input.value = '';
+  autoResize();
+};
+
+document.getElementById('btn-search').addEventListener('click', () => {
+  haptic.confirm();
+  const q = input.value.trim() || 'Google';
+  window.open(`https://www.google.com/search?q=${encodeURIComponent(q)}`, '_blank');
+});
+
+document.getElementById('btn-go').addEventListener('click', () => {
+  haptic();
+  const text = input.value.trim();
+  if (text) doTranslate(text);
+});
+
+/* ═══════════════════════════════════════════
+   SWIPE GESTURE
+═══════════════════════════════════════════ */
+function attachSwipe() {
+  const wrap = document.getElementById('fc-wrap');
+  if (!wrap) return;
+  let startX = 0, startY = 0;
+  wrap.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, {passive:true});
+  wrap.addEventListener('touchend', e => {
+    if (!flipped) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 55) {
+      dx < 0 ? window.rate('forgot') : window.rate('good');
+    }
+  }, {passive:true});
+}
+
+/* ═══════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════ */
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+buildIdiomList();
+buildGramList();
+buildParaList();
+render();
+attachSwipe();
+</script>
+
 </body>
 </html>
