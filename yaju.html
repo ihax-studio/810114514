@@ -3,637 +3,486 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>英検準1級 完全攻略</title>
 <script type="importmap">{"imports":{"ios-haptics":"https://esm.sh/ios-haptics"}}</script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-:root{
-  --bg:#f7f6f3;--card:#fff;--text:#1a1a1a;--sub:#888;--line:#ebebeb;
-  --green:#27a06a;--yellow:#d97706;--red:#dc2626;--blue:#2563eb;--purple:#7c3aed;
-  --shadow:0 2px 16px rgba(0,0,0,.07);--shadow-lg:0 8px 40px rgba(0,0,0,.13);
-}
-html,body{height:100%;height:100dvh;overflow:hidden;}
-body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);display:flex;flex-direction:column;}
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#f7f6f3;--card:#fff;--tx:#1a1a1a;--sub:#888;--ln:#e8e8e8;--g:#27a06a;--y:#d97706;--r:#dc2626;--b:#2563eb;--p:#7c3aed;--sh:0 2px 16px rgba(0,0,0,.07);--shl:0 8px 36px rgba(0,0,0,.12)}
+html,body{height:100dvh;overflow:hidden}
+body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);display:flex;flex-direction:column}
 
-/* NAV */
-.nav-bar{display:flex;gap:0;background:var(–card);border-bottom:1px solid var(–line);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
-.nav-bar::-webkit-scrollbar{display:none;}
-.nav-btn{flex-shrink:0;padding:11px 14px;border:none;background:none;font-family:inherit;font-size:12px;font-weight:600;color:var(–sub);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
-.nav-btn.active{color:var(–blue);border-bottom-color:var(–blue);}
+.nav{display:flex;background:var(–card);border-bottom:1px solid var(–ln);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nb{flex-shrink:0;padding:10px 13px;border:none;background:none;font-family:inherit;font-size:11px;font-weight:600;color:var(–sub);cursor:pointer;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}
+.nb.on{color:var(–b);border-bottom-color:var(–b)}
 
-/* PROGRESS */
-.prog-row{display:flex;align-items:center;gap:8px;padding:8px 16px 6px;flex-shrink:0;}
-.prog-bar{flex:1;height:4px;background:var(–line);border-radius:2px;overflow:hidden;}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(–blue),var(–purple));border-radius:2px;transition:width .4s ease;}
-.prog-txt{font-size:11px;font-weight:600;color:var(–sub);min-width:52px;text-align:right;}
+.pr{display:flex;align-items:center;gap:8px;padding:7px 16px 5px;flex-shrink:0}
+.prb{flex:1;height:4px;background:var(–ln);border-radius:2px;overflow:hidden}
+.prf{height:100%;background:linear-gradient(90deg,var(–b),var(–p));border-radius:2px;transition:width .4s}
+.prt{font-size:11px;font-weight:600;color:var(–sub);min-width:48px;text-align:right}
 
-/* STATS CHIPS */
-.stats-row{display:flex;gap:6px;padding:0 16px 8px;flex-shrink:0;}
-.chip{background:var(–card);border-radius:10px;padding:5px 10px;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;box-shadow:var(–shadow);}
+.sr{display:flex;gap:6px;padding:0 16px 6px;flex-shrink:0}
+.ch{background:var(–card);border-radius:10px;padding:4px 10px;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;box-shadow:var(–sh)}
 
-/* CARD AREA */
-.card-area{flex:1;display:flex;align-items:center;justify-content:center;padding:8px 16px;position:relative;overflow:hidden;min-height:0;}
+.ca{flex:1;display:flex;align-items:center;justify-content:center;padding:6px 16px;position:relative;overflow:hidden;min-height:0}
 
-/* TRANS OVERLAY */
-.trans-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:28px;background:rgba(247,246,243,.96);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40;}
-.trans-overlay.show{opacity:1;pointer-events:auto;}
-.trans-result{text-align:center;font-size:clamp(20px,5.5vw,38px);font-weight:300;color:var(–text);line-height:1.5;letter-spacing:-.01em;}
-.trans-sub{font-size:13px;color:var(–sub);margin-top:10px;}
+.tov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(247,246,243,.97);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
+.tov.show{opacity:1;pointer-events:auto}
+.tres{text-align:center;font-size:clamp(20px,5.5vw,36px);font-weight:300;color:var(–tx);line-height:1.5}
+.tsub{font-size:12px;color:var(–sub);margin-top:8px}
 
-/* FLASHCARD */
-.fc-wrap{width:100%;max-width:440px;perspective:1200px;cursor:pointer;-webkit-user-select:none;user-select:none;}
-.fc{width:100%;min-height:320px;position:relative;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1);}
-.fc.flipped{transform:rotateY(180deg);}
-.fc-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:24px;padding:24px 22px 20px;display:flex;flex-direction:column;box-shadow:var(–shadow-lg);background:var(–card);}
-.fc-back{transform:rotateY(180deg);}
+.fw{width:100%;max-width:440px;perspective:1200px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.fc{width:100%;min-height:300px;position:relative;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+.fc.fl{transform:rotateY(180deg)}
+.ff{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;padding:22px 20px 18px;display:flex;flex-direction:column;box-shadow:var(–shl);background:var(–card)}
+.fb{transform:rotateY(180deg)}
 
-/* front */
-.fc-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:auto;}
-.lv-badge{font-size:10px;font-weight:700;letter-spacing:.07em;padding:3px 9px;border-radius:20px;}
-.lv1{background:#dcfce7;color:#166534;}.lv2{background:#fef9c3;color:#854d0e;}.lv3{background:#fce7f3;color:#9d174d;}.lv-idiom{background:#ede9fe;color:#5b21b6;}.lv-gram{background:#e0f2fe;color:#075985;}
-.cat-badge{font-size:10px;color:var(–sub);font-weight:500;}
-.fc-word{font-size:clamp(28px,7vw,44px);font-weight:600;color:var(–text);letter-spacing:-.02em;margin:16px 0 4px;line-height:1.1;}
-.fc-pron{font-size:13px;color:var(–sub);font-weight:300;margin-bottom:6px;}
-.pos-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;}
-.pos-n{background:#eff6ff;color:#1d4ed8;}.pos-v{background:#f0fdf4;color:#166534;}.pos-adj{background:#fffbeb;color:#b45309;}.pos-adv{background:#fff1f2;color:#be123c;}.pos-other{background:#f5f3ff;color:#6d28d9;}
-.fc-hint{font-size:11px;color:var(–sub);margin-top:auto;text-align:center;opacity:.4;padding-top:12px;}
+.fmeta{display:flex;align-items:center;justify-content:space-between;margin-bottom:auto}
+.lv{font-size:10px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:20px}
+.l1{background:#dcfce7;color:#166534}.l2{background:#fef9c3;color:#854d0e}.l3{background:#fce7f3;color:#9d174d}.lid{background:#ede9fe;color:#5b21b6}.lgr{background:#e0f2fe;color:#075985}
+.fcat{font-size:10px;color:var(–sub);font-weight:500}
+.fword{font-size:clamp(26px,7vw,42px);font-weight:600;color:var(–tx);letter-spacing:-.02em;margin:14px 0 3px;line-height:1.1}
+.fpron{font-size:12px;color:var(–sub);font-weight:300;margin-bottom:5px}
+.fpos{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.pn{background:#eff6ff;color:#1d4ed8}.pv{background:#f0fdf4;color:#166534}.pa{background:#fffbeb;color:#b45309}.pd{background:#fff1f2;color:#be123c}.po{background:#f5f3ff;color:#6d28d9}
+.fh{font-size:11px;color:var(–sub);margin-top:auto;text-align:center;opacity:.4;padding-top:10px}
 
-/* back */
-.fc-mean{font-size:20px;font-weight:700;color:var(–text);margin-bottom:6px;}
-.fc-full{font-size:12px;color:#555;line-height:1.7;margin-bottom:10px;}
-.fc-ex{background:#f5f5f2;border-radius:12px;padding:10px 12px;margin-bottom:10px;}
-.fc-ex-e{font-size:13px;color:var(–text);line-height:1.6;}
-.fc-ex-j{font-size:11px;color:var(–sub);margin-top:3px;}
-.fc-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;}
-.tag{background:#f0f0ee;border-radius:7px;padding:2px 8px;font-size:10px;color:#555;}
-.fc-idioms-list{font-size:11px;line-height:1.9;color:var(–sub);}
-.fc-idiom-e{font-style:italic;color:#333;}
+.fmean{font-size:19px;font-weight:700;color:var(–tx);margin-bottom:4px}
+.ffull{font-size:11.5px;color:#555;line-height:1.7;margin-bottom:8px}
+.fex{background:#f5f5f2;border-radius:11px;padding:9px 11px;margin-bottom:8px;font-size:12px;line-height:1.6}
+.fexe{color:var(–tx)}.fexj{color:var(–sub);margin-top:2px;font-size:11px}
+.ftags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px}
+.ftag{background:#f0f0ee;border-radius:6px;padding:1px 7px;font-size:10px;color:#555}
+.fidm{font-size:11px;line-height:1.8;color:var(–sub)}
+.fide{font-style:italic;color:#333}
 
-/* ACTIONS */
-.actions{display:flex;gap:8px;padding:10px 16px 8px;flex-shrink:0;}
-.act-btn{flex:1;padding:11px 4px;border:none;border-radius:14px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:transform .15s,opacity .15s;display:flex;flex-direction:column;align-items:center;gap:2px;}
-.act-btn:active{transform:scale(.91);}
-.act-btn.forgot{background:#fef2f2;color:var(–red);}
-.act-btn.hard{background:#fffbeb;color:var(–yellow);}
-.act-btn.good{background:#f0fdf4;color:var(–green);}
-.act-btn span{font-size:18px;}
+.acts{display:flex;gap:8px;padding:8px 16px 6px;flex-shrink:0}
+.ab{flex:1;padding:10px 4px;border:none;border-radius:13px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:transform .15s;display:flex;flex-direction:column;align-items:center;gap:2px}
+.ab:active{transform:scale(.91)}
+.ab.af{background:#fef2f2;color:var(–r)}.ab.ah{background:#fffbeb;color:var(–y)}.ab.ag{background:#f0fdf4;color:var(–g)}
+.ab span{font-size:17px}
 
-/* TRANS BAR */
-.trans-bar{padding:8px 14px 24px;flex-shrink:0;}
-.trans-inner{display:flex;align-items:flex-end;gap:8px;background:var(–card);border-radius:24px;padding:8px 8px 8px 14px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
-#translate-input{flex:1;border:none;outline:none;background:transparent;font-family:inherit;font-size:15px;color:var(–text);resize:none;min-height:34px;max-height:28dvh;line-height:1.5;overflow-y:auto;}
-#translate-input::placeholder{color:#bbb;}
-.tbar-btn{flex-shrink:0;width:38px;height:38px;border-radius:50%;border:none;background:#f0f0ee;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(–sub);transition:transform .15s,background .15s;}
-.tbar-btn:active{transform:scale(.88);}
-.tbar-btn.go{background:var(–blue);color:#fff;}
+.tb{padding:6px 14px 22px;flex-shrink:0}
+.ti{display:flex;align-items:flex-end;gap:8px;background:var(–card);border-radius:22px;padding:7px 7px 7px 13px;box-shadow:0 4px 18px rgba(0,0,0,.07)}
+#ti{flex:1;border:none;outline:none;background:transparent;font-family:inherit;font-size:15px;color:var(–tx);resize:none;min-height:32px;max-height:26dvh;line-height:1.5;overflow-y:auto}
+#ti::placeholder{color:#bbb}
+.tbb{flex-shrink:0;width:36px;height:36px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s}
+.tbb:active{transform:scale(.88)}
+.tbs{background:#f0f0ee;color:var(–sub)}.tbg{background:var(–b);color:#fff}
 
-/* LIST VIEW (grammar/idioms tab) */
-.list-scroll{flex:1;overflow-y:auto;padding:10px 16px 8px;display:none;min-height:0;}
-.list-scroll.active{display:block;}
-.list-item{background:var(–card);border-radius:16px;padding:14px 16px;margin-bottom:8px;box-shadow:var(–shadow);}
-.list-word{font-size:16px;font-weight:700;color:var(–text);margin-bottom:3px;}
-.list-mean{font-size:13px;color:var(–sub);margin-bottom:6px;}
-.list-note{font-size:12px;color:#555;line-height:1.7;background:#f5f5f2;border-radius:10px;padding:8px 10px;margin-top:6px;}
-.list-ex{font-size:12px;color:#666;font-style:italic;margin-top:5px;}
-.section-head{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(–sub);padding:10px 0 6px;}
+.ls{flex:1;overflow-y:auto;padding:8px 16px;display:none;min-height:0}
+.ls.on{display:block}
+.li{background:var(–card);border-radius:14px;padding:12px 14px;margin-bottom:7px;box-shadow:var(–sh)}
+.lw{font-size:15px;font-weight:700;color:var(–tx);margin-bottom:2px}
+.lm{font-size:12px;color:var(–b);font-weight:600;margin-bottom:4px}
+.ln{font-size:11.5px;color:#555;line-height:1.7;background:#f5f5f2;border-radius:9px;padding:7px 9px;margin-top:5px}
+.le{font-size:11.5px;color:#666;font-style:italic;margin-top:4px;line-height:1.5}
+.sh{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(–sub);padding:8px 0 4px}
 
-/* swap animations */
-.fc-wrap.out{animation:cardOut .22s ease forwards;}
-.fc-wrap.in{animation:cardIn .22s ease forwards;}
-@keyframes cardOut{to{opacity:0;transform:scale(.93) translateY(18px);}}
-@keyframes cardIn{from{opacity:0;transform:scale(.93) translateY(-18px);}to{opacity:1;transform:none;}}
+.fw.out{animation:co .2s ease forwards}.fw.in{animation:ci .2s ease forwards}
+@keyframes co{to{opacity:0;transform:scale(.93) translateY(16px)}}
+@keyframes ci{from{opacity:0;transform:scale(.93) translateY(-16px)}to{opacity:1;transform:none}}
 
-/* complete screen */
-.complete-card{width:100%;max-width:440px;background:var(–card);border-radius:24px;padding:36px 24px;text-align:center;box-shadow:var(–shadow-lg);}
+.cc{width:100%;max-width:440px;background:var(–card);border-radius:22px;padding:32px 20px;text-align:center;box-shadow:var(–shl)}
 </style>
 
 </head>
 <body>
-
-<!-- NAV -->
-
-<div class="nav-bar">
-  <button class="nav-btn active" id="tab-flash" onclick="switchTab('flash')">🃏 単語カード</button>
-  <button class="nav-btn" id="tab-idiom" onclick="switchTab('idiom')">💬 イディオム</button>
-  <button class="nav-btn" id="tab-gram" onclick="switchTab('gram')">📐 文法・表現</button>
-  <button class="nav-btn" id="tab-para" onclick="switchTab('para')">✍️ 言い換え</button>
+<div class="nav">
+<button class="nb on" id="t-f" onclick="ST('f')">🃏 単語カード</button>
+<button class="nb" id="t-i" onclick="ST('i')">💬 イディオム</button>
+<button class="nb" id="t-g" onclick="ST('g')">📐 文法</button>
+<button class="nb" id="t-p" onclick="ST('p')">✍️ 言い換え</button>
+<button class="nb" id="t-r" onclick="ST('r')">📖 読解表現</button>
+<button class="nb" id="t-c" onclick="ST('c')">⚠️ 混同注意</button>
+<button class="nb" id="t-a" onclick="ST('a')">🎯 テーマ</button>
 </div>
-
-<!-- PROGRESS -->
-
-<div class="prog-row">
-  <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
-  <div class="prog-txt" id="prog-txt">0 / 0</div>
+<div class="pr"><div class="prb"><div class="prf" id="pf" style="width:0%"></div></div><div class="prt" id="pt">0/0</div></div>
+<div class="sr" id="sr">
+<div class="ch"><span style="color:var(--g)">✓</span><span id="sg" style="color:var(--g)">0</span></div>
+<div class="ch"><span style="color:var(--y)">△</span><span id="sh" style="color:var(--y)">0</span></div>
+<div class="ch"><span style="color:var(--r)">✗</span><span id="sf" style="color:var(--r)">0</span></div>
+<div class="ch" style="margin-left:auto;cursor:pointer" onclick="SD()">🔀</div>
 </div>
-
-<!-- STATS -->
-
-<div class="stats-row" id="stats-row">
-  <div class="chip"><span style="color:var(--green)">✓</span><span id="s-good" style="color:var(--green)">0</span></div>
-  <div class="chip"><span style="color:var(--yellow)">△</span><span id="s-hard" style="color:var(--yellow)">0</span></div>
-  <div class="chip"><span style="color:var(--red)">✗</span><span id="s-forgot" style="color:var(--red)">0</span></div>
-  <div class="chip" style="margin-left:auto;cursor:pointer" onclick="shuffleDeck()">🔀 シャッフル</div>
+<div class="ca" id="ca">
+<div class="tov" id="tov" onclick="CT()"><div><div class="tres" id="tr"></div><div class="tsub" id="ts"></div></div></div>
+<div class="fw" id="fw">
+<div class="fc" id="fc" onclick="FF()">
+<div class="ff" id="ff">
+<div class="fmeta"><span class="lv l1" id="flv"></span><span class="fcat" id="fca"></span></div>
+<div class="fword" id="fwo"></div>
+<div class="fpron" id="fpr"></div>
+<span class="fpos pv" id="fpo"></span>
+<div class="fh">タップして意味を確認</div>
 </div>
-
-<!-- CARD AREA -->
-
-<div class="card-area" id="card-area">
-  <!-- trans overlay -->
-  <div class="trans-overlay" id="trans-overlay" onclick="closeTrans()">
-    <div>
-      <div class="trans-result" id="trans-result"></div>
-      <div class="trans-sub" id="trans-sub"></div>
-    </div>
-  </div>
-  <!-- flashcard -->
-  <div class="fc-wrap" id="fc-wrap">
-    <div class="fc" id="fc" onclick="flipCard()">
-      <div class="fc-face fc-front" id="fc-front">
-        <div class="fc-meta">
-          <span class="lv-badge lv1" id="fc-lv">Lv1</span>
-          <span class="cat-badge" id="fc-cat"></span>
-        </div>
-        <div class="fc-word" id="fc-word">—</div>
-        <div class="fc-pron" id="fc-pron"></div>
-        <span class="pos-badge pos-v" id="fc-pos">動詞</span>
-        <div class="fc-hint">タップして意味を確認 →</div>
-      </div>
-      <div class="fc-face fc-back" id="fc-back">
-        <div class="fc-mean" id="fc-mean"></div>
-        <div class="fc-full" id="fc-full"></div>
-        <div class="fc-ex" id="fc-ex"></div>
-        <div class="fc-tags" id="fc-tags"></div>
-        <div class="fc-idioms-list" id="fc-idioms"></div>
-      </div>
-    </div>
-  </div>
+<div class="ff fb" id="fba">
+<div class="fmean" id="fme"></div>
+<div class="ffull" id="ffu"></div>
+<div class="fex" id="fex"></div>
+<div class="ftags" id="fta"></div>
+<div class="fidm" id="fid"></div>
 </div>
-
-<!-- LIST VIEWS -->
-
-<div class="list-scroll" id="list-idiom"></div>
-<div class="list-scroll" id="list-gram"></div>
-<div class="list-scroll" id="list-para"></div>
-
-<!-- ACTION BUTTONS -->
-
-<div class="actions" id="actions" style="display:none">
-  <button class="act-btn forgot" onclick="rate('forgot')"><span>😰</span>忘れた</button>
-  <button class="act-btn hard" onclick="rate('hard')"><span>🤔</span>難しい</button>
-  <button class="act-btn good" onclick="rate('good')"><span>✨</span>覚えた！</button>
 </div>
-
-<!-- TRANSLATOR -->
-
-<div class="trans-bar">
-  <div class="trans-inner">
-    <button class="tbar-btn" id="btn-search" title="Google検索">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-    </button>
-    <textarea id="translate-input" placeholder="翻訳 / Translate..." rows="1" spellcheck="true"></textarea>
-    <button class="tbar-btn go" id="btn-go" title="翻訳">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </button>
-  </div>
 </div>
+</div>
+<div class="ls" id="l-i"></div>
+<div class="ls" id="l-g"></div>
+<div class="ls" id="l-p"></div>
+<div class="ls" id="l-r"></div>
+<div class="ls" id="l-c"></div>
+<div class="ls" id="l-a"></div>
+<div class="acts" id="acts" style="display:none">
+<button class="ab af" onclick="R('f')"><span>😰</span>忘れた</button>
+<button class="ab ah" onclick="R('h')"><span>🤔</span>難しい</button>
+<button class="ab ag" onclick="R('g')"><span>✨</span>覚えた！</button>
+</div>
+<div class="tb"><div class="ti">
+<button class="tbb tbs" id="bsr" title="検索"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
+<textarea id="ti" placeholder="翻訳 / Translate..." rows="1" spellcheck="true"></textarea>
+<button class="tbb tbg" id="bgo" title="翻訳"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+</div></div>
 
 <script type="module">
-import { haptic } from 'ios-haptics';
+import{haptic}from'ios-haptics';
 
-/* ═══════════════════════════════════════════
-   DATA — 全単語・イディオム・文法・言い換え
-═══════════════════════════════════════════ */
-const VOCAB = [
-  /* ── LV1 基礎動詞 ── */
-  {w:"achieve",pos:"v",lv:"lv1",cat:"動詞",mean:"達成する・成し遂げる",pron:"/əˈtʃiːv/",full:"努力の結果として実現すること。achievement（名）・achievable（形）。",ex:{e:"She achieved her goal of becoming a doctor.",j:"彼女は医者になる目標を達成した。"},tags:["achievement (n)","achievable (adj)"],idioms:[{e:"achieve a goal",j:"目標を達成する"}]},
-  {w:"affect",pos:"v",lv:"lv1",cat:"動詞",mean:"影響を与える",pron:"/əˈfekt/",full:"⚠️ effect（名詞）と混同注意！affect=動詞、effect=名詞。",ex:{e:"Climate change affects everyone on Earth.",j:"気候変動は地球上の全員に影響を与える。"},tags:["effect (n)","affection (n)","affected (adj)"],idioms:[{e:"adversely affect",j:"悪影響を与える"}]},
-  {w:"allow",pos:"v",lv:"lv1",cat:"動詞",mean:"許可する・可能にする",pron:"/əˈlaʊ/",full:"「させてあげる」イメージ。allow A to do = Aが〜するのを許可する。",ex:{e:"The law allows people to vote at 18.",j:"法律は18歳での投票を認めている。"},tags:["allowance (n)"],idioms:[{e:"allow A to do",j:"Aが〜することを許可する"}]},
-  {w:"apply",pos:"v",lv:"lv1",cat:"動詞",mean:"応募する・適用する",pron:"/əˈplaɪ/",full:"「当てはめる」感覚。apply for=応募、apply to=〜に適用される。",ex:{e:"I applied for this job last week.",j:"先週この仕事に応募した。"},tags:["application (n)","applicant (n)"],idioms:[{e:"apply for",j:"〜に応募する"},{e:"apply to",j:"〜に適用される"}]},
-  {w:"reduce",pos:"v",lv:"lv1",cat:"動詞",mean:"減らす・低下させる",pron:"/rɪˈdjuːs/",full:"数量・強度などを小さくすること。reduction（名詞）。",ex:{e:"We need to reduce carbon emissions.",j:"炭素排出量を削減する必要がある。"},tags:["reduction (n)","reductive (adj)"],idioms:[{e:"reduce A to B",j:"AをBにまで減らす"}]},
-  {w:"require",pos:"v",lv:"lv1",cat:"動詞",mean:"必要とする・要求する",pron:"/rɪˈkwaɪər/",full:"requirement（名詞）。require A to do = Aに〜することを求める。",ex:{e:"The job requires strong communication skills.",j:"その仕事は高いコミュニケーション能力を必要とする。"},tags:["requirement (n)","required (adj)"],idioms:[]},
-  {w:"involve",pos:"v",lv:"lv1",cat:"動詞",mean:"含む・巻き込む・〜を伴う",pron:"/ɪnˈvɒlv/",full:"involve doing = 〜することを含む。involved（形）= 複雑な。",ex:{e:"The project involves a lot of research.",j:"そのプロジェクトは多くのリサーチを伴う。"},tags:["involvement (n)","involved (adj)"],idioms:[{e:"be involved in",j:"〜に関わっている"}]},
-  /* ── LV2 中級動詞 ── */
-  {w:"demonstrate",pos:"v",lv:"lv2",cat:"動詞",mean:"実演する・証明する・示す",pron:"/ˈdemənstreɪt/",full:"「見せて証明する」イメージ。demonstrate that = 〜ということを示す。",ex:{e:"The study demonstrates that sleep is vital.",j:"その研究は睡眠が不可欠であることを示す。"},tags:["demonstration (n)","demonstrator (n)"],idioms:[{e:"demonstrate that",j:"〜ということを証明する"}]},
-  {w:"indicate",pos:"v",lv:"lv2",cat:"動詞",mean:"示す・指し示す・暗示する",pron:"/ˈɪndɪkeɪt/",full:"データや状況が「〜を示している」場合に使う。indication（名）。",ex:{e:"Studies indicate that sleep is vital for health.",j:"研究は睡眠が健康に不可欠であることを示している。"},tags:["indication (n)","indicator (n)"],idioms:[]},
-  {w:"maintain",pos:"v",lv:"lv2",cat:"動詞",mean:"維持する・主張する",pron:"/meɪnˈteɪn/",full:"状態を保つことと、意見を「主張し続ける」両方の意味。",ex:{e:"We must maintain our environment for future generations.",j:"将来の世代のために環境を維持しなければならない。"},tags:["maintenance (n)"],idioms:[]},
-  {w:"contribute",pos:"v",lv:"lv2",cat:"動詞",mean:"貢献する・一因となる・寄付する",pron:"/kənˈtrɪbjuːt/",full:"contribute to 〜 = 〜に貢献する・〜の原因になる。",ex:{e:"Exercise contributes to good health.",j:"運動は健康に貢献する。"},tags:["contribution (n)","contributor (n)"],idioms:[{e:"contribute to",j:"〜に貢献する・〜の一因になる"}]},
-  {w:"obtain",pos:"v",lv:"lv2",cat:"動詞",mean:"入手する・得る",pron:"/əbˈteɪn/",full:"努力して手に入れること。getよりフォーマル。obtainable（形）。",ex:{e:"You can obtain a visa at the embassy.",j:"大使館でビザを取得できる。"},tags:["obtainable (adj)"],idioms:[]},
-  {w:"propose",pos:"v",lv:"lv2",cat:"動詞",mean:"提案する・提唱する",pron:"/prəˈpoʊz/",full:"アイデアや計画を公式に提出すること。proposal（名）。",ex:{e:"She proposed a new marketing strategy.",j:"彼女は新しいマーケティング戦略を提案した。"},tags:["proposal (n)"],idioms:[]},
-  {w:"decline",pos:"v",lv:"lv2",cat:"動詞",mean:"断る・減少する",pron:"/dɪˈklaɪn/",full:"2つの意味が頻出。「NO」と言うことと数・量が減ること。",ex:{e:"Sales declined sharply last year.",j:"昨年、売上が急激に減少した。"},tags:[],idioms:[]},
-  {w:"distinguish",pos:"v",lv:"lv2",cat:"動詞",mean:"区別する・識別する",pron:"/dɪˈstɪŋɡwɪʃ/",full:"distinguish A from B = AとBを区別する。",ex:{e:"Can you distinguish these two colors?",j:"この2色を区別できますか？"},tags:["distinguished (adj)"],idioms:[{e:"distinguish A from B",j:"AとBを区別する"}]},
-  {w:"expand",pos:"v",lv:"lv2",cat:"動詞",mean:"拡張する・広げる",pron:"/ɪkˈspænd/",full:"サイズ・範囲・規模を大きくすること。expand on = 〜について詳しく述べる。",ex:{e:"The company is expanding its business overseas.",j:"その会社は海外事業を拡大している。"},tags:["expansion (n)"],idioms:[{e:"expand on",j:"〜について詳しく述べる"}]},
-  /* ── LV3 上級動詞 ── */
-  {w:"acknowledge",pos:"v",lv:"lv3",cat:"動詞",mean:"認める・承認する・感謝する",pron:"/əkˈnɒlɪdʒ/",full:"事実・功績を公式に認めること。acknowledge that = 〜ということを認める。",ex:{e:"He acknowledged his mistake publicly.",j:"彼は公に自分の過ちを認めた。"},tags:["acknowledgment (n)"],idioms:[{e:"acknowledge that",j:"〜ということを認める"}]},
-  {w:"anticipate",pos:"v",lv:"lv3",cat:"動詞",mean:"予想する・期待する・先回りする",pron:"/ænˈtɪsɪpeɪt/",full:"expectより「積極的に心構えをする」ニュアンスが強い。",ex:{e:"We anticipate a large crowd at the event.",j:"イベントには大勢の人が来ると予想している。"},tags:["anticipation (n)"],idioms:[]},
-  {w:"facilitate",pos:"v",lv:"lv3",cat:"動詞",mean:"促進する・容易にする",pron:"/fəˈsɪlɪteɪt/",full:"何かがよりスムーズに進むようにすること。facility（施設）と同語根。",ex:{e:"Technology facilitates communication worldwide.",j:"技術は世界規模のコミュニケーションを促進する。"},tags:["facilitation (n)","facility (n)"],idioms:[]},
-  {w:"perceive",pos:"v",lv:"lv3",cat:"動詞",mean:"知覚する・〜とみなす",pron:"/pəˈsiːv/",full:"perceive A as B = AをBとみなす。perception（名）。",ex:{e:"Time is perceived differently depending on mood.",j:"時間の感覚は気分によって異なる。"},tags:["perception (n)","perceived (adj)"],idioms:[{e:"perceive A as B",j:"AをBとみなす"}]},
-  {w:"persist",pos:"v",lv:"lv3",cat:"動詞",mean:"持続する・こだわり続ける",pron:"/pəˈsɪst/",full:"困難があっても続けること。persist in = 〜に固執する。",ex:{e:"If you persist, you will succeed.",j:"粘り強く続ければ成功する。"},tags:["persistence (n)","persistent (adj)"],idioms:[{e:"persist in",j:"〜に固執する"}]},
-  {w:"tackle",pos:"v",lv:"lv3",cat:"動詞",mean:"取り組む・対処する",pron:"/ˈtækəl/",full:"困難な問題に積極的に立ち向かうこと。address / cope withの同義語。",ex:{e:"The government must tackle climate change.",j:"政府は気候変動に取り組まなければならない。"},tags:[],idioms:[{e:"tackle a problem",j:"問題に取り組む"}]},
-  /* ── 名詞 ── */
-  {w:"benefit",pos:"n",lv:"lv2",cat:"名詞",mean:"利点・恩恵・利益",pron:"/ˈbenɪfɪt/",full:"「良い影響・メリット」。benefit from = 〜から恩恵を受ける。動詞にもなる。",ex:{e:"Regular exercise has many health benefits.",j:"定期的な運動には多くの健康上の利点がある。"},tags:["beneficial (adj)","beneficiary (n)"],idioms:[{e:"benefit from",j:"〜から恩恵を受ける"}]},
-  {w:"consequence",pos:"n",lv:"lv2",cat:"名詞",mean:"結果・影響・重要性",pron:"/ˈkɒnsɪkwəns/",full:"特に悪い結果・重大な影響を示すことが多い。as a consequence = その結果として。",ex:{e:"Pollution has serious consequences for health.",j:"汚染は健康に深刻な影響をもたらす。"},tags:["consequently (adv)","consequential (adj)"],idioms:[{e:"as a consequence",j:"その結果として"}]},
-  {w:"bias",pos:"n",lv:"lv3",cat:"名詞",mean:"偏見・先入観・偏り",pron:"/ˈbaɪəs/",full:"公平でない一方的な判断の傾向。biased（形）= 偏った。",ex:{e:"Confirmation bias makes people seek only supporting evidence.",j:"確証バイアスは支持する証拠だけを探す傾向をもたらす。"},tags:["biased (adj)","unbiased (adj)"],idioms:[{e:"have a bias toward",j:"〜に偏りがある"}]},
-  {w:"access",pos:"n",lv:"lv1",cat:"名詞",mean:"アクセス・利用する権利",pron:"/ˈækses/",full:"何かに近づく・使う手段や権利。動詞でも使う（〜にアクセスする）。",ex:{e:"Everyone should have access to education.",j:"誰もが教育を受ける権利を持つべきだ。"},tags:["accessible (adj)"],idioms:[{e:"gain access to",j:"〜へのアクセスを得る"}]},
-  /* ── 形容詞 ── */
-  {w:"significant",pos:"adj",lv:"lv2",cat:"形容詞",mean:"重要な・かなりの・意味のある",pron:"/sɪɡˈnɪfɪkənt/",full:"量・重要性が「無視できないほど大きい」こと。significantly（副）。",ex:{e:"There has been a significant increase in prices.",j:"価格に著しい上昇があった。"},tags:["significantly (adv)","significance (n)"],idioms:[]},
-  {w:"crucial",pos:"adj",lv:"lv3",cat:"形容詞",mean:"極めて重要な・決定的な",pron:"/ˈkruːʃəl/",full:"「これがないとダメ」という決定的な重要さ。importantより強い。",ex:{e:"It is crucial to take care of your health.",j:"健康を大切にすることは極めて重要だ。"},tags:["crucially (adv)"],idioms:[]},
-  {w:"inevitable",pos:"adj",lv:"lv3",cat:"形容詞",mean:"避けられない・必然的な",pron:"/ɪnˈevɪtəbl/",full:"どうやっても起こる・防げないこと。inevitably（副）。",ex:{e:"Change is inevitable in modern society.",j:"現代社会において変化は避けられない。"},tags:["inevitably (adv)","inevitability (n)"],idioms:[]},
-  {w:"sustainable",pos:"adj",lv:"lv3",cat:"形容詞",mean:"持続可能な・環境に優しい",pron:"/səˈsteɪnəbl/",full:"長期間続けられる状態・環境を壊さない行動のこと。",ex:{e:"Sustainable energy includes solar and wind power.",j:"持続可能なエネルギーには太陽光と風力が含まれる。"},tags:["sustainability (n)","sustain (v)"],idioms:[{e:"sustainable development",j:"持続可能な発展"}]},
-  {w:"detrimental",pos:"adj",lv:"lv3",cat:"形容詞",mean:"有害な・悪影響を与える",pron:"/ˌdetrɪˈmentəl/",full:"harmful / badのフォーマル版。detrimental to 〜 = 〜に有害な。",ex:{e:"Smoking is detrimental to your health.",j:"喫煙は健康に有害だ。"},tags:["detrimentally (adv)"],idioms:[{e:"detrimental to",j:"〜に有害な"}]},
-  {w:"elaborate",pos:"adj",lv:"lv3",cat:"形容詞",mean:"精巧な・詳細な / 詳しく説明する（動詞）",pron:"/ɪˈlæbərɪt/",full:"adj「手が込んだ」v「詳しく述べる（elaborate on）」の2用法。",ex:{e:"Could you elaborate on your point?",j:"あなたの主張をもっと詳しく説明してもらえますか？"},tags:["elaboration (n)"],idioms:[{e:"elaborate on",j:"〜について詳しく述べる"}]},
-  {w:"accurate",pos:"adj",lv:"lv2",cat:"形容詞",mean:"正確な",pron:"/ˈækjərɪt/",full:"間違いがない・事実に忠実なこと。inaccurate（反）。",ex:{e:"The weather forecast was accurate.",j:"天気予報は正確だった。"},tags:["accuracy (n)","inaccurate (adj)"],idioms:[]},
-  {w:"appropriate",pos:"adj",lv:"lv2",cat:"形容詞",mean:"適切な・ふさわしい",pron:"/əˈproʊpriɪt/",full:"状況に合っている・正しいこと。inappropriate（反）。",ex:{e:"Wear appropriate clothing for the interview.",j:"面接にふさわしい服装をしてください。"},tags:["appropriately (adv)"],idioms:[]},
-  {w:"enormous",pos:"adj",lv:"lv2",cat:"形容詞",mean:"巨大な・膨大な",pron:"/ɪˈnɔːrməs/",full:"サイズ・量が「信じられないほど大きい」こと。enormously（副）。",ex:{e:"The company made an enormous profit.",j:"その会社は巨大な利益を上げた。"},tags:["enormously (adv)"],idioms:[]},
-  {w:"numerous",pos:"adj",lv:"lv2",cat:"形容詞",mean:"多数の・たくさんの",pron:"/ˈnjuːmərəs/",full:"many / a lot ofのフォーマル版。学術文で多用。",ex:{e:"There are numerous reasons to exercise.",j:"運動をする理由はたくさんある。"},tags:[],idioms:[]},
-  /* ── 準1級特出語 ── */
-  {w:"evade",pos:"v",lv:"lv3",cat:"準1級",mean:"逃れる・回避する",pron:"/ɪˈveɪd/",full:"police/arrest文脈で頻出。evasion（名）= 回避・脱税。",ex:{e:"The criminals evaded the police for three weeks.",j:"犯人たちは3週間警察から逃れた。"},tags:["evasion (n)","evasive (adj)"],idioms:[]},
-  {w:"compress",pos:"v",lv:"lv3",cat:"準1級",mean:"圧縮する・凝縮する",pron:"/kəmˈpres/",full:"情報・時間・データを小さくまとめること。",ex:{e:"He compressed all events into one day.",j:"彼はすべての出来事を1日に凝縮した。"},tags:["compression (n)"],idioms:[]},
-  {w:"autonomy",pos:"n",lv:"lv3",cat:"準1級",mean:"自律性・自治権",pron:"/ɔːˈtɒnəmi/",full:"autonomous（形）= 自律的な。astronomy（天文学）と混同注意！",ex:{e:"The company gave salespeople autonomy over their work.",j:"会社は営業員に仕事の自律性を与えた。"},tags:["autonomous (adj)"],idioms:[]},
-  {w:"rivalry",pos:"n",lv:"lv3",cat:"準1級",mean:"ライバル関係・競争",pron:"/ˈraɪvəlri/",full:"rival → rivalry。強い競争関係を示す。",ex:{e:"The rivalry between the teams is very strong.",j:"両チーム間のライバル関係は非常に強い。"},tags:["rival (n/v)"],idioms:[]},
-  {w:"cosmopolitan",pos:"adj",lv:"lv3",cat:"準1級",mean:"国際的な・世界主義の",pron:"/ˌkɒzməˈpɒlɪtən/",full:"cosmos（世界）+ polis（都市）。多文化が混在する都市を形容。",ex:{e:"New York is known for its cosmopolitan culture.",j:"ニューヨークは国際的な文化で知られている。"},tags:[],idioms:[]},
-  {w:"tentative",pos:"adj",lv:"lv3",cat:"準1級",mean:"仮の・暫定的な",pron:"/ˈtentətɪv/",full:"tentative plan = 仮の計画。attentive（注意深い）と混同注意！",ex:{e:"I have tentative plans to visit Spain.",j:"スペインを訪問する仮の予定がある。"},tags:[],idioms:[]},
-  {w:"anatomy",pos:"n",lv:"lv3",cat:"準1級",mean:"解剖学・（物事の）構造",pron:"/əˈnætəmi/",full:"医学文脈だけでなく「〜の詳細な構造」比喩的にも使う。",ex:{e:"Medical students must study human anatomy.",j:"医学生は人体解剖学を学ばなければならない。"},tags:["anatomical (adj)"],idioms:[]},
-  {w:"impede",pos:"v",lv:"lv3",cat:"準1級",mean:"妨げる・邪魔する",pron:"/ɪmˈpiːd/",full:"hinder / obstruct の同義語。progress / development を目的語に取ることが多い。",ex:{e:"Bad weather impeded the rescue operation.",j:"悪天候が救助活動を妨げた。"},tags:["impediment (n)"],idioms:[]},
-  {w:"disrupt",pos:"v",lv:"lv3",cat:"準1級",mean:"混乱させる・分断する",pron:"/dɪsˈrʌpt/",full:"disruption（名）= 混乱。テクノロジーが既存業界を「ディスラプトする」という文脈でも頻出。",ex:{e:"The storm disrupted power supplies across the city.",j:"嵐が市内全域の電力供給を混乱させた。"},tags:["disruption (n)","disruptive (adj)"],idioms:[]},
-  {w:"eradicate",pos:"v",lv:"lv3",cat:"準1級",mean:"根絶する・撲滅する",pron:"/ɪˈrædɪkeɪt/",full:"病気・貧困・差別などを「完全に取り除く」ときに使う。",ex:{e:"Scientists are working to eradicate malaria.",j:"科学者たちはマラリアの根絶に取り組んでいる。"},tags:["eradication (n)"],idioms:[]},
-  /* ── 副詞・接続詞 ── */
-  {w:"consequently",pos:"adv",lv:"lv2",cat:"接続副詞",mean:"その結果として",pron:"/ˈkɒnsɪkwəntli/",full:"therefore / as a result と同義。原因→結果の流れを示す。",ex:{e:"He didn't study. Consequently, he failed.",j:"彼は勉強しなかった。その結果、落第した。"},tags:["consequent (adj)"],idioms:[]},
-  {w:"nevertheless",pos:"adv",lv:"lv2",cat:"接続副詞",mean:"それにもかかわらず",pron:"/ˌnevəðəˈles/",full:"however / yet と同義。逆接を示す。接続副詞として文頭に使う。",ex:{e:"It was raining. Nevertheless, they continued.",j:"雨が降っていた。それにもかかわらず彼らは続けた。"},tags:[],idioms:[]},
-  {w:"furthermore",pos:"adv",lv:"lv2",cat:"接続副詞",mean:"さらに・加えて",pron:"/ˈfɜːðəmɔːr/",full:"moreover / in addition と同義。追加情報を提示する。",ex:{e:"The plan is expensive. Furthermore, it is risky.",j:"そのプランは費用がかかる。さらに、リスクも高い。"},tags:[],idioms:[]},
-  {w:"gradually",pos:"adv",lv:"lv1",cat:"副詞",mean:"徐々に・少しずつ",pron:"/ˈɡrædʒuəli/",full:"急ではなく、ゆっくりと変化する様子。gradual（形）。",ex:{e:"The situation gradually improved.",j:"状況は徐々に改善した。"},tags:["gradual (adj)"],idioms:[]},
+/* ═══ ALL VOCABULARY DATA ═══ */
+const V=[
+// ── 2015 JSON: verbs_high_priority (25) ──
+{w:"allege",p:"v",l:3,c:"2015動詞",m:"主張する・断言する",pr:"/əˈledʒ/",f:"that節をとる。allocate（割り当てる）と混同注意。",e:"He alleged that the company was guilty.",ej:"彼はその会社に罪があると主張した。",t:["allegation (n)"],id:[]},
+{w:"allocate",p:"v",l:3,c:"2015動詞",m:"割り当てる・配分する",pr:"/ˈæləkeɪt/",f:"allocate A to B の形。allege（主張する）と混同注意。",e:"The government allocated funds to the project.",ej:"政府はそのプロジェクトに資金を割り当てた。",t:["allocation (n)"],id:[]},
+{w:"apprehend",p:"v",l:3,c:"2015動詞",m:"逮捕する・理解する",pr:"/ˌæprɪˈhend/",f:"comprehend（理解する）と区別。警察文脈では逮捕。",e:"The police apprehended the suspect.",ej:"警察は容疑者を逮捕した。",t:["apprehension (n)"],id:[]},
+{w:"ascertain",p:"v",l:3,c:"2015動詞",m:"確認する・確かめる",pr:"/ˌæsərˈteɪn/",f:"≒make sure。that節と共に使う。",e:"We need to ascertain the facts.",ej:"事実を確認する必要がある。",t:[],id:[]},
+{w:"eradicate",p:"v",l:3,c:"2015動詞",m:"根絶する・撲滅する",pr:"/ɪˈrædɪkeɪt/",f:"erase（消す）＋radical。病気・社会問題の文脈。",e:"Scientists aim to eradicate malaria.",ej:"科学者たちはマラリアの根絶を目指している。",t:["eradication (n)"],id:[]},
+{w:"facilitate",p:"v",l:3,c:"2015動詞",m:"促進する・容易にする",pr:"/fəˈsɪlɪteɪt/",f:"≒make easier。直接目的語をとる。",e:"Technology facilitates communication.",ej:"技術はコミュニケーションを促進する。",t:["facilitation (n)","facility (n)"],id:[]},
+{w:"extradite",p:"v",l:3,c:"2015動詞",m:"引き渡す・送還する",pr:"/ˈekstrədaɪt/",f:"犯罪者を外国へ引き渡す。",e:"The criminal was extradited to face trial.",ej:"犯人は裁判を受けるために引き渡された。",t:["extradition (n)"],id:[]},
+{w:"illuminate",p:"v",l:3,c:"2015動詞",m:"照らす・明らかにする",pr:"/ɪˈluːmɪneɪt/",f:"比喩的に「問題を明らかにする」=光を当てる。",e:"The study illuminated a key issue.",ej:"その研究は重要な問題を明らかにした。",t:["illumination (n)"],id:[]},
+{w:"dominate",p:"v",l:3,c:"2015動詞",m:"支配する・優位を占める",pr:"/ˈdɒmɪneɪt/",f:"domesticate（飼いならす）と混同注意。",e:"One company dominates the market.",ej:"1つの会社が市場を支配している。",t:["dominance (n)","dominant (adj)"],id:[]},
+{w:"impede",p:"v",l:3,c:"2015動詞",m:"妨げる・邪魔する",pr:"/ɪmˈpiːd/",f:"≒hinder, obstruct。impede traffic（交通を妨げる）。",e:"Bad weather impeded the rescue.",ej:"悪天候が救助を妨げた。",t:["impediment (n)"],id:[]},
+{w:"disrupt",p:"v",l:3,c:"2015動詞",m:"混乱させる・分断する",pr:"/dɪsˈrʌpt/",f:"disrupt traffic/service 文脈が多い。",e:"The storm disrupted power supplies.",ej:"嵐が電力供給を混乱させた。",t:["disruption (n)","disruptive (adj)"],id:[]},
+{w:"dismiss",p:"v",l:3,c:"2015動詞",m:"解雇する・退ける",pr:"/dɪsˈmɪs/",f:"dismiss an idea（考えを退ける）も重要。",e:"The manager dismissed the idea.",ej:"マネージャーはそのアイデアを退けた。",t:["dismissal (n)"],id:[]},
+{w:"negotiate",p:"v",l:2,c:"2015動詞",m:"交渉する",pr:"/nɪˈɡoʊʃieɪt/",f:"negotiate with A / negotiate A。",e:"They negotiated a new contract.",ej:"彼らは新しい契約を交渉した。",t:["negotiation (n)","negotiator (n)"],id:[]},
+{w:"cherish",p:"v",l:3,c:"2015動詞",m:"大事にする・かわいがる",pr:"/ˈtʃerɪʃ/",f:"perish（死ぬ・滅びる）と混同注意。",e:"She cherished her childhood memories.",ej:"彼女は子供時代の思い出を大事にしていた。",t:[],id:[]},
+{w:"utilize",p:"v",l:2,c:"2015動詞",m:"利用する",pr:"/ˈjuːtəlaɪz/",f:"≒use。やや硬い表現。utilization（名）。",e:"We should utilize renewable energy.",ej:"再生可能エネルギーを利用すべきだ。",t:["utilization (n)"],id:[]},
+{w:"excel",p:"v",l:2,c:"2015動詞",m:"〜にまさる・優れる",pr:"/ɪkˈsel/",f:"excel at/in + 分野。",e:"She excels at mathematics.",ej:"彼女は数学に秀でている。",t:["excellent (adj)","excellence (n)"],id:[{e:"excel at",j:"〜に秀でる"}]},
+{w:"bestow",p:"v",l:3,c:"2015動詞",m:"与える・授ける",pr:"/bɪˈstoʊ/",f:"bestow A on B（AをBに与える）。≒grant, award。",e:"The king bestowed the medal on the hero.",ej:"王はその英雄にメダルを授けた。",t:[],id:[{e:"bestow A on B",j:"AをBに授ける"}]},
+{w:"penetrate",p:"v",l:3,c:"2015動詞",m:"貫通する・理解する",pr:"/ˈpenɪtreɪt/",f:"penalize（罰則を科す）と混同注意。",e:"The bullet penetrated the wall.",ej:"弾丸が壁を貫通した。",t:["penetration (n)"],id:[]},
+{w:"abide",p:"v",l:3,c:"2015動詞",m:"とどまる・従う",pr:"/əˈbaɪd/",f:"abide by ～（〜を守る）が重要熟語。",e:"You must abide by the rules.",ej:"ルールを守らなければならない。",t:[],id:[{e:"abide by",j:"〜を守る・従う"}]},
+{w:"boost",p:"v",l:2,c:"2015動詞",m:"強化する・押し上げる",pr:"/buːst/",f:"boost sales / confidence / morale。",e:"The new policy boosted the economy.",ej:"新しい政策は経済を押し上げた。",t:["booster (n)"],id:[]},
+{w:"elevate",p:"v",l:3,c:"2015動詞",m:"高める・上昇させる",pr:"/ˈeləveɪt/",f:"≒raise, enhance。elicit（引き出す）と混同注意。",e:"She elevated the company's reputation.",ej:"彼女は会社の評判を高めた。",t:["elevation (n)","elevator (n)"],id:[]},
+// ── 2015 JSON: nouns_high_priority (25) ──
+{w:"aftermath",p:"n",l:3,c:"2015名詞",m:"結果・余波",pr:"/ˈæftərmæθ/",f:"in the immediate aftermath of ～（〜の直後）頻出。",e:"In the aftermath of the disaster, many were homeless.",ej:"災害の余波で多くの人がホームレスになった。",t:[],id:[{e:"in the aftermath of",j:"〜の直後に"}]},
+{w:"consensus",p:"n",l:3,c:"2015名詞",m:"合意・一致した意見",pr:"/kənˈsensəs/",f:"reach a consensus（合意に達する）。",e:"The committee reached a consensus.",ej:"委員会は合意に達した。",t:[],id:[{e:"reach a consensus",j:"合意に達する"}]},
+{w:"credibility",p:"n",l:3,c:"2015名詞",m:"信頼性",pr:"/ˌkredəˈbɪləti/",f:"credible（信頼できる）の名詞形。",e:"The scandal damaged his credibility.",ej:"そのスキャンダルは彼の信頼性を傷つけた。",t:["credible (adj)","credence (n)"],id:[]},
+{w:"implication",p:"n",l:3,c:"2015名詞",m:"含意・暗示・影響",pr:"/ˌɪmplɪˈkeɪʃən/",f:"political implications（政治的影響）。",e:"The decision has serious implications.",ej:"その決定には重大な影響がある。",t:["imply (v)","implicit (adj)"],id:[]},
+{w:"erosion",p:"n",l:3,c:"2015名詞",m:"浸食・腐食",pr:"/ɪˈroʊʒən/",f:"比喩的に「信頼などの侵食」でも使う。",e:"Soil erosion is a major environmental problem.",ej:"土壌侵食は重大な環境問題だ。",t:["erode (v)"],id:[]},
+{w:"gist",p:"n",l:3,c:"2015名詞",m:"要点・核心",pr:"/dʒɪst/",f:"get the gist = 要点をつかむ。",e:"I got the gist of his argument.",ej:"彼の主張の要点はつかめた。",t:[],id:[{e:"get the gist",j:"要点をつかむ"}]},
+{w:"aptitude",p:"n",l:3,c:"2015名詞",m:"適性・才能",pr:"/ˈæptɪtjuːd/",f:"aptitude test（適性検査）。",e:"She has an aptitude for languages.",ej:"彼女は語学の才能がある。",t:[],id:[{e:"aptitude test",j:"適性検査"}]},
+{w:"deadlock",p:"n",l:3,c:"2015名詞",m:"行き詰まり・膠着状態",pr:"/ˈdedlɒk/",f:"break the deadlock（膠着状態を打破する）。",e:"The talks ended in a deadlock.",ej:"交渉は行き詰まりに終わった。",t:[],id:[{e:"break the deadlock",j:"膠着状態を打破する"}]},
+{w:"mediator",p:"n",l:3,c:"2015名詞",m:"仲裁人・調停者",pr:"/ˈmiːdieɪtər/",f:"meditate（瞑想する）と混同注意。mediate（仲裁する）の派生。",e:"A mediator resolved the dispute.",ej:"仲裁人が紛争を解決した。",t:["mediate (v)","mediation (n)"],id:[]},
+{w:"contamination",p:"n",l:3,c:"2015名詞",m:"汚染",pr:"/kənˌtæmɪˈneɪʃən/",f:"water contamination = 水質汚染。",e:"The water contamination made people sick.",ej:"水質汚染が人々を病気にした。",t:["contaminate (v)","contaminant (n)"],id:[]},
+{w:"alienation",p:"n",l:3,c:"2015名詞",m:"疎外・疎遠",pr:"/ˌeɪliəˈneɪʃən/",f:"emotional agitation（精神的興奮）と区別。",e:"Social alienation is a growing problem.",ej:"社会的疎外は深刻化する問題だ。",t:["alienate (v)","alien (adj)"],id:[]},
+// ── 2015 JSON: adjectives_high_priority (21) ──
+{w:"comprehensive",p:"adj",l:3,c:"2015形容詞",m:"包括的な",pr:"/ˌkɒmprɪˈhensɪv/",f:"⚠️ comprehensible（理解できる）と混同注意！最頻出ミス。",e:"A comprehensive review was conducted.",ej:"包括的なレビューが行われた。",t:["comprehend (v)","comprehension (n)"],id:[]},
+{w:"considerate",p:"adj",l:3,c:"2015形容詞",m:"思いやりのある",pr:"/kənˈsɪdərɪt/",f:"⚠️ considerable（かなりの）と混同注意！",e:"She is always considerate of others.",ej:"彼女はいつも他人に思いやりがある。",t:["consideration (n)","considerable (adj)"],id:[]},
+{w:"drastic",p:"adj",l:3,c:"2015形容詞",m:"抜本的な・思い切った",pr:"/ˈdræstɪk/",f:"drastic measures（抜本的な対策）。",e:"Drastic measures were needed.",ej:"抜本的な対策が必要だった。",t:["drastically (adv)"],id:[]},
+{w:"legitimate",p:"adj",l:3,c:"2015形容詞",m:"正当な・合法の",pr:"/lɪˈdʒɪtɪmɪt/",f:"≒legal, lawful。illegitimate（違法な）が対義語。",e:"He had a legitimate reason to leave.",ej:"彼には去る正当な理由があった。",t:["legitimacy (n)","legitimize (v)"],id:[]},
+{w:"skeptical",p:"adj",l:3,c:"2015形容詞",m:"懐疑的な",pr:"/ˈskeptɪkəl/",f:"be skeptical about ～。≒doubtful。",e:"Scientists are skeptical about the results.",ej:"科学者たちはその結果に懐疑的だ。",t:["skepticism (n)","skeptic (n)"],id:[]},
+{w:"obsolete",p:"adj",l:3,c:"2015形容詞",m:"時代遅れの",pr:"/ˌɒbsəˈliːt/",f:"≒outdated, old-fashioned。",e:"The technology is now obsolete.",ej:"その技術は今や時代遅れだ。",t:["obsolescence (n)"],id:[]},
+{w:"vulnerable",p:"adj",l:3,c:"2015形容詞",m:"傷つきやすい・脆弱な",pr:"/ˈvʌlnərəbl/",f:"be vulnerable to ～（〜に脆弱）。",e:"Children are vulnerable to infections.",ej:"子供は感染症に対して脆弱だ。",t:["vulnerability (n)"],id:[{e:"be vulnerable to",j:"〜に脆弱である"}]},
+{w:"impartial",p:"adj",l:3,c:"2015形容詞",m:"公平な",pr:"/ɪmˈpɑːrʃəl/",f:"≒fair, unbiased。≠partial（偏った）。",e:"The judge must be impartial.",ej:"裁判官は公平でなければならない。",t:["impartiality (n)"],id:[]},
+{w:"spontaneous",p:"adj",l:3,c:"2015形容詞",m:"自発的な・自然発生の",pr:"/spɒnˈteɪniəs/",f:"spontaneous combustion（自然発火）。",e:"The audience gave a spontaneous cheer.",ej:"観客は自然に歓声を上げた。",t:["spontaneously (adv)","spontaneity (n)"],id:[]},
+{w:"lucid",p:"adj",l:3,c:"2015形容詞",m:"明快な・わかりやすい",pr:"/ˈluːsɪd/",f:"≒clear。legible（読みやすい）と区別。",e:"Her explanation was lucid and helpful.",ej:"彼女の説明は明快で役に立った。",t:["lucidity (n)"],id:[]},
+{w:"subsequent",p:"adj",l:3,c:"2015形容詞",m:"後の・その後に続く",pr:"/ˈsʌbsɪkwənt/",f:"subsequent to ～（〜の後に）。",e:"Subsequent events proved him right.",ej:"その後の出来事が彼の正しさを証明した。",t:["subsequently (adv)"],id:[]},
+// ── 2025 試験出題語 ──
+{w:"evade",p:"v",l:3,c:"2025出題",m:"逃れる・回避する",pr:"/ɪˈveɪd/",f:"evasion（名）= 回避。invade（侵略）と混同注意！",e:"The prisoners evaded the police for weeks.",ej:"囚人たちは数週間警察から逃れた。",t:["evasion (n)","evasive (adj)"],id:[]},
+{w:"compress",p:"v",l:3,c:"2025出題",m:"圧縮する・凝縮する",pr:"/kəmˈpres/",f:"compression（名）。情報・時間・データを小さくまとめる。",e:"He compressed all events into one day.",ej:"彼はすべての出来事を1日に凝縮した。",t:["compression (n)"],id:[]},
+{w:"enroll",p:"v",l:2,c:"2025出題",m:"入学する・登録する",pr:"/ɪnˈroʊl/",f:"enroll in a school/course。enrollment（名）。",e:"She enrolled in the university last year.",ej:"彼女は去年その大学に入学した。",t:["enrollment (n)"],id:[]},
+{w:"detach",p:"v",l:3,c:"2025出題",m:"取り外す・分離する",pr:"/dɪˈtætʃ/",f:"attach（取り付ける）の反対。detachable（形）。",e:"He detached the old battery carefully.",ej:"彼は古いバッテリーを慎重に取り外した。",t:["detachment (n)","detachable (adj)"],id:[]},
+{w:"collide",p:"v",l:3,c:"2025出題",m:"衝突する",pr:"/kəˈlaɪd/",f:"collision（衝突・名）。物理的にも比喩的にも使う。",e:"The two cars nearly collided.",ej:"2台の車はもう少しで衝突するところだった。",t:["collision (n)"],id:[]},
+{w:"spacious",p:"adj",l:2,c:"2025出題",m:"広々とした",pr:"/ˈspeɪʃəs/",f:"space → spacious。部屋・建物の広さを形容。",e:"The apartment was spacious and bright.",ej:"そのアパートは広々として明るかった。",t:[],id:[]},
+{w:"tentative",p:"adj",l:3,c:"2025出題",m:"仮の・暫定的な",pr:"/ˈtentətɪv/",f:"⚠️ attentive（注意深い）と混同注意！",e:"We have tentative plans for next week.",ej:"来週の仮の予定がある。",t:["tentatively (adv)"],id:[]},
+{w:"cosmopolitan",p:"adj",l:3,c:"2025出題",m:"国際的な・世界主義の",pr:"/ˌkɒzməˈpɒlɪtən/",f:"cosmos（世界）+ polis（都市）。",e:"Tokyo is a cosmopolitan city.",ej:"東京は国際的な都市だ。",t:[],id:[]},
+{w:"anatomy",p:"n",l:3,c:"2025出題",m:"解剖学・構造",pr:"/əˈnætəmi/",f:"anatomical（形）。物事の詳細構造にも使う。",e:"Students must study human anatomy.",ej:"学生は人体解剖学を学ばなければならない。",t:["anatomical (adj)"],id:[]},
+{w:"ascent",p:"n",l:3,c:"2025出題",m:"登頂・上昇",pr:"/əˈsent/",f:"ascend（登る）の名詞形。descent（下降）が反意語。",e:"The ascent took two days.",ej:"登頂に2日かかった。",t:["ascend (v)","descent (n)"],id:[]},
+{w:"autonomy",p:"n",l:3,c:"2025出題",m:"自律性・自治権",pr:"/ɔːˈtɒnəmi/",f:"⚠️ astronomy（天文学）と混同注意！auto-=自己。",e:"Workers were given more autonomy.",ej:"労働者にはより多くの自律性が与えられた。",t:["autonomous (adj)"],id:[]},
+{w:"rivalry",p:"n",l:3,c:"2025出題",m:"ライバル関係・競争",pr:"/ˈraɪvəlri/",f:"rival → rivalry。",e:"The rivalry between the teams is fierce.",ej:"チーム間の競争は激しい。",t:["rival (n/v)"],id:[]},
+// ── 2025 句動詞 ──
+{w:"make for",p:"v",l:2,c:"2025句動詞",m:"〜に向かう",pr:"",f:"≒head for。目的地に向かう。",e:"They made for the nearest town.",ej:"彼らは最寄りの町に向かった。",t:[],id:[]},
+{w:"take on",p:"v",l:2,c:"2025句動詞",m:"引き受ける・取り組む",pr:"",f:"take on responsibilities / challenges。",e:"She took on new responsibilities.",ej:"彼女は新しい責任を引き受けた。",t:[],id:[]},
+{w:"rule out",p:"v",l:2,c:"2025句動詞",m:"除外する・排除する",pr:"",f:"rule out the possibility。",e:"We can't rule out that option.",ej:"その選択肢を排除できない。",t:[],id:[]},
+{w:"stick around",p:"v",l:2,c:"2025句動詞",m:"その場に留まる",pr:"",f:"stick = くっつく → 離れずに残る。",e:"Stick around — I'll be right back.",ej:"ここにいて — すぐ戻る。",t:[],id:[]},
+// ── untitled.txt: Lv1基礎語 ──
+{w:"ability",p:"n",l:1,c:"基礎",m:"能力・才能",pr:"/əˈbɪlɪti/",f:"able（できる）の名詞形。",e:"She has the ability to speak three languages.",ej:"彼女は3ヶ国語を話す能力がある。",t:["able (adj)","unable (adj)"],id:[{e:"to the best of one's ability",j:"能力の限りを尽くして"}]},
+{w:"access",p:"n",l:1,c:"基礎",m:"アクセス・利用する権利",pr:"/ˈækses/",f:"動詞でも使う（〜にアクセスする）。",e:"Everyone should have access to education.",ej:"誰もが教育を受ける権利を持つべきだ。",t:["accessible (adj)"],id:[{e:"gain access to",j:"〜へのアクセスを得る"}]},
+{w:"achieve",p:"v",l:1,c:"基礎",m:"達成する・成し遂げる",pr:"/əˈtʃiːv/",f:"努力の結果として実現すること。",e:"She achieved her goal.",ej:"彼女は目標を達成した。",t:["achievement (n)","achievable (adj)"],id:[]},
+{w:"affect",p:"v",l:1,c:"基礎",m:"影響を与える",pr:"/əˈfekt/",f:"⚠️ effect（名詞）と混同注意！affect=動詞、effect=名詞。",e:"Climate change affects everyone.",ej:"気候変動は全員に影響を与える。",t:["effect (n)","affection (n)"],id:[{e:"adversely affect",j:"悪影響を与える"}]},
+{w:"reduce",p:"v",l:1,c:"基礎",m:"減らす・低下させる",pr:"/rɪˈdjuːs/",f:"reduction（名詞）。",e:"We need to reduce carbon emissions.",ej:"炭素排出量を削減する必要がある。",t:["reduction (n)"],id:[]},
+{w:"require",p:"v",l:1,c:"基礎",m:"必要とする・要求する",pr:"/rɪˈkwaɪər/",f:"require A to do = Aに〜することを求める。",e:"The job requires strong skills.",ej:"その仕事は高いスキルを必要とする。",t:["requirement (n)"],id:[]},
+{w:"involve",p:"v",l:1,c:"基礎",m:"含む・巻き込む・伴う",pr:"/ɪnˈvɒlv/",f:"involve doing = 〜することを含む。",e:"The project involves research.",ej:"そのプロジェクトは調査を伴う。",t:["involvement (n)","involved (adj)"],id:[{e:"be involved in",j:"〜に関わっている"}]},
+{w:"gradually",p:"adv",l:1,c:"基礎",m:"徐々に・少しずつ",pr:"/ˈɡrædʒuəli/",f:"gradual（形容詞）。",e:"The situation gradually improved.",ej:"状況は徐々に改善した。",t:["gradual (adj)"],id:[]},
+// ── Lv2中級語 ──
+{w:"benefit",p:"n",l:2,c:"中級",m:"利点・恩恵",pr:"/ˈbenɪfɪt/",f:"benefit from = 〜から恩恵を受ける。動詞にもなる。",e:"Exercise has many health benefits.",ej:"運動には多くの健康上の利点がある。",t:["beneficial (adj)"],id:[{e:"benefit from",j:"〜から恩恵を受ける"}]},
+{w:"consequence",p:"n",l:2,c:"中級",m:"結果・影響",pr:"/ˈkɒnsɪkwəns/",f:"特に悪い結果。as a consequence = その結果として。",e:"Pollution has serious consequences.",ej:"汚染は深刻な影響をもたらす。",t:["consequently (adv)"],id:[{e:"as a consequence",j:"その結果として"}]},
+{w:"contribute",p:"v",l:2,c:"中級",m:"貢献する・一因となる",pr:"/kənˈtrɪbjuːt/",f:"contribute to 〜 = 〜に貢献する。",e:"Exercise contributes to good health.",ej:"運動は健康に貢献する。",t:["contribution (n)"],id:[{e:"contribute to",j:"〜に貢献する"}]},
+{w:"demonstrate",p:"v",l:2,c:"中級",m:"実演する・証明する・示す",pr:"/ˈdemənstreɪt/",f:"demonstrate that = 〜ということを示す。",e:"The study demonstrates the effect.",ej:"その研究は効果を証明する。",t:["demonstration (n)"],id:[]},
+{w:"distinguish",p:"v",l:2,c:"中級",m:"区別する・識別する",pr:"/dɪˈstɪŋɡwɪʃ/",f:"distinguish A from B = AとBを区別する。",e:"Can you distinguish the two colors?",ej:"その2色を区別できますか？",t:["distinguished (adj)"],id:[{e:"distinguish A from B",j:"AとBを区別する"}]},
+{w:"enormous",p:"adj",l:2,c:"中級",m:"巨大な・膨大な",pr:"/ɪˈnɔːrməs/",f:"enormously（副）。",e:"The company made enormous profits.",ej:"その会社は膨大な利益を上げた。",t:["enormously (adv)"],id:[]},
+{w:"expand",p:"v",l:2,c:"中級",m:"拡張する・広げる",pr:"/ɪkˈspænd/",f:"expand on = 〜について詳しく述べる。",e:"The company is expanding overseas.",ej:"その会社は海外展開している。",t:["expansion (n)"],id:[{e:"expand on",j:"〜について詳しく述べる"}]},
+{w:"decline",p:"v",l:2,c:"中級",m:"断る・減少する",pr:"/dɪˈklaɪn/",f:"2つの意味が頻出。",e:"Sales declined sharply.",ej:"売上が急激に減少した。",t:[],id:[]},
+{w:"indicate",p:"v",l:2,c:"中級",m:"示す・指し示す",pr:"/ˈɪndɪkeɪt/",f:"データが「〜を示している」場合に使う。",e:"Studies indicate sleep is vital.",ej:"研究は睡眠が不可欠であることを示す。",t:["indication (n)","indicator (n)"],id:[]},
+{w:"maintain",p:"v",l:2,c:"中級",m:"維持する・主張する",pr:"/meɪnˈteɪn/",f:"状態を保つ & 意見を主張する。",e:"We must maintain the environment.",ej:"環境を維持しなければならない。",t:["maintenance (n)"],id:[]},
+{w:"obtain",p:"v",l:2,c:"中級",m:"入手する・得る",pr:"/əbˈteɪn/",f:"getよりフォーマル。",e:"You can obtain a visa at the embassy.",ej:"大使館でビザを取得できる。",t:["obtainable (adj)"],id:[]},
+{w:"significant",p:"adj",l:2,c:"中級",m:"重要な・かなりの",pr:"/sɪɡˈnɪfɪkənt/",f:"significantly（副）。",e:"There was a significant increase.",ej:"著しい上昇があった。",t:["significantly (adv)","significance (n)"],id:[]},
+{w:"accurate",p:"adj",l:2,c:"中級",m:"正確な",pr:"/ˈækjərɪt/",f:"inaccurate（反）。",e:"The forecast was accurate.",ej:"予報は正確だった。",t:["accuracy (n)","inaccurate (adj)"],id:[]},
+{w:"consequently",p:"adv",l:2,c:"接続副詞",m:"その結果として",pr:"/ˈkɒnsɪkwəntli/",f:"therefore / as a result と同義。",e:"He didn't study. Consequently, he failed.",ej:"勉強しなかった。その結果、落第した。",t:[],id:[]},
+{w:"nevertheless",p:"adv",l:2,c:"接続副詞",m:"それにもかかわらず",pr:"/ˌnevəðəˈles/",f:"however と同義。逆接。",e:"It rained. Nevertheless, they continued.",ej:"雨が降った。それにもかかわらず続けた。",t:[],id:[]},
+{w:"furthermore",p:"adv",l:2,c:"接続副詞",m:"さらに・加えて",pr:"/ˈfɜːðəmɔːr/",f:"moreover / in addition と同義。",e:"The plan is costly. Furthermore, it's risky.",ej:"高い。さらにリスクも高い。",t:[],id:[]},
+// ── Lv3上級語 ──
+{w:"acknowledge",p:"v",l:3,c:"上級",m:"認める・承認する",pr:"/əkˈnɒlɪdʒ/",f:"acknowledge that = 〜ということを認める。",e:"He acknowledged his mistake.",ej:"彼は過ちを認めた。",t:["acknowledgment (n)"],id:[]},
+{w:"anticipate",p:"v",l:3,c:"上級",m:"予想する・期待する",pr:"/ænˈtɪsɪpeɪt/",f:"expectより積極的な心構え。",e:"We anticipate a large crowd.",ej:"大勢が来ると予想している。",t:["anticipation (n)"],id:[]},
+{w:"bias",p:"n",l:3,c:"上級",m:"偏見・先入観",pr:"/ˈbaɪəs/",f:"confirmation bias = 確証バイアス。",e:"Bias affects decision-making.",ej:"偏見は意思決定に影響する。",t:["biased (adj)","unbiased (adj)"],id:[]},
+{w:"perceive",p:"v",l:3,c:"上級",m:"知覚する・〜とみなす",pr:"/pəˈsiːv/",f:"perceive A as B = AをBとみなす。",e:"Time is perceived differently by everyone.",ej:"時間の感じ方は人それぞれ違う。",t:["perception (n)"],id:[{e:"perceive A as B",j:"AをBとみなす"}]},
+{w:"persist",p:"v",l:3,c:"上級",m:"持続する・こだわり続ける",pr:"/pəˈsɪst/",f:"persist in = 〜に固執する。",e:"If you persist, you will succeed.",ej:"粘り強く続ければ成功する。",t:["persistence (n)","persistent (adj)"],id:[]},
+{w:"sustainable",p:"adj",l:3,c:"上級",m:"持続可能な",pr:"/səˈsteɪnəbl/",f:"sustainable development = 持続可能な発展。",e:"We need sustainable energy sources.",ej:"持続可能なエネルギー源が必要だ。",t:["sustainability (n)","sustain (v)"],id:[]},
+{w:"crucial",p:"adj",l:3,c:"上級",m:"極めて重要な・決定的な",pr:"/ˈkruːʃəl/",f:"importantより強い。",e:"Education is crucial for success.",ej:"教育は成功に極めて重要だ。",t:["crucially (adv)"],id:[]},
+{w:"inevitable",p:"adj",l:3,c:"上級",m:"避けられない・必然的な",pr:"/ɪnˈevɪtəbl/",f:"どうやっても起こること。",e:"Change is inevitable.",ej:"変化は避けられない。",t:["inevitably (adv)"],id:[]},
+{w:"detrimental",p:"adj",l:3,c:"上級",m:"有害な・悪影響の",pr:"/ˌdetrɪˈmentəl/",f:"harmful/badのフォーマル版。英作文で差がつく語。",e:"Smoking is detrimental to health.",ej:"喫煙は健康に有害だ。",t:[],id:[{e:"detrimental to",j:"〜に有害な"}]},
+{w:"elaborate",p:"adj",l:3,c:"上級",m:"精巧な / 詳しく説明する（動詞）",pr:"/ɪˈlæbərɪt/",f:"elaborate on = 〜について詳しく述べる。",e:"Could you elaborate on that point?",ej:"その点を詳しく説明できますか？",t:["elaboration (n)"],id:[{e:"elaborate on",j:"〜について詳しく述べる"}]},
+{w:"numerous",p:"adj",l:2,c:"言い換え",m:"多数の・たくさんの",pr:"/ˈnjuːmərəs/",f:"many / a lot of のフォーマル版。学術文で必須。",e:"There are numerous benefits.",ej:"数多くの利点がある。",t:[],id:[]},
+{w:"claim",p:"v",l:2,c:"言い換え",m:"主張する・断言する",pr:"/kleɪm/",f:"say/thinkのフォーマル版。that節をとる。",e:"He claims that the data is incorrect.",ej:"彼はデータが不正確だと主張する。",t:["claim (n)"],id:[]},
+{w:"illustrate",p:"v",l:2,c:"言い換え",m:"説明する・例証する",pr:"/ˈɪləstreɪt/",f:"showのフォーマル版。具体例で示す。",e:"This example illustrates the problem.",ej:"この例は問題を明確に示す。",t:["illustration (n)"],id:[]},
+{w:"tackle",p:"v",l:2,c:"言い換え",m:"取り組む・対処する",pr:"/ˈtækəl/",f:"address / cope with と同義。",e:"We must tackle climate change.",ej:"気候変動に取り組まなければならない。",t:[],id:[{e:"tackle a problem",j:"問題に取り組む"}]},
 ];
 
-const IDIOMS = [
-  {w:"beat around the bush",mean:"遠回しに言う",note:"直訳：茂みの周りを打つ。率直に言わず回りくどいこと。",ex:"Stop beating around the bush and tell me what happened.",exj:"回りくどいことを言わずに何が起きたか教えて。",lv:"lv1"},
-  {w:"take the bull by the horns",mean:"勇気を出して困難に向かう",note:"直訳：雄牛を角をつかんで捕まえる。",ex:"It's time to take the bull by the horns and confront the issue.",exj:"勇気を出してその問題に立ち向かう時だ。",lv:"lv1"},
-  {w:"rack one's brains",mean:"知恵を絞る",note:"rack = ひどく苦しめる。全力で考えるさま。",ex:"I racked my brains but couldn't find the answer.",exj:"必死に考えたが答えが見つからなかった。",lv:"lv1"},
-  {w:"spill the beans",mean:"秘密をもらす",note:"意図せず（または意図的に）秘密を話してしまうこと。",ex:"Who spilled the beans about the surprise party?",exj:"誰がサプライズパーティーの秘密をもらしたの？",lv:"lv1"},
-  {w:"hit the nail on the head",mean:"的中する・正確に要点をつく",note:"nail = 釘。釘を正確に打つ = ズバリ当たっている。",ex:"Your analysis hit the nail on the head.",exj:"あなたの分析はまさに的を射ている。",lv:"lv1"},
-  {w:"bury one's head in the sand",mean:"困難から目をそらす",note:"ダチョウが危険を避けるために砂に頭を埋めるという俗説から。",ex:"You can't bury your head in the sand forever.",exj:"いつまでも現実から目を背けているわけにはいかない。",lv:"lv1"},
-  {w:"break the ice",mean:"場を和ませる・話の口火を切る",note:"緊張した雰囲気を「砕く」イメージ。初対面でよく使う。",ex:"He told a joke to break the ice at the meeting.",exj:"彼は会議の場を和ませるためにジョークを言った。",lv:"lv1"},
-  {w:"face the music",mean:"責任を取って批判・結果を受け入れる",note:"音楽=批判・現実。正面から向き合うこと。",ex:"It's time to face the music for your actions.",exj:"自分の行動の結果を受け入れるときだ。",lv:"lv1"},
-  {w:"make ends meet",mean:"収支を合わせる・やりくりする",note:"両端(収入と支出)をつなげる = 家計をやりくりする。",ex:"Many families struggle to make ends meet.",exj:"多くの家庭が家計のやりくりに苦労している。",lv:"lv1"},
-  {w:"hold water",mean:"論理が通る・完璧である",note:"直訳：水を保つ。穴のない論理・主張のこと。",ex:"I don't think that argument holds water.",exj:"その主張は論理が通っていないと思う。",lv:"lv1"},
-  {w:"in a nutshell",mean:"つまり・簡単に言えば",note:"ナッツの殻の中に収まる = 要点だけをコンパクトに。",ex:"In a nutshell, the project failed due to poor planning.",exj:"つまり、そのプロジェクトは計画の甘さで失敗した。",lv:"lv1"},
-  {w:"bear fruit",mean:"実を結ぶ・成果が出る",note:"努力や投資が良い結果をもたらすこと。",ex:"Their hard work finally bore fruit.",exj:"彼らの努力はついに実を結んだ。",lv:"lv1"},
-  {w:"hit the ceiling",mean:"かんかんに怒る",note:"= hit the roof。天井を突き抜けるほど激怒すること。",ex:"My father hit the ceiling when he heard the news.",exj:"父はその知らせを聞いてかんかんに怒った。",lv:"lv2"},
-  {w:"come in handy",mean:"役に立つ・便利である",note:"handy = 便利な。ちょうど必要なときに役立つ状況で使う。",ex:"A Swiss army knife always comes in handy.",exj:"スイスアーミーナイフはいつも役に立つ。",lv:"lv2"},
-  {w:"pull one's leg",mean:"人をからかう・冗談を言う",note:"真剣なふりをして冗談を言うこと。",ex:"Don't worry — I was just pulling your leg.",exj:"心配しないで。ただからかっていただけだよ。",lv:"lv2"},
-  {w:"burn the midnight oil",mean:"夜遅くまで勉強する・働く",note:"ランプの油が切れるほど夜更かしすること。",ex:"She burned the midnight oil preparing for the exam.",exj:"彼女は試験の準備のために夜遅くまで勉強した。",lv:"lv2"},
-  {w:"ring a bell",mean:"記憶を呼び起こす・ピンとくる",note:"That rings a bell. = 聞き覚えがある。",ex:"Does that name ring a bell?",exj:"その名前に聞き覚えはありますか？",lv:"lv2"},
-  {w:"take a rain check",mean:"また今度にする（丁寧な断り）",note:"アメリカの野球の雨天中止チケット（rain check）から。",ex:"I'll take a rain check on dinner tonight.",exj:"今夜のディナーはまた今度にしますね。",lv:"lv2"},
-  {w:"speak of the devil",mean:"噂をすれば（影）",note:"噂をしていた人がちょうど現れたときに使う。",ex:"Speak of the devil — here comes Tom!",exj:"噂をすれば — トムが来た！",lv:"lv2"},
-  {w:"for the life of me",mean:"どうしても（〜できない）",note:"否定文で使う。I can't for the life of me remember.",ex:"I can't for the life of me find my keys.",exj:"どうしても鍵が見つからない。",lv:"lv3"},
-  {w:"never say die",mean:"あきらめるな",note:"困難な状況でも諦めないという姿勢。",ex:"Never say die — there's still time to win.",exj:"あきらめるな — まだ勝てる時間がある。",lv:"lv3"},
-  {w:"step into one's shoes",mean:"〜の後任になる・立場に立つ",note:"誰かの仕事・役割を引き継ぐこと。",ex:"She stepped into her manager's shoes after his retirement.",exj:"彼の引退後、彼女がマネージャーの後任になった。",lv:"lv3"},
-  {w:"throw one's weight around",mean:"権力を乱用する・いばりちらす",note:"自分の影響力・権威を誇示すること。",ex:"The new director likes to throw his weight around.",exj:"新しいディレクターは権力を振りかざすのが好きだ。",lv:"lv3"},
+/* ═══ IDIOMS (44) ═══ */
+const ID=[
+{w:"beat around the bush",m:"遠回しに言う",n:"直訳：茂みの周りを打つ",e:"Stop beating around the bush.",ej:"遠回しに言うのはやめて。"},
+{w:"take the bull by the horns",m:"勇気を出して困難に向かう",n:"雄牛を角をつかんで捕まえる",e:"Let's take the bull by the horns.",ej:"勇敢に立ち向かおう。"},
+{w:"rack one's brains",m:"知恵を絞る",n:"rack = ひどく苦しめる",e:"I racked my brains for an answer.",ej:"答えを出すために必死に考えた。"},
+{w:"spill the beans",m:"秘密をもらす",n:"意図せず秘密を話すこと",e:"Who spilled the beans?",ej:"誰が秘密をもらしたの？"},
+{w:"call it a day",m:"その日の仕事を終わりにする",n:"Let's call it a day.",e:"We should call it a day.",ej:"今日はここまでにしよう。"},
+{w:"hit the nail on the head",m:"的中する・正確に要点をつく",n:"釘を正確に打つ",e:"You hit the nail on the head.",ej:"まさにその通りだ。"},
+{w:"bury one's head in the sand",m:"困難から目をそらす",n:"ダチョウの俗説から",e:"Don't bury your head in the sand.",ej:"現実から目を背けるな。"},
+{w:"come in handy",m:"役に立つ",n:"handy = 便利な",e:"This tool will come in handy.",ej:"この道具は役に立つだろう。"},
+{w:"break the ice",m:"場を和ませる",n:"緊張を「砕く」イメージ",e:"He told a joke to break the ice.",ej:"彼は場を和ませるためにジョークを言った。"},
+{w:"face the music",m:"責任を取り結果を受け入れる",n:"批判・現実に正面から向き合う",e:"He had to face the music.",ej:"彼は結果を受け入れなければならなかった。"},
+{w:"make ends meet",m:"収支を合わせる・やりくりする",n:"両端（収入と支出）をつなげる",e:"Many families struggle to make ends meet.",ej:"多くの家庭が生活のやりくりに苦労している。"},
+{w:"hold water",m:"論理が通る・完璧である",n:"穴のない論理",e:"His argument doesn't hold water.",ej:"彼の主張は筋が通っていない。"},
+{w:"in a nutshell",m:"つまり・簡単に言えば",n:"ナッツの殻に収まるほどコンパクトに",e:"In a nutshell, the plan failed.",ej:"つまり、計画は失敗した。"},
+{w:"bear fruit",m:"実を結ぶ・成果が出る",n:"努力が良い結果をもたらす",e:"Their efforts finally bore fruit.",ej:"彼らの努力はついに実を結んだ。"},
+{w:"hit the ceiling",m:"かんかんに怒る",n:"= hit the roof",e:"Dad hit the ceiling when he heard.",ej:"父はそれを聞いてかんかんに怒った。"},
+{w:"pull one's leg",m:"人をからかう",n:"冗談を言うこと",e:"I was just pulling your leg.",ej:"からかっただけだよ。"},
+{w:"ring a bell",m:"記憶を呼び起こす",n:"ピンとくる",e:"Does that name ring a bell?",ej:"その名前に聞き覚えは？"},
+{w:"take a rain check",m:"また今度にする",n:"丁寧な断り表現",e:"Can I take a rain check?",ej:"また今度でいい？"},
+{w:"burn the midnight oil",m:"夜遅くまで勉強・作業する",n:"ランプの油が切れるほど",e:"She burned the midnight oil studying.",ej:"彼女は夜遅くまで勉強した。"},
+{w:"speak of the devil",m:"噂をすれば（影）",n:"噂した人が来たときに使う",e:"Speak of the devil — here she comes!",ej:"噂をすれば — 彼女が来た！"},
+{w:"throw one's weight around",m:"いばりちらす・権力を乱用する",n:"自分の影響力を誇示",e:"He likes to throw his weight around.",ej:"彼は権力を振りかざすのが好きだ。"},
+{w:"step into one's shoes",m:"後任になる・立場に立つ",n:"誰かの仕事を引き継ぐ",e:"She stepped into her boss's shoes.",ej:"彼女は上司の後任になった。"},
+{w:"put on airs",m:"気取る・すます",n:"見栄を張ること",e:"She always puts on airs.",ej:"彼女はいつも気取っている。"},
+{w:"beef up",m:"強化する",n:"beef up R&D = 研究開発を強化",e:"The company beefed up security.",ej:"会社はセキュリティを強化した。"},
+{w:"hit it off",m:"ウマが合う・意気投合する",n:"初対面で仲良くなる",e:"We hit it off right away.",ej:"すぐに意気投合した。"},
+{w:"break one's back",m:"必死に努力する",n:"≒burn the midnight oil",e:"She broke her back to finish.",ej:"彼女は完成させるために必死に頑張った。"},
+{w:"dispose of",m:"処理する・捨てる",n:"discard（捨てる）も類義",e:"Please dispose of waste properly.",ej:"ゴミは適切に処分してください。"},
+{w:"come of age",m:"成人になる",n:"a coming-of-age ceremony = 成人式",e:"He came of age last year.",ej:"彼は去年成人になった。"},
+{w:"never say die",m:"あきらめるな",n:"困難でも諦めない姿勢",e:"Never say die — there's still time.",ej:"あきらめるな — まだ時間がある。"},
+{w:"for the life of me",m:"どうしても（〜できない）",n:"否定文で使う",e:"I can't for the life of me remember.",ej:"どうしても思い出せない。"},
 ];
 
-const GRAMMAR = [
-  {head:"仮定法過去",note:"現在の事実に反する仮定。If + S + 過去形, S + would/could/might + 動詞原形。",ex:"If I were you, I would accept the offer.",exj:"もし私があなたなら、そのオファーを受けるだろう。",tip:"be動詞は主語に関わらず were を使う（口語ではwasも）"},
-  {head:"仮定法過去完了",note:"過去の事実に反する仮定。If + S + had + pp, S + would have + pp。",ex:"If she had studied harder, she would have passed.",exj:"もし彼女がもっと勉強していたら、合格していただろう。",tip:"had+過去分詞 がキーシグナル。過去の後悔・反省を述べる。"},
-  {head:"関係代名詞 whose",note:"先行詞の所有関係を示す。名詞の前に置く。",ex:"I know a scientist whose research is groundbreaking.",exj:"私は画期的な研究をしている科学者を知っている。",tip:"whose + 名詞 のセットで使う。先行詞は人・物どちらでもOK。"},
-  {head:"分詞構文",note:"接続詞+主語を省略した副詞的用法。現在分詞Vingまたは過去分詞pp。",ex:"Having finished the report, she went home.",exj:"レポートを終えて、彼女は帰宅した。",tip:"主節と同じ主語のとき使える。時間・理由・条件・譲歩などを表す。"},
-  {head:"強調構文 It is … that",note:"文の一部を強調するために使う構文。",ex:"It was John that broke the window, not Mary.",exj:"窓を割ったのはメアリーではなくジョンだ。",tip:"It is/was [強調したい語] that/who … の形。"},
-  {head:"比較 the 比較級, the 比較級",note:"「〜すればするほど、ますます〜」の構文。",ex:"The harder you work, the more you achieve.",exj:"より一生懸命働けば、より多くを達成できる。",tip:"両方に the + 比較級。日本語の「〜ばするほど」にあたる。"},
-  {head:"付加疑問文",note:"文末に短い疑問を付け加える。肯定文→否定の疑問、否定文→肯定の疑問。",ex:"You've been to Paris, haven't you?",exj:"パリに行ったことがありますよね？",tip:"動詞の時制・助動詞に合わせてtagを作る。"},
-  {head:"不定詞の意味上の主語",note:"for + 名詞/代名詞 + to 動詞原形。",ex:"It is important for students to review regularly.",exj:"生徒たちが定期的に復習することは重要だ。",tip:"for whom が明示されるのが特徴。"},
-  {head:"〜しているのに気づいた (notice/find + O + doing)",note:"知覚動詞 + 目的語 + 現在分詞 or 原形不定詞。",ex:"She noticed him waiting outside the door.",exj:"彼女はドアの外で彼が待っているのに気づいた。",tip:"notice / see / hear / feel + O + Ving（進行中）/ 原形（全体）"},
-  {head:"使役動詞 make / have / let",note:"make = 強制、have = 依頼・当然、let = 許可。",ex:"The teacher made students memorize 50 words.",exj:"先生は生徒に50語を暗記させた。",tip:"目的語の後は原形不定詞（to なし）。"},
-  {head:"倒置（否定の副詞が文頭）",note:"Never / Rarely / Not only などが文頭に来ると倒置が起きる。",ex:"Never have I seen such a beautiful sunset.",exj:"これほど美しい夕日を見たことがない。",tip:"助動詞+主語+動詞の語順になる。フォーマルな書き言葉で頻出。"},
-  {head:"接続副詞の使い方",note:"Therefore / However / Moreover / Nevertheless / Consequently は文と文をつなぐ副詞。",ex:"The plan was expensive; however, it was approved.",exj:"そのプランは費用がかかった。しかし承認された。",tip:"セミコロン+接続副詞+コンマ、または文頭でピリオドの後に使う。"},
+/* ═══ GRAMMAR ═══ */
+const GR=[
+{h:"仮定法過去",n:"現在の事実に反する仮定。If + S + 過去形, S + would + 原形",e:"If I were you, I would accept.",ej:"私があなたなら受け入れるだろう。",tip:"beはwereを使う"},
+{h:"仮定法過去完了",n:"過去の事実に反する仮定。If + S + had pp, S + would have pp",e:"If she had studied, she would have passed.",ej:"もっと勉強していたら合格しただろう。",tip:"had+過去分詞がキー"},
+{h:"関係代名詞 whose",n:"先行詞の所有関係を示す。whose + 名詞。",e:"I met a scientist whose research is famous.",ej:"有名な研究をしている科学者に会った。",tip:"人・物どちらもOK"},
+{h:"分詞構文",n:"接続詞+主語を省略した副詞的用法。Ving / pp で始まる。",e:"Having finished the work, she left.",ej:"仕事を終えて彼女は去った。",tip:"主節と同じ主語のとき使える"},
+{h:"強調構文 It is...that",n:"文の一部を強調する構文。",e:"It was John that broke the window.",ej:"窓を割ったのはジョンだ。",tip:"It is/was [強調語] that...の形"},
+{h:"the 比較級, the 比較級",n:"「〜すればするほど、ますます〜」",e:"The harder you work, the more you achieve.",ej:"努力するほど多くを達成できる。",tip:"両方にthe+比較級"},
+{h:"使役動詞 make/have/let",n:"make=強制、have=依頼、let=許可。目的語+原形不定詞。",e:"The teacher made students memorize 50 words.",ej:"先生は生徒に50語を暗記させた。",tip:"目的語の後はto無しの原形"},
+{h:"倒置（否定副詞が文頭）",n:"Never/Rarely/Not only等が文頭→助動詞+S+V語順に。",e:"Never have I seen such a sunset.",ej:"これほどの夕日を見たことがない。",tip:"フォーマルな書き言葉で頻出"},
+{h:"接続副詞の使い方",n:"Therefore/However/Moreover/Consequently等は文と文をつなぐ副詞。",e:"The plan was costly; however, it was approved.",ej:"高かったが承認された。",tip:"セミコロン+副詞+コンマの形"},
+{h:"不定詞の意味上の主語",n:"for + 名詞 + to do の形。",e:"It is important for students to review.",ej:"生徒が復習することは重要だ。",tip:"for whomを明示"},
+{h:"知覚動詞+O+doing/原形",n:"notice/see/hear+O+Ving（進行中）/ 原形（全体）",e:"She noticed him waiting outside.",ej:"彼が外で待っているのに気づいた。",tip:"Ving=途中を見た、原形=一部始終"},
+{h:"付加疑問文",n:"肯定文→否定tag、否定文→肯定tag。",e:"You've been to Paris, haven't you?",ej:"パリに行ったことがありますよね？",tip:"時制・助動詞に合わせてtagを作る"},
 ];
 
-const PARAPHRASE = [
-  {orig:"say / think",better:["claim","assert","maintain","argue"],note:"意見・主張を述べる動詞のフォーマル版。英作文で差がつく。",ex:"Researchers claim that sleep is vital."},
-  {orig:"show",better:["illustrate","indicate","demonstrate","reveal"],note:"データや研究結果を「示す」場合のフォーマル表現。",ex:"The data illustrates a clear trend."},
-  {orig:"solve / deal with",better:["address","tackle","cope with","resolve"],note:"問題に「取り組む・対処する」フォーマル表現。",ex:"We must address climate change urgently."},
-  {orig:"bad / harmful",better:["detrimental","adverse","unfavorable","damaging"],note:"悪影響・有害な状態のフォーマル表現。",ex:"Excessive stress is detrimental to health."},
-  {orig:"good / helpful",better:["beneficial","advantageous","effective","constructive"],note:"利点・有益であることのフォーマル表現。",ex:"Regular exercise is beneficial for the body."},
-  {orig:"many / a lot of",better:["numerous","a wide range of","a variety of","a great number of"],note:"数が多いことのフォーマル表現。学術文で必須。",ex:"There are numerous advantages to this approach."},
-  {orig:"But",better:["However","Nevertheless","On the other hand","Nonetheless"],note:"逆接の接続副詞。文頭で使う場合はコンマを付ける。",ex:"The plan is costly; however, it is effective."},
-  {orig:"Because / So",better:["Due to the fact that","Therefore","Consequently","As a result"],note:"原因・結果を示す接続表現のフォーマル版。",ex:"Consequently, the project was cancelled."},
-  {orig:"Also",better:["Furthermore","In addition","Moreover","Additionally"],note:"追加情報を加える接続副詞。段落の展開で必須。",ex:"Furthermore, the cost was significantly reduced."},
-  {orig:"happen",better:["occur","take place","arise","emerge"],note:"出来事が「起こる」場合のフォーマル表現。",ex:"The accident occurred near the intersection."},
-  {orig:"use",better:["utilize","employ","implement","apply"],note:"何かを「使う」フォーマル表現。文脈により使い分け。",ex:"The company utilizes renewable energy sources."},
-  {orig:"change",better:["transform","alter","modify","shift"],note:"変化の程度により使い分ける。transformは大きな変化。",ex:"Technology has transformed the way we communicate."},
+/* ═══ PARAPHRASE ═══ */
+const PA=[
+{o:"say / think",b:["claim","assert","maintain","argue"],n:"意見・主張のフォーマル版",e:"Researchers claim that sleep is vital."},
+{o:"show",b:["illustrate","indicate","demonstrate","reveal"],n:"データ・研究結果を「示す」",e:"The data illustrates a clear trend."},
+{o:"solve / deal with",b:["address","tackle","cope with","resolve"],n:"問題に「取り組む」",e:"We must address climate change."},
+{o:"bad / harmful",b:["detrimental","adverse","unfavorable","damaging"],n:"悪影響のフォーマル版",e:"Smoking is detrimental to health."},
+{o:"good / helpful",b:["beneficial","advantageous","effective","constructive"],n:"利点のフォーマル版",e:"Exercise is beneficial for the body."},
+{o:"many / a lot of",b:["numerous","a wide range of","a variety of"],n:"数が多いフォーマル版",e:"There are numerous advantages."},
+{o:"But",b:["However","Nevertheless","On the other hand","Nonetheless"],n:"逆接の接続副詞",e:"The plan is costly; however, it is effective."},
+{o:"Because / So",b:["Due to","Therefore","Consequently","As a result"],n:"原因・結果のフォーマル版",e:"Consequently, the project was cancelled."},
+{o:"Also",b:["Furthermore","In addition","Moreover","Additionally"],n:"追加情報の接続副詞",e:"Furthermore, the cost was reduced."},
+{o:"happen",b:["occur","take place","arise","emerge"],n:"「起こる」のフォーマル版",e:"The accident occurred near the station."},
+{o:"use",b:["utilize","employ","implement","apply"],n:"「使う」のフォーマル版",e:"The company utilizes renewable energy."},
+{o:"change",b:["transform","alter","modify","shift"],n:"変化の程度で使い分け",e:"Technology has transformed communication."},
 ];
 
-/* ═══════════════════════════════════════════
-   STATE
-═══════════════════════════════════════════ */
-let currentTab = 'flash';
-let deck = shuffle([...VOCAB]);
-let idx = 0;
-let flipped = false;
-let stats = {good:0, hard:0, forgot:0};
-let transTimer = null;
+/* ═══ READING EXPRESSIONS ═══ */
+const RE=[
+{p:"a fact of life",m:"避けられない現実",e:"Water restrictions are a fact of life.",s:"2015 Water Worries"},
+{p:"in turn",m:"今度は・次には",e:"Such efforts will in turn lead to discoveries.",s:"2015"},
+{p:"figure out",m:"解明する・理解する",e:"We need to figure out the cause.",s:"2015"},
+{p:"on a regular basis",m:"定期的に",e:"I exercise on a regular basis.",s:"2015"},
+{p:"be confined to",m:"〜に限られる",e:"The problem is not confined to one country.",s:"2015"},
+{p:"exposure to",m:"〜にさらされること",e:"Prolonged exposure to noise is harmful.",s:"2015"},
+{p:"on the increase",m:"増加傾向にある",e:"Businesses targeting teens are on the increase.",s:"2015"},
+{p:"blend in with",m:"〜に溶け込む",e:"The robots blended in with real roaches.",s:"2015 Robot-Roaches"},
+{p:"sift through",m:"〜をふるいにかける",e:"The company sifted through candidates.",s:"2015"},
+{p:"did not occur in a vacuum",m:"真空の中で起きたわけではない（背景がある）",e:"The incident did not occur in a vacuum.",s:"2025 Haymarket"},
+{p:"whip up public anger",m:"大衆の怒りを煽る",e:"Newspapers whipped up public anger.",s:"2025 Haymarket"},
+{p:"induced resistance",m:"誘導抵抗性",e:"Induced resistance vaccinates plants against pests.",s:"2025 Protecting Plants"},
+{p:"defense priming",m:"防衛プライミング（植物免疫）",e:"Defense priming stimulates weak defense responses.",s:"2025 Protecting Plants"},
+{p:"fall behind one's peers",m:"仲間に後れをとる",e:"Low-income children fall behind their peers.",s:"2025 Early Education"},
+{p:"anecdotal evidence",m:"体験談的根拠（科学的でない）",e:"There was anecdotal evidence years ago.",s:"2015 Elephant Speech"},
+];
 
-/* ═══════════════════════════════════════════
-   FLASHCARD
-═══════════════════════════════════════════ */
-function render() {
-  if (idx >= deck.length) { showComplete(); return; }
-  const w = deck[idx];
-  flipped = false;
-  document.getElementById('fc').classList.remove('flipped');
-  document.getElementById('actions').style.display = 'none';
+/* ═══ CONFUSED PAIRS ═══ */
+const CP=[
+{a:"comprehensive（包括的な）",b:"comprehensible（理解できる）",n:"準1最頻出混同ミスNo.1"},
+{a:"considerable（かなりの）",b:"considerate（思いやりのある）",n:"Eで終わるのは人の性格を表す"},
+{a:"evade（逃れる）",b:"invade（侵略する）",n:"2025出題。e-=外へ、in-=内へ"},
+{a:"tentative（仮の）",b:"attentive（注意深い）",n:"2025出題"},
+{a:"autonomy（自律性）",b:"astronomy（天文学）",n:"auto-=自己、astro-=星"},
+{a:"allege（主張する）",b:"allocate（割り当てる）",n:"allegはthat節、allocateはto/for"},
+{a:"apprehend（逮捕・理解）",b:"comprehend（理解する）",n:"apprehendは逮捕の意味もある"},
+{a:"cherish（大事にする）",b:"perish（死ぬ・滅びる）",n:"見た目が似ているが逆方向"},
+{a:"dominate（支配する）",b:"domesticate（飼いならす）",n:"domesticateはwildlife文脈"},
+{a:"elicit（引き出す）",b:"elevate（高める）",n:"elicit a response=反応を引き出す"},
+];
 
-  // front
-  const lvMap = {lv1:'Lv1 基礎',lv2:'Lv2 中級',lv3:'Lv3 上級'};
-  const lvEl = document.getElementById('fc-lv');
-  lvEl.textContent = lvMap[w.lv] || w.lv;
-  lvEl.className = 'lv-badge ' + w.lv;
-  document.getElementById('fc-cat').textContent = w.cat || '';
-  document.getElementById('fc-word').textContent = w.w;
-  document.getElementById('fc-pron').textContent = w.pron || '';
-  const posEl = document.getElementById('fc-pos');
-  const posLabels = {n:'名詞',v:'動詞',adj:'形容詞',adv:'副詞'};
-  posEl.textContent = posLabels[w.pos] || w.pos;
-  posEl.className = 'pos-badge pos-' + (w.pos || 'other');
+/* ═══ ACADEMIC THEMES ═══ */
+const TH=[
+{cat:"環境・テクノロジー",items:["再生可能エネルギーの利点と限界","AIが労働市場に与える影響","プラスチックゴミと循環型経済"]},
+{cat:"社会・教育",items:["テレワークの社会的功罪","多文化主義と移民受け入れ","オンライン教育 vs 対面授業"]},
+{cat:"ビジネス・経済",items:["企業の社会的責任（CSR）","オーバーツーリズムと対策","シェアリングエコノミー"]},
+{cat:"歴史・文化",items:["絶滅危惧言語の保護","伝統技術の継承と近代化"]},
+{cat:"心理・健康",items:["睡眠不足と生産性","都市生活とメンタルヘルス"]},
+];
 
-  // back
-  document.getElementById('fc-mean').textContent = w.mean;
-  document.getElementById('fc-full').textContent = w.full || '';
-  document.getElementById('fc-ex').innerHTML = w.ex
-    ? `<div class="fc-ex-e">${w.ex.e}</div><div class="fc-ex-j">${w.ex.j}</div>`
-    : '';
-  document.getElementById('fc-tags').innerHTML = (w.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('');
-  document.getElementById('fc-idioms').innerHTML = (w.idioms||[]).map(i=>`<div class="fc-idiom-e">${i.e}</div><div style="color:var(--sub)">${i.j}</div>`).join('');
+/* ═══ STATE ═══ */
+let deck=shuf([...V]),idx=0,flipped=false,st={g:0,h:0,f:0},tab='f',tt=null;
 
-  // progress
-  const pct = Math.round(idx / deck.length * 100);
-  document.getElementById('prog-fill').style.width = pct + '%';
-  document.getElementById('prog-txt').textContent = idx + ' / ' + deck.length;
+/* ═══ RENDER ═══ */
+function render(){
+  if(idx>=deck.length){done();return}
+  const w=deck[idx];flipped=false;
+  document.getElementById('fc').classList.remove('fl');
+  document.getElementById('acts').style.display='none';
+  const lc=['','l1','l2','l3'];
+  const lbl=['','Lv1 基礎','Lv2 中級','Lv3 上級'];
+  const lv=document.getElementById('flv');lv.textContent=lbl[w.l]||'';lv.className='lv '+(lc[w.l]||'l3');
+  document.getElementById('fca').textContent=w.c||'';
+  document.getElementById('fwo').textContent=w.w;
+  document.getElementById('fpr').textContent=w.pr||'';
+  const po=document.getElementById('fpo');
+  const pl={n:'名詞',v:'動詞',adj:'形容詞',adv:'副詞'};
+  po.textContent=pl[w.p]||w.p;
+  po.className='fpos p'+(w.p==='adj'?'a':w.p==='adv'?'d':w.p==='n'?'n':w.p==='v'?'v':'o');
+  document.getElementById('fme').textContent=w.m;
+  document.getElementById('ffu').textContent=w.f||'';
+  document.getElementById('fex').innerHTML=w.e?`<div class="fexe">${w.e}</div><div class="fexj">${w.ej}</div>`:'';
+  document.getElementById('fta').innerHTML=(w.t||[]).map(t=>`<span class="ftag">${t}</span>`).join('');
+  document.getElementById('fid').innerHTML=(w.id||[]).map(i=>`<div class="fide">${i.e}</div><div>${i.j}</div>`).join('');
+  const pct=Math.round(idx/deck.length*100);
+  document.getElementById('pf').style.width=pct+'%';
+  document.getElementById('pt').textContent=idx+'/'+deck.length;
 }
 
-window.flipCard = function() {
-  flipped = !flipped;
-  document.getElementById('fc').classList.toggle('flipped', flipped);
+window.FF=function(){
+  flipped=!flipped;
+  document.getElementById('fc').classList.toggle('fl',flipped);
   haptic();
-  document.getElementById('actions').style.display = flipped ? 'flex' : 'none';
+  document.getElementById('acts').style.display=flipped?'flex':'none';
 };
 
-window.rate = function(type) {
+window.R=function(t){
   haptic.confirm();
-  stats[type]++;
-  document.getElementById('s-good').textContent = stats.good;
-  document.getElementById('s-hard').textContent = stats.hard;
-  document.getElementById('s-forgot').textContent = stats.forgot;
-  if (type === 'forgot') deck.push({...deck[idx]});
-  else if (type === 'hard') deck.splice(Math.min(idx+4, deck.length), 0, {...deck[idx]});
+  st[t]++;
+  document.getElementById('sg').textContent=st.g;
+  document.getElementById('sh').textContent=st.h;
+  document.getElementById('sf').textContent=st.f;
+  if(t==='f')deck.push({...deck[idx]});
+  else if(t==='h')deck.splice(Math.min(idx+4,deck.length),0,{...deck[idx]});
   idx++;
-  animNext();
+  const w=document.getElementById('fw');
+  w.classList.add('out');
+  setTimeout(()=>{w.classList.remove('out');render();void w.offsetWidth;w.classList.add('in');setTimeout(()=>w.classList.remove('in'),240)},190);
 };
 
-function animNext() {
-  const wrap = document.getElementById('fc-wrap');
-  wrap.classList.add('out');
-  setTimeout(() => {
-    wrap.classList.remove('out');
-    render();
-    void wrap.offsetWidth;
-    wrap.classList.add('in');
-    setTimeout(() => wrap.classList.remove('in'), 260);
-  }, 200);
+function done(){
+  document.getElementById('acts').style.display='none';
+  document.getElementById('pf').style.width='100%';
+  document.getElementById('fw').innerHTML=`<div class="cc"><div style="font-size:50px;margin-bottom:10px">🎉</div><div style="font-size:18px;font-weight:700;margin-bottom:4px">完了！</div><div style="font-size:12px;color:var(--sub);margin-bottom:16px">✓${st.g} △${st.h} ✗${st.f}</div><button onclick="SD()" style="background:var(--b);color:#fff;border:none;border-radius:11px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🔀 もう一度</button></div>`;
 }
 
-function showComplete() {
-  document.getElementById('actions').style.display = 'none';
-  document.getElementById('prog-fill').style.width = '100%';
-  document.getElementById('prog-txt').textContent = deck.length + ' / ' + deck.length;
-  document.getElementById('card-area').innerHTML = `
-    <div class="trans-overlay" id="trans-overlay" onclick="closeTrans()" style="z-index:40;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:28px;background:rgba(247,246,243,.96);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s;">
-      <div><div class="trans-result" id="trans-result"></div><div class="trans-sub" id="trans-sub"></div></div>
-    </div>
-    <div class="complete-card">
-      <div style="font-size:54px;margin-bottom:12px">🎉</div>
-      <div style="font-size:20px;font-weight:700;margin-bottom:6px">デッキ完了！</div>
-      <div style="font-size:13px;color:var(--sub);margin-bottom:20px">覚えた:${stats.good}　難しい:${stats.hard}　忘れた:${stats.forgot}</div>
-      <button onclick="window.restartDeck()" style="background:var(--blue);color:#fff;border:none;border-radius:12px;padding:11px 26px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">🔀 もう一度</button>
-    </div>`;
-}
-
-window.restartDeck = function() {
-  deck = shuffle([...VOCAB]);
-  idx = 0; stats = {good:0,hard:0,forgot:0};
-  document.getElementById('s-good').textContent = 0;
-  document.getElementById('s-hard').textContent = 0;
-  document.getElementById('s-forgot').textContent = 0;
-  // restore card area
-  document.getElementById('card-area').innerHTML = `
-    <div class="trans-overlay" id="trans-overlay" onclick="closeTrans()">
-      <div><div class="trans-result" id="trans-result"></div><div class="trans-sub" id="trans-sub"></div></div>
-    </div>
-    <div class="fc-wrap" id="fc-wrap">
-      <div class="fc" id="fc" onclick="flipCard()">
-        <div class="fc-face fc-front" id="fc-front">
-          <div class="fc-meta"><span class="lv-badge lv1" id="fc-lv"></span><span class="cat-badge" id="fc-cat"></span></div>
-          <div class="fc-word" id="fc-word"></div>
-          <div class="fc-pron" id="fc-pron"></div>
-          <span class="pos-badge pos-v" id="fc-pos"></span>
-          <div class="fc-hint">タップして意味を確認 →</div>
-        </div>
-        <div class="fc-face fc-back" id="fc-back">
-          <div class="fc-mean" id="fc-mean"></div>
-          <div class="fc-full" id="fc-full"></div>
-          <div class="fc-ex" id="fc-ex"></div>
-          <div class="fc-tags" id="fc-tags"></div>
-          <div class="fc-idioms-list" id="fc-idioms"></div>
-        </div>
-      </div>
-    </div>`;
-  render();
-  attachSwipe();
-};
-
-window.shuffleDeck = function() {
-  haptic.confirm();
-  deck = shuffle([...VOCAB]);
-  idx = 0;
+window.SD=function(){
+  haptic.confirm();deck=shuf([...V]);idx=0;st={g:0,h:0,f:0};
+  document.getElementById('sg').textContent=0;document.getElementById('sh').textContent=0;document.getElementById('sf').textContent=0;
+  // rebuild card HTML
+  document.getElementById('fw').innerHTML=`<div class="fc" id="fc" onclick="FF()"><div class="ff" id="ff"><div class="fmeta"><span class="lv l1" id="flv"></span><span class="fcat" id="fca"></span></div><div class="fword" id="fwo"></div><div class="fpron" id="fpr"></div><span class="fpos pv" id="fpo"></span><div class="fh">タップして意味を確認</div></div><div class="ff fb" id="fba"><div class="fmean" id="fme"></div><div class="ffull" id="ffu"></div><div class="fex" id="fex"></div><div class="ftags" id="fta"></div><div class="fidm" id="fid"></div></div></div>`;
   render();
 };
 
-/* ═══════════════════════════════════════════
-   LIST VIEWS
-═══════════════════════════════════════════ */
-function buildIdiomList() {
-  const el = document.getElementById('list-idiom');
-  el.innerHTML = '<div class="section-head">イディオム一覧 (' + IDIOMS.length + '個)</div>' +
-    IDIOMS.map(d => `
-      <div class="list-item">
-        <div class="list-word">${d.w}</div>
-        <div class="list-mean" style="color:var(--blue);font-weight:600">${d.mean}</div>
-        <div class="list-note">${d.note}</div>
-        <div class="list-ex">"${d.ex}"<br><span style="color:var(--sub)">${d.exj}</span></div>
-      </div>`).join('');
-}
-
-function buildGramList() {
-  const el = document.getElementById('list-gram');
-  el.innerHTML = '<div class="section-head">重要文法 (' + GRAMMAR.length + '項目)</div>' +
-    GRAMMAR.map(d => `
-      <div class="list-item">
-        <div class="list-word">${d.head}</div>
-        <div class="list-note">${d.note}<br><span style="color:var(--yellow);font-size:11px">💡 ${d.tip}</span></div>
-        <div class="list-ex">"${d.ex}"<br><span style="color:var(--sub)">${d.exj}</span></div>
-      </div>`).join('');
-}
-
-function buildParaList() {
-  const el = document.getElementById('list-para');
-  el.innerHTML = '<div class="section-head">言い換え表現 (ライティング必須)</div>' +
-    PARAPHRASE.map(d => `
-      <div class="list-item">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <div style="font-size:13px;color:var(--sub);background:#f0f0ee;padding:3px 10px;border-radius:20px">${d.orig}</div>
-          <span style="color:var(--sub)">→</span>
-          ${d.better.map(b=>`<div style="background:var(--blue);color:#fff;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600">${b}</div>`).join('')}
-        </div>
-        <div class="list-note" style="margin-top:8px">${d.note}</div>
-        <div class="list-ex">"${d.ex}"</div>
-      </div>`).join('');
-}
-
-/* ═══════════════════════════════════════════
-   TAB SWITCH
-═══════════════════════════════════════════ */
-window.switchTab = function(tab) {
-  haptic();
-  currentTab = tab;
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-
-  const isFlash = tab === 'flash';
-  document.getElementById('card-area').style.display = isFlash ? 'flex' : 'none';
-  document.getElementById('stats-row').style.display = isFlash ? 'flex' : 'none';
-  document.getElementById('actions').style.display = isFlash && flipped ? 'flex' : 'none';
-  document.getElementById('prog-row') && (document.querySelector('.prog-row').style.display = isFlash ? 'flex' : 'none');
-
-  ['idiom','gram','para'].forEach(t => {
-    const el = document.getElementById('list-' + t);
-    el.classList.toggle('active', t === tab);
-  });
+/* ═══ TAB SWITCH ═══ */
+window.ST=function(t){
+  haptic();tab=t;
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('t-'+t).classList.add('on');
+  const isF=t==='f';
+  document.getElementById('ca').style.display=isF?'flex':'none';
+  document.getElementById('sr').style.display=isF?'flex':'none';
+  document.getElementById('acts').style.display=isF&&flipped?'flex':'none';
+  document.querySelector('.pr').style.display=isF?'flex':'none';
+  ['i','g','p','r','c','a'].forEach(x=>{const el=document.getElementById('l-'+x);el&&(el.classList.toggle('on',x===t))});
 };
 
-/* ═══════════════════════════════════════════
-   TRANSLATOR
-═══════════════════════════════════════════ */
-const input = document.getElementById('translate-input');
-
-const autoResize = () => {
-  input.style.height = 'auto';
-  input.style.height = Math.min(input.scrollHeight, window.innerHeight * 0.28) + 'px';
-};
-
-input.addEventListener('input', e => {
-  autoResize();
-  const text = e.target.value.trim();
-  clearTimeout(transTimer);
-  if (!text) { closeTrans(); return; }
-  transTimer = setTimeout(() => doTranslate(text), 480);
-});
-
-input.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
-    e.preventDefault();
-    haptic();
-    const text = input.value.trim();
-    if (text) doTranslate(text);
-  }
-});
-
-input.addEventListener('focus', () => haptic());
-
-async function doTranslate(text) {
-  try {
-    const isJa = /[ぁ-んァ-ヶー一-龠]/.test(text);
-    const pair = isJa ? 'ja|en' : 'en|ja';
-    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${pair}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    const translated = data.responseData?.translatedText;
-    if (translated && translated !== 'N/A') {
-      showTrans(translated, isJa ? 'JA → EN' : 'EN → JA');
-    }
-  } catch (err) {
-    console.error('Translation error:', err);
-  }
+/* ═══ BUILD LISTS ═══ */
+function buildLists(){
+  // idioms
+  document.getElementById('l-i').innerHTML='<div class="sh">イディオム '+ID.length+'個</div>'+ID.map(d=>`<div class="li"><div class="lw">${d.w}</div><div class="lm">${d.m}</div><div class="ln">${d.n}</div><div class="le">"${d.e}"<br><span style="color:var(--sub)">${d.ej}</span></div></div>`).join('');
+  // grammar
+  document.getElementById('l-g').innerHTML='<div class="sh">重要文法 '+GR.length+'項目</div>'+GR.map(d=>`<div class="li"><div class="lw">${d.h}</div><div class="ln">${d.n}<br><span style="color:var(--y);font-size:11px">💡 ${d.tip}</span></div><div class="le">"${d.e}"<br><span style="color:var(--sub)">${d.ej}</span></div></div>`).join('');
+  // paraphrase
+  document.getElementById('l-p').innerHTML='<div class="sh">言い換え表現 '+PA.length+'セット</div>'+PA.map(d=>`<div class="li"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:12px;background:#f0f0ee;padding:2px 9px;border-radius:20px;color:var(--sub)">${d.o}</span><span style="color:var(--sub)">→</span>${d.b.map(b=>`<span style="background:var(--b);color:#fff;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600">${b}</span>`).join('')}</div><div class="ln" style="margin-top:6px">${d.n}</div><div class="le">"${d.e}"</div></div>`).join('');
+  // reading expressions
+  document.getElementById('l-r').innerHTML='<div class="sh">長文読解 重要表現 '+RE.length+'個</div>'+RE.map(d=>`<div class="li"><div class="lw">${d.p}</div><div class="lm">${d.m}</div><div class="le">"${d.e}"</div><div style="font-size:10px;color:var(--sub);margin-top:3px">出典: ${d.s}</div></div>`).join('');
+  // confused pairs
+  document.getElementById('l-c').innerHTML='<div class="sh">混同ペア '+CP.length+'組</div>'+CP.map(d=>`<div class="li"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px"><span style="background:#fef2f2;border:1px solid #fecaca;color:var(--r);padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700">${d.a}</span><span style="color:var(--sub);font-size:11px">vs</span><span style="background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700">${d.b}</span></div><div style="font-size:11px;color:#555">📌 ${d.n}</div></div>`).join('');
+  // themes
+  document.getElementById('l-a').innerHTML='<div class="sh">頻出アカデミックテーマ</div>'+TH.map(d=>`<div class="li"><div class="lw">${d.cat}</div>${d.items.map(i=>`<div style="font-size:12px;color:#555;padding:3px 0;border-bottom:1px solid var(--ln)">• ${i}</div>`).join('')}</div>`).join('');
 }
 
-function showTrans(text, label) {
-  const ov = document.getElementById('trans-overlay');
-  const res = document.getElementById('trans-result');
-  const sub = document.getElementById('trans-sub');
-  if (!ov || !res) return;
-  res.textContent = text;
-  if (sub) sub.textContent = label || '';
-  ov.classList.add('show');
-  haptic.confirm();
+/* ═══ TRANSLATOR ═══ */
+const inp=document.getElementById('ti');
+const ar=()=>{inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,window.innerHeight*.26)+'px'};
+inp.addEventListener('input',e=>{ar();const t=e.target.value.trim();clearTimeout(tt);if(!t){CT();return}tt=setTimeout(()=>doTr(t),480)});
+inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();haptic();const t=inp.value.trim();if(t)doTr(t)}});
+inp.addEventListener('focus',()=>haptic());
+
+async function doTr(t){
+  try{const j=/[ぁ-んァ-ヶー一-龠]/.test(t);const r=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(t)}&langpair=${j?'ja|en':'en|ja'}`);const d=await r.json();const x=d.responseData?.translatedText;if(x&&x!=='N/A'){document.getElementById('tr').textContent=x;document.getElementById('ts').textContent=j?'JA → EN':'EN → JA';document.getElementById('tov').classList.add('show');haptic.confirm()}}catch(e){console.error(e)}
 }
 
-window.closeTrans = function() {
-  const ov = document.getElementById('trans-overlay');
-  if (ov) ov.classList.remove('show');
-  haptic();
-  input.value = '';
-  autoResize();
-};
+window.CT=function(){document.getElementById('tov').classList.remove('show');haptic();inp.value='';ar()};
+document.getElementById('bsr').addEventListener('click',()=>{haptic.confirm();window.open(`https://www.google.com/search?q=${encodeURIComponent(inp.value.trim()||'Google')}`,'_blank')});
+document.getElementById('bgo').addEventListener('click',()=>{haptic();const t=inp.value.trim();if(t)doTr(t)});
 
-document.getElementById('btn-search').addEventListener('click', () => {
-  haptic.confirm();
-  const q = input.value.trim() || 'Google';
-  window.open(`https://www.google.com/search?q=${encodeURIComponent(q)}`, '_blank');
-});
+/* ═══ SWIPE ═══ */
+let sx=0;
+document.getElementById('fw').addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+document.getElementById('fw').addEventListener('touchend',e=>{if(!flipped)return;const d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>55){d<0?R('f'):R('g')}},{passive:true});
 
-document.getElementById('btn-go').addEventListener('click', () => {
-  haptic();
-  const text = input.value.trim();
-  if (text) doTranslate(text);
-});
+/* ═══ UTILS ═══ */
+function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
-/* ═══════════════════════════════════════════
-   SWIPE GESTURE
-═══════════════════════════════════════════ */
-function attachSwipe() {
-  const wrap = document.getElementById('fc-wrap');
-  if (!wrap) return;
-  let startX = 0, startY = 0;
-  wrap.addEventListener('touchstart', e => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-  }, {passive:true});
-  wrap.addEventListener('touchend', e => {
-    if (!flipped) return;
-    const dx = e.changedTouches[0].clientX - startX;
-    const dy = e.changedTouches[0].clientY - startY;
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 55) {
-      dx < 0 ? window.rate('forgot') : window.rate('good');
-    }
-  }, {passive:true});
-}
-
-/* ═══════════════════════════════════════════
-   UTILS
-═══════════════════════════════════════════ */
-function shuffle(a) {
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-/* ═══════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════ */
-buildIdiomList();
-buildGramList();
-buildParaList();
+/* ═══ INIT ═══ */
+buildLists();
 render();
-attachSwipe();
 </script>
 
 </body>
