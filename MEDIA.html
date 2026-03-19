@@ -376,7 +376,7 @@ body::after{content:"横向き・または表示サイズを広げよう";displa
   </div>
   <div class="media-browser">
     <div class="section-title">メディア</div>
-    <input type="file" id="fileInput" multiple accept="video/mp4,video/quicktime,audio/mpeg,audio/mp4,audio/wav,audio/x-m4a,image/*" style="display:none">
+    <input type="file" id="fileInput" multiple accept="video/mp4,video/quicktime,video/webm,audio/mpeg,audio/mp4,audio/wav,audio/x-m4a,audio/ogg,image/*,.stl,.obj,.glb,.gltf" style="display:none">
     <div class="media-list" id="mediaList"></div>
   </div>
   <div class="preview-panel">
@@ -444,8 +444,10 @@ body::after{content:"横向き・または表示サイズを広げよう";displa
   </div>
   <div class="popup-tabs" id="popupTabs">
     <button class="popup-tab active" data-tab="opacity" onclick="editor.switchPopupTab('opacity',this)">✨ 表示</button>
+    <button class="popup-tab" data-tab="trim" onclick="editor.switchPopupTab('trim',this)">✂ トリム</button>
     <button class="popup-tab" data-tab="transition" onclick="editor.switchPopupTab('transition',this)">🎬 効果</button>
     <button class="popup-tab" id="eqTabBtn" data-tab="eq" onclick="editor.switchPopupTab('eq',this)">🎵 EQ</button>
+    <button class="popup-tab" data-tab="3d" onclick="editor.switchPopupTab('3d',this)">🧊 3D</button>
     <button class="popup-tab" data-tab="anim" onclick="editor.switchPopupTab('anim',this)">🔄 アニメ</button>
   </div>
   <div class="popup-panel active" id="panel-opacity">
@@ -453,6 +455,13 @@ body::after{content:"横向き・または表示サイズを広げよう";displa
     <div class="popup-row" id="scalePopupRow"><div class="popup-label">スケール <span id="scaleVal">100</span>%</div><input type="range" min="0.1" max="3" step="0.05" id="scaleSlider" oninput="editor.liveUpdateProp('scale',parseFloat(this.value));document.getElementById('scaleVal').textContent=Math.round(this.value*100)"></div>
     <div class="popup-row" id="blurPopupRow" style="display:none"><div class="popup-label">ぼかし <span id="blurVal">0</span>px</div><input type="range" min="0" max="40" step="1" id="blurSlider" oninput="editor.liveUpdateProp('blurAmount',parseInt(this.value));document.getElementById('blurVal').textContent=this.value"></div>
     <div class="popup-row" id="textEditBtnRow" style="display:none"><button class="btn btn-secondary" style="width:100%;justify-content:center" onclick="editor.openTextEditOverlayFromPopup()">✏️ テキストを編集</button></div>
+  </div>
+  <!-- Trim Panel -->
+  <div class="popup-panel" id="panel-trim">
+    <div class="popup-row"><div class="popup-label">トリム開始 <span id="trimStartVal">0.0</span>s</div><input type="range" min="0" max="100" step="0.1" id="trimStartSlider" oninput="editor.updateTrim('start',this.value)"></div>
+    <div class="popup-row"><div class="popup-label">トリム終了 <span id="trimEndVal">—</span>s</div><input type="range" min="0" max="100" step="0.1" id="trimEndSlider" oninput="editor.updateTrim('end',this.value)"></div>
+    <div class="popup-row"><div class="popup-label">現在の長さ: <span id="trimDurVal">—</span>s</div></div>
+    <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-top:6px" onclick="editor.resetTrim()">↩ トリムをリセット</button>
   </div>
   <div class="popup-panel" id="panel-transition">
     <div class="popup-row">
@@ -479,6 +488,15 @@ body::after{content:"横向き・または表示サイズを広げよう";displa
       <div class="eq-bar-wrap"><input type="range" id="eqTreble" min="-10" max="10" value="0" oninput="editor.updateEQ('treble',this.value)"><div class="eq-bar-label">高音</div></div>
     </div>
     <div class="popup-row" style="margin-top:12px"><div class="popup-label">音量 <span id="volVal">100</span>%</div><input type="range" min="0" max="1" step="0.01" id="volumeSlider" oninput="editor.liveUpdateProp('volume',parseFloat(this.value));document.getElementById('volVal').textContent=Math.round(this.value*100)"></div>
+  </div>
+  <!-- 3D Panel -->
+  <div class="popup-panel" id="panel-3d">
+    <div class="popup-label" style="margin-bottom:10px">3D 回転 / 遠近感</div>
+    <div class="popup-row"><div class="popup-label">X軸回転 <span id="rot3dXVal">0</span>°</div><input type="range" min="-180" max="180" step="1" id="rot3dX" value="0" oninput="editor.update3D()"></div>
+    <div class="popup-row"><div class="popup-label">Y軸回転 <span id="rot3dYVal">0</span>°</div><input type="range" min="-180" max="180" step="1" id="rot3dY" value="0" oninput="editor.update3D()"></div>
+    <div class="popup-row"><div class="popup-label">Z軸回転 <span id="rot3dZVal">0</span>°</div><input type="range" min="-180" max="180" step="1" id="rot3dZ" value="0" oninput="editor.update3D()"></div>
+    <div class="popup-row"><div class="popup-label">遠近感 <span id="perspVal">800</span>px</div><input type="range" min="100" max="3000" step="50" id="perspSlider" value="800" oninput="editor.update3D()"></div>
+    <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-top:6px" onclick="editor.reset3D()">↩ 3Dリセット</button>
   </div>
   <div class="popup-panel" id="panel-anim">
     <div class="popup-label" style="margin-bottom:10px">時間比例アニメーション</div>
@@ -525,7 +543,11 @@ body::after{content:"横向き・または表示サイズを広げよう";displa
         </div>
       </div>
     </div>
-    <div class="modal-buttons"><button class="btn btn-secondary" onclick="editor.closeExportModal()">キャンセル</button><button class="btn btn-primary" onclick="editor.startExport()">エクスポート開始</button></div>
+    <div class="modal-buttons">
+      <button class="btn btn-secondary" onclick="editor.closeExportModal()">キャンセル</button>
+      <button class="btn btn-secondary" onclick="editor.startAudioExport()" style="background:rgba(139,92,246,.2);color:var(--accent-purple)">🎵 音声のみ</button>
+      <button class="btn btn-primary" onclick="editor.startExport()">🎬 エクスポート</button>
+    </div>
   </div>
 </div>
 <!-- Fullblur Text Edit -->
@@ -1143,8 +1165,9 @@ class VideoEditor {
 
   _makeClip(item, startTime) {
     return {id:Date.now()+Math.random(),mediaId:item.id,type:item.type,name:item.name,
-      startTime,duration:item.duration,trimStart:0,trimEnd:item.duration,
+      startTime,duration:item.duration,trimStart:0,trimEnd:item.duration,_origDuration:item.duration,
       position:{x:0,y:0},scale:1,rotation:0,opacity:1,muted:false,volume:1,blurAmount:0,
+      rot3d:{x:0,y:0,z:0},perspective:800,
       transitionIn:{enabled:false,type:'fade',duration:0.8,effect:''},
       transitionOut:{enabled:false,type:'fade',duration:0.8,effect:''},
       equalizer:{bass:0,mid:0,treble:0},
@@ -1159,15 +1182,41 @@ class VideoEditor {
       const trackEl=document.createElement('div');
       trackEl.className='track'; trackEl.dataset.trackId=track.id;
       trackEl.style.height=(track.height||72)+'px';
+      // ── Track header: expand + layer reorder buttons ──
+      const headerDiv=document.createElement('div');
+      headerDiv.style.cssText='position:absolute;left:2px;top:2px;bottom:2px;width:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;z-index:20';
+      // Layer up
+      const upBtn=document.createElement('button');
+      upBtn.style.cssText='width:20px;height:16px;border:none;border-radius:4px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);font-size:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s';
+      upBtn.textContent='▲';
+      upBtn.title='レイヤーを上へ';
+      upBtn.onmouseenter=()=>{upBtn.style.background='rgba(59,130,246,.3)';upBtn.style.color='#fff';};
+      upBtn.onmouseleave=()=>{upBtn.style.background='rgba(255,255,255,.08)';upBtn.style.color='rgba(255,255,255,.4)';};
+      upBtn.onclick=()=>{this.moveTrack(idx,-1);};
+      if(idx===0) upBtn.style.opacity='0.2';
+      // Expand
       const expandBtn=document.createElement('button');
       expandBtn.className='track-expand-btn';
+      expandBtn.style.cssText='position:static;transform:none;width:20px;height:16px;font-size:9px';
       expandBtn.textContent=track.expanded?'−':'+';
       expandBtn.onclick=()=>{track.expanded=!track.expanded;track.height=track.expanded?120:72;this.renderTracks();};
-      trackEl.innerHTML='<div class="track-content"></div><div class="track-resize-handle"></div>';
-      trackEl.insertBefore(expandBtn,trackEl.firstChild);
+      // Layer down
+      const downBtn=document.createElement('button');
+      downBtn.style.cssText='width:20px;height:16px;border:none;border-radius:4px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.4);font-size:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s';
+      downBtn.textContent='▼';
+      downBtn.title='レイヤーを下へ';
+      downBtn.onmouseenter=()=>{downBtn.style.background='rgba(59,130,246,.3)';downBtn.style.color='#fff';};
+      downBtn.onmouseleave=()=>{downBtn.style.background='rgba(255,255,255,.08)';downBtn.style.color='rgba(255,255,255,.4)';};
+      downBtn.onclick=()=>{this.moveTrack(idx,1);};
+      if(idx===this.tracks.length-1) downBtn.style.opacity='0.2';
+      headerDiv.appendChild(upBtn);
+      headerDiv.appendChild(expandBtn);
+      headerDiv.appendChild(downBtn);
+      trackEl.innerHTML='<div class="track-content" style="margin-left:28px"></div><div class="track-resize-handle"></div>';
+      trackEl.insertBefore(headerDiv,trackEl.firstChild);
       container.appendChild(trackEl);
       track.clips.forEach(clip=>this.renderClipEl(track.id,clip));
-      // Track resize
+      // Track resize handle
       const handle=trackEl.querySelector('.track-resize-handle');
       let startY,startH;
       handle.addEventListener('mousedown',e=>{e.preventDefault();startY=e.clientY;startH=track.height||72;
@@ -1176,6 +1225,15 @@ class VideoEditor {
         document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);
       });
     });
+  }
+
+  moveTrack(idx, dir) {
+    const newIdx=idx+dir;
+    if(newIdx<0||newIdx>=this.tracks.length) return;
+    [this.tracks[idx],this.tracks[newIdx]]=[this.tracks[newIdx],this.tracks[idx]];
+    this.saveState(); this.renderTracks(); this.render();
+    if(window.triggerHaptic) window.triggerHaptic();
+    this.showToast(dir<0?'レイヤーを上へ移動':'レイヤーを下へ移動');
   }
 
   renderClipEl(trackId, clip) {
@@ -1331,6 +1389,19 @@ class VideoEditor {
     const hasAudio=clip.type==='video'||clip.type==='audio';
     document.getElementById('eqTabBtn').style.display=hasAudio?'block':'none';
     if(hasAudio){document.getElementById('eqBass').value=clip.equalizer?.bass||0;document.getElementById('eqMid').value=clip.equalizer?.mid||0;document.getElementById('eqTreble').value=clip.equalizer?.treble||0;document.getElementById('volumeSlider').value=clip.volume||1;document.getElementById('volVal').textContent=Math.round((clip.volume||1)*100);}
+    // Trim
+    const origDur=clip._origDuration||clip.duration;
+    const tsS=document.getElementById('trimStartSlider'); const teS=document.getElementById('trimEndSlider');
+    if(tsS){tsS.max=origDur;tsS.value=clip.trimStart||0;document.getElementById('trimStartVal').textContent=(clip.trimStart||0).toFixed(1);}
+    if(teS){teS.max=origDur;teS.value=clip.trimEnd||origDur;document.getElementById('trimEndVal').textContent=(clip.trimEnd||origDur).toFixed(1);}
+    document.getElementById('trimDurVal').textContent=clip.duration.toFixed(1);
+    // 3D
+    const r3d=clip.rot3d||{x:0,y:0,z:0};
+    document.getElementById('rot3dX').value=r3d.x;document.getElementById('rot3dXVal').textContent=r3d.x;
+    document.getElementById('rot3dY').value=r3d.y;document.getElementById('rot3dYVal').textContent=r3d.y;
+    document.getElementById('rot3dZ').value=r3d.z;document.getElementById('rot3dZVal').textContent=r3d.z;
+    document.getElementById('perspSlider').value=clip.perspective||800;document.getElementById('perspVal').textContent=clip.perspective||800;
+    // Animation
     const anim=clip.animation||{};
     document.getElementById('animScaleStart').value=anim.scaleStart||1;
     document.getElementById('animScaleEnd').value=anim.scaleEnd||1;
@@ -1339,11 +1410,10 @@ class VideoEditor {
     document.getElementById('animTyStart').value=anim.tyStart||0;
     document.getElementById('animTyEnd').value=anim.tyEnd||0;
     this.syncEffectButtons(clip);
-    const rect=e.target.getBoundingClientRect();
-    let left=rect.left,top=rect.top-420;
-    if(top<10)top=rect.bottom+10;
-    if(left+300>window.innerWidth)left=window.innerWidth-310;
-    popup.style.left=`${left}px`;popup.style.top=`${top}px`;
+    // Position popup near center of screen (works on both PC and mobile)
+    const vw=window.innerWidth, vh=window.innerHeight;
+    popup.style.left=Math.max(10,Math.min(vw-310,(e.clientX||vw/2)-150))+'px';
+    popup.style.top=Math.max(10,Math.min(vh-480,(e.clientY||vh/3)-200))+'px';
     popup.classList.add('visible');
     this.switchPopupTab('opacity',document.querySelector('.popup-tab'));
   }
@@ -1366,6 +1436,131 @@ class VideoEditor {
   liveUpdateProp(prop,val){if(!this.popupClip)return;this.popupClip[prop]=val;this.render();}
   updateEQ(band,val){if(!this.popupClip)return;if(!this.popupClip.equalizer)this.popupClip.equalizer={};this.popupClip.equalizer[band]=parseFloat(val);}
   updateAnim(){if(!this.popupClip)return;this.popupClip.animation={scaleStart:parseFloat(document.getElementById('animScaleStart').value)||1,scaleEnd:parseFloat(document.getElementById('animScaleEnd').value)||1,txStart:parseFloat(document.getElementById('animTxStart').value)||0,txEnd:parseFloat(document.getElementById('animTxEnd').value)||0,tyStart:parseFloat(document.getElementById('animTyStart').value)||0,tyEnd:parseFloat(document.getElementById('animTyEnd').value)||0};this.render();}
+
+  /* ── TRIM ── */
+  updateTrim(side,val) {
+    if(!this.popupClip) return;
+    val=parseFloat(val);
+    if(side==='start'){
+      this.popupClip.trimStart=val;
+      document.getElementById('trimStartVal').textContent=val.toFixed(1);
+    } else {
+      this.popupClip.trimEnd=val;
+      document.getElementById('trimEndVal').textContent=val.toFixed(1);
+    }
+    const ts=this.popupClip.trimStart||0;
+    const te=this.popupClip.trimEnd||(this.popupClip._origDuration||this.popupClip.duration);
+    this.popupClip.duration=Math.max(0.1,te-ts);
+    document.getElementById('trimDurVal').textContent=this.popupClip.duration.toFixed(1);
+    this.renderTracks();this.render();
+  }
+
+  resetTrim() {
+    if(!this.popupClip) return;
+    const orig=this.popupClip._origDuration||this.popupClip.duration;
+    this.popupClip.trimStart=0; this.popupClip.trimEnd=orig; this.popupClip.duration=orig;
+    document.getElementById('trimStartSlider').value=0;
+    document.getElementById('trimEndSlider').value=orig;
+    document.getElementById('trimStartVal').textContent='0.0';
+    document.getElementById('trimEndVal').textContent=orig.toFixed(1);
+    document.getElementById('trimDurVal').textContent=orig.toFixed(1);
+    this.saveState();this.renderTracks();this.render();
+    if(window.triggerHaptic) window.triggerHaptic();
+    this.showToast('トリムをリセットしました');
+  }
+
+  /* ── 3D ── */
+  update3D() {
+    if(!this.popupClip) return;
+    if(!this.popupClip.rot3d) this.popupClip.rot3d={x:0,y:0,z:0};
+    this.popupClip.rot3d.x=parseInt(document.getElementById('rot3dX').value)||0;
+    this.popupClip.rot3d.y=parseInt(document.getElementById('rot3dY').value)||0;
+    this.popupClip.rot3d.z=parseInt(document.getElementById('rot3dZ').value)||0;
+    this.popupClip.perspective=parseInt(document.getElementById('perspSlider').value)||800;
+    document.getElementById('rot3dXVal').textContent=this.popupClip.rot3d.x;
+    document.getElementById('rot3dYVal').textContent=this.popupClip.rot3d.y;
+    document.getElementById('rot3dZVal').textContent=this.popupClip.rot3d.z;
+    document.getElementById('perspVal').textContent=this.popupClip.perspective;
+    this.render();
+  }
+
+  reset3D() {
+    if(!this.popupClip) return;
+    this.popupClip.rot3d={x:0,y:0,z:0}; this.popupClip.perspective=800;
+    ['rot3dX','rot3dY','rot3dZ'].forEach(id=>{document.getElementById(id).value=0;});
+    ['rot3dXVal','rot3dYVal','rot3dZVal'].forEach(id=>{document.getElementById(id).textContent='0';});
+    document.getElementById('perspSlider').value=800; document.getElementById('perspVal').textContent='800';
+    this.saveState();this.render();
+    if(window.triggerHaptic) window.triggerHaptic();
+    this.showToast('3Dリセット');
+  }
+
+  /* ── AUDIO EXPORT ── */
+  async startAudioExport() {
+    if(window.triggerHaptic) window.triggerHaptic();
+    this.closeExportModal();
+    const overlay=document.getElementById('exportBlurOverlay');
+    const fill=document.getElementById('exportBlurFill');
+    const text=document.getElementById('exportBlurText');
+    overlay.classList.add('active');
+    text.textContent='音声をミックス中...'; fill.style.width='5%';
+    try {
+      // Collect audio clips
+      const audioClips=[];
+      this.tracks.forEach(t=>t.clips.forEach(c=>{
+        if((c.type==='video'||c.type==='audio')&&!c.muted){
+          const item=this.mediaFiles.find(m=>m.id===c.mediaId);
+          if(item?.element) audioClips.push({clip:c,item});
+        }
+      }));
+      if(audioClips.length===0){this.showToast('音声トラックがありません');overlay.classList.remove('active');return;}
+      // Use OfflineAudioContext to mix
+      const sr=44100;
+      const durSec=this.duration;
+      const offCtx=new OfflineAudioContext(2, Math.ceil(durSec*sr), sr);
+      text.textContent='音声バッファを読み込み中...'; fill.style.width='15%';
+      for(const{clip,item} of audioClips){
+        try {
+          const resp=await fetch(item.url);
+          const arrBuf=await resp.arrayBuffer();
+          const audioBuf=await offCtx.decodeAudioData(arrBuf);
+          const src=offCtx.createBufferSource();
+          src.buffer=audioBuf;
+          const gain=offCtx.createGain();
+          gain.gain.value=Math.min(1,clip.volume||1);
+          src.connect(gain); gain.connect(offCtx.destination);
+          const offset=clip.trimStart||0;
+          src.start(Math.max(0,clip.startTime), offset, clip.duration);
+        } catch(e){console.warn('Audio decode failed for',item.name,e);}
+      }
+      text.textContent='レンダリング中...'; fill.style.width='50%';
+      const rendered=await offCtx.startRendering();
+      text.textContent='WAVに変換中...'; fill.style.width='80%';
+      const wav=this._bufToWav(rendered);
+      fill.style.width='100%';
+      const blob=new Blob([wav],{type:'audio/wav'});
+      this.downloadFile(blob,`cinema-studio-audio-${Date.now()}.wav`);
+      this.showToast('音声をWAVとして保存しました');
+    } catch(err){
+      console.error('Audio export error:',err);
+      this.showToast('音声エクスポートエラー: '+(err.message||err));
+    } finally {
+      overlay.classList.remove('active'); fill.style.width='0%';
+    }
+  }
+
+  _bufToWav(buffer) {
+    const numCh=buffer.numberOfChannels,sr=buffer.sampleRate,len=buffer.length;
+    const ab=new ArrayBuffer(44+len*numCh*2);const v=new DataView(ab);
+    const wr=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));};
+    wr(0,'RIFF');v.setUint32(4,36+len*numCh*2,true);wr(8,'WAVE');
+    wr(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,numCh,true);
+    v.setUint32(24,sr,true);v.setUint32(28,sr*numCh*2,true);v.setUint16(32,numCh*2,true);v.setUint16(34,16,true);
+    wr(36,'data');v.setUint32(40,len*numCh*2,true);
+    let offset=44;
+    for(let i=0;i<len;i++)for(let c=0;c<numCh;c++){const s=Math.max(-1,Math.min(1,buffer.getChannelData(c)[i]));v.setInt16(offset,s<0?s*0x8000:s*0x7FFF,true);offset+=2;}
+    return ab;
+  }
 
   applyEffect(eff,btn) {
     if(!this.popupClip) return;
@@ -1541,9 +1736,12 @@ class VideoEditor {
       if(clip.type!=='video'&&clip.type!=='audio') return;
       const item=this.mediaFiles.find(m=>m.id===clip.mediaId);if(!item?.element) return;
       const local=this.currentTime-clip.startTime;
+      const trimOff=clip.trimStart||0;
       if(local>=0&&local<clip.duration){
         const el=item.element;
-        if(this.isPlaying&&el.paused){el.currentTime=local;el.volume=clip.muted?0:Math.min(1,clip.volume||1);el.play().catch(()=>{});}
+        const targetTime=trimOff+local;
+        if(this.isPlaying&&el.paused){el.currentTime=targetTime;el.volume=clip.muted?0:Math.min(1,clip.volume||1);el.play().catch(()=>{});}
+        else if(this.isPlaying&&Math.abs(el.currentTime-targetTime)>0.5){el.currentTime=targetTime;}
         else if(!this.isPlaying&&!el.paused) el.pause();
       } else {if(!item.element.paused) item.element.pause();}
     }));
@@ -1570,8 +1768,16 @@ class VideoEditor {
     if(!item?.element&&clip.type!=='text') return;
     const ctx=this.ctx,cw=this.canvas.width,ch=this.canvas.height;
     const local=this.currentTime-clip.startTime,dur=clip.duration;
+    const trimOff=clip.trimStart||0;
+
+    // Seek video to correct trimmed position
+    if(clip.type==='video'&&item.element){
+      const targetTime=trimOff+local;
+      if(Math.abs(item.element.currentTime-targetTime)>0.15) item.element.currentTime=targetTime;
+    }
+
     let alpha=1;
-    const tin=clip.transitionIn,tout=clip.transitionOut;
+    const tin=clip.transitionIn||{},tout=clip.transitionOut||{};
     if(tin.enabled&&local<tin.duration){
       if(tin.effect==='scaleDownIn') alpha=this._easeOutCubic(local/tin.duration);
       else alpha=local/tin.duration;
@@ -1586,13 +1792,28 @@ class VideoEditor {
     if(tin.enabled&&tin.effect==='scaleUp'&&local<tin.duration) effectScale=0.7+0.3*(local/tin.duration);
     if(tin.enabled&&tin.effect==='scaleDownIn'&&local<tin.duration) effectScale=2-this._easeOutCubic(local/tin.duration);
     if(tout.enabled&&tout.effect==='scaleDown'){const fe=dur-local;if(fe<tout.duration) effectScale=Math.min(effectScale,2-(1-fe/tout.duration));}
+
+    // 3D perspective simulation using skew/scale
+    const r3d=clip.rot3d||{x:0,y:0,z:0};
+    const persp=clip.perspective||800;
+    const rx=r3d.x*Math.PI/180, ry=r3d.y*Math.PI/180, rz=r3d.z*Math.PI/180;
+    // Simplified 3D: apply cos scaling for depth + skew for rotation
+    const cosRx=Math.cos(rx), cosRy=Math.cos(ry);
+    const scaleXfactor=Math.abs(cosRy); // Y rotation reduces width
+    const scaleYfactor=Math.abs(cosRx); // X rotation reduces height
+    const skewX=Math.sin(ry)*0.5; // Y rotation creates horizontal skew
+    const skewY=Math.sin(rx)*0.5; // X rotation creates vertical skew
+
     ctx.save();
     ctx.translate(cw/2+clip.position.x+animTx,ch/2+clip.position.y+animTy);
-    ctx.rotate(clip.rotation*Math.PI/180);
-    ctx.scale(clip.scale*animS*effectScale,clip.scale*animS*effectScale);
+    ctx.rotate((clip.rotation+r3d.z)*Math.PI/180);
+    // Apply 3D perspective via transform matrix
+    const s=clip.scale*animS*effectScale;
+    ctx.transform(s*scaleXfactor, skewY*s, skewX*s, s*scaleYfactor, 0, 0);
     ctx.globalAlpha=(clip.opacity||1)*alpha;
     if(clip.blurAmount>0) ctx.filter=`blur(${clip.blurAmount}px)`;
-    if(clip.type==='video'){const v=item.element;const ar=v.videoWidth/(v.videoHeight||1);let dw=cw,dh=cw/ar;if(dh>ch){dh=ch;dw=ch*ar;}ctx.drawImage(v,-dw/2,-dh/2,dw,dh);}
+
+    if(clip.type==='video'){const v=item.element;if(v.readyState<2){ctx.restore();return;}const ar=v.videoWidth/(v.videoHeight||1);let dw=cw,dh=cw/ar;if(dh>ch){dh=ch;dw=ch*ar;}ctx.drawImage(v,-dw/2,-dh/2,dw,dh);}
     else if(clip.type==='image'){const img=item.element;const ar=img.naturalWidth/(img.naturalHeight||1);let dw=cw,dh=cw/ar;if(dh>ch){dh=ch;dw=ch*ar;}ctx.drawImage(img,-dw/2,-dh/2,dw,dh);}
     else if(clip.type==='text'){
       const fs=clip.fontSize||48;ctx.font=`${clip.fontWeight||'700'} ${fs}px ${clip.fontFamily||"'Noto Sans JP', sans-serif"}`;
@@ -1605,6 +1826,7 @@ class VideoEditor {
       ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.fillStyle=clip.fontColor||'#fff';ctx.fillText(txt,0,0);
     }
     ctx.filter='none';ctx.restore();
+    // Selection indicator
     if(this.selectedClip?.id===clip.id){ctx.save();ctx.translate(cw/2+clip.position.x+animTx,ch/2+clip.position.y+animTy);ctx.rotate(clip.rotation*Math.PI/180);ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=1;ctx.setLineDash([4,4]);const bw=cw*0.15,bh=ch*0.08;ctx.strokeRect(-bw/2,-bh/2,bw,bh);ctx.setLineDash([]);ctx.restore();}
   }
 
@@ -1854,17 +2076,19 @@ class VideoEditor {
       const t=frame/fps;
       offCtx.fillStyle='#000';offCtx.fillRect(0,0,w,h);
 
-      // Sync audio/video playback in real-time
+      // Sync audio/video playback in real-time with trimStart
       this.tracks.forEach(track=>track.clips.forEach(clip=>{
         if(clip.type!=='video'&&clip.type!=='audio') return;
         const item=this.mediaFiles.find(m=>m.id===clip.mediaId);
         if(!item?.element) return;
         const local=t-clip.startTime;
+        const trimOff=clip.trimStart||0;
         if(local>=0&&local<clip.duration){
           const el=item.element;
+          const targetTime=trimOff+local;
           el.volume=clip.muted?0:Math.min(1,clip.volume||1);
-          if(el.paused){el.currentTime=Math.max(0,local);el.play().catch(()=>{});}
-          else if(Math.abs(el.currentTime-local)>0.3){el.currentTime=local;}
+          if(el.paused){el.currentTime=Math.max(0,targetTime);el.play().catch(()=>{});}
+          else if(Math.abs(el.currentTime-targetTime)>0.3){el.currentTime=targetTime;}
         } else {if(!item.element.paused) item.element.pause();}
       }));
 
@@ -1876,8 +2100,9 @@ class VideoEditor {
         const item=this.mediaFiles.find(m=>m.id===clip.mediaId);
         if(!item?.element&&clip.type!=='text') return;
         const local=t-clip.startTime,dur=clip.duration;
+        const trimOff=clip.trimStart||0;
         let alpha=1;
-        const tin=clip.transitionIn,tout=clip.transitionOut;
+        const tin=clip.transitionIn||{},tout=clip.transitionOut||{};
         if(tin.enabled&&local<tin.duration){if(tin.effect==='scaleDownIn')alpha=this._easeOutCubic(local/tin.duration);else alpha=local/tin.duration;}
         if(tout.enabled){const fe=dur-local;if(fe<tout.duration)alpha=Math.min(alpha,fe/tout.duration);}
         const pct=dur>0?local/dur:0;const anim=clip.animation||{};
@@ -1888,12 +2113,21 @@ class VideoEditor {
         if(tin.enabled&&tin.effect==='scaleUp'&&local<tin.duration) effectScale=0.7+0.3*(local/tin.duration);
         if(tin.enabled&&tin.effect==='scaleDownIn'&&local<tin.duration) effectScale=2-this._easeOutCubic(local/tin.duration);
         if(tout.enabled&&tout.effect==='scaleDown'){const fe=dur-local;if(fe<tout.duration)effectScale=Math.min(effectScale,2-(1-fe/tout.duration));}
+        // Seek video to trimmed position
+        if(clip.type==='video'&&item.element){const tgt=trimOff+local;if(item.element.readyState>=2&&Math.abs(item.element.currentTime-tgt)>0.15)item.element.currentTime=tgt;}
+        // 3D
+        const r3d=clip.rot3d||{x:0,y:0,z:0};
+        const rx=r3d.x*Math.PI/180,ry=r3d.y*Math.PI/180;
+        const cosRx=Math.cos(rx),cosRy=Math.cos(ry);
+        const scaleXf=Math.abs(cosRy),scaleYf=Math.abs(cosRx);
+        const skewX=Math.sin(ry)*0.5,skewY=Math.sin(rx)*0.5;
 
         offCtx.save();
         const sX=w/this.canvas.width,sY=h/this.canvas.height;
         offCtx.translate(w/2+(clip.position.x+animTx)*sX,h/2+(clip.position.y+animTy)*sY);
-        offCtx.rotate(clip.rotation*Math.PI/180);
-        offCtx.scale(clip.scale*animS*effectScale*sX,clip.scale*animS*effectScale*sY);
+        offCtx.rotate((clip.rotation+(r3d.z||0))*Math.PI/180);
+        const s=clip.scale*animS*effectScale;
+        offCtx.transform(s*scaleXf*sX, skewY*s*sY, skewX*s*sX, s*scaleYf*sY, 0, 0);
         offCtx.globalAlpha=(clip.opacity||1)*alpha;
 
         if(clip.type==='video'&&item.element.readyState>=2){const ar=item.element.videoWidth/(item.element.videoHeight||1);let dw=this.canvas.width,dh=dw/ar;if(dh>this.canvas.height){dh=this.canvas.height;dw=this.canvas.height*ar;}offCtx.drawImage(item.element,-dw/2,-dh/2,dw,dh);}
