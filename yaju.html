@@ -36,7 +36,7 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);displa
 .fb{transform:rotateY(180deg)}
 .fmeta{display:flex;align-items:center;justify-content:space-between;margin-bottom:auto}
 .lv{font-size:10px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:20px}
-.l1{background:#dcfce7;color:#166534}.l2{background:#fef9c3;color:#854d0e}.l3{background:#fce7f3;color:#9d174d}
+.l1{background:#dcfce7;color:#166534}.l2{background:#fef9c3;color:#854d0e}.l3{background:#fce7f3;color:#9d174d}.lid{background:#ede9fe;color:#5b21b6}
 .fcat{font-size:10px;color:var(--sub);font-weight:500}
 .fword{font-size:clamp(26px,7vw,42px);font-weight:600;color:var(--tx);letter-spacing:-.02em;margin:14px 0 3px;line-height:1.1}
 .fpron{font-size:12px;color:var(--sub);font-weight:300;margin-bottom:5px}
@@ -75,7 +75,8 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);displa
 .lnx{font-size:11.5px;color:#555;line-height:1.7;background:#f5f5f2;border-radius:9px;padding:7px 9px;margin-top:5px}
 .le{font-size:11.5px;color:#666;font-style:italic;margin-top:4px;line-height:1.5}
 .sh{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);padding:8px 0 4px}
-.bsheet{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.98);border-radius:22px 22px 0 0;z-index:70;transform:translateY(105%);transition:transform .32s cubic-bezier(.4,0,.2,1);max-height:62dvh;display:flex;flex-direction:column;padding-bottom:var(--sab);box-shadow:0 -6px 40px rgba(0,0,0,.18);will-change:transform}
+/* Bottom Sheets */
+.bsheet{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.98);border-radius:22px 22px 0 0;z-index:70;transform:translateY(105%);transition:transform .32s cubic-bezier(.4,0,.2,1);max-height:70dvh;display:flex;flex-direction:column;padding-bottom:var(--sab);box-shadow:0 -6px 40px rgba(0,0,0,.18);will-change:transform}
 .bsheet.open{transform:translateY(0)}
 .bs-hdl{width:40px;height:4px;background:#d0d0d0;border-radius:2px;margin:12px auto 4px;flex-shrink:0;touch-action:none;cursor:grab}
 .bs-title{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.09em;text-transform:uppercase;text-align:center;padding:4px 0 8px;flex-shrink:0}
@@ -143,9 +144,14 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);displa
 </div>
 </div>
 </div>
-<div class="ls" id="l-i"></div><div class="ls" id="l-e"></div><div class="ls" id="l-v"></div>
-<div class="ls" id="l-g"></div><div class="ls" id="l-p"></div><div class="ls" id="l-r"></div>
-<div class="ls" id="l-c"></div><div class="ls" id="l-a"></div>
+<div class="ls" id="l-i"></div>
+<div class="ls" id="l-e"></div>
+<div class="ls" id="l-v"></div>
+<div class="ls" id="l-g"></div>
+<div class="ls" id="l-p"></div>
+<div class="ls" id="l-r"></div>
+<div class="ls" id="l-c"></div>
+<div class="ls" id="l-a"></div>
 <div class="acts" id="acts" style="display:none">
 <button class="ab af" onclick="R('f')"><span>😰</span>忘れた</button>
 <button class="ab ah" onclick="R('h')"><span>🤔</span>難しい</button>
@@ -168,113 +174,271 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);displa
 <div class="bs-body" id="hlist"></div>
 </div>
 <script type="module">
-/* ═══ HAPTIC ═══ */
+/* ═══ HAPTIC — non-blocking, never delays render ═══ */
 let _hRaw=null;
-try{const _m=await import('https://esm.sh/ios-haptics');_hRaw=_m.haptic;}catch(_){}
+(function(){
+  import('https://esm.sh/ios-haptics').then(m=>{_hRaw=m.haptic;}).catch(()=>{});
+})();
 function haptic(){try{_hRaw&&_hRaw();}catch(_){}}
 haptic.confirm=function(){try{_hRaw&&_hRaw.confirm&&_hRaw.confirm();}catch(_){}};
-/* ═══ VOCABULARY DATA ═══ */
+
 const V=[
-{w:"allege",p:"v",l:3,c:"2015動詞",m:"主張する・断言する",pr:"/əˈledʒ/",f:"that節をとる。allocate（割り当てる）と混同注意。",e:"He alleged that the company was guilty.",ej:"彼はその会社に罪があると主張した。",t:["allegation (n)"],id:[]},
-{w:"allocate",p:"v",l:3,c:"2015動詞",m:"割り当てる・配分する",pr:"/ˈæləkeɪt/",f:"allocate A to B の形。allege（主張する）と混同注意。",e:"The government allocated funds to the project.",ej:"政府はそのプロジェクトに資金を割り当てた。",t:["allocation (n)"],id:[]},
-{w:"apprehend",p:"v",l:3,c:"2015動詞",m:"逮捕する・理解する",pr:"/ˌæprɪˈhend/",f:"comprehend（理解する）と区別。警察文脈では逮捕。",e:"The police apprehended the suspect.",ej:"警察は容疑者を逮捕した。",t:["apprehension (n)"],id:[]},
-{w:"ascertain",p:"v",l:3,c:"2015動詞",m:"確認する・確かめる",pr:"/ˌæsərˈteɪn/",f:"≒make sure。that節と共に使う。",e:"We need to ascertain the facts.",ej:"事実を確認する必要がある。",t:[],id:[]},
-{w:"eradicate",p:"v",l:3,c:"2015動詞",m:"根絶する・撲滅する",pr:"/ɪˈrædɪkeɪt/",f:"病気・社会問題の文脈。",e:"Scientists aim to eradicate malaria.",ej:"科学者たちはマラリアの根絶を目指している。",t:["eradication (n)"],id:[]},
-{w:"facilitate",p:"v",l:3,c:"2015動詞",m:"促進する・容易にする",pr:"/fəˈsɪlɪteɪt/",f:"≒make easier。直接目的語をとる。",e:"Technology facilitates communication.",ej:"技術はコミュニケーションを促進する。",t:["facilitation (n)","facility (n)"],id:[]},
-{w:"extradite",p:"v",l:3,c:"2015動詞",m:"引き渡す・送還する",pr:"/ˈekstrədaɪt/",f:"犯罪者を外国へ引き渡す。",e:"The criminal was extradited to face trial.",ej:"犯人は裁判を受けるために引き渡された。",t:["extradition (n)"],id:[]},
-{w:"illuminate",p:"v",l:3,c:"2015動詞",m:"照らす・明らかにする",pr:"/ɪˈluːmɪneɪt/",f:"比喩的に「問題を明らかにする」。",e:"The study illuminated a key issue.",ej:"その研究は重要な問題を明らかにした。",t:["illumination (n)"],id:[]},
-{w:"dominate",p:"v",l:3,c:"2015動詞",m:"支配する・優位を占める",pr:"/ˈdɒmɪneɪt/",f:"domesticate（飼いならす）と混同注意。",e:"One company dominates the market.",ej:"1つの会社が市場を支配している。",t:["dominance (n)","dominant (adj)"],id:[]},
-{w:"impede",p:"v",l:3,c:"2015動詞",m:"妨げる・邪魔する",pr:"/ɪmˈpiːd/",f:"≒hinder, obstruct。",e:"Bad weather impeded the rescue.",ej:"悪天候が救助を妨げた。",t:["impediment (n)"],id:[]},
-{w:"disrupt",p:"v",l:3,c:"2015動詞",m:"混乱させる・分断する",pr:"/dɪsˈrʌpt/",f:"disrupt traffic/service 文脈が多い。",e:"The storm disrupted power supplies.",ej:"嵐が電力供給を混乱させた。",t:["disruption (n)","disruptive (adj)"],id:[]},
-{w:"dismiss",p:"v",l:3,c:"2015動詞",m:"解雇する・退ける",pr:"/dɪsˈmɪs/",f:"dismiss an idea（考えを退ける）も重要。",e:"The manager dismissed the idea.",ej:"マネージャーはそのアイデアを退けた。",t:["dismissal (n)"],id:[]},
-{w:"negotiate",p:"v",l:2,c:"2015動詞",m:"交渉する",pr:"/nɪˈɡoʊʃieɪt/",f:"negotiate with A / negotiate A。",e:"They negotiated a new contract.",ej:"彼らは新しい契約を交渉した。",t:["negotiation (n)","negotiator (n)"],id:[]},
-{w:"cherish",p:"v",l:3,c:"2015動詞",m:"大事にする・かわいがる",pr:"/ˈtʃerɪʃ/",f:"perish（死ぬ・滅びる）と混同注意。",e:"She cherished her childhood memories.",ej:"彼女は子供時代の思い出を大事にしていた。",t:[],id:[]},
-{w:"utilize",p:"v",l:2,c:"2015動詞",m:"利用する",pr:"/ˈjuːtəlaɪz/",f:"≒use。やや硬い表現。",e:"We should utilize renewable energy.",ej:"再生可能エネルギーを利用すべきだ。",t:["utilization (n)"],id:[]},
-{w:"excel",p:"v",l:2,c:"2015動詞",m:"〜にまさる・優れる",pr:"/ɪkˈsel/",f:"excel at/in + 分野。",e:"She excels at mathematics.",ej:"彼女は数学に秀でている。",t:["excellent (adj)"],id:[{e:"excel at",j:"〜に秀でる"}]},
-{w:"bestow",p:"v",l:3,c:"2015動詞",m:"与える・授ける",pr:"/bɪˈstoʊ/",f:"bestow A on B（AをBに与える）。≒grant, award。",e:"The king bestowed the medal on the hero.",ej:"王はその英雄にメダルを授けた。",t:[],id:[{e:"bestow A on B",j:"AをBに授ける"}]},
-{w:"penetrate",p:"v",l:3,c:"2015動詞",m:"貫通する・理解する",pr:"/ˈpenɪtreɪt/",f:"penalize（罰則を科す）と混同注意。",e:"The bullet penetrated the wall.",ej:"弾丸が壁を貫通した。",t:["penetration (n)"],id:[]},
-{w:"abide",p:"v",l:3,c:"2015動詞",m:"とどまる・従う",pr:"/əˈbaɪd/",f:"abide by ～（〜を守る）が重要熟語。",e:"You must abide by the rules.",ej:"ルールを守らなければならない。",t:[],id:[{e:"abide by",j:"〜を守る・従う"}]},
-{w:"boost",p:"v",l:2,c:"2015動詞",m:"強化する・押し上げる",pr:"/buːst/",f:"boost sales / confidence / morale。",e:"The new policy boosted the economy.",ej:"新しい政策は経済を押し上げた。",t:["booster (n)"],id:[]},
-{w:"elevate",p:"v",l:3,c:"2015動詞",m:"高める・上昇させる",pr:"/ˈeləveɪt/",f:"≒raise, enhance。elicit（引き出す）と混同注意。",e:"She elevated the company's reputation.",ej:"彼女は会社の評判を高めた。",t:["elevation (n)"],id:[]},
-{w:"aftermath",p:"n",l:3,c:"2015名詞",m:"結果・余波",pr:"/ˈæftərmæθ/",f:"in the aftermath of ～（〜の直後）頻出。",e:"In the aftermath of the disaster, many were homeless.",ej:"災害の余波で多くの人がホームレスになった。",t:[],id:[{e:"in the aftermath of",j:"〜の直後に"}]},
-{w:"consensus",p:"n",l:3,c:"2015名詞",m:"合意・一致した意見",pr:"/kənˈsensəs/",f:"reach a consensus（合意に達する）。",e:"The committee reached a consensus.",ej:"委員会は合意に達した。",t:[],id:[{e:"reach a consensus",j:"合意に達する"}]},
-{w:"credibility",p:"n",l:3,c:"2015名詞",m:"信頼性",pr:"/ˌkredəˈbɪləti/",f:"credible（信頼できる）の名詞形。",e:"The scandal damaged his credibility.",ej:"そのスキャンダルは彼の信頼性を傷つけた。",t:["credible (adj)"],id:[]},
-{w:"implication",p:"n",l:3,c:"2015名詞",m:"含意・暗示・影響",pr:"/ˌɪmplɪˈkeɪʃən/",f:"political implications（政治的影響）。",e:"The decision has serious implications.",ej:"その決定には重大な影響がある。",t:["imply (v)","implicit (adj)"],id:[]},
-{w:"erosion",p:"n",l:3,c:"2015名詞",m:"浸食・腐食",pr:"/ɪˈroʊʒən/",f:"比喩的に「信頼などの侵食」でも使う。",e:"Soil erosion is a major environmental problem.",ej:"土壌侵食は重大な環境問題だ。",t:["erode (v)"],id:[]},
-{w:"gist",p:"n",l:3,c:"2015名詞",m:"要点・核心",pr:"/dʒɪst/",f:"get the gist = 要点をつかむ。",e:"I got the gist of his argument.",ej:"彼の主張の要点はつかめた。",t:[],id:[{e:"get the gist",j:"要点をつかむ"}]},
-{w:"aptitude",p:"n",l:3,c:"2015名詞",m:"適性・才能",pr:"/ˈæptɪtjuːd/",f:"aptitude test（適性検査）。",e:"She has an aptitude for languages.",ej:"彼女は語学の才能がある。",t:[],id:[{e:"aptitude test",j:"適性検査"}]},
-{w:"deadlock",p:"n",l:3,c:"2015名詞",m:"行き詰まり・膠着状態",pr:"/ˈdedlɒk/",f:"break the deadlock（膠着状態を打破する）。",e:"The talks ended in a deadlock.",ej:"交渉は行き詰まりに終わった。",t:[],id:[{e:"break the deadlock",j:"膠着状態を打破する"}]},
-{w:"mediator",p:"n",l:3,c:"2015名詞",m:"仲裁人・調停者",pr:"/ˈmiːdieɪtər/",f:"meditate（瞑想する）と混同注意。",e:"A mediator resolved the dispute.",ej:"仲裁人が紛争を解決した。",t:["mediate (v)","mediation (n)"],id:[]},
-{w:"contamination",p:"n",l:3,c:"2015名詞",m:"汚染",pr:"/kənˌtæmɪˈneɪʃən/",f:"water contamination = 水質汚染。",e:"The water contamination made people sick.",ej:"水質汚染が人々を病気にした。",t:["contaminate (v)"],id:[]},
-{w:"alienation",p:"n",l:3,c:"2015名詞",m:"疎外・疎遠",pr:"/ˌeɪliəˈneɪʃən/",f:"emotional agitation（精神的興奮）と区別。",e:"Social alienation is a growing problem.",ej:"社会的疎外は深刻化する問題だ。",t:["alienate (v)"],id:[]},
-{w:"comprehensive",p:"adj",l:3,c:"2015形容詞",m:"包括的な",pr:"/ˌkɒmprɪˈhensɪv/",f:"⚠️ comprehensible（理解できる）と混同注意！最頻出ミス。",e:"A comprehensive review was conducted.",ej:"包括的なレビューが行われた。",t:["comprehend (v)"],id:[]},
-{w:"considerate",p:"adj",l:3,c:"2015形容詞",m:"思いやりのある",pr:"/kənˈsɪdərɪt/",f:"⚠️ considerable（かなりの）と混同注意！",e:"She is always considerate of others.",ej:"彼女はいつも他人に思いやりがある。",t:["considerable (adj)"],id:[]},
-{w:"drastic",p:"adj",l:3,c:"2015形容詞",m:"抜本的な・思い切った",pr:"/ˈdræstɪk/",f:"drastic measures（抜本的な対策）。",e:"Drastic measures were needed.",ej:"抜本的な対策が必要だった。",t:["drastically (adv)"],id:[]},
-{w:"legitimate",p:"adj",l:3,c:"2015形容詞",m:"正当な・合法の",pr:"/lɪˈdʒɪtɪmɪt/",f:"≒legal, lawful。illegitimate（違法な）が対義語。",e:"He had a legitimate reason to leave.",ej:"彼には去る正当な理由があった。",t:["legitimacy (n)"],id:[]},
-{w:"skeptical",p:"adj",l:3,c:"2015形容詞",m:"懐疑的な",pr:"/ˈskeptɪkəl/",f:"be skeptical about ～。≒doubtful。",e:"Scientists are skeptical about the results.",ej:"科学者たちはその結果に懐疑的だ。",t:["skepticism (n)"],id:[]},
-{w:"obsolete",p:"adj",l:3,c:"2015形容詞",m:"時代遅れの",pr:"/ˌɒbsəˈliːt/",f:"≒outdated, old-fashioned。",e:"The technology is now obsolete.",ej:"その技術は今や時代遅れだ。",t:["obsolescence (n)"],id:[]},
-{w:"vulnerable",p:"adj",l:3,c:"2015形容詞",m:"傷つきやすい・脆弱な",pr:"/ˈvʌlnərəbl/",f:"be vulnerable to ～（〜に脆弱）。",e:"Children are vulnerable to infections.",ej:"子供は感染症に対して脆弱だ。",t:["vulnerability (n)"],id:[{e:"be vulnerable to",j:"〜に脆弱である"}]},
-{w:"impartial",p:"adj",l:3,c:"2015形容詞",m:"公平な",pr:"/ɪmˈpɑːrʃəl/",f:"≒fair, unbiased。≠partial（偏った）。",e:"The judge must be impartial.",ej:"裁判官は公平でなければならない。",t:["impartiality (n)"],id:[]},
-{w:"spontaneous",p:"adj",l:3,c:"2015形容詞",m:"自発的な・自然発生の",pr:"/spɒnˈteɪniəs/",f:"spontaneous combustion（自然発火）。",e:"The audience gave a spontaneous cheer.",ej:"観客は自然に歓声を上げた。",t:["spontaneity (n)"],id:[]},
-{w:"lucid",p:"adj",l:3,c:"2015形容詞",m:"明快な・わかりやすい",pr:"/ˈluːsɪd/",f:"≒clear。legible（読みやすい）と区別。",e:"Her explanation was lucid and helpful.",ej:"彼女の説明は明快で役に立った。",t:["lucidity (n)"],id:[]},
-{w:"subsequent",p:"adj",l:3,c:"2015形容詞",m:"後の・その後に続く",pr:"/ˈsʌbsɪkwənt/",f:"subsequent to ～（〜の後に）。",e:"Subsequent events proved him right.",ej:"その後の出来事が彼の正しさを証明した。",t:["subsequently (adv)"],id:[]},
-{w:"evade",p:"v",l:3,c:"2025出題",m:"逃れる・回避する",pr:"/ɪˈveɪd/",f:"invade（侵略）と混同注意！",e:"The prisoners evaded the police for weeks.",ej:"囚人たちは数週間警察から逃れた。",t:["evasion (n)","evasive (adj)"],id:[]},
-{w:"compress",p:"v",l:3,c:"2025出題",m:"圧縮する・凝縮する",pr:"/kəmˈpres/",f:"情報・データを小さくまとめる。",e:"He compressed all events into one day.",ej:"彼はすべての出来事を1日に凝縮した。",t:["compression (n)"],id:[]},
-{w:"enroll",p:"v",l:2,c:"2025出題",m:"入学する・登録する",pr:"/ɪnˈroʊl/",f:"enroll in a school/course。",e:"She enrolled in the university last year.",ej:"彼女は去年その大学に入学した。",t:["enrollment (n)"],id:[]},
-{w:"detach",p:"v",l:3,c:"2025出題",m:"取り外す・分離する",pr:"/dɪˈtætʃ/",f:"attach（取り付ける）の反対。",e:"He detached the old battery carefully.",ej:"彼は古いバッテリーを慎重に取り外した。",t:["detachment (n)"],id:[]},
-{w:"collide",p:"v",l:3,c:"2025出題",m:"衝突する",pr:"/kəˈlaɪd/",f:"collision（衝突・名）。物理的にも比喩的にも使う。",e:"The two cars nearly collided.",ej:"2台の車はもう少しで衝突するところだった。",t:["collision (n)"],id:[]},
-{w:"spacious",p:"adj",l:2,c:"2025出題",m:"広々とした",pr:"/ˈspeɪʃəs/",f:"部屋・建物の広さを形容。",e:"The apartment was spacious and bright.",ej:"そのアパートは広々として明るかった。",t:[],id:[]},
-{w:"tentative",p:"adj",l:3,c:"2025出題",m:"仮の・暫定的な",pr:"/ˈtentətɪv/",f:"⚠️ attentive（注意深い）と混同注意！",e:"We have tentative plans for next week.",ej:"来週の仮の予定がある。",t:["tentatively (adv)"],id:[]},
-{w:"cosmopolitan",p:"adj",l:3,c:"2025出題",m:"国際的な・世界主義の",pr:"/ˌkɒzməˈpɒlɪtən/",f:"cosmos（世界）+ polis（都市）。",e:"Tokyo is a cosmopolitan city.",ej:"東京は国際的な都市だ。",t:[],id:[]},
-{w:"anatomy",p:"n",l:3,c:"2025出題",m:"解剖学・構造",pr:"/əˈnætəmi/",f:"物事の詳細構造にも使う。",e:"Students must study human anatomy.",ej:"学生は人体解剖学を学ばなければならない。",t:["anatomical (adj)"],id:[]},
-{w:"ascent",p:"n",l:3,c:"2025出題",m:"登頂・上昇",pr:"/əˈsent/",f:"ascend（登る）の名詞形。descent（下降）が反意語。",e:"The ascent took two days.",ej:"登頂に2日かかった。",t:["ascend (v)"],id:[]},
-{w:"autonomy",p:"n",l:3,c:"2025出題",m:"自律性・自治権",pr:"/ɔːˈtɒnəmi/",f:"⚠️ astronomy（天文学）と混同注意！",e:"Workers were given more autonomy.",ej:"労働者にはより多くの自律性が与えられた。",t:["autonomous (adj)"],id:[]},
-{w:"rivalry",p:"n",l:3,c:"2025出題",m:"ライバル関係・競争",pr:"/ˈraɪvəlri/",f:"rival → rivalry。",e:"The rivalry between the teams is fierce.",ej:"チーム間の競争は激しい。",t:["rival (n/v)"],id:[]},
-{w:"make for",p:"v",l:2,c:"2025句動詞",m:"〜に向かう",pr:"",f:"≒head for。目的地に向かう。",e:"They made for the nearest town.",ej:"彼らは最寄りの町に向かった。",t:[],id:[]},
-{w:"take on",p:"v",l:2,c:"2025句動詞",m:"引き受ける・取り組む",pr:"",f:"take on responsibilities / challenges。",e:"She took on new responsibilities.",ej:"彼女は新しい責任を引き受けた。",t:[],id:[]},
-{w:"rule out",p:"v",l:2,c:"2025句動詞",m:"除外する・排除する",pr:"",f:"rule out the possibility。",e:"We can't rule out that option.",ej:"その選択肢を排除できない。",t:[],id:[]},
-{w:"stick around",p:"v",l:2,c:"2025句動詞",m:"その場に留まる",pr:"",f:"stick = くっつく → 離れずに残る。",e:"Stick around — I'll be right back.",ej:"ここにいて — すぐ戻る。",t:[],id:[]},
-{w:"ability",p:"n",l:1,c:"基礎",m:"能力・才能",pr:"/əˈbɪlɪti/",f:"able（できる）の名詞形。",e:"She has the ability to speak three languages.",ej:"彼女は3ヶ国語を話す能力がある。",t:["able (adj)"],id:[{e:"to the best of one's ability",j:"能力の限りを尽くして"}]},
-{w:"access",p:"n",l:1,c:"基礎",m:"アクセス・利用する権利",pr:"/ˈækses/",f:"動詞でも使う（〜にアクセスする）。",e:"Everyone should have access to education.",ej:"誰もが教育を受ける権利を持つべきだ。",t:["accessible (adj)"],id:[{e:"gain access to",j:"〜へのアクセスを得る"}]},
-{w:"achieve",p:"v",l:1,c:"基礎",m:"達成する・成し遂げる",pr:"/əˈtʃiːv/",f:"努力の結果として実現すること。",e:"She achieved her goal.",ej:"彼女は目標を達成した。",t:["achievement (n)"],id:[]},
-{w:"affect",p:"v",l:1,c:"基礎",m:"影響を与える",pr:"/əˈfekt/",f:"⚠️ effect（名詞）と混同注意！affect=動詞、effect=名詞。",e:"Climate change affects everyone.",ej:"気候変動は全員に影響を与える。",t:["effect (n)"],id:[{e:"adversely affect",j:"悪影響を与える"}]},
-{w:"reduce",p:"v",l:1,c:"基礎",m:"減らす・低下させる",pr:"/rɪˈdjuːs/",f:"reduction（名詞）。",e:"We need to reduce carbon emissions.",ej:"炭素排出量を削減する必要がある。",t:["reduction (n)"],id:[]},
-{w:"require",p:"v",l:1,c:"基礎",m:"必要とする・要求する",pr:"/rɪˈkwaɪər/",f:"require A to do = Aに〜することを求める。",e:"The job requires strong skills.",ej:"その仕事は高いスキルを必要とする。",t:["requirement (n)"],id:[]},
-{w:"involve",p:"v",l:1,c:"基礎",m:"含む・巻き込む・伴う",pr:"/ɪnˈvɒlv/",f:"involve doing = 〜することを含む。",e:"The project involves research.",ej:"そのプロジェクトは調査を伴う。",t:["involvement (n)"],id:[{e:"be involved in",j:"〜に関わっている"}]},
-{w:"gradually",p:"adv",l:1,c:"基礎",m:"徐々に・少しずつ",pr:"/ˈɡrædʒuəli/",f:"gradual（形容詞）。",e:"The situation gradually improved.",ej:"状況は徐々に改善した。",t:["gradual (adj)"],id:[]},
-{w:"benefit",p:"n",l:2,c:"中級",m:"利点・恩恵",pr:"/ˈbenɪfɪt/",f:"benefit from = 〜から恩恵を受ける。動詞にもなる。",e:"Exercise has many health benefits.",ej:"運動には多くの健康上の利点がある。",t:["beneficial (adj)"],id:[{e:"benefit from",j:"〜から恩恵を受ける"}]},
-{w:"consequence",p:"n",l:2,c:"中級",m:"結果・影響",pr:"/ˈkɒnsɪkwəns/",f:"特に悪い結果。as a consequence = その結果として。",e:"Pollution has serious consequences.",ej:"汚染は深刻な影響をもたらす。",t:["consequently (adv)"],id:[{e:"as a consequence",j:"その結果として"}]},
-{w:"contribute",p:"v",l:2,c:"中級",m:"貢献する・一因となる",pr:"/kənˈtrɪbjuːt/",f:"contribute to 〜 = 〜に貢献する。",e:"Exercise contributes to good health.",ej:"運動は健康に貢献する。",t:["contribution (n)"],id:[{e:"contribute to",j:"〜に貢献する"}]},
-{w:"demonstrate",p:"v",l:2,c:"中級",m:"実演する・証明する",pr:"/ˈdemənstreɪt/",f:"demonstrate that = 〜ということを示す。",e:"The study demonstrates the effect.",ej:"その研究は効果を証明する。",t:["demonstration (n)"],id:[]},
-{w:"distinguish",p:"v",l:2,c:"中級",m:"区別する・識別する",pr:"/dɪˈstɪŋɡwɪʃ/",f:"distinguish A from B = AとBを区別する。",e:"Can you distinguish the two colors?",ej:"その2色を区別できますか？",t:["distinguished (adj)"],id:[{e:"distinguish A from B",j:"AとBを区別する"}]},
-{w:"enormous",p:"adj",l:2,c:"中級",m:"巨大な・膨大な",pr:"/ɪˈnɔːrməs/",f:"enormously（副）。",e:"The company made enormous profits.",ej:"その会社は膨大な利益を上げた。",t:["enormously (adv)"],id:[]},
-{w:"expand",p:"v",l:2,c:"中級",m:"拡張する・広げる",pr:"/ɪkˈspænd/",f:"expand on = 〜について詳しく述べる。",e:"The company is expanding overseas.",ej:"その会社は海外展開している。",t:["expansion (n)"],id:[{e:"expand on",j:"〜について詳しく述べる"}]},
-{w:"decline",p:"v",l:2,c:"中級",m:"断る・減少する",pr:"/dɪˈklaɪn/",f:"2つの意味が頻出。",e:"Sales declined sharply.",ej:"売上が急激に減少した。",t:[],id:[]},
-{w:"indicate",p:"v",l:2,c:"中級",m:"示す・指し示す",pr:"/ˈɪndɪkeɪt/",f:"データが「〜を示している」場合に使う。",e:"Studies indicate sleep is vital.",ej:"研究は睡眠が不可欠であることを示す。",t:["indication (n)"],id:[]},
-{w:"maintain",p:"v",l:2,c:"中級",m:"維持する・主張する",pr:"/meɪnˈteɪn/",f:"状態を保つ & 意見を主張する。",e:"We must maintain the environment.",ej:"環境を維持しなければならない。",t:["maintenance (n)"],id:[]},
-{w:"obtain",p:"v",l:2,c:"中級",m:"入手する・得る",pr:"/əbˈteɪn/",f:"getよりフォーマル。",e:"You can obtain a visa at the embassy.",ej:"大使館でビザを取得できる。",t:["obtainable (adj)"],id:[]},
-{w:"significant",p:"adj",l:2,c:"中級",m:"重要な・かなりの",pr:"/sɪɡˈnɪfɪkənt/",f:"significantly（副）。",e:"There was a significant increase.",ej:"著しい上昇があった。",t:["significantly (adv)","significance (n)"],id:[]},
-{w:"accurate",p:"adj",l:2,c:"中級",m:"正確な",pr:"/ˈækjərɪt/",f:"inaccurate（反）。",e:"The forecast was accurate.",ej:"予報は正確だった。",t:["accuracy (n)","inaccurate (adj)"],id:[]},
-{w:"consequently",p:"adv",l:2,c:"接続副詞",m:"その結果として",pr:"/ˈkɒnsɪkwəntli/",f:"therefore / as a result と同義。",e:"He didn't study. Consequently, he failed.",ej:"勉強しなかった。その結果、落第した。",t:[],id:[]},
-{w:"nevertheless",p:"adv",l:2,c:"接続副詞",m:"それにもかかわらず",pr:"/ˌnevəðəˈles/",f:"however と同義。逆接。",e:"It rained. Nevertheless, they continued.",ej:"雨が降った。それにもかかわらず続けた。",t:[],id:[]},
-{w:"furthermore",p:"adv",l:2,c:"接続副詞",m:"さらに・加えて",pr:"/ˈfɜːðəmɔːr/",f:"moreover / in addition と同義。",e:"The plan is costly. Furthermore, it's risky.",ej:"高い。さらにリスクも高い。",t:[],id:[]},
-{w:"acknowledge",p:"v",l:3,c:"上級",m:"認める・承認する",pr:"/əkˈnɒlɪdʒ/",f:"acknowledge that = 〜ということを認める。",e:"He acknowledged his mistake.",ej:"彼は過ちを認めた。",t:["acknowledgment (n)"],id:[]},
-{w:"anticipate",p:"v",l:3,c:"上級",m:"予想する・期待する",pr:"/ænˈtɪsɪpeɪt/",f:"expectより積極的な心構え。",e:"We anticipate a large crowd.",ej:"大勢が来ると予想している。",t:["anticipation (n)"],id:[]},
-{w:"bias",p:"n",l:3,c:"上級",m:"偏見・先入観",pr:"/ˈbaɪəs/",f:"confirmation bias = 確証バイアス。",e:"Bias affects decision-making.",ej:"偏見は意思決定に影響する。",t:["biased (adj)"],id:[]},
-{w:"perceive",p:"v",l:3,c:"上級",m:"知覚する・〜とみなす",pr:"/pəˈsiːv/",f:"perceive A as B = AをBとみなす。",e:"Time is perceived differently by everyone.",ej:"時間の感じ方は人それぞれ違う。",t:["perception (n)"],id:[{e:"perceive A as B",j:"AをBとみなす"}]},
-{w:"persist",p:"v",l:3,c:"上級",m:"持続する・こだわり続ける",pr:"/pəˈsɪst/",f:"persist in = 〜に固執する。",e:"If you persist, you will succeed.",ej:"粘り強く続ければ成功する。",t:["persistence (n)","persistent (adj)"],id:[]},
-{w:"sustainable",p:"adj",l:3,c:"上級",m:"持続可能な",pr:"/səˈsteɪnəbl/",f:"sustainable development = 持続可能な発展。",e:"We need sustainable energy sources.",ej:"持続可能なエネルギー源が必要だ。",t:["sustainability (n)","sustain (v)"],id:[]},
-{w:"crucial",p:"adj",l:3,c:"上級",m:"極めて重要な・決定的な",pr:"/ˈkruːʃəl/",f:"importantより強い。",e:"Education is crucial for success.",ej:"教育は成功に極めて重要だ。",t:["crucially (adv)"],id:[]},
-{w:"inevitable",p:"adj",l:3,c:"上級",m:"避けられない・必然的な",pr:"/ɪnˈevɪtəbl/",f:"どうやっても起こること。",e:"Change is inevitable.",ej:"変化は避けられない。",t:["inevitably (adv)"],id:[]},
-{w:"detrimental",p:"adj",l:3,c:"上級",m:"有害な・悪影響の",pr:"/ˌdetrɪˈmentəl/",f:"harmful/badのフォーマル版。英作文で差がつく語。",e:"Smoking is detrimental to health.",ej:"喫煙は健康に有害だ。",t:[],id:[{e:"detrimental to",j:"〜に有害な"}]},
-{w:"elaborate",p:"adj",l:3,c:"上級",m:"精巧な / 詳しく説明する（動詞）",pr:"/ɪˈlæbərɪt/",f:"elaborate on = 〜について詳しく述べる。",e:"Could you elaborate on that point?",ej:"その点を詳しく説明できますか？",t:["elaboration (n)"],id:[{e:"elaborate on",j:"〜について詳しく述べる"}]},
-{w:"numerous",p:"adj",l:2,c:"言い換え",m:"多数の・たくさんの",pr:"/ˈnjuːmərəs/",f:"many / a lot of のフォーマル版。",e:"There are numerous benefits.",ej:"数多くの利点がある。",t:[],id:[]},
-{w:"claim",p:"v",l:2,c:"言い換え",m:"主張する・断言する",pr:"/kleɪm/",f:"say/thinkのフォーマル版。that節をとる。",e:"He claims that the data is incorrect.",ej:"彼はデータが不正確だと主張する。",t:["claim (n)"],id:[]},
-{w:"illustrate",p:"v",l:2,c:"言い換え",m:"説明する・例証する",pr:"/ˈɪləstreɪt/",f:"showのフォーマル版。具体例で示す。",e:"This example illustrates the problem.",ej:"この例は問題を明確に示す。",t:["illustration (n)"],id:[]},
-{w:"tackle",p:"v",l:2,c:"言い換え",m:"取り組む・対処する",pr:"/ˈtækəl/",f:"address / cope with と同義。",e:"We must tackle climate change.",ej:"気候変動に取り組まなければならない。",t:[],id:[{e:"tackle a problem",j:"問題に取り組む"}]},
+{w:“allege”,p:“v”,l:3,c:“2015動詞”,m:“主張する・断言する”,pr:”/əˈledʒ/”,f:“that節をとる。allocate（割り当てる）と混同注意。”,e:“He alleged that the company was guilty.”,ej:“彼はその会社に罪があると主張した。”,t:[“allegation (n)”],id:[]},
+{w:“allocate”,p:“v”,l:3,c:“2015動詞”,m:“割り当てる・配分する”,pr:”/ˈæləkeɪt/”,f:“allocate A to B の形。allege（主張する）と混同注意。”,e:“The government allocated funds to the project.”,ej:“政府はそのプロジェクトに資金を割り当てた。”,t:[“allocation (n)”],id:[]},
+{w:“apprehend”,p:“v”,l:3,c:“2015動詞”,m:“逮捕する・理解する”,pr:”/ˌæprɪˈhend/”,f:“comprehend（理解する）と区別。警察文脈では逮捕。”,e:“The police apprehended the suspect.”,ej:“警察は容疑者を逮捕した。”,t:[“apprehension (n)”],id:[]},
+{w:“ascertain”,p:“v”,l:3,c:“2015動詞”,m:“確認する・確かめる”,pr:”/ˌæsərˈteɪn/”,f:“≒make sure。that節と共に使う。”,e:“We need to ascertain the facts.”,ej:“事実を確認する必要がある。”,t:[],id:[]},
+{w:“eradicate”,p:“v”,l:3,c:“2015動詞”,m:“根絶する・撲滅する”,pr:”/ɪˈrædɪkeɪt/”,f:“病気・社会問題の文脈。”,e:“Scientists aim to eradicate malaria.”,ej:“科学者たちはマラリアの根絶を目指している。”,t:[“eradication (n)”],id:[]},
+{w:“facilitate”,p:“v”,l:3,c:“2015動詞”,m:“促進する・容易にする”,pr:”/fəˈsɪlɪteɪt/”,f:“≒make easier。直接目的語をとる。”,e:“Technology facilitates communication.”,ej:“技術はコミュニケーションを促進する。”,t:[“facilitation (n)”,“facility (n)”],id:[]},
+{w:“extradite”,p:“v”,l:3,c:“2015動詞”,m:“引き渡す・送還する”,pr:”/ˈekstrədaɪt/”,f:“犯罪者を外国へ引き渡す。”,e:“The criminal was extradited to face trial.”,ej:“犯人は裁判を受けるために引き渡された。”,t:[“extradition (n)”],id:[]},
+{w:“illuminate”,p:“v”,l:3,c:“2015動詞”,m:“照らす・明らかにする”,pr:”/ɪˈluːmɪneɪt/”,f:“比喩的に「問題を明らかにする」。”,e:“The study illuminated a key issue.”,ej:“その研究は重要な問題を明らかにした。”,t:[“illumination (n)”],id:[]},
+{w:“dominate”,p:“v”,l:3,c:“2015動詞”,m:“支配する・優位を占める”,pr:”/ˈdɒmɪneɪt/”,f:“domesticate（飼いならす）と混同注意。”,e:“One company dominates the market.”,ej:“1つの会社が市場を支配している。”,t:[“dominance (n)”,“dominant (adj)”],id:[]},
+{w:“impede”,p:“v”,l:3,c:“2015動詞”,m:“妨げる・邪魔する”,pr:”/ɪmˈpiːd/”,f:“≒hinder, obstruct。”,e:“Bad weather impeded the rescue.”,ej:“悪天候が救助を妨げた。”,t:[“impediment (n)”],id:[]},
+{w:“disrupt”,p:“v”,l:3,c:“2015動詞”,m:“混乱させる・分断する”,pr:”/dɪsˈrʌpt/”,f:“disrupt traffic/service 文脈が多い。”,e:“The storm disrupted power supplies.”,ej:“嵐が電力供給を混乱させた。”,t:[“disruption (n)”,“disruptive (adj)”],id:[]},
+{w:“dismiss”,p:“v”,l:3,c:“2015動詞”,m:“解雇する・退ける”,pr:”/dɪsˈmɪs/”,f:“dismiss an idea（考えを退ける）も重要。”,e:“The manager dismissed the idea.”,ej:“マネージャーはそのアイデアを退けた。”,t:[“dismissal (n)”],id:[]},
+{w:“negotiate”,p:“v”,l:2,c:“2015動詞”,m:“交渉する”,pr:”/nɪˈɡoʊʃieɪt/”,f:“negotiate with A / negotiate A。”,e:“They negotiated a new contract.”,ej:“彼らは新しい契約を交渉した。”,t:[“negotiation (n)”,“negotiator (n)”],id:[]},
+{w:“cherish”,p:“v”,l:3,c:“2015動詞”,m:“大事にする・かわいがる”,pr:”/ˈtʃerɪʃ/”,f:“perish（死ぬ・滅びる）と混同注意。”,e:“She cherished her childhood memories.”,ej:“彼女は子供時代の思い出を大事にしていた。”,t:[],id:[]},
+{w:“utilize”,p:“v”,l:2,c:“2015動詞”,m:“利用する”,pr:”/ˈjuːtəlaɪz/”,f:“≒use。やや硬い表現。”,e:“We should utilize renewable energy.”,ej:“再生可能エネルギーを利用すべきだ。”,t:[“utilization (n)”],id:[]},
+{w:“excel”,p:“v”,l:2,c:“2015動詞”,m:”〜にまさる・優れる”,pr:”/ɪkˈsel/”,f:“excel at/in + 分野。”,e:“She excels at mathematics.”,ej:“彼女は数学に秀でている。”,t:[“excellent (adj)”],id:[{e:“excel at”,j:”〜に秀でる”}]},
+{w:“bestow”,p:“v”,l:3,c:“2015動詞”,m:“与える・授ける”,pr:”/bɪˈstoʊ/”,f:“bestow A on B（AをBに与える）。≒grant, award。”,e:“The king bestowed the medal on the hero.”,ej:“王はその英雄にメダルを授けた。”,t:[],id:[{e:“bestow A on B”,j:“AをBに授ける”}]},
+{w:“penetrate”,p:“v”,l:3,c:“2015動詞”,m:“貫通する・理解する”,pr:”/ˈpenɪtreɪt/”,f:“penalize（罰則を科す）と混同注意。”,e:“The bullet penetrated the wall.”,ej:“弾丸が壁を貫通した。”,t:[“penetration (n)”],id:[]},
+{w:“abide”,p:“v”,l:3,c:“2015動詞”,m:“とどまる・従う”,pr:”/əˈbaɪd/”,f:“abide by ～（〜を守る）が重要熟語。”,e:“You must abide by the rules.”,ej:“ルールを守らなければならない。”,t:[],id:[{e:“abide by”,j:”〜を守る・従う”}]},
+{w:“boost”,p:“v”,l:2,c:“2015動詞”,m:“強化する・押し上げる”,pr:”/buːst/”,f:“boost sales / confidence / morale。”,e:“The new policy boosted the economy.”,ej:“新しい政策は経済を押し上げた。”,t:[“booster (n)”],id:[]},
+{w:“elevate”,p:“v”,l:3,c:“2015動詞”,m:“高める・上昇させる”,pr:”/ˈeləveɪt/”,f:“≒raise, enhance。elicit（引き出す）と混同注意。”,e:“She elevated the company’s reputation.”,ej:“彼女は会社の評判を高めた。”,t:[“elevation (n)”],id:[]},
+{w:“aftermath”,p:“n”,l:3,c:“2015名詞”,m:“結果・余波”,pr:”/ˈæftərmæθ/”,f:“in the aftermath of ～（〜の直後）頻出。”,e:“In the aftermath of the disaster, many were homeless.”,ej:“災害の余波で多くの人がホームレスになった。”,t:[],id:[{e:“in the aftermath of”,j:”〜の直後に”}]},
+{w:“consensus”,p:“n”,l:3,c:“2015名詞”,m:“合意・一致した意見”,pr:”/kənˈsensəs/”,f:“reach a consensus（合意に達する）。”,e:“The committee reached a consensus.”,ej:“委員会は合意に達した。”,t:[],id:[{e:“reach a consensus”,j:“合意に達する”}]},
+{w:“credibility”,p:“n”,l:3,c:“2015名詞”,m:“信頼性”,pr:”/ˌkredəˈbɪləti/”,f:“credible（信頼できる）の名詞形。”,e:“The scandal damaged his credibility.”,ej:“そのスキャンダルは彼の信頼性を傷つけた。”,t:[“credible (adj)”],id:[]},
+{w:“implication”,p:“n”,l:3,c:“2015名詞”,m:“含意・暗示・影響”,pr:”/ˌɪmplɪˈkeɪʃən/”,f:“political implications（政治的影響）。”,e:“The decision has serious implications.”,ej:“その決定には重大な影響がある。”,t:[“imply (v)”,“implicit (adj)”],id:[]},
+{w:“erosion”,p:“n”,l:3,c:“2015名詞”,m:“浸食・腐食”,pr:”/ɪˈroʊʒən/”,f:“比喩的に「信頼などの侵食」でも使う。”,e:“Soil erosion is a major environmental problem.”,ej:“土壌侵食は重大な環境問題だ。”,t:[“erode (v)”],id:[]},
+{w:“gist”,p:“n”,l:3,c:“2015名詞”,m:“要点・核心”,pr:”/dʒɪst/”,f:“get the gist = 要点をつかむ。”,e:“I got the gist of his argument.”,ej:“彼の主張の要点はつかめた。”,t:[],id:[{e:“get the gist”,j:“要点をつかむ”}]},
+{w:“aptitude”,p:“n”,l:3,c:“2015名詞”,m:“適性・才能”,pr:”/ˈæptɪtjuːd/”,f:“aptitude test（適性検査）。”,e:“She has an aptitude for languages.”,ej:“彼女は語学の才能がある。”,t:[],id:[{e:“aptitude test”,j:“適性検査”}]},
+{w:“deadlock”,p:“n”,l:3,c:“2015名詞”,m:“行き詰まり・膠着状態”,pr:”/ˈdedlɒk/”,f:“break the deadlock（膠着状態を打破する）。”,e:“The talks ended in a deadlock.”,ej:“交渉は行き詰まりに終わった。”,t:[],id:[{e:“break the deadlock”,j:“膠着状態を打破する”}]},
+{w:“mediator”,p:“n”,l:3,c:“2015名詞”,m:“仲裁人・調停者”,pr:”/ˈmiːdieɪtər/”,f:“meditate（瞑想する）と混同注意。”,e:“A mediator resolved the dispute.”,ej:“仲裁人が紛争を解決した。”,t:[“mediate (v)”,“mediation (n)”],id:[]},
+{w:“contamination”,p:“n”,l:3,c:“2015名詞”,m:“汚染”,pr:”/kənˌtæmɪˈneɪʃən/”,f:“water contamination = 水質汚染。”,e:“The water contamination made people sick.”,ej:“水質汚染が人々を病気にした。”,t:[“contaminate (v)”],id:[]},
+{w:“alienation”,p:“n”,l:3,c:“2015名詞”,m:“疎外・疎遠”,pr:”/ˌeɪliəˈneɪʃən/”,f:“emotional agitation（精神的興奮）と区別。”,e:“Social alienation is a growing problem.”,ej:“社会的疎外は深刻化する問題だ。”,t:[“alienate (v)”],id:[]},
+{w:“comprehensive”,p:“adj”,l:3,c:“2015形容詞”,m:“包括的な”,pr:”/ˌkɒmprɪˈhensɪv/”,f:“⚠️ comprehensible（理解できる）と混同注意！最頻出ミス。”,e:“A comprehensive review was conducted.”,ej:“包括的なレビューが行われた。”,t:[“comprehend (v)”],id:[]},
+{w:“considerate”,p:“adj”,l:3,c:“2015形容詞”,m:“思いやりのある”,pr:”/kənˈsɪdərɪt/”,f:“⚠️ considerable（かなりの）と混同注意！”,e:“She is always considerate of others.”,ej:“彼女はいつも他人に思いやりがある。”,t:[“considerable (adj)”],id:[]},
+{w:“drastic”,p:“adj”,l:3,c:“2015形容詞”,m:“抜本的な・思い切った”,pr:”/ˈdræstɪk/”,f:“drastic measures（抜本的な対策）。”,e:“Drastic measures were needed.”,ej:“抜本的な対策が必要だった。”,t:[“drastically (adv)”],id:[]},
+{w:“legitimate”,p:“adj”,l:3,c:“2015形容詞”,m:“正当な・合法の”,pr:”/lɪˈdʒɪtɪmɪt/”,f:“≒legal, lawful。illegitimate（違法な）が対義語。”,e:“He had a legitimate reason to leave.”,ej:“彼には去る正当な理由があった。”,t:[“legitimacy (n)”],id:[]},
+{w:“skeptical”,p:“adj”,l:3,c:“2015形容詞”,m:“懐疑的な”,pr:”/ˈskeptɪkəl/”,f:“be skeptical about ～。≒doubtful。”,e:“Scientists are skeptical about the results.”,ej:“科学者たちはその結果に懐疑的だ。”,t:[“skepticism (n)”],id:[]},
+{w:“obsolete”,p:“adj”,l:3,c:“2015形容詞”,m:“時代遅れの”,pr:”/ˌɒbsəˈliːt/”,f:“≒outdated, old-fashioned。”,e:“The technology is now obsolete.”,ej:“その技術は今や時代遅れだ。”,t:[“obsolescence (n)”],id:[]},
+{w:“vulnerable”,p:“adj”,l:3,c:“2015形容詞”,m:“傷つきやすい・脆弱な”,pr:”/ˈvʌlnərəbl/”,f:“be vulnerable to ～（〜に脆弱）。”,e:“Children are vulnerable to infections.”,ej:“子供は感染症に対して脆弱だ。”,t:[“vulnerability (n)”],id:[{e:“be vulnerable to”,j:”〜に脆弱である”}]},
+{w:“impartial”,p:“adj”,l:3,c:“2015形容詞”,m:“公平な”,pr:”/ɪmˈpɑːrʃəl/”,f:“≒fair, unbiased。≠partial（偏った）。”,e:“The judge must be impartial.”,ej:“裁判官は公平でなければならない。”,t:[“impartiality (n)”],id:[]},
+{w:“spontaneous”,p:“adj”,l:3,c:“2015形容詞”,m:“自発的な・自然発生の”,pr:”/spɒnˈteɪniəs/”,f:“spontaneous combustion（自然発火）。”,e:“The audience gave a spontaneous cheer.”,ej:“観客は自然に歓声を上げた。”,t:[“spontaneity (n)”],id:[]},
+{w:“lucid”,p:“adj”,l:3,c:“2015形容詞”,m:“明快な・わかりやすい”,pr:”/ˈluːsɪd/”,f:“≒clear。legible（読みやすい）と区別。”,e:“Her explanation was lucid and helpful.”,ej:“彼女の説明は明快で役に立った。”,t:[“lucidity (n)”],id:[]},
+{w:“subsequent”,p:“adj”,l:3,c:“2015形容詞”,m:“後の・その後に続く”,pr:”/ˈsʌbsɪkwənt/”,f:“subsequent to ～（〜の後に）。”,e:“Subsequent events proved him right.”,ej:“その後の出来事が彼の正しさを証明した。”,t:[“subsequently (adv)”],id:[]},
+{w:“evade”,p:“v”,l:3,c:“2025出題”,m:“逃れる・回避する”,pr:”/ɪˈveɪd/”,f:“invade（侵略）と混同注意！”,e:“The prisoners evaded the police for weeks.”,ej:“囚人たちは数週間警察から逃れた。”,t:[“evasion (n)”,“evasive (adj)”],id:[]},
+{w:“compress”,p:“v”,l:3,c:“2025出題”,m:“圧縮する・凝縮する”,pr:”/kəmˈpres/”,f:“情報・データを小さくまとめる。”,e:“He compressed all events into one day.”,ej:“彼はすべての出来事を1日に凝縮した。”,t:[“compression (n)”],id:[]},
+{w:“enroll”,p:“v”,l:2,c:“2025出題”,m:“入学する・登録する”,pr:”/ɪnˈroʊl/”,f:“enroll in a school/course。”,e:“She enrolled in the university last year.”,ej:“彼女は去年その大学に入学した。”,t:[“enrollment (n)”],id:[]},
+{w:“detach”,p:“v”,l:3,c:“2025出題”,m:“取り外す・分離する”,pr:”/dɪˈtætʃ/”,f:“attach（取り付ける）の反対。”,e:“He detached the old battery carefully.”,ej:“彼は古いバッテリーを慎重に取り外した。”,t:[“detachment (n)”],id:[]},
+{w:“collide”,p:“v”,l:3,c:“2025出題”,m:“衝突する”,pr:”/kəˈlaɪd/”,f:“collision（衝突・名）。物理的にも比喩的にも使う。”,e:“The two cars nearly collided.”,ej:“2台の車はもう少しで衝突するところだった。”,t:[“collision (n)”],id:[]},
+{w:“spacious”,p:“adj”,l:2,c:“2025出題”,m:“広々とした”,pr:”/ˈspeɪʃəs/”,f:“部屋・建物の広さを形容。”,e:“The apartment was spacious and bright.”,ej:“そのアパートは広々として明るかった。”,t:[],id:[]},
+{w:“tentative”,p:“adj”,l:3,c:“2025出題”,m:“仮の・暫定的な”,pr:”/ˈtentətɪv/”,f:“⚠️ attentive（注意深い）と混同注意！”,e:“We have tentative plans for next week.”,ej:“来週の仮の予定がある。”,t:[“tentatively (adv)”],id:[]},
+{w:“cosmopolitan”,p:“adj”,l:3,c:“2025出題”,m:“国際的な・世界主義の”,pr:”/ˌkɒzməˈpɒlɪtən/”,f:“cosmos（世界）+ polis（都市）。”,e:“Tokyo is a cosmopolitan city.”,ej:“東京は国際的な都市だ。”,t:[],id:[]},
+{w:“anatomy”,p:“n”,l:3,c:“2025出題”,m:“解剖学・構造”,pr:”/əˈnætəmi/”,f:“物事の詳細構造にも使う。”,e:“Students must study human anatomy.”,ej:“学生は人体解剖学を学ばなければならない。”,t:[“anatomical (adj)”],id:[]},
+{w:“ascent”,p:“n”,l:3,c:“2025出題”,m:“登頂・上昇”,pr:”/əˈsent/”,f:“ascend（登る）の名詞形。descent（下降）が反意語。”,e:“The ascent took two days.”,ej:“登頂に2日かかった。”,t:[“ascend (v)”],id:[]},
+{w:“autonomy”,p:“n”,l:3,c:“2025出題”,m:“自律性・自治権”,pr:”/ɔːˈtɒnəmi/”,f:“⚠️ astronomy（天文学）と混同注意！”,e:“Workers were given more autonomy.”,ej:“労働者にはより多くの自律性が与えられた。”,t:[“autonomous (adj)”],id:[]},
+{w:“rivalry”,p:“n”,l:3,c:“2025出題”,m:“ライバル関係・競争”,pr:”/ˈraɪvəlri/”,f:“rival → rivalry。”,e:“The rivalry between the teams is fierce.”,ej:“チーム間の競争は激しい。”,t:[“rival (n/v)”],id:[]},
+{w:“make for”,p:“v”,l:2,c:“2025句動詞”,m:”〜に向かう”,pr:””,f:“≒head for。目的地に向かう。”,e:“They made for the nearest town.”,ej:“彼らは最寄りの町に向かった。”,t:[],id:[]},
+{w:“take on”,p:“v”,l:2,c:“2025句動詞”,m:“引き受ける・取り組む”,pr:””,f:“take on responsibilities / challenges。”,e:“She took on new responsibilities.”,ej:“彼女は新しい責任を引き受けた。”,t:[],id:[]},
+{w:“rule out”,p:“v”,l:2,c:“2025句動詞”,m:“除外する・排除する”,pr:””,f:“rule out the possibility。”,e:“We can’t rule out that option.”,ej:“その選択肢を排除できない。”,t:[],id:[]},
+{w:“stick around”,p:“v”,l:2,c:“2025句動詞”,m:“その場に留まる”,pr:””,f:“stick = くっつく → 離れずに残る。”,e:“Stick around — I’ll be right back.”,ej:“ここにいて — すぐ戻る。”,t:[],id:[]},
+{w:“ability”,p:“n”,l:1,c:“基礎”,m:“能力・才能”,pr:”/əˈbɪlɪti/”,f:“able（できる）の名詞形。”,e:“She has the ability to speak three languages.”,ej:“彼女は3ヶ国語を話す能力がある。”,t:[“able (adj)”],id:[{e:“to the best of one’s ability”,j:“能力の限りを尽くして”}]},
+{w:“access”,p:“n”,l:1,c:“基礎”,m:“アクセス・利用する権利”,pr:”/ˈækses/”,f:“動詞でも使う（〜にアクセスする）。”,e:“Everyone should have access to education.”,ej:“誰もが教育を受ける権利を持つべきだ。”,t:[“accessible (adj)”],id:[{e:“gain access to”,j:”〜へのアクセスを得る”}]},
+{w:“achieve”,p:“v”,l:1,c:“基礎”,m:“達成する・成し遂げる”,pr:”/əˈtʃiːv/”,f:“努力の結果として実現すること。”,e:“She achieved her goal.”,ej:“彼女は目標を達成した。”,t:[“achievement (n)”],id:[]},
+{w:“affect”,p:“v”,l:1,c:“基礎”,m:“影響を与える”,pr:”/əˈfekt/”,f:“⚠️ effect（名詞）と混同注意！affect=動詞、effect=名詞。”,e:“Climate change affects everyone.”,ej:“気候変動は全員に影響を与える。”,t:[“effect (n)”],id:[{e:“adversely affect”,j:“悪影響を与える”}]},
+{w:“reduce”,p:“v”,l:1,c:“基礎”,m:“減らす・低下させる”,pr:”/rɪˈdjuːs/”,f:“reduction（名詞）。”,e:“We need to reduce carbon emissions.”,ej:“炭素排出量を削減する必要がある。”,t:[“reduction (n)”],id:[]},
+{w:“require”,p:“v”,l:1,c:“基礎”,m:“必要とする・要求する”,pr:”/rɪˈkwaɪər/”,f:“require A to do = Aに〜することを求める。”,e:“The job requires strong skills.”,ej:“その仕事は高いスキルを必要とする。”,t:[“requirement (n)”],id:[]},
+{w:“involve”,p:“v”,l:1,c:“基礎”,m:“含む・巻き込む・伴う”,pr:”/ɪnˈvɒlv/”,f:“involve doing = 〜することを含む。”,e:“The project involves research.”,ej:“そのプロジェクトは調査を伴う。”,t:[“involvement (n)”],id:[{e:“be involved in”,j:”〜に関わっている”}]},
+{w:“gradually”,p:“adv”,l:1,c:“基礎”,m:“徐々に・少しずつ”,pr:”/ˈɡrædʒuəli/”,f:“gradual（形容詞）。”,e:“The situation gradually improved.”,ej:“状況は徐々に改善した。”,t:[“gradual (adj)”],id:[]},
+{w:“benefit”,p:“n”,l:2,c:“中級”,m:“利点・恩恵”,pr:”/ˈbenɪfɪt/”,f:“benefit from = 〜から恩恵を受ける。動詞にもなる。”,e:“Exercise has many health benefits.”,ej:“運動には多くの健康上の利点がある。”,t:[“beneficial (adj)”],id:[{e:“benefit from”,j:”〜から恩恵を受ける”}]},
+{w:“consequence”,p:“n”,l:2,c:“中級”,m:“結果・影響”,pr:”/ˈkɒnsɪkwəns/”,f:“特に悪い結果。as a consequence = その結果として。”,e:“Pollution has serious consequences.”,ej:“汚染は深刻な影響をもたらす。”,t:[“consequently (adv)”],id:[{e:“as a consequence”,j:“その結果として”}]},
+{w:“contribute”,p:“v”,l:2,c:“中級”,m:“貢献する・一因となる”,pr:”/kənˈtrɪbjuːt/”,f:“contribute to 〜 = 〜に貢献する。”,e:“Exercise contributes to good health.”,ej:“運動は健康に貢献する。”,t:[“contribution (n)”],id:[{e:“contribute to”,j:”〜に貢献する”}]},
+{w:“demonstrate”,p:“v”,l:2,c:“中級”,m:“実演する・証明する”,pr:”/ˈdemənstreɪt/”,f:“demonstrate that = 〜ということを示す。”,e:“The study demonstrates the effect.”,ej:“その研究は効果を証明する。”,t:[“demonstration (n)”],id:[]},
+{w:“distinguish”,p:“v”,l:2,c:“中級”,m:“区別する・識別する”,pr:”/dɪˈstɪŋɡwɪʃ/”,f:“distinguish A from B = AとBを区別する。”,e:“Can you distinguish the two colors?”,ej:“その2色を区別できますか？”,t:[“distinguished (adj)”],id:[{e:“distinguish A from B”,j:“AとBを区別する”}]},
+{w:“enormous”,p:“adj”,l:2,c:“中級”,m:“巨大な・膨大な”,pr:”/ɪˈnɔːrməs/”,f:“enormously（副）。”,e:“The company made enormous profits.”,ej:“その会社は膨大な利益を上げた。”,t:[“enormously (adv)”],id:[]},
+{w:“expand”,p:“v”,l:2,c:“中級”,m:“拡張する・広げる”,pr:”/ɪkˈspænd/”,f:“expand on = 〜について詳しく述べる。”,e:“The company is expanding overseas.”,ej:“その会社は海外展開している。”,t:[“expansion (n)”],id:[{e:“expand on”,j:”〜について詳しく述べる”}]},
+{w:“decline”,p:“v”,l:2,c:“中級”,m:“断る・減少する”,pr:”/dɪˈklaɪn/”,f:“2つの意味が頻出。”,e:“Sales declined sharply.”,ej:“売上が急激に減少した。”,t:[],id:[]},
+{w:“indicate”,p:“v”,l:2,c:“中級”,m:“示す・指し示す”,pr:”/ˈɪndɪkeɪt/”,f:“データが「〜を示している」場合に使う。”,e:“Studies indicate sleep is vital.”,ej:“研究は睡眠が不可欠であることを示す。”,t:[“indication (n)”],id:[]},
+{w:“maintain”,p:“v”,l:2,c:“中級”,m:“維持する・主張する”,pr:”/meɪnˈteɪn/”,f:“状態を保つ & 意見を主張する。”,e:“We must maintain the environment.”,ej:“環境を維持しなければならない。”,t:[“maintenance (n)”],id:[]},
+{w:“obtain”,p:“v”,l:2,c:“中級”,m:“入手する・得る”,pr:”/əbˈteɪn/”,f:“getよりフォーマル。”,e:“You can obtain a visa at the embassy.”,ej:“大使館でビザを取得できる。”,t:[“obtainable (adj)”],id:[]},
+{w:“significant”,p:“adj”,l:2,c:“中級”,m:“重要な・かなりの”,pr:”/sɪɡˈnɪfɪkənt/”,f:“significantly（副）。”,e:“There was a significant increase.”,ej:“著しい上昇があった。”,t:[“significantly (adv)”,“significance (n)”],id:[]},
+{w:“accurate”,p:“adj”,l:2,c:“中級”,m:“正確な”,pr:”/ˈækjərɪt/”,f:“inaccurate（反）。”,e:“The forecast was accurate.”,ej:“予報は正確だった。”,t:[“accuracy (n)”,“inaccurate (adj)”],id:[]},
+{w:“consequently”,p:“adv”,l:2,c:“接続副詞”,m:“その結果として”,pr:”/ˈkɒnsɪkwəntli/”,f:“therefore / as a result と同義。”,e:“He didn’t study. Consequently, he failed.”,ej:“勉強しなかった。その結果、落第した。”,t:[],id:[]},
+{w:“nevertheless”,p:“adv”,l:2,c:“接続副詞”,m:“それにもかかわらず”,pr:”/ˌnevəðəˈles/”,f:“however と同義。逆接。”,e:“It rained. Nevertheless, they continued.”,ej:“雨が降った。それにもかかわらず続けた。”,t:[],id:[]},
+{w:“furthermore”,p:“adv”,l:2,c:“接続副詞”,m:“さらに・加えて”,pr:”/ˈfɜːðəmɔːr/”,f:“moreover / in addition と同義。”,e:“The plan is costly. Furthermore, it’s risky.”,ej:“高い。さらにリスクも高い。”,t:[],id:[]},
+{w:“acknowledge”,p:“v”,l:3,c:“上級”,m:“認める・承認する”,pr:”/əkˈnɒlɪdʒ/”,f:“acknowledge that = 〜ということを認める。”,e:“He acknowledged his mistake.”,ej:“彼は過ちを認めた。”,t:[“acknowledgment (n)”],id:[]},
+{w:“anticipate”,p:“v”,l:3,c:“上級”,m:“予想する・期待する”,pr:”/ænˈtɪsɪpeɪt/”,f:“expectより積極的な心構え。”,e:“We anticipate a large crowd.”,ej:“大勢が来ると予想している。”,t:[“anticipation (n)”],id:[]},
+{w:“bias”,p:“n”,l:3,c:“上級”,m:“偏見・先入観”,pr:”/ˈbaɪəs/”,f:“confirmation bias = 確証バイアス。”,e:“Bias affects decision-making.”,ej:“偏見は意思決定に影響する。”,t:[“biased (adj)”],id:[]},
+{w:“perceive”,p:“v”,l:3,c:“上級”,m:“知覚する・〜とみなす”,pr:”/pəˈsiːv/”,f:“perceive A as B = AをBとみなす。”,e:“Time is perceived differently by everyone.”,ej:“時間の感じ方は人それぞれ違う。”,t:[“perception (n)”],id:[{e:“perceive A as B”,j:“AをBとみなす”}]},
+{w:“persist”,p:“v”,l:3,c:“上級”,m:“持続する・こだわり続ける”,pr:”/pəˈsɪst/”,f:“persist in = 〜に固執する。”,e:“If you persist, you will succeed.”,ej:“粘り強く続ければ成功する。”,t:[“persistence (n)”,“persistent (adj)”],id:[]},
+{w:“sustainable”,p:“adj”,l:3,c:“上級”,m:“持続可能な”,pr:”/səˈsteɪnəbl/”,f:“sustainable development = 持続可能な発展。”,e:“We need sustainable energy sources.”,ej:“持続可能なエネルギー源が必要だ。”,t:[“sustainability (n)”,“sustain (v)”],id:[]},
+{w:“crucial”,p:“adj”,l:3,c:“上級”,m:“極めて重要な・決定的な”,pr:”/ˈkruːʃəl/”,f:“importantより強い。”,e:“Education is crucial for success.”,ej:“教育は成功に極めて重要だ。”,t:[“crucially (adv)”],id:[]},
+{w:“inevitable”,p:“adj”,l:3,c:“上級”,m:“避けられない・必然的な”,pr:”/ɪnˈevɪtəbl/”,f:“どうやっても起こること。”,e:“Change is inevitable.”,ej:“変化は避けられない。”,t:[“inevitably (adv)”],id:[]},
+{w:“detrimental”,p:“adj”,l:3,c:“上級”,m:“有害な・悪影響の”,pr:”/ˌdetrɪˈmentəl/”,f:“harmful/badのフォーマル版。英作文で差がつく語。”,e:“Smoking is detrimental to health.”,ej:“喫煙は健康に有害だ。”,t:[],id:[{e:“detrimental to”,j:”〜に有害な”}]},
+{w:“elaborate”,p:“adj”,l:3,c:“上級”,m:“精巧な / 詳しく説明する（動詞）”,pr:”/ɪˈlæbərɪt/”,f:“elaborate on = 〜について詳しく述べる。”,e:“Could you elaborate on that point?”,ej:“その点を詳しく説明できますか？”,t:[“elaboration (n)”],id:[{e:“elaborate on”,j:”〜について詳しく述べる”}]},
+{w:“numerous”,p:“adj”,l:2,c:“言い換え”,m:“多数の・たくさんの”,pr:”/ˈnjuːmərəs/”,f:“many / a lot of のフォーマル版。”,e:“There are numerous benefits.”,ej:“数多くの利点がある。”,t:[],id:[]},
+{w:“claim”,p:“v”,l:2,c:“言い換え”,m:“主張する・断言する”,pr:”/kleɪm/”,f:“say/thinkのフォーマル版。that節をとる。”,e:“He claims that the data is incorrect.”,ej:“彼はデータが不正確だと主張する。”,t:[“claim (n)”],id:[]},
+{w:“illustrate”,p:“v”,l:2,c:“言い換え”,m:“説明する・例証する”,pr:”/ˈɪləstreɪt/”,f:“showのフォーマル版。具体例で示す。”,e:“This example illustrates the problem.”,ej:“この例は問題を明確に示す。”,t:[“illustration (n)”],id:[]},
+{w:“tackle”,p:“v”,l:2,c:“言い換え”,m:“取り組む・対処する”,pr:”/ˈtækəl/”,f:“address / cope with と同義。”,e:“We must tackle climate change.”,ej:“気候変動に取り組まなければならない。”,t:[],id:[{e:“tackle a problem”,j:“問題に取り組む”}]},
+,
+// ── 英検準1級 頻出動詞 追加 ──
+{w:“abolish”,p:“v”,l:3,c:“準1必須動詞”,m:“廃止する・撤廃する”,pr:”/əˈbɒlɪʃ/”,f:“abolish the law（法律を廃止する）。abolition（名）。”,e:“The law was finally abolished.”,ej:“その法律はついに廃止された。”,t:[“abolition (n)”],id:[]},
+{w:“abstain”,p:“v”,l:3,c:“準1必須動詞”,m:“控える・棄権する”,pr:”/əbˈsteɪn/”,f:“abstain from ～（〜を控える）。abstain from voting（棄権）。”,e:“He abstained from alcohol for a month.”,ej:“彼は1ヶ月間アルコールを控えた。”,t:[“abstinence (n)”],id:[{e:“abstain from”,j:”〜を控える”}]},
+{w:“accelerate”,p:“v”,l:3,c:“準1必須動詞”,m:“加速する・促進する”,pr:”/əkˈseləreɪt/”,f:“acceleration（名）。decelerate（減速）が反意語。”,e:“Technology has accelerated social change.”,ej:“技術は社会変化を加速させた。”,t:[“acceleration (n)”],id:[]},
+{w:“accommodate”,p:“v”,l:3,c:“準1必須動詞”,m:“収容する・適応させる”,pr:”/əˈkɒmədeɪt/”,f:“accommodation（名）=宿泊施設。”,e:“The hotel accommodates 300 guests.”,ej:“そのホテルは300人の宿泊客を収容できる。”,t:[“accommodation (n)”],id:[]},
+{w:“accumulate”,p:“v”,l:3,c:“準1必須動詞”,m:“蓄積する・積み重なる”,pr:”/əˈkjuːmjəleɪt/”,f:“accumulation（名）。”,e:“Debts accumulated over the years.”,ej:“借金は何年にもわたって蓄積した。”,t:[“accumulation (n)”],id:[]},
+{w:“adhere”,p:“v”,l:3,c:“準1必須動詞”,m:“固執する・付着する”,pr:”/ədˈhɪər/”,f:“adhere to ～（〜を守る・固執する）。”,e:“You must adhere to the contract.”,ej:“契約を遵守しなければならない。”,t:[“adherence (n)”,“adhesive (adj)”],id:[{e:“adhere to”,j:”〜を守る”}]},
+{w:“advocate”,p:“v”,l:3,c:“準1必須動詞”,m:“主張する・支持する”,pr:”/ˈædvəkeɪt/”,f:“advocate for ～（〜を擁護する）。名詞形は/ˈædvəkɪt/。”,e:“She advocates for environmental protection.”,ej:“彼女は環境保護を主張している。”,t:[“advocacy (n)”],id:[]},
+{w:“aggravate”,p:“v”,l:3,c:“準1必須動詞”,m:“悪化させる・いらだたせる”,pr:”/ˈæɡrəveɪt/”,f:“alleviate（軽減する）が反意語。”,e:“Stress can aggravate health problems.”,ej:“ストレスは健康問題を悪化させる。”,t:[“aggravation (n)”],id:[]},
+{w:“alleviate”,p:“v”,l:3,c:“準1必須動詞”,m:“軽減する・和らげる”,pr:”/əˈliːvieɪt/”,f:“alleviate pain/poverty（痛み・貧困を和らげる）。”,e:“Music can alleviate stress.”,ej:“音楽はストレスを和らげることができる。”,t:[“alleviation (n)”],id:[]},
+{w:“assert”,p:“v”,l:3,c:“準1必須動詞”,m:“断言する・主張する”,pr:”/əˈsɜːrt/”,f:“assert that = 〜と断言する。assertive（積極的な）。”,e:“He asserted his innocence.”,ej:“彼は無実を主張した。”,t:[“assertion (n)”,“assertive (adj)”],id:[]},
+{w:“attribute”,p:“v”,l:3,c:“準1必須動詞”,m:”〜のせいにする・帰する”,pr:”/əˈtrɪbjuːt/”,f:“attribute A to B = AをBのせいにする。”,e:“The success was attributed to teamwork.”,ej:“成功はチームワークのおかげとされた。”,t:[“attribution (n)”],id:[{e:“attribute A to B”,j:“AはBのおかげ（せい）だとする”}]},
+{w:“cease”,p:“v”,l:3,c:“準1必須動詞”,m:“やめる・止まる”,pr:”/siːs/”,f:“cease to do / cease doing。≒stop。フォーマル。”,e:“The fighting ceased after negotiations.”,ej:“交渉の後、戦闘は止まった。”,t:[“ceaseless (adj)”],id:[{e:“cease to exist”,j:“存在しなくなる”}]},
+{w:“compensate”,p:“v”,l:3,c:“準1必須動詞”,m:“補償する・埋め合わせる”,pr:”/ˈkɒmpənseɪt/”,f:“compensate for ～（〜を補う）。compensation（名）。”,e:“Nothing can compensate for the loss.”,ej:“何もその損失を補うことはできない。”,t:[“compensation (n)”],id:[{e:“compensate for”,j:”〜を補償する”}]},
+{w:“conceal”,p:“v”,l:3,c:“準1必須動詞”,m:“隠す・秘密にする”,pr:”/kənˈsiːl/”,f:“reveal（明らかにする）が反意語。”,e:“She concealed her feelings.”,ej:“彼女は感情を隠した。”,t:[“concealment (n)”],id:[]},
+{w:“condemn”,p:“v”,l:3,c:“準1必須動詞”,m:“非難する・有罪宣告する”,pr:”/kənˈdem/”,f:“condemn A for B（AをBのことで非難する）。”,e:“The action was condemned internationally.”,ej:“その行為は国際的に非難された。”,t:[“condemnation (n)”],id:[]},
+{w:“confiscate”,p:“v”,l:3,c:“準1必須動詞”,m:“没収する・押収する”,pr:”/ˈkɒnfɪskeɪt/”,f:“confiscation（名）。”,e:“Police confiscated the weapons.”,ej:“警察は武器を没収した。”,t:[“confiscation (n)”],id:[]},
+{w:“contemplate”,p:“v”,l:3,c:“準1必須動詞”,m:“熟考する・検討する”,pr:”/ˈkɒntəmpleɪt/”,f:“≒consider carefully。contemplation（名）。”,e:“He contemplated changing careers.”,ej:“彼はキャリアチェンジを検討した。”,t:[“contemplation (n)”],id:[]},
+{w:“convey”,p:“v”,l:3,c:“準1必須動詞”,m:“伝える・運ぶ”,pr:”/kənˈveɪ/”,f:“convey a message/meaning（意味・メッセージを伝える）。”,e:“Words cannot convey my gratitude.”,ej:“言葉では感謝の気持ちを伝えられない。”,t:[“conveyance (n)”],id:[]},
+{w:“correlate”,p:“v”,l:3,c:“準1必須動詞”,m:“相関する・関連付ける”,pr:”/ˈkɒrəleɪt/”,f:“correlate with ～（〜と相関する）。”,e:“Income correlates with education level.”,ej:“収入は教育レベルと相関する。”,t:[“correlation (n)”],id:[{e:“correlate with”,j:”〜と相関する”}]},
+{w:“cultivate”,p:“v”,l:3,c:“準1必須動詞”,m:“育む・耕す”,pr:”/ˈkʌltɪveɪt/”,f:“cultivate relationships（関係を築く）。”,e:“It’s important to cultivate good habits.”,ej:“良い習慣を育むことが大切だ。”,t:[“cultivation (n)”],id:[]},
+{w:“depict”,p:“v”,l:3,c:“準1必須動詞”,m:“描写する・表現する”,pr:”/dɪˈpɪkt/”,f:“depict A as B（AをBとして描写する）。”,e:“The film depicts life in wartime.”,ej:“その映画は戦時中の生活を描写している。”,t:[“depiction (n)”],id:[]},
+{w:“deplete”,p:“v”,l:3,c:“準1必須動詞”,m:“使い果たす・枯渇させる”,pr:”/dɪˈpliːt/”,f:“deplete resources（資源を枯渇させる）。”,e:“Overuse is depleting natural resources.”,ej:“乱用が天然資源を枯渇させている。”,t:[“depletion (n)”],id:[]},
+{w:“derive”,p:“v”,l:3,c:“準1必須動詞”,m:“引き出す・由来する”,pr:”/dɪˈraɪv/”,f:“derive A from B（BからAを引き出す）。”,e:“English derives many words from Latin.”,ej:“英語は多くの語をラテン語から引き出している。”,t:[“derivation (n)”],id:[{e:“derive from”,j:”〜に由来する”}]},
+{w:“deteriorate”,p:“v”,l:3,c:“準1必須動詞”,m:“悪化する・劣化する”,pr:”/dɪˈtɪəriəreɪt/”,f:“≒worsen。deterioration（名）。”,e:“His health deteriorated rapidly.”,ej:“彼の健康状態は急速に悪化した。”,t:[“deterioration (n)”],id:[]},
+{w:“deter”,p:“v”,l:3,c:“準1必須動詞”,m:“思いとどまらせる・抑止する”,pr:”/dɪˈtɜːr/”,f:“deter A from B（AがBするのを思いとどまらせる）。”,e:“Fear of punishment deters crime.”,ej:“処罰への恐れが犯罪を抑止する。”,t:[“deterrence (n)”,“deterrent (n)”],id:[]},
+{w:“diminish”,p:“v”,l:3,c:“準1必須動詞”,m:“減少する・小さくする”,pr:”/dɪˈmɪnɪʃ/”,f:“≒decrease, reduce。”,e:“His influence gradually diminished.”,ej:“彼の影響力は徐々に低下した。”,t:[“diminishment (n)”],id:[]},
+{w:“discern”,p:“v”,l:3,c:“準1必須動詞”,m:“識別する・見分ける”,pr:”/dɪˈsɜːrn/”,f:“discerning（眼識のある）も頻出。”,e:“She could discern subtle differences.”,ej:“彼女は微妙な違いを識別できた。”,t:[“discernment (n)”,“discerning (adj)”],id:[]},
+{w:“dispatch”,p:“v”,l:3,c:“準1必須動詞”,m:“派遣する・発送する”,pr:”/dɪˈspætʃ/”,f:“dispatch troops/goods（軍・物資を派遣・発送）。”,e:“Aid workers were dispatched to the region.”,ej:“援助要員がその地域に派遣された。”,t:[],id:[]},
+{w:“dispose”,p:“v”,l:3,c:“準1必須動詞”,m:“処分する・配置する”,pr:”/dɪˈspoʊz/”,f:“dispose of ～（〜を処分する）。”,e:“Batteries should be disposed of properly.”,ej:“電池は適切に処分すべきだ。”,t:[“disposal (n)”],id:[{e:“dispose of”,j:”〜を処分する”}]},
+{w:“divert”,p:“v”,l:3,c:“準1必須動詞”,m:“そらす・転換する”,pr:”/daɪˈvɜːrt/”,f:“divert attention（注意をそらす）。”,e:“The road was diverted for repairs.”,ej:“道路は修理のため迂回された。”,t:[“diversion (n)”],id:[]},
+{w:“embrace”,p:“v”,l:3,c:“準1必須動詞”,m:“受け入れる・抱擁する”,pr:”/ɪmˈbreɪs/”,f:“embrace diversity（多様性を受け入れる）。”,e:“We should embrace new technology.”,ej:“新しい技術を受け入れるべきだ。”,t:[],id:[]},
+{w:“endure”,p:“v”,l:3,c:“準1必須動詞”,m:“耐える・持続する”,pr:”/ɪnˈdjʊər/”,f:“endurance（名）。”,e:“She endured years of hardship.”,ej:“彼女は何年もの苦難に耐えた。”,t:[“endurance (n)”],id:[]},
+{w:“enforce”,p:“v”,l:3,c:“準1必須動詞”,m:“執行する・強制する”,pr:”/ɪnˈfɔːrs/”,f:“enforce the law（法律を執行する）。”,e:“Police enforce traffic regulations.”,ej:“警察は交通規制を執行する。”,t:[“enforcement (n)”],id:[]},
+{w:“enhance”,p:“v”,l:3,c:“準1必須動詞”,m:“高める・強化する”,pr:”/ɪnˈhæns/”,f:“enhance performance/image（性能・イメージを高める）。”,e:“Exercise enhances mental well-being.”,ej:“運動は精神的健康を高める。”,t:[“enhancement (n)”],id:[]},
+{w:“ensure”,p:“v”,l:3,c:“準1必須動詞”,m:“確保する・保証する”,pr:”/ɪnˈʃʊər/”,f:“ensure that = 〜を確実にする。≒make sure。”,e:“Ensure that all doors are locked.”,ej:“すべてのドアに鍵がかかっているか確認せよ。”,t:[],id:[]},
+{w:“establish”,p:“v”,l:3,c:“準1必須動詞”,m:“設立する・確立する”,pr:”/ɪˈstæblɪʃ/”,f:“establish a company/rule（会社・ルールを設立・確立）。”,e:“The company was established in 1990.”,ej:“その会社は1990年に設立された。”,t:[“establishment (n)”],id:[]},
+{w:“evaluate”,p:“v”,l:3,c:“準1必須動詞”,m:“評価する・査定する”,pr:”/ɪˈvæljueɪt/”,f:“evaluation（名）。≒assess。”,e:“Teachers evaluate students regularly.”,ej:“教師は定期的に生徒を評価する。”,t:[“evaluation (n)”],id:[]},
+{w:“execute”,p:“v”,l:3,c:“準1必須動詞”,m:“実行する・処刑する”,pr:”/ˈeksɪkjuːt/”,f:“execute a plan（計画を実行する）。”,e:“The plan was executed perfectly.”,ej:“計画は完璧に実行された。”,t:[“execution (n)”],id:[]},
+{w:“exhaust”,p:“v”,l:3,c:“準1必須動詞”,m:“使い果たす・疲弊させる”,pr:”/ɪɡˈzɔːst/”,f:“exhaustion（名）。exhaust all options（すべての選択肢を試す）。”,e:“The long journey exhausted them.”,ej:“長旅で彼らは疲れ果てた。”,t:[“exhaustion (n)”],id:[]},
+{w:“exploit”,p:“v”,l:3,c:“準1必須動詞”,m:“利用する・搾取する”,pr:”/ɪkˈsplɔɪt/”,f:“exploit resources（資源を活用する）。exploitation（名）。”,e:“Companies should not exploit workers.”,ej:“企業は労働者を搾取すべきでない。”,t:[“exploitation (n)”],id:[]},
+{w:“expose”,p:“v”,l:3,c:“準1必須動詞”,m:“さらす・暴露する”,pr:”/ɪkˈspoʊz/”,f:“be exposed to ～（〜にさらされる）。exposure（名）。”,e:“Children should be exposed to art.”,ej:“子供たちは芸術に触れるべきだ。”,t:[“exposure (n)”],id:[{e:“be exposed to”,j:”〜にさらされる”}]},
+{w:“fluctuate”,p:“v”,l:3,c:“準1必須動詞”,m:“変動する・上下する”,pr:”/ˈflʌktʃueɪt/”,f:“fluctuation（名）。”,e:“Prices fluctuate with the seasons.”,ej:“価格は季節によって変動する。”,t:[“fluctuation (n)”],id:[]},
+{w:“foster”,p:“v”,l:3,c:“準1必須動詞”,m:“育む・促進する”,pr:”/ˈfɒstər/”,f:“foster creativity/growth（創造性・成長を育む）。”,e:“Good teachers foster curiosity.”,ej:“良い教師は好奇心を育む。”,t:[],id:[]},
+{w:“generate”,p:“v”,l:3,c:“準1必須動詞”,m:“生み出す・発生させる”,pr:”/ˈdʒenəreɪt/”,f:“generate electricity/income（電力・収入を生み出す）。”,e:“Solar panels generate clean energy.”,ej:“太陽光パネルはクリーンエネルギーを生み出す。”,t:[“generation (n)”,“generator (n)”],id:[]},
+{w:“hamper”,p:“v”,l:3,c:“準1必須動詞”,m:“妨げる・邪魔する”,pr:”/ˈhæmpər/”,f:“≒hinder, impede。”,e:“Bad weather hampered rescue efforts.”,ej:“悪天候が救助活動を妨げた。”,t:[],id:[]},
+{w:“implement”,p:“v”,l:3,c:“準1必須動詞”,m:“実施する・実行する”,pr:”/ˈɪmplɪment/”,f:“implement a policy/plan（政策・計画を実施）。”,e:“The new system was implemented last year.”,ej:“新しいシステムは昨年実施された。”,t:[“implementation (n)”],id:[]},
+{w:“impose”,p:“v”,l:3,c:“準1必須動詞”,m:“課す・押しつける”,pr:”/ɪmˈpoʊz/”,f:“impose a tax/fine（税金・罰金を課す）。”,e:“A new tax was imposed on luxury goods.”,ej:“高級品に新たな税が課された。”,t:[“imposition (n)”],id:[{e:“impose A on B”,j:“AをBに課す”}]},
+{w:“inhibit”,p:“v”,l:3,c:“準1必須動詞”,m:“阻害する・抑制する”,pr:”/ɪnˈhɪbɪt/”,f:“inhibit growth（成長を阻害する）。”,e:“Fear inhibits creative thinking.”,ej:“恐れは創造的思考を阻害する。”,t:[“inhibition (n)”],id:[]},
+{w:“initiate”,p:“v”,l:3,c:“準1必須動詞”,m:“開始する・始める”,pr:”/ɪˈnɪʃieɪt/”,f:“initiate a project（プロジェクトを開始する）。”,e:“She initiated the peace talks.”,ej:“彼女が和平交渉を開始した。”,t:[“initiative (n)”],id:[]},
+{w:“integrate”,p:“v”,l:3,c:“準1必須動詞”,m:“統合する・一体化する”,pr:”/ˈɪntɪɡreɪt/”,f:“integration（名）。”,e:“Technology has integrated into daily life.”,ej:“技術は日常生活に統合されている。”,t:[“integration (n)”],id:[]},
+{w:“invoke”,p:“v”,l:3,c:“準1必須動詞”,m:“援用する・呼び起こす”,pr:”/ɪnˈvoʊk/”,f:“invoke a law（法律を援用する）。”,e:“He invoked the right to remain silent.”,ej:“彼は黙秘権を援用した。”,t:[],id:[]},
+{w:“isolate”,p:“v”,l:3,c:“準1必須動詞”,m:“孤立させる・隔離する”,pr:”/ˈaɪsəleɪt/”,f:“isolation（名）。isolate A from B（AをBから隔離）。”,e:“The patient was isolated to prevent infection.”,ej:“感染を防ぐため患者は隔離された。”,t:[“isolation (n)”],id:[]},
+{w:“justify”,p:“v”,l:3,c:“準1必須動詞”,m:“正当化する”,pr:”/ˈdʒʌstɪfaɪ/”,f:“justify doing = 〜することを正当化する。”,e:“Nothing can justify violence.”,ej:“何も暴力を正当化できない。”,t:[“justification (n)”],id:[]},
+{w:“manipulate”,p:“v”,l:3,c:“準1必須動詞”,m:“操作する・巧みに扱う”,pr:”/məˈnɪpjuleɪt/”,f:“manipulate data/people（データ・人を操作）。”,e:“The media can manipulate public opinion.”,ej:“メディアは世論を操作できる。”,t:[“manipulation (n)”],id:[]},
+{w:“mitigate”,p:“v”,l:3,c:“準1必須動詞”,m:“緩和する・軽減する”,pr:”/ˈmɪtɪɡeɪt/”,f:“mitigate risk/damage（リスク・被害を軽減）。”,e:“Trees mitigate the effects of flooding.”,ej:“木は洪水の影響を緩和する。”,t:[“mitigation (n)”],id:[]},
+{w:“modify”,p:“v”,l:3,c:“準1必須動詞”,m:“修正する・変更する”,pr:”/ˈmɒdɪfaɪ/”,f:“modification（名）。”,e:“The plan was modified after feedback.”,ej:“計画はフィードバックを受けて修正された。”,t:[“modification (n)”],id:[]},
+{w:“motivate”,p:“v”,l:3,c:“準1必須動詞”,m:“動機づける・やる気にさせる”,pr:”/ˈmoʊtɪveɪt/”,f:“motivation（名）。”,e:“Good leaders motivate their team.”,ej:“良いリーダーはチームを動機づける。”,t:[“motivation (n)”],id:[]},
+{w:“neglect”,p:“v”,l:3,c:“準1必須動詞”,m:“怠る・無視する”,pr:”/nɪˈɡlekt/”,f:“neglect one’s health（健康を怠る）。”,e:“He neglected his responsibilities.”,ej:“彼は責任を怠った。”,t:[“negligence (n)”,“negligent (adj)”],id:[]},
+{w:“notify”,p:“v”,l:3,c:“準1必須動詞”,m:“知らせる・通知する”,pr:”/ˈnoʊtɪfaɪ/”,f:“notify A of B（AにBを通知する）。”,e:“Please notify us of any changes.”,ej:“変更があればお知らせください。”,t:[“notification (n)”],id:[{e:“notify A of B”,j:“AにBを知らせる”}]},
+{w:“oppose”,p:“v”,l:3,c:“準1必須動詞”,m:“反対する・抵抗する”,pr:”/əˈpoʊz/”,f:“opposition（名）。”,e:“Many citizens opposed the new law.”,ej:“多くの市民が新しい法律に反対した。”,t:[“opposition (n)”],id:[]},
+{w:“overcome”,p:“v”,l:3,c:“準1必須動詞”,m:“克服する・乗り越える”,pr:”/ˌoʊvərˈkʌm/”,f:“overcome obstacles/difficulties（障害・困難を克服）。”,e:“She overcame many challenges.”,ej:“彼女は多くの困難を克服した。”,t:[],id:[]},
+{w:“overlook”,p:“v”,l:3,c:“準1必須動詞”,m:“見落とす・見渡す”,pr:”/ˌoʊvərˈlʊk/”,f:“overlook a mistake（ミスを見落とす）。”,e:“Don’t overlook the details.”,ej:“細部を見落としてはいけない。”,t:[],id:[]},
+{w:“preserve”,p:“v”,l:3,c:“準1必須動詞”,m:“保存する・保護する”,pr:”/prɪˈzɜːrv/”,f:“preserve traditions/nature（伝統・自然を保護）。”,e:“We must preserve biodiversity.”,ej:“生物多様性を保護しなければならない。”,t:[“preservation (n)”],id:[]},
+{w:“prevent”,p:“v”,l:3,c:“準1必須動詞”,m:“防ぐ・妨げる”,pr:”/prɪˈvent/”,f:“prevent A from doing（AがするのをB）。”,e:“Vaccines prevent disease.”,ej:“ワクチンは病気を防ぐ。”,t:[“prevention (n)”],id:[{e:“prevent A from doing”,j:“AがするのをBで防ぐ”}]},
+{w:“prohibit”,p:“v”,l:3,c:“準1必須動詞”,m:“禁止する”,pr:”/prəˈhɪbɪt/”,f:“prohibit A from doing（AがするのをBで禁じる）。”,e:“Smoking is prohibited in public places.”,ej:“公共の場での喫煙は禁止されている。”,t:[“prohibition (n)”],id:[]},
+{w:“propose”,p:“v”,l:2,c:“準1必須動詞”,m:“提案する”,pr:”/prəˈpoʊz/”,f:“propose a solution（解決策を提案する）。”,e:“She proposed a new approach.”,ej:“彼女は新しいアプローチを提案した。”,t:[“proposal (n)”],id:[]},
+{w:“reinforce”,p:“v”,l:3,c:“準1必須動詞”,m:“強化する・補強する”,pr:”/ˌriːɪnˈfɔːrs/”,f:“reinforce a belief/structure（信念・構造を強化）。”,e:“The results reinforce our hypothesis.”,ej:“結果は我々の仮説を強化する。”,t:[“reinforcement (n)”],id:[]},
+{w:“reluctant”,p:“adj”,l:3,c:“準1必須形容詞”,m:“気乗りしない・いやいやな”,pr:”/rɪˈlʌktənt/”,f:“be reluctant to do（〜するのをいやがる）。”,e:“He was reluctant to accept help.”,ej:“彼は援助を受け入れることをいやがった。”,t:[“reluctance (n)”],id:[{e:“be reluctant to”,j:”〜するのを嫌がる”}]},
+{w:“restrict”,p:“v”,l:2,c:“準1必須動詞”,m:“制限する・規制する”,pr:”/rɪˈstrɪkt/”,f:“restrict access/movement（アクセス・移動を制限）。”,e:“Access is restricted to staff only.”,ej:“入場はスタッフのみに制限されている。”,t:[“restriction (n)”],id:[]},
+{w:“retrieve”,p:“v”,l:3,c:“準1必須動詞”,m:“取り戻す・検索する”,pr:”/rɪˈtriːv/”,f:“retrieve data（データを取り出す）。”,e:“She retrieved the lost document.”,ej:“彼女は紛失した書類を取り戻した。”,t:[“retrieval (n)”],id:[]},
+{w:“stimulate”,p:“v”,l:3,c:“準1必須動詞”,m:“刺激する・活性化する”,pr:”/ˈstɪmjuleɪt/”,f:“stimulate growth/economy（成長・経済を刺激）。”,e:“Exercise stimulates the immune system.”,ej:“運動は免疫系を刺激する。”,t:[“stimulation (n)”,“stimulus (n)”],id:[]},
+{w:“substitute”,p:“v”,l:3,c:“準1必須動詞”,m:“代替する・取り替える”,pr:”/ˈsʌbstɪtjuːt/”,f:“substitute A for B（AをBの代わりにする）。”,e:“You can substitute honey for sugar.”,ej:“砂糖の代わりにはちみつを使えます。”,t:[“substitution (n)”],id:[{e:“substitute A for B”,j:“BのかわりにAを使う”}]},
+{w:“suppress”,p:“v”,l:3,c:“準1必須動詞”,m:“抑圧する・抑制する”,pr:”/səˈpres/”,f:“suppress emotions/rebellion（感情・反乱を抑圧）。”,e:“The government suppressed protests.”,ej:“政府は抗議運動を抑圧した。”,t:[“suppression (n)”],id:[]},
+{w:“sustain”,p:“v”,l:3,c:“準1必須動詞”,m:“持続する・支える”,pr:”/səˈsteɪn/”,f:“sustainable（形）はここから。”,e:“Economic growth cannot be sustained forever.”,ej:“経済成長は永遠に持続できない。”,t:[“sustainable (adj)”,“sustainability (n)”],id:[]},
+{w:“transform”,p:“v”,l:2,c:“準1必須動詞”,m:“変革する・一変させる”,pr:”/trænsˈfɔːrm/”,f:“transformation（名）。”,e:“Digital tech has transformed society.”,ej:“デジタル技術は社会を一変させた。”,t:[“transformation (n)”],id:[]},
+{w:“transmit”,p:“v”,l:3,c:“準1必須動詞”,m:“伝達する・感染させる”,pr:”/trænsˈmɪt/”,f:“transmit information/disease（情報・病気を伝達・感染）。”,e:“Viruses are transmitted through contact.”,ej:“ウイルスは接触によって感染する。”,t:[“transmission (n)”],id:[]},
+{w:“undermine”,p:“v”,l:3,c:“準1必須動詞”,m:“損なう・弱体化させる”,pr:”/ˌʌndərˈmaɪn/”,f:“undermine confidence/authority（信頼・権威を損なう）。”,e:“Corruption undermines democracy.”,ej:“汚職は民主主義を損なう。”,t:[],id:[]},
+// ── 準1必須名詞 追加 ──
+{w:“abundance”,p:“n”,l:3,c:“準1必須名詞”,m:“豊富・十分な量”,pr:”/əˈbʌndəns/”,f:“abundant（形）の名詞形。”,e:“There is an abundance of evidence.”,ej:“証拠は豊富にある。”,t:[“abundant (adj)”],id:[{e:“in abundance”,j:“豊富に”}]},
+{w:“alliance”,p:“n”,l:3,c:“準1必須名詞”,m:“同盟・連携”,pr:”/əˈlaɪəns/”,f:“form an alliance（同盟を結ぶ）。”,e:“The two countries formed a military alliance.”,ej:“両国は軍事同盟を結んだ。”,t:[“allied (adj)”],id:[]},
+{w:“ambiguity”,p:“n”,l:3,c:“準1必須名詞”,m:“曖昧さ”,pr:”/ˌæmbɪˈɡjuːɪti/”,f:“ambiguous（形）の名詞形。”,e:“The statement was full of ambiguity.”,ej:“その発言は曖昧さで溢れていた。”,t:[“ambiguous (adj)”],id:[]},
+{w:“aspiration”,p:“n”,l:3,c:“準1必須名詞”,m:“願望・大志”,pr:”/ˌæspɪˈreɪʃən/”,f:“aspire to（〜を目指す）の名詞形。”,e:“Her aspiration is to become a doctor.”,ej:“彼女の夢は医者になることだ。”,t:[“aspire (v)”],id:[]},
+{w:“catastrophe”,p:“n”,l:3,c:“準1必須名詞”,m:“大惨事・壊滅的事態”,pr:”/kəˈtæstrəfi/”,f:“catastrophic（形）。≒disaster。”,e:“The oil spill was an environmental catastrophe.”,ej:“石油流出は環境の大惨事だった。”,t:[“catastrophic (adj)”],id:[]},
+{w:“circumstance”,p:“n”,l:2,c:“準1必須名詞”,m:“状況・事情”,pr:”/ˈsɜːrkəmstæns/”,f:“under no circumstances（どんな状況でも〜しない）。”,e:“Consider the circumstances carefully.”,ej:“状況をよく考慮してください。”,t:[],id:[{e:“under no circumstances”,j:“いかなる状況でも〜しない”}]},
+{w:“collaboration”,p:“n”,l:3,c:“準1必須名詞”,m:“協力・共同作業”,pr:”/kəˌlæbəˈreɪʃən/”,f:“in collaboration with（〜と共同で）。”,e:“The project is a collaboration between universities.”,ej:“そのプロジェクトは大学間の共同作業だ。”,t:[“collaborate (v)”],id:[{e:“in collaboration with”,j:”〜と共同で”}]},
+{w:“commitment”,p:“n”,l:2,c:“準1必須名詞”,m:“責任・約束・献身”,pr:”/kəˈmɪtmənt/”,f:“make a commitment（約束・誓約する）。”,e:“She shows great commitment to her work.”,ej:“彼女は仕事に対して大きな献身を示している。”,t:[“commit (v)”],id:[]},
+{w:“complication”,p:“n”,l:3,c:“準1必須名詞”,m:“複雑化・合併症”,pr:”/ˌkɒmplɪˈkeɪʃən/”,f:“medical complications（医療上の合併症）。”,e:“The surgery had no complications.”,ej:“手術は合併症なしで終わった。”,t:[“complicate (v)”,“complicated (adj)”],id:[]},
+{w:“compromise”,p:“n”,l:2,c:“準1必須名詞”,m:“妥協・折衷案”,pr:”/ˈkɒmprəmaɪz/”,f:“reach a compromise（妥協に達する）。動詞でも使う。”,e:“Both sides made a compromise.”,ej:“双方が妥協した。”,t:[],id:[{e:“reach a compromise”,j:“妥協点に達する”}]},
+{w:“conviction”,p:“n”,l:3,c:“準1必須名詞”,m:“確信・有罪判決”,pr:”/kənˈvɪkʃən/”,f:“criminal conviction（前科）。”,e:“She spoke with great conviction.”,ej:“彼女は強い確信を持って語った。”,t:[“convince (v)”],id:[]},
+{w:“correlation”,p:“n”,l:3,c:“準1必須名詞”,m:“相関関係”,pr:”/ˌkɒrəˈleɪʃən/”,f:“there is a strong correlation between（〜間に強い相関）。”,e:“There is a correlation between diet and health.”,ej:“食事と健康の間に相関関係がある。”,t:[“correlate (v)”],id:[]},
+{w:“deterioration”,p:“n”,l:3,c:“準1必須名詞”,m:“悪化・劣化”,pr:”/dɪˌtɪəriəˈreɪʃən/”,f:“deteriorate（悪化する）の名詞形。”,e:“The deterioration of the environment is alarming.”,ej:“環境の悪化は憂慮すべきだ。”,t:[“deteriorate (v)”],id:[]},
+{w:“discrimination”,p:“n”,l:3,c:“準1必須名詞”,m:“差別・識別”,pr:”/dɪˌskrɪmɪˈneɪʃən/”,f:“racial discrimination（人種差別）。”,e:“Discrimination in the workplace is illegal.”,ej:“職場での差別は違法だ。”,t:[“discriminate (v)”],id:[]},
+{w:“diversity”,p:“n”,l:2,c:“準1必須名詞”,m:“多様性”,pr:”/daɪˈvɜːrsɪti/”,f:“celebrate diversity（多様性を称える）。”,e:“Diversity in the workplace boosts creativity.”,ej:“職場の多様性は創造性を高める。”,t:[“diverse (adj)”,“diversify (v)”],id:[]},
+{w:“dynamics”,p:“n”,l:3,c:“準1必須名詞”,m:“力学・動態”,pr:”/daɪˈnæmɪks/”,f:“social dynamics（社会力学）。”,e:“The dynamics of the situation changed.”,ej:“状況の力学が変わった。”,t:[“dynamic (adj)”],id:[]},
+{w:“emission”,p:“n”,l:3,c:“準1必須名詞”,m:“排出・放出”,pr:”/ɪˈmɪʃən/”,f:“carbon emissions（炭素排出）。”,e:“We must cut greenhouse gas emissions.”,ej:“温室効果ガスの排出を削減しなければならない。”,t:[“emit (v)”],id:[]},
+{w:“epidemic”,p:“n”,l:3,c:“準1必須名詞”,m:“流行病・蔓延”,pr:”/ˌepɪˈdemɪk/”,f:“pandemic（全世界的流行）と区別。”,e:“An epidemic of flu swept the city.”,ej:“インフルエンザの流行が市を席巻した。”,t:[“pandemic (n)”],id:[]},
+{w:“extinction”,p:“n”,l:3,c:“準1必須名詞”,m:“絶滅”,pr:”/ɪkˈstɪŋkʃən/”,f:“on the verge of extinction（絶滅寸前）。”,e:“Many species face extinction.”,ej:“多くの種が絶滅の危機に瀕している。”,t:[“extinct (adj)”],id:[{e:“on the verge of extinction”,j:“絶滅寸前”}]},
+{w:“fatigue”,p:“n”,l:3,c:“準1必須名詞”,m:“疲労・倦怠感”,pr:”/fəˈtiːɡ/”,f:“mental/physical fatigue（精神的・身体的疲労）。”,e:“Chronic fatigue affects many workers.”,ej:“慢性的な疲労が多くの労働者を悩ませている。”,t:[],id:[]},
+{w:“fluctuation”,p:“n”,l:3,c:“準1必須名詞”,m:“変動・浮動”,pr:”/ˌflʌktʃuˈeɪʃən/”,f:“fluctuate（変動する）の名詞形。”,e:“Price fluctuations affect consumers.”,ej:“価格の変動は消費者に影響を与える。”,t:[“fluctuate (v)”],id:[]},
+{w:“fraction”,p:“n”,l:3,c:“準1必須名詞”,m:“一部・分数”,pr:”/ˈfrækʃən/”,f:“only a fraction of（〜のほんの一部）。”,e:“Only a fraction of applicants were hired.”,ej:“応募者のほんの一部しか採用されなかった。”,t:[],id:[{e:“a fraction of”,j:”〜のほんの一部”}]},
+{w:“friction”,p:“n”,l:3,c:“準1必須名詞”,m:“摩擦・軋轢”,pr:”/ˈfrɪkʃən/”,f:“cause friction between（〜の間に軋轢を生む）。”,e:“There was growing friction between the teams.”,ej:“チーム間の軋轢が増大していた。”,t:[],id:[]},
+{w:“globalization”,p:“n”,l:2,c:“準1必須名詞”,m:“グローバル化”,pr:”/ˌɡloʊbələˈzeɪʃən/”,f:“globalize（グローバル化する）の名詞形。”,e:“Globalization has increased trade.”,ej:“グローバル化は貿易を増加させた。”,t:[“globalize (v)”],id:[]},
+{w:“habitat”,p:“n”,l:3,c:“準1必須名詞”,m:“生息地・居住地”,pr:”/ˈhæbɪtæt/”,f:“destroy/protect habitat（生息地を破壊・保護）。”,e:“The forest is the natural habitat of tigers.”,ej:“森はトラの自然生息地だ。”,t:[],id:[]},
+{w:“hierarchy”,p:“n”,l:3,c:“準1必須名詞”,m:“階層・序列”,pr:”/ˈhaɪərɑːrki/”,f:“social hierarchy（社会的階層）。”,e:“The company has a strict hierarchy.”,ej:“その会社には厳格な階層がある。”,t:[“hierarchical (adj)”],id:[]},
+{w:“hypothesis”,p:“n”,l:3,c:“準1必須名詞”,m:“仮説”,pr:”/haɪˈpɒθɪsɪs/”,f:“prove/test a hypothesis（仮説を証明・検証）。”,e:“The scientist tested her hypothesis.”,ej:“科学者は自分の仮説を検証した。”,t:[“hypothetical (adj)”],id:[]},
+{w:“ideology”,p:“n”,l:3,c:“準1必須名詞”,m:“イデオロギー・思想体系”,pr:”/ˌaɪdiˈɒlədʒi/”,f:“political ideology（政治的イデオロギー）。”,e:“Different ideologies led to conflict.”,ej:“異なるイデオロギーが衝突を招いた。”,t:[“ideological (adj)”],id:[]},
+{w:“incentive”,p:“n”,l:3,c:“準1必須名詞”,m:“動機・インセンティブ”,pr:”/ɪnˈsentɪv/”,f:“provide incentives（動機を与える）。”,e:“Tax incentives encourage investment.”,ej:“税制上の優遇措置は投資を促進する。”,t:[],id:[]},
+{w:“infrastructure”,p:“n”,l:3,c:“準1必須名詞”,m:“インフラ・基盤整備”,pr:”/ˈɪnfrəstrʌktʃər/”,f:“transport/digital infrastructure（交通・デジタルインフラ）。”,e:“Poor infrastructure hinders development.”,ej:“貧弱なインフラは発展を妨げる。”,t:[],id:[]},
+{w:“instinct”,p:“n”,l:3,c:“準1必須名詞”,m:“本能・直感”,pr:”/ˈɪnstɪŋkt/”,f:“survival instinct（生存本能）。”,e:“Animals act on instinct.”,ej:“動物は本能によって行動する。”,t:[“instinctive (adj)”],id:[]},
+{w:“integrity”,p:“n”,l:3,c:“準1必須名詞”,m:“誠実さ・高潔さ”,pr:”/ɪnˈteɡrɪti/”,f:“academic/moral integrity（学術的・道徳的誠実さ）。”,e:“Leadership requires integrity.”,ej:“リーダーシップには誠実さが必要だ。”,t:[],id:[]},
+{w:“legislation”,p:“n”,l:3,c:“準1必須名詞”,m:“法律・立法”,pr:”/ˌledʒɪsˈleɪʃən/”,f:“pass/introduce legislation（法律を可決・導入）。”,e:“New legislation was passed to protect workers.”,ej:“労働者を守るため新しい法律が可決された。”,t:[“legislate (v)”],id:[]},
+{w:“magnitude”,p:“n”,l:3,c:“準1必須名詞”,m:“規模・大きさ”,pr:”/ˈmæɡnɪtjuːd/”,f:“the magnitude of the problem（問題の規模）。”,e:“The earthquake was 7.0 in magnitude.”,ej:“地震はマグニチュード7.0だった。”,t:[],id:[]},
+{w:“mortality”,p:“n”,l:3,c:“準1必須名詞”,m:“死亡率・人間の死すべき運命”,pr:”/mɔːrˈtæləti/”,f:“infant mortality rate（乳幼児死亡率）。”,e:“Advances in medicine have reduced mortality.”,ej:“医学の進歩は死亡率を下げた。”,t:[“mortal (adj)”],id:[]},
+{w:“motivation”,p:“n”,l:2,c:“準1必須名詞”,m:“動機・やる気”,pr:”/ˌmoʊtɪˈveɪʃən/”,f:“intrinsic/extrinsic motivation（内発的・外発的動機）。”,e:“Motivation is key to success.”,ej:“動機付けが成功の鍵だ。”,t:[“motivate (v)”],id:[]},
+{w:“mutation”,p:“n”,l:3,c:“準1必須名詞”,m:“突然変異・変化”,pr:”/mjuːˈteɪʃən/”,f:“gene mutation（遺伝子変異）。”,e:“Mutations can be caused by radiation.”,ej:“突然変異は放射線によって引き起こされうる。”,t:[“mutate (v)”],id:[]},
+{w:“narrative”,p:“n”,l:3,c:“準1必須名詞”,m:“物語・語り”,pr:”/ˈnærətɪv/”,f:“dominant narrative（支配的な語り）。”,e:“The film presents a powerful narrative.”,ej:“その映画は力強い物語を提示している。”,t:[“narrate (v)”],id:[]},
+{w:“obstacle”,p:“n”,l:2,c:“準1必須名詞”,m:“障害・妨げ”,pr:”/ˈɒbstəkl/”,f:“overcome obstacles（障害を克服）。”,e:“Lack of funds is a major obstacle.”,ej:“資金不足は大きな障害だ。”,t:[],id:[]},
+{w:“optimism”,p:“n”,l:3,c:“準1必須名詞”,m:“楽観主義”,pr:”/ˈɒptɪmɪzəm/”,f:“pessimism（悲観主義）が対義語。”,e:“Despite difficulties, she maintained optimism.”,ej:“困難にもかかわらず彼女は楽観主義を保った。”,t:[“optimistic (adj)”,“pessimism (n)”],id:[]},
+{w:“paradox”,p:“n”,l:3,c:“準1必須名詞”,m:“逆説・パラドックス”,pr:”/ˈpærədɒks/”,f:“paradoxical（形）。”,e:“The paradox is that more choice causes stress.”,ej:“逆説的なことに、選択肢が多いと却ってストレスになる。”,t:[“paradoxical (adj)”],id:[]},
+{w:“phenomenon”,p:“n”,l:3,c:“準1必須名詞”,m:“現象”,pr:”/fɪˈnɒmɪnən/”,f:“複数形はphenomena。”,e:“Climate change is a global phenomenon.”,ej:“気候変動は地球規模の現象だ。”,t:[],id:[]},
+{w:“prejudice”,p:“n”,l:3,c:“準1必須名詞”,m:“偏見・先入観”,pr:”/ˈpredʒʊdɪs/”,f:“racial prejudice（人種的偏見）。”,e:“Prejudice leads to unfair treatment.”,ej:“偏見は不公平な扱いにつながる。”,t:[“prejudiced (adj)”],id:[]},
+{w:“privilege”,p:“n”,l:3,c:“準1必須名詞”,m:“特権・恩典”,pr:”/ˈprɪvɪlɪdʒ/”,f:“privilege of ～（〜の特権）。”,e:“Education is a privilege for some.”,ej:“教育は一部の人にとって特権だ。”,t:[“privileged (adj)”],id:[]},
+{w:“proportion”,p:“n”,l:2,c:“準1必須名詞”,m:“割合・比率”,pr:”/prəˈpɔːrʃən/”,f:“a large proportion of（〜の大きな割合）。”,e:“A large proportion of teens own smartphones.”,ej:“ティーンの大きな割合がスマートフォンを持っている。”,t:[“proportional (adj)”],id:[{e:“in proportion to”,j:”〜に比例して”}]},
+{w:“prototype”,p:“n”,l:3,c:“準1必須名詞”,m:“原型・プロトタイプ”,pr:”/ˈproʊtətaɪp/”,f:“develop a prototype（試作品を開発）。”,e:“Engineers built a prototype of the device.”,ej:“エンジニアはデバイスの試作品を作った。”,t:[],id:[]},
+{w:“recession”,p:“n”,l:3,c:“準1必須名詞”,m:“景気後退”,pr:”/rɪˈseʃən/”,f:“economic recession（経済不況）。”,e:“The country fell into a deep recession.”,ej:“その国は深刻な景気後退に陥った。”,t:[],id:[]},
+{w:“regulation”,p:“n”,l:2,c:“準1必須名詞”,m:“規制・規則”,pr:”/ˌreɡjʊˈleɪʃən/”,f:“government regulations（政府の規制）。”,e:“Strict regulations protect consumers.”,ej:“厳格な規制は消費者を守る。”,t:[“regulate (v)”,“regulatory (adj)”],id:[]},
+{w:“resilience”,p:“n”,l:3,c:“準1必須名詞”,m:“回復力・弾力性”,pr:”/rɪˈzɪliəns/”,f:“build resilience（回復力を高める）。”,e:“Children develop resilience through challenges.”,ej:“子供たちは困難を通して回復力を育む。”,t:[“resilient (adj)”],id:[]},
+{w:“resolution”,p:“n”,l:2,c:“準1必須名詞”,m:“決意・解決策”,pr:”/ˌrezəˈluːʃən/”,f:“New Year’s resolution（新年の抱負）。”,e:“A peaceful resolution was reached.”,ej:“平和的な解決が得られた。”,t:[“resolve (v)”],id:[]},
+{w:“speculation”,p:“n”,l:3,c:“準1必須名詞”,m:“推測・憶測”,pr:”/ˌspekjʊˈleɪʃən/”,f:“mere speculation（単なる憶測）。”,e:“There was much speculation about the result.”,ej:“結果についてさまざまな憶測があった。”,t:[“speculate (v)”,“speculative (adj)”],id:[]},
+{w:“stigma”,p:“n”,l:3,c:“準1必須名詞”,m:“汚名・スティグマ”,pr:”/ˈstɪɡmə/”,f:“social stigma（社会的汚名）。”,e:“There is still a stigma around mental illness.”,ej:“精神疾患には今もスティグマがある。”,t:[“stigmatize (v)”],id:[]},
+{w:“stimulus”,p:“n”,l:3,c:“準1必須名詞”,m:“刺激・景気刺激策”,pr:”/ˈstɪmjʊləs/”,f:“economic stimulus（経済刺激策）。複数はstimuli。”,e:“The government launched an economic stimulus.”,ej:“政府は経済刺激策を打ち出した。”,t:[“stimulate (v)”],id:[]},
+{w:“syndrome”,p:“n”,l:3,c:“準1必須名詞”,m:“症候群”,pr:”/ˈsɪndroʊm/”,f:“down syndrome, burnout syndrome（症候群）。”,e:“Burnout syndrome is increasing among workers.”,ej:“バーンアウト症候群が労働者の間で増加している。”,t:[],id:[]},
+{w:“transition”,p:“n”,l:3,c:“準1必須名詞”,m:“移行・変化”,pr:”/trænˈzɪʃən/”,f:“in transition（移行中）。”,e:“The country is in a period of transition.”,ej:“その国は移行期にある。”,t:[“transit (n)”],id:[]},
+{w:“transparency”,p:“n”,l:3,c:“準1必須名詞”,m:“透明性”,pr:”/trænsˈpærənsi/”,f:“government transparency（政府の透明性）。”,e:“Transparency builds public trust.”,ej:“透明性は公的信頼を築く。”,t:[“transparent (adj)”],id:[]},
+{w:“trauma”,p:“n”,l:3,c:“準1必須名詞”,m:“トラウマ・心的外傷”,pr:”/ˈtrɔːmə/”,f:“traumatic（形）。PTSD（心的外傷後ストレス障害）に関連。”,e:“The accident caused lasting trauma.”,ej:“その事故は長引くトラウマを引き起こした。”,t:[“traumatic (adj)”],id:[]},
+{w:“velocity”,p:“n”,l:3,c:“準1必須名詞”,m:“速度・速さ”,pr:”/vɪˈlɒsɪti/”,f:“high velocity（高速度）。speedと区別：方向含む。”,e:“The velocity of the wind increased.”,ej:“風の速度が増した。”,t:[],id:[]},
+// ── 準1必須形容詞 追加 ──
+{w:“ambiguous”,p:“adj”,l:3,c:“準1必須形容詞”,m:“曖昧な・二義的な”,pr:”/æmˈbɪɡjuəs/”,f:“ambiguity（名）。”,e:“The law is ambiguous on this point.”,ej:“この点について法律は曖昧だ。”,t:[“ambiguity (n)”],id:[]},
+{w:“coherent”,p:“adj”,l:3,c:“準1必須形容詞”,m:“一貫した・筋の通った”,pr:”/koʊˈhɪərənt/”,f:“coherence（名）。incoherent（支離滅裂）が反意語。”,e:“Please give a coherent explanation.”,ej:“一貫した説明をしてください。”,t:[“coherence (n)”],id:[]},
+{w:“controversial”,p:“adj”,l:3,c:“準1必須形容詞”,m:“論争を呼ぶ・物議をかもす”,pr:”/ˌkɒntrəˈvɜːrʃəl/”,f:“controversy（名）。”,e:“Genetic modification is a controversial topic.”,ej:“遺伝子改変は物議を呼ぶ話題だ。”,t:[“controversy (n)”],id:[]},
+{w:“deliberate”,p:“adj”,l:3,c:“準1必須形容詞”,m:“意図的な・慎重な”,pr:”/dɪˈlɪbərɪt/”,f:“deliberately（副）。動詞では/dɪˈlɪbəreɪt/（熟考する）。”,e:“It was a deliberate attempt to mislead.”,ej:“それは意図的な欺きだった。”,t:[“deliberately (adv)”],id:[]},
+{w:“devastating”,p:“adj”,l:3,c:“準1必須形容詞”,m:“壊滅的な・打ちのめすような”,pr:”/ˈdevəsteɪtɪŋ/”,f:“devastating news/impact（壊滅的なニュース・影響）。”,e:“The earthquake had a devastating impact.”,ej:“地震は壊滅的な影響をもたらした。”,t:[“devastate (v)”,“devastation (n)”],id:[]},
+{w:“empirical”,p:“adj”,l:3,c:“準1必須形容詞”,m:“経験的な・実証的な”,pr:”/ɪmˈpɪrɪkəl/”,f:“empirical evidence（実証的証拠）。”,e:“We need empirical evidence to prove this.”,ej:“これを証明するには実証的証拠が必要だ。”,t:[],id:[]},
+{w:“inherent”,p:“adj”,l:3,c:“準1必須形容詞”,m:“本来備わっている・固有の”,pr:”/ɪnˈhɪərənt/”,f:“inherent risk（本来のリスク）。”,e:“There are inherent risks in any investment.”,ej:“どんな投資にも本来のリスクがある。”,t:[“inherently (adv)”],id:[{e:“inherent in”,j:”〜に本来備わっている”}]},
+{w:“innovative”,p:“adj”,l:2,c:“準1必須形容詞”,m:“革新的な”,pr:”/ˈɪnəveɪtɪv/”,f:“innovation（名）。”,e:“The company is known for innovative products.”,ej:“その会社は革新的な製品で知られている。”,t:[“innovation (n)”,“innovate (v)”],id:[]},
+{w:“integral”,p:“adj”,l:3,c:“準1必須形容詞”,m:“不可欠な・重要な”,pr:”/ˈɪntɪɡrəl/”,f:“integral part of（〜の不可欠な部分）。”,e:“Trust is integral to any relationship.”,ej:“信頼はどんな関係にも不可欠だ。”,t:[],id:[{e:“integral to”,j:”〜に不可欠な”}]},
+{w:“moderate”,p:“adj”,l:2,c:“準1必須形容詞”,m:“適度な・穏やかな”,pr:”/ˈmɒdərɪt/”,f:“moderate exercise（適度な運動）。動詞/ˈmɒdəreɪt/。”,e:“Moderate exercise is good for health.”,ej:“適度な運動は健康に良い。”,t:[“moderation (n)”],id:[]},
+{w:“notorious”,p:“adj”,l:3,c:“準1必須形容詞”,m:“悪名高い”,pr:”/noʊˈtɔːriəs/”,f:“notorious for ～（〜で悪名高い）。”,e:“The city is notorious for traffic jams.”,ej:“その都市は交通渋滞で悪名高い。”,t:[“notoriously (adv)”],id:[{e:“notorious for”,j:”〜で悪名高い”}]},
+{w:“persistent”,p:“adj”,l:3,c:“準1必須形容詞”,m:“持続的な・執拗な”,pr:”/pəˈsɪstənt/”,f:“persistence（名）。”,e:“The persistent rain ruined the event.”,ej:“持続的な雨がイベントを台無しにした。”,t:[“persistence (n)”,“persist (v)”],id:[]},
+{w:“prevalent”,p:“adj”,l:3,c:“準1必須形容詞”,m:“普及している・広まっている”,pr:”/ˈprevələnt/”,f:“prevalence（名）。”,e:“Obesity is prevalent in developed countries.”,ej:“肥満は先進国で広まっている。”,t:[“prevalence (n)”],id:[]},
+{w:“profound”,p:“adj”,l:3,c:“準1必須形容詞”,m:“深い・深遠な”,pr:”/prəˈfaʊnd/”,f:“profound impact（深い影響）。”,e:“The speech had a profound effect on the audience.”,ej:“そのスピーチは聴衆に深い影響を与えた。”,t:[“profoundly (adv)”],id:[]},
+{w:“rational”,p:“adj”,l:3,c:“準1必須形容詞”,m:“合理的な・理性的な”,pr:”/ˈræʃənəl/”,f:“irrational（非合理的）が反意語。”,e:“We need a rational approach.”,ej:“合理的なアプローチが必要だ。”,t:[“rationality (n)”,“irrational (adj)”],id:[]},
+{w:“superficial”,p:“adj”,l:3,c:“準1必須形容詞”,m:“表面的な・浅薄な”,pr:”/ˌsuːpərˈfɪʃəl/”,f:“superficial understanding（表面的な理解）。”,e:“His knowledge of the subject was superficial.”,ej:“その件に関する彼の知識は表面的だった。”,t:[“superficially (adv)”],id:[]},
+{w:“transparent”,p:“adj”,l:3,c:“準1必須形容詞”,m:“透明な・明白な”,pr:”/trænsˈpærənt/”,f:“transparency（名）。”,e:“The government should be transparent.”,ej:“政府は透明であるべきだ。”,t:[“transparency (n)”],id:[]},
+{w:“urgent”,p:“adj”,l:2,c:“準1必須形容詞”,m:“緊急の・急を要する”,pr:”/ˈɜːrdʒənt/”,f:“urgency（名）。urgent action（緊急の行動）。”,e:“Urgent action is needed on climate change.”,ej:“気候変動に関して緊急の行動が必要だ。”,t:[“urgency (n)”],id:[]},
 ];
 
-/* ═══ IDIOMS ═══ */
 const ID=[
 {w:“beat around the bush”,m:“遠回しに言う”,n:“直訳：茂みの周りを打つ”,e:“Stop beating around the bush.”,ej:“遠回しに言うのはやめて。”},
 {w:“take the bull by the horns”,m:“勇気を出して困難に向かう”,n:“雄牛を角をつかんで捕まえる”,e:“Let’s take the bull by the horns.”,ej:“勇敢に立ち向かおう。”},
@@ -307,8 +471,6 @@ const ID=[
 {w:“never say die”,m:“あきらめるな”,n:“困難でも諦めない姿勢”,e:“Never say die — there’s still time.”,ej:“あきらめるな — まだ時間がある。”},
 {w:“for the life of me”,m:“どうしても（〜できない）”,n:“否定文で使う”,e:“I can’t for the life of me remember.”,ej:“どうしても思い出せない。”},
 ];
-
-/* ═══ GRAMMAR ═══ */
 const GR=[
 {h:“仮定法過去”,n:“現在の事実に反する仮定。If + S + 過去形, S + would + 原形”,e:“If I were you, I would accept.”,ej:“私があなたなら受け入れるだろう。”,tip:“beはwereを使う”},
 {h:“仮定法過去完了”,n:“過去の事実に反する仮定。If + S + had pp, S + would have pp”,e:“If she had studied, she would have passed.”,ej:“もっと勉強していたら合格しただろう。”,tip:“had+過去分詞がキー”},
@@ -323,8 +485,6 @@ const GR=[
 {h:“知覚動詞+O+doing/原形”,n:“notice/see/hear+O+Ving（進行中）/ 原形（全体）”,e:“She noticed him waiting outside.”,ej:“彼が外で待っているのに気づいた。”,tip:“Ving=途中を見た、原形=一部始終”},
 {h:“付加疑問文”,n:“肯定文→否定tag、否定文→肯定tag。”,e:“You’ve been to Paris, haven’t you?”,ej:“パリに行ったことがありますよね？”,tip:“時制・助動詞に合わせてtagを作る”},
 ];
-
-/* ═══ PARAPHRASE ═══ */
 const PA=[
 {o:“say / think”,b:[“claim”,“assert”,“maintain”,“argue”],n:“意見・主張のフォーマル版”,e:“Researchers claim that sleep is vital.”},
 {o:“show”,b:[“illustrate”,“indicate”,“demonstrate”,“reveal”],n:“データ・研究結果を「示す」”,e:“The data illustrates a clear trend.”},
@@ -339,8 +499,6 @@ const PA=[
 {o:“use”,b:[“utilize”,“employ”,“implement”,“apply”],n:”「使う」のフォーマル版”,e:“The company utilizes renewable energy.”},
 {o:“change”,b:[“transform”,“alter”,“modify”,“shift”],n:“変化の程度で使い分け”,e:“Technology has transformed communication.”},
 ];
-
-/* ═══ READING EXPRESSIONS ═══ */
 const RE=[
 {p:“a fact of life”,m:“避けられない現実”,e:“Water restrictions are a fact of life.”,s:“2015 Water Worries”},
 {p:“in turn”,m:“今度は・次には”,e:“Such efforts will in turn lead to discoveries.”,s:“2015”},
@@ -358,8 +516,6 @@ const RE=[
 {p:“fall behind one’s peers”,m:“仲間に後れをとる”,e:“Low-income children fall behind their peers.”,s:“2025 Early Education”},
 {p:“anecdotal evidence”,m:“体験談的根拠（科学的でない）”,e:“There was anecdotal evidence years ago.”,s:“2015 Elephant Speech”},
 ];
-
-/* ═══ CONFUSED PAIRS ═══ */
 const CP=[
 {a:“comprehensive（包括的な）”,b:“comprehensible（理解できる）”,n:“準1最頻出混同ミスNo.1”},
 {a:“considerable（かなりの）”,b:“considerate（思いやりのある）”,n:“Eで終わるのは人の性格を表す”},
@@ -372,8 +528,6 @@ const CP=[
 {a:“dominate（支配する）”,b:“domesticate（飼いならす）”,n:“domesticateはwildlife文脈”},
 {a:“elicit（引き出す）”,b:“elevate（高める）”,n:“elicit a response=反応を引き出す”},
 ];
-
-/* ═══ THEMES ═══ */
 const TH=[
 {cat:“環境・テクノロジー”,items:[“再生可能エネルギーの利点と限界”,“AIが労働市場に与える影響”,“プラスチックゴミと循環型経済”]},
 {cat:“社会・教育”,items:[“テレワークの社会的功罪”,“多文化主義と移民受け入れ”,“オンライン教育 vs 対面授業”]},
@@ -381,8 +535,6 @@ const TH=[
 {cat:“歴史・文化”,items:[“絶滅危惧言語の保護”,“伝統技術の継承と近代化”]},
 {cat:“心理・健康”,items:[“睡眠不足と生産性”,“都市生活とメンタルヘルス”]},
 ];
-
-/* ═══ EXPRESSIONS from textbook (入試で使える表現リスト) ─ NOT IN QUIZ ═══ */
 const EX=[
 {n:1,ph:“my favorite food”,ja:“私の好きな食べ物”,e:“My favorite food is chocolate.”,ej:“私の好きな食べ物はチョコレートです。”},
 {n:2,ph:“foreign people”,ja:“外国人”,e:“Many foreign people visit Kyoto every year.”,ej:“毎年、多くの外国人が京都を訪れます。”},
@@ -510,8 +662,6 @@ const EX=[
 {n:124,ph:“Shall we sit down?”,ja:“座りましょうか。”,e:“Shall we have a break?”,ej:“休憩しましょうか。”},
 {n:125,ph:“May I speak to Tom, please?”,ja:“トムと話してもよろしいですか。”,e:“May I speak to Emily, please?”,ej:“エミリーと話してもよろしいですか。”},
 ];
-
-/* ═══ IRREGULAR VERBS (from textbook 不規則動詞の変化表) ─ NOT IN QUIZ ═══ */
 const IV=[
 {b:“be”,p:“was/were”,pp:“been”,m:”〜である”,s:“is”,g:“being”},
 {b:“become”,p:“became”,pp:“become”,m:”〜になる”,s:“becomes”,g:“becoming”},
@@ -588,6 +738,9 @@ const IV=[
 let deck=shuf([…V]),idx=0,flipped=false,st={g:0,h:0,f:0},tab=‘f’;
 let hist=[],prevState=null;
 
+/* ═══ UTILS ═══ */
+function shuf(a){for(let i=a.length-1;i>0;i–){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
 /* ═══ SHEET SYSTEM ═══ */
 const scrim=document.getElementById(‘scrim’);
 let activeSheet=null;
@@ -622,10 +775,12 @@ function localLookup(q){
 const ql=q.toLowerCase().trim();
 const vr=V.find(w=>w.w.toLowerCase()===ql);
 if(vr)return`📚 <strong>${vr.w}</strong> [${vr.p}] — ${vr.m}${vr.pr?` <span style="color:var(--sub)">${vr.pr}</span>`:''}`;
-const er=EX.find(e=>e.ph.toLowerCase()===ql||(ql.length>5&&e.ph.toLowerCase().includes(ql)));
+const er=EX.find(e=>e.ph.toLowerCase()===ql||(ql.length>4&&e.ph.toLowerCase().includes(ql)));
 if(er)return`📝 <strong>${er.ph}</strong> — ${er.ja}`;
 const ir=IV.find(v=>v.b===ql||v.p===ql||v.pp===ql||v.p.split(’/’).some(x=>x.trim()===ql));
 if(ir)return`🔄 <strong>${ir.b}</strong> → ${ir.p} → ${ir.pp} ／ ${ir.m}`;
+const idr=ID.find(d=>d.w.toLowerCase().includes(ql)&&ql.length>4);
+if(idr)return`💬 <strong>${idr.w}</strong> — ${idr.m}`;
 return null;
 }
 
@@ -656,7 +811,8 @@ document.getElementById(‘cbk’).disabled=!prevState;
 window.FF=function(){
 flipped=!flipped;
 document.getElementById(‘fc’).classList.toggle(‘fl’,flipped);
-haptic();document.getElementById(‘acts’).style.display=flipped?‘flex’:‘none’;
+haptic();
+document.getElementById(‘acts’).style.display=flipped?‘flex’:‘none’;
 };
 function updateStats(){
 document.getElementById(‘sg’).textContent=st.g;
@@ -671,7 +827,7 @@ haptic.confirm();
 prevState={deck:[…deck],idx,st:{…st},hist:[…hist]};
 const cur=deck[idx];
 hist.unshift({w:cur.w,m:cur.m,r:t});
-if(hist.length>60)hist.pop();
+if(hist.length>80)hist.pop();
 st[t]++;updateStats();
 if(t===‘f’)deck.push({…deck[idx]});
 else if(t===‘h’)deck.splice(Math.min(idx+4,deck.length),0,{…deck[idx]});
@@ -685,7 +841,8 @@ setTimeout(()=>{fw.classList.remove(‘out’);render();void fw.offsetWidth;fw.c
 window.goBack=function(){
 if(!prevState)return;
 haptic.confirm();
-({deck,idx,st,hist}=prevState);prevState=null;flipped=false;
+deck=prevState.deck;idx=prevState.idx;st=prevState.st;hist=prevState.hist;
+prevState=null;flipped=false;
 updateStats();render();
 };
 
@@ -708,7 +865,8 @@ document.getElementById(‘pf’).style.width=‘100%’;
 document.getElementById(‘fw’).innerHTML=`<div class="cc"><div style="font-size:50px;margin-bottom:10px">🎉</div><div style="font-size:18px;font-weight:700;margin-bottom:4px">完了！</div><div style="font-size:12px;color:var(--sub);margin-bottom:16px">✓${st.g} △${st.h} ✗${st.f}</div><button onclick="SD()" style="background:var(--b);color:#fff;border:none;border-radius:11px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🔀 もう一度</button></div>`;
 }
 window.SD=function(){
-haptic.confirm();deck=shuf([…V]);idx=0;st={g:0,h:0,f:0};hist=[];prevState=null;
+haptic.confirm();
+deck=shuf([…V]);idx=0;st={g:0,h:0,f:0};hist=[];prevState=null;
 updateStats();
 document.getElementById(‘fw’).innerHTML=`<div class="fc" id="fc" onclick="FF()"><div class="ff" id="ff"><div class="fmeta"><span class="lv l1" id="flv"></span><span class="fcat" id="fca"></span></div><div class="fword" id="fwo"></div><div class="fpron" id="fpr"></div><span class="fpos pv" id="fpo"></span><div class="fh">タップして意味を確認 · スワイプ →✓ ←✗</div></div><div class="ff fb" id="fba"><div class="fmean" id="fme"></div><div class="ffull" id="ffu"></div><div class="fex" id="fex"></div><div class="ftags" id="fta"></div><div class="fidm" id="fid"></div></div></div>`;
 render();
@@ -729,7 +887,6 @@ const el=document.getElementById(‘l-’+x);if(el)el.classList.toggle(‘on’,
 });
 };
 
-/* ═══ BUILD LISTS ═══ */
 function buildLists(){
 // idioms
 document.getElementById(‘l-i’).innerHTML=’<div class="sh">イディオム ‘+ID.length+‘個</div>’+
@@ -825,9 +982,7 @@ if(!flipped)return;const dx=e.changedTouches[0].clientX-sx;
 if(Math.abs(dx)>55){dx>0?R(‘g’):R(‘f’);}
 },{passive:true});
 
-/* ═══ UTILS ═══ */
-function shuf(a){for(let i=a.length-1;i>0;i–){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-
 /* ═══ INIT ═══ */
-buildLists();render();
+buildLists();
+render();
 </script></body></html>
