@@ -289,8 +289,8 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:non
 .cs-seg-bar{background:rgba(0,0,0,.06);padding:3px;border-radius:22px;box-shadow:inset -1px -1px 1px rgb(255 255 255/87%),inset 1px 1px 1px rgb(255 255 255),0 0 23px #00000036;backdrop-filter:blur(20px) saturate(280%);display:flex;position:relative;overflow:hidden}
 .cs-seg-item{flex:1 0 auto;min-width:44px;padding:9px 10px;text-align:center;font-size:12px;font-weight:700;color:#888;cursor:pointer;transition:all .3s ease;position:relative;z-index:2;white-space:nowrap;user-select:none;border-radius:18px}
 .cs-seg-item.active{color:#000}
-.cs-seg-item:hover{box-shadow:inset -1px -1px 1px rgb(255 255 255/87%),inset 1px 1px 1px rgb(255 255 255),0 0 23px #00000036;transform:scale(1.12)}
-.cs-seg-item:active{transform:scale(.9)}
+.cs-seg-item:hover{transform:scale(1.08);color:#555}
+.cs-seg-item:active{transform:scale(.92)}
 .cs-seg-slider{position:absolute;top:3px;left:3px;height:calc(100% - 6px);background:#ffffff70;border-radius:33px;box-shadow:inset -1px -1px 1px rgb(255 255 255/87%),inset 1px 1px 1px rgb(255 255 255),0 0 23px #00000036;transition:transform .28s var(--ios-ease-cs),width .28s var(--ios-ease-cs);z-index:1;pointer-events:none;will-change:transform,width}
 .cs-ratio-preview-wrap{position:absolute;display:flex;align-items:center;justify-content:center;width:100%;height:100%;pointer-events:none;z-index:2}
 .cs-ratio-frame{transition:width .35s var(--ios-ease-cs),height .35s var(--ios-ease-cs);width:128px;height:72px;display:flex;align-items:center;justify-content:center}
@@ -490,10 +490,40 @@ body::after{content:"横向き・または表示サイズを広げよう";displa
 <!-- Export Modal -->
 <div class="modal" id="exportModal">
   <div class="modal-content">
-    <div class="modal-title">エクスポート (WebM)</div>
+    <div class="modal-title">🎬 エクスポート</div>
     <div class="export-options">
-      <div class="export-option"><label>解像度:</label><select id="resolution" class="property-select"><option value="1080">1080p</option><option value="720" selected>720p</option><option value="480">480p</option></select></div>
-      <div class="export-option"><label style="font-size:11px;color:rgba(255,255,255,.4)">音声トラックも含まれます</label></div>
+      <div class="export-option"><label>形式:</label>
+        <select id="exportFormat" class="property-select">
+          <option value="webm" selected>WebM (VP9 + Opus)</option>
+          <option value="webm-gif">WebM GIF風 (音声なし)</option>
+        </select>
+      </div>
+      <div class="export-option"><label>解像度:</label>
+        <select id="resolution" class="property-select">
+          <option value="1080">1080p (フルHD)</option>
+          <option value="720" selected>720p (HD)</option>
+          <option value="480">480p (SD)</option>
+        </select>
+      </div>
+      <div class="export-option"><label>リフレッシュレート:</label>
+        <div id="exportFpsDisplay" style="font-size:14px;font-weight:700;color:var(--accent-blue);padding:6px 0">60 Hz</div>
+      </div>
+      <div class="export-option">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+          <div style="flex:1;padding:10px 14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:12px">
+            <div style="font-size:10px;color:rgba(255,255,255,.4)">比率</div>
+            <div id="exportRatioDisplay" style="font-size:13px;font-weight:700;color:#fff">16:9</div>
+          </div>
+          <div style="flex:1;padding:10px 14px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:12px">
+            <div style="font-size:10px;color:rgba(255,255,255,.4)">音声</div>
+            <div id="exportAudioDisplay" style="font-size:13px;font-weight:700;color:#fff">含む</div>
+          </div>
+          <div style="flex:1;padding:10px 14px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);border-radius:12px">
+            <div style="font-size:10px;color:rgba(255,255,255,.4)">推定</div>
+            <div id="exportEstDisplay" style="font-size:13px;font-weight:700;color:#fff">—</div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="modal-buttons"><button class="btn btn-secondary" onclick="editor.closeExportModal()">キャンセル</button><button class="btn btn-primary" onclick="editor.startExport()">エクスポート開始</button></div>
   </div>
@@ -866,14 +896,99 @@ class VideoEditor {
     const list=document.getElementById('mediaList');
     const el=document.createElement('div');
     el.className='media-item'; el.draggable=true; el.dataset.id=item.id;
+    el.setAttribute('data-allow-touch','1'); // allow scrolling/touch
     const icons={video:'🎬',audio:'🎵',image:'🖼️'};
     const thumb=item.type==='image'?`<img src="${item.url}" alt="">`:(icons[item.type]||'📄');
     const bgBtns=item.type==='image'?`<button class="media-bg-remove" onclick="event.stopPropagation();editor.removeBackground(${item.id})">✨ 背景削除</button><button class="media-bg-remove" onclick="event.stopPropagation();editor.chromaKeyRemove(${item.id})" style="background:rgba(139,92,246,.2);color:#8b5cf6">🎨 クロマキー</button>`:'';
     el.innerHTML=`<div class="media-thumb">${thumb}</div><div class="media-info"><div class="media-name">${item.name}</div><div class="media-meta">${item.type} • ${this.formatTime(item.duration)}</div>${bgBtns}</div>`;
+    // PC drag
     el.addEventListener('dragstart', e => e.dataTransfer.setData('mediaId',item.id));
-    el.addEventListener('dblclick', () => this.addClipToTimeline(item));
+    // Double click/tap → add to timeline
+    el.addEventListener('dblclick', () => {if(window.triggerHaptic)window.triggerHaptic();this.addClipToTimeline(item);});
+    // Single tap on mobile → add to timeline (easier on phone)
+    let _tapTimer=null, _isSwiping=false, _touchStartTime=0;
+    el.addEventListener('touchstart', e => {
+      _touchStartTime=Date.now(); _isSwiping=false;
+    }, {passive:true});
+    el.addEventListener('touchmove', () => {_isSwiping=true;}, {passive:true});
+    el.addEventListener('touchend', e => {
+      const elapsed=Date.now()-_touchStartTime;
+      // Quick tap (< 300ms, no swipe) → add to timeline
+      if(!_isSwiping && elapsed<300 && !e.target.closest('.media-bg-remove')){
+        if(window.triggerHaptic) window.triggerHaptic();
+        this.addClipToTimeline(item);
+      }
+    }, {passive:true});
+    // iOS touch-drag to timeline: long press then drag
+    this._setupTouchDrag(el, item);
+    // Long press → context menu
     this.addLongPressListener(el, e => {this.contextMenuTarget={type:'media',data:item};this.showContextMenu(e,el);});
     list.appendChild(el);
+    if(window.triggerHaptic) window.triggerHaptic();
+  }
+
+  /* ── iOS Touch Drag: media item → timeline ── */
+  _setupTouchDrag(el, mediaItem) {
+    let ghost=null, dragActive=false, longPressTimer=null;
+    const LONG_PRESS_MS=400;
+    el.addEventListener('touchstart', e => {
+      if(e.target.closest('.media-bg-remove')) return;
+      const touch=e.touches[0];
+      longPressTimer=setTimeout(()=>{
+        dragActive=true;
+        if(window.triggerHaptic) window.triggerHaptic();
+        // Create floating ghost
+        ghost=document.createElement('div');
+        ghost.style.cssText=`position:fixed;z-index:9000;padding:8px 16px;border-radius:20px;background:rgba(59,130,246,.85);color:#fff;font-size:12px;font-weight:700;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.4);backdrop-filter:blur(10px);transform:translate(-50%,-50%)`;
+        ghost.textContent='📎 '+mediaItem.name.substring(0,15);
+        document.body.appendChild(ghost);
+        ghost.style.left=touch.clientX+'px';
+        ghost.style.top=touch.clientY+'px';
+        el.style.opacity='0.4';
+      },LONG_PRESS_MS);
+    },{passive:true});
+    el.addEventListener('touchmove', e => {
+      clearTimeout(longPressTimer);
+      if(!dragActive||!ghost) return;
+      const touch=e.touches[0];
+      ghost.style.left=touch.clientX+'px';
+      ghost.style.top=touch.clientY+'px';
+      // Highlight timeline if hovering over it
+      const tlEl=document.getElementById('timelineTracks');
+      const tlRect=tlEl?.getBoundingClientRect();
+      if(tlRect && touch.clientY>=tlRect.top && touch.clientY<=tlRect.bottom){
+        ghost.style.background='rgba(16,185,129,.9)';
+        ghost.textContent='✓ ドロップして追加';
+      } else {
+        ghost.style.background='rgba(59,130,246,.85)';
+        ghost.textContent='📎 '+mediaItem.name.substring(0,15);
+      }
+    },{passive:true});
+    const endDrag=(e)=>{
+      clearTimeout(longPressTimer);
+      if(!dragActive){return;}
+      dragActive=false;
+      el.style.opacity='1';
+      if(ghost){
+        const touch=e.changedTouches?e.changedTouches[0]:null;
+        if(touch){
+          const tlEl=document.getElementById('timelineTracks');
+          const tlRect=tlEl?.getBoundingClientRect();
+          if(tlRect && touch.clientY>=tlRect.top && touch.clientY<=tlRect.bottom){
+            // Dropped on timeline!
+            const tc=document.getElementById('timelineContent');
+            const x=touch.clientX-tlRect.left+(tc?.scrollLeft||0);
+            const startT=Math.max(0,x/(this.pixelsPerSecond*this.zoom));
+            this.addClipToTimeline(mediaItem,startT);
+            if(window.triggerHaptic) window.triggerHaptic();
+          }
+        }
+        document.body.removeChild(ghost);
+        ghost=null;
+      }
+    };
+    el.addEventListener('touchend',endDrag,{passive:true});
+    el.addEventListener('touchcancel',endDrag,{passive:true});
   }
 
   /* ── BG REMOVAL ── */
@@ -899,21 +1014,59 @@ class VideoEditor {
   async chromaKeyRemove(mediaId) {
     const item=this.mediaFiles.find(m=>m.id===mediaId);
     if(!item||item.type!=='image') return;
-    const picker=document.createElement('input'); picker.type='color'; picker.value='#00ff00';
-    picker.style.cssText='position:fixed;opacity:0'; document.body.appendChild(picker); picker.click();
-    picker.addEventListener('input', async()=>{
-      const hex=picker.value; document.body.removeChild(picker);
-      const cr=parseInt(hex.substr(1,2),16),cg=parseInt(hex.substr(3,2),16),cb=parseInt(hex.substr(5,2),16);
-      const c=document.createElement('canvas'); const img=item.element;
-      c.width=img.naturalWidth||img.width; c.height=img.naturalHeight||img.height;
-      const cx=c.getContext('2d'); cx.drawImage(img,0,0);
-      const id=cx.getImageData(0,0,c.width,c.height); const d=id.data;
-      for(let i=0;i<d.length;i+=4){if(Math.abs(d[i]-cr)<50&&Math.abs(d[i+1]-cg)<50&&Math.abs(d[i+2]-cb)<50)d[i+3]=0;}
-      cx.putImageData(id,0,0);
-      const ni=new Image(); ni.src=c.toDataURL('image/png');
-      await new Promise(r=>{ni.onload=r;});
-      item.element=ni; item.url=ni.src; this.render(); this.showToast('クロマキー削除完了');
-    },{once:true});
+    // Create visible color picker overlay
+    const overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;z-index:6000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)';
+    overlay.innerHTML=`
+      <div style="background:rgba(30,30,40,.92);border:1px solid rgba(255,255,255,.2);border-radius:24px;padding:24px;min-width:280px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)">
+        <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:16px">🎨 クロマキー — 削除する色を選択</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px">
+          <input type="color" id="ckColorPicker" value="#00ff00" style="width:60px;height:60px;border:none;border-radius:16px;cursor:pointer;background:transparent">
+          <div style="text-align:left">
+            <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:4px">選択中の色</div>
+            <div id="ckColorHex" style="font-size:16px;font-weight:700;color:#00ff00;font-family:monospace">#00ff00</div>
+          </div>
+        </div>
+        <div style="margin-bottom:16px;text-align:left">
+          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:6px">許容範囲: <span id="ckTolVal" style="color:var(--accent-blue)">50</span></div>
+          <input type="range" id="ckTolRange" min="10" max="120" value="50" style="width:100%">
+        </div>
+        <div style="display:flex;gap:10px">
+          <button id="ckCancelBtn" class="btn btn-secondary" style="flex:1;justify-content:center">キャンセル</button>
+          <button id="ckApplyBtn" class="btn btn-primary" style="flex:1;justify-content:center">適用</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    if(window.triggerHaptic) window.triggerHaptic();
+    const colorPicker=overlay.querySelector('#ckColorPicker');
+    const hexLabel=overlay.querySelector('#ckColorHex');
+    const tolRange=overlay.querySelector('#ckTolRange');
+    const tolVal=overlay.querySelector('#ckTolVal');
+    colorPicker.addEventListener('input',()=>{hexLabel.textContent=colorPicker.value;hexLabel.style.color=colorPicker.value;});
+    tolRange.addEventListener('input',()=>{tolVal.textContent=tolRange.value;});
+    return new Promise(resolve=>{
+      overlay.querySelector('#ckCancelBtn').addEventListener('click',()=>{document.body.removeChild(overlay);resolve();});
+      overlay.querySelector('#ckApplyBtn').addEventListener('click',async()=>{
+        const hex=colorPicker.value;const tol=parseInt(tolRange.value);
+        document.body.removeChild(overlay);
+        if(window.triggerHaptic) window.triggerHaptic();
+        this.showToast('クロマキー削除中...');
+        const cr=parseInt(hex.substr(1,2),16),cg=parseInt(hex.substr(3,2),16),cb=parseInt(hex.substr(5,2),16);
+        const c=document.createElement('canvas'); const img=item.element;
+        c.width=img.naturalWidth||img.width; c.height=img.naturalHeight||img.height;
+        const cx=c.getContext('2d'); cx.drawImage(img,0,0);
+        const id=cx.getImageData(0,0,c.width,c.height); const d=id.data;
+        for(let i=0;i<d.length;i+=4){if(Math.abs(d[i]-cr)<tol&&Math.abs(d[i+1]-cg)<tol&&Math.abs(d[i+2]-cb)<tol)d[i+3]=0;}
+        cx.putImageData(id,0,0);
+        const ni=new Image(); ni.src=c.toDataURL('image/png');
+        await new Promise(r=>{ni.onload=r;});
+        item.element=ni; item.url=ni.src; this.render();
+        const thumbEl=document.querySelector(`[data-id="${mediaId}"] .media-thumb img`);
+        if(thumbEl) thumbEl.src=ni.src;
+        this.showToast('クロマキー削除完了');
+        resolve();
+      });
+    });
   }
 
   /* ── TIMELINE ── */
@@ -1018,54 +1171,91 @@ class VideoEditor {
 
   makeClipDraggable(el, clip, trackId) {
     let dragging=false,sx=0,sy=0,sl=0,curTrackId=trackId;
+    // Unified handler for both mouse and touch
+    const startDrag=(clientX,clientY,e)=>{
+      if(this.editMode==='split') return;
+      dragging=true;sx=clientX;sy=clientY;sl=parseFloat(el.style.left);
+      if(window.triggerHaptic) window.triggerHaptic();
+    };
+    const moveDrag=(clientX,clientY)=>{
+      if(!dragging)return;
+      const pps=this.pixelsPerSecond*this.zoom;
+      let newLeft=Math.max(0,sl+(clientX-sx));
+      const newStartT=newLeft/pps;
+      this.tracks.forEach(t=>t.clips.forEach(c=>{
+        if(c.id===clip.id) return;
+        const cEnd=c.startTime+c.duration;
+        if(Math.abs(newStartT-cEnd)*pps<8) newLeft=cEnd*pps;
+        if(Math.abs(newStartT+clip.duration-c.startTime)*pps<8) newLeft=(c.startTime-clip.duration)*pps;
+      }));
+      newLeft=Math.max(0,newLeft);
+      el.style.left=`${newLeft}px`;
+      clip.startTime=newLeft/pps;
+      this.updatePlayhead();this.render();
+      const dy=clientY-sy;
+      if(Math.abs(dy)>50){
+        const ti=this.tracks.findIndex(t=>t.id===curTrackId);
+        const ni=ti+Math.sign(dy);
+        if(ni>=0&&ni<this.tracks.length){
+          this.tracks[ti].clips=this.tracks[ti].clips.filter(c=>c.id!==clip.id);
+          this.tracks[ni].clips.push(clip);
+          curTrackId=this.tracks[ni].id;sy=clientY;dragging=false;
+          this.renderTracks();this.saveState();
+        }
+      }
+    };
+    const endDrag=()=>{if(dragging){dragging=false;this.saveState();this.updateDuration();this.render();}};
+    // Mouse events
     el.addEventListener('mousedown',e=>{
       if(e.target.classList.contains('clip-resize-left')||e.target.classList.contains('clip-resize-right')) return;
-      if(this.editMode==='split') return;
-      dragging=true;sx=e.clientX;sy=e.clientY;sl=parseFloat(el.style.left);e.preventDefault();
-      const onMove=e2=>{
-        if(!dragging)return;
-        const pps=this.pixelsPerSecond*this.zoom;
-        let newLeft=Math.max(0,sl+(e2.clientX-sx));
-        // Snap
-        const newStartT=newLeft/pps;
-        this.tracks.forEach(t=>t.clips.forEach(c=>{
-          if(c.id===clip.id) return;
-          const cEnd=c.startTime+c.duration;
-          if(Math.abs(newStartT-cEnd)*pps<8) newLeft=cEnd*pps;
-          if(Math.abs(newStartT+clip.duration-c.startTime)*pps<8) newLeft=(c.startTime-clip.duration)*pps;
-        }));
-        newLeft=Math.max(0,newLeft);
-        el.style.left=`${newLeft}px`;
-        clip.startTime=newLeft/pps;
-        this.updatePlayhead();this.render();
-        // Track switch
-        const dy=e2.clientY-sy;
-        if(Math.abs(dy)>50){
-          const ti=this.tracks.findIndex(t=>t.id===curTrackId);
-          const ni=ti+Math.sign(dy);
-          if(ni>=0&&ni<this.tracks.length){
-            this.tracks[ti].clips=this.tracks[ti].clips.filter(c=>c.id!==clip.id);
-            this.tracks[ni].clips.push(clip);
-            curTrackId=this.tracks[ni].id; sy=e2.clientY; dragging=false;
-            this.renderTracks();this.saveState();
-          }
-        }
-      };
-      const onUp=()=>{if(dragging){dragging=false;this.saveState();this.updateDuration();this.render();}document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);};
+      startDrag(e.clientX,e.clientY,e);e.preventDefault();
+      const onMove=e2=>moveDrag(e2.clientX,e2.clientY);
+      const onUp=()=>{endDrag();document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);};
       document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);
     });
+    // Touch events (iOS)
+    el.addEventListener('touchstart',e=>{
+      if(e.target.classList.contains('clip-resize-left')||e.target.classList.contains('clip-resize-right')) return;
+      if(e.touches.length!==1) return;
+      const t=e.touches[0];startDrag(t.clientX,t.clientY,e);
+    },{passive:true});
+    el.addEventListener('touchmove',e=>{
+      if(!dragging||!e.touches.length) return;
+      e.preventDefault();
+      moveDrag(e.touches[0].clientX,e.touches[0].clientY);
+    },{passive:false});
+    el.addEventListener('touchend',()=>endDrag(),{passive:true});
+    el.addEventListener('touchcancel',()=>endDrag(),{passive:true});
   }
 
   makeClipResizable(el, clip, trackId) {
-    const setup=(handle,side)=>{handle.addEventListener('mousedown',e=>{e.preventDefault();e.stopPropagation();
-      const startX=e.clientX,startDur=clip.duration,startStart=clip.startTime;
-      const onMove=e2=>{const dx=(e2.clientX-startX)/(this.pixelsPerSecond*this.zoom);
-        if(side==='left'){const ns=Math.max(0,startStart+dx);clip.duration=Math.max(0.1,startDur-(ns-startStart));clip.startTime=ns;}
-        else clip.duration=Math.max(0.1,startDur+dx);
-        this.renderTracks();this.render();};
-      const onUp=()=>{this.saveState();this.updateDuration();document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);};
-      document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);
-    });};
+    const setup=(handle,side)=>{
+      // Mouse
+      handle.addEventListener('mousedown',e=>{e.preventDefault();e.stopPropagation();
+        const startX=e.clientX,startDur=clip.duration,startStart=clip.startTime;
+        const onMove=e2=>{const dx=(e2.clientX-startX)/(this.pixelsPerSecond*this.zoom);
+          if(side==='left'){const ns=Math.max(0,startStart+dx);clip.duration=Math.max(0.1,startDur-(ns-startStart));clip.startTime=ns;}
+          else clip.duration=Math.max(0.1,startDur+dx);
+          this.renderTracks();this.render();};
+        const onUp=()=>{this.saveState();this.updateDuration();document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);};
+        document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);
+      });
+      // Touch
+      handle.addEventListener('touchstart',e=>{
+        if(!e.touches.length) return;
+        e.preventDefault();e.stopPropagation();
+        const startX=e.touches[0].clientX,startDur=clip.duration,startStart=clip.startTime;
+        const onMove=e2=>{if(!e2.touches.length) return;e2.preventDefault();
+          const dx=(e2.touches[0].clientX-startX)/(this.pixelsPerSecond*this.zoom);
+          if(side==='left'){const ns=Math.max(0,startStart+dx);clip.duration=Math.max(0.1,startDur-(ns-startStart));clip.startTime=ns;}
+          else clip.duration=Math.max(0.1,startDur+dx);
+          this.renderTracks();this.render();};
+        const onUp=()=>{this.saveState();this.updateDuration();document.removeEventListener('touchmove',onMove);document.removeEventListener('touchend',onUp);document.removeEventListener('touchcancel',onUp);};
+        document.addEventListener('touchmove',onMove,{passive:false});
+        document.addEventListener('touchend',onUp,{passive:true});
+        document.addEventListener('touchcancel',onUp,{passive:true});
+      },{passive:false});
+    };
     setup(el.querySelector('.clip-resize-left'),'left');
     setup(el.querySelector('.clip-resize-right'),'right');
   }
@@ -1494,7 +1684,15 @@ class VideoEditor {
   addLongPressListener(el,cb){let timer;const start=e=>{timer=setTimeout(()=>{if(window.triggerHaptic)window.triggerHaptic('confirm');cb(e);},500);};const cancel=()=>clearTimeout(timer);el.addEventListener('mousedown',start);el.addEventListener('mouseup',cancel);el.addEventListener('mouseleave',cancel);el.addEventListener('touchstart',start,{passive:true});el.addEventListener('touchend',cancel);el.addEventListener('touchcancel',cancel);}
 
   /* ── EXPORT ── */
-  showExportModal(){document.getElementById('exportModal').classList.add('active');}
+  showExportModal(){
+    const m=document.getElementById('exportModal');m.classList.add('active');
+    document.getElementById('exportFpsDisplay').textContent=(this.isGif?'GIF ':'')+this.fps+' Hz';
+    document.getElementById('exportRatioDisplay').textContent=this.aspectRatio;
+    const hasAudio=this.tracks.some(t=>t.clips.some(c=>c.type==='video'||c.type==='audio'));
+    document.getElementById('exportAudioDisplay').textContent=hasAudio?'含む':'なし';
+    document.getElementById('exportEstDisplay').textContent=this.formatTime(this.duration);
+    if(window.triggerHaptic) window.triggerHaptic();
+  }
   closeExportModal(){document.getElementById('exportModal').classList.remove('active');}
 
   async startExport(){
