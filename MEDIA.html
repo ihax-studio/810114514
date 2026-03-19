@@ -723,6 +723,7 @@ function csSetRatio(el) {
 }
 
 async function csLang(el, lang) {
+  if(window.triggerHaptic) window.triggerHaptic();
   _csActiveLang = lang;
   document.querySelectorAll('.cs-flag').forEach(f => f.classList.remove('active'));
   el.classList.add('active');
@@ -828,6 +829,37 @@ class VideoEditor {
     this.canvas.addEventListener('mouseup', e => this.onCanvasMouseUp(e));
     this.canvas.addEventListener('dblclick', e => this.onCanvasDblClick(e));
     this.canvas.addEventListener('wheel', e => {e.preventDefault();this.onCanvasWheel(e);}, {passive:false});
+    // ── Canvas swipe left/right → seek ──
+    this._initCanvasSwipeSeek();
+  }
+
+  _initCanvasSwipeSeek() {
+    const container=document.getElementById('canvasContainer');
+    let _sx=0, _sy=0, _st=0, _seeking=false;
+    container.addEventListener('touchstart', e => {
+      if(e.touches.length!==1) return;
+      // Don't interfere with draw mode
+      if(this.isDrawMode) return;
+      const t=e.touches[0]; _sx=t.clientX; _sy=t.clientY; _st=this.currentTime; _seeking=false;
+    },{passive:true});
+    container.addEventListener('touchmove', e => {
+      if(e.touches.length!==1||this.isDrawMode) return;
+      const t=e.touches[0];
+      const dx=t.clientX-_sx, dy=t.clientY-_sy;
+      // Only horizontal swipe (ignore vertical)
+      if(Math.abs(dx)>Math.abs(dy)*1.5 && Math.abs(dx)>15){
+        _seeking=true;
+        e.preventDefault();
+        // 300px swipe ≈ 10 seconds seek
+        const seekDelta=dx/30;
+        this.currentTime=Math.max(0,Math.min(this.duration,_st+seekDelta));
+        this.updatePlayhead(); this.render(); this._updateFloatTime();
+      }
+    },{passive:false});
+    container.addEventListener('touchend', e => {
+      if(_seeking && window.triggerHaptic) window.triggerHaptic();
+      _seeking=false;
+    },{passive:true});
   }
 
   seekTo(t) {
@@ -896,105 +928,103 @@ class VideoEditor {
     const list=document.getElementById('mediaList');
     const el=document.createElement('div');
     el.className='media-item'; el.draggable=true; el.dataset.id=item.id;
-    el.setAttribute('data-allow-touch','1'); // allow scrolling/touch
+    el.setAttribute('data-allow-touch','1');
     const icons={video:'🎬',audio:'🎵',image:'🖼️'};
     const thumb=item.type==='image'?`<img src="${item.url}" alt="">`:(icons[item.type]||'📄');
     const bgBtns=item.type==='image'?`<button class="media-bg-remove" onclick="event.stopPropagation();editor.removeBackground(${item.id})">✨ 背景削除</button><button class="media-bg-remove" onclick="event.stopPropagation();editor.chromaKeyRemove(${item.id})" style="background:rgba(139,92,246,.2);color:#8b5cf6">🎨 クロマキー</button>`:'';
     el.innerHTML=`<div class="media-thumb">${thumb}</div><div class="media-info"><div class="media-name">${item.name}</div><div class="media-meta">${item.type} • ${this.formatTime(item.duration)}</div>${bgBtns}</div>`;
-    // PC drag
+
+    // ═══ PC: drag to timeline ═══
     el.addEventListener('dragstart', e => e.dataTransfer.setData('mediaId',item.id));
-    // Double click/tap → add to timeline
-    el.addEventListener('dblclick', () => {if(window.triggerHaptic)window.triggerHaptic();this.addClipToTimeline(item);});
-    // Single tap on mobile → add to timeline (easier on phone)
-    let _tapTimer=null, _isSwiping=false, _touchStartTime=0;
+
+    // ═══ PC: single click → add to timeline ═══
+    el.addEventListener('click', e => {
+      if(e.target.closest('.media-bg-remove')) return;
+      if(window.triggerHaptic) window.triggerHaptic();
+      this.addClipToTimeline(item);
+    });
+
+    // ═══ PC: right-click → context menu ═══
+    el.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      this.contextMenuTarget={type:'media',data:item};
+      this.showContextMenu(e,el);
+    });
+
+    // ═══ Mobile touch: tap → add, long-press-drag → timeline position ═══
+    let _touchSX=0, _touchSY=0, _isTouchDrag=false, _ghost=null, _lpTimer=null;
+    let _tapPrevented=false;
+
     el.addEventListener('touchstart', e => {
-      _touchStartTime=Date.now(); _isSwiping=false;
-    }, {passive:true});
-    el.addEventListener('touchmove', () => {_isSwiping=true;}, {passive:true});
-    el.addEventListener('touchend', e => {
-      const elapsed=Date.now()-_touchStartTime;
-      // Quick tap (< 300ms, no swipe) → add to timeline
-      if(!_isSwiping && elapsed<300 && !e.target.closest('.media-bg-remove')){
+      if(e.target.closest('.media-bg-remove')) return;
+      _tapPrevented=false; _isTouchDrag=false;
+      const t=e.touches[0]; _touchSX=t.clientX; _touchSY=t.clientY;
+      // Long press (400ms) → start drag ghost
+      _lpTimer=setTimeout(()=>{
+        _tapPrevented=true; _isTouchDrag=true;
+        if(window.triggerHaptic) window.triggerHaptic();
+        _ghost=document.createElement('div');
+        _ghost.style.cssText='position:fixed;z-index:9000;padding:8px 16px;border-radius:20px;background:rgba(59,130,246,.85);color:#fff;font-size:12px;font-weight:700;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.4);backdrop-filter:blur(10px);transform:translate(-50%,-50%)';
+        _ghost.textContent='📎 '+item.name.substring(0,15);
+        document.body.appendChild(_ghost);
+        _ghost.style.left=t.clientX+'px'; _ghost.style.top=t.clientY+'px';
+        el.style.opacity='0.4';
+      },400);
+    },{passive:true});
+
+    el.addEventListener('touchmove', e => {
+      const t=e.touches[0];
+      const dx=Math.abs(t.clientX-_touchSX), dy=Math.abs(t.clientY-_touchSY);
+      if(dx>8||dy>8){clearTimeout(_lpTimer); _tapPrevented=true;}
+      if(!_isTouchDrag||!_ghost) return;
+      _ghost.style.left=t.clientX+'px'; _ghost.style.top=t.clientY+'px';
+      const tlRect=document.getElementById('timelineTracks')?.getBoundingClientRect();
+      if(tlRect && t.clientY>=tlRect.top && t.clientY<=tlRect.bottom){
+        _ghost.style.background='rgba(16,185,129,.9)'; _ghost.textContent='✓ ドロップして追加';
+      } else {
+        _ghost.style.background='rgba(59,130,246,.85)'; _ghost.textContent='📎 '+item.name.substring(0,15);
+      }
+    },{passive:true});
+
+    const endTouchDrag=(e)=>{
+      clearTimeout(_lpTimer);
+      el.style.opacity='1';
+      if(_isTouchDrag && _ghost){
+        const ct=e.changedTouches?.[0];
+        if(ct){
+          const tlRect=document.getElementById('timelineTracks')?.getBoundingClientRect();
+          if(tlRect && ct.clientY>=tlRect.top && ct.clientY<=tlRect.bottom){
+            const tc=document.getElementById('timelineContent');
+            const x=ct.clientX-tlRect.left+(tc?.scrollLeft||0);
+            this.addClipToTimeline(item,Math.max(0,x/(this.pixelsPerSecond*this.zoom)));
+          }
+        }
+        document.body.removeChild(_ghost); _ghost=null;
+        if(window.triggerHaptic) window.triggerHaptic();
+      } else if(!_tapPrevented && !e.target.closest('.media-bg-remove')){
+        // Simple tap (no drag, no move) → add to timeline
         if(window.triggerHaptic) window.triggerHaptic();
         this.addClipToTimeline(item);
       }
-    }, {passive:true});
-    // iOS touch-drag to timeline: long press then drag
-    this._setupTouchDrag(el, item);
-    // Long press → context menu
-    this.addLongPressListener(el, e => {this.contextMenuTarget={type:'media',data:item};this.showContextMenu(e,el);});
+      _isTouchDrag=false;
+    };
+    el.addEventListener('touchend',endTouchDrag,{passive:true});
+    el.addEventListener('touchcancel',endTouchDrag,{passive:true});
+
     list.appendChild(el);
     if(window.triggerHaptic) window.triggerHaptic();
   }
 
-  /* ── iOS Touch Drag: media item → timeline ── */
-  _setupTouchDrag(el, mediaItem) {
-    let ghost=null, dragActive=false, longPressTimer=null;
-    const LONG_PRESS_MS=400;
-    el.addEventListener('touchstart', e => {
-      if(e.target.closest('.media-bg-remove')) return;
-      const touch=e.touches[0];
-      longPressTimer=setTimeout(()=>{
-        dragActive=true;
-        if(window.triggerHaptic) window.triggerHaptic();
-        // Create floating ghost
-        ghost=document.createElement('div');
-        ghost.style.cssText=`position:fixed;z-index:9000;padding:8px 16px;border-radius:20px;background:rgba(59,130,246,.85);color:#fff;font-size:12px;font-weight:700;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.4);backdrop-filter:blur(10px);transform:translate(-50%,-50%)`;
-        ghost.textContent='📎 '+mediaItem.name.substring(0,15);
-        document.body.appendChild(ghost);
-        ghost.style.left=touch.clientX+'px';
-        ghost.style.top=touch.clientY+'px';
-        el.style.opacity='0.4';
-      },LONG_PRESS_MS);
-    },{passive:true});
-    el.addEventListener('touchmove', e => {
-      clearTimeout(longPressTimer);
-      if(!dragActive||!ghost) return;
-      const touch=e.touches[0];
-      ghost.style.left=touch.clientX+'px';
-      ghost.style.top=touch.clientY+'px';
-      // Highlight timeline if hovering over it
-      const tlEl=document.getElementById('timelineTracks');
-      const tlRect=tlEl?.getBoundingClientRect();
-      if(tlRect && touch.clientY>=tlRect.top && touch.clientY<=tlRect.bottom){
-        ghost.style.background='rgba(16,185,129,.9)';
-        ghost.textContent='✓ ドロップして追加';
-      } else {
-        ghost.style.background='rgba(59,130,246,.85)';
-        ghost.textContent='📎 '+mediaItem.name.substring(0,15);
-      }
-    },{passive:true});
-    const endDrag=(e)=>{
-      clearTimeout(longPressTimer);
-      if(!dragActive){return;}
-      dragActive=false;
-      el.style.opacity='1';
-      if(ghost){
-        const touch=e.changedTouches?e.changedTouches[0]:null;
-        if(touch){
-          const tlEl=document.getElementById('timelineTracks');
-          const tlRect=tlEl?.getBoundingClientRect();
-          if(tlRect && touch.clientY>=tlRect.top && touch.clientY<=tlRect.bottom){
-            // Dropped on timeline!
-            const tc=document.getElementById('timelineContent');
-            const x=touch.clientX-tlRect.left+(tc?.scrollLeft||0);
-            const startT=Math.max(0,x/(this.pixelsPerSecond*this.zoom));
-            this.addClipToTimeline(mediaItem,startT);
-            if(window.triggerHaptic) window.triggerHaptic();
-          }
-        }
-        document.body.removeChild(ghost);
-        ghost=null;
-      }
-    };
-    el.addEventListener('touchend',endDrag,{passive:true});
-    el.addEventListener('touchcancel',endDrag,{passive:true});
-  }
+  /* ── BG REMOVAL (with revert) ── */
+  _saveOrig(item){if(!item._origEl){item._origEl=item.element;item._origUrl=item.url;}}
+  _updThumb(mid,src){const t=document.querySelector(`[data-id="${mid}"] .media-thumb img`);if(t)t.src=src;}
+  _addRevertBtn(mid){const el=document.querySelector(`[data-id="${mid}"]`);if(!el||el.querySelector('[data-rv]'))return;const b=document.createElement('button');b.className='media-bg-remove';b.dataset.rv=mid;b.style.cssText='background:rgba(239,68,68,.2);color:#ef4444';b.textContent='↩ 元に戻す';b.addEventListener('click',e=>{e.stopPropagation();this.revertImage(mid);});el.querySelector('.media-info')?.appendChild(b);}
+  revertImage(mid){const item=this.mediaFiles.find(m=>m.id===mid);if(!item||!item._origEl)return;item.element=item._origEl;item.url=item._origUrl;delete item._origEl;delete item._origUrl;this.render();this._updThumb(mid,item.url);const b=document.querySelector(`[data-rv="${mid}"]`);if(b)b.remove();this.showToast('元に戻しました');if(window.triggerHaptic)window.triggerHaptic();}
 
-  /* ── BG REMOVAL ── */
   async removeBackground(mediaId) {
     const item=this.mediaFiles.find(m=>m.id===mediaId);
     if(!item||item.type!=='image') return;
+    this._saveOrig(item);
     this.showToast('背景削除中...');
     const c=document.createElement('canvas'); const img=item.element;
     c.width=img.naturalWidth||img.width; c.height=img.naturalHeight||img.height;
@@ -1006,15 +1036,14 @@ class VideoEditor {
     const ni=new Image(); ni.src=c.toDataURL('image/png');
     await new Promise(r=>{ni.onload=r;});
     item.element=ni; item.url=ni.src; this.render();
-    const te=document.querySelector(`[data-id="${mediaId}"] .media-thumb img`);
-    if(te) te.src=ni.src;
+    this._updThumb(mediaId,ni.src); this._addRevertBtn(mediaId);
     this.showToast('背景削除完了');
   }
 
   async chromaKeyRemove(mediaId) {
     const item=this.mediaFiles.find(m=>m.id===mediaId);
     if(!item||item.type!=='image') return;
-    // Create visible color picker overlay
+    this._saveOrig(item);
     const overlay=document.createElement('div');
     overlay.style.cssText='position:fixed;inset:0;z-index:6000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)';
     overlay.innerHTML=`
@@ -1158,12 +1187,21 @@ class VideoEditor {
     const width=Math.max(16,clip.duration*this.pixelsPerSecond*this.zoom);
     el.style.left=`${left}px`; el.style.width=`${width}px`;
     el.innerHTML=`<div class="clip-resize-left"></div><div class="clip-name">${clip.name}</div><div class="clip-duration">${this.formatTime(clip.duration)}</div>${clip.muted?'<div class="clip-muted">🔇</div>':''}<div class="clip-resize-right"></div>`;
+    // ── Single click: select + open popup ──
     el.addEventListener('click',e=>{e.stopPropagation();
-      if(this.editMode==='split'){const rect=el.getBoundingClientRect();this.splitClipAt(clip,trackId,clip.startTime+(e.clientX-rect.left)/(this.pixelsPerSecond*this.zoom));}
-      else this.selectClip(clip,trackId);
+      if(window.triggerHaptic) window.triggerHaptic();
+      if(this.editMode==='split'){
+        const rect=el.getBoundingClientRect();
+        this.splitClipAt(clip,trackId,clip.startTime+(e.clientX-rect.left)/(this.pixelsPerSecond*this.zoom));
+      } else {
+        this.selectClip(clip,trackId);
+        this.openClipPopup(clip,trackId,e);
+      }
     });
-    el.addEventListener('dblclick',e=>{e.stopPropagation();this.openClipPopup(clip,trackId,e);});
-    this.addLongPressListener(el,e=>{this.contextMenuTarget={type:'clip',data:clip,trackId};this.showContextMenu(e,el);});
+    // ── Right-click (PC) → context menu ──
+    el.addEventListener('contextmenu',e=>{e.preventDefault();e.stopPropagation();this.contextMenuTarget={type:'clip',data:clip,trackId};this.showContextMenu(e,el);});
+    // ── Long-press (iOS) → context menu ──
+    this._addTouchContextMenu(el, ()=>{this.contextMenuTarget={type:'clip',data:clip,trackId};});
     this.makeClipDraggable(el,clip,trackId);
     this.makeClipResizable(el,clip,trackId);
     trackEl.appendChild(el);
@@ -1656,16 +1694,55 @@ class VideoEditor {
 
   /* ── CONTEXT MENU ── */
   showContextMenu(e,el){
-    e.preventDefault?.();const menu=document.getElementById('contextMenu');
-    const rect=el.getBoundingClientRect();
-    let left=rect.left,top=rect.bottom+4;
-    if(left+200>window.innerWidth)left=window.innerWidth-210;
-    if(top+200>window.innerHeight)top=rect.top-210;
-    menu.style.left=`${left}px`;menu.style.top=`${top}px`;menu.classList.add('active');
-    el.classList.add('context-menu-open');
-    setTimeout(()=>{const hide=ev=>{if(!ev.target.closest('.context-menu')){menu.classList.remove('active');el.classList.remove('context-menu-open');document.removeEventListener('click',hide);}};document.addEventListener('click',hide);},100);
+    e.preventDefault?.(); e.stopPropagation?.();
+    if(window.triggerHaptic) window.triggerHaptic();
+    const menu=document.getElementById('contextMenu');
+    // Use event coordinates (works for both mouse and touch)
+    let left = e.clientX || e.pageX || 0;
+    let top  = e.clientY || e.pageY || 0;
+    // Fallback to element position if no coords
+    if(!left && !top && el) {
+      const rect=el.getBoundingClientRect();
+      left=rect.left+rect.width/2; top=rect.bottom+4;
+    }
+    // Keep within viewport
+    if(left+220>window.innerWidth) left=window.innerWidth-230;
+    if(top+250>window.innerHeight) top=Math.max(10,top-260);
+    if(left<10) left=10; if(top<10) top=10;
+    menu.style.left=`${left}px`; menu.style.top=`${top}px`;
+    menu.classList.add('active');
+    // Dismiss on any outside click/touch
+    const dismiss=()=>{
+      menu.classList.remove('active');
+      document.removeEventListener('click',dismissCheck);
+      document.removeEventListener('touchstart',dismissCheck);
+    };
+    const dismissCheck=ev=>{if(!ev.target.closest('.context-menu'))dismiss();};
+    setTimeout(()=>{
+      document.addEventListener('click',dismissCheck);
+      document.addEventListener('touchstart',dismissCheck,{passive:true});
+    },80);
   }
   hideContextMenu(){document.getElementById('contextMenu').classList.remove('active');}
+
+  /* Touch long-press → shows context menu (for iOS where contextmenu event doesn't fire) */
+  _addTouchContextMenu(el, setTarget) {
+    let _lpT=null, _moved=false;
+    el.addEventListener('touchstart', e => {
+      _moved=false;
+      _lpT=setTimeout(()=>{
+        if(_moved) return;
+        setTarget();
+        if(window.triggerHaptic) window.triggerHaptic();
+        const touch=e.touches[0]||e.changedTouches[0];
+        const fakeEvt={clientX:touch.clientX,clientY:touch.clientY,preventDefault:()=>{},stopPropagation:()=>{}};
+        this.showContextMenu(fakeEvt,el);
+      },600);
+    },{passive:true});
+    el.addEventListener('touchmove', ()=>{_moved=true;clearTimeout(_lpT);},{passive:true});
+    el.addEventListener('touchend', ()=>clearTimeout(_lpT),{passive:true});
+    el.addEventListener('touchcancel', ()=>clearTimeout(_lpT),{passive:true});
+  }
 
   contextAction(action){
     if(window.triggerHaptic) window.triggerHaptic('confirm');
