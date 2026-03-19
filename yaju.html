@@ -1,17 +1,21 @@
-<!DOCTYPE html><html lang="ja">
+<!DOCTYPE html>
 
+<html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="英語究極">
+<meta name="theme-color" content="#f7f6f3">
 <title>英語究極参考書</title>
-<script type="importmap">{"imports":{"ios-haptics":"https://esm.sh/ios-haptics"}}</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#f7f6f3;--card:#fff;--tx:#1a1a1a;--sub:#888;--ln:#e8e8e8;--g:#27a06a;--y:#d97706;--r:#dc2626;--b:#2563eb;--p:#7c3aed;--sh:0 2px 16px rgba(0,0,0,.07);--shl:0 8px 36px rgba(0,0,0,.12)}
+:root{--bg:#f7f6f3;--card:#fff;--tx:#1a1a1a;--sub:#888;--ln:#e8e8e8;--g:#27a06a;--y:#d97706;--r:#dc2626;--b:#2563eb;--p:#7c3aed;--sh:0 2px 16px rgba(0,0,0,.07);--shl:0 8px 36px rgba(0,0,0,.12);--sat:env(safe-area-inset-top);--sab:env(safe-area-inset-bottom)}
 html,body{height:100dvh;overflow:hidden}
 body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);display:flex;flex-direction:column}
-.nav{display:flex;background:var(--card);border-bottom:1px solid var(--ln);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.nav{display:flex;background:var(--card);border-bottom:1px solid var(--ln);flex-shrink:0;overflow-x:auto;scrollbar-width:none;padding-top:var(--sat)}
 .nav::-webkit-scrollbar{display:none}
 .nb{flex-shrink:0;padding:10px 13px;border:none;background:none;font-family:inherit;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}
 .nb.on{color:var(--b);border-bottom-color:var(--b)}
@@ -19,14 +23,12 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);displa
 .prb{flex:1;height:4px;background:var(--ln);border-radius:2px;overflow:hidden}
 .prf{height:100%;background:linear-gradient(90deg,var(--b),var(--p));border-radius:2px;transition:width .4s}
 .prt{font-size:11px;font-weight:600;color:var(--sub);min-width:48px;text-align:right}
-.sr{display:flex;gap:6px;padding:0 16px 6px;flex-shrink:0}
-.ch{background:var(--card);border-radius:10px;padding:4px 10px;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;box-shadow:var(--sh)}
+.sr{display:flex;gap:5px;padding:0 14px 6px;flex-shrink:0;align-items:center}
+.ch{background:var(--card);border-radius:10px;padding:5px 10px;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;box-shadow:var(--sh);border:none;font-family:inherit;cursor:pointer;transition:transform .12s}
+.ch:active{transform:scale(.9)}
+.ch-bk{font-size:16px;padding:4px 10px;background:#f0f0ee;color:var(--sub)}
+.ch-bk:disabled{opacity:.28;cursor:default;transform:none!important}
 .ca{flex:1;display:flex;align-items:center;justify-content:center;padding:6px 16px;position:relative;overflow:hidden;min-height:0}
-.tov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(247,246,243,.97);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
-.tov.show{opacity:1;pointer-events:auto}
-.tres{text-align:center;font-size:clamp(20px,5.5vw,36px);font-weight:300;color:var(--tx);line-height:1.5}
-.tsub{font-size:12px;color:var(--sub);margin-top:8px}
-.tloc{font-size:12px;color:var(--b);background:rgba(37,99,235,.08);border-radius:8px;padding:6px 10px;margin-bottom:10px;display:none;line-height:1.6}
 .fw{width:100%;max-width:440px;perspective:1200px;cursor:pointer;user-select:none;-webkit-user-select:none}
 .fc{width:100%;min-height:300px;position:relative;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1)}
 .fc.fl{transform:rotateY(180deg)}
@@ -34,7 +36,7 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);displa
 .fb{transform:rotateY(180deg)}
 .fmeta{display:flex;align-items:center;justify-content:space-between;margin-bottom:auto}
 .lv{font-size:10px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:20px}
-.l1{background:#dcfce7;color:#166534}.l2{background:#fef9c3;color:#854d0e}.l3{background:#fce7f3;color:#9d174d}.lid{background:#ede9fe;color:#5b21b6}.lgr{background:#e0f2fe;color:#075985}
+.l1{background:#dcfce7;color:#166534}.l2{background:#fef9c3;color:#854d0e}.l3{background:#fce7f3;color:#9d174d}
 .fcat{font-size:10px;color:var(--sub);font-weight:500}
 .fword{font-size:clamp(26px,7vw,42px);font-weight:600;color:var(--tx);letter-spacing:-.02em;margin:14px 0 3px;line-height:1.1}
 .fpron{font-size:12px;color:var(--sub);font-weight:300;margin-bottom:5px}
@@ -49,19 +51,23 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);displa
 .ftag{background:#f0f0ee;border-radius:6px;padding:1px 7px;font-size:10px;color:#555}
 .fidm{font-size:11px;line-height:1.8;color:var(--sub)}
 .fide{font-style:italic;color:#333}
+.fw.out{animation:co .2s ease forwards}.fw.in{animation:ci .2s ease forwards}
+@keyframes co{to{opacity:0;transform:scale(.93) translateY(16px)}}
+@keyframes ci{from{opacity:0;transform:scale(.93) translateY(-16px)}to{opacity:1;transform:none}}
+.cc{width:100%;max-width:440px;background:var(--card);border-radius:22px;padding:32px 20px;text-align:center;box-shadow:var(--shl)}
 .acts{display:flex;gap:8px;padding:8px 16px 6px;flex-shrink:0}
 .ab{flex:1;padding:10px 4px;border:none;border-radius:13px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:transform .15s;display:flex;flex-direction:column;align-items:center;gap:2px}
 .ab:active{transform:scale(.91)}
 .ab.af{background:#fef2f2;color:var(--r)}.ab.ah{background:#fffbeb;color:var(--y)}.ab.ag{background:#f0fdf4;color:var(--g)}
 .ab span{font-size:17px}
-.tb{padding:6px 14px 22px;flex-shrink:0}
+.tb{padding:6px 14px calc(8px + var(--sab));flex-shrink:0}
 .ti{display:flex;align-items:flex-end;gap:8px;background:var(--card);border-radius:22px;padding:7px 7px 7px 13px;box-shadow:0 4px 18px rgba(0,0,0,.07)}
 #ti{flex:1;border:none;outline:none;background:transparent;font-family:inherit;font-size:15px;color:var(--tx);resize:none;min-height:32px;max-height:26dvh;line-height:1.5;overflow-y:auto}
 #ti::placeholder{color:#bbb}
 .tbb{flex-shrink:0;width:36px;height:36px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s}
 .tbb:active{transform:scale(.88)}
 .tbs{background:#f0f0ee;color:var(--sub)}.tbg{background:var(--b);color:#fff}
-.ls{flex:1;overflow-y:auto;padding:8px 16px;display:none;min-height:0}
+.ls{flex:1;overflow-y:auto;padding:8px 16px;display:none;min-height:0;-webkit-overflow-scrolling:touch}
 .ls.on{display:block}
 .li{background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:7px;box-shadow:var(--sh)}
 .lw{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:2px}
@@ -69,38 +75,32 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);displa
 .lnx{font-size:11.5px;color:#555;line-height:1.7;background:#f5f5f2;border-radius:9px;padding:7px 9px;margin-top:5px}
 .le{font-size:11.5px;color:#666;font-style:italic;margin-top:4px;line-height:1.5}
 .sh{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);padding:8px 0 4px}
-.fw.out{animation:co .2s ease forwards}.fw.in{animation:ci .2s ease forwards}
-@keyframes co{to{opacity:0;transform:scale(.93) translateY(16px)}}
-@keyframes ci{from{opacity:0;transform:scale(.93) translateY(-16px)}to{opacity:1;transform:none}}
-.cc{width:100%;max-width:440px;background:var(--card);border-radius:22px;padding:32px 20px;text-align:center;box-shadow:var(--shl)}
-/* ─── History Overlay ─── */
-.hov{position:fixed;inset:0;background:rgba(0,0,0,.32);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:60;display:flex;align-items:flex-end;padding-bottom:max(12px,env(safe-area-inset-bottom));opacity:0;pointer-events:none;transition:opacity .25s}
-.hov.show{opacity:1;pointer-events:auto}
-.hbox{width:100%;max-width:480px;margin:0 auto;background:rgba(255,255,255,.97);border-radius:22px 22px 16px 16px;padding:14px 16px 18px;max-height:65dvh;overflow-y:auto}
-.hpull{width:36px;height:4px;background:var(--ln);border-radius:2px;margin:0 auto 10px}
-.htit{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.08em;text-transform:uppercase;text-align:center;margin-bottom:10px}
+.bsheet{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.98);border-radius:22px 22px 0 0;z-index:70;transform:translateY(105%);transition:transform .32s cubic-bezier(.4,0,.2,1);max-height:62dvh;display:flex;flex-direction:column;padding-bottom:var(--sab);box-shadow:0 -6px 40px rgba(0,0,0,.18);will-change:transform}
+.bsheet.open{transform:translateY(0)}
+.bs-hdl{width:40px;height:4px;background:#d0d0d0;border-radius:2px;margin:12px auto 4px;flex-shrink:0;touch-action:none;cursor:grab}
+.bs-title{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.09em;text-transform:uppercase;text-align:center;padding:4px 0 8px;flex-shrink:0}
+.bs-body{flex:1;overflow-y:auto;padding:4px 18px 14px;-webkit-overflow-scrolling:touch}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.22);z-index:65;opacity:0;pointer-events:none;transition:opacity .28s;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.scrim.on{opacity:1;pointer-events:auto}
+.tloc{font-size:12.5px;color:var(--b);background:rgba(37,99,235,.07);border-radius:10px;padding:9px 12px;margin-bottom:10px;display:none;line-height:1.7}
+.tres{font-size:clamp(18px,5vw,32px);font-weight:300;color:var(--tx);line-height:1.5;word-break:break-word}
+.tsub{font-size:12px;color:var(--sub);margin-top:6px}
 .hrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--ln)}
 .hrow:last-child{border-bottom:none}
 .hbdg{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
-.hg{background:#dcfce7;color:#166534}.hh{background:#fef9c3;color:#854d0e}.hf{background:#fee2e2;color:#991b1b}
-.hw{font-size:13px;font-weight:700;color:var(--tx)}
-.hm{font-size:11px;color:var(--sub);margin-top:1px}
-/* ─── Expression list ─── */
+.hg-b{background:#dcfce7;color:#166534}.hh-b{background:#fef9c3;color:#854d0e}.hf-b{background:#fee2e2;color:#991b1b}
+.hw{font-size:13px;font-weight:700;color:var(--tx)}.hm{font-size:11px;color:var(--sub);margin-top:1px}
 .exr{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--ln)}
 .exr:last-child{border-bottom:none}
 .exn{font-size:10px;font-weight:700;color:var(--sub);min-width:30px;padding-top:2px}
-.exph{font-size:13px;font-weight:700;color:var(--b)}
-.exja{font-size:11px;color:var(--sub);margin-top:1px}
+.exph{font-size:13px;font-weight:700;color:var(--b)}.exja{font-size:11px;color:var(--sub);margin-top:1px}
 .exe{font-size:11px;color:#555;font-style:italic;margin-top:3px;line-height:1.5}
-/* ─── Irregular verb table ─── */
 .ivwrap{overflow-x:auto;border-radius:12px;box-shadow:var(--sh);margin-bottom:8px}
 .ivt{width:100%;border-collapse:collapse;font-size:11.5px;background:var(--card)}
 .ivt th{background:var(--b);color:#fff;padding:7px 5px;text-align:center;font-weight:700;font-size:10px;white-space:nowrap}
-.ivt td{padding:5px 5px;border-bottom:1px solid var(--ln);text-align:center;vertical-align:middle;white-space:nowrap}
+.ivt td{padding:5px;border-bottom:1px solid var(--ln);text-align:center;vertical-align:middle;white-space:nowrap}
 .ivt tr:nth-child(even) td{background:#f9f8f6}
-.ivp{color:var(--r);font-weight:700}
-.ivpp{color:var(--b);font-weight:700}
-.ivb{font-weight:700;color:var(--tx)}
+.ivp{color:var(--r);font-weight:700}.ivpp{color:var(--b);font-weight:700}.ivb{font-weight:700;color:var(--tx)}
 </style>
 </head>
 <body>
@@ -115,22 +115,15 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);displa
 <button class="nb" id="t-c" onclick="ST('c')">⚠️ 混同注意</button>
 <button class="nb" id="t-a" onclick="ST('a')">🎯 テーマ</button>
 </div>
-<div class="pr"><div class="prb"><div class="prf" id="pf" style="width:0%"></div></div><div class="prt" id="pt">0/0</div></div>
+<div class="pr" id="prbar"><div class="prb"><div class="prf" id="pf" style="width:0%"></div></div><div class="prt" id="pt">0/0</div></div>
 <div class="sr" id="sr">
-<div class="ch"><span style="color:var(--g)">✓</span><span id="sg" style="color:var(--g)">0</span></div>
-<div class="ch"><span style="color:var(--y)">△</span><span id="sh2" style="color:var(--y)">0</span></div>
-<div class="ch"><span style="color:var(--r)">✗</span><span id="sf" style="color:var(--r)">0</span></div>
-<div class="ch" style="margin-left:auto;cursor:pointer" onclick="SD()">🔀</div>
-<div class="ch" style="cursor:pointer" onclick="showHistFull()">📋</div>
+<button class="ch ch-bk" id="cbk" onclick="goBack()" disabled>←</button>
+<button class="ch" style="color:var(--g)" onclick="showHist('g')">✓ <span id="sg">0</span></button>
+<button class="ch" style="color:var(--y)" onclick="showHist('h')">△ <span id="sh2">0</span></button>
+<button class="ch" style="color:var(--r)" onclick="showHist('f')">✗ <span id="sf">0</span></button>
+<button class="ch" style="margin-left:auto" onclick="SD()">🔀</button>
 </div>
 <div class="ca" id="ca">
-<div class="tov" id="tov" onclick="CT()">
-<div>
-<div class="tloc" id="tl"></div>
-<div class="tres" id="tr"></div>
-<div class="tsub" id="ts"></div>
-</div>
-</div>
 <div class="fw" id="fw">
 <div class="fc" id="fc" onclick="FF()">
 <div class="ff" id="ff">
@@ -138,7 +131,7 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);displa
 <div class="fword" id="fwo"></div>
 <div class="fpron" id="fpr"></div>
 <span class="fpos pv" id="fpo"></span>
-<div class="fh">タップして意味を確認 · 答えたらスワイプ →✓ ←✗</div>
+<div class="fh">タップして意味を確認 · スワイプ →✓ ←✗</div>
 </div>
 <div class="ff fb" id="fba">
 <div class="fmean" id="fme"></div>
@@ -150,43 +143,36 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);displa
 </div>
 </div>
 </div>
-<!-- List panels -->
-<div class="ls" id="l-i"></div>
-<div class="ls" id="l-e"></div>
-<div class="ls" id="l-v"></div>
-<div class="ls" id="l-g"></div>
-<div class="ls" id="l-p"></div>
-<div class="ls" id="l-r"></div>
-<div class="ls" id="l-c"></div>
-<div class="ls" id="l-a"></div>
-<!-- Action buttons -->
+<div class="ls" id="l-i"></div><div class="ls" id="l-e"></div><div class="ls" id="l-v"></div>
+<div class="ls" id="l-g"></div><div class="ls" id="l-p"></div><div class="ls" id="l-r"></div>
+<div class="ls" id="l-c"></div><div class="ls" id="l-a"></div>
 <div class="acts" id="acts" style="display:none">
 <button class="ab af" onclick="R('f')"><span>😰</span>忘れた</button>
 <button class="ab ah" onclick="R('h')"><span>🤔</span>難しい</button>
 <button class="ab ag" onclick="R('g')"><span>✨</span>覚えた！</button>
 </div>
-<!-- Translator bar -->
 <div class="tb"><div class="ti">
-<button class="tbb tbs" id="bsr" title="検索"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
+<button class="tbb tbs" id="bsr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
 <textarea id="ti" placeholder="翻訳 / 単語検索..." rows="1" spellcheck="true"></textarea>
-<button class="tbb tbg" id="bgo" title="翻訳"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+<button class="tbb tbg" id="bgo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
 </div></div>
-<!-- History overlay -->
-<div id="hov" class="hov" onclick="document.getElementById('hov').classList.remove('show')">
-<div class="hbox" onclick="event.stopPropagation()">
-<div class="hpull"></div>
-<div class="htit">ANSWER HISTORY · タップして閉じる</div>
-<div id="hlist"></div>
+<div class="scrim" id="scrim"></div>
+<div class="bsheet" id="tsheet">
+<div class="bs-hdl" id="tsh-hdl"></div>
+<div class="bs-title">TRANSLATION</div>
+<div class="bs-body"><div class="tloc" id="tl"></div><div class="tres" id="tr"></div><div class="tsub" id="ts"></div></div>
 </div>
+<div class="bsheet" id="hsheet">
+<div class="bs-hdl" id="hsh-hdl"></div>
+<div class="bs-title" id="htit">ANSWER HISTORY</div>
+<div class="bs-body" id="hlist"></div>
 </div>
-
 <script type="module">
-/* ═══ HAPTIC SAFE LOADER ═══ */
+/* ═══ HAPTIC ═══ */
 let _hRaw=null;
-try{const m=await import('https://esm.sh/ios-haptics');_hRaw=m.haptic;}catch(_){}
+try{const _m=await import('https://esm.sh/ios-haptics');_hRaw=_m.haptic;}catch(_){}
 function haptic(){try{_hRaw&&_hRaw();}catch(_){}}
 haptic.confirm=function(){try{_hRaw&&_hRaw.confirm&&_hRaw.confirm();}catch(_){}};
-
 /* ═══ VOCABULARY DATA ═══ */
 const V=[
 {w:"allege",p:"v",l:3,c:"2015動詞",m:"主張する・断言する",pr:"/əˈledʒ/",f:"that節をとる。allocate（割り当てる）と混同注意。",e:"He alleged that the company was guilty.",ej:"彼はその会社に罪があると主張した。",t:["allegation (n)"],id:[]},
@@ -290,572 +276,558 @@ const V=[
 
 /* ═══ IDIOMS ═══ */
 const ID=[
-{w:"beat around the bush",m:"遠回しに言う",n:"直訳：茂みの周りを打つ",e:"Stop beating around the bush.",ej:"遠回しに言うのはやめて。"},
-{w:"take the bull by the horns",m:"勇気を出して困難に向かう",n:"雄牛を角をつかんで捕まえる",e:"Let's take the bull by the horns.",ej:"勇敢に立ち向かおう。"},
-{w:"rack one's brains",m:"知恵を絞る",n:"rack = ひどく苦しめる",e:"I racked my brains for an answer.",ej:"答えを出すために必死に考えた。"},
-{w:"spill the beans",m:"秘密をもらす",n:"意図せず秘密を話すこと",e:"Who spilled the beans?",ej:"誰が秘密をもらしたの？"},
-{w:"call it a day",m:"その日の仕事を終わりにする",n:"今日はここまでにしよう",e:"We should call it a day.",ej:"今日はここまでにしよう。"},
-{w:"hit the nail on the head",m:"的中する・正確に要点をつく",n:"釘を正確に打つ",e:"You hit the nail on the head.",ej:"まさにその通りだ。"},
-{w:"bury one's head in the sand",m:"困難から目をそらす",n:"ダチョウの俗説から",e:"Don't bury your head in the sand.",ej:"現実から目を背けるな。"},
-{w:"come in handy",m:"役に立つ",n:"handy = 便利な",e:"This tool will come in handy.",ej:"この道具は役に立つだろう。"},
-{w:"break the ice",m:"場を和ませる",n:"緊張を「砕く」イメージ",e:"He told a joke to break the ice.",ej:"彼は場を和ませるためにジョークを言った。"},
-{w:"face the music",m:"責任を取り結果を受け入れる",n:"批判・現実に正面から向き合う",e:"He had to face the music.",ej:"彼は結果を受け入れなければならなかった。"},
-{w:"make ends meet",m:"収支を合わせる・やりくりする",n:"両端（収入と支出）をつなげる",e:"Many families struggle to make ends meet.",ej:"多くの家庭が生活のやりくりに苦労している。"},
-{w:"hold water",m:"論理が通る・完璧である",n:"穴のない論理",e:"His argument doesn't hold water.",ej:"彼の主張は筋が通っていない。"},
-{w:"in a nutshell",m:"つまり・簡単に言えば",n:"ナッツの殻に収まるほどコンパクトに",e:"In a nutshell, the plan failed.",ej:"つまり、計画は失敗した。"},
-{w:"bear fruit",m:"実を結ぶ・成果が出る",n:"努力が良い結果をもたらす",e:"Their efforts finally bore fruit.",ej:"彼らの努力はついに実を結んだ。"},
-{w:"hit the ceiling",m:"かんかんに怒る",n:"= hit the roof",e:"Dad hit the ceiling when he heard.",ej:"父はそれを聞いてかんかんに怒った。"},
-{w:"pull one's leg",m:"人をからかう",n:"冗談を言うこと",e:"I was just pulling your leg.",ej:"からかっただけだよ。"},
-{w:"ring a bell",m:"記憶を呼び起こす",n:"ピンとくる",e:"Does that name ring a bell?",ej:"その名前に聞き覚えは？"},
-{w:"take a rain check",m:"また今度にする",n:"丁寧な断り表現",e:"Can I take a rain check?",ej:"また今度でいい？"},
-{w:"burn the midnight oil",m:"夜遅くまで勉強・作業する",n:"ランプの油が切れるほど",e:"She burned the midnight oil studying.",ej:"彼女は夜遅くまで勉強した。"},
-{w:"speak of the devil",m:"噂をすれば（影）",n:"噂した人が来たときに使う",e:"Speak of the devil — here she comes!",ej:"噂をすれば — 彼女が来た！"},
-{w:"throw one's weight around",m:"いばりちらす・権力を乱用する",n:"自分の影響力を誇示",e:"He likes to throw his weight around.",ej:"彼は権力を振りかざすのが好きだ。"},
-{w:"step into one's shoes",m:"後任になる・立場に立つ",n:"誰かの仕事を引き継ぐ",e:"She stepped into her boss's shoes.",ej:"彼女は上司の後任になった。"},
-{w:"put on airs",m:"気取る・すます",n:"見栄を張ること",e:"She always puts on airs.",ej:"彼女はいつも気取っている。"},
-{w:"beef up",m:"強化する",n:"beef up R&D = 研究開発を強化",e:"The company beefed up security.",ej:"会社はセキュリティを強化した。"},
-{w:"hit it off",m:"ウマが合う・意気投合する",n:"初対面で仲良くなる",e:"We hit it off right away.",ej:"すぐに意気投合した。"},
-{w:"break one's back",m:"必死に努力する",n:"≒burn the midnight oil",e:"She broke her back to finish.",ej:"彼女は完成させるために必死に頑張った。"},
-{w:"dispose of",m:"処理する・捨てる",n:"discard（捨てる）も類義",e:"Please dispose of waste properly.",ej:"ゴミは適切に処分してください。"},
-{w:"come of age",m:"成人になる",n:"coming-of-age ceremony = 成人式",e:"He came of age last year.",ej:"彼は去年成人になった。"},
-{w:"never say die",m:"あきらめるな",n:"困難でも諦めない姿勢",e:"Never say die — there's still time.",ej:"あきらめるな — まだ時間がある。"},
-{w:"for the life of me",m:"どうしても（〜できない）",n:"否定文で使う",e:"I can't for the life of me remember.",ej:"どうしても思い出せない。"},
+{w:“beat around the bush”,m:“遠回しに言う”,n:“直訳：茂みの周りを打つ”,e:“Stop beating around the bush.”,ej:“遠回しに言うのはやめて。”},
+{w:“take the bull by the horns”,m:“勇気を出して困難に向かう”,n:“雄牛を角をつかんで捕まえる”,e:“Let’s take the bull by the horns.”,ej:“勇敢に立ち向かおう。”},
+{w:“rack one’s brains”,m:“知恵を絞る”,n:“rack = ひどく苦しめる”,e:“I racked my brains for an answer.”,ej:“答えを出すために必死に考えた。”},
+{w:“spill the beans”,m:“秘密をもらす”,n:“意図せず秘密を話すこと”,e:“Who spilled the beans?”,ej:“誰が秘密をもらしたの？”},
+{w:“call it a day”,m:“その日の仕事を終わりにする”,n:“今日はここまでにしよう”,e:“We should call it a day.”,ej:“今日はここまでにしよう。”},
+{w:“hit the nail on the head”,m:“的中する・正確に要点をつく”,n:“釘を正確に打つ”,e:“You hit the nail on the head.”,ej:“まさにその通りだ。”},
+{w:“bury one’s head in the sand”,m:“困難から目をそらす”,n:“ダチョウの俗説から”,e:“Don’t bury your head in the sand.”,ej:“現実から目を背けるな。”},
+{w:“come in handy”,m:“役に立つ”,n:“handy = 便利な”,e:“This tool will come in handy.”,ej:“この道具は役に立つだろう。”},
+{w:“break the ice”,m:“場を和ませる”,n:“緊張を「砕く」イメージ”,e:“He told a joke to break the ice.”,ej:“彼は場を和ませるためにジョークを言った。”},
+{w:“face the music”,m:“責任を取り結果を受け入れる”,n:“批判・現実に正面から向き合う”,e:“He had to face the music.”,ej:“彼は結果を受け入れなければならなかった。”},
+{w:“make ends meet”,m:“収支を合わせる・やりくりする”,n:“両端（収入と支出）をつなげる”,e:“Many families struggle to make ends meet.”,ej:“多くの家庭が生活のやりくりに苦労している。”},
+{w:“hold water”,m:“論理が通る・完璧である”,n:“穴のない論理”,e:“His argument doesn’t hold water.”,ej:“彼の主張は筋が通っていない。”},
+{w:“in a nutshell”,m:“つまり・簡単に言えば”,n:“ナッツの殻に収まるほどコンパクトに”,e:“In a nutshell, the plan failed.”,ej:“つまり、計画は失敗した。”},
+{w:“bear fruit”,m:“実を結ぶ・成果が出る”,n:“努力が良い結果をもたらす”,e:“Their efforts finally bore fruit.”,ej:“彼らの努力はついに実を結んだ。”},
+{w:“hit the ceiling”,m:“かんかんに怒る”,n:”= hit the roof”,e:“Dad hit the ceiling when he heard.”,ej:“父はそれを聞いてかんかんに怒った。”},
+{w:“pull one’s leg”,m:“人をからかう”,n:“冗談を言うこと”,e:“I was just pulling your leg.”,ej:“からかっただけだよ。”},
+{w:“ring a bell”,m:“記憶を呼び起こす”,n:“ピンとくる”,e:“Does that name ring a bell?”,ej:“その名前に聞き覚えは？”},
+{w:“take a rain check”,m:“また今度にする”,n:“丁寧な断り表現”,e:“Can I take a rain check?”,ej:“また今度でいい？”},
+{w:“burn the midnight oil”,m:“夜遅くまで勉強・作業する”,n:“ランプの油が切れるほど”,e:“She burned the midnight oil studying.”,ej:“彼女は夜遅くまで勉強した。”},
+{w:“speak of the devil”,m:“噂をすれば（影）”,n:“噂した人が来たときに使う”,e:“Speak of the devil — here she comes!”,ej:“噂をすれば — 彼女が来た！”},
+{w:“throw one’s weight around”,m:“いばりちらす・権力を乱用する”,n:“自分の影響力を誇示”,e:“He likes to throw his weight around.”,ej:“彼は権力を振りかざすのが好きだ。”},
+{w:“step into one’s shoes”,m:“後任になる・立場に立つ”,n:“誰かの仕事を引き継ぐ”,e:“She stepped into her boss’s shoes.”,ej:“彼女は上司の後任になった。”},
+{w:“put on airs”,m:“気取る・すます”,n:“見栄を張ること”,e:“She always puts on airs.”,ej:“彼女はいつも気取っている。”},
+{w:“beef up”,m:“強化する”,n:“beef up R&D = 研究開発を強化”,e:“The company beefed up security.”,ej:“会社はセキュリティを強化した。”},
+{w:“hit it off”,m:“ウマが合う・意気投合する”,n:“初対面で仲良くなる”,e:“We hit it off right away.”,ej:“すぐに意気投合した。”},
+{w:“break one’s back”,m:“必死に努力する”,n:“≒burn the midnight oil”,e:“She broke her back to finish.”,ej:“彼女は完成させるために必死に頑張った。”},
+{w:“dispose of”,m:“処理する・捨てる”,n:“discard（捨てる）も類義”,e:“Please dispose of waste properly.”,ej:“ゴミは適切に処分してください。”},
+{w:“come of age”,m:“成人になる”,n:“coming-of-age ceremony = 成人式”,e:“He came of age last year.”,ej:“彼は去年成人になった。”},
+{w:“never say die”,m:“あきらめるな”,n:“困難でも諦めない姿勢”,e:“Never say die — there’s still time.”,ej:“あきらめるな — まだ時間がある。”},
+{w:“for the life of me”,m:“どうしても（〜できない）”,n:“否定文で使う”,e:“I can’t for the life of me remember.”,ej:“どうしても思い出せない。”},
 ];
 
 /* ═══ GRAMMAR ═══ */
 const GR=[
-{h:"仮定法過去",n:"現在の事実に反する仮定。If + S + 過去形, S + would + 原形",e:"If I were you, I would accept.",ej:"私があなたなら受け入れるだろう。",tip:"beはwereを使う"},
-{h:"仮定法過去完了",n:"過去の事実に反する仮定。If + S + had pp, S + would have pp",e:"If she had studied, she would have passed.",ej:"もっと勉強していたら合格しただろう。",tip:"had+過去分詞がキー"},
-{h:"関係代名詞 whose",n:"先行詞の所有関係を示す。whose + 名詞。",e:"I met a scientist whose research is famous.",ej:"有名な研究をしている科学者に会った。",tip:"人・物どちらもOK"},
-{h:"分詞構文",n:"接続詞+主語を省略した副詞的用法。Ving / pp で始まる。",e:"Having finished the work, she left.",ej:"仕事を終えて彼女は去った。",tip:"主節と同じ主語のとき使える"},
-{h:"強調構文 It is...that",n:"文の一部を強調する構文。",e:"It was John that broke the window.",ej:"窓を割ったのはジョンだ。",tip:"It is/was [強調語] that...の形"},
-{h:"the 比較級, the 比較級",n:"「〜すればするほど、ますます〜」",e:"The harder you work, the more you achieve.",ej:"努力するほど多くを達成できる。",tip:"両方にthe+比較級"},
-{h:"使役動詞 make/have/let",n:"make=強制、have=依頼、let=許可。目的語+原形不定詞。",e:"The teacher made students memorize 50 words.",ej:"先生は生徒に50語を暗記させた。",tip:"目的語の後はto無しの原形"},
-{h:"倒置（否定副詞が文頭）",n:"Never/Rarely/Not only等が文頭→助動詞+S+V語順に。",e:"Never have I seen such a sunset.",ej:"これほどの夕日を見たことがない。",tip:"フォーマルな書き言葉で頻出"},
-{h:"接続副詞の使い方",n:"Therefore/However/Moreover/Consequently等は文と文をつなぐ副詞。",e:"The plan was costly; however, it was approved.",ej:"高かったが承認された。",tip:"セミコロン+副詞+コンマの形"},
-{h:"不定詞の意味上の主語",n:"for + 名詞 + to do の形。",e:"It is important for students to review.",ej:"生徒が復習することは重要だ。",tip:"for whomを明示"},
-{h:"知覚動詞+O+doing/原形",n:"notice/see/hear+O+Ving（進行中）/ 原形（全体）",e:"She noticed him waiting outside.",ej:"彼が外で待っているのに気づいた。",tip:"Ving=途中を見た、原形=一部始終"},
-{h:"付加疑問文",n:"肯定文→否定tag、否定文→肯定tag。",e:"You've been to Paris, haven't you?",ej:"パリに行ったことがありますよね？",tip:"時制・助動詞に合わせてtagを作る"},
+{h:“仮定法過去”,n:“現在の事実に反する仮定。If + S + 過去形, S + would + 原形”,e:“If I were you, I would accept.”,ej:“私があなたなら受け入れるだろう。”,tip:“beはwereを使う”},
+{h:“仮定法過去完了”,n:“過去の事実に反する仮定。If + S + had pp, S + would have pp”,e:“If she had studied, she would have passed.”,ej:“もっと勉強していたら合格しただろう。”,tip:“had+過去分詞がキー”},
+{h:“関係代名詞 whose”,n:“先行詞の所有関係を示す。whose + 名詞。”,e:“I met a scientist whose research is famous.”,ej:“有名な研究をしている科学者に会った。”,tip:“人・物どちらもOK”},
+{h:“分詞構文”,n:“接続詞+主語を省略した副詞的用法。Ving / pp で始まる。”,e:“Having finished the work, she left.”,ej:“仕事を終えて彼女は去った。”,tip:“主節と同じ主語のとき使える”},
+{h:“強調構文 It is…that”,n:“文の一部を強調する構文。”,e:“It was John that broke the window.”,ej:“窓を割ったのはジョンだ。”,tip:“It is/was [強調語] that…の形”},
+{h:“the 比較級, the 比較級”,n:”「〜すればするほど、ますます〜」”,e:“The harder you work, the more you achieve.”,ej:“努力するほど多くを達成できる。”,tip:“両方にthe+比較級”},
+{h:“使役動詞 make/have/let”,n:“make=強制、have=依頼、let=許可。目的語+原形不定詞。”,e:“The teacher made students memorize 50 words.”,ej:“先生は生徒に50語を暗記させた。”,tip:“目的語の後はto無しの原形”},
+{h:“倒置（否定副詞が文頭）”,n:“Never/Rarely/Not only等が文頭→助動詞+S+V語順に。”,e:“Never have I seen such a sunset.”,ej:“これほどの夕日を見たことがない。”,tip:“フォーマルな書き言葉で頻出”},
+{h:“接続副詞の使い方”,n:“Therefore/However/Moreover/Consequently等は文と文をつなぐ副詞。”,e:“The plan was costly; however, it was approved.”,ej:“高かったが承認された。”,tip:“セミコロン+副詞+コンマの形”},
+{h:“不定詞の意味上の主語”,n:“for + 名詞 + to do の形。”,e:“It is important for students to review.”,ej:“生徒が復習することは重要だ。”,tip:“for whomを明示”},
+{h:“知覚動詞+O+doing/原形”,n:“notice/see/hear+O+Ving（進行中）/ 原形（全体）”,e:“She noticed him waiting outside.”,ej:“彼が外で待っているのに気づいた。”,tip:“Ving=途中を見た、原形=一部始終”},
+{h:“付加疑問文”,n:“肯定文→否定tag、否定文→肯定tag。”,e:“You’ve been to Paris, haven’t you?”,ej:“パリに行ったことがありますよね？”,tip:“時制・助動詞に合わせてtagを作る”},
 ];
 
 /* ═══ PARAPHRASE ═══ */
 const PA=[
-{o:"say / think",b:["claim","assert","maintain","argue"],n:"意見・主張のフォーマル版",e:"Researchers claim that sleep is vital."},
-{o:"show",b:["illustrate","indicate","demonstrate","reveal"],n:"データ・研究結果を「示す」",e:"The data illustrates a clear trend."},
-{o:"solve / deal with",b:["address","tackle","cope with","resolve"],n:"問題に「取り組む」",e:"We must address climate change."},
-{o:"bad / harmful",b:["detrimental","adverse","unfavorable","damaging"],n:"悪影響のフォーマル版",e:"Smoking is detrimental to health."},
-{o:"good / helpful",b:["beneficial","advantageous","effective","constructive"],n:"利点のフォーマル版",e:"Exercise is beneficial for the body."},
-{o:"many / a lot of",b:["numerous","a wide range of","a variety of"],n:"数が多いフォーマル版",e:"There are numerous advantages."},
-{o:"But",b:["However","Nevertheless","On the other hand","Nonetheless"],n:"逆接の接続副詞",e:"The plan is costly; however, it is effective."},
-{o:"Because / So",b:["Due to","Therefore","Consequently","As a result"],n:"原因・結果のフォーマル版",e:"Consequently, the project was cancelled."},
-{o:"Also",b:["Furthermore","In addition","Moreover","Additionally"],n:"追加情報の接続副詞",e:"Furthermore, the cost was reduced."},
-{o:"happen",b:["occur","take place","arise","emerge"],n:"「起こる」のフォーマル版",e:"The accident occurred near the station."},
-{o:"use",b:["utilize","employ","implement","apply"],n:"「使う」のフォーマル版",e:"The company utilizes renewable energy."},
-{o:"change",b:["transform","alter","modify","shift"],n:"変化の程度で使い分け",e:"Technology has transformed communication."},
+{o:“say / think”,b:[“claim”,“assert”,“maintain”,“argue”],n:“意見・主張のフォーマル版”,e:“Researchers claim that sleep is vital.”},
+{o:“show”,b:[“illustrate”,“indicate”,“demonstrate”,“reveal”],n:“データ・研究結果を「示す」”,e:“The data illustrates a clear trend.”},
+{o:“solve / deal with”,b:[“address”,“tackle”,“cope with”,“resolve”],n:“問題に「取り組む」”,e:“We must address climate change.”},
+{o:“bad / harmful”,b:[“detrimental”,“adverse”,“unfavorable”,“damaging”],n:“悪影響のフォーマル版”,e:“Smoking is detrimental to health.”},
+{o:“good / helpful”,b:[“beneficial”,“advantageous”,“effective”,“constructive”],n:“利点のフォーマル版”,e:“Exercise is beneficial for the body.”},
+{o:“many / a lot of”,b:[“numerous”,“a wide range of”,“a variety of”],n:“数が多いフォーマル版”,e:“There are numerous advantages.”},
+{o:“But”,b:[“However”,“Nevertheless”,“On the other hand”,“Nonetheless”],n:“逆接の接続副詞”,e:“The plan is costly; however, it is effective.”},
+{o:“Because / So”,b:[“Due to”,“Therefore”,“Consequently”,“As a result”],n:“原因・結果のフォーマル版”,e:“Consequently, the project was cancelled.”},
+{o:“Also”,b:[“Furthermore”,“In addition”,“Moreover”,“Additionally”],n:“追加情報の接続副詞”,e:“Furthermore, the cost was reduced.”},
+{o:“happen”,b:[“occur”,“take place”,“arise”,“emerge”],n:”「起こる」のフォーマル版”,e:“The accident occurred near the station.”},
+{o:“use”,b:[“utilize”,“employ”,“implement”,“apply”],n:”「使う」のフォーマル版”,e:“The company utilizes renewable energy.”},
+{o:“change”,b:[“transform”,“alter”,“modify”,“shift”],n:“変化の程度で使い分け”,e:“Technology has transformed communication.”},
 ];
 
 /* ═══ READING EXPRESSIONS ═══ */
 const RE=[
-{p:"a fact of life",m:"避けられない現実",e:"Water restrictions are a fact of life.",s:"2015 Water Worries"},
-{p:"in turn",m:"今度は・次には",e:"Such efforts will in turn lead to discoveries.",s:"2015"},
-{p:"figure out",m:"解明する・理解する",e:"We need to figure out the cause.",s:"2015"},
-{p:"on a regular basis",m:"定期的に",e:"I exercise on a regular basis.",s:"2015"},
-{p:"be confined to",m:"〜に限られる",e:"The problem is not confined to one country.",s:"2015"},
-{p:"exposure to",m:"〜にさらされること",e:"Prolonged exposure to noise is harmful.",s:"2015"},
-{p:"on the increase",m:"増加傾向にある",e:"Businesses targeting teens are on the increase.",s:"2015"},
-{p:"blend in with",m:"〜に溶け込む",e:"The robots blended in with real roaches.",s:"2015 Robot-Roaches"},
-{p:"sift through",m:"〜をふるいにかける",e:"The company sifted through candidates.",s:"2015"},
-{p:"did not occur in a vacuum",m:"真空の中で起きたわけではない（背景がある）",e:"The incident did not occur in a vacuum.",s:"2025 Haymarket"},
-{p:"whip up public anger",m:"大衆の怒りを煽る",e:"Newspapers whipped up public anger.",s:"2025 Haymarket"},
-{p:"induced resistance",m:"誘導抵抗性",e:"Induced resistance vaccinates plants against pests.",s:"2025 Protecting Plants"},
-{p:"defense priming",m:"防衛プライミング（植物免疫）",e:"Defense priming stimulates weak defense responses.",s:"2025 Protecting Plants"},
-{p:"fall behind one's peers",m:"仲間に後れをとる",e:"Low-income children fall behind their peers.",s:"2025 Early Education"},
-{p:"anecdotal evidence",m:"体験談的根拠（科学的でない）",e:"There was anecdotal evidence years ago.",s:"2015 Elephant Speech"},
+{p:“a fact of life”,m:“避けられない現実”,e:“Water restrictions are a fact of life.”,s:“2015 Water Worries”},
+{p:“in turn”,m:“今度は・次には”,e:“Such efforts will in turn lead to discoveries.”,s:“2015”},
+{p:“figure out”,m:“解明する・理解する”,e:“We need to figure out the cause.”,s:“2015”},
+{p:“on a regular basis”,m:“定期的に”,e:“I exercise on a regular basis.”,s:“2015”},
+{p:“be confined to”,m:”〜に限られる”,e:“The problem is not confined to one country.”,s:“2015”},
+{p:“exposure to”,m:”〜にさらされること”,e:“Prolonged exposure to noise is harmful.”,s:“2015”},
+{p:“on the increase”,m:“増加傾向にある”,e:“Businesses targeting teens are on the increase.”,s:“2015”},
+{p:“blend in with”,m:”〜に溶け込む”,e:“The robots blended in with real roaches.”,s:“2015 Robot-Roaches”},
+{p:“sift through”,m:”〜をふるいにかける”,e:“The company sifted through candidates.”,s:“2015”},
+{p:“did not occur in a vacuum”,m:“真空の中で起きたわけではない（背景がある）”,e:“The incident did not occur in a vacuum.”,s:“2025 Haymarket”},
+{p:“whip up public anger”,m:“大衆の怒りを煽る”,e:“Newspapers whipped up public anger.”,s:“2025 Haymarket”},
+{p:“induced resistance”,m:“誘導抵抗性”,e:“Induced resistance vaccinates plants against pests.”,s:“2025 Protecting Plants”},
+{p:“defense priming”,m:“防衛プライミング（植物免疫）”,e:“Defense priming stimulates weak defense responses.”,s:“2025 Protecting Plants”},
+{p:“fall behind one’s peers”,m:“仲間に後れをとる”,e:“Low-income children fall behind their peers.”,s:“2025 Early Education”},
+{p:“anecdotal evidence”,m:“体験談的根拠（科学的でない）”,e:“There was anecdotal evidence years ago.”,s:“2015 Elephant Speech”},
 ];
 
 /* ═══ CONFUSED PAIRS ═══ */
 const CP=[
-{a:"comprehensive（包括的な）",b:"comprehensible（理解できる）",n:"準1最頻出混同ミスNo.1"},
-{a:"considerable（かなりの）",b:"considerate（思いやりのある）",n:"Eで終わるのは人の性格を表す"},
-{a:"evade（逃れる）",b:"invade（侵略する）",n:"2025出題。e-=外へ、in-=内へ"},
-{a:"tentative（仮の）",b:"attentive（注意深い）",n:"2025出題"},
-{a:"autonomy（自律性）",b:"astronomy（天文学）",n:"auto-=自己、astro-=星"},
-{a:"allege（主張する）",b:"allocate（割り当てる）",n:"allegはthat節、allocateはto/for"},
-{a:"apprehend（逮捕・理解）",b:"comprehend（理解する）",n:"apprehendは逮捕の意味もある"},
-{a:"cherish（大事にする）",b:"perish（死ぬ・滅びる）",n:"見た目が似ているが逆方向"},
-{a:"dominate（支配する）",b:"domesticate（飼いならす）",n:"domesticateはwildlife文脈"},
-{a:"elicit（引き出す）",b:"elevate（高める）",n:"elicit a response=反応を引き出す"},
+{a:“comprehensive（包括的な）”,b:“comprehensible（理解できる）”,n:“準1最頻出混同ミスNo.1”},
+{a:“considerable（かなりの）”,b:“considerate（思いやりのある）”,n:“Eで終わるのは人の性格を表す”},
+{a:“evade（逃れる）”,b:“invade（侵略する）”,n:“2025出題。e-=外へ、in-=内へ”},
+{a:“tentative（仮の）”,b:“attentive（注意深い）”,n:“2025出題”},
+{a:“autonomy（自律性）”,b:“astronomy（天文学）”,n:“auto-=自己、astro-=星”},
+{a:“allege（主張する）”,b:“allocate（割り当てる）”,n:“allegはthat節、allocateはto/for”},
+{a:“apprehend（逮捕・理解）”,b:“comprehend（理解する）”,n:“apprehendは逮捕の意味もある”},
+{a:“cherish（大事にする）”,b:“perish（死ぬ・滅びる）”,n:“見た目が似ているが逆方向”},
+{a:“dominate（支配する）”,b:“domesticate（飼いならす）”,n:“domesticateはwildlife文脈”},
+{a:“elicit（引き出す）”,b:“elevate（高める）”,n:“elicit a response=反応を引き出す”},
 ];
 
 /* ═══ THEMES ═══ */
 const TH=[
-{cat:"環境・テクノロジー",items:["再生可能エネルギーの利点と限界","AIが労働市場に与える影響","プラスチックゴミと循環型経済"]},
-{cat:"社会・教育",items:["テレワークの社会的功罪","多文化主義と移民受け入れ","オンライン教育 vs 対面授業"]},
-{cat:"ビジネス・経済",items:["企業の社会的責任（CSR）","オーバーツーリズムと対策","シェアリングエコノミー"]},
-{cat:"歴史・文化",items:["絶滅危惧言語の保護","伝統技術の継承と近代化"]},
-{cat:"心理・健康",items:["睡眠不足と生産性","都市生活とメンタルヘルス"]},
+{cat:“環境・テクノロジー”,items:[“再生可能エネルギーの利点と限界”,“AIが労働市場に与える影響”,“プラスチックゴミと循環型経済”]},
+{cat:“社会・教育”,items:[“テレワークの社会的功罪”,“多文化主義と移民受け入れ”,“オンライン教育 vs 対面授業”]},
+{cat:“ビジネス・経済”,items:[“企業の社会的責任（CSR）”,“オーバーツーリズムと対策”,“シェアリングエコノミー”]},
+{cat:“歴史・文化”,items:[“絶滅危惧言語の保護”,“伝統技術の継承と近代化”]},
+{cat:“心理・健康”,items:[“睡眠不足と生産性”,“都市生活とメンタルヘルス”]},
 ];
 
 /* ═══ EXPRESSIONS from textbook (入試で使える表現リスト) ─ NOT IN QUIZ ═══ */
 const EX=[
-{n:1,ph:"my favorite food",ja:"私の好きな食べ物",e:"My favorite food is chocolate.",ej:"私の好きな食べ物はチョコレートです。"},
-{n:2,ph:"foreign people",ja:"外国人",e:"Many foreign people visit Kyoto every year.",ej:"毎年、多くの外国人が京都を訪れます。"},
-{n:3,ph:"people in this town",ja:"この町の人々",e:"People in this town are very kind.",ej:"この町の人々はとても親切です。"},
-{n:4,ph:"each other",ja:"おたがい",e:"Do you know each other?",ej:"あなたたちはおたがいを知っているのですか。"},
-{n:5,ph:"something to drink",ja:"何か飲むもの",e:"I want something to drink.",ej:"何か飲むものがほしいです。"},
-{n:6,ph:"a member of the art club",ja:"美術部のメンバー",e:"She is a member of the art club.",ej:"彼女は美術部のメンバーです。"},
-{n:7,ph:"a lot of things",ja:"たくさんのこと",e:"I have a lot of things to do.",ej:"ぼくにはすべきことがたくさんあります。"},
-{n:8,ph:"one of my classmates",ja:"私のクラスメートの1人",e:"He is one of my classmates.",ej:"彼は私のクラスメートのうちの1人です。"},
-{n:9,ph:"some of the students",ja:"生徒のうちの数人",e:"Some of the students had a fever.",ej:"生徒のうちの数人に、熱がありました。"},
-{n:10,ph:"most of the children",ja:"子どもたちのほとんど",e:"Most of the children like this book.",ej:"子どもたちのほとんどがこの本を気に入っています。"},
-{n:11,ph:"each of us",ja:"私たちそれぞれ",e:"Each of us has to be careful.",ej:"私たちのそれぞれが注意しなければなりません。"},
-{n:12,ph:"the number of the visitors",ja:"訪問者の数",e:"The number of the visitors is growing.",ej:"訪問者の数は増えています。"},
-{n:13,ph:"many kinds of animals",ja:"いろいろな種類の動物",e:"I saw many kinds of animals there.",ej:"ぼくはそこで、いろいろな種類の動物を見ました。"},
-{n:14,ph:"have a good time",ja:"楽しく過ごす",e:"We had a very good time.",ej:"私たちはとても楽しく過ごしました。"},
-{n:15,ph:"have fun",ja:"楽しむ",e:"I had fun today.",ej:"今日は楽しかったです。"},
-{n:16,ph:"have a cold",ja:"風邪をひいている",e:"Do you have a cold?",ej:"あなたは風邪をひいているのですか。"},
-{n:17,ph:"do my homework",ja:"宿題をする",e:"I did my homework after dinner.",ej:"私は夕食のあとに宿題をしました。"},
-{n:18,ph:"do my best",ja:"ベストを尽くす",e:"I'll do my best.",ej:"ぼくはベストを尽くします。"},
-{n:19,ph:"go shopping",ja:"買い物に行く",e:"I went shopping yesterday afternoon.",ej:"私は昨日の午後、買い物に行きました。"},
-{n:20,ph:"go home",ja:"家に帰る",e:"What time did you go home last night?",ej:"あなたは昨夜、何時に家に帰りましたか。"},
-{n:21,ph:"go to bed",ja:"寝る",e:"I usually go to bed at ten.",ej:"ぼくはふだん10時に寝ます。"},
-{n:22,ph:"say goodbye",ja:"さよならを言う",e:"I don't want to say goodbye.",ej:"さよならを言いたくはありません。"},
-{n:23,ph:"make a mistake",ja:"まちがう",e:"I made a mistake in my test.",ej:"私はテストで1つまちがいました。"},
-{n:24,ph:"make a speech",ja:"スピーチをする",e:"I have to make a speech tomorrow.",ej:"ぼくは明日、スピーチをしなければなりません。"},
-{n:25,ph:"come to my house",ja:"私の家に来る",e:"Miki came to my house today.",ej:"今日、ミキが私の家に来ました。"},
-{n:26,ph:"come true",ja:"実現する",e:"Your dream will come true.",ej:"あなたの夢はきっと実現します。"},
-{n:27,ph:"get up",ja:"起きる",e:"I got up late this morning.",ej:"私は今朝、遅く起きました。"},
-{n:28,ph:"get to school",ja:"学校に着く",e:"I got to school very early today.",ej:"私は今日、とても早く学校に着きました。"},
-{n:29,ph:"get on[off] a bus",ja:"バスに乗車する[を下車する]",e:"Where should I get off the bus?",ej:"どこでバスを降りればいいのですか。"},
-{n:30,ph:"get well",ja:"よく[上手に]なる",e:"His Japanese is getting better.",ej:"彼の日本語は上手になってきています。"},
-{n:31,ph:"take care of my cat",ja:"うちのねこの世話をする",e:"I take care of my cat.",ej:"ぼくが、うちのねこの世話をしています。"},
-{n:32,ph:"take pictures",ja:"写真を撮る",e:"My brother likes taking pictures.",ej:"兄は写真を撮るのが好きです。"},
-{n:33,ph:"take a bath",ja:"おふろに入る",e:"I want to take a bath now.",ej:"私は今、おふろに入りたいです。"},
-{n:34,ph:"take a bus",ja:"バスを利用する",e:"Do you take a bus to go to school?",ej:"あなたは通学するのにバスを利用しますか。"},
-{n:35,ph:"take 20 minutes",ja:"20分かかる",e:"It takes 20 minutes to the park by bike.",ej:"その公園まで自転車で20分かかります。"},
-{n:36,ph:"look at the sky",ja:"空を見る",e:"I like looking at the sky.",ej:"私は空を見るのが好きです。"},
-{n:37,ph:"look for a bookstore",ja:"本屋を探す",e:"I'm looking for a bookstore.",ej:"本屋さんを探しています。"},
-{n:38,ph:"look forward to the next time",ja:"次回を楽しみにする",e:"I'm looking forward to the next time.",ej:"次回を楽しみにしています。"},
-{n:39,ph:"give up",ja:"あきらめる",e:"Don't give up yet.",ej:"まだあきらめてはいけません。"},
-{n:40,ph:"leave home",ja:"家を出る",e:"I leave home at seven every morning.",ej:"私は毎朝7時に家を出ます。"},
-{n:41,ph:"leave a message",ja:"メッセージを残す",e:"Can I leave a message for her?",ej:"彼女にメッセージを残してもいいですか。"},
-{n:42,ph:"ask a question",ja:"質問をする",e:"May I ask you a question?",ej:"1つ質問をしてもよろしいですか。"},
-{n:43,ph:"start at nine",ja:"9時に始まる[始める]",e:"Our school starts at nine.",ej:"私たちの学校は9時に始まります。"},
-{n:44,ph:"try to remember",ja:"思い出そうとする",e:"Now I'm trying to remember its name.",ej:"今はその名前を思い出そうとしています。"},
-{n:45,ph:"show him around a town",ja:"彼に町を案内する",e:"I showed him around my town.",ej:"私は彼に町を案内しました。"},
-{n:46,ph:"call you back",ja:"あなたに電話をかけ直す",e:"I'll call you back in ten minutes.",ej:"10分したらあなたに電話をかけ直します。"},
-{n:47,ph:"hear from you",ja:"あなたから連絡をもらう",e:"I'm glad to hear from you.",ej:"あなたから連絡をもらえてうれしいです。"},
-{n:48,ph:"feel happy",ja:"幸せを感じる",e:"I feel happy when I go to bed.",ej:"ベッドに向かうときに幸せを感じます。"},
-{n:49,ph:"stay at a hotel",ja:"ホテルに泊まる",e:"We stayed at a hotel by the sea.",ej:"私たちは海のそばのホテルに滞在しました。"},
-{n:50,ph:"stay with my uncle",ja:"おじのところに滞在する",e:"We stayed with my uncle.",ej:"私たちはおじのところに滞在しました。"},
-{n:51,ph:"listen to music",ja:"音楽を聴く",e:"I listen to music every day.",ej:"私は毎日音楽を聴きます。"},
-{n:52,ph:"answer the phone",ja:"電話に出る",e:"Can you answer the phone?",ej:"電話に出てもらえますか。"},
-{n:53,ph:"wait for my friend",ja:"友達を待つ",e:"I'm waiting for my friend now.",ej:"私は今、友達を待っています。"},
-{n:54,ph:"arrive at the station",ja:"駅に着く",e:"We have just arrived at the station.",ej:"私たちはちょうど今駅に着いたところです。"},
-{n:55,ph:"agree with you",ja:"あなたに同意する",e:"I agree with you.",ej:"私はあなたに同意します。"},
-{n:56,ph:"be interested in making things",ja:"ものを作ることに興味がある",e:"I'm interested in making things.",ej:"ぼくはものを作ることに興味があります。"},
-{n:57,ph:"be surprised at the news",ja:"その知らせに驚いている",e:"We were surprised at the news.",ej:"私たちはその知らせに驚きました。"},
-{n:58,ph:"be excited for the trip",ja:"旅行にわくわくする",e:"I'm excited for the trip.",ej:"ぼくは旅行にわくわくしています。"},
-{n:59,ph:"be impressed with the words",ja:"そのことばに感動する",e:"I was impressed with the words.",ej:"私はそのことばに感動しました。"},
-{n:60,ph:"be proud of you",ja:"あなたを誇りに思う",e:"I am very proud of you.",ej:"私はあなたのことをとても誇りに思います。"},
-{n:61,ph:"be worried about her",ja:"彼女のことを心配する",e:"Everyone is worried about her.",ej:"みんな彼女のことを心配しています。"},
-{n:62,ph:"be good at sports",ja:"スポーツが得意である",e:"She is good at sports.",ej:"彼女はスポーツが得意です。"},
-{n:63,ph:"be able to win the game",ja:"試合に勝つことができる",e:"He will be able to win the game.",ej:"彼は試合に勝つことができるでしょう。"},
-{n:64,ph:"be busy with work",ja:"仕事で忙しい",e:"My sister is busy with work.",ej:"姉は仕事で忙しいです。"},
-{n:65,ph:"be late for class",ja:"授業に遅れる",e:"Don't be late for your class.",ej:"授業に遅れてはいけません。"},
-{n:66,ph:"be kind to others",ja:"他者に親切にする",e:"Be kind to others.",ej:"他者に親切にしなさい。"},
-{n:67,ph:"be famous for oranges",ja:"みかんで有名である",e:"My town is famous for oranges.",ej:"ぼくの町はみかんで有名です。"},
-{n:68,ph:"be popular among girls",ja:"女の子の間で人気である",e:"This song is popular among girls.",ej:"この歌は女の子の間で人気です。"},
-{n:69,ph:"be different from mine",ja:"私のとはちがっている",e:"His idea is different from mine.",ej:"彼のアイデアは私のとはちがっています。"},
-{n:70,ph:"be full of joy",ja:"喜びでいっぱいである",e:"She was full of joy.",ej:"彼女は喜びでいっぱいでした。"},
-{n:71,ph:"be born",ja:"生まれる",e:"I was born in Aomori.",ej:"ぼくは青森で生まれました。"},
-{n:72,ph:"a few days ago",ja:"数日前",e:"I got this a few days ago.",ej:"私はこれを数日前に受け取りました。"},
-{n:73,ph:"a lot",ja:"たくさん",e:"My mother talks a lot.",ej:"母はよくしゃべります。"},
-{n:74,ph:"a little",ja:"少し",e:"My sister speaks English a little.",ej:"姉は少し英語を話します。"},
-{n:75,ph:"in the morning",ja:"午前中",e:"I helped my father in the morning.",ej:"午前中、ぼくはお父さんの手伝いをしました。"},
-{n:76,ph:"in the future",ja:"将来",e:"She will be a doctor in the future.",ej:"将来、彼女は医者になるでしょう。"},
-{n:77,ph:"in front of everyone",ja:"みんなの前で",e:"I can't sing in front of everyone.",ej:"私はみんなの前では歌えません。"},
-{n:78,ph:"in English",ja:"英語で",e:'How do you say "hasami" in English?',ej:"「はさみ」は英語でどのように言うのですか。"},
-{n:79,ph:"for three hours",ja:"3時間",e:"I watched TV for three hours.",ej:"ぼくは3時間テレビを見ました。"},
-{n:80,ph:"for a long time",ja:"長い間",e:"I haven't seen her for a long time.",ej:"私は長い間彼女に会っていません。"},
-{n:81,ph:"for the first time",ja:"初めて",e:"I came here for the first time.",ej:"私は初めてここに来ました。"},
-{n:82,ph:"for example",ja:"たとえば",e:"What do you like to do, for example?",ej:"あなたはたとえば、どんなことをするのが好きですか。"},
-{n:83,ph:"at night",ja:"夜に",e:"He often eats at night.",ej:"彼は夜によく食べます。"},
-{n:84,ph:"at first",ja:"最初は",e:"I didn't like English at first.",ej:"最初は、英語が好きではありませんでした。"},
-{n:85,ph:"at last",ja:"ついに",e:"We could win at last.",ej:"ぼくたちはついに勝つことができました。"},
-{n:86,ph:"at that time",ja:"そのとき",e:"I was sleeping at that time.",ej:"私はそのとき眠っていました。"},
-{n:87,ph:"at home",ja:"家[学校]で",e:"We were having dinner at home.",ej:"ぼくたちは家で夕食を食べていました。"},
-{n:88,ph:"this afternoon",ja:"今日の午後",e:"It rained a lot this afternoon.",ej:"今日の午後はたくさん雨が降りました。"},
-{n:89,ph:"on Sunday",ja:"日曜日に",e:"Please come to my house on Sunday.",ej:"日曜日に私の家に来てください。"},
-{n:90,ph:"on the internet",ja:"インターネットで",e:"I found this on the internet.",ej:"ぼくはこれを、インターネットで見つけました。"},
-{n:91,ph:"on your right",ja:"あなたの右側[左側]に",e:"You'll see the building on your right.",ej:"その建物はあなたの右側に見えます。"},
-{n:92,ph:"with my friends",ja:"友達といっしょに",e:"I sometimes study with my friends.",ej:"私はときどき、友達といっしょに勉強します。"},
-{n:93,ph:"like you",ja:"あなたのように[な]",e:"I want to be a teacher like you.",ej:"私はあなたのような先生になりたいです。"},
-{n:94,ph:"very well",ja:"とてもよく[上手に]",e:"You play the guitar very well.",ej:"あなたはとても上手にギターをひきますね。"},
-{n:95,ph:"very hard",ja:"とても一生懸命に",e:"We need to practice very hard.",ej:"ぼくたちはとても一生懸命に練習する必要があります。"},
-{n:96,ph:"many times",ja:"何度も",e:"I read the e-mail many times.",ej:"私はそのメールを何度も読みました。"},
-{n:97,ph:"from here to there",ja:"ここからそこまで",e:"How long will it take from here to there?",ej:"ここからそこまで、時間はどれくらいかかるでしょうか。"},
-{n:98,ph:"some time this week",ja:"今週のいつか",e:"Can I see you some time this week?",ej:"今週のいつかに会えますか。"},
-{n:99,ph:"all day",ja:"一日中",e:"I stayed home all day today.",ej:"私は今日、一日中家にいました。"},
-{n:100,ph:"by bike",ja:"自転車で",e:"Ms. Ito comes to school by bike.",ej:"伊藤先生は自転車で学校に来ています。"},
-{n:101,ph:"because of the rain",ja:"雨が原因で",e:"Our game was stopped because of the rain.",ej:"私たちの試合は、雨で中止になりました。"},
-{n:102,ph:"thanks to you",ja:"あなたのおかげで",e:"Thanks to you, we had really fun.",ej:"あなたのおかげで、ぼくたちは本当に楽しかったです。"},
-{n:103,ph:"after dinner",ja:"夕食のあと[前]",e:"I wanted to watch a movie after dinner.",ej:"夕食のあとで映画を見たいと思っていました。"},
-{n:104,ph:"next month",ja:"来月",e:"I'll be fifteen next month.",ej:"ぼくは来月15歳になります。"},
-{n:105,ph:"next to me",ja:"私の隣に",e:"Akira sat next to me.",ej:"アキラはぼくの隣に座りました。"},
-{n:106,ph:"last year",ja:"昨年",e:"He came to Japan last year.",ej:"彼は昨年、日本に来ました。"},
-{n:107,ph:"every day",ja:"毎日",e:"I drink milk every day.",ej:"私は毎日、牛乳を飲みます。"},
-{n:108,ph:"these days",ja:"このごろ",e:"She doesn't look well these days.",ej:"彼女はこのごろ元気がないようです。"},
-{n:109,ph:"around the world",ja:"世界中で",e:"He is famous around the world.",ej:"彼は世界中で有名です。"},
-{n:110,ph:"near our school",ja:"私たちの学校の近くに",e:"There is a supermarket near our school.",ej:"ぼくたちの学校の近くにスーパーが1軒あります。"},
-{n:111,ph:"during the summer vacation",ja:"夏休みの間に",e:"I put on 2 kilos during the summer vacation.",ej:"私は夏休みの間に2キロ太りました。"},
-{n:112,ph:"since then",ja:"それ以来",e:"I haven't talked with him since then.",ej:"それ以来、彼とは話していません。"},
-{n:113,ph:"without water",ja:"水なしで",e:"We can't live without clean air and water.",ej:"私たちはきれいな空気や水なしで生きることはできません。"},
-{n:114,ph:"How about this one?",ja:"これはどうですか。",e:"How about playing video games?",ej:"ゲームをするのはどうですか。"},
-{n:115,ph:"Can I use this one?",ja:"これを使ってもよろしいですか。",e:"Can I see this one?",ej:"これを見てもいいですか。"},
-{n:116,ph:"Can you help me?",ja:"手伝ってもらえますか。",e:"Can you show me your notebook?",ej:"ノートを見せてくれますか。"},
-{n:117,ph:"How long does it take?",ja:"どれくらいかかりますか。",e:"How long does it take from here?",ej:"ここからどれくらいかかりますか。"},
-{n:118,ph:"I'd like to send this one",ja:"これを送りたいのですが。",e:"I'd like to see Mr. Yokota.",ej:"横田さんにお会いしたいのですが。"},
-{n:119,ph:"I'd like this one",ja:"これにしたいのですが。",e:"I'd like some coffee.",ej:"コーヒーをいただきたいのですが。"},
-{n:120,ph:"Would you like this one?",ja:"こちらはいかがですか。",e:"Would you like some tea?",ej:"紅茶はいかがですか。"},
-{n:121,ph:"Thank you for your e-mail",ja:"メールをありがとう。",e:"Thank you for coming today.",ej:"今日は来てくれてありがとう。"},
-{n:122,ph:"Why don't you try?",ja:"ためしてみたらどうですか。",e:"Why don't you eat this?",ej:"これを食べてみたらどうですか。"},
-{n:123,ph:"Shall I take your bag?",ja:"かばんをお持ちしましょうか。",e:"Shall I get you a taxi?",ej:"タクシーを呼びましょうか。"},
-{n:124,ph:"Shall we sit down?",ja:"座りましょうか。",e:"Shall we have a break?",ej:"休憩しましょうか。"},
-{n:125,ph:"May I speak to Tom, please?",ja:"トムと話してもよろしいですか。",e:"May I speak to Emily, please?",ej:"エミリーと話してもよろしいですか。"},
+{n:1,ph:“my favorite food”,ja:“私の好きな食べ物”,e:“My favorite food is chocolate.”,ej:“私の好きな食べ物はチョコレートです。”},
+{n:2,ph:“foreign people”,ja:“外国人”,e:“Many foreign people visit Kyoto every year.”,ej:“毎年、多くの外国人が京都を訪れます。”},
+{n:3,ph:“people in this town”,ja:“この町の人々”,e:“People in this town are very kind.”,ej:“この町の人々はとても親切です。”},
+{n:4,ph:“each other”,ja:“おたがい”,e:“Do you know each other?”,ej:“あなたたちはおたがいを知っているのですか。”},
+{n:5,ph:“something to drink”,ja:“何か飲むもの”,e:“I want something to drink.”,ej:“何か飲むものがほしいです。”},
+{n:6,ph:“a member of the art club”,ja:“美術部のメンバー”,e:“She is a member of the art club.”,ej:“彼女は美術部のメンバーです。”},
+{n:7,ph:“a lot of things”,ja:“たくさんのこと”,e:“I have a lot of things to do.”,ej:“ぼくにはすべきことがたくさんあります。”},
+{n:8,ph:“one of my classmates”,ja:“私のクラスメートの1人”,e:“He is one of my classmates.”,ej:“彼は私のクラスメートのうちの1人です。”},
+{n:9,ph:“some of the students”,ja:“生徒のうちの数人”,e:“Some of the students had a fever.”,ej:“生徒のうちの数人に、熱がありました。”},
+{n:10,ph:“most of the children”,ja:“子どもたちのほとんど”,e:“Most of the children like this book.”,ej:“子どもたちのほとんどがこの本を気に入っています。”},
+{n:11,ph:“each of us”,ja:“私たちそれぞれ”,e:“Each of us has to be careful.”,ej:“私たちのそれぞれが注意しなければなりません。”},
+{n:12,ph:“the number of the visitors”,ja:“訪問者の数”,e:“The number of the visitors is growing.”,ej:“訪問者の数は増えています。”},
+{n:13,ph:“many kinds of animals”,ja:“いろいろな種類の動物”,e:“I saw many kinds of animals there.”,ej:“ぼくはそこで、いろいろな種類の動物を見ました。”},
+{n:14,ph:“have a good time”,ja:“楽しく過ごす”,e:“We had a very good time.”,ej:“私たちはとても楽しく過ごしました。”},
+{n:15,ph:“have fun”,ja:“楽しむ”,e:“I had fun today.”,ej:“今日は楽しかったです。”},
+{n:16,ph:“have a cold”,ja:“風邪をひいている”,e:“Do you have a cold?”,ej:“あなたは風邪をひいているのですか。”},
+{n:17,ph:“do my homework”,ja:“宿題をする”,e:“I did my homework after dinner.”,ej:“私は夕食のあとに宿題をしました。”},
+{n:18,ph:“do my best”,ja:“ベストを尽くす”,e:“I’ll do my best.”,ej:“ぼくはベストを尽くします。”},
+{n:19,ph:“go shopping”,ja:“買い物に行く”,e:“I went shopping yesterday afternoon.”,ej:“私は昨日の午後、買い物に行きました。”},
+{n:20,ph:“go home”,ja:“家に帰る”,e:“What time did you go home last night?”,ej:“あなたは昨夜、何時に家に帰りましたか。”},
+{n:21,ph:“go to bed”,ja:“寝る”,e:“I usually go to bed at ten.”,ej:“ぼくはふだん10時に寝ます。”},
+{n:22,ph:“say goodbye”,ja:“さよならを言う”,e:“I don’t want to say goodbye.”,ej:“さよならを言いたくはありません。”},
+{n:23,ph:“make a mistake”,ja:“まちがう”,e:“I made a mistake in my test.”,ej:“私はテストで1つまちがいました。”},
+{n:24,ph:“make a speech”,ja:“スピーチをする”,e:“I have to make a speech tomorrow.”,ej:“ぼくは明日、スピーチをしなければなりません。”},
+{n:25,ph:“come to my house”,ja:“私の家に来る”,e:“Miki came to my house today.”,ej:“今日、ミキが私の家に来ました。”},
+{n:26,ph:“come true”,ja:“実現する”,e:“Your dream will come true.”,ej:“あなたの夢はきっと実現します。”},
+{n:27,ph:“get up”,ja:“起きる”,e:“I got up late this morning.”,ej:“私は今朝、遅く起きました。”},
+{n:28,ph:“get to school”,ja:“学校に着く”,e:“I got to school very early today.”,ej:“私は今日、とても早く学校に着きました。”},
+{n:29,ph:“get on[off] a bus”,ja:“バスに乗車する[を下車する]”,e:“Where should I get off the bus?”,ej:“どこでバスを降りればいいのですか。”},
+{n:30,ph:“get well”,ja:“よく[上手に]なる”,e:“His Japanese is getting better.”,ej:“彼の日本語は上手になってきています。”},
+{n:31,ph:“take care of my cat”,ja:“うちのねこの世話をする”,e:“I take care of my cat.”,ej:“ぼくが、うちのねこの世話をしています。”},
+{n:32,ph:“take pictures”,ja:“写真を撮る”,e:“My brother likes taking pictures.”,ej:“兄は写真を撮るのが好きです。”},
+{n:33,ph:“take a bath”,ja:“おふろに入る”,e:“I want to take a bath now.”,ej:“私は今、おふろに入りたいです。”},
+{n:34,ph:“take a bus”,ja:“バスを利用する”,e:“Do you take a bus to go to school?”,ej:“あなたは通学するのにバスを利用しますか。”},
+{n:35,ph:“take 20 minutes”,ja:“20分かかる”,e:“It takes 20 minutes to the park by bike.”,ej:“その公園まで自転車で20分かかります。”},
+{n:36,ph:“look at the sky”,ja:“空を見る”,e:“I like looking at the sky.”,ej:“私は空を見るのが好きです。”},
+{n:37,ph:“look for a bookstore”,ja:“本屋を探す”,e:“I’m looking for a bookstore.”,ej:“本屋さんを探しています。”},
+{n:38,ph:“look forward to the next time”,ja:“次回を楽しみにする”,e:“I’m looking forward to the next time.”,ej:“次回を楽しみにしています。”},
+{n:39,ph:“give up”,ja:“あきらめる”,e:“Don’t give up yet.”,ej:“まだあきらめてはいけません。”},
+{n:40,ph:“leave home”,ja:“家を出る”,e:“I leave home at seven every morning.”,ej:“私は毎朝7時に家を出ます。”},
+{n:41,ph:“leave a message”,ja:“メッセージを残す”,e:“Can I leave a message for her?”,ej:“彼女にメッセージを残してもいいですか。”},
+{n:42,ph:“ask a question”,ja:“質問をする”,e:“May I ask you a question?”,ej:“1つ質問をしてもよろしいですか。”},
+{n:43,ph:“start at nine”,ja:“9時に始まる[始める]”,e:“Our school starts at nine.”,ej:“私たちの学校は9時に始まります。”},
+{n:44,ph:“try to remember”,ja:“思い出そうとする”,e:“Now I’m trying to remember its name.”,ej:“今はその名前を思い出そうとしています。”},
+{n:45,ph:“show him around a town”,ja:“彼に町を案内する”,e:“I showed him around my town.”,ej:“私は彼に町を案内しました。”},
+{n:46,ph:“call you back”,ja:“あなたに電話をかけ直す”,e:“I’ll call you back in ten minutes.”,ej:“10分したらあなたに電話をかけ直します。”},
+{n:47,ph:“hear from you”,ja:“あなたから連絡をもらう”,e:“I’m glad to hear from you.”,ej:“あなたから連絡をもらえてうれしいです。”},
+{n:48,ph:“feel happy”,ja:“幸せを感じる”,e:“I feel happy when I go to bed.”,ej:“ベッドに向かうときに幸せを感じます。”},
+{n:49,ph:“stay at a hotel”,ja:“ホテルに泊まる”,e:“We stayed at a hotel by the sea.”,ej:“私たちは海のそばのホテルに滞在しました。”},
+{n:50,ph:“stay with my uncle”,ja:“おじのところに滞在する”,e:“We stayed with my uncle.”,ej:“私たちはおじのところに滞在しました。”},
+{n:51,ph:“listen to music”,ja:“音楽を聴く”,e:“I listen to music every day.”,ej:“私は毎日音楽を聴きます。”},
+{n:52,ph:“answer the phone”,ja:“電話に出る”,e:“Can you answer the phone?”,ej:“電話に出てもらえますか。”},
+{n:53,ph:“wait for my friend”,ja:“友達を待つ”,e:“I’m waiting for my friend now.”,ej:“私は今、友達を待っています。”},
+{n:54,ph:“arrive at the station”,ja:“駅に着く”,e:“We have just arrived at the station.”,ej:“私たちはちょうど今駅に着いたところです。”},
+{n:55,ph:“agree with you”,ja:“あなたに同意する”,e:“I agree with you.”,ej:“私はあなたに同意します。”},
+{n:56,ph:“be interested in making things”,ja:“ものを作ることに興味がある”,e:“I’m interested in making things.”,ej:“ぼくはものを作ることに興味があります。”},
+{n:57,ph:“be surprised at the news”,ja:“その知らせに驚いている”,e:“We were surprised at the news.”,ej:“私たちはその知らせに驚きました。”},
+{n:58,ph:“be excited for the trip”,ja:“旅行にわくわくする”,e:“I’m excited for the trip.”,ej:“ぼくは旅行にわくわくしています。”},
+{n:59,ph:“be impressed with the words”,ja:“そのことばに感動する”,e:“I was impressed with the words.”,ej:“私はそのことばに感動しました。”},
+{n:60,ph:“be proud of you”,ja:“あなたを誇りに思う”,e:“I am very proud of you.”,ej:“私はあなたのことをとても誇りに思います。”},
+{n:61,ph:“be worried about her”,ja:“彼女のことを心配する”,e:“Everyone is worried about her.”,ej:“みんな彼女のことを心配しています。”},
+{n:62,ph:“be good at sports”,ja:“スポーツが得意である”,e:“She is good at sports.”,ej:“彼女はスポーツが得意です。”},
+{n:63,ph:“be able to win the game”,ja:“試合に勝つことができる”,e:“He will be able to win the game.”,ej:“彼は試合に勝つことができるでしょう。”},
+{n:64,ph:“be busy with work”,ja:“仕事で忙しい”,e:“My sister is busy with work.”,ej:“姉は仕事で忙しいです。”},
+{n:65,ph:“be late for class”,ja:“授業に遅れる”,e:“Don’t be late for your class.”,ej:“授業に遅れてはいけません。”},
+{n:66,ph:“be kind to others”,ja:“他者に親切にする”,e:“Be kind to others.”,ej:“他者に親切にしなさい。”},
+{n:67,ph:“be famous for oranges”,ja:“みかんで有名である”,e:“My town is famous for oranges.”,ej:“ぼくの町はみかんで有名です。”},
+{n:68,ph:“be popular among girls”,ja:“女の子の間で人気である”,e:“This song is popular among girls.”,ej:“この歌は女の子の間で人気です。”},
+{n:69,ph:“be different from mine”,ja:“私のとはちがっている”,e:“His idea is different from mine.”,ej:“彼のアイデアは私のとはちがっています。”},
+{n:70,ph:“be full of joy”,ja:“喜びでいっぱいである”,e:“She was full of joy.”,ej:“彼女は喜びでいっぱいでした。”},
+{n:71,ph:“be born”,ja:“生まれる”,e:“I was born in Aomori.”,ej:“ぼくは青森で生まれました。”},
+{n:72,ph:“a few days ago”,ja:“数日前”,e:“I got this a few days ago.”,ej:“私はこれを数日前に受け取りました。”},
+{n:73,ph:“a lot”,ja:“たくさん”,e:“My mother talks a lot.”,ej:“母はよくしゃべります。”},
+{n:74,ph:“a little”,ja:“少し”,e:“My sister speaks English a little.”,ej:“姉は少し英語を話します。”},
+{n:75,ph:“in the morning”,ja:“午前中”,e:“I helped my father in the morning.”,ej:“午前中、ぼくはお父さんの手伝いをしました。”},
+{n:76,ph:“in the future”,ja:“将来”,e:“She will be a doctor in the future.”,ej:“将来、彼女は医者になるでしょう。”},
+{n:77,ph:“in front of everyone”,ja:“みんなの前で”,e:“I can’t sing in front of everyone.”,ej:“私はみんなの前では歌えません。”},
+{n:78,ph:“in English”,ja:“英語で”,e:‘How do you say “hasami” in English?’,ej:”「はさみ」は英語でどのように言うのですか。”},
+{n:79,ph:“for three hours”,ja:“3時間”,e:“I watched TV for three hours.”,ej:“ぼくは3時間テレビを見ました。”},
+{n:80,ph:“for a long time”,ja:“長い間”,e:“I haven’t seen her for a long time.”,ej:“私は長い間彼女に会っていません。”},
+{n:81,ph:“for the first time”,ja:“初めて”,e:“I came here for the first time.”,ej:“私は初めてここに来ました。”},
+{n:82,ph:“for example”,ja:“たとえば”,e:“What do you like to do, for example?”,ej:“あなたはたとえば、どんなことをするのが好きですか。”},
+{n:83,ph:“at night”,ja:“夜に”,e:“He often eats at night.”,ej:“彼は夜によく食べます。”},
+{n:84,ph:“at first”,ja:“最初は”,e:“I didn’t like English at first.”,ej:“最初は、英語が好きではありませんでした。”},
+{n:85,ph:“at last”,ja:“ついに”,e:“We could win at last.”,ej:“ぼくたちはついに勝つことができました。”},
+{n:86,ph:“at that time”,ja:“そのとき”,e:“I was sleeping at that time.”,ej:“私はそのとき眠っていました。”},
+{n:87,ph:“at home”,ja:“家[学校]で”,e:“We were having dinner at home.”,ej:“ぼくたちは家で夕食を食べていました。”},
+{n:88,ph:“this afternoon”,ja:“今日の午後”,e:“It rained a lot this afternoon.”,ej:“今日の午後はたくさん雨が降りました。”},
+{n:89,ph:“on Sunday”,ja:“日曜日に”,e:“Please come to my house on Sunday.”,ej:“日曜日に私の家に来てください。”},
+{n:90,ph:“on the internet”,ja:“インターネットで”,e:“I found this on the internet.”,ej:“ぼくはこれを、インターネットで見つけました。”},
+{n:91,ph:“on your right”,ja:“あなたの右側[左側]に”,e:“You’ll see the building on your right.”,ej:“その建物はあなたの右側に見えます。”},
+{n:92,ph:“with my friends”,ja:“友達といっしょに”,e:“I sometimes study with my friends.”,ej:“私はときどき、友達といっしょに勉強します。”},
+{n:93,ph:“like you”,ja:“あなたのように[な]”,e:“I want to be a teacher like you.”,ej:“私はあなたのような先生になりたいです。”},
+{n:94,ph:“very well”,ja:“とてもよく[上手に]”,e:“You play the guitar very well.”,ej:“あなたはとても上手にギターをひきますね。”},
+{n:95,ph:“very hard”,ja:“とても一生懸命に”,e:“We need to practice very hard.”,ej:“ぼくたちはとても一生懸命に練習する必要があります。”},
+{n:96,ph:“many times”,ja:“何度も”,e:“I read the e-mail many times.”,ej:“私はそのメールを何度も読みました。”},
+{n:97,ph:“from here to there”,ja:“ここからそこまで”,e:“How long will it take from here to there?”,ej:“ここからそこまで、時間はどれくらいかかるでしょうか。”},
+{n:98,ph:“some time this week”,ja:“今週のいつか”,e:“Can I see you some time this week?”,ej:“今週のいつかに会えますか。”},
+{n:99,ph:“all day”,ja:“一日中”,e:“I stayed home all day today.”,ej:“私は今日、一日中家にいました。”},
+{n:100,ph:“by bike”,ja:“自転車で”,e:“Ms. Ito comes to school by bike.”,ej:“伊藤先生は自転車で学校に来ています。”},
+{n:101,ph:“because of the rain”,ja:“雨が原因で”,e:“Our game was stopped because of the rain.”,ej:“私たちの試合は、雨で中止になりました。”},
+{n:102,ph:“thanks to you”,ja:“あなたのおかげで”,e:“Thanks to you, we had really fun.”,ej:“あなたのおかげで、ぼくたちは本当に楽しかったです。”},
+{n:103,ph:“after dinner”,ja:“夕食のあと[前]”,e:“I wanted to watch a movie after dinner.”,ej:“夕食のあとで映画を見たいと思っていました。”},
+{n:104,ph:“next month”,ja:“来月”,e:“I’ll be fifteen next month.”,ej:“ぼくは来月15歳になります。”},
+{n:105,ph:“next to me”,ja:“私の隣に”,e:“Akira sat next to me.”,ej:“アキラはぼくの隣に座りました。”},
+{n:106,ph:“last year”,ja:“昨年”,e:“He came to Japan last year.”,ej:“彼は昨年、日本に来ました。”},
+{n:107,ph:“every day”,ja:“毎日”,e:“I drink milk every day.”,ej:“私は毎日、牛乳を飲みます。”},
+{n:108,ph:“these days”,ja:“このごろ”,e:“She doesn’t look well these days.”,ej:“彼女はこのごろ元気がないようです。”},
+{n:109,ph:“around the world”,ja:“世界中で”,e:“He is famous around the world.”,ej:“彼は世界中で有名です。”},
+{n:110,ph:“near our school”,ja:“私たちの学校の近くに”,e:“There is a supermarket near our school.”,ej:“ぼくたちの学校の近くにスーパーが1軒あります。”},
+{n:111,ph:“during the summer vacation”,ja:“夏休みの間に”,e:“I put on 2 kilos during the summer vacation.”,ej:“私は夏休みの間に2キロ太りました。”},
+{n:112,ph:“since then”,ja:“それ以来”,e:“I haven’t talked with him since then.”,ej:“それ以来、彼とは話していません。”},
+{n:113,ph:“without water”,ja:“水なしで”,e:“We can’t live without clean air and water.”,ej:“私たちはきれいな空気や水なしで生きることはできません。”},
+{n:114,ph:“How about this one?”,ja:“これはどうですか。”,e:“How about playing video games?”,ej:“ゲームをするのはどうですか。”},
+{n:115,ph:“Can I use this one?”,ja:“これを使ってもよろしいですか。”,e:“Can I see this one?”,ej:“これを見てもいいですか。”},
+{n:116,ph:“Can you help me?”,ja:“手伝ってもらえますか。”,e:“Can you show me your notebook?”,ej:“ノートを見せてくれますか。”},
+{n:117,ph:“How long does it take?”,ja:“どれくらいかかりますか。”,e:“How long does it take from here?”,ej:“ここからどれくらいかかりますか。”},
+{n:118,ph:“I’d like to send this one”,ja:“これを送りたいのですが。”,e:“I’d like to see Mr. Yokota.”,ej:“横田さんにお会いしたいのですが。”},
+{n:119,ph:“I’d like this one”,ja:“これにしたいのですが。”,e:“I’d like some coffee.”,ej:“コーヒーをいただきたいのですが。”},
+{n:120,ph:“Would you like this one?”,ja:“こちらはいかがですか。”,e:“Would you like some tea?”,ej:“紅茶はいかがですか。”},
+{n:121,ph:“Thank you for your e-mail”,ja:“メールをありがとう。”,e:“Thank you for coming today.”,ej:“今日は来てくれてありがとう。”},
+{n:122,ph:“Why don’t you try?”,ja:“ためしてみたらどうですか。”,e:“Why don’t you eat this?”,ej:“これを食べてみたらどうですか。”},
+{n:123,ph:“Shall I take your bag?”,ja:“かばんをお持ちしましょうか。”,e:“Shall I get you a taxi?”,ej:“タクシーを呼びましょうか。”},
+{n:124,ph:“Shall we sit down?”,ja:“座りましょうか。”,e:“Shall we have a break?”,ej:“休憩しましょうか。”},
+{n:125,ph:“May I speak to Tom, please?”,ja:“トムと話してもよろしいですか。”,e:“May I speak to Emily, please?”,ej:“エミリーと話してもよろしいですか。”},
 ];
 
 /* ═══ IRREGULAR VERBS (from textbook 不規則動詞の変化表) ─ NOT IN QUIZ ═══ */
 const IV=[
-{b:"be",p:"was/were",pp:"been",m:"〜である",s:"is",g:"being"},
-{b:"become",p:"became",pp:"become",m:"〜になる",s:"becomes",g:"becoming"},
-{b:"begin",p:"began",pp:"begun",m:"始める・始まる",s:"begins",g:"beginning"},
-{b:"break",p:"broke",pp:"broken",m:"壊す",s:"breaks",g:"breaking"},
-{b:"bring",p:"brought",pp:"brought",m:"持ってくる",s:"brings",g:"bringing"},
-{b:"build",p:"built",pp:"built",m:"建てる",s:"builds",g:"building"},
-{b:"burn",p:"burnt",pp:"burnt",m:"燃やす",s:"burns",g:"burning"},
-{b:"buy",p:"bought",pp:"bought",m:"買う",s:"buys",g:"buying"},
-{b:"catch",p:"caught",pp:"caught",m:"捕まえる",s:"catches",g:"catching"},
-{b:"choose",p:"chose",pp:"chosen",m:"選ぶ",s:"chooses",g:"choosing"},
-{b:"come",p:"came",pp:"come",m:"来る・行く",s:"comes",g:"coming"},
-{b:"cut",p:"cut",pp:"cut",m:"切る",s:"cuts",g:"cutting"},
-{b:"do",p:"did",pp:"done",m:"する",s:"does",g:"doing"},
-{b:"draw",p:"drew",pp:"drawn",m:"引く・（線を）描く",s:"draws",g:"drawing"},
-{b:"drink",p:"drank",pp:"drunk",m:"飲む",s:"drinks",g:"drinking"},
-{b:"drive",p:"drove",pp:"driven",m:"運転する",s:"drives",g:"driving"},
-{b:"eat",p:"ate",pp:"eaten",m:"食べる",s:"eats",g:"eating"},
-{b:"fall",p:"fell",pp:"fallen",m:"落ちる",s:"falls",g:"falling"},
-{b:"feel",p:"felt",pp:"felt",m:"感じる",s:"feels",g:"feeling"},
-{b:"fight",p:"fought",pp:"fought",m:"戦う・闘う",s:"fights",g:"fighting"},
-{b:"find",p:"found",pp:"found",m:"見つける",s:"finds",g:"finding"},
-{b:"fly",p:"flew",pp:"flown",m:"飛ぶ",s:"flies",g:"flying"},
-{b:"forget",p:"forgot",pp:"forgotten",m:"忘れる",s:"forgets",g:"forgetting"},
-{b:"get",p:"got",pp:"gotten",m:"手に入れる",s:"gets",g:"getting"},
-{b:"give",p:"gave",pp:"given",m:"与える",s:"gives",g:"giving"},
-{b:"go",p:"went",pp:"gone",m:"行く",s:"goes",g:"going"},
-{b:"grow",p:"grew",pp:"grown",m:"成長する",s:"grows",g:"growing"},
-{b:"have",p:"had",pp:"had",m:"持っている",s:"has",g:"having"},
-{b:"hear",p:"heard",pp:"heard",m:"耳にする",s:"hears",g:"hearing"},
-{b:"hit",p:"hit",pp:"hit",m:"打つ",s:"hits",g:"hitting"},
-{b:"hold",p:"held",pp:"held",m:"持つ・催す",s:"holds",g:"holding"},
-{b:"hurt",p:"hurt",pp:"hurt",m:"傷つける",s:"hurts",g:"hurting"},
-{b:"keep",p:"kept",pp:"kept",m:"保つ",s:"keeps",g:"keeping"},
-{b:"know",p:"knew",pp:"known",m:"知っている",s:"knows",g:"knowing"},
-{b:"lead",p:"led",pp:"led",m:"導く",s:"leads",g:"leading"},
-{b:"leave",p:"left",pp:"left",m:"去る・残す",s:"leaves",g:"leaving"},
-{b:"lend",p:"lent",pp:"lent",m:"貸す",s:"lends",g:"lending"},
-{b:"lose",p:"lost",pp:"lost",m:"失う・負ける",s:"loses",g:"losing"},
-{b:"make",p:"made",pp:"made",m:"作る",s:"makes",g:"making"},
-{b:"mean",p:"meant",pp:"meant",m:"意味する",s:"means",g:"meaning"},
-{b:"meet",p:"met",pp:"met",m:"会う",s:"meets",g:"meeting"},
-{b:"put",p:"put",pp:"put",m:"置く",s:"puts",g:"putting"},
-{b:"quit",p:"quit",pp:"quit",m:"やめる",s:"quits",g:"quitting"},
-{b:"read",p:"read",pp:"read",m:"読む",s:"reads",g:"reading"},
-{b:"ride",p:"rode",pp:"ridden",m:"乗る",s:"rides",g:"riding"},
-{b:"rise",p:"rose",pp:"risen",m:"上がる",s:"rises",g:"rising"},
-{b:"run",p:"ran",pp:"run",m:"走る",s:"runs",g:"running"},
-{b:"say",p:"said",pp:"said",m:"言う",s:"says",g:"saying"},
-{b:"see",p:"saw",pp:"seen",m:"目にする",s:"sees",g:"seeing"},
-{b:"sell",p:"sold",pp:"sold",m:"売る",s:"sells",g:"selling"},
-{b:"send",p:"sent",pp:"sent",m:"送る",s:"sends",g:"sending"},
-{b:"shake",p:"shook",pp:"shaken",m:"振る",s:"shakes",g:"shaking"},
-{b:"show",p:"showed",pp:"shown",m:"見せる",s:"shows",g:"showing"},
-{b:"sing",p:"sang",pp:"sung",m:"歌う",s:"sings",g:"singing"},
-{b:"sit",p:"sat",pp:"sat",m:"座る",s:"sits",g:"sitting"},
-{b:"sleep",p:"slept",pp:"slept",m:"眠る",s:"sleeps",g:"sleeping"},
-{b:"speak",p:"spoke",pp:"spoken",m:"話す",s:"speaks",g:"speaking"},
-{b:"spend",p:"spent",pp:"spent",m:"費やす",s:"spends",g:"spending"},
-{b:"spread",p:"spread",pp:"spread",m:"広がる",s:"spreads",g:"spreading"},
-{b:"stand",p:"stood",pp:"stood",m:"立っている",s:"stands",g:"standing"},
-{b:"swim",p:"swam",pp:"swum",m:"泳ぐ",s:"swims",g:"swimming"},
-{b:"take",p:"took",pp:"taken",m:"とる",s:"takes",g:"taking"},
-{b:"teach",p:"taught",pp:"taught",m:"教える",s:"teaches",g:"teaching"},
-{b:"tell",p:"told",pp:"told",m:"伝える",s:"tells",g:"telling"},
-{b:"think",p:"thought",pp:"thought",m:"思う",s:"thinks",g:"thinking"},
-{b:"understand",p:"understood",pp:"understood",m:"理解する",s:"understands",g:"understanding"},
-{b:"wear",p:"wore",pp:"worn",m:"身に着けている",s:"wears",g:"wearing"},
-{b:"win",p:"won",pp:"won",m:"勝つ",s:"wins",g:"winning"},
-{b:"write",p:"wrote",pp:"written",m:"書く",s:"writes",g:"writing"},
+{b:“be”,p:“was/were”,pp:“been”,m:”〜である”,s:“is”,g:“being”},
+{b:“become”,p:“became”,pp:“become”,m:”〜になる”,s:“becomes”,g:“becoming”},
+{b:“begin”,p:“began”,pp:“begun”,m:“始める・始まる”,s:“begins”,g:“beginning”},
+{b:“break”,p:“broke”,pp:“broken”,m:“壊す”,s:“breaks”,g:“breaking”},
+{b:“bring”,p:“brought”,pp:“brought”,m:“持ってくる”,s:“brings”,g:“bringing”},
+{b:“build”,p:“built”,pp:“built”,m:“建てる”,s:“builds”,g:“building”},
+{b:“burn”,p:“burnt”,pp:“burnt”,m:“燃やす”,s:“burns”,g:“burning”},
+{b:“buy”,p:“bought”,pp:“bought”,m:“買う”,s:“buys”,g:“buying”},
+{b:“catch”,p:“caught”,pp:“caught”,m:“捕まえる”,s:“catches”,g:“catching”},
+{b:“choose”,p:“chose”,pp:“chosen”,m:“選ぶ”,s:“chooses”,g:“choosing”},
+{b:“come”,p:“came”,pp:“come”,m:“来る・行く”,s:“comes”,g:“coming”},
+{b:“cut”,p:“cut”,pp:“cut”,m:“切る”,s:“cuts”,g:“cutting”},
+{b:“do”,p:“did”,pp:“done”,m:“する”,s:“does”,g:“doing”},
+{b:“draw”,p:“drew”,pp:“drawn”,m:“引く・（線を）描く”,s:“draws”,g:“drawing”},
+{b:“drink”,p:“drank”,pp:“drunk”,m:“飲む”,s:“drinks”,g:“drinking”},
+{b:“drive”,p:“drove”,pp:“driven”,m:“運転する”,s:“drives”,g:“driving”},
+{b:“eat”,p:“ate”,pp:“eaten”,m:“食べる”,s:“eats”,g:“eating”},
+{b:“fall”,p:“fell”,pp:“fallen”,m:“落ちる”,s:“falls”,g:“falling”},
+{b:“feel”,p:“felt”,pp:“felt”,m:“感じる”,s:“feels”,g:“feeling”},
+{b:“fight”,p:“fought”,pp:“fought”,m:“戦う・闘う”,s:“fights”,g:“fighting”},
+{b:“find”,p:“found”,pp:“found”,m:“見つける”,s:“finds”,g:“finding”},
+{b:“fly”,p:“flew”,pp:“flown”,m:“飛ぶ”,s:“flies”,g:“flying”},
+{b:“forget”,p:“forgot”,pp:“forgotten”,m:“忘れる”,s:“forgets”,g:“forgetting”},
+{b:“get”,p:“got”,pp:“gotten”,m:“手に入れる”,s:“gets”,g:“getting”},
+{b:“give”,p:“gave”,pp:“given”,m:“与える”,s:“gives”,g:“giving”},
+{b:“go”,p:“went”,pp:“gone”,m:“行く”,s:“goes”,g:“going”},
+{b:“grow”,p:“grew”,pp:“grown”,m:“成長する”,s:“grows”,g:“growing”},
+{b:“have”,p:“had”,pp:“had”,m:“持っている”,s:“has”,g:“having”},
+{b:“hear”,p:“heard”,pp:“heard”,m:“耳にする”,s:“hears”,g:“hearing”},
+{b:“hit”,p:“hit”,pp:“hit”,m:“打つ”,s:“hits”,g:“hitting”},
+{b:“hold”,p:“held”,pp:“held”,m:“持つ・催す”,s:“holds”,g:“holding”},
+{b:“hurt”,p:“hurt”,pp:“hurt”,m:“傷つける”,s:“hurts”,g:“hurting”},
+{b:“keep”,p:“kept”,pp:“kept”,m:“保つ”,s:“keeps”,g:“keeping”},
+{b:“know”,p:“knew”,pp:“known”,m:“知っている”,s:“knows”,g:“knowing”},
+{b:“lead”,p:“led”,pp:“led”,m:“導く”,s:“leads”,g:“leading”},
+{b:“leave”,p:“left”,pp:“left”,m:“去る・残す”,s:“leaves”,g:“leaving”},
+{b:“lend”,p:“lent”,pp:“lent”,m:“貸す”,s:“lends”,g:“lending”},
+{b:“lose”,p:“lost”,pp:“lost”,m:“失う・負ける”,s:“loses”,g:“losing”},
+{b:“make”,p:“made”,pp:“made”,m:“作る”,s:“makes”,g:“making”},
+{b:“mean”,p:“meant”,pp:“meant”,m:“意味する”,s:“means”,g:“meaning”},
+{b:“meet”,p:“met”,pp:“met”,m:“会う”,s:“meets”,g:“meeting”},
+{b:“put”,p:“put”,pp:“put”,m:“置く”,s:“puts”,g:“putting”},
+{b:“quit”,p:“quit”,pp:“quit”,m:“やめる”,s:“quits”,g:“quitting”},
+{b:“read”,p:“read”,pp:“read”,m:“読む”,s:“reads”,g:“reading”},
+{b:“ride”,p:“rode”,pp:“ridden”,m:“乗る”,s:“rides”,g:“riding”},
+{b:“rise”,p:“rose”,pp:“risen”,m:“上がる”,s:“rises”,g:“rising”},
+{b:“run”,p:“ran”,pp:“run”,m:“走る”,s:“runs”,g:“running”},
+{b:“say”,p:“said”,pp:“said”,m:“言う”,s:“says”,g:“saying”},
+{b:“see”,p:“saw”,pp:“seen”,m:“目にする”,s:“sees”,g:“seeing”},
+{b:“sell”,p:“sold”,pp:“sold”,m:“売る”,s:“sells”,g:“selling”},
+{b:“send”,p:“sent”,pp:“sent”,m:“送る”,s:“sends”,g:“sending”},
+{b:“shake”,p:“shook”,pp:“shaken”,m:“振る”,s:“shakes”,g:“shaking”},
+{b:“show”,p:“showed”,pp:“shown”,m:“見せる”,s:“shows”,g:“showing”},
+{b:“sing”,p:“sang”,pp:“sung”,m:“歌う”,s:“sings”,g:“singing”},
+{b:“sit”,p:“sat”,pp:“sat”,m:“座る”,s:“sits”,g:“sitting”},
+{b:“sleep”,p:“slept”,pp:“slept”,m:“眠る”,s:“sleeps”,g:“sleeping”},
+{b:“speak”,p:“spoke”,pp:“spoken”,m:“話す”,s:“speaks”,g:“speaking”},
+{b:“spend”,p:“spent”,pp:“spent”,m:“費やす”,s:“spends”,g:“spending”},
+{b:“spread”,p:“spread”,pp:“spread”,m:“広がる”,s:“spreads”,g:“spreading”},
+{b:“stand”,p:“stood”,pp:“stood”,m:“立っている”,s:“stands”,g:“standing”},
+{b:“swim”,p:“swam”,pp:“swum”,m:“泳ぐ”,s:“swims”,g:“swimming”},
+{b:“take”,p:“took”,pp:“taken”,m:“とる”,s:“takes”,g:“taking”},
+{b:“teach”,p:“taught”,pp:“taught”,m:“教える”,s:“teaches”,g:“teaching”},
+{b:“tell”,p:“told”,pp:“told”,m:“伝える”,s:“tells”,g:“telling”},
+{b:“think”,p:“thought”,pp:“thought”,m:“思う”,s:“thinks”,g:“thinking”},
+{b:“understand”,p:“understood”,pp:“understood”,m:“理解する”,s:“understands”,g:“understanding”},
+{b:“wear”,p:“wore”,pp:“worn”,m:“身に着けている”,s:“wears”,g:“wearing”},
+{b:“win”,p:“won”,pp:“won”,m:“勝つ”,s:“wins”,g:“winning”},
+{b:“write”,p:“wrote”,pp:“written”,m:“書く”,s:“writes”,g:“writing”},
 ];
 
 /* ═══ STATE ═══ */
-let deck=shuf([...V]),idx=0,flipped=false,st={g:0,h:0,f:0},tab='f',tt=null;
-let hist=[],htimer=null;
+let deck=shuf([…V]),idx=0,flipped=false,st={g:0,h:0,f:0},tab=‘f’;
+let hist=[],prevState=null;
+
+/* ═══ SHEET SYSTEM ═══ */
+const scrim=document.getElementById(‘scrim’);
+let activeSheet=null;
+function openSheet(sh){
+if(activeSheet&&activeSheet!==sh)_closeSheet(activeSheet);
+sh.classList.add(‘open’);scrim.classList.add(‘on’);activeSheet=sh;
+}
+function _closeSheet(sh){
+if(!sh)return;
+sh.classList.remove(‘open’);sh.style.transform=’’;sh.style.transition=’’;
+scrim.classList.remove(‘on’);activeSheet=null;
+}
+scrim.addEventListener(‘click’,()=>{_closeSheet(activeSheet);haptic();});
+function makeSwipeable(shId,hdlId){
+const sh=document.getElementById(shId),hdl=document.getElementById(hdlId);
+let sy=0,drag=false;
+const start=y=>{sy=y;drag=true;sh.style.transition=‘none’;};
+const move=y=>{if(!drag)return;const d=y-sy;if(d>0)sh.style.transform=`translateY(${d}px)`;};
+const end=y=>{if(!drag)return;drag=false;sh.style.transition=’’;if(y-sy>60){_closeSheet(sh);haptic();}else sh.style.transform=’’;};
+hdl.addEventListener(‘touchstart’,e=>start(e.touches[0].clientY),{passive:true});
+hdl.addEventListener(‘touchmove’,e=>move(e.touches[0].clientY),{passive:true});
+hdl.addEventListener(‘touchend’,e=>end(e.changedTouches[0].clientY),{passive:true});
+hdl.addEventListener(‘mousedown’,e=>{sy=e.clientY;drag=true;sh.style.transition=‘none’;});
+window.addEventListener(‘mousemove’,e=>{move(e.clientY);});
+window.addEventListener(‘mouseup’,e=>{end(e.clientY);});
+}
+makeSwipeable(‘tsheet’,‘tsh-hdl’);
+makeSwipeable(‘hsheet’,‘hsh-hdl’);
 
 /* ═══ LOCAL LOOKUP ═══ */
 function localLookup(q){
-  const ql=q.toLowerCase().trim();
-  const vr=V.find(w=>w.w.toLowerCase()===ql);
-  if(vr)return`📚 <strong>${vr.w}</strong> [${vr.p}] — ${vr.m}${vr.pr?` <span style="color:var(--sub)">${vr.pr}</span>`:''}`;
-  const er=EX.find(e=>e.ph.toLowerCase()===ql||(ql.length>5&&e.ph.toLowerCase().includes(ql)));
-  if(er)return`📝 <strong>${er.ph}</strong> — ${er.ja}`;
-  const ir=IV.find(v=>v.b===ql||v.p===ql||v.pp===ql||v.p.split('/').some(x=>x.trim()===ql));
-  if(ir)return`🔄 <strong>${ir.b}</strong> → ${ir.p} → ${ir.pp} ／ ${ir.m}`;
-  return null;
+const ql=q.toLowerCase().trim();
+const vr=V.find(w=>w.w.toLowerCase()===ql);
+if(vr)return`📚 <strong>${vr.w}</strong> [${vr.p}] — ${vr.m}${vr.pr?` <span style="color:var(--sub)">${vr.pr}</span>`:''}`;
+const er=EX.find(e=>e.ph.toLowerCase()===ql||(ql.length>5&&e.ph.toLowerCase().includes(ql)));
+if(er)return`📝 <strong>${er.ph}</strong> — ${er.ja}`;
+const ir=IV.find(v=>v.b===ql||v.p===ql||v.pp===ql||v.p.split(’/’).some(x=>x.trim()===ql));
+if(ir)return`🔄 <strong>${ir.b}</strong> → ${ir.p} → ${ir.pp} ／ ${ir.m}`;
+return null;
 }
 
-/* ═══ RENDER CARD ═══ */
+/* ═══ RENDER ═══ */
 function render(){
-  if(idx>=deck.length){done();return}
-  const w=deck[idx];flipped=false;
-  document.getElementById('fc').classList.remove('fl');
-  document.getElementById('acts').style.display='none';
-  const lc=['','l1','l2','l3'];
-  const lbl=['','Lv1 基礎','Lv2 中級','Lv3 上級'];
-  const lv=document.getElementById('flv');lv.textContent=lbl[w.l]||'';lv.className='lv '+(lc[w.l]||'l3');
-  document.getElementById('fca').textContent=w.c||'';
-  document.getElementById('fwo').textContent=w.w;
-  document.getElementById('fpr').textContent=w.pr||'';
-  const po=document.getElementById('fpo');
-  const pl={n:'名詞',v:'動詞',adj:'形容詞',adv:'副詞'};
-  po.textContent=pl[w.p]||w.p;
-  po.className='fpos p'+(w.p==='adj'?'a':w.p==='adv'?'d':w.p==='n'?'n':w.p==='v'?'v':'o');
-  document.getElementById('fme').textContent=w.m;
-  document.getElementById('ffu').textContent=w.f||'';
-  document.getElementById('fex').innerHTML=w.e?`<div class="fexe">${w.e}</div><div class="fexj">${w.ej}</div>`:'';
-  document.getElementById('fta').innerHTML=(w.t||[]).map(t=>`<span class="ftag">${t}</span>`).join('');
-  document.getElementById('fid').innerHTML=(w.id||[]).map(i=>`<div class="fide">${i.e}</div><div>${i.j}</div>`).join('');
-  const pct=Math.round(idx/deck.length*100);
-  document.getElementById('pf').style.width=pct+'%';
-  document.getElementById('pt').textContent=idx+'/'+deck.length;
+if(idx>=deck.length){done();return;}
+const w=deck[idx];flipped=false;
+document.getElementById(‘fc’).classList.remove(‘fl’);
+document.getElementById(‘acts’).style.display=‘none’;
+const lbl=[’’,‘Lv1 基礎’,‘Lv2 中級’,‘Lv3 上級’],lc=[’’,‘l1’,‘l2’,‘l3’];
+const lv=document.getElementById(‘flv’);
+lv.textContent=lbl[w.l]||’’;lv.className=‘lv ‘+(lc[w.l]||‘l3’);
+document.getElementById(‘fca’).textContent=w.c||’’;
+document.getElementById(‘fwo’).textContent=w.w;
+document.getElementById(‘fpr’).textContent=w.pr||’’;
+const po=document.getElementById(‘fpo’),pl={n:‘名詞’,v:‘動詞’,adj:‘形容詞’,adv:‘副詞’};
+po.textContent=pl[w.p]||w.p;
+po.className=‘fpos p’+(w.p===‘adj’?‘a’:w.p===‘adv’?‘d’:w.p===‘n’?‘n’:w.p===‘v’?‘v’:‘o’);
+document.getElementById(‘fme’).textContent=w.m;
+document.getElementById(‘ffu’).textContent=w.f||’’;
+document.getElementById(‘fex’).innerHTML=w.e?`<div class="fexe">${w.e}</div><div class="fexj">${w.ej}</div>`:’’;
+document.getElementById(‘fta’).innerHTML=(w.t||[]).map(t=>`<span class="ftag">${t}</span>`).join(’’);
+document.getElementById(‘fid’).innerHTML=(w.id||[]).map(i=>`<div class="fide">${i.e}</div><div>${i.j}</div>`).join(’’);
+document.getElementById(‘pf’).style.width=Math.round(idx/deck.length*100)+’%’;
+document.getElementById(‘pt’).textContent=idx+’/’+deck.length;
+document.getElementById(‘cbk’).disabled=!prevState;
 }
-
 window.FF=function(){
-  flipped=!flipped;
-  document.getElementById('fc').classList.toggle('fl',flipped);
-  haptic();
-  document.getElementById('acts').style.display=flipped?'flex':'none';
+flipped=!flipped;
+document.getElementById(‘fc’).classList.toggle(‘fl’,flipped);
+haptic();document.getElementById(‘acts’).style.display=flipped?‘flex’:‘none’;
 };
+function updateStats(){
+document.getElementById(‘sg’).textContent=st.g;
+document.getElementById(‘sh2’).textContent=st.h;
+document.getElementById(‘sf’).textContent=st.f;
+}
 
-/* ═══ ANSWER + HISTORY ═══ */
+/* ═══ ANSWER ═══ */
 window.R=function(t){
-  if(idx>=deck.length)return;
-  haptic.confirm();
-  const cur=deck[idx];
-  hist.unshift({w:cur.w,m:cur.m,r:t});
-  if(hist.length>30)hist.pop();
-  showHistBrief();
-  st[t]++;
-  document.getElementById('sg').textContent=st.g;
-  document.getElementById('sh2').textContent=st.h;
-  document.getElementById('sf').textContent=st.f;
-  if(t==='f')deck.push({...deck[idx]});
-  else if(t==='h')deck.splice(Math.min(idx+4,deck.length),0,{...deck[idx]});
-  idx++;
-  const fw=document.getElementById('fw');
-  fw.classList.add('out');
-  setTimeout(()=>{fw.classList.remove('out');render();void fw.offsetWidth;fw.classList.add('in');setTimeout(()=>fw.classList.remove('in'),240)},190);
+if(idx>=deck.length)return;
+haptic.confirm();
+prevState={deck:[…deck],idx,st:{…st},hist:[…hist]};
+const cur=deck[idx];
+hist.unshift({w:cur.w,m:cur.m,r:t});
+if(hist.length>60)hist.pop();
+st[t]++;updateStats();
+if(t===‘f’)deck.push({…deck[idx]});
+else if(t===‘h’)deck.splice(Math.min(idx+4,deck.length),0,{…deck[idx]});
+idx++;
+const fw=document.getElementById(‘fw’);
+fw.classList.add(‘out’);
+setTimeout(()=>{fw.classList.remove(‘out’);render();void fw.offsetWidth;fw.classList.add(‘in’);setTimeout(()=>fw.classList.remove(‘in’),240);},190);
 };
 
-function buildHistHTML(limit){
-  if(!hist.length)return'<div style="text-align:center;color:var(--sub);font-size:12px;padding:20px 0">まだ回答がありません</div>';
-  return hist.slice(0,limit).map(h=>`
-    <div class="hrow">
-      <div class="hbdg ${h.r==='g'?'hg':h.r==='h'?'hh':'hf'}">${h.r==='g'?'✓':h.r==='h'?'△':'✗'}</div>
-      <div><div class="hw">${h.w}</div><div class="hm">${h.m}</div></div>
-    </div>`).join('');
-}
+/* ═══ BACK ═══ */
+window.goBack=function(){
+if(!prevState)return;
+haptic.confirm();
+({deck,idx,st,hist}=prevState);prevState=null;flipped=false;
+updateStats();render();
+};
 
-function showHistBrief(){
-  document.getElementById('hlist').innerHTML=buildHistHTML(8);
-  document.getElementById('hov').classList.add('show');
-  clearTimeout(htimer);
-  htimer=setTimeout(()=>document.getElementById('hov').classList.remove('show'),2200);
-}
-
-window.showHistFull=function(){
-  haptic();
-  document.getElementById('hlist').innerHTML=buildHistHTML(30);
-  document.getElementById('hov').classList.add('show');
-  clearTimeout(htimer);
+/* ═══ HISTORY SHEET ═══ */
+window.showHist=function(filter){
+haptic();
+const labels={g:‘✓ 正解’,h:‘△ むずい’,f:‘✗ 忘れた’};
+const filtered=hist.filter(h=>h.r===filter);
+document.getElementById(‘htit’).textContent=labels[filter]+’ — ‘+filtered.length+‘件’;
+document.getElementById(‘hlist’).innerHTML=!filtered.length
+?’<div style="text-align:center;color:var(--sub);font-size:12px;padding:20px 0">まだ記録がありません</div>’
+:filtered.map(h=>`<div class="hrow"><div class="hbdg ${h.r==='g'?'hg-b':h.r==='h'?'hh-b':'hf-b'}">${h.r==='g'?'✓':h.r==='h'?'△':'✗'}</div><div><div class="hw">${h.w}</div><div class="hm">${h.m}</div></div></div>`).join(’’);
+openSheet(document.getElementById(‘hsheet’));
 };
 
 /* ═══ DONE ═══ */
 function done(){
-  document.getElementById('acts').style.display='none';
-  document.getElementById('pf').style.width='100%';
-  document.getElementById('fw').innerHTML=`<div class="cc"><div style="font-size:50px;margin-bottom:10px">🎉</div><div style="font-size:18px;font-weight:700;margin-bottom:4px">完了！</div><div style="font-size:12px;color:var(--sub);margin-bottom:16px">✓${st.g} △${st.h} ✗${st.f}</div><button onclick="SD()" style="background:var(--b);color:#fff;border:none;border-radius:11px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🔀 もう一度</button></div>`;
+document.getElementById(‘acts’).style.display=‘none’;
+document.getElementById(‘pf’).style.width=‘100%’;
+document.getElementById(‘fw’).innerHTML=`<div class="cc"><div style="font-size:50px;margin-bottom:10px">🎉</div><div style="font-size:18px;font-weight:700;margin-bottom:4px">完了！</div><div style="font-size:12px;color:var(--sub);margin-bottom:16px">✓${st.g} △${st.h} ✗${st.f}</div><button onclick="SD()" style="background:var(--b);color:#fff;border:none;border-radius:11px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🔀 もう一度</button></div>`;
 }
-
 window.SD=function(){
-  haptic.confirm();deck=shuf([...V]);idx=0;st={g:0,h:0,f:0};hist=[];
-  document.getElementById('sg').textContent=0;document.getElementById('sh2').textContent=0;document.getElementById('sf').textContent=0;
-  document.getElementById('fw').innerHTML=`<div class="fc" id="fc" onclick="FF()"><div class="ff" id="ff"><div class="fmeta"><span class="lv l1" id="flv"></span><span class="fcat" id="fca"></span></div><div class="fword" id="fwo"></div><div class="fpron" id="fpr"></div><span class="fpos pv" id="fpo"></span><div class="fh">タップして意味を確認 · 答えたらスワイプ →✓ ←✗</div></div><div class="ff fb" id="fba"><div class="fmean" id="fme"></div><div class="ffull" id="ffu"></div><div class="fex" id="fex"></div><div class="ftags" id="fta"></div><div class="fidm" id="fid"></div></div></div>`;
-  render();
+haptic.confirm();deck=shuf([…V]);idx=0;st={g:0,h:0,f:0};hist=[];prevState=null;
+updateStats();
+document.getElementById(‘fw’).innerHTML=`<div class="fc" id="fc" onclick="FF()"><div class="ff" id="ff"><div class="fmeta"><span class="lv l1" id="flv"></span><span class="fcat" id="fca"></span></div><div class="fword" id="fwo"></div><div class="fpron" id="fpr"></div><span class="fpos pv" id="fpo"></span><div class="fh">タップして意味を確認 · スワイプ →✓ ←✗</div></div><div class="ff fb" id="fba"><div class="fmean" id="fme"></div><div class="ffull" id="ffu"></div><div class="fex" id="fex"></div><div class="ftags" id="fta"></div><div class="fidm" id="fid"></div></div></div>`;
+render();
 };
 
 /* ═══ TAB SWITCH ═══ */
 window.ST=function(t){
-  haptic();tab=t;
-  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
-  document.getElementById('t-'+t).classList.add('on');
-  const isF=t==='f';
-  document.getElementById('ca').style.display=isF?'flex':'none';
-  document.getElementById('sr').style.display=isF?'flex':'none';
-  document.getElementById('acts').style.display=isF&&flipped?'flex':'none';
-  document.querySelector('.pr').style.display=isF?'flex':'none';
-  ['i','e','v','g','p','r','c','a'].forEach(x=>{
-    const el=document.getElementById('l-'+x);
-    if(el)el.classList.toggle('on',x===t);
-  });
+haptic();tab=t;
+document.querySelectorAll(’.nb’).forEach(b=>b.classList.remove(‘on’));
+document.getElementById(‘t-’+t).classList.add(‘on’);
+const isF=t===‘f’;
+document.getElementById(‘ca’).style.display=isF?‘flex’:‘none’;
+document.getElementById(‘sr’).style.display=isF?‘flex’:‘none’;
+document.getElementById(‘prbar’).style.display=isF?‘flex’:‘none’;
+document.getElementById(‘acts’).style.display=isF&&flipped?‘flex’:‘none’;
+[‘i’,‘e’,‘v’,‘g’,‘p’,‘r’,‘c’,‘a’].forEach(x=>{
+const el=document.getElementById(‘l-’+x);if(el)el.classList.toggle(‘on’,x===t);
+});
 };
 
 /* ═══ BUILD LISTS ═══ */
 function buildLists(){
-  // idioms
-  document.getElementById('l-i').innerHTML='<div class="sh">イディオム '+ID.length+'個</div>'+
-    ID.map(d=>`<div class="li"><div class="lw">${d.w}</div><div class="lm">${d.m}</div><div class="lnx">${d.n}</div><div class="le">"${d.e}"<br><span style="color:var(--sub)">${d.ej}</span></div></div>`).join('');
+// idioms
+document.getElementById(‘l-i’).innerHTML=’<div class="sh">イディオム ‘+ID.length+‘個</div>’+
+ID.map(d=>`<div class="li"><div class="lw">${d.w}</div><div class="lm">${d.m}</div><div class="lnx">${d.n}</div><div class="le">"${d.e}"<br><span style="color:var(--sub)">${d.ej}</span></div></div>`).join(’’);
 
-  // expressions
-  const exByGroup=[
-    {label:"「人」や「もの」を伝える表現",range:[1,13]},
-    {label:"「〜する」を伝える表現",range:[14,40]},
-    {label:"メッセージ・動作表現",range:[41,55]},
-    {label:"「〜である」を伝える表現",range:[56,71]},
-    {label:"「どのように」「どこで」「いつ」を伝える表現",range:[72,113]},
-    {label:"日常会話でよく使う表現",range:[114,125]},
-  ];
-  let exHtml='<div class="sh">入試で使える表現リスト '+EX.length+'個</div>';
-  exByGroup.forEach(g=>{
-    exHtml+=`<div style="font-size:10px;font-weight:700;color:var(--sub);background:var(--ln);border-radius:8px;padding:4px 10px;margin:6px 0 4px;letter-spacing:.04em">${g.label}</div>`;
-    const items=EX.filter(e=>e.n>=g.range[0]&&e.n<=g.range[1]);
-    exHtml+=`<div class="li" style="padding:8px 12px">`;
-    exHtml+=items.map(d=>`<div class="exr"><div class="exn">${String(d.n).padStart(3,'0')}</div><div style="flex:1"><div class="exph">${d.ph}</div><div class="exja">${d.ja}</div>${d.e?`<div class="exe">${d.e} <span style="color:var(--sub)">${d.ej}</span></div>`:''}</div></div>`).join('');
-    exHtml+='</div>';
-  });
-  document.getElementById('l-e').innerHTML=exHtml;
+// expressions
+const exByGroup=[
+{label:”「人」や「もの」を伝える表現”,range:[1,13]},
+{label:”「〜する」を伝える表現”,range:[14,40]},
+{label:“メッセージ・動作表現”,range:[41,55]},
+{label:”「〜である」を伝える表現”,range:[56,71]},
+{label:”「どのように」「どこで」「いつ」を伝える表現”,range:[72,113]},
+{label:“日常会話でよく使う表現”,range:[114,125]},
+];
+let exHtml=’<div class="sh">入試で使える表現リスト ‘+EX.length+‘個</div>’;
+exByGroup.forEach(g=>{
+exHtml+=`<div style="font-size:10px;font-weight:700;color:var(--sub);background:var(--ln);border-radius:8px;padding:4px 10px;margin:6px 0 4px;letter-spacing:.04em">${g.label}</div>`;
+const items=EX.filter(e=>e.n>=g.range[0]&&e.n<=g.range[1]);
+exHtml+=`<div class="li" style="padding:8px 12px">`;
+exHtml+=items.map(d=>`<div class="exr"><div class="exn">${String(d.n).padStart(3,'0')}</div><div style="flex:1"><div class="exph">${d.ph}</div><div class="exja">${d.ja}</div>${d.e?`<div class="exe">${d.e} <span style="color:var(--sub)">${d.ej}</span></div>`:''}</div></div>`).join(’’);
+exHtml+=’</div>’;
+});
+document.getElementById(‘l-e’).innerHTML=exHtml;
 
-  // irregular verbs
-  document.getElementById('l-v').innerHTML=`<div class="sh">不規則動詞の変化表 ${IV.length}語</div>
-    <div class="ivwrap"><table class="ivt">
-    <thead><tr><th>原形</th><th>過去形</th><th>過去分詞</th><th>意味</th><th>3単現</th><th>現在分詞</th></tr></thead>
-    <tbody>${IV.map(v=>`<tr>
-      <td class="ivb">${v.b}</td>
-      <td class="ivp">${v.p}</td>
-      <td class="ivpp">${v.pp}</td>
-      <td>${v.m}</td>
-      <td>${v.s}</td>
-      <td>${v.g}</td>
-    </tr>`).join('')}</tbody></table></div>
-    <div style="font-size:10px;color:var(--sub);padding:4px 2px">※ burnの過去形・過去分詞はburned、forgetの過去分詞はforgot、getの過去分詞はgotとなることもあります。</div>`;
+// irregular verbs
+document.getElementById(‘l-v’).innerHTML=`<div class="sh">不規則動詞の変化表 ${IV.length}語</div> <div class="ivwrap"><table class="ivt"> <thead><tr><th>原形</th><th>過去形</th><th>過去分詞</th><th>意味</th><th>3単現</th><th>現在分詞</th></tr></thead> <tbody>${IV.map(v=>`<tr>
+<td class="ivb">${v.b}</td>
+<td class="ivp">${v.p}</td>
+<td class="ivpp">${v.pp}</td>
+<td>${v.m}</td>
+<td>${v.s}</td>
+<td>${v.g}</td>
+</tr>`).join('')}</tbody></table></div> <div style="font-size:10px;color:var(--sub);padding:4px 2px">※ burnの過去形・過去分詞はburned、forgetの過去分詞はforgot、getの過去分詞はgotとなることもあります。</div>`;
 
-  // grammar
-  document.getElementById('l-g').innerHTML='<div class="sh">重要文法 '+GR.length+'項目</div>'+
-    GR.map(d=>`<div class="li"><div class="lw">${d.h}</div><div class="lnx">${d.n}<br><span style="color:var(--y);font-size:11px">💡 ${d.tip}</span></div><div class="le">"${d.e}"<br><span style="color:var(--sub)">${d.ej}</span></div></div>`).join('');
+// grammar
+document.getElementById(‘l-g’).innerHTML=’<div class="sh">重要文法 ‘+GR.length+‘項目</div>’+
+GR.map(d=>`<div class="li"><div class="lw">${d.h}</div><div class="lnx">${d.n}<br><span style="color:var(--y);font-size:11px">💡 ${d.tip}</span></div><div class="le">"${d.e}"<br><span style="color:var(--sub)">${d.ej}</span></div></div>`).join(’’);
 
-  // paraphrase
-  document.getElementById('l-p').innerHTML='<div class="sh">言い換え表現 '+PA.length+'セット</div>'+
-    PA.map(d=>`<div class="li"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:12px;background:#f0f0ee;padding:2px 9px;border-radius:20px;color:var(--sub)">${d.o}</span><span style="color:var(--sub)">→</span>${d.b.map(b=>`<span style="background:var(--b);color:#fff;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600">${b}</span>`).join('')}</div><div class="lnx" style="margin-top:6px">${d.n}</div><div class="le">"${d.e}"</div></div>`).join('');
+// paraphrase
+document.getElementById(‘l-p’).innerHTML=’<div class="sh">言い換え表現 ‘+PA.length+‘セット</div>’+
+PA.map(d=>`<div class="li"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:12px;background:#f0f0ee;padding:2px 9px;border-radius:20px;color:var(--sub)">${d.o}</span><span style="color:var(--sub)">→</span>${d.b.map(b=>`<span style="background:var(--b);color:#fff;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600">${b}</span>`).join('')}</div><div class="lnx" style="margin-top:6px">${d.n}</div><div class="le">"${d.e}"</div></div>`).join(’’);
 
-  // reading
-  document.getElementById('l-r').innerHTML='<div class="sh">長文読解 重要表現 '+RE.length+'個</div>'+
-    RE.map(d=>`<div class="li"><div class="lw">${d.p}</div><div class="lm">${d.m}</div><div class="le">"${d.e}"</div><div style="font-size:10px;color:var(--sub);margin-top:3px">出典: ${d.s}</div></div>`).join('');
+// reading
+document.getElementById(‘l-r’).innerHTML=’<div class="sh">長文読解 重要表現 ‘+RE.length+‘個</div>’+
+RE.map(d=>`<div class="li"><div class="lw">${d.p}</div><div class="lm">${d.m}</div><div class="le">"${d.e}"</div><div style="font-size:10px;color:var(--sub);margin-top:3px">出典: ${d.s}</div></div>`).join(’’);
 
-  // confused
-  document.getElementById('l-c').innerHTML='<div class="sh">混同ペア '+CP.length+'組</div>'+
-    CP.map(d=>`<div class="li"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px"><span style="background:#fef2f2;border:1px solid #fecaca;color:var(--r);padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700">${d.a}</span><span style="color:var(--sub);font-size:11px">vs</span><span style="background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700">${d.b}</span></div><div style="font-size:11px;color:#555">📌 ${d.n}</div></div>`).join('');
+// confused
+document.getElementById(‘l-c’).innerHTML=’<div class="sh">混同ペア ‘+CP.length+‘組</div>’+
+CP.map(d=>`<div class="li"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px"><span style="background:#fef2f2;border:1px solid #fecaca;color:var(--r);padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700">${d.a}</span><span style="color:var(--sub);font-size:11px">vs</span><span style="background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700">${d.b}</span></div><div style="font-size:11px;color:#555">📌 ${d.n}</div></div>`).join(’’);
 
-  // themes
-  document.getElementById('l-a').innerHTML='<div class="sh">頻出アカデミックテーマ</div>'+
-    TH.map(d=>`<div class="li"><div class="lw">${d.cat}</div>${d.items.map(i=>`<div style="font-size:12px;color:#555;padding:3px 0;border-bottom:1px solid var(--ln)">• ${i}</div>`).join('')}</div>`).join('');
+// themes
+document.getElementById(‘l-a’).innerHTML=’<div class="sh">頻出アカデミックテーマ</div>’+
+TH.map(d=>`<div class="li"><div class="lw">${d.cat}</div>${d.items.map(i=>`<div style="font-size:12px;color:#555;padding:3px 0;border-bottom:1px solid var(--ln)">• ${i}</div>`).join('')}</div>`).join(’’);
 }
 
 /* ═══ TRANSLATOR ═══ */
-const inp=document.getElementById('ti');
-const ar=()=>{inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,window.innerHeight*.26)+'px'};
-inp.addEventListener('input',e=>{
-  ar();
-  const t=e.target.value.trim();
-  clearTimeout(tt);
-  if(!t){CT();return}
-  tt=setTimeout(()=>doTr(t),480);
+const inp=document.getElementById(‘ti’);
+const ar=()=>{inp.style.height=‘auto’;inp.style.height=Math.min(inp.scrollHeight,window.innerHeight*.26)+‘px’;};
+inp.addEventListener(‘input’,ar);
+inp.addEventListener(‘keydown’,e=>{
+if(e.key===‘Enter’&&!e.shiftKey&&!e.isComposing){e.preventDefault();haptic();const t=inp.value.trim();if(t)doTr(t);}
 });
-inp.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){
-    e.preventDefault();haptic();
-    const t=inp.value.trim();if(t)doTr(t);
-  }
-});
-inp.addEventListener('focus',()=>haptic());
-
+inp.addEventListener(‘focus’,()=>haptic());
 async function doTr(t){
-  const lc=localLookup(t);
-  const tlEl=document.getElementById('tl');
-  if(lc){tlEl.innerHTML=lc;tlEl.style.display='block';}
-  else{tlEl.style.display='none';}
-  try{
-    const j=/[ぁ-んァ-ヶー一-龠]/.test(t);
-    const r=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(t)}&langpair=${j?'ja|en':'en|ja'}`);
-    const d=await r.json();
-    const x=d.responseData?.translatedText;
-    if(x&&x!=='N/A'){
-      document.getElementById('tr').textContent=x;
-      document.getElementById('ts').textContent=j?'JA → EN':'EN → JA';
-      document.getElementById('tov').classList.add('show');
-      haptic.confirm();
-    } else if(lc){
-      document.getElementById('tr').textContent='';
-      document.getElementById('ts').textContent='';
-      document.getElementById('tov').classList.add('show');
-      haptic.confirm();
-    }
-  }catch(e){
-    if(lc){
-      document.getElementById('tr').textContent='';
-      document.getElementById('ts').textContent='';
-      document.getElementById('tov').classList.add('show');
-    }
-  }
+if(!t)return;
+const tsh=document.getElementById(‘tsheet’);
+const tlEl=document.getElementById(‘tl’),trEl=document.getElementById(‘tr’),tsEl=document.getElementById(‘ts’);
+const lc=localLookup(t);
+if(lc){tlEl.innerHTML=lc;tlEl.style.display=‘block’;}else{tlEl.style.display=‘none’;}
+trEl.textContent=’…’;tsEl.textContent=’’;
+openSheet(tsh);
+try{
+const j=/[ぁ-んァ-ヶー一-龠]/.test(t);
+const res=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(t)}&langpair=${j?'ja|en':'en|ja'}`);
+const d=await res.json();
+const x=d.responseData?.translatedText;
+if(x&&x!==‘N/A’&&!x.toLowerCase().includes(‘mymemory’)){
+trEl.textContent=x;tsEl.textContent=j?‘JA → EN’:‘EN → JA’;haptic.confirm();
+}else{trEl.textContent=lc?’’:‘翻訳できませんでした’;}
+}catch(err){trEl.textContent=lc?’’:‘オフラインです’;}
 }
-
-window.CT=function(){
-  document.getElementById('tov').classList.remove('show');
-  haptic();inp.value='';ar();
-};
-document.getElementById('bsr').addEventListener('click',()=>{
-  haptic.confirm();
-  window.open(`https://www.google.com/search?q=${encodeURIComponent(inp.value.trim()||'Google')}`,'_blank');
+document.getElementById(‘bsr’).addEventListener(‘click’,()=>{
+haptic.confirm();const q=inp.value.trim();
+if(q)window.open(`https://www.google.com/search?q=${encodeURIComponent(q)}&hl=ja`,’_blank’);
 });
-document.getElementById('bgo').addEventListener('click',()=>{haptic();const t=inp.value.trim();if(t)doTr(t)});
+document.getElementById(‘bgo’).addEventListener(‘click’,()=>{haptic();const t=inp.value.trim();if(t)doTr(t);});
 
-/* ═══ SWIPE ═══ */
+/* ═══ CARD SWIPE ═══ */
 let sx=0;
-document.getElementById('fw').addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
-document.getElementById('fw').addEventListener('touchend',e=>{
-  if(!flipped)return;
-  const d=e.changedTouches[0].clientX-sx;
-  if(Math.abs(d)>55){d>0?R('g'):R('f');}
+document.getElementById(‘fw’).addEventListener(‘touchstart’,e=>{sx=e.touches[0].clientX;},{passive:true});
+document.getElementById(‘fw’).addEventListener(‘touchend’,e=>{
+if(!flipped)return;const dx=e.changedTouches[0].clientX-sx;
+if(Math.abs(dx)>55){dx>0?R(‘g’):R(‘f’);}
 },{passive:true});
 
-/* ═══ CLOSE HISTORY ON BACKDROP TAP ═══ */
-document.getElementById('hov').addEventListener('click',function(e){
-  if(e.target===this){this.classList.remove('show');clearTimeout(htimer);}
-});
-
 /* ═══ UTILS ═══ */
-function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function shuf(a){for(let i=a.length-1;i>0;i–){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
 /* ═══ INIT ═══ */
-buildLists();
-render();
+buildLists();render();
 </script></body></html>
