@@ -1,10 +1,9 @@
-<!DOCTYPE html>
+<!DOCTYPE html><html lang="ja">
 
-<html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>英検準1級 完全攻略</title>
+<title>英語究極参考書</title>
 <script type="importmap">{"imports":{"ios-haptics":"https://esm.sh/ios-haptics"}}</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -12,87 +11,104 @@
 :root{--bg:#f7f6f3;--card:#fff;--tx:#1a1a1a;--sub:#888;--ln:#e8e8e8;--g:#27a06a;--y:#d97706;--r:#dc2626;--b:#2563eb;--p:#7c3aed;--sh:0 2px 16px rgba(0,0,0,.07);--shl:0 8px 36px rgba(0,0,0,.12)}
 html,body{height:100dvh;overflow:hidden}
 body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);display:flex;flex-direction:column}
-
-.nav{display:flex;background:var(–card);border-bottom:1px solid var(–ln);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.nav{display:flex;background:var(--card);border-bottom:1px solid var(--ln);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
 .nav::-webkit-scrollbar{display:none}
-.nb{flex-shrink:0;padding:10px 13px;border:none;background:none;font-family:inherit;font-size:11px;font-weight:600;color:var(–sub);cursor:pointer;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}
-.nb.on{color:var(–b);border-bottom-color:var(–b)}
-
+.nb{flex-shrink:0;padding:10px 13px;border:none;background:none;font-family:inherit;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}
+.nb.on{color:var(--b);border-bottom-color:var(--b)}
 .pr{display:flex;align-items:center;gap:8px;padding:7px 16px 5px;flex-shrink:0}
-.prb{flex:1;height:4px;background:var(–ln);border-radius:2px;overflow:hidden}
-.prf{height:100%;background:linear-gradient(90deg,var(–b),var(–p));border-radius:2px;transition:width .4s}
-.prt{font-size:11px;font-weight:600;color:var(–sub);min-width:48px;text-align:right}
-
+.prb{flex:1;height:4px;background:var(--ln);border-radius:2px;overflow:hidden}
+.prf{height:100%;background:linear-gradient(90deg,var(--b),var(--p));border-radius:2px;transition:width .4s}
+.prt{font-size:11px;font-weight:600;color:var(--sub);min-width:48px;text-align:right}
 .sr{display:flex;gap:6px;padding:0 16px 6px;flex-shrink:0}
-.ch{background:var(–card);border-radius:10px;padding:4px 10px;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;box-shadow:var(–sh)}
-
+.ch{background:var(--card);border-radius:10px;padding:4px 10px;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;box-shadow:var(--sh)}
 .ca{flex:1;display:flex;align-items:center;justify-content:center;padding:6px 16px;position:relative;overflow:hidden;min-height:0}
-
 .tov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(247,246,243,.97);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
 .tov.show{opacity:1;pointer-events:auto}
-.tres{text-align:center;font-size:clamp(20px,5.5vw,36px);font-weight:300;color:var(–tx);line-height:1.5}
-.tsub{font-size:12px;color:var(–sub);margin-top:8px}
-
+.tres{text-align:center;font-size:clamp(20px,5.5vw,36px);font-weight:300;color:var(--tx);line-height:1.5}
+.tsub{font-size:12px;color:var(--sub);margin-top:8px}
+.tloc{font-size:12px;color:var(--b);background:rgba(37,99,235,.08);border-radius:8px;padding:6px 10px;margin-bottom:10px;display:none;line-height:1.6}
 .fw{width:100%;max-width:440px;perspective:1200px;cursor:pointer;user-select:none;-webkit-user-select:none}
 .fc{width:100%;min-height:300px;position:relative;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1)}
 .fc.fl{transform:rotateY(180deg)}
-.ff{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;padding:22px 20px 18px;display:flex;flex-direction:column;box-shadow:var(–shl);background:var(–card)}
+.ff{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;padding:22px 20px 18px;display:flex;flex-direction:column;box-shadow:var(--shl);background:var(--card)}
 .fb{transform:rotateY(180deg)}
-
 .fmeta{display:flex;align-items:center;justify-content:space-between;margin-bottom:auto}
 .lv{font-size:10px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:20px}
 .l1{background:#dcfce7;color:#166534}.l2{background:#fef9c3;color:#854d0e}.l3{background:#fce7f3;color:#9d174d}.lid{background:#ede9fe;color:#5b21b6}.lgr{background:#e0f2fe;color:#075985}
-.fcat{font-size:10px;color:var(–sub);font-weight:500}
-.fword{font-size:clamp(26px,7vw,42px);font-weight:600;color:var(–tx);letter-spacing:-.02em;margin:14px 0 3px;line-height:1.1}
-.fpron{font-size:12px;color:var(–sub);font-weight:300;margin-bottom:5px}
+.fcat{font-size:10px;color:var(--sub);font-weight:500}
+.fword{font-size:clamp(26px,7vw,42px);font-weight:600;color:var(--tx);letter-spacing:-.02em;margin:14px 0 3px;line-height:1.1}
+.fpron{font-size:12px;color:var(--sub);font-weight:300;margin-bottom:5px}
 .fpos{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
 .pn{background:#eff6ff;color:#1d4ed8}.pv{background:#f0fdf4;color:#166534}.pa{background:#fffbeb;color:#b45309}.pd{background:#fff1f2;color:#be123c}.po{background:#f5f3ff;color:#6d28d9}
-.fh{font-size:11px;color:var(–sub);margin-top:auto;text-align:center;opacity:.4;padding-top:10px}
-
-.fmean{font-size:19px;font-weight:700;color:var(–tx);margin-bottom:4px}
+.fh{font-size:11px;color:var(--sub);margin-top:auto;text-align:center;opacity:.4;padding-top:10px}
+.fmean{font-size:19px;font-weight:700;color:var(--tx);margin-bottom:4px}
 .ffull{font-size:11.5px;color:#555;line-height:1.7;margin-bottom:8px}
 .fex{background:#f5f5f2;border-radius:11px;padding:9px 11px;margin-bottom:8px;font-size:12px;line-height:1.6}
-.fexe{color:var(–tx)}.fexj{color:var(–sub);margin-top:2px;font-size:11px}
+.fexe{color:var(--tx)}.fexj{color:var(--sub);margin-top:2px;font-size:11px}
 .ftags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px}
 .ftag{background:#f0f0ee;border-radius:6px;padding:1px 7px;font-size:10px;color:#555}
-.fidm{font-size:11px;line-height:1.8;color:var(–sub)}
+.fidm{font-size:11px;line-height:1.8;color:var(--sub)}
 .fide{font-style:italic;color:#333}
-
 .acts{display:flex;gap:8px;padding:8px 16px 6px;flex-shrink:0}
 .ab{flex:1;padding:10px 4px;border:none;border-radius:13px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:transform .15s;display:flex;flex-direction:column;align-items:center;gap:2px}
 .ab:active{transform:scale(.91)}
-.ab.af{background:#fef2f2;color:var(–r)}.ab.ah{background:#fffbeb;color:var(–y)}.ab.ag{background:#f0fdf4;color:var(–g)}
+.ab.af{background:#fef2f2;color:var(--r)}.ab.ah{background:#fffbeb;color:var(--y)}.ab.ag{background:#f0fdf4;color:var(--g)}
 .ab span{font-size:17px}
-
 .tb{padding:6px 14px 22px;flex-shrink:0}
-.ti{display:flex;align-items:flex-end;gap:8px;background:var(–card);border-radius:22px;padding:7px 7px 7px 13px;box-shadow:0 4px 18px rgba(0,0,0,.07)}
-#ti{flex:1;border:none;outline:none;background:transparent;font-family:inherit;font-size:15px;color:var(–tx);resize:none;min-height:32px;max-height:26dvh;line-height:1.5;overflow-y:auto}
+.ti{display:flex;align-items:flex-end;gap:8px;background:var(--card);border-radius:22px;padding:7px 7px 7px 13px;box-shadow:0 4px 18px rgba(0,0,0,.07)}
+#ti{flex:1;border:none;outline:none;background:transparent;font-family:inherit;font-size:15px;color:var(--tx);resize:none;min-height:32px;max-height:26dvh;line-height:1.5;overflow-y:auto}
 #ti::placeholder{color:#bbb}
 .tbb{flex-shrink:0;width:36px;height:36px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s}
 .tbb:active{transform:scale(.88)}
-.tbs{background:#f0f0ee;color:var(–sub)}.tbg{background:var(–b);color:#fff}
-
+.tbs{background:#f0f0ee;color:var(--sub)}.tbg{background:var(--b);color:#fff}
 .ls{flex:1;overflow-y:auto;padding:8px 16px;display:none;min-height:0}
 .ls.on{display:block}
-.li{background:var(–card);border-radius:14px;padding:12px 14px;margin-bottom:7px;box-shadow:var(–sh)}
-.lw{font-size:15px;font-weight:700;color:var(–tx);margin-bottom:2px}
-.lm{font-size:12px;color:var(–b);font-weight:600;margin-bottom:4px}
-.ln{font-size:11.5px;color:#555;line-height:1.7;background:#f5f5f2;border-radius:9px;padding:7px 9px;margin-top:5px}
+.li{background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:7px;box-shadow:var(--sh)}
+.lw{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:2px}
+.lm{font-size:12px;color:var(--b);font-weight:600;margin-bottom:4px}
+.lnx{font-size:11.5px;color:#555;line-height:1.7;background:#f5f5f2;border-radius:9px;padding:7px 9px;margin-top:5px}
 .le{font-size:11.5px;color:#666;font-style:italic;margin-top:4px;line-height:1.5}
-.sh{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(–sub);padding:8px 0 4px}
-
+.sh{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);padding:8px 0 4px}
 .fw.out{animation:co .2s ease forwards}.fw.in{animation:ci .2s ease forwards}
 @keyframes co{to{opacity:0;transform:scale(.93) translateY(16px)}}
 @keyframes ci{from{opacity:0;transform:scale(.93) translateY(-16px)}to{opacity:1;transform:none}}
-
-.cc{width:100%;max-width:440px;background:var(–card);border-radius:22px;padding:32px 20px;text-align:center;box-shadow:var(–shl)}
+.cc{width:100%;max-width:440px;background:var(--card);border-radius:22px;padding:32px 20px;text-align:center;box-shadow:var(--shl)}
+/* ─── History Overlay ─── */
+.hov{position:fixed;inset:0;background:rgba(0,0,0,.32);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:60;display:flex;align-items:flex-end;padding-bottom:max(12px,env(safe-area-inset-bottom));opacity:0;pointer-events:none;transition:opacity .25s}
+.hov.show{opacity:1;pointer-events:auto}
+.hbox{width:100%;max-width:480px;margin:0 auto;background:rgba(255,255,255,.97);border-radius:22px 22px 16px 16px;padding:14px 16px 18px;max-height:65dvh;overflow-y:auto}
+.hpull{width:36px;height:4px;background:var(--ln);border-radius:2px;margin:0 auto 10px}
+.htit{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.08em;text-transform:uppercase;text-align:center;margin-bottom:10px}
+.hrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--ln)}
+.hrow:last-child{border-bottom:none}
+.hbdg{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.hg{background:#dcfce7;color:#166534}.hh{background:#fef9c3;color:#854d0e}.hf{background:#fee2e2;color:#991b1b}
+.hw{font-size:13px;font-weight:700;color:var(--tx)}
+.hm{font-size:11px;color:var(--sub);margin-top:1px}
+/* ─── Expression list ─── */
+.exr{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--ln)}
+.exr:last-child{border-bottom:none}
+.exn{font-size:10px;font-weight:700;color:var(--sub);min-width:30px;padding-top:2px}
+.exph{font-size:13px;font-weight:700;color:var(--b)}
+.exja{font-size:11px;color:var(--sub);margin-top:1px}
+.exe{font-size:11px;color:#555;font-style:italic;margin-top:3px;line-height:1.5}
+/* ─── Irregular verb table ─── */
+.ivwrap{overflow-x:auto;border-radius:12px;box-shadow:var(--sh);margin-bottom:8px}
+.ivt{width:100%;border-collapse:collapse;font-size:11.5px;background:var(--card)}
+.ivt th{background:var(--b);color:#fff;padding:7px 5px;text-align:center;font-weight:700;font-size:10px;white-space:nowrap}
+.ivt td{padding:5px 5px;border-bottom:1px solid var(--ln);text-align:center;vertical-align:middle;white-space:nowrap}
+.ivt tr:nth-child(even) td{background:#f9f8f6}
+.ivp{color:var(--r);font-weight:700}
+.ivpp{color:var(--b);font-weight:700}
+.ivb{font-weight:700;color:var(--tx)}
 </style>
-
 </head>
 <body>
 <div class="nav">
 <button class="nb on" id="t-f" onclick="ST('f')">🃏 単語カード</button>
 <button class="nb" id="t-i" onclick="ST('i')">💬 イディオム</button>
+<button class="nb" id="t-e" onclick="ST('e')">📝 入試表現</button>
+<button class="nb" id="t-v" onclick="ST('v')">🔄 動詞変化</button>
 <button class="nb" id="t-g" onclick="ST('g')">📐 文法</button>
 <button class="nb" id="t-p" onclick="ST('p')">✍️ 言い換え</button>
 <button class="nb" id="t-r" onclick="ST('r')">📖 読解表現</button>
@@ -102,12 +118,19 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);displa
 <div class="pr"><div class="prb"><div class="prf" id="pf" style="width:0%"></div></div><div class="prt" id="pt">0/0</div></div>
 <div class="sr" id="sr">
 <div class="ch"><span style="color:var(--g)">✓</span><span id="sg" style="color:var(--g)">0</span></div>
-<div class="ch"><span style="color:var(--y)">△</span><span id="sh" style="color:var(--y)">0</span></div>
+<div class="ch"><span style="color:var(--y)">△</span><span id="sh2" style="color:var(--y)">0</span></div>
 <div class="ch"><span style="color:var(--r)">✗</span><span id="sf" style="color:var(--r)">0</span></div>
 <div class="ch" style="margin-left:auto;cursor:pointer" onclick="SD()">🔀</div>
+<div class="ch" style="cursor:pointer" onclick="showHistFull()">📋</div>
 </div>
 <div class="ca" id="ca">
-<div class="tov" id="tov" onclick="CT()"><div><div class="tres" id="tr"></div><div class="tsub" id="ts"></div></div></div>
+<div class="tov" id="tov" onclick="CT()">
+<div>
+<div class="tloc" id="tl"></div>
+<div class="tres" id="tr"></div>
+<div class="tsub" id="ts"></div>
+</div>
+</div>
 <div class="fw" id="fw">
 <div class="fc" id="fc" onclick="FF()">
 <div class="ff" id="ff">
@@ -115,7 +138,7 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);displa
 <div class="fword" id="fwo"></div>
 <div class="fpron" id="fpr"></div>
 <span class="fpos pv" id="fpo"></span>
-<div class="fh">タップして意味を確認</div>
+<div class="fh">タップして意味を確認 · 答えたらスワイプ →✓ ←✗</div>
 </div>
 <div class="ff fb" id="fba">
 <div class="fmean" id="fme"></div>
@@ -127,111 +150,121 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);displa
 </div>
 </div>
 </div>
+<!-- List panels -->
 <div class="ls" id="l-i"></div>
+<div class="ls" id="l-e"></div>
+<div class="ls" id="l-v"></div>
 <div class="ls" id="l-g"></div>
 <div class="ls" id="l-p"></div>
 <div class="ls" id="l-r"></div>
 <div class="ls" id="l-c"></div>
 <div class="ls" id="l-a"></div>
+<!-- Action buttons -->
 <div class="acts" id="acts" style="display:none">
 <button class="ab af" onclick="R('f')"><span>😰</span>忘れた</button>
 <button class="ab ah" onclick="R('h')"><span>🤔</span>難しい</button>
 <button class="ab ag" onclick="R('g')"><span>✨</span>覚えた！</button>
 </div>
+<!-- Translator bar -->
 <div class="tb"><div class="ti">
 <button class="tbb tbs" id="bsr" title="検索"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
-<textarea id="ti" placeholder="翻訳 / Translate..." rows="1" spellcheck="true"></textarea>
+<textarea id="ti" placeholder="翻訳 / 単語検索..." rows="1" spellcheck="true"></textarea>
 <button class="tbb tbg" id="bgo" title="翻訳"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
 </div></div>
+<!-- History overlay -->
+<div id="hov" class="hov" onclick="document.getElementById('hov').classList.remove('show')">
+<div class="hbox" onclick="event.stopPropagation()">
+<div class="hpull"></div>
+<div class="htit">ANSWER HISTORY · タップして閉じる</div>
+<div id="hlist"></div>
+</div>
+</div>
 
 <script type="module">
-import{haptic}from'ios-haptics';
+/* ═══ HAPTIC SAFE LOADER ═══ */
+let _hRaw=null;
+try{const m=await import('https://esm.sh/ios-haptics');_hRaw=m.haptic;}catch(_){}
+function haptic(){try{_hRaw&&_hRaw();}catch(_){}}
+haptic.confirm=function(){try{_hRaw&&_hRaw.confirm&&_hRaw.confirm();}catch(_){}};
 
-/* ═══ ALL VOCABULARY DATA ═══ */
+/* ═══ VOCABULARY DATA ═══ */
 const V=[
-// ── 2015 JSON: verbs_high_priority (25) ──
 {w:"allege",p:"v",l:3,c:"2015動詞",m:"主張する・断言する",pr:"/əˈledʒ/",f:"that節をとる。allocate（割り当てる）と混同注意。",e:"He alleged that the company was guilty.",ej:"彼はその会社に罪があると主張した。",t:["allegation (n)"],id:[]},
 {w:"allocate",p:"v",l:3,c:"2015動詞",m:"割り当てる・配分する",pr:"/ˈæləkeɪt/",f:"allocate A to B の形。allege（主張する）と混同注意。",e:"The government allocated funds to the project.",ej:"政府はそのプロジェクトに資金を割り当てた。",t:["allocation (n)"],id:[]},
 {w:"apprehend",p:"v",l:3,c:"2015動詞",m:"逮捕する・理解する",pr:"/ˌæprɪˈhend/",f:"comprehend（理解する）と区別。警察文脈では逮捕。",e:"The police apprehended the suspect.",ej:"警察は容疑者を逮捕した。",t:["apprehension (n)"],id:[]},
 {w:"ascertain",p:"v",l:3,c:"2015動詞",m:"確認する・確かめる",pr:"/ˌæsərˈteɪn/",f:"≒make sure。that節と共に使う。",e:"We need to ascertain the facts.",ej:"事実を確認する必要がある。",t:[],id:[]},
-{w:"eradicate",p:"v",l:3,c:"2015動詞",m:"根絶する・撲滅する",pr:"/ɪˈrædɪkeɪt/",f:"erase（消す）＋radical。病気・社会問題の文脈。",e:"Scientists aim to eradicate malaria.",ej:"科学者たちはマラリアの根絶を目指している。",t:["eradication (n)"],id:[]},
+{w:"eradicate",p:"v",l:3,c:"2015動詞",m:"根絶する・撲滅する",pr:"/ɪˈrædɪkeɪt/",f:"病気・社会問題の文脈。",e:"Scientists aim to eradicate malaria.",ej:"科学者たちはマラリアの根絶を目指している。",t:["eradication (n)"],id:[]},
 {w:"facilitate",p:"v",l:3,c:"2015動詞",m:"促進する・容易にする",pr:"/fəˈsɪlɪteɪt/",f:"≒make easier。直接目的語をとる。",e:"Technology facilitates communication.",ej:"技術はコミュニケーションを促進する。",t:["facilitation (n)","facility (n)"],id:[]},
 {w:"extradite",p:"v",l:3,c:"2015動詞",m:"引き渡す・送還する",pr:"/ˈekstrədaɪt/",f:"犯罪者を外国へ引き渡す。",e:"The criminal was extradited to face trial.",ej:"犯人は裁判を受けるために引き渡された。",t:["extradition (n)"],id:[]},
-{w:"illuminate",p:"v",l:3,c:"2015動詞",m:"照らす・明らかにする",pr:"/ɪˈluːmɪneɪt/",f:"比喩的に「問題を明らかにする」=光を当てる。",e:"The study illuminated a key issue.",ej:"その研究は重要な問題を明らかにした。",t:["illumination (n)"],id:[]},
+{w:"illuminate",p:"v",l:3,c:"2015動詞",m:"照らす・明らかにする",pr:"/ɪˈluːmɪneɪt/",f:"比喩的に「問題を明らかにする」。",e:"The study illuminated a key issue.",ej:"その研究は重要な問題を明らかにした。",t:["illumination (n)"],id:[]},
 {w:"dominate",p:"v",l:3,c:"2015動詞",m:"支配する・優位を占める",pr:"/ˈdɒmɪneɪt/",f:"domesticate（飼いならす）と混同注意。",e:"One company dominates the market.",ej:"1つの会社が市場を支配している。",t:["dominance (n)","dominant (adj)"],id:[]},
-{w:"impede",p:"v",l:3,c:"2015動詞",m:"妨げる・邪魔する",pr:"/ɪmˈpiːd/",f:"≒hinder, obstruct。impede traffic（交通を妨げる）。",e:"Bad weather impeded the rescue.",ej:"悪天候が救助を妨げた。",t:["impediment (n)"],id:[]},
+{w:"impede",p:"v",l:3,c:"2015動詞",m:"妨げる・邪魔する",pr:"/ɪmˈpiːd/",f:"≒hinder, obstruct。",e:"Bad weather impeded the rescue.",ej:"悪天候が救助を妨げた。",t:["impediment (n)"],id:[]},
 {w:"disrupt",p:"v",l:3,c:"2015動詞",m:"混乱させる・分断する",pr:"/dɪsˈrʌpt/",f:"disrupt traffic/service 文脈が多い。",e:"The storm disrupted power supplies.",ej:"嵐が電力供給を混乱させた。",t:["disruption (n)","disruptive (adj)"],id:[]},
 {w:"dismiss",p:"v",l:3,c:"2015動詞",m:"解雇する・退ける",pr:"/dɪsˈmɪs/",f:"dismiss an idea（考えを退ける）も重要。",e:"The manager dismissed the idea.",ej:"マネージャーはそのアイデアを退けた。",t:["dismissal (n)"],id:[]},
 {w:"negotiate",p:"v",l:2,c:"2015動詞",m:"交渉する",pr:"/nɪˈɡoʊʃieɪt/",f:"negotiate with A / negotiate A。",e:"They negotiated a new contract.",ej:"彼らは新しい契約を交渉した。",t:["negotiation (n)","negotiator (n)"],id:[]},
 {w:"cherish",p:"v",l:3,c:"2015動詞",m:"大事にする・かわいがる",pr:"/ˈtʃerɪʃ/",f:"perish（死ぬ・滅びる）と混同注意。",e:"She cherished her childhood memories.",ej:"彼女は子供時代の思い出を大事にしていた。",t:[],id:[]},
-{w:"utilize",p:"v",l:2,c:"2015動詞",m:"利用する",pr:"/ˈjuːtəlaɪz/",f:"≒use。やや硬い表現。utilization（名）。",e:"We should utilize renewable energy.",ej:"再生可能エネルギーを利用すべきだ。",t:["utilization (n)"],id:[]},
-{w:"excel",p:"v",l:2,c:"2015動詞",m:"〜にまさる・優れる",pr:"/ɪkˈsel/",f:"excel at/in + 分野。",e:"She excels at mathematics.",ej:"彼女は数学に秀でている。",t:["excellent (adj)","excellence (n)"],id:[{e:"excel at",j:"〜に秀でる"}]},
+{w:"utilize",p:"v",l:2,c:"2015動詞",m:"利用する",pr:"/ˈjuːtəlaɪz/",f:"≒use。やや硬い表現。",e:"We should utilize renewable energy.",ej:"再生可能エネルギーを利用すべきだ。",t:["utilization (n)"],id:[]},
+{w:"excel",p:"v",l:2,c:"2015動詞",m:"〜にまさる・優れる",pr:"/ɪkˈsel/",f:"excel at/in + 分野。",e:"She excels at mathematics.",ej:"彼女は数学に秀でている。",t:["excellent (adj)"],id:[{e:"excel at",j:"〜に秀でる"}]},
 {w:"bestow",p:"v",l:3,c:"2015動詞",m:"与える・授ける",pr:"/bɪˈstoʊ/",f:"bestow A on B（AをBに与える）。≒grant, award。",e:"The king bestowed the medal on the hero.",ej:"王はその英雄にメダルを授けた。",t:[],id:[{e:"bestow A on B",j:"AをBに授ける"}]},
 {w:"penetrate",p:"v",l:3,c:"2015動詞",m:"貫通する・理解する",pr:"/ˈpenɪtreɪt/",f:"penalize（罰則を科す）と混同注意。",e:"The bullet penetrated the wall.",ej:"弾丸が壁を貫通した。",t:["penetration (n)"],id:[]},
 {w:"abide",p:"v",l:3,c:"2015動詞",m:"とどまる・従う",pr:"/əˈbaɪd/",f:"abide by ～（〜を守る）が重要熟語。",e:"You must abide by the rules.",ej:"ルールを守らなければならない。",t:[],id:[{e:"abide by",j:"〜を守る・従う"}]},
 {w:"boost",p:"v",l:2,c:"2015動詞",m:"強化する・押し上げる",pr:"/buːst/",f:"boost sales / confidence / morale。",e:"The new policy boosted the economy.",ej:"新しい政策は経済を押し上げた。",t:["booster (n)"],id:[]},
-{w:"elevate",p:"v",l:3,c:"2015動詞",m:"高める・上昇させる",pr:"/ˈeləveɪt/",f:"≒raise, enhance。elicit（引き出す）と混同注意。",e:"She elevated the company's reputation.",ej:"彼女は会社の評判を高めた。",t:["elevation (n)","elevator (n)"],id:[]},
-// ── 2015 JSON: nouns_high_priority (25) ──
-{w:"aftermath",p:"n",l:3,c:"2015名詞",m:"結果・余波",pr:"/ˈæftərmæθ/",f:"in the immediate aftermath of ～（〜の直後）頻出。",e:"In the aftermath of the disaster, many were homeless.",ej:"災害の余波で多くの人がホームレスになった。",t:[],id:[{e:"in the aftermath of",j:"〜の直後に"}]},
+{w:"elevate",p:"v",l:3,c:"2015動詞",m:"高める・上昇させる",pr:"/ˈeləveɪt/",f:"≒raise, enhance。elicit（引き出す）と混同注意。",e:"She elevated the company's reputation.",ej:"彼女は会社の評判を高めた。",t:["elevation (n)"],id:[]},
+{w:"aftermath",p:"n",l:3,c:"2015名詞",m:"結果・余波",pr:"/ˈæftərmæθ/",f:"in the aftermath of ～（〜の直後）頻出。",e:"In the aftermath of the disaster, many were homeless.",ej:"災害の余波で多くの人がホームレスになった。",t:[],id:[{e:"in the aftermath of",j:"〜の直後に"}]},
 {w:"consensus",p:"n",l:3,c:"2015名詞",m:"合意・一致した意見",pr:"/kənˈsensəs/",f:"reach a consensus（合意に達する）。",e:"The committee reached a consensus.",ej:"委員会は合意に達した。",t:[],id:[{e:"reach a consensus",j:"合意に達する"}]},
-{w:"credibility",p:"n",l:3,c:"2015名詞",m:"信頼性",pr:"/ˌkredəˈbɪləti/",f:"credible（信頼できる）の名詞形。",e:"The scandal damaged his credibility.",ej:"そのスキャンダルは彼の信頼性を傷つけた。",t:["credible (adj)","credence (n)"],id:[]},
+{w:"credibility",p:"n",l:3,c:"2015名詞",m:"信頼性",pr:"/ˌkredəˈbɪləti/",f:"credible（信頼できる）の名詞形。",e:"The scandal damaged his credibility.",ej:"そのスキャンダルは彼の信頼性を傷つけた。",t:["credible (adj)"],id:[]},
 {w:"implication",p:"n",l:3,c:"2015名詞",m:"含意・暗示・影響",pr:"/ˌɪmplɪˈkeɪʃən/",f:"political implications（政治的影響）。",e:"The decision has serious implications.",ej:"その決定には重大な影響がある。",t:["imply (v)","implicit (adj)"],id:[]},
 {w:"erosion",p:"n",l:3,c:"2015名詞",m:"浸食・腐食",pr:"/ɪˈroʊʒən/",f:"比喩的に「信頼などの侵食」でも使う。",e:"Soil erosion is a major environmental problem.",ej:"土壌侵食は重大な環境問題だ。",t:["erode (v)"],id:[]},
 {w:"gist",p:"n",l:3,c:"2015名詞",m:"要点・核心",pr:"/dʒɪst/",f:"get the gist = 要点をつかむ。",e:"I got the gist of his argument.",ej:"彼の主張の要点はつかめた。",t:[],id:[{e:"get the gist",j:"要点をつかむ"}]},
 {w:"aptitude",p:"n",l:3,c:"2015名詞",m:"適性・才能",pr:"/ˈæptɪtjuːd/",f:"aptitude test（適性検査）。",e:"She has an aptitude for languages.",ej:"彼女は語学の才能がある。",t:[],id:[{e:"aptitude test",j:"適性検査"}]},
 {w:"deadlock",p:"n",l:3,c:"2015名詞",m:"行き詰まり・膠着状態",pr:"/ˈdedlɒk/",f:"break the deadlock（膠着状態を打破する）。",e:"The talks ended in a deadlock.",ej:"交渉は行き詰まりに終わった。",t:[],id:[{e:"break the deadlock",j:"膠着状態を打破する"}]},
-{w:"mediator",p:"n",l:3,c:"2015名詞",m:"仲裁人・調停者",pr:"/ˈmiːdieɪtər/",f:"meditate（瞑想する）と混同注意。mediate（仲裁する）の派生。",e:"A mediator resolved the dispute.",ej:"仲裁人が紛争を解決した。",t:["mediate (v)","mediation (n)"],id:[]},
-{w:"contamination",p:"n",l:3,c:"2015名詞",m:"汚染",pr:"/kənˌtæmɪˈneɪʃən/",f:"water contamination = 水質汚染。",e:"The water contamination made people sick.",ej:"水質汚染が人々を病気にした。",t:["contaminate (v)","contaminant (n)"],id:[]},
-{w:"alienation",p:"n",l:3,c:"2015名詞",m:"疎外・疎遠",pr:"/ˌeɪliəˈneɪʃən/",f:"emotional agitation（精神的興奮）と区別。",e:"Social alienation is a growing problem.",ej:"社会的疎外は深刻化する問題だ。",t:["alienate (v)","alien (adj)"],id:[]},
-// ── 2015 JSON: adjectives_high_priority (21) ──
-{w:"comprehensive",p:"adj",l:3,c:"2015形容詞",m:"包括的な",pr:"/ˌkɒmprɪˈhensɪv/",f:"⚠️ comprehensible（理解できる）と混同注意！最頻出ミス。",e:"A comprehensive review was conducted.",ej:"包括的なレビューが行われた。",t:["comprehend (v)","comprehension (n)"],id:[]},
-{w:"considerate",p:"adj",l:3,c:"2015形容詞",m:"思いやりのある",pr:"/kənˈsɪdərɪt/",f:"⚠️ considerable（かなりの）と混同注意！",e:"She is always considerate of others.",ej:"彼女はいつも他人に思いやりがある。",t:["consideration (n)","considerable (adj)"],id:[]},
+{w:"mediator",p:"n",l:3,c:"2015名詞",m:"仲裁人・調停者",pr:"/ˈmiːdieɪtər/",f:"meditate（瞑想する）と混同注意。",e:"A mediator resolved the dispute.",ej:"仲裁人が紛争を解決した。",t:["mediate (v)","mediation (n)"],id:[]},
+{w:"contamination",p:"n",l:3,c:"2015名詞",m:"汚染",pr:"/kənˌtæmɪˈneɪʃən/",f:"water contamination = 水質汚染。",e:"The water contamination made people sick.",ej:"水質汚染が人々を病気にした。",t:["contaminate (v)"],id:[]},
+{w:"alienation",p:"n",l:3,c:"2015名詞",m:"疎外・疎遠",pr:"/ˌeɪliəˈneɪʃən/",f:"emotional agitation（精神的興奮）と区別。",e:"Social alienation is a growing problem.",ej:"社会的疎外は深刻化する問題だ。",t:["alienate (v)"],id:[]},
+{w:"comprehensive",p:"adj",l:3,c:"2015形容詞",m:"包括的な",pr:"/ˌkɒmprɪˈhensɪv/",f:"⚠️ comprehensible（理解できる）と混同注意！最頻出ミス。",e:"A comprehensive review was conducted.",ej:"包括的なレビューが行われた。",t:["comprehend (v)"],id:[]},
+{w:"considerate",p:"adj",l:3,c:"2015形容詞",m:"思いやりのある",pr:"/kənˈsɪdərɪt/",f:"⚠️ considerable（かなりの）と混同注意！",e:"She is always considerate of others.",ej:"彼女はいつも他人に思いやりがある。",t:["considerable (adj)"],id:[]},
 {w:"drastic",p:"adj",l:3,c:"2015形容詞",m:"抜本的な・思い切った",pr:"/ˈdræstɪk/",f:"drastic measures（抜本的な対策）。",e:"Drastic measures were needed.",ej:"抜本的な対策が必要だった。",t:["drastically (adv)"],id:[]},
-{w:"legitimate",p:"adj",l:3,c:"2015形容詞",m:"正当な・合法の",pr:"/lɪˈdʒɪtɪmɪt/",f:"≒legal, lawful。illegitimate（違法な）が対義語。",e:"He had a legitimate reason to leave.",ej:"彼には去る正当な理由があった。",t:["legitimacy (n)","legitimize (v)"],id:[]},
-{w:"skeptical",p:"adj",l:3,c:"2015形容詞",m:"懐疑的な",pr:"/ˈskeptɪkəl/",f:"be skeptical about ～。≒doubtful。",e:"Scientists are skeptical about the results.",ej:"科学者たちはその結果に懐疑的だ。",t:["skepticism (n)","skeptic (n)"],id:[]},
+{w:"legitimate",p:"adj",l:3,c:"2015形容詞",m:"正当な・合法の",pr:"/lɪˈdʒɪtɪmɪt/",f:"≒legal, lawful。illegitimate（違法な）が対義語。",e:"He had a legitimate reason to leave.",ej:"彼には去る正当な理由があった。",t:["legitimacy (n)"],id:[]},
+{w:"skeptical",p:"adj",l:3,c:"2015形容詞",m:"懐疑的な",pr:"/ˈskeptɪkəl/",f:"be skeptical about ～。≒doubtful。",e:"Scientists are skeptical about the results.",ej:"科学者たちはその結果に懐疑的だ。",t:["skepticism (n)"],id:[]},
 {w:"obsolete",p:"adj",l:3,c:"2015形容詞",m:"時代遅れの",pr:"/ˌɒbsəˈliːt/",f:"≒outdated, old-fashioned。",e:"The technology is now obsolete.",ej:"その技術は今や時代遅れだ。",t:["obsolescence (n)"],id:[]},
 {w:"vulnerable",p:"adj",l:3,c:"2015形容詞",m:"傷つきやすい・脆弱な",pr:"/ˈvʌlnərəbl/",f:"be vulnerable to ～（〜に脆弱）。",e:"Children are vulnerable to infections.",ej:"子供は感染症に対して脆弱だ。",t:["vulnerability (n)"],id:[{e:"be vulnerable to",j:"〜に脆弱である"}]},
 {w:"impartial",p:"adj",l:3,c:"2015形容詞",m:"公平な",pr:"/ɪmˈpɑːrʃəl/",f:"≒fair, unbiased。≠partial（偏った）。",e:"The judge must be impartial.",ej:"裁判官は公平でなければならない。",t:["impartiality (n)"],id:[]},
-{w:"spontaneous",p:"adj",l:3,c:"2015形容詞",m:"自発的な・自然発生の",pr:"/spɒnˈteɪniəs/",f:"spontaneous combustion（自然発火）。",e:"The audience gave a spontaneous cheer.",ej:"観客は自然に歓声を上げた。",t:["spontaneously (adv)","spontaneity (n)"],id:[]},
+{w:"spontaneous",p:"adj",l:3,c:"2015形容詞",m:"自発的な・自然発生の",pr:"/spɒnˈteɪniəs/",f:"spontaneous combustion（自然発火）。",e:"The audience gave a spontaneous cheer.",ej:"観客は自然に歓声を上げた。",t:["spontaneity (n)"],id:[]},
 {w:"lucid",p:"adj",l:3,c:"2015形容詞",m:"明快な・わかりやすい",pr:"/ˈluːsɪd/",f:"≒clear。legible（読みやすい）と区別。",e:"Her explanation was lucid and helpful.",ej:"彼女の説明は明快で役に立った。",t:["lucidity (n)"],id:[]},
 {w:"subsequent",p:"adj",l:3,c:"2015形容詞",m:"後の・その後に続く",pr:"/ˈsʌbsɪkwənt/",f:"subsequent to ～（〜の後に）。",e:"Subsequent events proved him right.",ej:"その後の出来事が彼の正しさを証明した。",t:["subsequently (adv)"],id:[]},
-// ── 2025 試験出題語 ──
-{w:"evade",p:"v",l:3,c:"2025出題",m:"逃れる・回避する",pr:"/ɪˈveɪd/",f:"evasion（名）= 回避。invade（侵略）と混同注意！",e:"The prisoners evaded the police for weeks.",ej:"囚人たちは数週間警察から逃れた。",t:["evasion (n)","evasive (adj)"],id:[]},
-{w:"compress",p:"v",l:3,c:"2025出題",m:"圧縮する・凝縮する",pr:"/kəmˈpres/",f:"compression（名）。情報・時間・データを小さくまとめる。",e:"He compressed all events into one day.",ej:"彼はすべての出来事を1日に凝縮した。",t:["compression (n)"],id:[]},
-{w:"enroll",p:"v",l:2,c:"2025出題",m:"入学する・登録する",pr:"/ɪnˈroʊl/",f:"enroll in a school/course。enrollment（名）。",e:"She enrolled in the university last year.",ej:"彼女は去年その大学に入学した。",t:["enrollment (n)"],id:[]},
-{w:"detach",p:"v",l:3,c:"2025出題",m:"取り外す・分離する",pr:"/dɪˈtætʃ/",f:"attach（取り付ける）の反対。detachable（形）。",e:"He detached the old battery carefully.",ej:"彼は古いバッテリーを慎重に取り外した。",t:["detachment (n)","detachable (adj)"],id:[]},
+{w:"evade",p:"v",l:3,c:"2025出題",m:"逃れる・回避する",pr:"/ɪˈveɪd/",f:"invade（侵略）と混同注意！",e:"The prisoners evaded the police for weeks.",ej:"囚人たちは数週間警察から逃れた。",t:["evasion (n)","evasive (adj)"],id:[]},
+{w:"compress",p:"v",l:3,c:"2025出題",m:"圧縮する・凝縮する",pr:"/kəmˈpres/",f:"情報・データを小さくまとめる。",e:"He compressed all events into one day.",ej:"彼はすべての出来事を1日に凝縮した。",t:["compression (n)"],id:[]},
+{w:"enroll",p:"v",l:2,c:"2025出題",m:"入学する・登録する",pr:"/ɪnˈroʊl/",f:"enroll in a school/course。",e:"She enrolled in the university last year.",ej:"彼女は去年その大学に入学した。",t:["enrollment (n)"],id:[]},
+{w:"detach",p:"v",l:3,c:"2025出題",m:"取り外す・分離する",pr:"/dɪˈtætʃ/",f:"attach（取り付ける）の反対。",e:"He detached the old battery carefully.",ej:"彼は古いバッテリーを慎重に取り外した。",t:["detachment (n)"],id:[]},
 {w:"collide",p:"v",l:3,c:"2025出題",m:"衝突する",pr:"/kəˈlaɪd/",f:"collision（衝突・名）。物理的にも比喩的にも使う。",e:"The two cars nearly collided.",ej:"2台の車はもう少しで衝突するところだった。",t:["collision (n)"],id:[]},
-{w:"spacious",p:"adj",l:2,c:"2025出題",m:"広々とした",pr:"/ˈspeɪʃəs/",f:"space → spacious。部屋・建物の広さを形容。",e:"The apartment was spacious and bright.",ej:"そのアパートは広々として明るかった。",t:[],id:[]},
+{w:"spacious",p:"adj",l:2,c:"2025出題",m:"広々とした",pr:"/ˈspeɪʃəs/",f:"部屋・建物の広さを形容。",e:"The apartment was spacious and bright.",ej:"そのアパートは広々として明るかった。",t:[],id:[]},
 {w:"tentative",p:"adj",l:3,c:"2025出題",m:"仮の・暫定的な",pr:"/ˈtentətɪv/",f:"⚠️ attentive（注意深い）と混同注意！",e:"We have tentative plans for next week.",ej:"来週の仮の予定がある。",t:["tentatively (adv)"],id:[]},
 {w:"cosmopolitan",p:"adj",l:3,c:"2025出題",m:"国際的な・世界主義の",pr:"/ˌkɒzməˈpɒlɪtən/",f:"cosmos（世界）+ polis（都市）。",e:"Tokyo is a cosmopolitan city.",ej:"東京は国際的な都市だ。",t:[],id:[]},
-{w:"anatomy",p:"n",l:3,c:"2025出題",m:"解剖学・構造",pr:"/əˈnætəmi/",f:"anatomical（形）。物事の詳細構造にも使う。",e:"Students must study human anatomy.",ej:"学生は人体解剖学を学ばなければならない。",t:["anatomical (adj)"],id:[]},
-{w:"ascent",p:"n",l:3,c:"2025出題",m:"登頂・上昇",pr:"/əˈsent/",f:"ascend（登る）の名詞形。descent（下降）が反意語。",e:"The ascent took two days.",ej:"登頂に2日かかった。",t:["ascend (v)","descent (n)"],id:[]},
-{w:"autonomy",p:"n",l:3,c:"2025出題",m:"自律性・自治権",pr:"/ɔːˈtɒnəmi/",f:"⚠️ astronomy（天文学）と混同注意！auto-=自己。",e:"Workers were given more autonomy.",ej:"労働者にはより多くの自律性が与えられた。",t:["autonomous (adj)"],id:[]},
+{w:"anatomy",p:"n",l:3,c:"2025出題",m:"解剖学・構造",pr:"/əˈnætəmi/",f:"物事の詳細構造にも使う。",e:"Students must study human anatomy.",ej:"学生は人体解剖学を学ばなければならない。",t:["anatomical (adj)"],id:[]},
+{w:"ascent",p:"n",l:3,c:"2025出題",m:"登頂・上昇",pr:"/əˈsent/",f:"ascend（登る）の名詞形。descent（下降）が反意語。",e:"The ascent took two days.",ej:"登頂に2日かかった。",t:["ascend (v)"],id:[]},
+{w:"autonomy",p:"n",l:3,c:"2025出題",m:"自律性・自治権",pr:"/ɔːˈtɒnəmi/",f:"⚠️ astronomy（天文学）と混同注意！",e:"Workers were given more autonomy.",ej:"労働者にはより多くの自律性が与えられた。",t:["autonomous (adj)"],id:[]},
 {w:"rivalry",p:"n",l:3,c:"2025出題",m:"ライバル関係・競争",pr:"/ˈraɪvəlri/",f:"rival → rivalry。",e:"The rivalry between the teams is fierce.",ej:"チーム間の競争は激しい。",t:["rival (n/v)"],id:[]},
-// ── 2025 句動詞 ──
 {w:"make for",p:"v",l:2,c:"2025句動詞",m:"〜に向かう",pr:"",f:"≒head for。目的地に向かう。",e:"They made for the nearest town.",ej:"彼らは最寄りの町に向かった。",t:[],id:[]},
 {w:"take on",p:"v",l:2,c:"2025句動詞",m:"引き受ける・取り組む",pr:"",f:"take on responsibilities / challenges。",e:"She took on new responsibilities.",ej:"彼女は新しい責任を引き受けた。",t:[],id:[]},
 {w:"rule out",p:"v",l:2,c:"2025句動詞",m:"除外する・排除する",pr:"",f:"rule out the possibility。",e:"We can't rule out that option.",ej:"その選択肢を排除できない。",t:[],id:[]},
 {w:"stick around",p:"v",l:2,c:"2025句動詞",m:"その場に留まる",pr:"",f:"stick = くっつく → 離れずに残る。",e:"Stick around — I'll be right back.",ej:"ここにいて — すぐ戻る。",t:[],id:[]},
-// ── untitled.txt: Lv1基礎語 ──
-{w:"ability",p:"n",l:1,c:"基礎",m:"能力・才能",pr:"/əˈbɪlɪti/",f:"able（できる）の名詞形。",e:"She has the ability to speak three languages.",ej:"彼女は3ヶ国語を話す能力がある。",t:["able (adj)","unable (adj)"],id:[{e:"to the best of one's ability",j:"能力の限りを尽くして"}]},
+{w:"ability",p:"n",l:1,c:"基礎",m:"能力・才能",pr:"/əˈbɪlɪti/",f:"able（できる）の名詞形。",e:"She has the ability to speak three languages.",ej:"彼女は3ヶ国語を話す能力がある。",t:["able (adj)"],id:[{e:"to the best of one's ability",j:"能力の限りを尽くして"}]},
 {w:"access",p:"n",l:1,c:"基礎",m:"アクセス・利用する権利",pr:"/ˈækses/",f:"動詞でも使う（〜にアクセスする）。",e:"Everyone should have access to education.",ej:"誰もが教育を受ける権利を持つべきだ。",t:["accessible (adj)"],id:[{e:"gain access to",j:"〜へのアクセスを得る"}]},
-{w:"achieve",p:"v",l:1,c:"基礎",m:"達成する・成し遂げる",pr:"/əˈtʃiːv/",f:"努力の結果として実現すること。",e:"She achieved her goal.",ej:"彼女は目標を達成した。",t:["achievement (n)","achievable (adj)"],id:[]},
-{w:"affect",p:"v",l:1,c:"基礎",m:"影響を与える",pr:"/əˈfekt/",f:"⚠️ effect（名詞）と混同注意！affect=動詞、effect=名詞。",e:"Climate change affects everyone.",ej:"気候変動は全員に影響を与える。",t:["effect (n)","affection (n)"],id:[{e:"adversely affect",j:"悪影響を与える"}]},
+{w:"achieve",p:"v",l:1,c:"基礎",m:"達成する・成し遂げる",pr:"/əˈtʃiːv/",f:"努力の結果として実現すること。",e:"She achieved her goal.",ej:"彼女は目標を達成した。",t:["achievement (n)"],id:[]},
+{w:"affect",p:"v",l:1,c:"基礎",m:"影響を与える",pr:"/əˈfekt/",f:"⚠️ effect（名詞）と混同注意！affect=動詞、effect=名詞。",e:"Climate change affects everyone.",ej:"気候変動は全員に影響を与える。",t:["effect (n)"],id:[{e:"adversely affect",j:"悪影響を与える"}]},
 {w:"reduce",p:"v",l:1,c:"基礎",m:"減らす・低下させる",pr:"/rɪˈdjuːs/",f:"reduction（名詞）。",e:"We need to reduce carbon emissions.",ej:"炭素排出量を削減する必要がある。",t:["reduction (n)"],id:[]},
 {w:"require",p:"v",l:1,c:"基礎",m:"必要とする・要求する",pr:"/rɪˈkwaɪər/",f:"require A to do = Aに〜することを求める。",e:"The job requires strong skills.",ej:"その仕事は高いスキルを必要とする。",t:["requirement (n)"],id:[]},
-{w:"involve",p:"v",l:1,c:"基礎",m:"含む・巻き込む・伴う",pr:"/ɪnˈvɒlv/",f:"involve doing = 〜することを含む。",e:"The project involves research.",ej:"そのプロジェクトは調査を伴う。",t:["involvement (n)","involved (adj)"],id:[{e:"be involved in",j:"〜に関わっている"}]},
+{w:"involve",p:"v",l:1,c:"基礎",m:"含む・巻き込む・伴う",pr:"/ɪnˈvɒlv/",f:"involve doing = 〜することを含む。",e:"The project involves research.",ej:"そのプロジェクトは調査を伴う。",t:["involvement (n)"],id:[{e:"be involved in",j:"〜に関わっている"}]},
 {w:"gradually",p:"adv",l:1,c:"基礎",m:"徐々に・少しずつ",pr:"/ˈɡrædʒuəli/",f:"gradual（形容詞）。",e:"The situation gradually improved.",ej:"状況は徐々に改善した。",t:["gradual (adj)"],id:[]},
-// ── Lv2中級語 ──
 {w:"benefit",p:"n",l:2,c:"中級",m:"利点・恩恵",pr:"/ˈbenɪfɪt/",f:"benefit from = 〜から恩恵を受ける。動詞にもなる。",e:"Exercise has many health benefits.",ej:"運動には多くの健康上の利点がある。",t:["beneficial (adj)"],id:[{e:"benefit from",j:"〜から恩恵を受ける"}]},
 {w:"consequence",p:"n",l:2,c:"中級",m:"結果・影響",pr:"/ˈkɒnsɪkwəns/",f:"特に悪い結果。as a consequence = その結果として。",e:"Pollution has serious consequences.",ej:"汚染は深刻な影響をもたらす。",t:["consequently (adv)"],id:[{e:"as a consequence",j:"その結果として"}]},
 {w:"contribute",p:"v",l:2,c:"中級",m:"貢献する・一因となる",pr:"/kənˈtrɪbjuːt/",f:"contribute to 〜 = 〜に貢献する。",e:"Exercise contributes to good health.",ej:"運動は健康に貢献する。",t:["contribution (n)"],id:[{e:"contribute to",j:"〜に貢献する"}]},
-{w:"demonstrate",p:"v",l:2,c:"中級",m:"実演する・証明する・示す",pr:"/ˈdemənstreɪt/",f:"demonstrate that = 〜ということを示す。",e:"The study demonstrates the effect.",ej:"その研究は効果を証明する。",t:["demonstration (n)"],id:[]},
+{w:"demonstrate",p:"v",l:2,c:"中級",m:"実演する・証明する",pr:"/ˈdemənstreɪt/",f:"demonstrate that = 〜ということを示す。",e:"The study demonstrates the effect.",ej:"その研究は効果を証明する。",t:["demonstration (n)"],id:[]},
 {w:"distinguish",p:"v",l:2,c:"中級",m:"区別する・識別する",pr:"/dɪˈstɪŋɡwɪʃ/",f:"distinguish A from B = AとBを区別する。",e:"Can you distinguish the two colors?",ej:"その2色を区別できますか？",t:["distinguished (adj)"],id:[{e:"distinguish A from B",j:"AとBを区別する"}]},
 {w:"enormous",p:"adj",l:2,c:"中級",m:"巨大な・膨大な",pr:"/ɪˈnɔːrməs/",f:"enormously（副）。",e:"The company made enormous profits.",ej:"その会社は膨大な利益を上げた。",t:["enormously (adv)"],id:[]},
 {w:"expand",p:"v",l:2,c:"中級",m:"拡張する・広げる",pr:"/ɪkˈspænd/",f:"expand on = 〜について詳しく述べる。",e:"The company is expanding overseas.",ej:"その会社は海外展開している。",t:["expansion (n)"],id:[{e:"expand on",j:"〜について詳しく述べる"}]},
 {w:"decline",p:"v",l:2,c:"中級",m:"断る・減少する",pr:"/dɪˈklaɪn/",f:"2つの意味が頻出。",e:"Sales declined sharply.",ej:"売上が急激に減少した。",t:[],id:[]},
-{w:"indicate",p:"v",l:2,c:"中級",m:"示す・指し示す",pr:"/ˈɪndɪkeɪt/",f:"データが「〜を示している」場合に使う。",e:"Studies indicate sleep is vital.",ej:"研究は睡眠が不可欠であることを示す。",t:["indication (n)","indicator (n)"],id:[]},
+{w:"indicate",p:"v",l:2,c:"中級",m:"示す・指し示す",pr:"/ˈɪndɪkeɪt/",f:"データが「〜を示している」場合に使う。",e:"Studies indicate sleep is vital.",ej:"研究は睡眠が不可欠であることを示す。",t:["indication (n)"],id:[]},
 {w:"maintain",p:"v",l:2,c:"中級",m:"維持する・主張する",pr:"/meɪnˈteɪn/",f:"状態を保つ & 意見を主張する。",e:"We must maintain the environment.",ej:"環境を維持しなければならない。",t:["maintenance (n)"],id:[]},
 {w:"obtain",p:"v",l:2,c:"中級",m:"入手する・得る",pr:"/əbˈteɪn/",f:"getよりフォーマル。",e:"You can obtain a visa at the embassy.",ej:"大使館でビザを取得できる。",t:["obtainable (adj)"],id:[]},
 {w:"significant",p:"adj",l:2,c:"中級",m:"重要な・かなりの",pr:"/sɪɡˈnɪfɪkənt/",f:"significantly（副）。",e:"There was a significant increase.",ej:"著しい上昇があった。",t:["significantly (adv)","significance (n)"],id:[]},
@@ -239,10 +272,9 @@ const V=[
 {w:"consequently",p:"adv",l:2,c:"接続副詞",m:"その結果として",pr:"/ˈkɒnsɪkwəntli/",f:"therefore / as a result と同義。",e:"He didn't study. Consequently, he failed.",ej:"勉強しなかった。その結果、落第した。",t:[],id:[]},
 {w:"nevertheless",p:"adv",l:2,c:"接続副詞",m:"それにもかかわらず",pr:"/ˌnevəðəˈles/",f:"however と同義。逆接。",e:"It rained. Nevertheless, they continued.",ej:"雨が降った。それにもかかわらず続けた。",t:[],id:[]},
 {w:"furthermore",p:"adv",l:2,c:"接続副詞",m:"さらに・加えて",pr:"/ˈfɜːðəmɔːr/",f:"moreover / in addition と同義。",e:"The plan is costly. Furthermore, it's risky.",ej:"高い。さらにリスクも高い。",t:[],id:[]},
-// ── Lv3上級語 ──
 {w:"acknowledge",p:"v",l:3,c:"上級",m:"認める・承認する",pr:"/əkˈnɒlɪdʒ/",f:"acknowledge that = 〜ということを認める。",e:"He acknowledged his mistake.",ej:"彼は過ちを認めた。",t:["acknowledgment (n)"],id:[]},
 {w:"anticipate",p:"v",l:3,c:"上級",m:"予想する・期待する",pr:"/ænˈtɪsɪpeɪt/",f:"expectより積極的な心構え。",e:"We anticipate a large crowd.",ej:"大勢が来ると予想している。",t:["anticipation (n)"],id:[]},
-{w:"bias",p:"n",l:3,c:"上級",m:"偏見・先入観",pr:"/ˈbaɪəs/",f:"confirmation bias = 確証バイアス。",e:"Bias affects decision-making.",ej:"偏見は意思決定に影響する。",t:["biased (adj)","unbiased (adj)"],id:[]},
+{w:"bias",p:"n",l:3,c:"上級",m:"偏見・先入観",pr:"/ˈbaɪəs/",f:"confirmation bias = 確証バイアス。",e:"Bias affects decision-making.",ej:"偏見は意思決定に影響する。",t:["biased (adj)"],id:[]},
 {w:"perceive",p:"v",l:3,c:"上級",m:"知覚する・〜とみなす",pr:"/pəˈsiːv/",f:"perceive A as B = AをBとみなす。",e:"Time is perceived differently by everyone.",ej:"時間の感じ方は人それぞれ違う。",t:["perception (n)"],id:[{e:"perceive A as B",j:"AをBとみなす"}]},
 {w:"persist",p:"v",l:3,c:"上級",m:"持続する・こだわり続ける",pr:"/pəˈsɪst/",f:"persist in = 〜に固執する。",e:"If you persist, you will succeed.",ej:"粘り強く続ければ成功する。",t:["persistence (n)","persistent (adj)"],id:[]},
 {w:"sustainable",p:"adj",l:3,c:"上級",m:"持続可能な",pr:"/səˈsteɪnəbl/",f:"sustainable development = 持続可能な発展。",e:"We need sustainable energy sources.",ej:"持続可能なエネルギー源が必要だ。",t:["sustainability (n)","sustain (v)"],id:[]},
@@ -250,19 +282,19 @@ const V=[
 {w:"inevitable",p:"adj",l:3,c:"上級",m:"避けられない・必然的な",pr:"/ɪnˈevɪtəbl/",f:"どうやっても起こること。",e:"Change is inevitable.",ej:"変化は避けられない。",t:["inevitably (adv)"],id:[]},
 {w:"detrimental",p:"adj",l:3,c:"上級",m:"有害な・悪影響の",pr:"/ˌdetrɪˈmentəl/",f:"harmful/badのフォーマル版。英作文で差がつく語。",e:"Smoking is detrimental to health.",ej:"喫煙は健康に有害だ。",t:[],id:[{e:"detrimental to",j:"〜に有害な"}]},
 {w:"elaborate",p:"adj",l:3,c:"上級",m:"精巧な / 詳しく説明する（動詞）",pr:"/ɪˈlæbərɪt/",f:"elaborate on = 〜について詳しく述べる。",e:"Could you elaborate on that point?",ej:"その点を詳しく説明できますか？",t:["elaboration (n)"],id:[{e:"elaborate on",j:"〜について詳しく述べる"}]},
-{w:"numerous",p:"adj",l:2,c:"言い換え",m:"多数の・たくさんの",pr:"/ˈnjuːmərəs/",f:"many / a lot of のフォーマル版。学術文で必須。",e:"There are numerous benefits.",ej:"数多くの利点がある。",t:[],id:[]},
+{w:"numerous",p:"adj",l:2,c:"言い換え",m:"多数の・たくさんの",pr:"/ˈnjuːmərəs/",f:"many / a lot of のフォーマル版。",e:"There are numerous benefits.",ej:"数多くの利点がある。",t:[],id:[]},
 {w:"claim",p:"v",l:2,c:"言い換え",m:"主張する・断言する",pr:"/kleɪm/",f:"say/thinkのフォーマル版。that節をとる。",e:"He claims that the data is incorrect.",ej:"彼はデータが不正確だと主張する。",t:["claim (n)"],id:[]},
 {w:"illustrate",p:"v",l:2,c:"言い換え",m:"説明する・例証する",pr:"/ˈɪləstreɪt/",f:"showのフォーマル版。具体例で示す。",e:"This example illustrates the problem.",ej:"この例は問題を明確に示す。",t:["illustration (n)"],id:[]},
 {w:"tackle",p:"v",l:2,c:"言い換え",m:"取り組む・対処する",pr:"/ˈtækəl/",f:"address / cope with と同義。",e:"We must tackle climate change.",ej:"気候変動に取り組まなければならない。",t:[],id:[{e:"tackle a problem",j:"問題に取り組む"}]},
 ];
 
-/* ═══ IDIOMS (44) ═══ */
+/* ═══ IDIOMS ═══ */
 const ID=[
 {w:"beat around the bush",m:"遠回しに言う",n:"直訳：茂みの周りを打つ",e:"Stop beating around the bush.",ej:"遠回しに言うのはやめて。"},
 {w:"take the bull by the horns",m:"勇気を出して困難に向かう",n:"雄牛を角をつかんで捕まえる",e:"Let's take the bull by the horns.",ej:"勇敢に立ち向かおう。"},
 {w:"rack one's brains",m:"知恵を絞る",n:"rack = ひどく苦しめる",e:"I racked my brains for an answer.",ej:"答えを出すために必死に考えた。"},
 {w:"spill the beans",m:"秘密をもらす",n:"意図せず秘密を話すこと",e:"Who spilled the beans?",ej:"誰が秘密をもらしたの？"},
-{w:"call it a day",m:"その日の仕事を終わりにする",n:"Let's call it a day.",e:"We should call it a day.",ej:"今日はここまでにしよう。"},
+{w:"call it a day",m:"その日の仕事を終わりにする",n:"今日はここまでにしよう",e:"We should call it a day.",ej:"今日はここまでにしよう。"},
 {w:"hit the nail on the head",m:"的中する・正確に要点をつく",n:"釘を正確に打つ",e:"You hit the nail on the head.",ej:"まさにその通りだ。"},
 {w:"bury one's head in the sand",m:"困難から目をそらす",n:"ダチョウの俗説から",e:"Don't bury your head in the sand.",ej:"現実から目を背けるな。"},
 {w:"come in handy",m:"役に立つ",n:"handy = 便利な",e:"This tool will come in handy.",ej:"この道具は役に立つだろう。"},
@@ -285,7 +317,7 @@ const ID=[
 {w:"hit it off",m:"ウマが合う・意気投合する",n:"初対面で仲良くなる",e:"We hit it off right away.",ej:"すぐに意気投合した。"},
 {w:"break one's back",m:"必死に努力する",n:"≒burn the midnight oil",e:"She broke her back to finish.",ej:"彼女は完成させるために必死に頑張った。"},
 {w:"dispose of",m:"処理する・捨てる",n:"discard（捨てる）も類義",e:"Please dispose of waste properly.",ej:"ゴミは適切に処分してください。"},
-{w:"come of age",m:"成人になる",n:"a coming-of-age ceremony = 成人式",e:"He came of age last year.",ej:"彼は去年成人になった。"},
+{w:"come of age",m:"成人になる",n:"coming-of-age ceremony = 成人式",e:"He came of age last year.",ej:"彼は去年成人になった。"},
 {w:"never say die",m:"あきらめるな",n:"困難でも諦めない姿勢",e:"Never say die — there's still time.",ej:"あきらめるな — まだ時間がある。"},
 {w:"for the life of me",m:"どうしても（〜できない）",n:"否定文で使う",e:"I can't for the life of me remember.",ej:"どうしても思い出せない。"},
 ];
@@ -355,7 +387,7 @@ const CP=[
 {a:"elicit（引き出す）",b:"elevate（高める）",n:"elicit a response=反応を引き出す"},
 ];
 
-/* ═══ ACADEMIC THEMES ═══ */
+/* ═══ THEMES ═══ */
 const TH=[
 {cat:"環境・テクノロジー",items:["再生可能エネルギーの利点と限界","AIが労働市場に与える影響","プラスチックゴミと循環型経済"]},
 {cat:"社会・教育",items:["テレワークの社会的功罪","多文化主義と移民受け入れ","オンライン教育 vs 対面授業"]},
@@ -364,10 +396,225 @@ const TH=[
 {cat:"心理・健康",items:["睡眠不足と生産性","都市生活とメンタルヘルス"]},
 ];
 
+/* ═══ EXPRESSIONS from textbook (入試で使える表現リスト) ─ NOT IN QUIZ ═══ */
+const EX=[
+{n:1,ph:"my favorite food",ja:"私の好きな食べ物",e:"My favorite food is chocolate.",ej:"私の好きな食べ物はチョコレートです。"},
+{n:2,ph:"foreign people",ja:"外国人",e:"Many foreign people visit Kyoto every year.",ej:"毎年、多くの外国人が京都を訪れます。"},
+{n:3,ph:"people in this town",ja:"この町の人々",e:"People in this town are very kind.",ej:"この町の人々はとても親切です。"},
+{n:4,ph:"each other",ja:"おたがい",e:"Do you know each other?",ej:"あなたたちはおたがいを知っているのですか。"},
+{n:5,ph:"something to drink",ja:"何か飲むもの",e:"I want something to drink.",ej:"何か飲むものがほしいです。"},
+{n:6,ph:"a member of the art club",ja:"美術部のメンバー",e:"She is a member of the art club.",ej:"彼女は美術部のメンバーです。"},
+{n:7,ph:"a lot of things",ja:"たくさんのこと",e:"I have a lot of things to do.",ej:"ぼくにはすべきことがたくさんあります。"},
+{n:8,ph:"one of my classmates",ja:"私のクラスメートの1人",e:"He is one of my classmates.",ej:"彼は私のクラスメートのうちの1人です。"},
+{n:9,ph:"some of the students",ja:"生徒のうちの数人",e:"Some of the students had a fever.",ej:"生徒のうちの数人に、熱がありました。"},
+{n:10,ph:"most of the children",ja:"子どもたちのほとんど",e:"Most of the children like this book.",ej:"子どもたちのほとんどがこの本を気に入っています。"},
+{n:11,ph:"each of us",ja:"私たちそれぞれ",e:"Each of us has to be careful.",ej:"私たちのそれぞれが注意しなければなりません。"},
+{n:12,ph:"the number of the visitors",ja:"訪問者の数",e:"The number of the visitors is growing.",ej:"訪問者の数は増えています。"},
+{n:13,ph:"many kinds of animals",ja:"いろいろな種類の動物",e:"I saw many kinds of animals there.",ej:"ぼくはそこで、いろいろな種類の動物を見ました。"},
+{n:14,ph:"have a good time",ja:"楽しく過ごす",e:"We had a very good time.",ej:"私たちはとても楽しく過ごしました。"},
+{n:15,ph:"have fun",ja:"楽しむ",e:"I had fun today.",ej:"今日は楽しかったです。"},
+{n:16,ph:"have a cold",ja:"風邪をひいている",e:"Do you have a cold?",ej:"あなたは風邪をひいているのですか。"},
+{n:17,ph:"do my homework",ja:"宿題をする",e:"I did my homework after dinner.",ej:"私は夕食のあとに宿題をしました。"},
+{n:18,ph:"do my best",ja:"ベストを尽くす",e:"I'll do my best.",ej:"ぼくはベストを尽くします。"},
+{n:19,ph:"go shopping",ja:"買い物に行く",e:"I went shopping yesterday afternoon.",ej:"私は昨日の午後、買い物に行きました。"},
+{n:20,ph:"go home",ja:"家に帰る",e:"What time did you go home last night?",ej:"あなたは昨夜、何時に家に帰りましたか。"},
+{n:21,ph:"go to bed",ja:"寝る",e:"I usually go to bed at ten.",ej:"ぼくはふだん10時に寝ます。"},
+{n:22,ph:"say goodbye",ja:"さよならを言う",e:"I don't want to say goodbye.",ej:"さよならを言いたくはありません。"},
+{n:23,ph:"make a mistake",ja:"まちがう",e:"I made a mistake in my test.",ej:"私はテストで1つまちがいました。"},
+{n:24,ph:"make a speech",ja:"スピーチをする",e:"I have to make a speech tomorrow.",ej:"ぼくは明日、スピーチをしなければなりません。"},
+{n:25,ph:"come to my house",ja:"私の家に来る",e:"Miki came to my house today.",ej:"今日、ミキが私の家に来ました。"},
+{n:26,ph:"come true",ja:"実現する",e:"Your dream will come true.",ej:"あなたの夢はきっと実現します。"},
+{n:27,ph:"get up",ja:"起きる",e:"I got up late this morning.",ej:"私は今朝、遅く起きました。"},
+{n:28,ph:"get to school",ja:"学校に着く",e:"I got to school very early today.",ej:"私は今日、とても早く学校に着きました。"},
+{n:29,ph:"get on[off] a bus",ja:"バスに乗車する[を下車する]",e:"Where should I get off the bus?",ej:"どこでバスを降りればいいのですか。"},
+{n:30,ph:"get well",ja:"よく[上手に]なる",e:"His Japanese is getting better.",ej:"彼の日本語は上手になってきています。"},
+{n:31,ph:"take care of my cat",ja:"うちのねこの世話をする",e:"I take care of my cat.",ej:"ぼくが、うちのねこの世話をしています。"},
+{n:32,ph:"take pictures",ja:"写真を撮る",e:"My brother likes taking pictures.",ej:"兄は写真を撮るのが好きです。"},
+{n:33,ph:"take a bath",ja:"おふろに入る",e:"I want to take a bath now.",ej:"私は今、おふろに入りたいです。"},
+{n:34,ph:"take a bus",ja:"バスを利用する",e:"Do you take a bus to go to school?",ej:"あなたは通学するのにバスを利用しますか。"},
+{n:35,ph:"take 20 minutes",ja:"20分かかる",e:"It takes 20 minutes to the park by bike.",ej:"その公園まで自転車で20分かかります。"},
+{n:36,ph:"look at the sky",ja:"空を見る",e:"I like looking at the sky.",ej:"私は空を見るのが好きです。"},
+{n:37,ph:"look for a bookstore",ja:"本屋を探す",e:"I'm looking for a bookstore.",ej:"本屋さんを探しています。"},
+{n:38,ph:"look forward to the next time",ja:"次回を楽しみにする",e:"I'm looking forward to the next time.",ej:"次回を楽しみにしています。"},
+{n:39,ph:"give up",ja:"あきらめる",e:"Don't give up yet.",ej:"まだあきらめてはいけません。"},
+{n:40,ph:"leave home",ja:"家を出る",e:"I leave home at seven every morning.",ej:"私は毎朝7時に家を出ます。"},
+{n:41,ph:"leave a message",ja:"メッセージを残す",e:"Can I leave a message for her?",ej:"彼女にメッセージを残してもいいですか。"},
+{n:42,ph:"ask a question",ja:"質問をする",e:"May I ask you a question?",ej:"1つ質問をしてもよろしいですか。"},
+{n:43,ph:"start at nine",ja:"9時に始まる[始める]",e:"Our school starts at nine.",ej:"私たちの学校は9時に始まります。"},
+{n:44,ph:"try to remember",ja:"思い出そうとする",e:"Now I'm trying to remember its name.",ej:"今はその名前を思い出そうとしています。"},
+{n:45,ph:"show him around a town",ja:"彼に町を案内する",e:"I showed him around my town.",ej:"私は彼に町を案内しました。"},
+{n:46,ph:"call you back",ja:"あなたに電話をかけ直す",e:"I'll call you back in ten minutes.",ej:"10分したらあなたに電話をかけ直します。"},
+{n:47,ph:"hear from you",ja:"あなたから連絡をもらう",e:"I'm glad to hear from you.",ej:"あなたから連絡をもらえてうれしいです。"},
+{n:48,ph:"feel happy",ja:"幸せを感じる",e:"I feel happy when I go to bed.",ej:"ベッドに向かうときに幸せを感じます。"},
+{n:49,ph:"stay at a hotel",ja:"ホテルに泊まる",e:"We stayed at a hotel by the sea.",ej:"私たちは海のそばのホテルに滞在しました。"},
+{n:50,ph:"stay with my uncle",ja:"おじのところに滞在する",e:"We stayed with my uncle.",ej:"私たちはおじのところに滞在しました。"},
+{n:51,ph:"listen to music",ja:"音楽を聴く",e:"I listen to music every day.",ej:"私は毎日音楽を聴きます。"},
+{n:52,ph:"answer the phone",ja:"電話に出る",e:"Can you answer the phone?",ej:"電話に出てもらえますか。"},
+{n:53,ph:"wait for my friend",ja:"友達を待つ",e:"I'm waiting for my friend now.",ej:"私は今、友達を待っています。"},
+{n:54,ph:"arrive at the station",ja:"駅に着く",e:"We have just arrived at the station.",ej:"私たちはちょうど今駅に着いたところです。"},
+{n:55,ph:"agree with you",ja:"あなたに同意する",e:"I agree with you.",ej:"私はあなたに同意します。"},
+{n:56,ph:"be interested in making things",ja:"ものを作ることに興味がある",e:"I'm interested in making things.",ej:"ぼくはものを作ることに興味があります。"},
+{n:57,ph:"be surprised at the news",ja:"その知らせに驚いている",e:"We were surprised at the news.",ej:"私たちはその知らせに驚きました。"},
+{n:58,ph:"be excited for the trip",ja:"旅行にわくわくする",e:"I'm excited for the trip.",ej:"ぼくは旅行にわくわくしています。"},
+{n:59,ph:"be impressed with the words",ja:"そのことばに感動する",e:"I was impressed with the words.",ej:"私はそのことばに感動しました。"},
+{n:60,ph:"be proud of you",ja:"あなたを誇りに思う",e:"I am very proud of you.",ej:"私はあなたのことをとても誇りに思います。"},
+{n:61,ph:"be worried about her",ja:"彼女のことを心配する",e:"Everyone is worried about her.",ej:"みんな彼女のことを心配しています。"},
+{n:62,ph:"be good at sports",ja:"スポーツが得意である",e:"She is good at sports.",ej:"彼女はスポーツが得意です。"},
+{n:63,ph:"be able to win the game",ja:"試合に勝つことができる",e:"He will be able to win the game.",ej:"彼は試合に勝つことができるでしょう。"},
+{n:64,ph:"be busy with work",ja:"仕事で忙しい",e:"My sister is busy with work.",ej:"姉は仕事で忙しいです。"},
+{n:65,ph:"be late for class",ja:"授業に遅れる",e:"Don't be late for your class.",ej:"授業に遅れてはいけません。"},
+{n:66,ph:"be kind to others",ja:"他者に親切にする",e:"Be kind to others.",ej:"他者に親切にしなさい。"},
+{n:67,ph:"be famous for oranges",ja:"みかんで有名である",e:"My town is famous for oranges.",ej:"ぼくの町はみかんで有名です。"},
+{n:68,ph:"be popular among girls",ja:"女の子の間で人気である",e:"This song is popular among girls.",ej:"この歌は女の子の間で人気です。"},
+{n:69,ph:"be different from mine",ja:"私のとはちがっている",e:"His idea is different from mine.",ej:"彼のアイデアは私のとはちがっています。"},
+{n:70,ph:"be full of joy",ja:"喜びでいっぱいである",e:"She was full of joy.",ej:"彼女は喜びでいっぱいでした。"},
+{n:71,ph:"be born",ja:"生まれる",e:"I was born in Aomori.",ej:"ぼくは青森で生まれました。"},
+{n:72,ph:"a few days ago",ja:"数日前",e:"I got this a few days ago.",ej:"私はこれを数日前に受け取りました。"},
+{n:73,ph:"a lot",ja:"たくさん",e:"My mother talks a lot.",ej:"母はよくしゃべります。"},
+{n:74,ph:"a little",ja:"少し",e:"My sister speaks English a little.",ej:"姉は少し英語を話します。"},
+{n:75,ph:"in the morning",ja:"午前中",e:"I helped my father in the morning.",ej:"午前中、ぼくはお父さんの手伝いをしました。"},
+{n:76,ph:"in the future",ja:"将来",e:"She will be a doctor in the future.",ej:"将来、彼女は医者になるでしょう。"},
+{n:77,ph:"in front of everyone",ja:"みんなの前で",e:"I can't sing in front of everyone.",ej:"私はみんなの前では歌えません。"},
+{n:78,ph:"in English",ja:"英語で",e:'How do you say "hasami" in English?',ej:"「はさみ」は英語でどのように言うのですか。"},
+{n:79,ph:"for three hours",ja:"3時間",e:"I watched TV for three hours.",ej:"ぼくは3時間テレビを見ました。"},
+{n:80,ph:"for a long time",ja:"長い間",e:"I haven't seen her for a long time.",ej:"私は長い間彼女に会っていません。"},
+{n:81,ph:"for the first time",ja:"初めて",e:"I came here for the first time.",ej:"私は初めてここに来ました。"},
+{n:82,ph:"for example",ja:"たとえば",e:"What do you like to do, for example?",ej:"あなたはたとえば、どんなことをするのが好きですか。"},
+{n:83,ph:"at night",ja:"夜に",e:"He often eats at night.",ej:"彼は夜によく食べます。"},
+{n:84,ph:"at first",ja:"最初は",e:"I didn't like English at first.",ej:"最初は、英語が好きではありませんでした。"},
+{n:85,ph:"at last",ja:"ついに",e:"We could win at last.",ej:"ぼくたちはついに勝つことができました。"},
+{n:86,ph:"at that time",ja:"そのとき",e:"I was sleeping at that time.",ej:"私はそのとき眠っていました。"},
+{n:87,ph:"at home",ja:"家[学校]で",e:"We were having dinner at home.",ej:"ぼくたちは家で夕食を食べていました。"},
+{n:88,ph:"this afternoon",ja:"今日の午後",e:"It rained a lot this afternoon.",ej:"今日の午後はたくさん雨が降りました。"},
+{n:89,ph:"on Sunday",ja:"日曜日に",e:"Please come to my house on Sunday.",ej:"日曜日に私の家に来てください。"},
+{n:90,ph:"on the internet",ja:"インターネットで",e:"I found this on the internet.",ej:"ぼくはこれを、インターネットで見つけました。"},
+{n:91,ph:"on your right",ja:"あなたの右側[左側]に",e:"You'll see the building on your right.",ej:"その建物はあなたの右側に見えます。"},
+{n:92,ph:"with my friends",ja:"友達といっしょに",e:"I sometimes study with my friends.",ej:"私はときどき、友達といっしょに勉強します。"},
+{n:93,ph:"like you",ja:"あなたのように[な]",e:"I want to be a teacher like you.",ej:"私はあなたのような先生になりたいです。"},
+{n:94,ph:"very well",ja:"とてもよく[上手に]",e:"You play the guitar very well.",ej:"あなたはとても上手にギターをひきますね。"},
+{n:95,ph:"very hard",ja:"とても一生懸命に",e:"We need to practice very hard.",ej:"ぼくたちはとても一生懸命に練習する必要があります。"},
+{n:96,ph:"many times",ja:"何度も",e:"I read the e-mail many times.",ej:"私はそのメールを何度も読みました。"},
+{n:97,ph:"from here to there",ja:"ここからそこまで",e:"How long will it take from here to there?",ej:"ここからそこまで、時間はどれくらいかかるでしょうか。"},
+{n:98,ph:"some time this week",ja:"今週のいつか",e:"Can I see you some time this week?",ej:"今週のいつかに会えますか。"},
+{n:99,ph:"all day",ja:"一日中",e:"I stayed home all day today.",ej:"私は今日、一日中家にいました。"},
+{n:100,ph:"by bike",ja:"自転車で",e:"Ms. Ito comes to school by bike.",ej:"伊藤先生は自転車で学校に来ています。"},
+{n:101,ph:"because of the rain",ja:"雨が原因で",e:"Our game was stopped because of the rain.",ej:"私たちの試合は、雨で中止になりました。"},
+{n:102,ph:"thanks to you",ja:"あなたのおかげで",e:"Thanks to you, we had really fun.",ej:"あなたのおかげで、ぼくたちは本当に楽しかったです。"},
+{n:103,ph:"after dinner",ja:"夕食のあと[前]",e:"I wanted to watch a movie after dinner.",ej:"夕食のあとで映画を見たいと思っていました。"},
+{n:104,ph:"next month",ja:"来月",e:"I'll be fifteen next month.",ej:"ぼくは来月15歳になります。"},
+{n:105,ph:"next to me",ja:"私の隣に",e:"Akira sat next to me.",ej:"アキラはぼくの隣に座りました。"},
+{n:106,ph:"last year",ja:"昨年",e:"He came to Japan last year.",ej:"彼は昨年、日本に来ました。"},
+{n:107,ph:"every day",ja:"毎日",e:"I drink milk every day.",ej:"私は毎日、牛乳を飲みます。"},
+{n:108,ph:"these days",ja:"このごろ",e:"She doesn't look well these days.",ej:"彼女はこのごろ元気がないようです。"},
+{n:109,ph:"around the world",ja:"世界中で",e:"He is famous around the world.",ej:"彼は世界中で有名です。"},
+{n:110,ph:"near our school",ja:"私たちの学校の近くに",e:"There is a supermarket near our school.",ej:"ぼくたちの学校の近くにスーパーが1軒あります。"},
+{n:111,ph:"during the summer vacation",ja:"夏休みの間に",e:"I put on 2 kilos during the summer vacation.",ej:"私は夏休みの間に2キロ太りました。"},
+{n:112,ph:"since then",ja:"それ以来",e:"I haven't talked with him since then.",ej:"それ以来、彼とは話していません。"},
+{n:113,ph:"without water",ja:"水なしで",e:"We can't live without clean air and water.",ej:"私たちはきれいな空気や水なしで生きることはできません。"},
+{n:114,ph:"How about this one?",ja:"これはどうですか。",e:"How about playing video games?",ej:"ゲームをするのはどうですか。"},
+{n:115,ph:"Can I use this one?",ja:"これを使ってもよろしいですか。",e:"Can I see this one?",ej:"これを見てもいいですか。"},
+{n:116,ph:"Can you help me?",ja:"手伝ってもらえますか。",e:"Can you show me your notebook?",ej:"ノートを見せてくれますか。"},
+{n:117,ph:"How long does it take?",ja:"どれくらいかかりますか。",e:"How long does it take from here?",ej:"ここからどれくらいかかりますか。"},
+{n:118,ph:"I'd like to send this one",ja:"これを送りたいのですが。",e:"I'd like to see Mr. Yokota.",ej:"横田さんにお会いしたいのですが。"},
+{n:119,ph:"I'd like this one",ja:"これにしたいのですが。",e:"I'd like some coffee.",ej:"コーヒーをいただきたいのですが。"},
+{n:120,ph:"Would you like this one?",ja:"こちらはいかがですか。",e:"Would you like some tea?",ej:"紅茶はいかがですか。"},
+{n:121,ph:"Thank you for your e-mail",ja:"メールをありがとう。",e:"Thank you for coming today.",ej:"今日は来てくれてありがとう。"},
+{n:122,ph:"Why don't you try?",ja:"ためしてみたらどうですか。",e:"Why don't you eat this?",ej:"これを食べてみたらどうですか。"},
+{n:123,ph:"Shall I take your bag?",ja:"かばんをお持ちしましょうか。",e:"Shall I get you a taxi?",ej:"タクシーを呼びましょうか。"},
+{n:124,ph:"Shall we sit down?",ja:"座りましょうか。",e:"Shall we have a break?",ej:"休憩しましょうか。"},
+{n:125,ph:"May I speak to Tom, please?",ja:"トムと話してもよろしいですか。",e:"May I speak to Emily, please?",ej:"エミリーと話してもよろしいですか。"},
+];
+
+/* ═══ IRREGULAR VERBS (from textbook 不規則動詞の変化表) ─ NOT IN QUIZ ═══ */
+const IV=[
+{b:"be",p:"was/were",pp:"been",m:"〜である",s:"is",g:"being"},
+{b:"become",p:"became",pp:"become",m:"〜になる",s:"becomes",g:"becoming"},
+{b:"begin",p:"began",pp:"begun",m:"始める・始まる",s:"begins",g:"beginning"},
+{b:"break",p:"broke",pp:"broken",m:"壊す",s:"breaks",g:"breaking"},
+{b:"bring",p:"brought",pp:"brought",m:"持ってくる",s:"brings",g:"bringing"},
+{b:"build",p:"built",pp:"built",m:"建てる",s:"builds",g:"building"},
+{b:"burn",p:"burnt",pp:"burnt",m:"燃やす",s:"burns",g:"burning"},
+{b:"buy",p:"bought",pp:"bought",m:"買う",s:"buys",g:"buying"},
+{b:"catch",p:"caught",pp:"caught",m:"捕まえる",s:"catches",g:"catching"},
+{b:"choose",p:"chose",pp:"chosen",m:"選ぶ",s:"chooses",g:"choosing"},
+{b:"come",p:"came",pp:"come",m:"来る・行く",s:"comes",g:"coming"},
+{b:"cut",p:"cut",pp:"cut",m:"切る",s:"cuts",g:"cutting"},
+{b:"do",p:"did",pp:"done",m:"する",s:"does",g:"doing"},
+{b:"draw",p:"drew",pp:"drawn",m:"引く・（線を）描く",s:"draws",g:"drawing"},
+{b:"drink",p:"drank",pp:"drunk",m:"飲む",s:"drinks",g:"drinking"},
+{b:"drive",p:"drove",pp:"driven",m:"運転する",s:"drives",g:"driving"},
+{b:"eat",p:"ate",pp:"eaten",m:"食べる",s:"eats",g:"eating"},
+{b:"fall",p:"fell",pp:"fallen",m:"落ちる",s:"falls",g:"falling"},
+{b:"feel",p:"felt",pp:"felt",m:"感じる",s:"feels",g:"feeling"},
+{b:"fight",p:"fought",pp:"fought",m:"戦う・闘う",s:"fights",g:"fighting"},
+{b:"find",p:"found",pp:"found",m:"見つける",s:"finds",g:"finding"},
+{b:"fly",p:"flew",pp:"flown",m:"飛ぶ",s:"flies",g:"flying"},
+{b:"forget",p:"forgot",pp:"forgotten",m:"忘れる",s:"forgets",g:"forgetting"},
+{b:"get",p:"got",pp:"gotten",m:"手に入れる",s:"gets",g:"getting"},
+{b:"give",p:"gave",pp:"given",m:"与える",s:"gives",g:"giving"},
+{b:"go",p:"went",pp:"gone",m:"行く",s:"goes",g:"going"},
+{b:"grow",p:"grew",pp:"grown",m:"成長する",s:"grows",g:"growing"},
+{b:"have",p:"had",pp:"had",m:"持っている",s:"has",g:"having"},
+{b:"hear",p:"heard",pp:"heard",m:"耳にする",s:"hears",g:"hearing"},
+{b:"hit",p:"hit",pp:"hit",m:"打つ",s:"hits",g:"hitting"},
+{b:"hold",p:"held",pp:"held",m:"持つ・催す",s:"holds",g:"holding"},
+{b:"hurt",p:"hurt",pp:"hurt",m:"傷つける",s:"hurts",g:"hurting"},
+{b:"keep",p:"kept",pp:"kept",m:"保つ",s:"keeps",g:"keeping"},
+{b:"know",p:"knew",pp:"known",m:"知っている",s:"knows",g:"knowing"},
+{b:"lead",p:"led",pp:"led",m:"導く",s:"leads",g:"leading"},
+{b:"leave",p:"left",pp:"left",m:"去る・残す",s:"leaves",g:"leaving"},
+{b:"lend",p:"lent",pp:"lent",m:"貸す",s:"lends",g:"lending"},
+{b:"lose",p:"lost",pp:"lost",m:"失う・負ける",s:"loses",g:"losing"},
+{b:"make",p:"made",pp:"made",m:"作る",s:"makes",g:"making"},
+{b:"mean",p:"meant",pp:"meant",m:"意味する",s:"means",g:"meaning"},
+{b:"meet",p:"met",pp:"met",m:"会う",s:"meets",g:"meeting"},
+{b:"put",p:"put",pp:"put",m:"置く",s:"puts",g:"putting"},
+{b:"quit",p:"quit",pp:"quit",m:"やめる",s:"quits",g:"quitting"},
+{b:"read",p:"read",pp:"read",m:"読む",s:"reads",g:"reading"},
+{b:"ride",p:"rode",pp:"ridden",m:"乗る",s:"rides",g:"riding"},
+{b:"rise",p:"rose",pp:"risen",m:"上がる",s:"rises",g:"rising"},
+{b:"run",p:"ran",pp:"run",m:"走る",s:"runs",g:"running"},
+{b:"say",p:"said",pp:"said",m:"言う",s:"says",g:"saying"},
+{b:"see",p:"saw",pp:"seen",m:"目にする",s:"sees",g:"seeing"},
+{b:"sell",p:"sold",pp:"sold",m:"売る",s:"sells",g:"selling"},
+{b:"send",p:"sent",pp:"sent",m:"送る",s:"sends",g:"sending"},
+{b:"shake",p:"shook",pp:"shaken",m:"振る",s:"shakes",g:"shaking"},
+{b:"show",p:"showed",pp:"shown",m:"見せる",s:"shows",g:"showing"},
+{b:"sing",p:"sang",pp:"sung",m:"歌う",s:"sings",g:"singing"},
+{b:"sit",p:"sat",pp:"sat",m:"座る",s:"sits",g:"sitting"},
+{b:"sleep",p:"slept",pp:"slept",m:"眠る",s:"sleeps",g:"sleeping"},
+{b:"speak",p:"spoke",pp:"spoken",m:"話す",s:"speaks",g:"speaking"},
+{b:"spend",p:"spent",pp:"spent",m:"費やす",s:"spends",g:"spending"},
+{b:"spread",p:"spread",pp:"spread",m:"広がる",s:"spreads",g:"spreading"},
+{b:"stand",p:"stood",pp:"stood",m:"立っている",s:"stands",g:"standing"},
+{b:"swim",p:"swam",pp:"swum",m:"泳ぐ",s:"swims",g:"swimming"},
+{b:"take",p:"took",pp:"taken",m:"とる",s:"takes",g:"taking"},
+{b:"teach",p:"taught",pp:"taught",m:"教える",s:"teaches",g:"teaching"},
+{b:"tell",p:"told",pp:"told",m:"伝える",s:"tells",g:"telling"},
+{b:"think",p:"thought",pp:"thought",m:"思う",s:"thinks",g:"thinking"},
+{b:"understand",p:"understood",pp:"understood",m:"理解する",s:"understands",g:"understanding"},
+{b:"wear",p:"wore",pp:"worn",m:"身に着けている",s:"wears",g:"wearing"},
+{b:"win",p:"won",pp:"won",m:"勝つ",s:"wins",g:"winning"},
+{b:"write",p:"wrote",pp:"written",m:"書く",s:"writes",g:"writing"},
+];
+
 /* ═══ STATE ═══ */
 let deck=shuf([...V]),idx=0,flipped=false,st={g:0,h:0,f:0},tab='f',tt=null;
+let hist=[],htimer=null;
 
-/* ═══ RENDER ═══ */
+/* ═══ LOCAL LOOKUP ═══ */
+function localLookup(q){
+  const ql=q.toLowerCase().trim();
+  const vr=V.find(w=>w.w.toLowerCase()===ql);
+  if(vr)return`📚 <strong>${vr.w}</strong> [${vr.p}] — ${vr.m}${vr.pr?` <span style="color:var(--sub)">${vr.pr}</span>`:''}`;
+  const er=EX.find(e=>e.ph.toLowerCase()===ql||(ql.length>5&&e.ph.toLowerCase().includes(ql)));
+  if(er)return`📝 <strong>${er.ph}</strong> — ${er.ja}`;
+  const ir=IV.find(v=>v.b===ql||v.p===ql||v.pp===ql||v.p.split('/').some(x=>x.trim()===ql));
+  if(ir)return`🔄 <strong>${ir.b}</strong> → ${ir.p} → ${ir.pp} ／ ${ir.m}`;
+  return null;
+}
+
+/* ═══ RENDER CARD ═══ */
 function render(){
   if(idx>=deck.length){done();return}
   const w=deck[idx];flipped=false;
@@ -400,20 +647,50 @@ window.FF=function(){
   document.getElementById('acts').style.display=flipped?'flex':'none';
 };
 
+/* ═══ ANSWER + HISTORY ═══ */
 window.R=function(t){
+  if(idx>=deck.length)return;
   haptic.confirm();
+  const cur=deck[idx];
+  hist.unshift({w:cur.w,m:cur.m,r:t});
+  if(hist.length>30)hist.pop();
+  showHistBrief();
   st[t]++;
   document.getElementById('sg').textContent=st.g;
-  document.getElementById('sh').textContent=st.h;
+  document.getElementById('sh2').textContent=st.h;
   document.getElementById('sf').textContent=st.f;
   if(t==='f')deck.push({...deck[idx]});
   else if(t==='h')deck.splice(Math.min(idx+4,deck.length),0,{...deck[idx]});
   idx++;
-  const w=document.getElementById('fw');
-  w.classList.add('out');
-  setTimeout(()=>{w.classList.remove('out');render();void w.offsetWidth;w.classList.add('in');setTimeout(()=>w.classList.remove('in'),240)},190);
+  const fw=document.getElementById('fw');
+  fw.classList.add('out');
+  setTimeout(()=>{fw.classList.remove('out');render();void fw.offsetWidth;fw.classList.add('in');setTimeout(()=>fw.classList.remove('in'),240)},190);
 };
 
+function buildHistHTML(limit){
+  if(!hist.length)return'<div style="text-align:center;color:var(--sub);font-size:12px;padding:20px 0">まだ回答がありません</div>';
+  return hist.slice(0,limit).map(h=>`
+    <div class="hrow">
+      <div class="hbdg ${h.r==='g'?'hg':h.r==='h'?'hh':'hf'}">${h.r==='g'?'✓':h.r==='h'?'△':'✗'}</div>
+      <div><div class="hw">${h.w}</div><div class="hm">${h.m}</div></div>
+    </div>`).join('');
+}
+
+function showHistBrief(){
+  document.getElementById('hlist').innerHTML=buildHistHTML(8);
+  document.getElementById('hov').classList.add('show');
+  clearTimeout(htimer);
+  htimer=setTimeout(()=>document.getElementById('hov').classList.remove('show'),2200);
+}
+
+window.showHistFull=function(){
+  haptic();
+  document.getElementById('hlist').innerHTML=buildHistHTML(30);
+  document.getElementById('hov').classList.add('show');
+  clearTimeout(htimer);
+};
+
+/* ═══ DONE ═══ */
 function done(){
   document.getElementById('acts').style.display='none';
   document.getElementById('pf').style.width='100%';
@@ -421,10 +698,9 @@ function done(){
 }
 
 window.SD=function(){
-  haptic.confirm();deck=shuf([...V]);idx=0;st={g:0,h:0,f:0};
-  document.getElementById('sg').textContent=0;document.getElementById('sh').textContent=0;document.getElementById('sf').textContent=0;
-  // rebuild card HTML
-  document.getElementById('fw').innerHTML=`<div class="fc" id="fc" onclick="FF()"><div class="ff" id="ff"><div class="fmeta"><span class="lv l1" id="flv"></span><span class="fcat" id="fca"></span></div><div class="fword" id="fwo"></div><div class="fpron" id="fpr"></div><span class="fpos pv" id="fpo"></span><div class="fh">タップして意味を確認</div></div><div class="ff fb" id="fba"><div class="fmean" id="fme"></div><div class="ffull" id="ffu"></div><div class="fex" id="fex"></div><div class="ftags" id="fta"></div><div class="fidm" id="fid"></div></div></div>`;
+  haptic.confirm();deck=shuf([...V]);idx=0;st={g:0,h:0,f:0};hist=[];
+  document.getElementById('sg').textContent=0;document.getElementById('sh2').textContent=0;document.getElementById('sf').textContent=0;
+  document.getElementById('fw').innerHTML=`<div class="fc" id="fc" onclick="FF()"><div class="ff" id="ff"><div class="fmeta"><span class="lv l1" id="flv"></span><span class="fcat" id="fca"></span></div><div class="fword" id="fwo"></div><div class="fpron" id="fpr"></div><span class="fpos pv" id="fpo"></span><div class="fh">タップして意味を確認 · 答えたらスワイプ →✓ ←✗</div></div><div class="ff fb" id="fba"><div class="fmean" id="fme"></div><div class="ffull" id="ffu"></div><div class="fex" id="fex"></div><div class="ftags" id="fta"></div><div class="fidm" id="fid"></div></div></div>`;
   render();
 };
 
@@ -438,44 +714,143 @@ window.ST=function(t){
   document.getElementById('sr').style.display=isF?'flex':'none';
   document.getElementById('acts').style.display=isF&&flipped?'flex':'none';
   document.querySelector('.pr').style.display=isF?'flex':'none';
-  ['i','g','p','r','c','a'].forEach(x=>{const el=document.getElementById('l-'+x);el&&(el.classList.toggle('on',x===t))});
+  ['i','e','v','g','p','r','c','a'].forEach(x=>{
+    const el=document.getElementById('l-'+x);
+    if(el)el.classList.toggle('on',x===t);
+  });
 };
 
 /* ═══ BUILD LISTS ═══ */
 function buildLists(){
   // idioms
-  document.getElementById('l-i').innerHTML='<div class="sh">イディオム '+ID.length+'個</div>'+ID.map(d=>`<div class="li"><div class="lw">${d.w}</div><div class="lm">${d.m}</div><div class="ln">${d.n}</div><div class="le">"${d.e}"<br><span style="color:var(--sub)">${d.ej}</span></div></div>`).join('');
+  document.getElementById('l-i').innerHTML='<div class="sh">イディオム '+ID.length+'個</div>'+
+    ID.map(d=>`<div class="li"><div class="lw">${d.w}</div><div class="lm">${d.m}</div><div class="lnx">${d.n}</div><div class="le">"${d.e}"<br><span style="color:var(--sub)">${d.ej}</span></div></div>`).join('');
+
+  // expressions
+  const exByGroup=[
+    {label:"「人」や「もの」を伝える表現",range:[1,13]},
+    {label:"「〜する」を伝える表現",range:[14,40]},
+    {label:"メッセージ・動作表現",range:[41,55]},
+    {label:"「〜である」を伝える表現",range:[56,71]},
+    {label:"「どのように」「どこで」「いつ」を伝える表現",range:[72,113]},
+    {label:"日常会話でよく使う表現",range:[114,125]},
+  ];
+  let exHtml='<div class="sh">入試で使える表現リスト '+EX.length+'個</div>';
+  exByGroup.forEach(g=>{
+    exHtml+=`<div style="font-size:10px;font-weight:700;color:var(--sub);background:var(--ln);border-radius:8px;padding:4px 10px;margin:6px 0 4px;letter-spacing:.04em">${g.label}</div>`;
+    const items=EX.filter(e=>e.n>=g.range[0]&&e.n<=g.range[1]);
+    exHtml+=`<div class="li" style="padding:8px 12px">`;
+    exHtml+=items.map(d=>`<div class="exr"><div class="exn">${String(d.n).padStart(3,'0')}</div><div style="flex:1"><div class="exph">${d.ph}</div><div class="exja">${d.ja}</div>${d.e?`<div class="exe">${d.e} <span style="color:var(--sub)">${d.ej}</span></div>`:''}</div></div>`).join('');
+    exHtml+='</div>';
+  });
+  document.getElementById('l-e').innerHTML=exHtml;
+
+  // irregular verbs
+  document.getElementById('l-v').innerHTML=`<div class="sh">不規則動詞の変化表 ${IV.length}語</div>
+    <div class="ivwrap"><table class="ivt">
+    <thead><tr><th>原形</th><th>過去形</th><th>過去分詞</th><th>意味</th><th>3単現</th><th>現在分詞</th></tr></thead>
+    <tbody>${IV.map(v=>`<tr>
+      <td class="ivb">${v.b}</td>
+      <td class="ivp">${v.p}</td>
+      <td class="ivpp">${v.pp}</td>
+      <td>${v.m}</td>
+      <td>${v.s}</td>
+      <td>${v.g}</td>
+    </tr>`).join('')}</tbody></table></div>
+    <div style="font-size:10px;color:var(--sub);padding:4px 2px">※ burnの過去形・過去分詞はburned、forgetの過去分詞はforgot、getの過去分詞はgotとなることもあります。</div>`;
+
   // grammar
-  document.getElementById('l-g').innerHTML='<div class="sh">重要文法 '+GR.length+'項目</div>'+GR.map(d=>`<div class="li"><div class="lw">${d.h}</div><div class="ln">${d.n}<br><span style="color:var(--y);font-size:11px">💡 ${d.tip}</span></div><div class="le">"${d.e}"<br><span style="color:var(--sub)">${d.ej}</span></div></div>`).join('');
+  document.getElementById('l-g').innerHTML='<div class="sh">重要文法 '+GR.length+'項目</div>'+
+    GR.map(d=>`<div class="li"><div class="lw">${d.h}</div><div class="lnx">${d.n}<br><span style="color:var(--y);font-size:11px">💡 ${d.tip}</span></div><div class="le">"${d.e}"<br><span style="color:var(--sub)">${d.ej}</span></div></div>`).join('');
+
   // paraphrase
-  document.getElementById('l-p').innerHTML='<div class="sh">言い換え表現 '+PA.length+'セット</div>'+PA.map(d=>`<div class="li"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:12px;background:#f0f0ee;padding:2px 9px;border-radius:20px;color:var(--sub)">${d.o}</span><span style="color:var(--sub)">→</span>${d.b.map(b=>`<span style="background:var(--b);color:#fff;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600">${b}</span>`).join('')}</div><div class="ln" style="margin-top:6px">${d.n}</div><div class="le">"${d.e}"</div></div>`).join('');
-  // reading expressions
-  document.getElementById('l-r').innerHTML='<div class="sh">長文読解 重要表現 '+RE.length+'個</div>'+RE.map(d=>`<div class="li"><div class="lw">${d.p}</div><div class="lm">${d.m}</div><div class="le">"${d.e}"</div><div style="font-size:10px;color:var(--sub);margin-top:3px">出典: ${d.s}</div></div>`).join('');
-  // confused pairs
-  document.getElementById('l-c').innerHTML='<div class="sh">混同ペア '+CP.length+'組</div>'+CP.map(d=>`<div class="li"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px"><span style="background:#fef2f2;border:1px solid #fecaca;color:var(--r);padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700">${d.a}</span><span style="color:var(--sub);font-size:11px">vs</span><span style="background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700">${d.b}</span></div><div style="font-size:11px;color:#555">📌 ${d.n}</div></div>`).join('');
+  document.getElementById('l-p').innerHTML='<div class="sh">言い換え表現 '+PA.length+'セット</div>'+
+    PA.map(d=>`<div class="li"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:12px;background:#f0f0ee;padding:2px 9px;border-radius:20px;color:var(--sub)">${d.o}</span><span style="color:var(--sub)">→</span>${d.b.map(b=>`<span style="background:var(--b);color:#fff;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600">${b}</span>`).join('')}</div><div class="lnx" style="margin-top:6px">${d.n}</div><div class="le">"${d.e}"</div></div>`).join('');
+
+  // reading
+  document.getElementById('l-r').innerHTML='<div class="sh">長文読解 重要表現 '+RE.length+'個</div>'+
+    RE.map(d=>`<div class="li"><div class="lw">${d.p}</div><div class="lm">${d.m}</div><div class="le">"${d.e}"</div><div style="font-size:10px;color:var(--sub);margin-top:3px">出典: ${d.s}</div></div>`).join('');
+
+  // confused
+  document.getElementById('l-c').innerHTML='<div class="sh">混同ペア '+CP.length+'組</div>'+
+    CP.map(d=>`<div class="li"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px"><span style="background:#fef2f2;border:1px solid #fecaca;color:var(--r);padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700">${d.a}</span><span style="color:var(--sub);font-size:11px">vs</span><span style="background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700">${d.b}</span></div><div style="font-size:11px;color:#555">📌 ${d.n}</div></div>`).join('');
+
   // themes
-  document.getElementById('l-a').innerHTML='<div class="sh">頻出アカデミックテーマ</div>'+TH.map(d=>`<div class="li"><div class="lw">${d.cat}</div>${d.items.map(i=>`<div style="font-size:12px;color:#555;padding:3px 0;border-bottom:1px solid var(--ln)">• ${i}</div>`).join('')}</div>`).join('');
+  document.getElementById('l-a').innerHTML='<div class="sh">頻出アカデミックテーマ</div>'+
+    TH.map(d=>`<div class="li"><div class="lw">${d.cat}</div>${d.items.map(i=>`<div style="font-size:12px;color:#555;padding:3px 0;border-bottom:1px solid var(--ln)">• ${i}</div>`).join('')}</div>`).join('');
 }
 
 /* ═══ TRANSLATOR ═══ */
 const inp=document.getElementById('ti');
 const ar=()=>{inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,window.innerHeight*.26)+'px'};
-inp.addEventListener('input',e=>{ar();const t=e.target.value.trim();clearTimeout(tt);if(!t){CT();return}tt=setTimeout(()=>doTr(t),480)});
-inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();haptic();const t=inp.value.trim();if(t)doTr(t)}});
+inp.addEventListener('input',e=>{
+  ar();
+  const t=e.target.value.trim();
+  clearTimeout(tt);
+  if(!t){CT();return}
+  tt=setTimeout(()=>doTr(t),480);
+});
+inp.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){
+    e.preventDefault();haptic();
+    const t=inp.value.trim();if(t)doTr(t);
+  }
+});
 inp.addEventListener('focus',()=>haptic());
 
 async function doTr(t){
-  try{const j=/[ぁ-んァ-ヶー一-龠]/.test(t);const r=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(t)}&langpair=${j?'ja|en':'en|ja'}`);const d=await r.json();const x=d.responseData?.translatedText;if(x&&x!=='N/A'){document.getElementById('tr').textContent=x;document.getElementById('ts').textContent=j?'JA → EN':'EN → JA';document.getElementById('tov').classList.add('show');haptic.confirm()}}catch(e){console.error(e)}
+  const lc=localLookup(t);
+  const tlEl=document.getElementById('tl');
+  if(lc){tlEl.innerHTML=lc;tlEl.style.display='block';}
+  else{tlEl.style.display='none';}
+  try{
+    const j=/[ぁ-んァ-ヶー一-龠]/.test(t);
+    const r=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(t)}&langpair=${j?'ja|en':'en|ja'}`);
+    const d=await r.json();
+    const x=d.responseData?.translatedText;
+    if(x&&x!=='N/A'){
+      document.getElementById('tr').textContent=x;
+      document.getElementById('ts').textContent=j?'JA → EN':'EN → JA';
+      document.getElementById('tov').classList.add('show');
+      haptic.confirm();
+    } else if(lc){
+      document.getElementById('tr').textContent='';
+      document.getElementById('ts').textContent='';
+      document.getElementById('tov').classList.add('show');
+      haptic.confirm();
+    }
+  }catch(e){
+    if(lc){
+      document.getElementById('tr').textContent='';
+      document.getElementById('ts').textContent='';
+      document.getElementById('tov').classList.add('show');
+    }
+  }
 }
 
-window.CT=function(){document.getElementById('tov').classList.remove('show');haptic();inp.value='';ar()};
-document.getElementById('bsr').addEventListener('click',()=>{haptic.confirm();window.open(`https://www.google.com/search?q=${encodeURIComponent(inp.value.trim()||'Google')}`,'_blank')});
+window.CT=function(){
+  document.getElementById('tov').classList.remove('show');
+  haptic();inp.value='';ar();
+};
+document.getElementById('bsr').addEventListener('click',()=>{
+  haptic.confirm();
+  window.open(`https://www.google.com/search?q=${encodeURIComponent(inp.value.trim()||'Google')}`,'_blank');
+});
 document.getElementById('bgo').addEventListener('click',()=>{haptic();const t=inp.value.trim();if(t)doTr(t)});
 
 /* ═══ SWIPE ═══ */
 let sx=0;
 document.getElementById('fw').addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
-document.getElementById('fw').addEventListener('touchend',e=>{if(!flipped)return;const d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>55){d<0?R('f'):R('g')}},{passive:true});
+document.getElementById('fw').addEventListener('touchend',e=>{
+  if(!flipped)return;
+  const d=e.changedTouches[0].clientX-sx;
+  if(Math.abs(d)>55){d>0?R('g'):R('f');}
+},{passive:true});
+
+/* ═══ CLOSE HISTORY ON BACKDROP TAP ═══ */
+document.getElementById('hov').addEventListener('click',function(e){
+  if(e.target===this){this.classList.remove('show');clearTimeout(htimer);}
+});
 
 /* ═══ UTILS ═══ */
 function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -483,7 +858,4 @@ function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*
 /* ═══ INIT ═══ */
 buildLists();
 render();
-</script>
-
-</body>
-</html>
+</script></body></html>
