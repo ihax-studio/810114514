@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -6,223 +7,322 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="英語究極">
-<meta name="theme-color" content="#f7f6f3">
+<meta name="theme-color" content="#060608">
 <title>英語究極参考書</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#f7f6f3;--card:#fff;--tx:#1a1a1a;--sub:#888;--ln:#e8e8e8;--g:#27a06a;--y:#d97706;--r:#dc2626;--b:#2563eb;--p:#7c3aed;--sh:0 2px 16px rgba(0,0,0,.07);--shl:0 8px 36px rgba(0,0,0,.12);--sat:env(safe-area-inset-top);--sab:env(safe-area-inset-bottom)}
-html,body{height:100dvh;overflow:hidden}
-body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);display:flex;flex-direction:column}
-.nav{display:flex;background:var(--card);border-bottom:1px solid var(--ln);flex-shrink:0;overflow-x:auto;scrollbar-width:none;padding-top:var(--sat)}
-.nav::-webkit-scrollbar{display:none}
-.nb{flex-shrink:0;padding:10px 13px;border:none;background:none;font-family:inherit;font-size:11px;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}
-.nb.on{color:var(--b);border-bottom-color:var(--b)}
-.pr{display:flex;align-items:center;gap:8px;padding:7px 16px 5px;flex-shrink:0}
-.prb{flex:1;height:4px;background:var(--ln);border-radius:2px;overflow:hidden}
-.prf{height:100%;background:linear-gradient(90deg,var(--b),var(--p));border-radius:2px;transition:width .4s}
-.prt{font-size:11px;font-weight:600;color:var(--sub);min-width:48px;text-align:right}
-.sr{display:flex;gap:5px;padding:0 14px 6px;flex-shrink:0;align-items:center}
-.ch{background:var(--card);border-radius:10px;padding:5px 10px;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;box-shadow:var(--sh);border:none;font-family:inherit;cursor:pointer;transition:transform .12s}
-.ch:active{transform:scale(.9)}
-.ch-bk{font-size:16px;padding:4px 10px;background:#f0f0ee;color:var(--sub)}
-.ch-bk:disabled{opacity:.28;cursor:default;transform:none!important}
-.ca{flex:1;display:flex;align-items:center;justify-content:center;padding:6px 16px;position:relative;overflow:hidden;min-height:0}
-.fw{width:100%;max-width:440px;perspective:1200px;cursor:pointer;user-select:none;-webkit-user-select:none}
-.fc{width:100%;min-height:300px;position:relative;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+:root{
+  --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);
+  --b:#0a84ff;--g:#30d158;--y:#ff9f0a;--r:#ff453a;--p:#bf5af2;
+  --tx:#ffffff;--sub:rgba(255,255,255,.5);--dim:rgba(255,255,255,.2);
+  --ln:rgba(255,255,255,.08);
+  --glass:rgba(255,255,255,.08);
+  --glass-b:blur(28px) saturate(180%);
+  --border:rgba(255,255,255,.14);
+  --card-bg:rgba(255,255,255,.1);
+  --card-in:inset 0 1px 0 rgba(255,255,255,.22);
+  --sh:0 20px 60px rgba(0,0,0,.55);
+}
+html,body{height:100dvh;overflow:hidden;background:#060608}
+body{font-family:-apple-system,"Noto Sans JP",sans-serif;color:var(--tx)}
+
+/* ─── SPLASH ─── */
+#splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse 140% 100% at 50% -20%,#1a1040,#060608 70%);animation:splashFade .35s .75s ease forwards}
+@keyframes splashFade{to{opacity:0;pointer-events:none}}
+#splash-inner{text-align:center;transform:scale(1.5);animation:splashShrink .55s .2s cubic-bezier(.34,1.4,.64,1) forwards}
+@keyframes splashShrink{to{transform:scale(1)}}
+.sp-orb{width:88px;height:88px;border-radius:24px;background:linear-gradient(145deg,#0a84ff,#5e5ce6);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:0 0 60px rgba(10,132,255,.5),0 0 120px rgba(94,92,230,.2)}
+.sp-t{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.04em}
+.sp-s{font-size:12px;color:var(–sub);margin-top:5px;font-weight:300;letter-spacing:.05em;text-transform:uppercase}
+
+/* ─── HOME ─── */
+#home{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;padding-top:var(–sat);transition:opacity .28s,transform .28s cubic-bezier(.4,0,.2,1);background:radial-gradient(ellipse 120% 60% at 30% 0%,rgba(10,132,255,.12),transparent 60%),radial-gradient(ellipse 80% 60% at 80% 100%,rgba(191,90,242,.08),transparent 60%),#060608}
+#home.hidden{opacity:0;transform:scale(.96);pointer-events:none}
+.hm-hdr{padding:22px 20px 8px}
+.hm-ttl{font-size:32px;font-weight:800;letter-spacing:-.05em;background:linear-gradient(135deg,#fff 40%,rgba(255,255,255,.55));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hm-sub{font-size:12px;color:var(–sub);margin-top:3px;letter-spacing:.04em}
+.hm-scroll{flex:1;overflow-y:auto;padding:0 14px calc(90px + var(–sab));-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.hm-scroll::-webkit-scrollbar{display:none}
+.hg-lbl{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(–sub);padding:14px 6px 6px}
+.hg-list{border-radius:18px;overflow:hidden;background:var(–glass);backdrop-filter:var(–glass-b);-webkit-backdrop-filter:var(–glass-b);border:1px solid var(–border);box-shadow:0 4px 32px rgba(0,0,0,.3)}
+.hcard{display:flex;align-items:center;gap:13px;padding:12px 14px;border-bottom:1px solid var(–ln);cursor:pointer;transition:background .1s;user-select:none;-webkit-user-select:none}
+.hcard:last-child{border-bottom:none}
+.hcard:active{background:rgba(255,255,255,.12)}
+.hcard-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.ic-b{background:linear-gradient(145deg,#0a84ff,#0056cc)}
+.ic-p{background:linear-gradient(145deg,#bf5af2,#8a2be2)}
+.ic-g{background:linear-gradient(145deg,#30d158,#1a9e40)}
+.ic-y{background:linear-gradient(145deg,#ff9f0a,#d06000)}
+.ic-r{background:linear-gradient(145deg,#ff453a,#c0001a)}
+.ic-t{background:linear-gradient(145deg,#5ac8fa,#0071a4)}
+.ic-i{background:linear-gradient(145deg,#5e5ce6,#3634a3)}
+.ic-d{background:linear-gradient(145deg,#48484a,#2c2c2e)}
+.hcard-info{flex:1;min-width:0}
+.hcard-name{font-size:14px;font-weight:600}
+.hcard-desc{font-size:11px;color:var(–sub);margin-top:1px}
+.hcard-badge{background:rgba(255,255,255,.1);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:var(–dim);flex-shrink:0;border:1px solid rgba(255,255,255,.08)}
+.hcard-chev{color:rgba(255,255,255,.18);font-size:13px;margin-left:3px}
+
+/* ─── APP ─── */
+#app{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .36s cubic-bezier(.4,0,.2,1);background:#060608}
+#app.vis{transform:translateY(0)}
+.app-hdr{display:flex;align-items:center;gap:10px;padding:calc(var(–sat) + 10px) 14px 10px;flex-shrink:0;background:rgba(6,6,8,.8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(–ln)}
+.app-back{width:32px;height:32px;border-radius:50%;background:rgba(10,132,255,.15);border:none;color:var(–b);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s;flex-shrink:0}
+.app-back:active{transform:scale(.82)}
+.app-ttl{flex:1;text-align:center;font-size:15px;font-weight:700;letter-spacing:-.01em}
+.app-dots{display:flex;gap:5px;align-items:center;justify-content:center;padding:7px 0 5px;flex-shrink:0}
+.dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.2);transition:all .22s}
+.dot.on{background:var(–b);width:16px;border-radius:3px}
+
+/* ─── PANELS ─── */
+.swipe-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;position:relative}
+.swipe-track{display:flex;height:100%;transition:transform .32s cubic-bezier(.4,0,.2,1);will-change:transform}
+.swipe-panel{flex-shrink:0;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden}
+
+/* ─── PROGRESS ─── */
+.pr-row{display:flex;align-items:center;gap:8px;padding:5px 14px 2px;flex-shrink:0}
+.prb{flex:1;height:2px;background:rgba(255,255,255,.1);border-radius:1px;overflow:hidden}
+.prf{height:100%;background:linear-gradient(90deg,var(–b),var(–p));border-radius:1px;transition:width .4s}
+.prt{font-size:10px;font-weight:600;color:var(–sub);min-width:38px;text-align:right}
+
+/* ─── SCORE ROW ─── */
+.sr{display:flex;gap:4px;padding:0 12px 4px;flex-shrink:0;align-items:center}
+.ch{background:rgba(255,255,255,.07);border-radius:10px;padding:5px 9px;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;border:1px solid rgba(255,255,255,.1);cursor:pointer;transition:transform .12s,background .12s;font-family:inherit;color:var(–tx)}
+.ch:active{transform:scale(.88);background:rgba(255,255,255,.14)}
+.ch-bk{font-size:15px;padding:4px 9px;background:rgba(255,255,255,.05)}
+.ch-bk:disabled{opacity:.2;cursor:default;transform:none!important}
+
+/* ─── CARD ─── */
+.ca{flex:1;display:flex;align-items:center;justify-content:center;padding:4px 14px 2px;min-height:0}
+.fw{width:100%;max-width:400px;perspective:1200px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.fc{width:100%;min-height:260px;position:relative;transform-style:preserve-3d;transition:transform .48s cubic-bezier(.4,0,.2,1)}
 .fc.fl{transform:rotateY(180deg)}
-.ff{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;padding:22px 20px 18px;display:flex;flex-direction:column;box-shadow:var(--shl);background:var(--card)}
-.fb{transform:rotateY(180deg)}
+.ff{
+position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+border-radius:22px;padding:20px 18px 16px;display:flex;flex-direction:column;
+background:var(–card-bg);
+backdrop-filter:blur(32px) saturate(200%);-webkit-backdrop-filter:blur(32px) saturate(200%);
+border:1px solid var(–border);
+box-shadow:var(–sh),var(–card-in);
+}
+.fb{transform:rotateY(180deg);background:rgba(255,255,255,.12)}
 .fmeta{display:flex;align-items:center;justify-content:space-between;margin-bottom:auto}
-.lv{font-size:10px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:20px}
-.l1{background:#dcfce7;color:#166534}.l2{background:#fef9c3;color:#854d0e}.l3{background:#fce7f3;color:#9d174d}.lid{background:#ede9fe;color:#5b21b6}
-.fcat{font-size:10px;color:var(--sub);font-weight:500}
-.fword{font-size:clamp(26px,7vw,42px);font-weight:600;color:var(--tx);letter-spacing:-.02em;margin:14px 0 3px;line-height:1.1}
-.fpron{font-size:12px;color:var(--sub);font-weight:300;margin-bottom:5px}
-.fpos{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
-.pn{background:#eff6ff;color:#1d4ed8}.pv{background:#f0fdf4;color:#166534}.pa{background:#fffbeb;color:#b45309}.pd{background:#fff1f2;color:#be123c}.po{background:#f5f3ff;color:#6d28d9}
-.fh{font-size:11px;color:var(--sub);margin-top:auto;text-align:center;opacity:.4;padding-top:10px}
-.fmean{font-size:19px;font-weight:700;color:var(--tx);margin-bottom:4px}
-.ffull{font-size:11.5px;color:#555;line-height:1.7;margin-bottom:8px}
-.fex{background:#f5f5f2;border-radius:11px;padding:9px 11px;margin-bottom:8px;font-size:12px;line-height:1.6}
-.fexe{color:var(--tx)}.fexj{color:var(--sub);margin-top:2px;font-size:11px}
-.ftags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px}
-.ftag{background:#f0f0ee;border-radius:6px;padding:1px 7px;font-size:10px;color:#555}
-.fidm{font-size:11px;line-height:1.8;color:var(--sub)}
-.fide{font-style:italic;color:#333}
-.fw.out{animation:co .2s ease forwards}.fw.in{animation:ci .2s ease forwards}
-@keyframes co{to{opacity:0;transform:scale(.93) translateY(16px)}}
-@keyframes ci{from{opacity:0;transform:scale(.93) translateY(-16px)}to{opacity:1;transform:none}}
-.cc{width:100%;max-width:440px;background:var(--card);border-radius:22px;padding:32px 20px;text-align:center;box-shadow:var(--shl)}
-.acts{display:flex;gap:8px;padding:8px 16px 6px;flex-shrink:0}
-.ab{flex:1;padding:10px 4px;border:none;border-radius:13px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:transform .15s;display:flex;flex-direction:column;align-items:center;gap:2px}
-.ab:active{transform:scale(.91)}
-.ab.af{background:#fef2f2;color:var(--r)}.ab.ah{background:#fffbeb;color:var(--y)}.ab.ag{background:#f0fdf4;color:var(--g)}
-.ab span{font-size:17px}
-.tb{padding:6px 14px calc(8px + var(--sab));flex-shrink:0}
-.ti{display:flex;align-items:flex-end;gap:8px;background:var(--card);border-radius:22px;padding:7px 7px 7px 13px;box-shadow:0 4px 18px rgba(0,0,0,.07)}
-#ti{flex:1;border:none;outline:none;background:transparent;font-family:inherit;font-size:15px;color:var(--tx);resize:none;min-height:32px;max-height:26dvh;line-height:1.5;overflow-y:auto}
-#ti::placeholder{color:#bbb}
-.tbb{flex-shrink:0;width:36px;height:36px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s}
-.tbb:active{transform:scale(.88)}
-.tbs{background:#f0f0ee;color:var(--sub)}.tbg{background:var(--b);color:#fff}
-.ls{flex:1;overflow-y:auto;padding:8px 16px;display:none;min-height:0;-webkit-overflow-scrolling:touch}
-.ls.on{display:block}
-.li{background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:7px;box-shadow:var(--sh)}
-.lw{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:2px}
-.lm{font-size:12px;color:var(--b);font-weight:600;margin-bottom:4px}
-.lnx{font-size:11.5px;color:#555;line-height:1.7;background:#f5f5f2;border-radius:9px;padding:7px 9px;margin-top:5px}
-.le{font-size:11.5px;color:#666;font-style:italic;margin-top:4px;line-height:1.5}
-.sh{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);padding:8px 0 4px}
-/* Bottom Sheets */
-.bsheet{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.98);border-radius:22px 22px 0 0;z-index:70;transform:translateY(105%);transition:transform .32s cubic-bezier(.4,0,.2,1);max-height:70dvh;display:flex;flex-direction:column;padding-bottom:var(--sab);box-shadow:0 -6px 40px rgba(0,0,0,.18);will-change:transform}
-.bsheet.open{transform:translateY(0)}
-.bs-hdl{width:40px;height:4px;background:#d0d0d0;border-radius:2px;margin:12px auto 4px;flex-shrink:0;touch-action:none;cursor:grab}
-.bs-title{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.09em;text-transform:uppercase;text-align:center;padding:4px 0 8px;flex-shrink:0}
-.bs-body{flex:1;overflow-y:auto;padding:4px 18px 14px;-webkit-overflow-scrolling:touch}
-.scrim{position:fixed;inset:0;background:rgba(0,0,0,.22);z-index:65;opacity:0;pointer-events:none;transition:opacity .28s;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-.scrim.on{opacity:1;pointer-events:auto}
-.tloc{font-size:12.5px;color:var(--b);background:rgba(37,99,235,.07);border-radius:10px;padding:9px 12px;margin-bottom:10px;display:none;line-height:1.7}
-.tres{font-size:clamp(18px,5vw,32px);font-weight:300;color:var(--tx);line-height:1.5;word-break:break-word}
-.tsub{font-size:12px;color:var(--sub);margin-top:6px}
-.hrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--ln)}
-.hrow:last-child{border-bottom:none}
-.hbdg{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
-.hg-b{background:#dcfce7;color:#166534}.hh-b{background:#fef9c3;color:#854d0e}.hf-b{background:#fee2e2;color:#991b1b}
-.hw{font-size:13px;font-weight:700;color:var(--tx)}.hm{font-size:11px;color:var(--sub);margin-top:1px}
-.exr{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--ln)}
+.lv{font-size:9px;font-weight:800;letter-spacing:.08em;padding:3px 9px;border-radius:20px;text-transform:uppercase}
+.l1{background:rgba(48,209,88,.2);color:var(–g);border:1px solid rgba(48,209,88,.3)}
+.l2{background:rgba(255,159,10,.2);color:var(–y);border:1px solid rgba(255,159,10,.3)}
+.l3{background:rgba(191,90,242,.2);color:var(–p);border:1px solid rgba(191,90,242,.3)}
+.l-e2{background:rgba(0,132,255,.2);color:#5ac8fa;border:1px solid rgba(0,132,255,.3)}
+.fcat{font-size:10px;color:var(–sub)}
+.fword{font-size:clamp(20px,6vw,34px);font-weight:700;color:#fff;letter-spacing:-.02em;margin:11px 0 3px;line-height:1.15}
+.fpron{font-size:11px;color:var(–sub);margin-bottom:3px}
+.fpos{display:inline-block;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid transparent}
+.pn{background:rgba(90,200,250,.15);color:#5ac8fa;border-color:rgba(90,200,250,.3)}
+.pv{background:rgba(48,209,88,.15);color:var(–g);border-color:rgba(48,209,88,.3)}
+.pa{background:rgba(255,159,10,.15);color:var(–y);border-color:rgba(255,159,10,.3)}
+.pd{background:rgba(255,69,58,.15);color:#ff6961;border-color:rgba(255,69,58,.3)}
+.po{background:rgba(191,90,242,.15);color:#da8fff;border-color:rgba(191,90,242,.3)}
+.fh{font-size:9px;color:var(–sub);margin-top:auto;text-align:center;opacity:.45;padding-top:8px}
+.fmean{font-size:17px;font-weight:700;color:#fff;margin-bottom:4px}
+.ffull{font-size:11px;color:var(–sub);line-height:1.7;margin-bottom:6px}
+.fex{background:rgba(0,0,0,.3);border-radius:10px;padding:8px 10px;margin-bottom:6px;font-size:11px;line-height:1.6;border:1px solid rgba(255,255,255,.07);display:none}
+.fexe{color:rgba(255,255,255,.85)}.fexj{color:var(–sub);margin-top:2px;font-size:10px}
+.ftags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px}
+.ftag{background:rgba(255,255,255,.07);border-radius:6px;padding:1px 6px;font-size:9px;color:var(–sub);border:1px solid rgba(255,255,255,.1)}
+.fidm{font-size:10px;line-height:1.8;color:var(–sub)}
+.fide{font-style:italic;color:rgba(255,255,255,.7)}
+.fw.out{animation:co .17s ease forwards}.fw.in{animation:ci .17s ease forwards}
+@keyframes co{to{opacity:0;transform:scale(.93) translateY(11px)}}
+@keyframes ci{from{opacity:0;transform:scale(.93) translateY(-11px)}to{opacity:1;transform:none}}
+.cc{width:100%;max-width:400px;background:var(–card-bg);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);border-radius:22px;padding:26px 18px;text-align:center;border:1px solid var(–border);box-shadow:var(–sh)}
+
+/* ─── ACTION BUTTONS ─── */
+.acts{display:flex;gap:6px;padding:5px 12px calc(6px + var(–sab,0px) / 2);flex-shrink:0}
+.ab{flex:1;padding:11px 4px;border:none;border-radius:14px;font-family:inherit;font-size:10px;font-weight:800;cursor:pointer;transition:transform .15s;display:flex;flex-direction:column;align-items:center;gap:3px;letter-spacing:.03em}
+.ab:active{transform:scale(.88)}
+.ab.af{background:rgba(255,69,58,.16);color:#ff6961;border:1px solid rgba(255,69,58,.25)}
+.ab.ah{background:rgba(255,159,10,.16);color:var(–y);border:1px solid rgba(255,159,10,.25)}
+.ab.ag{background:rgba(48,209,88,.16);color:var(–g);border:1px solid rgba(48,209,88,.25)}
+.ab span{font-size:18px;line-height:1}
+
+/* ─── LIST WRAP ─── */
+.lswrap{flex:1;overflow-y:auto;padding:8px 14px calc(90px + var(–sab,0px));-webkit-overflow-scrolling:touch;min-height:0;scrollbar-width:none}
+.lswrap::-webkit-scrollbar{display:none}
+/* List items */
+.li{background:var(–glass);border-radius:14px;padding:12px 14px;margin-bottom:7px;border:1px solid var(–border)}
+.lw{font-size:14px;font-weight:700;margin-bottom:2px}
+.lm{font-size:12px;color:var(–b);font-weight:600;margin-bottom:3px}
+.lnx{font-size:11px;color:var(–sub);line-height:1.7;background:rgba(0,0,0,.25);border-radius:8px;padding:6px 8px;margin-top:4px;border:1px solid rgba(255,255,255,.05)}
+.le{font-size:11px;color:rgba(255,255,255,.4);font-style:italic;margin-top:4px;line-height:1.5}
+.sh{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(–sub);padding:8px 0 5px}
+.exr{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(–ln)}
 .exr:last-child{border-bottom:none}
-.exn{font-size:10px;font-weight:700;color:var(--sub);min-width:30px;padding-top:2px}
-.exph{font-size:13px;font-weight:700;color:var(--b)}.exja{font-size:11px;color:var(--sub);margin-top:1px}
-.exe{font-size:11px;color:#555;font-style:italic;margin-top:3px;line-height:1.5}
-.ivwrap{overflow-x:auto;border-radius:12px;box-shadow:var(--sh);margin-bottom:8px}
-.ivt{width:100%;border-collapse:collapse;font-size:11.5px;background:var(--card)}
-.ivt th{background:var(--b);color:#fff;padding:7px 5px;text-align:center;font-weight:700;font-size:10px;white-space:nowrap}
-.ivt td{padding:5px;border-bottom:1px solid var(--ln);text-align:center;vertical-align:middle;white-space:nowrap}
-.ivt tr:nth-child(even) td{background:#f9f8f6}
-.ivp{color:var(--r);font-weight:700}.ivpp{color:var(--b);font-weight:700}.ivb{font-weight:700;color:var(--tx)}
+.exn{font-size:9px;font-weight:700;color:var(–sub);min-width:28px;padding-top:2px}
+.exph{font-size:12px;font-weight:700;color:var(–b)}.exja{font-size:10px;color:var(–sub);margin-top:1px}
+.exe{font-size:10px;color:rgba(255,255,255,.35);font-style:italic;margin-top:2px;line-height:1.5}
+.ivwrap{overflow-x:auto;border-radius:12px;margin-bottom:8px;border:1px solid var(–border)}
+.ivt{width:100%;border-collapse:collapse;font-size:11px;background:rgba(0,0,0,.3)}
+.ivt th{background:rgba(10,132,255,.3);color:#fff;padding:6px 4px;text-align:center;font-weight:700;font-size:9px;white-space:nowrap;border-bottom:1px solid var(–border)}
+.ivt td{padding:4px;border-bottom:1px solid var(–ln);text-align:center;white-space:nowrap;color:rgba(255,255,255,.8)}
+.ivt tr:nth-child(even) td{background:rgba(255,255,255,.03)}
+.ivp{color:#ff6961;font-weight:700}.ivpp{color:#5ac8fa;font-weight:700}.ivb{font-weight:700;color:#fff}
+
+/* ─── TRANSLATION BAR ─── */
+#tr-bar{position:fixed;bottom:0;left:0;right:0;z-index:200;padding:6px 12px calc(8px + var(–sab,0px));background:linear-gradient(to top,rgba(6,6,8,.9) 40%,transparent)}
+.ti-wrap{display:flex;align-items:flex-end;gap:7px;background:rgba(255,255,255,.1);border-radius:24px;padding:8px 8px 8px 14px;border:1px solid var(–border);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 4px 24px rgba(0,0,0,.4)}
+#ti{flex:1;border:none;outline:none;background:transparent;font-family:inherit;font-size:15px;color:#fff;resize:none;min-height:26px;max-height:100px;line-height:1.5;overflow-y:auto}
+#ti::placeholder{color:rgba(255,255,255,.3)}
+.tbb{flex-shrink:0;width:34px;height:34px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:transform .12s}
+.tbb:active{transform:scale(.84)}
+.tb-s{background:rgba(255,255,255,.1);color:var(–sub)}
+.tb-g{background:var(–b);color:#fff;box-shadow:0 2px 12px rgba(10,132,255,.4)}
+
+/* ─── TRANSLATION SHEET ─── */
+#tr-scrim{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);opacity:0;pointer-events:none;transition:opacity .26s}
+#tr-scrim.on{opacity:1;pointer-events:auto}
+#tr-sheet{position:fixed;bottom:0;left:0;right:0;z-index:301;background:rgba(16,16,22,.94);backdrop-filter:blur(48px) saturate(200%);-webkit-backdrop-filter:blur(48px) saturate(200%);border-top:1px solid rgba(255,255,255,.14);border-radius:22px 22px 0 0;padding-bottom:var(–sab,0px);transform:translateY(105%);transition:transform .32s cubic-bezier(.4,0,.2,1);max-height:66dvh;display:flex;flex-direction:column;box-shadow:0 -8px 60px rgba(0,0,0,.7)}
+#tr-sheet.open{transform:translateY(0)}
+.tr-hdl{width:40px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:12px auto 6px;flex-shrink:0;cursor:pointer;touch-action:none}
+.tr-body{flex:1;overflow-y:auto;padding:0 18px 16px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tr-body::-webkit-scrollbar{display:none}
+.tr-spin-wrap{text-align:center;padding:22px;color:var(–sub);font-size:12px}
+.tr-spin{width:20px;height:20px;border:2px solid rgba(255,255,255,.12);border-top-color:var(–b);border-radius:50%;animation:spin .6s linear infinite;margin:0 auto 8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tr-item{padding:11px 0;border-bottom:1px solid var(–ln)}
+.tr-item:last-child{border-bottom:none}
+.tr-local{font-size:12px;color:var(–b);background:rgba(10,132,255,.1);border-radius:10px;padding:8px 12px;margin-bottom:8px;line-height:1.7;border:1px solid rgba(10,132,255,.2)}
+.tr-dir{font-size:9px;font-weight:800;letter-spacing:.09em;color:var(–b);text-transform:uppercase;margin-bottom:3px}
+.tr-txt{font-size:clamp(14px,4vw,24px);font-weight:300;color:#fff;line-height:1.5;word-break:break-word}
+.tr-q{font-size:9px;color:var(–sub);margin-top:2px}
+
+/* ─── HISTORY SHEET ─── */
+#hs-scrim{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:395;opacity:0;pointer-events:none;transition:opacity .22s;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+#hs-scrim.on{opacity:1;pointer-events:auto}
+#hsheet{position:fixed;bottom:0;left:0;right:0;z-index:400;background:rgba(16,16,22,.94);backdrop-filter:blur(48px);-webkit-backdrop-filter:blur(48px);border-top:1px solid rgba(255,255,255,.14);border-radius:22px 22px 0 0;padding-bottom:var(–sab,0px);transform:translateY(105%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:72dvh;display:flex;flex-direction:column;box-shadow:0 -8px 60px rgba(0,0,0,.7)}
+#hsheet.open{transform:translateY(0)}
+.hs-hdl{width:40px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:12px auto 4px;flex-shrink:0;touch-action:none;cursor:pointer}
+.hs-ttl{font-size:10px;font-weight:800;color:var(–sub);letter-spacing:.09em;text-transform:uppercase;text-align:center;padding:4px 0 8px;flex-shrink:0}
+.hs-body{flex:1;overflow-y:auto;padding:4px 18px 14px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.hs-body::-webkit-scrollbar{display:none}
+.hrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(–ln)}
+.hrow:last-child{border-bottom:none}
+.hbdg{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.hg-b{background:rgba(48,209,88,.2);color:var(–g)}.hh-b{background:rgba(255,159,10,.2);color:var(–y)}.hf-b{background:rgba(255,69,58,.2);color:#ff6961}
+.hw{font-size:13px;font-weight:700}.hm{font-size:11px;color:var(–sub);margin-top:1px}
 </style>
+
 </head>
 <body>
-<div class="nav">
-<button class="nb on" id="t-f" onclick="ST('f')">🃏 単語カード</button>
-<button class="nb" id="t-i" onclick="ST('i')">💬 イディオム</button>
-<button class="nb" id="t-e" onclick="ST('e')">📝 入試表現</button>
-<button class="nb" id="t-v" onclick="ST('v')">🔄 動詞変化</button>
-<button class="nb" id="t-g" onclick="ST('g')">📐 文法</button>
-<button class="nb" id="t-p" onclick="ST('p')">✍️ 言い換え</button>
-<button class="nb" id="t-r" onclick="ST('r')">📖 読解表現</button>
-<button class="nb" id="t-c" onclick="ST('c')">⚠️ 混同注意</button>
-<button class="nb" id="t-a" onclick="ST('a')">🎯 テーマ</button>
-<button class="nb" id="t-1" onclick="ST('1')">📚 準1 Pass単</button>
-</div>
-<div class="pr" id="prbar"><div class="prb"><div class="prf" id="pf" style="width:0%"></div></div><div class="prt" id="pt">0/0</div></div>
-<div class="sr" id="sr">
-<button class="ch ch-bk" id="cbk" onclick="goBack()" disabled>←</button>
-<button class="ch" style="color:var(--g)" onclick="showHist('g')">✓ <span id="sg">0</span></button>
-<button class="ch" style="color:var(--y)" onclick="showHist('h')">△ <span id="sh2">0</span></button>
-<button class="ch" style="color:var(--r)" onclick="showHist('f')">✗ <span id="sf">0</span></button>
-<button class="ch" style="margin-left:auto" onclick="SD()">🔀</button>
-</div>
-<div class="ca" id="ca">
-<div class="fw" id="fw">
-<div class="fc" id="fc" onclick="FF()">
-<div class="ff" id="ff">
-<div class="fmeta"><span class="lv l1" id="flv"></span><span class="fcat" id="fca"></span></div>
-<div class="fword" id="fwo"></div>
-<div class="fpron" id="fpr"></div>
-<span class="fpos pv" id="fpo"></span>
-<div class="fh">タップして意味を確認 · スワイプ →✓ ←✗</div>
-</div>
-<div class="ff fb" id="fba">
-<div class="fmean" id="fme"></div>
-<div class="ffull" id="ffu"></div>
-<div class="fex" id="fex"></div>
-<div class="ftags" id="fta"></div>
-<div class="fidm" id="fid"></div>
-</div>
-</div>
-</div>
-</div>
-<div class="ls" id="l-i"></div>
-<div class="ls" id="l-e"></div>
-<div class="ls" id="l-v"></div>
-<div class="ls" id="l-g"></div>
-<div class="ls" id="l-p"></div>
-<div class="ls" id="l-r"></div>
-<div class="ls" id="l-c"></div>
-<div class="ls" id="l-a"></div>
-<div class="acts" id="acts" style="display:none">
-<button class="ab af" onclick="R('f')"><span>😰</span>忘れた</button>
-<button class="ab ah" onclick="R('h')"><span>🤔</span>難しい</button>
-<button class="ab ag" onclick="R('g')"><span>✨</span>覚えた！</button>
+
+<!-- Splash -->
+
+<div id="splash">
+  <div id="splash-inner">
+    <div class="sp-orb">📖</div>
+    <div class="sp-t">英語究極参考書</div>
+    <div class="sp-s">Eiken Complete · 2級 / 準1級</div>
+  </div>
 </div>
 
-<!-- Pre-1 Pass-Tan area -->
-<div id="p1-area" style="display:none;flex:1;flex-direction:column;min-height:0;overflow:hidden">
-  <div class="sr" id="p1-sr" style="padding-top:6px">
-    <button class="ch" style="font-size:10px;padding:4px 9px" onclick="p1Toggle()">
-      <span id="p1-mode-lbl">単語</span> ↕ 熟語
-    </button>
-    <button class="ch ch-bk" id="p1-cbk" onclick="p1Back()" disabled>←</button>
-    <button class="ch" style="color:var(--g)" onclick="p1ShowHist('g')">✓ <span id="p1-sg">0</span></button>
-    <button class="ch" style="color:var(--y)" onclick="p1ShowHist('h')">△ <span id="p1-sh">0</span></button>
-    <button class="ch" style="color:var(--r)" onclick="p1ShowHist('f')">✗ <span id="p1-sf">0</span></button>
-    <button class="ch" style="margin-left:auto" onclick="p1Shuffle()">🔀</button>
+<!-- Home -->
+
+<div id="home">
+  <div class="hm-hdr">
+    <div class="hm-ttl">英語究極</div>
+    <div class="hm-sub">EIKEN COMPLETE · 英検2級 / 準1級</div>
   </div>
-  <div style="display:flex;align-items:center;gap:8px;padding:4px 16px 3px;flex-shrink:0">
-    <div class="prb" style="flex:1"><div class="prf" id="p1-pf" style="width:0%"></div></div>
-    <div class="prt" id="p1-pt">0/0</div>
+  <div class="hm-scroll">
+    <div class="hg-lbl">クイズ · 準1級</div>
+    <div class="hg-list">
+      <div class="hcard" onclick="openSection('card',0)"><div class="hcard-ico ic-b">🃏</div><div class="hcard-info"><div class="hcard-name">準1級 単語カード</div><div class="hcard-desc">頻出 · 2015〜2025</div></div><div class="hcard-badge" id="bv">---</div><div class="hcard-chev">›</div></div>
+      <div class="hcard" onclick="openSection('card',1)"><div class="hcard-ico ic-p">📗</div><div class="hcard-info"><div class="hcard-name">Pass単 単語</div><div class="hcard-desc">でる順パス単 1,488語</div></div><div class="hcard-badge">1488</div><div class="hcard-chev">›</div></div>
+      <div class="hcard" onclick="openSection('card',2)"><div class="hcard-ico ic-r">🔗</div><div class="hcard-info"><div class="hcard-name">Pass単 熟語・句動詞</div><div class="hcard-desc">でる順パス単 222句</div></div><div class="hcard-badge">222</div><div class="hcard-chev">›</div></div>
+      <div class="hcard" onclick="openSection('card',3)"><div class="hcard-ico ic-y">💡</div><div class="hcard-info"><div class="hcard-name">準1 イディオム</div><div class="hcard-desc">重要30個</div></div><div class="hcard-badge">30</div><div class="hcard-chev">›</div></div>
+    </div>
+    <div class="hg-lbl">クイズ · 2級</div>
+    <div class="hg-list">
+      <div class="hcard" onclick="openSection('card',4)"><div class="hcard-ico ic-g">🔤</div><div class="hcard-info"><div class="hcard-name">2級 単語</div><div class="hcard-desc">教科書索引 + 過去5年補足 699語</div></div><div class="hcard-badge">699</div><div class="hcard-chev">›</div></div>
+      <div class="hcard" onclick="openSection('card',5)"><div class="hcard-ico ic-t">🔗</div><div class="hcard-info"><div class="hcard-name">2級 熟語・句動詞</div><div class="hcard-desc">218フレーズ</div></div><div class="hcard-badge">218</div><div class="hcard-chev">›</div></div>
+    </div>
+    <div class="hg-lbl">参考書</div>
+    <div class="hg-list">
+      <div class="hcard" onclick="openSection('list','ex')"><div class="hcard-ico ic-t">📝</div><div class="hcard-info"><div class="hcard-name">入試で使える表現</div><div class="hcard-desc">125フレーズ · グループ別</div></div><div class="hcard-chev">›</div></div>
+      <div class="hcard" onclick="openSection('list','v')"><div class="hcard-ico ic-g">🔄</div><div class="hcard-info"><div class="hcard-name">不規則動詞変化表</div><div class="hcard-desc">69語 完全版</div></div><div class="hcard-chev">›</div></div>
+      <div class="hcard" onclick="openSection('list','g')"><div class="hcard-ico ic-i">📐</div><div class="hcard-info"><div class="hcard-name">重要文法</div><div class="hcard-desc">仮定法・強調・倒置 12項目</div></div><div class="hcard-chev">›</div></div>
+      <div class="hcard" onclick="openSection('list','p')"><div class="hcard-ico ic-b">✍️</div><div class="hcard-info"><div class="hcard-name">言い換え表現</div><div class="hcard-desc">12セット フォーマル置換</div></div><div class="hcard-chev">›</div></div>
+      <div class="hcard" onclick="openSection('list','r')"><div class="hcard-ico ic-t">📖</div><div class="hcard-info"><div class="hcard-name">長文読解 重要表現</div><div class="hcard-desc">15フレーズ 出典付き</div></div><div class="hcard-chev">›</div></div>
+      <div class="hcard" onclick="openSection('list','c')"><div class="hcard-ico ic-r">⚠️</div><div class="hcard-info"><div class="hcard-name">混同注意ペア</div><div class="hcard-desc">最頻出10ペア</div></div><div class="hcard-chev">›</div></div>
+      <div class="hcard" onclick="openSection('list','a')"><div class="hcard-ico ic-d">🎯</div><div class="hcard-info"><div class="hcard-name">頻出テーマ</div><div class="hcard-desc">環境・社会・ビジネスなど</div></div><div class="hcard-chev">›</div></div>
+    </div>
+    <div style="height:20px"></div>
   </div>
-  <div class="ca" id="p1-ca">
-    <div class="fw" id="p1-fw">
-      <div class="fc" id="p1-fc" onclick="p1Flip()">
-        <div class="ff" id="p1-ff">
-          <div class="fmeta">
-            <span class="lv l2" id="p1-lv">準1級</span>
-            <span class="fcat" id="p1-cat">英単語</span>
-          </div>
-          <div class="fword" id="p1-word" style="font-size:clamp(22px,6vw,36px)"></div>
-          <div class="fh">タップして意味を確認 · スワイプ →✓ ←✗</div>
-        </div>
-        <div class="ff fb" id="p1-back">
-          <div class="fmean" id="p1-mean"></div>
-          <div id="p1-extra" style="font-size:11px;color:var(--sub);margin-top:6px;line-height:1.7"></div>
-        </div>
-      </div>
+</div>
+
+<!-- App -->
+
+<div id="app">
+  <div class="app-hdr">
+    <button class="app-back" onclick="goHome()">←</button>
+    <div class="app-ttl" id="app-ttl">カード</div>
+    <div style="width:32px"></div>
+  </div>
+  <div class="app-dots" id="app-dots" style="display:none">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+  <!-- Swipe wrap for card sections -->
+  <div class="swipe-wrap" id="sw-wrap" style="display:none">
+    <div class="swipe-track" id="sw-track">
+      <!-- 6 panels generated below -->
     </div>
   </div>
-  <div class="acts" id="p1-acts" style="display:none">
-    <button class="ab af" onclick="p1Ans('f')"><span>😰</span>忘れた</button>
-    <button class="ab ah" onclick="p1Ans('h')"><span>🤔</span>難しい</button>
-    <button class="ab ag" onclick="p1Ans('g')"><span>✨</span>覚えた！</button>
+  <!-- List section -->
+  <div class="lswrap" id="list-wrap" style="display:none">
+    <div id="list-cnt"></div>
   </div>
 </div>
-<div class="tb"><div class="ti">
-<button class="tbb tbs" id="bsr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
-<textarea id="ti" placeholder="翻訳 / 単語検索..." rows="1" spellcheck="true"></textarea>
-<button class="tbb tbg" id="bgo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-</div></div>
-<div class="scrim" id="scrim"></div>
-<div class="bsheet" id="tsheet">
-<div class="bs-hdl" id="tsh-hdl"></div>
-<div class="bs-title">TRANSLATION</div>
-<div class="bs-body"><div class="tloc" id="tl"></div><div class="tres" id="tr"></div><div class="tsub" id="ts"></div></div>
-</div>
-<div class="bsheet" id="hsheet">
-<div class="bs-hdl" id="hsh-hdl"></div>
-<div class="bs-title" id="htit">ANSWER HISTORY</div>
-<div class="bs-body" id="hlist"></div>
-</div>
-<script type="module">
-/* ═══ HAPTIC — non-blocking, never delays render ═══ */
-let _hRaw=null;
-(function(){
-  import('https://esm.sh/ios-haptics').then(m=>{_hRaw=m.haptic;}).catch(()=>{});
-})();
-function haptic(){try{_hRaw&&_hRaw();}catch(_){}}
-haptic.confirm=function(){try{_hRaw&&_hRaw.confirm&&_hRaw.confirm();}catch(_){}};
 
+<!-- Translation bar (always visible) -->
+
+<div id="tr-bar">
+  <div class="ti-wrap">
+    <button class="tbb tb-s" id="bsr">🔍</button>
+    <textarea id="ti" placeholder="翻訳・単語検索 (English / 日本語)" rows="1"></textarea>
+    <button class="tbb tb-g" id="bgo">↑</button>
+  </div>
+</div>
+
+<!-- Translation sheet -->
+
+<div id="tr-scrim"></div>
+<div id="tr-sheet">
+  <div class="tr-hdl" id="tr-hdl"></div>
+  <div class="tr-body" id="tr-body"><div class="tr-spin-wrap"><div class="tr-spin"></div>翻訳中...</div></div>
+</div>
+
+<!-- History sheet -->
+
+<div id="hs-scrim"></div>
+<div id="hsheet">
+  <div class="hs-hdl" id="hs-hdl"></div>
+  <div class="hs-ttl" id="hs-ttl">履歴</div>
+  <div class="hs-body" id="hs-list"></div>
+</div>
+
+<script type="module">
+/* ═══ HAPTIC ═══ */
+let _h=null;
+(()=>{import('https://esm.sh/ios-haptics').then(m=>{_h=m.haptic;}).catch(()=>{});})();
+const haptic=()=>{try{_h&&_h();}catch(_){}};
+haptic.confirm=()=>{try{_h&&_h.confirm&&_h.confirm();}catch(_){}};
+haptic.error=()=>{try{_h&&_h.error&&_h.error();}catch(_){}};
+
+/* Haptic patterns */
+const hRemember=()=>{const delay=30;for(let i=0;i<5;i++)setTimeout(()=>haptic.error(),i*delay);}; // 覚えた
+const hForgot=()=>{const delay=18;for(let i=0;i<1100;i++)setTimeout(()=>haptic.error(),i*delay);}; // 忘れた (long burst)
+const hHard=()=>haptic.error(); // 難しい
+
+/* ═══ DATA ═══ */
 const V=[
 {w:"allege",p:"v",l:3,c:"2015動詞",m:"主張する・断言する",pr:"/əˈledʒ/",f:"that節をとる。allocate（割り当てる）と混同注意。",e:"He alleged that the company was guilty.",ej:"彼はその会社に罪があると主張した。",t:["allegation (n)"],id:[]},
 {w:"allocate",p:"v",l:3,c:"2015動詞",m:"割り当てる・配分する",pr:"/ˈæləkeɪt/",f:"allocate A to B の形。allege（主張する）と混同注意。",e:"The government allocated funds to the project.",ej:"政府はそのプロジェクトに資金を割り当てた。",t:["allocation (n)"],id:[]},
@@ -479,7 +579,6 @@ const V=[
 {w:"transparent",p:"adj",l:3,c:"準1必須形容詞",m:"透明な・明白な",pr:"/trænsˈpærənt/",f:"transparency（名）。",e:"The government should be transparent.",ej:"政府は透明であるべきだ。",t:["transparency (n)"],id:[]},
 {w:"urgent",p:"adj",l:2,c:"準1必須形容詞",m:"緊急の・急を要する",pr:"/ˈɜːrdʒənt/",f:"urgency（名）。urgent action（緊急の行動）。",e:"Urgent action is needed on climate change.",ej:"気候変動に関して緊急の行動が必要だ。",t:["urgency (n)"],id:[]},
 ];
-
 const ID=[
 {w:"beat around the bush",m:"遠回しに言う",n:"直訳：茂みの周りを打つ",e:"Stop beating around the bush.",ej:"遠回しに言うのはやめて。"},
 {w:"take the bull by the horns",m:"勇気を出して困難に向かう",n:"雄牛を角をつかんで捕まえる",e:"Let's take the bull by the horns.",ej:"勇敢に立ち向かおう。"},
@@ -774,169 +873,244 @@ const IV=[
 {b:"win",p:"won",pp:"won",m:"勝つ",s:"wins",g:"winning"},
 {b:"write",p:"wrote",pp:"written",m:"書く",s:"writes",g:"writing"},
 ];
-
 const P1W=[{e:"last",j:"続く、最後の"},{e:"affect",j:"影響する"},{e:"claim",j:"主張する、要求する"},{e:"ship",j:"輸送する、船"},{e:"issue",j:"問題、発行する"},{e:"purchase",j:"購入する"},{e:"occur",j:"起こる、生じる"},{e:"deal",j:"取引、処理する"},{e:"consume",j:"消費する"},{e:"present",j:"提示する、現在の、贈り物"},{e:"fire",j:"解雇する、火"},{e:"regard",j:"〜とみなす、尊重"},{e:"fine",j:"罰金、素晴らしい"},{e:"transfer",j:"転送する、移動する"},{e:"decline",j:"断る、衰退する"},{e:"eliminate",j:"除去する、排除する"},{e:"indicate",j:"示す、指し示す"},{e:"ensure",j:"確保する、保証する"},{e:"expand",j:"拡大する、広げる"},{e:"address",j:"取り組む、住所、演説する"},{e:"identify",j:"識別する、特定する"},{e:"construct",j:"建設する、構築する"},{e:"invest",j:"投資する"},{e:"obtain",j:"得る、取得する"},{e:"struggle",j:"奮闘する、苦闘"},{e:"counter",j:"反論する、カウンター"},{e:"associate",j:"関連付ける、仲間"},{e:"register",j:"登録する"},{e:"reveal",j:"明らかにする"},{e:"species",j:"種（生物の）"},{e:"diet",j:"食事制限、ダイエット"},{e:"site",j:"場所、サイト"},{e:"cell",j:"細胞、独房、携帯電話"},{e:"facility",j:"施設、設備"},{e:"practice",j:"練習する、実践"},{e:"resident",j:"住民、居住者"},{e:"option",j:"選択肢"},{e:"organ",j:"器官、臓器"},{e:"critic",j:"批評家"},{e:"region",j:"地域"},{e:"tax",j:"税金"},{e:"access",j:"アクセス、接近"},{e:"bill",j:"請求書、法案、紙幣"},{e:"evidence",j:"証拠"},{e:"attempt",j:"試みる、試み"},{e:"account",j:"口座、説明する"},{e:"theory",j:"理論"},{e:"factor",j:"要因"},{e:"stock",j:"株式、在庫"},{e:"chemical",j:"化学物質、化学の"},{e:"media",j:"メディア"},{e:"income",j:"収入、所得"},{e:"supplementary",j:"補足の、追加の"},{e:"shortage",j:"不足"},{e:"poverty",j:"貧困"},{e:"criminal",j:"犯罪者、犯罪の"},{e:"budget",j:"予算"},{e:"authority",j:"権威、当局"},{e:"genome",j:"ゲノム"},{e:"atmosphere",j:"大気、雰囲気"},{e:"aid",j:"援助する、援助"},{e:"measure",j:"測定する、対策"},{e:"subject",j:"主題、科目、〜を受けやすい"},{e:"decade",j:"10年間"},{e:"nutrient",j:"栄養素"},{e:"expense",j:"費用、経費"},{e:"structure",j:"構造、建造物"},{e:"adolescent",j:"青年、思春期の"},{e:"procedure",j:"手順、手続き"},{e:"minimum",j:"最小限"},{e:"fuel",j:"燃料、あおる"},{e:"resource",j:"資源"},{e:"regulation",j:"規制、規則"},{e:"contract",j:"契約、収縮する"},{e:"insurance",j:"保険"},{e:"employment",j:"雇用"},{e:"ban",j:"禁止する、禁止"},{e:"soil",j:"土、土壌"},{e:"cargo",j:"貨物"},{e:"aircraft",j:"航空機"},{e:"current",j:"現在の、流れ"},{e:"political",j:"政治的な"},{e:"significant",j:"重要な、著しい"},{e:"effective",j:"効果的な"},{e:"military",j:"軍事の、軍隊"},{e:"due",j:"〜のため、期日の、当然の"},{e:"essential",j:"不可欠な、本質的な"},{e:"illegal",j:"違法な"},{e:"immune",j:"免疫の、影響されない"},{e:"numerous",j:"多数の"},{e:"extreme",j:"極端な、極度の"},{e:"general",j:"一般的な、将軍"},{e:"agricultural",j:"農業の"},{e:"overall",j:"全体的な、全体として"},{e:"additional",j:"追加の"},{e:"entire",j:"全体の"},{e:"severe",j:"厳しい、ひどい"},{e:"alter",j:"変える、改める"},{e:"adopt",j:"採用する、養子にする"},{e:"reform",j:"改革する、改革"},{e:"determine",j:"決定する、決心する"},{e:"enable",j:"可能にする"},{e:"conduct",j:"行為、実施する、指揮する"},{e:"direct",j:"直接の、指示する"},{e:"absorb",j:"吸収する"},{e:"imply",j:"暗示する"},{e:"operate",j:"操作する、運営する"},{e:"demonstrate",j:"示す、証明する"},{e:"boost",j:"高める、増大させる"},{e:"prove",j:"証明する"},{e:"monitor",j:"監視する、モニター"},{e:"defeat",j:"打ち負かす、敗北"},{e:"protest",j:"抗議する、抗議"},{e:"target",j:"目標、標的にする"},{e:"preserve",j:"保護する、保存する"},{e:"oppose",j:"反対する"},{e:"migrate",j:"移住する、移動する"},{e:"analyze",j:"分析する"},{e:"discourage",j:"落胆させる、思いとどまらせる"},{e:"confirm",j:"確認する"},{e:"intelligent",j:"知能の高い、賢い"},{e:"precise",j:"正確な、精密な"},{e:"extend",j:"延長する、広げる"},{e:"figure",j:"数字、人物、理解する"},{e:"suspect",j:"疑う、容疑者"},{e:"institution",j:"機関、施設"},{e:"theft",j:"窃盗"},{e:"candidate",j:"候補者"},{e:"mammal",j:"哺乳動物"},{e:"economist",j:"経済学者"},{e:"protein",j:"タンパク質"},{e:"immigrant",j:"移民"},{e:"property",j:"財産、不動産、性質"},{e:"fund",j:"資金、基金"},{e:"habitat",j:"生息地"},{e:"symptom",j:"症状"},{e:"eruption",j:"噴火、勃発"},{e:"quantity",j:"量"},{e:"saving",j:"節約、貯蓄"},{e:"territory",j:"領土、縄張り"},{e:"threat",j:"脅威、脅迫"},{e:"sue",j:"訴える"},{e:"emission",j:"排出、放出"},{e:"executive",j:"幹部、経営の"},{e:"strategy",j:"戦略"},{e:"riot",j:"暴動"},{e:"district",j:"地区"},{e:"election",j:"選挙"},{e:"medication",j:"薬、投薬"},{e:"breed",j:"育てる、品種"},{e:"conflict",j:"対立、紛争"},{e:"productivity",j:"生産性"},{e:"organism",j:"生物、有機体"},{e:"representative",j:"代表者、代表的な"},{e:"replicate",j:"複製する"},{e:"refund",j:"払い戻す、払い戻し"},{e:"tuition",j:"授業料"},{e:"range",j:"範囲、山脈"},{e:"trunk",j:"幹、トランク"},{e:"dose",j:"用量、一服"},{e:"mainland",j:"本土"},{e:"weed",j:"雑草、除草する"},{e:"satellite",j:"衛星"},{e:"evolution",j:"進化"},{e:"prey",j:"獲物、〜を狩る"},{e:"bystander",j:"傍観者"},{e:"creature",j:"生き物"},{e:"civilization",j:"文明"},{e:"trial",j:"裁判、試み"},{e:"permission",j:"許可"},{e:"barrier",j:"障壁、障害物"},{e:"wage",j:"賃金"},{e:"drone",j:"ドローン、雄バチ"},{e:"appearance",j:"外見、出現"},{e:"embassy",j:"大使館"},{e:"skeleton",j:"骨格、骸骨"},{e:"potential",j:"可能性、潜在的な"},{e:"limited",j:"限られた"},{e:"rural",j:"地方の、田舎の"},{e:"advanced",j:"高度な、先進の"},{e:"beneficial",j:"有益な"},{e:"genetic",j:"遺伝の、遺伝子の"},{e:"radical",j:"根本的な、急進的な"},{e:"hostile",j:"敵対的な"},{e:"long-term",j:"長期的な"},{e:"Arctic",j:"北極の"},{e:"minor",j:"未成年者、少数の、副専攻"},{e:"risky",j:"危険な"},{e:"complex",j:"複雑な、複合施設"},{e:"competitive",j:"競争力のある"},{e:"immediate",j:"即座の、直接の"},{e:"religious",j:"宗教の"},{e:"related",j:"関連した"},{e:"affordable",j:"手頃な価格の"},{e:"donate",j:"寄付する"},{e:"lessen",j:"減らす、小さくなる"},{e:"manufacture",j:"製造する"},{e:"commute",j:"通勤する"},{e:"exaggerate",j:"誇張する"},{e:"acquire",j:"習得する、取得する"},{e:"reintroduce",j:"再導入する"},{e:"reschedule",j:"予定を変更する"},{e:"adapt",j:"適応する"},{e:"generate",j:"生み出す"},{e:"guarantee",j:"保証する"},{e:"dump",j:"捨てる、ゴミ捨て場"},{e:"classify",j:"分類する"},{e:"acknowledge",j:"認める、感謝を表す"},{e:"enforce",j:"施行する、強制する"},{e:"renew",j:"更新する"},{e:"overlook",j:"見落とす、見渡す"},{e:"evaluate",j:"評価する"},{e:"commit",j:"専念する、犯す"},{e:"argument",j:"議論、論点"},{e:"archaeologist",j:"考古学者"},{e:"reputation",j:"評判"},{e:"fossil",j:"化石"},{e:"status",j:"状態、地位"},{e:"contrast",j:"対比、対照"},{e:"workforce",j:"労働力"},{e:"equality",j:"平等"},{e:"colleague",j:"同僚"},{e:"assistance",j:"援助、助け"},{e:"luxury",j:"贅沢"},{e:"outbreak",j:"勃発、発生"},{e:"council",j:"議会、評議会"},{e:"pottery",j:"陶器"},{e:"assignment",j:"課題、割り当て"},{e:"particle",j:"粒子"},{e:"radiation",j:"放射線、放射"},{e:"priority",j:"優先事項"},{e:"content",j:"内容、満足した"},{e:"destination",j:"目的地"},{e:"mine",j:"鉱山、採掘する"},{e:"injury",j:"怪我"},{e:"lottery",j:"宝くじ"},{e:"feature",j:"特徴、特集する"},{e:"labor",j:"労働、労働する"},{e:"diabetes",j:"糖尿病"},{e:"resume",j:"再開する、履歴書"},{e:"psychology",j:"心理学"},{e:"corporation",j:"企業、法人"},{e:"ecosystem",j:"生態系"},{e:"promotion",j:"昇進、宣伝"},{e:"administration",j:"行政、管理"},{e:"complaint",j:"苦情、不満"},{e:"debt",j:"借金、負債"},{e:"requirement",j:"必要条件"},{e:"workout",j:"運動、トレーニング"},{e:"predict",j:"予測する"},{e:"refugee",j:"難民"},{e:"inhabitant",j:"住民、居住者"},{e:"subscription",j:"定期購読"},{e:"recipient",j:"受取人"},{e:"shift",j:"変化する、シフト"},{e:"ingredient",j:"成分、材料"},{e:"wilderness",j:"荒野"},{e:"alternative",j:"代替の、選択肢"},{e:"enormous",j:"巨大な"},{e:"specific",j:"具体的な、特定の"},{e:"artificial",j:"人工的な"},{e:"toll",j:"通行料、犠牲"},{e:"flexible",j:"柔軟な"},{e:"latest",j:"最新の"},{e:"former",j:"以前の、前者の"},{e:"capable",j:"有能な、〜できる"},{e:"practical",j:"実用的な"},{e:"federal",j:"連邦の"},{e:"aggressive",j:"攻撃的な、積極的な"},{e:"adequate",j:"十分な"},{e:"attractive",j:"魅力的な"},{e:"costly",j:"高価な、費用のかかる"},{e:"eventually",j:"最終的に"},{e:"otherwise",j:"そうでなければ、別の方法で"},{e:"previously",j:"以前に"},{e:"relatively",j:"比較的"},{e:"consequently",j:"その結果"},{e:"constantly",j:"絶えず"},{e:"barely",j:"かろうじて"},{e:"despite",j:"〜にもかかわらず"},{e:"per",j:"〜につき"},{e:"beneath",j:"〜の下に"},{e:"whereas",j:"一方で"},{e:"post",j:"投稿する、役職、郵便"},{e:"reject",j:"拒否する"},{e:"consult",j:"相談する"},{e:"obey",j:"従う"},{e:"engage",j:"関与する、約束する"},{e:"restore",j:"修復する、回復する"},{e:"colonize",j:"植民地化する"},{e:"interact",j:"相互作用する"},{e:"inspire",j:"鼓舞する"},{e:"estimate",j:"見積もる、推定する"},{e:"strengthen",j:"強化する"},{e:"carve",j:"彫る、切り分ける"},{e:"convince",j:"説得する"},{e:"propose",j:"提案する"},{e:"blame",j:"非難する"},{e:"collapse",j:"崩壊する"},{e:"impose",j:"課する、押しつける"},{e:"pollute",j:"汚染する"},{e:"prescription",j:"処方箋"},{e:"duty",j:"義務、税金"},{e:"devote",j:"捧げる、専念する"},{e:"concept",j:"概念"},{e:"survival",j:"生存"},{e:"maintenance",j:"維持、メンテナンス"},{e:"formation",j:"形成、隊形"},{e:"educator",j:"教育者"},{e:"kidney",j:"腎臓"},{e:"nutrition",j:"栄養"},{e:"brand",j:"ブランド"},{e:"storage",j:"貯蔵、ストレージ"},{e:"firm",j:"会社、固い"},{e:"statistics",j:"統計"},{e:"unrest",j:"不安、騒乱"},{e:"tighten",j:"締める、強化する"},{e:"circumstance",j:"状況、事情"},{e:"reduction",j:"削減、縮小"},{e:"settlement",j:"解決、定住地"},{e:"livestock",j:"家畜"},{e:"likelihood",j:"可能性、見込み"},{e:"divorce",j:"離婚"},{e:"possession",j:"所有、所持品"},{e:"category",j:"カテゴリー"},{e:"welfare",j:"福祉"},{e:"moisture",j:"湿気、水分"},{e:"obesity",j:"肥満"},{e:"grant",j:"助成金、認める"},{e:"layer",j:"層"},{e:"secretary",j:"秘書、大臣"},{e:"anxiety",j:"不安"},{e:"ownership",j:"所有権"},{e:"foundation",j:"基盤、財団"},{e:"division",j:"分割、部門"},{e:"establishment",j:"機関、設立"},{e:"conservation",j:"保全、保護"},{e:"murder",j:"殺人、殺す"},{e:"presence",j:"存在、出席"},{e:"paradox",j:"逆説"},{e:"prisoner",j:"囚人"},{e:"supreme",j:"最高の"},{e:"frequency",j:"頻度、周波数"},{e:"port",j:"港"},{e:"reception",j:"受付、歓迎会"},{e:"coworker",j:"同僚"},{e:"athletics",j:"陸上競技"},{e:"voyage",j:"航海"},{e:"ecologist",j:"生態学者"},{e:"soul",j:"魂"},{e:"isolated",j:"孤立した"},{e:"biased",j:"偏った"},{e:"multiple",j:"複数の、多数の"},{e:"critical",j:"重要な、批判的な"},{e:"remote",j:"遠い、リモートの"},{e:"encouraging",j:"励みになる"},{e:"humble",j:"謙虚な"},{e:"stable",j:"安定した、馬小屋"},{e:"domestic",j:"国内の、家庭の"},{e:"wisdom",j:"知恵"},{e:"summon",j:"召喚する"},{e:"profitable",j:"利益を生む"},{e:"solid",j:"固体の、しっかりした"},{e:"triumph",j:"勝利する、勝利"},{e:"integrate",j:"統合する"},{e:"chief",j:"長、主要な"},{e:"steady",j:"安定した"},{e:"coastal",j:"沿岸の"},{e:"dairy",j:"乳製品の、酪農の"},{e:"digestive",j:"消化の"},{e:"loyal",j:"忠実な"},{e:"sensory",j:"感覚の"},{e:"spoil",j:"台無しにする、甘やかす"},{e:"stimulate",j:"刺激する"},{e:"distract",j:"気を散らす"},{e:"bargain",j:"交渉する、お得品"},{e:"wander",j:"さまよう"},{e:"browse",j:"閲覧する"},{e:"define",j:"定義する"},{e:"adjust",j:"調整する"},{e:"deserve",j:"値する、ふさわしい"},{e:"contradict",j:"矛盾する"},{e:"wither",j:"しおれる、衰える"},{e:"accompany",j:"同伴する"},{e:"infect",j:"感染させる"},{e:"rebel",j:"反乱を起こす、反逆者"},{e:"convert",j:"変換する"},{e:"calculate",j:"計算する"},{e:"stir",j:"かき混ぜる、刺激する"},{e:"admit",j:"認める、入学を許可する"},{e:"punish",j:"罰する"},{e:"approve",j:"承認する"},{e:"owe",j:"〜に借りがある"},{e:"proceed",j:"進む、続ける"},{e:"navigate",j:"航行する、操作する"},{e:"postpone",j:"延期する"},{e:"swallow",j:"飲み込む"},{e:"tailor",j:"仕立て屋、合わせる"},{e:"overhear",j:"偶然耳にする"},{e:"consequence",j:"結果、影響"},{e:"application",j:"応用、申請"},{e:"tumble",j:"転倒する、急落する"},{e:"obstacle",j:"障害物"},{e:"deforestation",j:"森林破壊"},{e:"infrastructure",j:"インフラ"},{e:"contribution",j:"貢献、寄付"},{e:"congestion",j:"混雑、渋滞"},{e:"exposure",j:"露出、さらすこと"},{e:"participation",j:"参加"},{e:"crisis",j:"危機"},{e:"ancestor",j:"先祖"},{e:"architect",j:"建築家"},{e:"existence",j:"存在"},{e:"depict",j:"描写する"},{e:"finance",j:"財政、資金を提供する"},{e:"awareness",j:"意識、認識"},{e:"intact",j:"損なわれていない"},{e:"yield",j:"生み出す、収量、譲る"},{e:"coverage",j:"報道範囲、補償"},{e:"lawsuit",j:"訴訟"},{e:"session",j:"セッション、会期"},{e:"means",j:"手段"},{e:"pioneer",j:"先駆者"},{e:"satisfaction",j:"満足"},{e:"basis",j:"基礎、基準"},{e:"element",j:"要素"},{e:"phenomenon",j:"現象"},{e:"scale",j:"規模、尺度、はかり"},{e:"journal",j:"日誌、学術誌"},{e:"grain",j:"穀物、粒"},{e:"continent",j:"大陸"},{e:"hazard",j:"危険"},{e:"globalization",j:"グローバル化"},{e:"brochure",j:"パンフレット"},{e:"inspection",j:"検査、点検"},{e:"attendance",j:"出席"},{e:"copper",j:"銅"},{e:"flu",j:"インフルエンザ"},{e:"burial",j:"埋葬"},{e:"diagram",j:"図、ダイアグラム"},{e:"placement",j:"配置、就職"},{e:"shame",j:"恥、恥じさせる"},{e:"wheelchair",j:"車椅子"},{e:"initial",j:"最初の、頭文字"},{e:"mainstream",j:"主流"},{e:"appropriate",j:"適切な"},{e:"fake",j:"偽の、偽造品"},{e:"alert",j:"警戒した、警報"},{e:"fatal",j:"致命的な"},{e:"nutritious",j:"栄養のある"},{e:"sophisticated",j:"洗練された、高度な"},{e:"automatic",j:"自動の"},{e:"raw",j:"生の、未加工の"},{e:"slight",j:"わずかな"},{e:"aging",j:"老化、高齢化"},{e:"spiritual",j:"精神的な"},{e:"endangered",j:"絶滅の危機に瀕した"},{e:"fertile",j:"肥沃な、多産の"},{e:"elsewhere",j:"他の場所で"},{e:"altogether",j:"全部で、完全に"},{e:"strictly",j:"厳しく"},{e:"beforehand",j:"事前に"},{e:"likewise",j:"同様に"},{e:"detect",j:"発見する、探知する"},{e:"combat",j:"戦う、戦闘"},{e:"pose",j:"姿勢、ポーズをとる"},{e:"emphasize",j:"強調する"},{e:"highlight",j:"強調する、ハイライト"},{e:"resist",j:"抵抗する"},{e:"exceed",j:"超える"},{e:"relocate",j:"移転する"},{e:"disprove",j:"反証する"},{e:"foster",j:"育む、養子にする"},{e:"harass",j:"嫌がらせをする"},{e:"magnify",j:"拡大する"},{e:"stray",j:"迷子になる、飼い主のない"},{e:"wipe",j:"ぬぐう、拭く"},{e:"advocate",j:"提唱する、支持者"},{e:"evacuate",j:"避難する"},{e:"vessel",j:"船、容器、血管"},{e:"abuse",j:"乱用する、虐待する"},{e:"scatter",j:"散らばる、まき散らす"},{e:"endorse",j:"支持する、裏書きする"},{e:"modify",j:"修正する"},{e:"penetrate",j:"貫通する"},{e:"conform",j:"従う、順応する"},{e:"gut",j:"腸、直感"},{e:"lightning",j:"稲妻"},{e:"antioxidant",j:"抗酸化物質"},{e:"disorder",j:"無秩序、障害"},{e:"cattle",j:"牛"},{e:"oath",j:"誓い、宣誓"},{e:"monument",j:"記念碑"},{e:"headquarters",j:"本社、司令部"},{e:"germ",j:"細菌、芽"},{e:"legend",j:"伝説"},{e:"auditorium",j:"講堂、公会堂"},{e:"therapy",j:"療法、治療"},{e:"heritage",j:"遺産"},{e:"invasion",j:"侵略"},{e:"instruction",j:"指示、説明書"},{e:"extinction",j:"絶滅"},{e:"creativity",j:"創造性"},{e:"plantation",j:"農園、プランテーション"},{e:"drought",j:"干ばつ"},{e:"wealth",j:"富、財産"},{e:"reminder",j:"リマインダー、思い出させるもの"},{e:"inquiry",j:"問い合わせ、調査"},{e:"investigation",j:"調査"},{e:"boundary",j:"境界"},{e:"substitute",j:"代用品、代わりになる"},{e:"hybrid",j:"ハイブリッド"},{e:"characteristic",j:"特徴、特徴的な"},{e:"routine",j:"日課、決まった手順"},{e:"edge",j:"端、優位"},{e:"incident",j:"出来事、事件"},{e:"clue",j:"手がかり"},{e:"removal",j:"除去、撤去"},{e:"outcome",j:"結果、成果"},{e:"altitude",j:"高度"},{e:"closure",j:"閉鎖"},{e:"compound",j:"化合物、複合の"},{e:"surplus",j:"余剰、過剰"},{e:"reference",j:"参照、推薦状"},{e:"obligation",j:"義務"},{e:"ritual",j:"儀式、慣習"},{e:"coral",j:"サンゴ"},{e:"novel",j:"小説、新しい"},{e:"relevant",j:"関連した"},{e:"efficient",j:"効率的な"},{e:"fragile",j:"壊れやすい"},{e:"impressive",j:"印象的な"},{e:"offensive",j:"攻撃的な"},{e:"distinct",j:"明確な、異なる"},{e:"temporary",j:"一時的な"},{e:"arrogant",j:"傲慢な"},{e:"spacious",j:"広々とした"},{e:"reasonable",j:"合理的な、手頃な"},{e:"substantial",j:"かなりの、実質的な"},{e:"disabled",j:"障害のある"},{e:"straightforward",j:"率直な、簡単な"},{e:"tame",j:"おとなしい、飼いならす"},{e:"mandatory",j:"義務的な"},{e:"edible",j:"食べられる"},{e:"outstanding",j:"傑出した、未払いの"},{e:"deadly",j:"致命的な"},{e:"petty",j:"些細な、けちな"},{e:"definitely",j:"確かに、間違いなく"},{e:"roughly",j:"おおよそ、乱暴に"},{e:"violate",j:"違反する"},{e:"apparently",j:"どうやら〜らしい"},{e:"briefly",j:"簡潔に"},{e:"aside",j:"脇に、別にして"},{e:"legally",j:"法的に"},{e:"resort",j:"リゾート、頼る"},{e:"submit",j:"提出する、服従する"},{e:"originate",j:"起源を持つ"},{e:"regret",j:"後悔する"},{e:"cooperate",j:"協力する"},{e:"revise",j:"改訂する"},{e:"restrict",j:"制限する"},{e:"occupy",j:"占める、占領する"},{e:"fade",j:"色あせる、薄れる"},{e:"relieve",j:"和らげる、安心させる"},{e:"supply",j:"供給する"},{e:"starve",j:"餓死する、飢える"},{e:"grip",j:"握る、把握"},{e:"surrender",j:"降伏する"},{e:"remodel",j:"リモデルする、改造する"},{e:"triple",j:"3倍の"},{e:"drown",j:"溺れる、溺死させる"},{e:"lean",j:"傾く、痩せた"},{e:"soak",j:"浸す、染み込む"},{e:"hover",j:"空中に浮かぶ"},{e:"interrupt",j:"遮る、邪魔する"},{e:"socialize",j:"社交する、交際する"},{e:"termite",j:"シロアリ"},{e:"microbe",j:"微生物"},{e:"beverage",j:"飲み物"},{e:"paperwork",j:"書類仕事"},{e:"descendant",j:"子孫"},{e:"sculpture",j:"彫刻"},{e:"handout",j:"配布資料、施し物"},{e:"replacement",j:"交換、代替品"},{e:"minister",j:"大臣、聖職者"},{e:"stream",j:"流れ、小川"},{e:"predator",j:"捕食者"},{e:"observer",j:"観察者、傍聴者"},{e:"commission",j:"委員会、手数料"},{e:"committee",j:"委員会"},{e:"skim",j:"ざっと読む、すくう"},{e:"departure",j:"出発"},{e:"description",j:"説明、記述"},{e:"superstitious",j:"迷信深い"},{e:"guidance",j:"指導、案内"},{e:"landscape",j:"景色、風景"},{e:"crew",j:"乗組員、クルー"},{e:"drain",j:"排水する、消耗させる"},{e:"stereotype",j:"固定観念"},{e:"graphic",j:"グラフィックの、生々しい"},{e:"pathway",j:"通路、経路"},{e:"reunion",j:"同窓会、再会"},{e:"cliff",j:"崖"},{e:"coordinator",j:"調整役、コーディネーター"},{e:"depression",j:"不況、うつ病、くぼみ"},{e:"liver",j:"肝臓"},{e:"monopoly",j:"独占"},{e:"usage",j:"使用法、用法"},{e:"chart",j:"グラフ、地図"},{e:"expectancy",j:"期待、予想"},{e:"courthouse",j:"裁判所"},{e:"ministry",j:"省、聖職"},{e:"inflammation",j:"炎症"},{e:"cholesterol",j:"コレステロール"},{e:"gender",j:"性別"},{e:"deposit",j:"預ける、堆積物、手付金"},{e:"stem",j:"茎、由来する"},{e:"personnel",j:"人員、人事部"},{e:"controversy",j:"論争、議論"},{e:"recognition",j:"認識、承認"},{e:"applicant",j:"応募者"},{e:"anthropologist",j:"人類学者"},{e:"sewage",j:"下水"},{e:"acceptable",j:"受け入れられる"},{e:"nuclear",j:"核の"},{e:"moral",j:"道徳的な、教訓"},{e:"marine",j:"海の、海兵隊"},{e:"conventional",j:"従来の、慣習的な"},{e:"awful",j:"ひどい、恐ろしい"},{e:"consistent",j:"一貫した"},{e:"primitive",j:"原始的な"},{e:"mature",j:"成熟した、熟する"},{e:"unfamiliar",j:"不慣れな、見知らぬ"},{e:"impractical",j:"実用的でない"},{e:"unpredictable",j:"予測できない"},{e:"misleading",j:"誤解を招く"},{e:"plentiful",j:"豊富な"},{e:"unsafe",j:"危険な"},{e:"bare",j:"裸の、むき出しの"},{e:"feeble",j:"弱い、力のない"},{e:"horrible",j:"恐ろしい"},{e:"scenic",j:"景色のよい"},{e:"supervisor",j:"上司、監督者"},{e:"nosy",j:"詮索好きな"},{e:"intermediate",j:"中間の"},{e:"universal",j:"普遍的な"},{e:"capture",j:"捕らえる"},{e:"arise",j:"生じる、立ち上がる"},{e:"implement",j:"実施する、道具"},{e:"reproduce",j:"複製する、繁殖する"},{e:"seize",j:"つかむ、押収する"},{e:"dominate",j:"支配する"},{e:"complicate",j:"複雑にする"},{e:"scandal",j:"スキャンダル"},{e:"negotiate",j:"交渉する"},{e:"illustrate",j:"図で説明する、例示する"},{e:"encounter",j:"遭遇する"},{e:"confine",j:"制限する、閉じ込める"},{e:"transform",j:"変換する、変身させる"},{e:"administer",j:"管理する、投与する"},{e:"ease",j:"楽にする、和らげる"},{e:"pursue",j:"追求する"},{e:"decay",j:"腐敗する、衰退する"},{e:"shrink",j:"縮む、萎縮する"},{e:"cherish",j:"大切にする"},{e:"launch",j:"発射する、開始する"},{e:"accommodate",j:"収容する、適応させる"},{e:"wreck",j:"難破させる、廃墟"},{e:"halt",j:"止まる、停止"},{e:"transaction",j:"取引"},{e:"transplant",j:"移植する"},{e:"retail",j:"小売り"},{e:"abandon",j:"捨てる、断念する"},{e:"developer",j:"開発者"},{e:"circulation",j:"循環"},{e:"appliance",j:"電化製品"},{e:"bond",j:"絆、結合"},{e:"circuit",j:"回路、循環"},{e:"innovation",j:"革新"},{e:"infant",j:"乳児"},{e:"trait",j:"特性、特徴"},{e:"celebrity",j:"有名人"},{e:"checkup",j:"健康診断"},{e:"makeup",j:"化粧品、構成"},{e:"respondent",j:"回答者"},{e:"well-being",j:"幸福、健康"},{e:"flaw",j:"欠点、傷"},{e:"strain",j:"緊張、引っ張る"},{e:"rivalry",j:"競争、ライバル関係"},{e:"publicity",j:"宣伝、知名度"},{e:"consent",j:"同意する、同意"},{e:"addiction",j:"依存症"},{e:"profession",j:"職業"},{e:"sacrifice",j:"犠牲にする、生け贄"},{e:"nerve",j:"神経、勇気"},{e:"assumption",j:"仮定"},{e:"context",j:"文脈"},{e:"era",j:"時代"},{e:"trace",j:"追跡する、痕跡"},{e:"voucher",j:"バウチャー、証明書"},{e:"draft",j:"草稿、ドラフト"},{e:"currency",j:"通貨"},{e:"stance",j:"立場、スタンス"},{e:"fluid",j:"液体、流動的な"},{e:"dispute",j:"論争、争う"},{e:"counterpart",j:"対応する人"},{e:"perception",j:"知覚、認識"},{e:"custody",j:"監護権、拘留"},{e:"venue",j:"会場"},{e:"dread",j:"恐れる"},{e:"incentive",j:"動機、インセンティブ"},{e:"disgust",j:"嫌悪感"},{e:"province",j:"州、地方"},{e:"proponent",j:"支持者"},{e:"commercial",j:"商業の、コマーシャル"},{e:"excessive",j:"過度の"},{e:"vulnerable",j:"脆弱な"},{e:"protective",j:"保護的な"},{e:"secure",j:"安全な、確保する"},{e:"obvious",j:"明らかな"},{e:"reluctant",j:"気が進まない"},{e:"confident",j:"自信のある"},{e:"intellectual",j:"知的な"},{e:"barren",j:"不毛の"},{e:"epidemic",j:"流行病、蔓延"},{e:"reliable",j:"信頼できる"},{e:"curious",j:"好奇心旺盛な"},{e:"harsh",j:"厳しい、過酷な"},{e:"behavioral",j:"行動の"},{e:"bulky",j:"かさばる"},{e:"faulty",j:"欠陥のある"},{e:"heating",j:"暖房"},{e:"knowledgeable",j:"知識のある"},{e:"tense",j:"緊張した、時制"},{e:"comprehensive",j:"包括的な"},{e:"hesitant",j:"ためらっている"},{e:"scarce",j:"乏しい"},{e:"defensive",j:"防御的な"},{e:"permanently",j:"永続的に"},{e:"nonetheless",j:"それにもかかわらず"},{e:"primarily",j:"主に"},{e:"intentionally",j:"意図的に"},{e:"abruptly",j:"突然に"},{e:"outsource",j:"外部委託する"},{e:"applaud",j:"拍手する"},{e:"bribe",j:"賄賂を贈る"},{e:"stroll",j:"散歩する"},{e:"swell",j:"膨らむ、腫れる"},{e:"uphold",j:"支持する、維持する"},{e:"vomit",j:"吐く"},{e:"expire",j:"期限切れになる"},{e:"recruit",j:"採用する"},{e:"enhance",j:"高める"},{e:"accumulate",j:"蓄積する"},{e:"designate",j:"指定する"},{e:"conceal",j:"隠す"},{e:"disregard",j:"無視する"},{e:"accelerate",j:"加速する"},{e:"revive",j:"復活させる"},{e:"enact",j:"法律を制定する"},{e:"exert",j:"及ぼす、行使する"},{e:"leak",j:"漏れる、漏洩"},{e:"jail",j:"刑務所"},{e:"declare",j:"宣言する"},{e:"outline",j:"概要、輪郭"},{e:"annoy",j:"悩ます"},{e:"interfere",j:"干渉する"},{e:"nest",j:"巣"},{e:"founder",j:"設立者"},{e:"biologist",j:"生物学者"},{e:"arrangement",j:"手配、配置"},{e:"landfill",j:"埋立地"},{e:"principle",j:"原則"},{e:"series",j:"シリーズ、連続"},{e:"independence",j:"独立"},{e:"upbringing",j:"育ち方、しつけ"},{e:"justice",j:"正義、司法"},{e:"humanity",j:"人類、人間性"},{e:"involvement",j:"関与"},{e:"accounting",j:"会計"},{e:"discrimination",j:"差別"},{e:"inequality",j:"不平等"},{e:"master",j:"習得する、主人"},{e:"millennium",j:"千年紀"},{e:"refusal",j:"拒否"},{e:"wrinkle",j:"しわ"},{e:"absence",j:"不在、欠席"},{e:"distribution",j:"分配、配布"},{e:"wildlife",j:"野生動物"},{e:"concentration",j:"集中、濃度"},{e:"craft",j:"技術、工芸"},{e:"crust",j:"地殻、パンの耳"},{e:"basement",j:"地下室"},{e:"janitor",j:"用務員"},{e:"prejudice",j:"偏見"},{e:"prosperity",j:"繁栄"},{e:"robbery",j:"強盗"},{e:"warranty",j:"保証書"},{e:"appetite",j:"食欲"},{e:"bullet",j:"弾丸"},{e:"preparation",j:"準備"},{e:"citizenship",j:"市民権"},{e:"stale",j:"古くなった、新鮮でない"},{e:"disadvantaged",j:"不利な立場の"},{e:"ongoing",j:"進行中の"},{e:"sturdy",j:"丈夫な"},{e:"unauthorized",j:"無許可の"},{e:"verbal",j:"言葉の、口頭の"},{e:"weary",j:"疲れた"},{e:"equivalent",j:"同等の"},{e:"intend",j:"意図する"},{e:"consecutive",j:"連続した"},{e:"noticeable",j:"目立つ"},{e:"crucial",j:"重要な"},{e:"electrical",j:"電気の"},{e:"steep",j:"急勾配の、浸す"},{e:"civil",j:"市民の、礼儀正しい"},{e:"suppress",j:"抑制する"},{e:"elite",j:"エリート"},{e:"broad",j:"広い"},{e:"industrial",j:"産業の"},{e:"allied",j:"同盟した"},{e:"external",j:"外部の"},{e:"mere",j:"単なる"},{e:"latter",j:"後者の、後半の"},{e:"presidential",j:"大統領の"},{e:"ethical",j:"倫理的な"},{e:"realistic",j:"現実的な"},{e:"harbor",j:"港、かくまう"},{e:"urgent",j:"緊急の"},{e:"complimentary",j:"無料の、称賛の"},{e:"eager",j:"熱心な"},{e:"loudly",j:"大きな声で"},{e:"accordingly",j:"したがって"},{e:"occasionally",j:"時折"},{e:"smoothly",j:"なめらかに"},{e:"frankly",j:"率直に"},{e:"notably",j:"特に"},{e:"continuously",j:"継続して"},{e:"compel",j:"強制する"},{e:"distinguish",j:"区別する"},{e:"heed",j:"注意を払う"},{e:"ruin",j:"破滅させる、廃墟"},{e:"equip",j:"装備する"},{e:"export",j:"輸出する"},{e:"glance",j:"ちらっと見る"},{e:"notify",j:"通知する"},{e:"overdo",j:"やりすぎる"},{e:"pierce",j:"貫く、突き刺す"},{e:"overestimate",j:"過大評価する"},{e:"raid",j:"急襲する"},{e:"recall",j:"思い出す、リコール"},{e:"simplify",j:"簡単にする"},{e:"conspire",j:"陰謀を企てる"},{e:"imitate",j:"模倣する"},{e:"inhale",j:"吸い込む"},{e:"sympathize",j:"同情する"},{e:"glide",j:"滑空する"},{e:"kidnap",j:"誘拐する"},{e:"presume",j:"推定する"},{e:"simmer",j:"煮込む、くすぶる"},{e:"thaw",j:"解凍する"},{e:"unfold",j:"広げる、展開する"},{e:"detain",j:"拘留する"},{e:"puncture",j:"パンクする"},{e:"hygiene",j:"衛生"},{e:"oppression",j:"抑圧"},{e:"collaboration",j:"協力、共同作業"},{e:"lawn",j:"芝生"},{e:"pedestrian",j:"歩行者"},{e:"racism",j:"人種差別"},{e:"sufficient",j:"十分な"},{e:"heighten",j:"高める"},{e:"maternity",j:"母性、出産の"},{e:"stroke",j:"脳卒中、なでる"},{e:"tale",j:"物語"},{e:"certainty",j:"確実性"},{e:"imbalance",j:"不均衡"},{e:"incidence",j:"発生率"},{e:"texture",j:"質感、テクスチャー"},{e:"thrive",j:"繁栄する"},{e:"undergraduate",j:"学部生"},{e:"withdraw",j:"引き出す、撤退する"},{e:"bride",j:"花嫁"},{e:"dictator",j:"独裁者"},{e:"signature",j:"署名"},{e:"testament",j:"遺言、証明"},{e:"attachment",j:"添付、愛着"},{e:"bachelor",j:"独身男性、学士"},{e:"blister",j:"水ぶくれ"},{e:"blockade",j:"封鎖"},{e:"condo",j:"マンション、コンドミニアム"},{e:"invoice",j:"請求書、インボイス"},{e:"leisure",j:"余暇"},{e:"meditation",j:"瞑想"},{e:"procession",j:"行列"},{e:"equator",j:"赤道"},{e:"exhausted",j:"疲れ果てた"},{e:"problematic",j:"問題のある"},{e:"desirable",j:"望ましい"},{e:"geological",j:"地質学的な"},{e:"solitary",j:"孤独な、一人の"},{e:"antique",j:"骨董品の"},{e:"dense",j:"密度の高い、濃い"},{e:"economical",j:"経済的な"},{e:"fictional",j:"架空の"},{e:"gradual",j:"徐々の"},{e:"intimate",j:"親密な"},{e:"lengthy",j:"長い"},{e:"ultimate",j:"究極の、最終的な"},{e:"victorious",j:"勝利を収めた"},{e:"blurry",j:"ぼやけた"},{e:"exceptional",j:"例外的な"},{e:"finite",j:"有限の"},{e:"vacant",j:"空いている"},{e:"cheery",j:"陽気な"},{e:"cowardly",j:"臆病な"},{e:"immeasurable",j:"計り知れない"},{e:"impaired",j:"障害のある、低下した"},{e:"superior",j:"優れた、上司"},{e:"unpleasant",j:"不快な"},{e:"wicked",j:"邪悪な"},{e:"ecological",j:"生態学的な"},{e:"imaginary",j:"想像上の"},{e:"ripe",j:"熟した"},{e:"disguise",j:"変装する"},{e:"curb",j:"抑制する"},{e:"restrain",j:"抑制する"},{e:"stumble",j:"つまずく"},{e:"diminish",j:"減少する"},{e:"rotate",j:"回転する"},{e:"compress",j:"圧縮する"},{e:"decode",j:"解読する"},{e:"offset",j:"相殺する"},{e:"bid",j:"入札する"},{e:"burst",j:"破裂する"},{e:"overtake",j:"追い越す"},{e:"retain",j:"保持する"},{e:"litter",j:"散らかす、ゴミ"},{e:"prohibit",j:"禁止する"},{e:"discipline",j:"規律"},{e:"sweep",j:"掃く、一掃する"},{e:"dictate",j:"命令する、口述する"},{e:"inject",j:"注射する"},{e:"uproar",j:"騒乱、大騒ぎ"},{e:"mimic",j:"真似する"},{e:"roam",j:"歩き回る"},{e:"assess",j:"評価する"},{e:"boast",j:"自慢する"},{e:"drag",j:"引きずる"},{e:"renovate",j:"改修する"},{e:"overthrow",j:"打倒する"},{e:"fulfill",j:"果たす、達成する"},{e:"doom",j:"運命、破滅"},{e:"affiliate",j:"加入させる、系列会社"},{e:"assault",j:"暴行する"},{e:"testimony",j:"証言"},{e:"errand",j:"用事"},{e:"friction",j:"摩擦"},{e:"coalition",j:"連立、連合"},{e:"influx",j:"流入"},{e:"curse",j:"呪う、悪態をつく"},{e:"app",j:"アプリ"},{e:"visibility",j:"視界、視認性"},{e:"fabric",j:"布、生地"},{e:"collision",j:"衝突"},{e:"dioxide",j:"二酸化物"},{e:"orbit",j:"軌道"},{e:"literacy",j:"読み書き能力"},{e:"scheme",j:"計画、陰謀"},{e:"completion",j:"完了"},{e:"expertise",j:"専門知識"},{e:"diploma",j:"卒業証書"},{e:"livelihood",j:"生計"},{e:"motive",j:"動機"},{e:"recession",j:"不況、後退"},{e:"fortune",j:"財産、幸運"},{e:"tissue",j:"組織、ティッシュ"},{e:"toxic",j:"有毒な"},{e:"vendor",j:"販売業者"},{e:"physician",j:"医師"},{e:"perspective",j:"視点、遠近法"},{e:"physics",j:"物理学"},{e:"legislation",j:"法律、立法"},{e:"barn",j:"納屋"},{e:"tragic",j:"悲劇的な"},{e:"sinister",j:"不吉な、邪悪な"},{e:"striking",j:"著しい、人目を引く"},{e:"vital",j:"不可欠な、生命の"},{e:"sensitive",j:"敏感な"},{e:"remarkable",j:"注目すべき"},{e:"minimal",j:"最小限の"},{e:"bankrupt",j:"破産した"},{e:"authentic",j:"本物の"},{e:"moderate",j:"穏やかな、適度な"},{e:"alien",j:"外国人、異質な"},{e:"prompt",j:"促す、迅速な"},{e:"random",j:"無作為の"},{e:"decisive",j:"決定的な"},{e:"inevitable",j:"避けられない"},{e:"acid",j:"酸、酸性の"},{e:"climatic",j:"気候の"},{e:"incredible",j:"信じられない"},{e:"precede",j:"先行する"},{e:"invaluable",j:"非常に貴重な"},{e:"stern",j:"厳格な、船尾"},{e:"indifferent",j:"無関心な"},{e:"charitable",j:"慈善の"},{e:"massive",j:"巨大な"},{e:"comparable",j:"匹敵する"},{e:"irrational",j:"非合理的な"},{e:"cynical",j:"皮肉な"},{e:"overly",j:"過度に"},{e:"literally",j:"文字通り"},{e:"voluntarily",j:"自発的に"},{e:"technically",j:"技術的に"},{e:"wholly",j:"完全に"},{e:"approximately",j:"おおよそ"},{e:"union",j:"連合、組合"},{e:"bewilder",j:"当惑させる"},{e:"clutch",j:"しっかりつかむ"},{e:"discard",j:"捨てる"},{e:"enlist",j:"入隊させる、協力を求める"},{e:"hectic",j:"忙しい、慌ただしい"},{e:"liberate",j:"解放する"},{e:"overlap",j:"重なる"},{e:"reconstruct",j:"再建する"},{e:"shriek",j:"金切り声を上げる"},{e:"sprain",j:"捻挫する"},{e:"resent",j:"憤慨する"},{e:"thrill",j:"興奮させる、戦慄"},{e:"embrace",j:"抱擁する、受け入れる"},{e:"excel",j:"優れている"},{e:"enroll",j:"入学する、登録する"},{e:"retrieve",j:"取り戻す"},{e:"degrade",j:"劣化させる"},{e:"reconcile",j:"和解させる"},{e:"contaminate",j:"汚染する"},{e:"disrupt",j:"混乱させる"},{e:"divert",j:"そらす、転換する"},{e:"grumble",j:"不平を言う"},{e:"provoke",j:"挑発する"},{e:"outweigh",j:"〜より重要である"},{e:"crave",j:"熱望する"},{e:"sustain",j:"維持する"},{e:"disclose",j:"明らかにする"},{e:"tempt",j:"誘惑する"},{e:"resign",j:"辞任する"},{e:"dismiss",j:"解雇する、却下する"},{e:"surgeon",j:"外科医"},{e:"bounce",j:"跳ねる"},{e:"bureau",j:"局、事務局"},{e:"dependency",j:"依存"},{e:"discomfort",j:"不快感"},{e:"drawback",j:"欠点、デメリット"},{e:"feast",j:"宴会、ごちそう"},{e:"hydrogen",j:"水素"},{e:"modernization",j:"近代化"},{e:"objective",j:"目的、客観的な"},{e:"poll",j:"世論調査、投票"},{e:"ration",j:"配給する"},{e:"revenue",j:"収益、歳入"},{e:"scholarship",j:"奨学金"},{e:"compliment",j:"褒め言葉"},{e:"excerpt",j:"抜粋"},{e:"faith",j:"信仰、信頼"},{e:"segment",j:"部分、区分"},{e:"downturn",j:"景気後退"},{e:"tedious",j:"退屈な"},{e:"fragment",j:"破片、断片"},{e:"intersection",j:"交差点"},{e:"anarchy",j:"無政府状態"},{e:"breakup",j:"別れ、崩壊"},{e:"privilege",j:"特権"},{e:"exemption",j:"免除"},{e:"monarch",j:"君主"},{e:"narrative",j:"物語、語り"},{e:"sensation",j:"感覚、話題"},{e:"apprentice",j:"見習い"},{e:"chore",j:"雑用"},{e:"dehydration",j:"脱水"},{e:"questionable",j:"疑わしい"},{e:"outdated",j:"時代遅れの"},{e:"forthcoming",j:"近刊の、協力的な"},{e:"gross",j:"総計の、ひどい"},{e:"overdue",j:"期限が過ぎた"},{e:"contemporary",j:"現代の、同時代の"},{e:"drastic",j:"思い切った"},{e:"conditional",j:"条件付きの"},{e:"subjective",j:"主観的な"},{e:"exotic",j:"異国風の"},{e:"intensive",j:"集中的な"},{e:"obscure",j:"不明確な、無名の"},{e:"exclusive",j:"独占的な、高級な"},{e:"decent",j:"まともな、きちんとした"},{e:"considerate",j:"思いやりのある"},{e:"durable",j:"耐久性のある"},{e:"perpetual",j:"永続する"},{e:"proficient",j:"熟達した"},{e:"acoustic",j:"音響の"},{e:"biographical",j:"伝記の"},{e:"botanical",j:"植物学の"},{e:"brutal",j:"残酷な"},{e:"commendable",j:"称賛に値する"},{e:"desperate",j:"必死の、絶望的な"},{e:"extravagant",j:"ぜいたくな"},{e:"filthy",j:"汚れた"},{e:"serene",j:"穏やかな"},{e:"vague",j:"曖昧な"},{e:"inherent",j:"固有の"},{e:"merely",j:"単に"},{e:"somehow",j:"なんとかして"},{e:"subsequently",j:"その後"},{e:"deliberately",j:"故意に"},{e:"gently",j:"優しく"},{e:"alongside",j:"〜と並んで"},{e:"portray",j:"描写する"},{e:"dispatch",j:"派遣する"},{e:"quote",j:"引用する、見積もり"},{e:"amend",j:"改正する"},{e:"betray",j:"裏切る"},{e:"suspend",j:"停止する"},{e:"omit",j:"省略する"},{e:"fabricate",j:"製造する、でっち上げる"},{e:"allege",j:"主張する、申し立てる"},{e:"integral",j:"不可欠な"},{e:"uncover",j:"明らかにする"},{e:"escort",j:"護衛する"},{e:"facilitate",j:"促進する"},{e:"initiate",j:"始める"},{e:"convey",j:"伝える"},{e:"populate",j:"居住する、満たす"},{e:"reinforce",j:"強化する"},{e:"attain",j:"達成する"},{e:"cheat",j:"不正をする"},{e:"deceive",j:"だます"},{e:"frustrate",j:"欲求不満にする"},{e:"subsidize",j:"補助金を与える"},{e:"alternate",j:"交互の、代わりになる"},{e:"dedicate",j:"捧げる"},{e:"endeavor",j:"努力する"},{e:"intrigue",j:"興味をそそる、陰謀"},{e:"soar",j:"急上昇する"},{e:"tease",j:"からかう"},{e:"confer",j:"協議する、授与する"},{e:"forbid",j:"禁止する"},{e:"nod",j:"頷く"},{e:"oblige",j:"義務付ける"},{e:"discontent",j:"不満"},{e:"disposal",j:"処理、廃棄"},{e:"exile",j:"追放、亡命"},{e:"foe",j:"敵"},{e:"itinerary",j:"旅程"},{e:"persecution",j:"迫害"},{e:"publication",j:"出版物"},{e:"riddle",j:"謎"},{e:"sanitation",j:"衛生設備"},{e:"component",j:"構成要素"},{e:"quota",j:"割当量"},{e:"cuisine",j:"料理"},{e:"detour",j:"迂回"},{e:"inmate",j:"囚人、入院患者"},{e:"fatigue",j:"疲労"},{e:"coincidence",j:"偶然の一致"},{e:"correspondence",j:"文通、対応"},{e:"ballot",j:"投票"},{e:"competence",j:"能力"},{e:"underestimate",j:"過小評価する"},{e:"hasty",j:"性急な"},{e:"explosion",j:"爆発"},{e:"famine",j:"飢饉"},{e:"acceptance",j:"受諾"},{e:"apprehension",j:"不安、逮捕"},{e:"landmark",j:"目印、画期的な出来事"},{e:"dweller",j:"居住者"},{e:"geometry",j:"幾何学"},{e:"diversity",j:"多様性"},{e:"accuracy",j:"正確さ"},{e:"brick",j:"レンガ"},{e:"bay",j:"湾"},{e:"lenient",j:"寛大な"},{e:"stubborn",j:"頑固な"},{e:"clumsy",j:"不器用な"},{e:"perilous",j:"危険な"},{e:"adverse",j:"不利な"},{e:"persistent",j:"しつこい、持続する"},{e:"outrageous",j:"法外な、常識外れの"},{e:"skeptical",j:"懐疑的な"},{e:"legitimate",j:"正当な"},{e:"corrupt",j:"腐敗した"},{e:"experimental",j:"実験的な"},{e:"improper",j:"不適切な"},{e:"spontaneous",j:"自発的な"},{e:"unconditional",j:"無条件の"},{e:"counterfeit",j:"偽造の"},{e:"dizzy",j:"めまいがする"},{e:"sustainable",j:"持続可能な"},{e:"democratic",j:"民主主義の"},{e:"conservative",j:"保守的な"},{e:"fundamental",j:"根本的な"},{e:"ambitious",j:"野心的な"},{e:"concrete",j:"具体的な、コンクリート"},{e:"cruel",j:"残酷な"},{e:"inferior",j:"劣っている"},{e:"ample",j:"十分な、広い"},{e:"inaccurate",j:"不正確な"},{e:"inadequate",j:"不十分な"},{e:"inappropriate",j:"不適切な"},{e:"uncertain",j:"不確かな"},{e:"retreat",j:"退却する、撤退"},{e:"revolt",j:"反乱を起こす"},{e:"deflect",j:"そらす"},{e:"demote",j:"降格する"},{e:"despise",j:"軽蔑する"},{e:"grasp",j:"つかむ、理解する"},{e:"summit",j:"頂上、首脳会談"},{e:"expel",j:"追放する"},{e:"redeem",j:"取り戻す、償う"},{e:"comprise",j:"〜から成る"},{e:"prevail",j:"勝る、普及する"},{e:"eject",j:"放出する"},{e:"falsify",j:"偽造する"},{e:"obstruct",j:"妨害する"},{e:"wound",j:"傷つける、傷"},{e:"confess",j:"告白する"},{e:"stare",j:"じっと見る"},{e:"ache",j:"痛む"},{e:"reflect",j:"反映する、反省する"},{e:"assert",j:"主張する"},{e:"import",j:"輸入する"},{e:"interpret",j:"解釈する"},{e:"deteriorate",j:"悪化する"},{e:"contemplate",j:"熟考する"},{e:"delegate",j:"代表者、委任する"},{e:"propel",j:"推進する"},{e:"recede",j:"後退する"},{e:"scrape",j:"こする、かき集める"},{e:"smash",j:"粉砕する"},{e:"scold",j:"叱る"},{e:"amuse",j:"楽しませる"},{e:"overhaul",j:"点検する、見直す"},{e:"herd",j:"群れ"},{e:"bait",j:"餌、誘惑する"},{e:"petition",j:"請願する"},{e:"ransom",j:"身代金"},{e:"fragrance",j:"芳香"},{e:"insight",j:"洞察力"},{e:"conquest",j:"征服"},{e:"sincerity",j:"誠実さ"},{e:"tariff",j:"関税"},{e:"sanction",j:"制裁、承認"},{e:"sphere",j:"球体、領域"},{e:"outcast",j:"追放者"},{e:"affair",j:"問題、事件"},{e:"allergy",j:"アレルギー"},{e:"destruction",j:"破壊"},{e:"peasant",j:"農民"},{e:"burden",j:"負担"},{e:"faculty",j:"教員、能力"},{e:"tactics",j:"戦術"},{e:"fare",j:"運賃"},{e:"manner",j:"方法、態度、行儀"},{e:"correlation",j:"相関関係"},{e:"command",j:"命令する"},{e:"quarter",j:"4分の1、地区"},{e:"availability",j:"利用可能性"},{e:"caution",j:"注意"},{e:"prevention",j:"予防"},{e:"reptile",j:"爬虫類"},{e:"fate",j:"運命"},{e:"inclination",j:"傾向"},{e:"scorn",j:"軽蔑する"},{e:"contempt",j:"軽蔑"},{e:"domain",j:"領域"},{e:"pillar",j:"柱"},{e:"tender",j:"優しい、入札する"},{e:"awkward",j:"気まずい、ぎこちない"},{e:"fierce",j:"猛烈な"},{e:"peculiar",j:"奇妙な、特有の"},{e:"genuine",j:"本物の"},{e:"vigorous",j:"精力的な"},{e:"gloomy",j:"憂鬱な"},{e:"medieval",j:"中世の"},{e:"subtle",j:"微妙な"},{e:"rigid",j:"硬直した"},{e:"coarse",j:"粗い"},{e:"slack",j:"たるんだ、ゆるい"},{e:"trivial",j:"些細な"},{e:"mutual",j:"相互の"},{e:"redundant",j:"余剰の、不要な"},{e:"premature",j:"早まった、早産の"},{e:"attentive",j:"注意深い"},{e:"memorable",j:"記憶に残る"},{e:"persuasive",j:"説得力のある"},{e:"prevalent",j:"広まっている"},{e:"unaware",j:"気づいていない"},{e:"amazing",j:"素晴らしい"},{e:"eligible",j:"資格のある"},{e:"vicious",j:"残忍な"},{e:"invisible",j:"見えない"},{e:"invalid",j:"無効な、患者"},{e:"rotten",j:"腐った"},{e:"plague",j:"疫病、悩ます"},{e:"sponsor",j:"スポンサー、後援する"},{e:"honor",j:"名誉、敬意を示す"},{e:"remark",j:"発言する、注目する"},{e:"incorporate",j:"組み込む"},{e:"resolve",j:"解決する、決心する"},{e:"sway",j:"揺れる、影響を与える"},{e:"inherit",j:"相続する"},{e:"pile",j:"山、積む"},{e:"undermine",j:"弱体化させる"},{e:"maximize",j:"最大化する"},{e:"mislead",j:"誤解させる"},{e:"opt",j:"選ぶ"},{e:"outnumber",j:"数で上回る"},{e:"refine",j:"精製する、改良する"},{e:"strive",j:"努力する"},{e:"arouse",j:"目覚めさせる、引き起こす"},{e:"converge",j:"収束する"},{e:"deduct",j:"差し引く"},{e:"disconnect",j:"切断する"},{e:"gossip",j:"うわさ話"},{e:"thrilling",j:"スリリングな"},{e:"dye",j:"染める"},{e:"trespass",j:"不法侵入する"},{e:"graze",j:"草を食む、かすり傷"},{e:"entrust",j:"委ねる"},{e:"peer",j:"仲間、じっと見る"},{e:"molecule",j:"分子"},{e:"meantime",j:"その間"},{e:"merit",j:"長所、価値"},{e:"prospect",j:"見込み、見通し"},{e:"chatter",j:"おしゃべりする"},{e:"funeral",j:"葬式"},{e:"knot",j:"結び目、結ぶ"},{e:"bundle",j:"束、まとめる"},{e:"burglar",j:"泥棒"},{e:"canyon",j:"峡谷"},{e:"duration",j:"期間"},{e:"fountain",j:"噴水"},{e:"genius",j:"天才"},{e:"grassland",j:"草原"},{e:"interval",j:"間隔"},{e:"longevity",j:"長寿"},{e:"mode",j:"モード、様式"},{e:"needle",j:"針"},{e:"organizer",j:"主催者"},{e:"rehearsal",j:"リハーサル"},{e:"servant",j:"使用人"},{e:"sociology",j:"社会学"},{e:"spectacle",j:"見世物、光景"},{e:"norm",j:"規範"},{e:"certificate",j:"証明書"},{e:"rubber",j:"ゴム"},{e:"asteroid",j:"小惑星"},{e:"syndrome",j:"症候群"},{e:"detention",j:"拘留"},{e:"distress",j:"苦悩"},{e:"esteem",j:"尊敬する"},{e:"hospitality",j:"おもてなし"},{e:"legacy",j:"遺産、功績"},{e:"sane",j:"正気の"},{e:"doubtful",j:"疑わしい"},{e:"favorable",j:"好ましい"},{e:"generous",j:"寛大な、気前の良い"},{e:"hollow",j:"空洞の、くぼみ"},{e:"internal",j:"内部の"},{e:"interpersonal",j:"対人の"},{e:"staple",j:"主要な、ホチキス"},{e:"token",j:"しるし、トークン"},{e:"folk",j:"人々、民族の"},{e:"furious",j:"激怒した"},{e:"ironic",j:"皮肉な"},{e:"pale",j:"青白い"},{e:"pregnant",j:"妊娠している"},{e:"rewarding",j:"やりがいのある"},{e:"sacred",j:"神聖な"},{e:"terrific",j:"素晴らしい、恐ろしい"},{e:"abridged",j:"要約された"},{e:"dull",j:"鈍い、退屈な"},{e:"faint",j:"気絶する、かすかな"},{e:"irresponsible",j:"無責任な"},{e:"notorious",j:"悪名高い"},{e:"recurrent",j:"再発する"},{e:"irresistible",j:"抵抗できない"},{e:"binding",j:"拘束力のある"},{e:"dejected",j:"落胆した"},{e:"fictitious",j:"架空の、偽の"},{e:"gracious",j:"優雅な"},{e:"upcoming",j:"近づいている、来たる"},{e:"abundant",j:"豊富な"},{e:"grind",j:"すり潰す、苦労"},{e:"archive",j:"記録、保管する"},{e:"devise",j:"考案する"},{e:"horrify",j:"恐怖を与える"},{e:"lodge",j:"泊まる、小屋"},{e:"mediate",j:"仲介する"},{e:"mingle",j:"混ざる"},{e:"perspire",j:"汗をかく"},{e:"concede",j:"認める、譲歩する"},{e:"hinder",j:"妨げる"},{e:"waver",j:"揺れる、ためらう"},{e:"formulate",j:"公式化する"},{e:"exhale",j:"息を吐く"},{e:"rebound",j:"跳ね返る"},{e:"gratify",j:"満足させる"},{e:"pledge",j:"誓う、誓約"},{e:"fasten",j:"締める、固定する"},{e:"relay",j:"リレーする、中継"},{e:"align",j:"一致させる"},{e:"ascend",j:"上昇する"},{e:"gaze",j:"じっと見る"},{e:"adore",j:"崇拝する"},{e:"chill",j:"冷える、ゾッとする"},{e:"curve",j:"曲線"},{e:"deflate",j:"しぼませる"},{e:"detach",j:"分離する"},{e:"enclose",j:"囲む、同封する"},{e:"fetch",j:"取ってくる"},{e:"proclaim",j:"宣言する"},{e:"forge",j:"偽造する、鍛える"},{e:"outburst",j:"爆発"},{e:"dimension",j:"次元"},{e:"swarm",j:"群がる、大群"},{e:"sequel",j:"続編"},{e:"artifact",j:"人工物"},{e:"mercy",j:"慈悲"},{e:"successor",j:"後継者"},{e:"victim",j:"被害者"},{e:"clause",j:"条項"},{e:"analogy",j:"類推、比喩"},{e:"downfall",j:"失墜、没落"},{e:"fusion",j:"融合"},{e:"fracture",j:"骨折、亀裂"},{e:"menace",j:"脅威、脅す"},{e:"setback",j:"後退、挫折"},{e:"empathy",j:"共感"},{e:"diameter",j:"直径"},{e:"momentum",j:"勢い、運動量"},{e:"troop",j:"軍隊、集まる"},{e:"pharmacy",j:"薬局"},{e:"nightmare",j:"悪夢"},{e:"slope",j:"斜面"},{e:"glacier",j:"氷河"},{e:"grief",j:"悲しみ"},{e:"misery",j:"苦しみ、みじめさ"},{e:"accent",j:"アクセント"},{e:"ambassador",j:"大使"},{e:"autopsy",j:"解剖"},{e:"blast",j:"爆発"},{e:"courtesy",j:"礼儀"},{e:"deed",j:"行為、証書"},{e:"discourse",j:"談話、講演"},{e:"impulse",j:"衝動"},{e:"jar",j:"瓶、不快にする"},{e:"sibling",j:"きょうだい"},{e:"enterprise",j:"企業、事業"},{e:"horizontal",j:"水平の"},{e:"indefinite",j:"不明確な"},{e:"vulgar",j:"下品な"},{e:"resilient",j:"立ち直りの早い"},{e:"aquatic",j:"水生の"},{e:"insistent",j:"主張する、しつこい"},{e:"frantic",j:"半狂乱の"},{e:"deceptive",j:"欺瞞的な"},{e:"illogical",j:"非論理的な"},{e:"elaborate",j:"精巧な、詳述する"},{e:"mellow",j:"まろやかな、円熟した"},{e:"boundless",j:"無限の"},{e:"cordial",j:"心からの"},{e:"seasonal",j:"季節の"},{e:"sour",j:"酸っぱい、不機嫌な"},{e:"swift",j:"速い"},{e:"cumulative",j:"累積的な"},{e:"savage",j:"野蛮な"},{e:"admirable",j:"称賛に値する"},{e:"informative",j:"有益な情報を与える"},{e:"proportional",j:"比例した"},{e:"simultaneous",j:"同時の"},{e:"static",j:"静的な、静電気"},{e:"uneasy",j:"不安な"},{e:"autonomous",j:"自律的な"},{e:"bold",j:"大胆な"},{e:"pessimistic",j:"悲観的な"},{e:"repetitive",j:"反復的な"},{e:"respiratory",j:"呼吸の"},{e:"coherent",j:"首尾一貫した"}];
 const P1P=[{e:"account for ~",j:"〜を説明する、〜を占める"},{e:"accuse A of B",j:"AをBのことで非難する"},{e:"act on ~",j:"〜に従って行動する"},{e:"add up to ~",j:"合計〜になる"},{e:"adhere to ~",j:"〜に固執する、〜を守る"},{e:"all but",j:"ほとんど〜も同然"},{e:"allow for ~",j:"〜を考慮に入れる"},{e:"answer for ~",j:"〜について責任を負う"},{e:"aspire to do",j:"〜することを熱望する"},{e:"attribute A to B",j:"AをBのせいにする"},{e:"back down",j:"折れる、引き下がる"},{e:"back off",j:"手を引く、下がる"},{e:"back up ~",j:"〜を支援する"},{e:"bank on ~",j:"〜を当てにする"},{e:"be committed to ~",j:"〜に専念している"},{e:"be destined to do",j:"〜する運命にある"},{e:"be free of ~",j:"〜がない、〜から自由な"},{e:"be obsessed with ~",j:"〜に取り憑かれている"},{e:"be subject to ~",j:"〜を受けやすい、〜に従う"},{e:"blast off",j:"ロケットが発射する"},{e:"blow up",j:"爆発する、怒り出す"},{e:"bounce back",j:"立ち直る"},{e:"break away from ~",j:"〜から逃げ出す"},{e:"break down",j:"故障する、崩壊する"},{e:"break out",j:"勃発する、脱走する"},{e:"bring about ~",j:"〜をもたらす"},{e:"bring down ~",j:"〜を倒す、下げる"},{e:"bring off ~",j:"〜を成功させる"},{e:"bring on ~",j:"〜を引き起こす"},{e:"bring out ~",j:"〜を引き出す、発売する"},{e:"bump into ~",j:"〜に偶然会う"},{e:"burn out ~",j:"燃え尽きる"},{e:"by means of ~",j:"〜を用いて"},{e:"call for ~",j:"〜を必要とする、〜を求める"},{e:"call off ~",j:"〜を中止する"},{e:"call on ~",j:"〜を訪問する、〜に頼む"},{e:"carry away ~",j:"〜を運び去る、有頂天にさせる"},{e:"carry through ~",j:"〜を成し遂げる"},{e:"catch up on ~",j:"〜の遅れを取り戻す"},{e:"chip in",j:"寄付する、口を挟む"},{e:"clean out ~",j:"〜をきれいにする"},{e:"clear up ~",j:"〜を片付ける、晴れ上がる"},{e:"come down to ~",j:"結局〜に行き着く"},{e:"come down with ~",j:"〜の病気にかかる"},{e:"come off",j:"成功する、取れる"},{e:"come through ~",j:"〜を切り抜ける"},{e:"comply with ~",j:"〜に従う"},{e:"contribute to ~",j:"〜に貢献する"},{e:"cope with ~",j:"〜に対処する"},{e:"cover for ~",j:"〜の代わりをする"},{e:"cover up ~",j:"〜を隠す"},{e:"cut back on ~",j:"〜を削減する"},{e:"cut down on ~",j:"〜を減らす"},{e:"cut in on ~",j:"割り込む"},{e:"deal in ~",j:"〜を扱う、〜を売買する"},{e:"deprive A of B",j:"AからBを奪う"},{e:"die down",j:"風・興奮などが収まる"},{e:"die out",j:"絶滅する"},{e:"dispose of ~",j:"〜を処分する"},{e:"do away with ~",j:"〜を廃止する"},{e:"drag on",j:"長引く"},{e:"draw on ~",j:"〜を利用する"},{e:"draw up ~",j:"〜を作成する"},{e:"drop out of ~",j:"〜を中退する、脱落する"},{e:"ease into ~",j:"〜に徐々に慣れる"},{e:"eat up ~",j:"〜を食べ尽くす、消費する"},{e:"embark on ~",j:"〜に乗り出す"},{e:"endear A to B",j:"AをBに愛されるようにする"},{e:"face off",j:"対決する"},{e:"fall back on ~",j:"〜に頼る"},{e:"fall for ~",j:"〜にだまされる、〜に恋する"},{e:"fall off",j:"減少する、落ちる"},{e:"fall through",j:"計画が失敗する"},{e:"feel for ~",j:"〜に同情する"},{e:"figure out ~",j:"〜を理解する、解決する"},{e:"fill out ~",j:"〜に記入する"},{e:"fire up ~",j:"〜を奮い立たせる"},{e:"fit into ~",j:"〜に合う、〜に溶け込む"},{e:"fix up ~",j:"〜を修理する、手配する"},{e:"for all ~",j:"〜にもかかわらず"},{e:"for the time being",j:"当分の間"},{e:"free up ~",j:"〜を解放する"},{e:"frown on ~",j:"〜を非難する"},{e:"gear up ~",j:"〜の準備をする"},{e:"get around ~",j:"〜を回避する"},{e:"get around to doing",j:"〜する時間を作る"},{e:"get away with ~",j:"〜をうまくやり通す"},{e:"get by",j:"なんとかやっていく"},{e:"get down to ~",j:"〜に取りかかる"},{e:"get into ~",j:"〜に入る、〜に興味を持つ"},{e:"get on with ~",j:"〜と仲良くする"},{e:"give away ~",j:"〜を無料で与える、漏らす"},{e:"give in to ~",j:"〜に屈する"},{e:"give off ~",j:"〜を発する"},{e:"give rise to ~",j:"〜を引き起こす"},{e:"go back on ~",j:"〜を撤回する"},{e:"go for ~",j:"〜を選ぶ、〜に挑戦する"},{e:"grow into ~",j:"〜に成長する"},{e:"grow out of ~",j:"〜から脱する"},{e:"hand down ~",j:"〜を受け継ぐ"},{e:"hand out A to B",j:"AをBに配る"},{e:"hang on",j:"しがみつく、待つ"},{e:"head off ~",j:"〜を防ぐ"},{e:"hold back ~",j:"〜を抑える"},{e:"hold off ~",j:"〜を遅らせる"},{e:"hold out ~",j:"持ちこたえる"},{e:"in a row",j:"連続して"},{e:"in favor of ~",j:"〜に賛成して"},{e:"in response to ~",j:"〜に応えて"},{e:"in terms of ~",j:"〜の点で"},{e:"in the event of ~",j:"〜の場合に"},{e:"in vain",j:"無駄に"},{e:"jump at ~",j:"〜に飛びつく"},{e:"keep track of ~",j:"〜を把握する"},{e:"keep up with ~",j:"〜に遅れずについていく"},{e:"kick in",j:"始まる、作用し始める"},{e:"knock down ~",j:"〜を打ち倒す"},{e:"lay off ~",j:"〜を解雇する"},{e:"let alone ~",j:"〜は言うまでもなく"},{e:"let down ~",j:"〜を失望させる"},{e:"let out ~",j:"〜を放す、〜を漏らす"},{e:"level off",j:"水平になる、安定する"},{e:"lift off",j:"離陸する"},{e:"live up to ~",j:"〜に応える"},{e:"look down on ~",j:"〜を見下す"},{e:"make ends meet",j:"収支を合わせる"},{e:"make do with ~",j:"〜で間に合わせる"},{e:"make it",j:"成功する、間に合う"},{e:"make out ~",j:"〜を理解する"},{e:"mark down ~",j:"〜を値下げする"},{e:"miss out on ~",j:"〜を逃す"},{e:"narrow down ~",j:"〜を絞り込む"},{e:"on a ~ basis",j:"〜ベースで"},{e:"on behalf of A",j:"Aを代表して"},{e:"on the contrary",j:"それどころか、むしろ"},{e:"on the spot",j:"その場で"},{e:"on the verge of ~",j:"〜の瀬戸際に"},{e:"owing to ~",j:"〜のために"},{e:"pass A on to B",j:"AをBに渡す"},{e:"pass out",j:"気を失う、配布する"},{e:"pay off ~",j:"〜に報いる、返済する"},{e:"phase out ~",j:"〜を段階的に廃止する"},{e:"pile up",j:"積み重なる"},{e:"pin down ~",j:"〜を特定する"},{e:"play down ~",j:"〜を軽く見せる"},{e:"play up ~",j:"〜を強調する"},{e:"point to ~",j:"〜を指し示す"},{e:"pull off ~",j:"〜をうまくやり遂げる"},{e:"pull through",j:"困難・病気を乗り越える"},{e:"push for ~",j:"〜を強く求める"},{e:"push through ~",j:"〜を強引に通す"},{e:"put down ~",j:"〜を置く、〜をけなす"},{e:"put forward ~",j:"〜を提案する"},{e:"put in ~",j:"〜を入れる、費やす"},{e:"read off ~",j:"〜を読み上げる"},{e:"refrain from doing",j:"〜することを控える"},{e:"regardless of ~",j:"〜にかかわらず"},{e:"round off ~",j:"〜を締めくくる"},{e:"round up ~",j:"〜をかき集める"},{e:"rule out ~",j:"〜を除外する"},{e:"run through ~",j:"〜をざっと見る"},{e:"see about ~",j:"〜の手配をする"},{e:"see A off",j:"Aを見送る"},{e:"see through ~",j:"〜を見抜く"},{e:"sell out ~",j:"〜を売り切る"},{e:"send for ~",j:"〜を呼び寄せる"},{e:"set aside ~",j:"〜を取っておく"},{e:"set down ~",j:"〜を書き留める"},{e:"set in",j:"季節・状態が始まる"},{e:"set off ~",j:"出発する、〜を引き起こす"},{e:"set out to do",j:"〜しようと着手する"},{e:"set up ~",j:"〜を設立する、準備する"},{e:"settle down",j:"落ち着く"},{e:"shake up ~",j:"〜を揺さぶる、激変させる"},{e:"show off ~",j:"〜を見せびらかす"},{e:"show up",j:"現れる"},{e:"sign up for ~",j:"〜に申し込む"},{e:"sink in",j:"意味が浸透する"},{e:"sit back",j:"くつろぐ"},{e:"skim over ~",j:"〜をざっと目を通す"},{e:"smooth over ~",j:"〜を円満に収める"},{e:"speak for ~",j:"〜を代弁する"},{e:"split up ~",j:"〜を分ける、別れる"},{e:"spring from ~",j:"〜から生じる"},{e:"stand for ~",j:"〜を表す、〜を支持する"},{e:"stand up to ~",j:"〜に立ち向かう"},{e:"step down",j:"辞任する"},{e:"stick around",j:"その場にとどまる"},{e:"stick to ~",j:"〜に固執する"},{e:"stick up for ~",j:"〜を擁護する"},{e:"stir up ~",j:"〜をかき立てる"},{e:"sum up ~",j:"〜を要約する"},{e:"take in ~",j:"〜を取り込む、理解する"},{e:"take on ~",j:"〜を引き受ける"},{e:"take over ~",j:"〜を引き継ぐ"},{e:"take up ~",j:"〜を始める、〜を占める"},{e:"talk A into doing",j:"AをBするように説得する"},{e:"tear down ~",j:"〜を取り壊す"},{e:"tell on ~",j:"〜を告げ口する"},{e:"the other way around",j:"逆に、反対に"},{e:"throw off ~",j:"〜を振り払う"},{e:"tidy up ~",j:"〜を片付ける"},{e:"tie up ~",j:"〜を縛る、〜を独占する"},{e:"touch up ~",j:"〜に手を加える"},{e:"track down A",j:"Aを追跡して捕まえる"},{e:"try out ~",j:"〜を試す"},{e:"tune in to ~",j:"〜にチャンネルを合わせる"},{e:"turn around ~",j:"〜を好転させる"},{e:"turn away ~",j:"〜を追い返す"},{e:"turn in ~",j:"〜を提出する"},{e:"turn out",j:"判明する、結果になる"},{e:"turn to ~",j:"〜に頼る"},{e:"wander off",j:"迷子になる"},{e:"wash away ~",j:"〜を押し流す"},{e:"watch over ~",j:"〜を見守る"},{e:"wear off",j:"効果が薄れる"},{e:"wear out ~",j:"〜を消耗させる"},{e:"weigh on ~",j:"〜を重くのしかかる"},{e:"win over ~",j:"〜を説得する、〜の心をつかむ"},{e:"wipe out ~",j:"〜を全滅させる"},{e:"work out ~",j:"〜を解決する、うまくいく"},{e:"wrap up ~",j:"〜を締めくくる"}];
-/* ═══ STATE ═══ */
-let deck=shuf([...V]),idx=0,flipped=false,st={g:0,h:0,f:0},tab='f';
-let hist=[],prevState=null;
+const E2W=[{e:"abandon",j:"〜を捨てる・放棄する"},{e:"ability",j:"能力・才能"},{e:"absorb",j:"〜を吸収する"},{e:"academic",j:"学問の・学術的な"},{e:"accept",j:"〜を受け入れる"},{e:"access",j:"アクセス・利用する"},{e:"accidentally",j:"偶然に・うっかり"},{e:"account",j:"口座・説明する"},{e:"accounting",j:"会計・経理"},{e:"accuracy",j:"正確さ"},{e:"accurate",j:"正確な"},{e:"achieve",j:"〜を達成する"},{e:"act",j:"行動する・法律"},{e:"active",j:"活発な・積極的な"},{e:"actual",j:"実際の"},{e:"adapt",j:"〜を適応させる"},{e:"add",j:"〜を加える"},{e:"additional",j:"追加の"},{e:"additionally",j:"さらに・加えて"},{e:"adjust",j:"〜を調整する"},{e:"admire",j:"〜を賞賛する"},{e:"admit",j:"〜を認める・入場を許す"},{e:"adopt",j:"〜を採用する・養子にする"},{e:"advance",j:"前進する・進歩"},{e:"advantage",j:"利点・有利"},{e:"advertise",j:"〜を宣伝する"},{e:"advise",j:"〜に忠告する"},{e:"aerobic",j:"有酸素運動の"},{e:"affect",j:"〜に影響する"},{e:"afford",j:"〜する余裕がある"},{e:"afterward",j:"その後"},{e:"agency",j:"代理店・機関"},{e:"agent",j:"代理人・エージェント"},{e:"agreement",j:"合意・契約"},{e:"agriculture",j:"農業"},{e:"aid",j:"援助・助ける"},{e:"aim",j:"目標・狙う"},{e:"allow",j:"〜を許可する"},{e:"alternative",j:"代替の・選択肢"},{e:"although",j:"〜だけれども"},{e:"amateur",j:"アマチュアの"},{e:"ambitious",j:"野心的な"},{e:"amount",j:"量・総計"},{e:"amuse",j:"〜を楽しませる"},{e:"analysis",j:"分析"},{e:"analyze",j:"〜を分析する"},{e:"ancient",j:"古代の"},{e:"anniversary",j:"記念日"},{e:"announce",j:"〜を発表する"},{e:"annoy",j:"〜をいらいらさせる"},{e:"annual",j:"年1回の・毎年の"},{e:"anxiety",j:"不安・心配"},{e:"apologize",j:"謝る"},{e:"apology",j:"謝罪"},{e:"appeal",j:"訴える・魅力"},{e:"appear",j:"現れる・〜に見える"},{e:"appearance",j:"外見・出現"},{e:"application",j:"申し込み・応用"},{e:"apply",j:"申し込む・適用する"},{e:"appointment",j:"予約・約束"},{e:"appreciate",j:"〜を感謝する・評価する"},{e:"approach",j:"接近する・方法"},{e:"architect",j:"建築家"},{e:"argue",j:"議論する・主張する"},{e:"argument",j:"議論・口論"},{e:"army",j:"軍隊"},{e:"arrange",j:"〜を手配する・並べる"},{e:"arrangement",j:"手配・取り決め"},{e:"arrest",j:"〜を逮捕する"},{e:"article",j:"記事・条項"},{e:"artificial",j:"人工の・人工的な"},{e:"artwork",j:"芸術作品"},{e:"aside",j:"わきに・別として"},{e:"aspect",j:"側面・観点"},{e:"assignment",j:"課題・任務"},{e:"assist",j:"〜を助ける"},{e:"association",j:"協会・連想"},{e:"athletic",j:"運動の・スポーツの"},{e:"atmosphere",j:"雰囲気・大気"},{e:"attach",j:"〜を添付する・くっつける"},{e:"attempt",j:"試みる・試み"},{e:"attendance",j:"出席・参加"},{e:"attitude",j:"態度・考え方"},{e:"attract",j:"〜を引き付ける"},{e:"attraction",j:"魅力・呼び物"},{e:"attractive",j:"魅力的な"},{e:"audience",j:"聴衆・観客"},{e:"author",j:"著者・作家"},{e:"automatically",j:"自動的に"},{e:"available",j:"利用できる・入手できる"},{e:"average",j:"平均・平均的な"},{e:"avoid",j:"〜を避ける"},{e:"award",j:"賞・〜を授与する"},{e:"aware",j:"気づいている・認識している"},{e:"awful",j:"ひどい・恐ろしい"},{e:"bacteria",j:"バクテリア・細菌"},{e:"balance",j:"バランス・残高"},{e:"ban",j:"〜を禁止する・禁止"},{e:"barely",j:"ほとんど〜ない・かろうじて"},{e:"basic",j:"基本的な"},{e:"basis",j:"基礎・基準"},{e:"battery",j:"電池・バッテリー"},{e:"behave",j:"振る舞う"},{e:"behavior",j:"行動・振る舞い"},{e:"belief",j:"信念・信仰"},{e:"beneficial",j:"有益な"},{e:"benefit",j:"利益・恩恵"},{e:"bill",j:"請求書・紙幣・法案"},{e:"biological",j:"生物学的な"},{e:"biology",j:"生物学"},{e:"blame",j:"〜を責める"},{e:"blood",j:"血"},{e:"board",j:"板・取締役会・搭乗する"},{e:"bone",j:"骨"},{e:"boss",j:"上司・ボス"},{e:"bother",j:"〜を悩ます・気にする"},{e:"brain",j:"脳"},{e:"brand",j:"ブランド"},{e:"breath",j:"息"},{e:"breathe",j:"呼吸する"},{e:"broadcast",j:"〜を放送する"},{e:"budget",j:"予算"},{e:"calm",j:"穏やかな・落ち着く"},{e:"campaign",j:"キャンペーン・運動"},{e:"campus",j:"キャンパス"},{e:"cancel",j:"〜を取り消す"},{e:"cancer",j:"がん"},{e:"candidate",j:"候補者"},{e:"capable",j:"〜ができる・有能な"},{e:"carbon",j:"炭素・カーボン"},{e:"career",j:"職業・経歴"},{e:"cause",j:"原因・〜を引き起こす"},{e:"certain",j:"確かな・ある〜"},{e:"challenge",j:"挑戦・難題"},{e:"championship",j:"選手権"},{e:"change",j:"変化・〜を変える"},{e:"character",j:"性格・登場人物"},{e:"charge",j:"料金・充電する・責任"},{e:"charity",j:"慈善・慈善団体"},{e:"chemical",j:"化学の・化学物質"},{e:"chemistry",j:"化学"},{e:"chief",j:"主要な・長"},{e:"childhood",j:"幼年期"},{e:"choice",j:"選択"},{e:"citizen",j:"市民"},{e:"claim",j:"〜を主張する・要求する"},{e:"classic",j:"古典の・一流の"},{e:"climate",j:"気候"},{e:"collapse",j:"崩壊する・倒れる"},{e:"colleague",j:"同僚"},{e:"combination",j:"組み合わせ"},{e:"combine",j:"〜を結合する"},{e:"comment",j:"コメント・論評"},{e:"commercial",j:"商業的な・コマーシャル"},{e:"committee",j:"委員会"},{e:"communicate",j:"〜を伝える・通信する"},{e:"communication",j:"コミュニケーション"},{e:"compare",j:"〜を比較する"},{e:"compete",j:"競争する"},{e:"competition",j:"競争・コンテスト"},{e:"complain",j:"不平を言う"},{e:"complaint",j:"不平・苦情"},{e:"complete",j:"完成する・完全な"},{e:"complex",j:"複雑な・複合施設"},{e:"concentrate",j:"集中する"},{e:"concentration",j:"集中・濃度"},{e:"concern",j:"心配・関心事"},{e:"conclude",j:"〜と結論を下す"},{e:"conclusion",j:"結論"},{e:"condition",j:"状態・条件"},{e:"conduct",j:"〜を行う・行動"},{e:"conference",j:"会議"},{e:"confidence",j:"自信"},{e:"confident",j:"自信がある"},{e:"confirm",j:"〜を確認する"},{e:"connect",j:"〜をつなぐ"},{e:"connection",j:"つながり・接続"},{e:"consider",j:"〜を考慮する"},{e:"consist",j:"〜から成る"},{e:"constant",j:"絶え間ない"},{e:"constantly",j:"絶えず"},{e:"construct",j:"〜を建設する"},{e:"construction",j:"建設・建造物"},{e:"consume",j:"〜を消費する"},{e:"consumer",j:"消費者"},{e:"consumption",j:"消費"},{e:"contain",j:"〜を含む"},{e:"contribute",j:"貢献する・寄付する"},{e:"contribution",j:"貢献・寄付"},{e:"conversation",j:"会話"},{e:"convert",j:"〜を変換する・改宗する"},{e:"convince",j:"〜を説得する・確信させる"},{e:"cooperate",j:"協力する"},{e:"cooperation",j:"協力"},{e:"corporation",j:"会社・法人"},{e:"costly",j:"費用のかかる・高価な"},{e:"courage",j:"勇気"},{e:"crash",j:"衝突する・墜落する"},{e:"create",j:"〜を作る・創造する"},{e:"crime",j:"犯罪"},{e:"criticize",j:"〜を批判する"},{e:"crowd",j:"群衆"},{e:"cultural",j:"文化の"},{e:"cure",j:"〜を治療する・治療法"},{e:"curious",j:"好奇心の強い"},{e:"currency",j:"通貨"},{e:"current",j:"現在の・流れ"},{e:"currently",j:"現在"},{e:"daily",j:"毎日の・日常の"},{e:"damage",j:"損害・〜に損害を与える"},{e:"danger",j:"危険"},{e:"deadline",j:"締め切り"},{e:"deal",j:"取引・処理する"},{e:"death",j:"死"},{e:"decade",j:"10年間"},{e:"decline",j:"断る・低下する"},{e:"decrease",j:"減少する・減らす"},{e:"dedicate",j:"〜を捧げる"},{e:"defeat",j:"〜を打ち負かす・敗北"},{e:"define",j:"〜を定義する"},{e:"delay",j:"遅れ・〜を遅らせる"},{e:"deliver",j:"〜を配達する"},{e:"delivery",j:"配達"},{e:"demand",j:"需要・〜を要求する"},{e:"deny",j:"〜を否定する"},{e:"depend",j:"依存する・〜次第である"},{e:"describe",j:"〜を説明する"},{e:"deserve",j:"〜に値する"},{e:"desire",j:"欲望・望む"},{e:"despite",j:"〜にもかかわらず"},{e:"detect",j:"〜を検出する"},{e:"determine",j:"〜を決定する・決意する"},{e:"develop",j:"〜を発展させる"},{e:"development",j:"発展・開発"},{e:"device",j:"装置・デバイス"},{e:"diet",j:"食事・ダイエット"},{e:"difficulty",j:"困難・難しさ"},{e:"dioxide",j:"二酸化物"},{e:"discover",j:"〜を発見する"},{e:"discovery",j:"発見"},{e:"discuss",j:"〜について話し合う"},{e:"disease",j:"病気"},{e:"display",j:"〜を展示する・表示"},{e:"distance",j:"距離"},{e:"district",j:"地区・地域"},{e:"disturb",j:"〜を妨げる・乱す"},{e:"divide",j:"〜を分ける"},{e:"donate",j:"〜を寄付する"},{e:"donation",j:"寄付"},{e:"doubt",j:"疑い・疑う"},{e:"dramatic",j:"劇的な"},{e:"dramatically",j:"劇的に"},{e:"due",j:"〜が原因で・期限"},{e:"duty",j:"義務・職務"},{e:"earn",j:"〜を稼ぐ"},{e:"earthquake",j:"地震"},{e:"economic",j:"経済の"},{e:"economics",j:"経済学"},{e:"economy",j:"経済"},{e:"edge",j:"端・優位"},{e:"educate",j:"〜を教育する"},{e:"education",j:"教育"},{e:"educational",j:"教育的な"},{e:"effect",j:"効果・影響"},{e:"effective",j:"効果的な"},{e:"effectively",j:"効果的に"},{e:"efficient",j:"効率的な"},{e:"efficiently",j:"効率的に"},{e:"effort",j:"努力"},{e:"electric",j:"電気の"},{e:"electricity",j:"電気"},{e:"emergency",j:"緊急事態"},{e:"emphasize",j:"〜を強調する"},{e:"employ",j:"〜を雇う"},{e:"employee",j:"従業員"},{e:"employment",j:"雇用"},{e:"enable",j:"〜を可能にする"},{e:"encounter",j:"〜に出会う"},{e:"encourage",j:"〜を励ます"},{e:"enemy",j:"敵"},{e:"enormous",j:"巨大な"},{e:"entire",j:"全体の"},{e:"entirely",j:"完全に"},{e:"environmental",j:"環境の"},{e:"equal",j:"等しい"},{e:"equipment",j:"装備・機器"},{e:"escape",j:"逃げる・脱出"},{e:"essential",j:"不可欠な"},{e:"establish",j:"〜を設立する"},{e:"estimate",j:"〜を見積もる・推定する"},{e:"eventually",j:"最終的に"},{e:"evidence",j:"証拠"},{e:"evolution",j:"進化"},{e:"exactly",j:"正確に・まさに"},{e:"exaggerate",j:"誇張する"},{e:"examine",j:"〜を検査する・調べる"},{e:"exist",j:"存在する"},{e:"existence",j:"存在"},{e:"expand",j:"拡大する"},{e:"experiment",j:"実験"},{e:"expert",j:"専門家"},{e:"explore",j:"〜を探検する"},{e:"export",j:"〜を輸出する"},{e:"expose",j:"〜をさらす"},{e:"extend",j:"〜を延長する"},{e:"extinction",j:"絶滅"},{e:"facility",j:"施設"},{e:"factor",j:"要因・因子"},{e:"fail",j:"失敗する・〜しそこなう"},{e:"feature",j:"特徴・〜を特集する"},{e:"feed",j:"〜に食べ物を与える"},{e:"financial",j:"財政の・金融の"},{e:"flexible",j:"柔軟な"},{e:"flood",j:"洪水"},{e:"focus",j:"焦点・集中する"},{e:"force",j:"力・〜を強制する"},{e:"forecast",j:"予報・予測する"},{e:"forgive",j:"〜を許す"},{e:"form",j:"形・形成する・フォーム"},{e:"fossil",j:"化石"},{e:"foundation",j:"基礎・財団"},{e:"freeze",j:"凍る・〜を凍らせる"},{e:"frequent",j:"頻繁な"},{e:"frequently",j:"頻繁に"},{e:"fuel",j:"燃料"},{e:"function",j:"機能・機能する"},{e:"gain",j:"〜を得る・利益"},{e:"gather",j:"集まる・〜を集める"},{e:"general",j:"一般的な・将軍"},{e:"generate",j:"〜を生み出す・発電する"},{e:"generation",j:"世代・発生"},{e:"gentle",j:"穏やかな・優しい"},{e:"global",j:"世界的な・地球規模の"},{e:"government",j:"政府"},{e:"gradually",j:"徐々に"},{e:"greenhouse",j:"温室"},{e:"growth",j:"成長・増加"},{e:"guarantee",j:"〜を保証する"},{e:"harm",j:"害・〜に害を与える"},{e:"harmful",j:"有害な"},{e:"heal",j:"〜を癒やす・回復する"},{e:"hesitate",j:"ためらう"},{e:"hire",j:"〜を雇う"},{e:"identify",j:"〜を識別する"},{e:"illegal",j:"違法な"},{e:"illness",j:"病気"},{e:"impact",j:"衝撃・影響"},{e:"import",j:"〜を輸入する"},{e:"improve",j:"〜を改善する"},{e:"improvement",j:"改善・上達"},{e:"include",j:"〜を含む"},{e:"income",j:"収入"},{e:"increase",j:"増加する・増やす"},{e:"indicate",j:"〜を示す"},{e:"individual",j:"個人・個々の"},{e:"influence",j:"影響・〜に影響を与える"},{e:"injury",j:"けが・負傷"},{e:"install",j:"〜を設置する"},{e:"instruct",j:"〜を指示する・教える"},{e:"insurance",j:"保険"},{e:"intend",j:"〜するつもりである"},{e:"invest",j:"投資する"},{e:"investigate",j:"〜を調査する"},{e:"involve",j:"〜を含む・巻き込む"},{e:"issue",j:"問題・発行する"},{e:"jealous",j:"嫉妬している"},{e:"journey",j:"旅・旅をする"},{e:"knowledge",j:"知識"},{e:"lack",j:"欠如・〜に欠けている"},{e:"launch",j:"〜を始める・発射する"},{e:"law",j:"法律・法則"},{e:"layer",j:"層"},{e:"lead",j:"〜を率いる"},{e:"lecture",j:"講義"},{e:"lifestyle",j:"生活様式・ライフスタイル"},{e:"likely",j:"〜しそうな・たぶん"},{e:"locate",j:"〜の場所を突き止める"},{e:"location",j:"場所・位置"},{e:"maintain",j:"〜を維持する"},{e:"manufacture",j:"〜を製造する"},{e:"material",j:"材料・物質・素材"},{e:"measure",j:"〜を測定する・手段"},{e:"medical",j:"医療の・医学の"},{e:"mental",j:"精神の・知的な"},{e:"method",j:"方法・手段"},{e:"mission",j:"使命・任務"},{e:"mixture",j:"混合物・混合"},{e:"monitor",j:"〜を監視する・モニター"},{e:"moreover",j:"その上・さらに"},{e:"mostly",j:"主に・ほとんど"},{e:"motion",j:"動き・動作"},{e:"muscle",j:"筋肉"},{e:"nation",j:"国家・国民"},{e:"negative",j:"否定的な・マイナスの"},{e:"neighborhood",j:"近所"},{e:"nevertheless",j:"それにもかかわらず"},{e:"normal",j:"普通の・正常な"},{e:"nutrition",j:"栄養"},{e:"obvious",j:"明らかな"},{e:"occur",j:"起こる・思い浮かぶ"},{e:"offer",j:"〜を申し出る・提供する"},{e:"opportunity",j:"機会・チャンス"},{e:"organize",j:"〜を組織する"},{e:"origin",j:"起源・出身"},{e:"original",j:"最初の・独創的な"},{e:"otherwise",j:"さもなければ・別の方法で"},{e:"overcome",j:"〜を乗り越える"},{e:"overseas",j:"海外の・海外で"},{e:"oxygen",j:"酸素"},{e:"particular",j:"特定の・特別な"},{e:"patient",j:"患者・辛抱強い"},{e:"payment",j:"支払い"},{e:"permit",j:"〜を許可する・許可証"},{e:"persuade",j:"〜を説得する"},{e:"physical",j:"身体の・物質の"},{e:"pleasant",j:"楽しい・気持ちの良い"},{e:"poison",j:"毒・〜を毒殺する"},{e:"policy",j:"政策・方針"},{e:"polite",j:"礼儀正しい"},{e:"pollute",j:"〜を汚染する"},{e:"population",j:"人口"},{e:"positive",j:"肯定的な・前向きな"},{e:"poverty",j:"貧困"},{e:"practical",j:"実用的な"},{e:"praise",j:"〜をほめる・称賛"},{e:"predict",j:"〜を予測する"},{e:"prefer",j:"〜を好む"},{e:"preserve",j:"〜を保護する・保存する"},{e:"prevent",j:"〜を防ぐ"},{e:"previous",j:"前の"},{e:"print",j:"〜を印刷する"},{e:"private",j:"私的な・個人の"},{e:"process",j:"過程・処理する"},{e:"product",j:"製品"},{e:"professor",j:"教授"},{e:"progress",j:"進歩・進む"},{e:"promote",j:"〜を推進する・昇進させる"},{e:"properly",j:"適切に・正しく"},{e:"protect",j:"〜を守る"},{e:"provide",j:"〜を提供する"},{e:"publish",j:"〜を出版する"},{e:"punish",j:"〜を罰する"},{e:"purchase",j:"〜を購入する・購入"},{e:"purpose",j:"目的"},{e:"quality",j:"質・品質"},{e:"quit",j:"やめる"},{e:"rare",j:"珍しい・まれな"},{e:"react",j:"反応する"},{e:"realize",j:"〜に気づく・実現する"},{e:"recognize",j:"〜を認識する"},{e:"recommend",j:"〜を推薦する"},{e:"recover",j:"回復する"},{e:"reduce",j:"〜を減らす"},{e:"reflect",j:"〜を反射する・反映する"},{e:"refuse",j:"〜を断る"},{e:"regret",j:"後悔する・残念に思う"},{e:"regular",j:"規則的な・定期的な"},{e:"reject",j:"〜を断る・却下する"},{e:"relationship",j:"関係"},{e:"release",j:"〜を解放する・発売する"},{e:"rely",j:"〜に頼る"},{e:"remain",j:"残る・〜のままである"},{e:"remind",j:"〜に思い出させる"},{e:"remove",j:"〜を取り除く"},{e:"repair",j:"〜を修理する"},{e:"replace",j:"〜と取り替える"},{e:"represent",j:"〜を代表する"},{e:"request",j:"要求・〜を頼む"},{e:"research",j:"研究・〜を調査する"},{e:"resist",j:"〜に抵抗する"},{e:"resource",j:"資源・資料"},{e:"respect",j:"尊重・〜を尊重する"},{e:"respond",j:"反応する・返答する"},{e:"responsibility",j:"責任"},{e:"restore",j:"〜を回復させる"},{e:"result",j:"結果・生じる"},{e:"reveal",j:"〜を明らかにする"},{e:"review",j:"〜を見直す・批評"},{e:"reward",j:"報酬・〜に報いる"},{e:"risk",j:"リスク・危険を冒す"},{e:"role",j:"役割"},{e:"route",j:"ルート・経路"},{e:"salary",j:"給料"},{e:"satellite",j:"衛星"},{e:"scene",j:"場面・景色"},{e:"scientific",j:"科学的な"},{e:"security",j:"安全・防衛"},{e:"select",j:"〜を選ぶ"},{e:"serious",j:"深刻な・まじめな"},{e:"settle",j:"〜を解決する・定住する"},{e:"severe",j:"厳しい・深刻な"},{e:"signal",j:"信号・合図"},{e:"similar",j:"似ている"},{e:"situation",j:"状況・立場"},{e:"skill",j:"技術・能力"},{e:"society",j:"社会"},{e:"solution",j:"解決策・溶液"},{e:"source",j:"源・情報源"},{e:"species",j:"種（生物）"},{e:"strength",j:"強さ・力"},{e:"stress",j:"ストレス・強調する"},{e:"structure",j:"構造・建造物"},{e:"struggle",j:"苦労する・奮闘"},{e:"succeed",j:"成功する"},{e:"suggest",j:"〜を提案する"},{e:"supply",j:"〜を供給する・供給"},{e:"surface",j:"表面"},{e:"survival",j:"生存・サバイバル"},{e:"survive",j:"生き残る"},{e:"suspect",j:"〜を疑う・容疑者"},{e:"switch",j:"スイッチ・切り替える"},{e:"target",j:"目標・標的"},{e:"task",j:"課題・仕事"},{e:"technology",j:"技術・テクノロジー"},{e:"temperature",j:"温度・気温"},{e:"temporary",j:"一時的な"},{e:"tend",j:"〜する傾向がある"},{e:"theory",j:"理論"},{e:"therefore",j:"したがって"},{e:"threaten",j:"〜を脅す"},{e:"throughout",j:"〜を通じて"},{e:"thus",j:"したがって・このように"},{e:"tiny",j:"非常に小さい"},{e:"topic",j:"話題・テーマ"},{e:"total",j:"合計・全体の"},{e:"tourism",j:"観光業"},{e:"trade",j:"貿易・取引"},{e:"training",j:"訓練・トレーニング"},{e:"transfer",j:"〜を移す・乗り換える"},{e:"translate",j:"〜を翻訳する"},{e:"transport",j:"〜を輸送する・交通機関"},{e:"treasure",j:"宝物"},{e:"treat",j:"〜を扱う・治療する"},{e:"trend",j:"傾向・トレンド"},{e:"trust",j:"信頼・〜を信頼する"},{e:"typical",j:"典型的な"},{e:"urban",j:"都市の"},{e:"urgent",j:"緊急の"},{e:"valuable",j:"価値のある"},{e:"value",j:"価値・大切にする"},{e:"various",j:"様々な"},{e:"vary",j:"異なる・変化する"},{e:"vehicle",j:"乗り物"},{e:"visible",j:"目に見える"},{e:"vision",j:"視力・ビジョン"},{e:"vocabulary",j:"語彙"},{e:"vote",j:"投票する・票"},{e:"wage",j:"賃金・給料"},{e:"warn",j:"〜に警告する"},{e:"wave",j:"波・〜を振る"},{e:"wealthy",j:"裕福な"},{e:"weight",j:"重さ・体重"},{e:"wildlife",j:"野生生物"},{e:"witness",j:"目撃者・〜を目撃する"},{e:"worldwide",j:"世界的な・世界中で"},{e:"wound",j:"傷・〜を傷つける"},{e:"youth",j:"若者・青年期"},{e:"accelerate",j:"加速する・速める"},{e:"accessible",j:"アクセスしやすい・利用しやすい"},{e:"accommodate",j:"〜を収容する・適応させる"},{e:"accumulate",j:"〜を蓄積する"},{e:"acknowledge",j:"〜を認める・感謝する"},{e:"adequate",j:"十分な・適切な"},{e:"advocate",j:"〜を主張する・支持者"},{e:"affordable",j:"手ごろな価格の"},{e:"allocate",j:"〜を割り当てる"},{e:"anticipate",j:"〜を予期する"},{e:"approximately",j:"おおよそ・約〜"},{e:"assess",j:"〜を評価する・査定する"},{e:"assume",j:"〜を仮定する・思い込む"},{e:"automation",j:"自動化"},{e:"awareness",j:"認識・意識"},{e:"biodiversity",j:"生物多様性"},{e:"breakthrough",j:"革新的な発見・突破口"},{e:"capability",j:"能力・可能性"},{e:"clarify",j:"〜を明確にする"},{e:"collaborate",j:"協力する"},{e:"collaboration",j:"共同作業・コラボ"},{e:"commitment",j:"献身・約束"},{e:"compensate",j:"〜を補償する"},{e:"competitive",j:"競争的な"},{e:"compulsory",j:"義務的な・強制的な"},{e:"consequence",j:"結果・重要性"},{e:"consistently",j:"一貫して"},{e:"controversial",j:"論争を招く"},{e:"convenience",j:"便利さ"},{e:"conventional",j:"従来の・伝統的な"},{e:"critical",j:"批判的な・重大な"},{e:"crucial",j:"非常に重要な・重大な"},{e:"cybersecurity",j:"サイバーセキュリティ"},{e:"deceive",j:"〜をだます"},{e:"dedicated",j:"専念した・献身的な"},{e:"deliberately",j:"わざと・慎重に"},{e:"dependent",j:"依存している"},{e:"deplete",j:"〜を使い果たす"},{e:"deforestation",j:"森林破壊"},{e:"discriminate",j:"差別する"},{e:"disposal",j:"処分・廃棄"},{e:"distribute",j:"〜を配布する"},{e:"diversity",j:"多様性"},{e:"dominate",j:"〜を支配する"},{e:"drought",j:"干ばつ"},{e:"durable",j:"耐久性のある"},{e:"ecosystem",j:"生態系"},{e:"eliminate",j:"〜を取り除く"},{e:"emission",j:"排出量・排気"},{e:"enforce",j:"〜を施行する"},{e:"enhance",j:"〜を高める・強化する"},{e:"ensure",j:"〜を確実にする"},{e:"ethical",j:"倫理的な"},{e:"evaluate",j:"〜を評価する"},{e:"excessive",j:"過度の"},{e:"exploit",j:"〜を利用する・搾取する"},{e:"extinct",j:"絶滅した"},{e:"facilitate",j:"〜を促進する"},{e:"famine",j:"飢饉"},{e:"fluctuate",j:"変動する"},{e:"fundamental",j:"根本的な・基本の"},{e:"globalization",j:"グローバル化"},{e:"grateful",j:"感謝している"},{e:"habitat",j:"生息地"},{e:"heritage",j:"遺産"},{e:"highlight",j:"〜を強調する・ハイライト"},{e:"humanitarian",j:"人道的な"},{e:"hypothesis",j:"仮説"},{e:"immigration",j:"移民・移住"},{e:"implement",j:"〜を実施する"},{e:"incentive",j:"奨励金・誘因"},{e:"inequality",j:"不平等"},{e:"infection",j:"感染症"},{e:"initiative",j:"主導権・新たな取り組み"},{e:"innovative",j:"革新的な"},{e:"inspire",j:"〜を鼓舞する"},{e:"integrate",j:"〜を統合する"},{e:"investment",j:"投資"},{e:"legislation",j:"法律・立法"},{e:"massive",j:"大規模な"},{e:"migration",j:"移住・渡り"},{e:"minimize",j:"〜を最小化する"},{e:"mislead",j:"〜を誤解させる"},{e:"moderate",j:"適度な・中程度の"},{e:"modify",j:"〜を修正する"},{e:"motivate",j:"〜を動機付ける"},{e:"negotiate",j:"交渉する"},{e:"neutral",j:"中立の"},{e:"numerous",j:"多数の"},{e:"obesity",j:"肥満"},{e:"obstacle",j:"障害物"},{e:"outcome",j:"結果"},{e:"outstanding",j:"優れた・目立つ"},{e:"pandemic",j:"パンデミック・世界的流行"},{e:"phenomenon",j:"現象"},{e:"precaution",j:"予防措置"},{e:"priority",j:"優先事項"},{e:"productive",j:"生産的な"},{e:"prohibit",j:"〜を禁止する"},{e:"proportion",j:"割合・比率"},{e:"propose",j:"〜を提案する"},{e:"rapidly",j:"急速に"},{e:"realistic",j:"現実的な"},{e:"recognition",j:"認識・表彰"},{e:"recycle",j:"〜をリサイクルする"},{e:"reform",j:"改革・〜を改革する"},{e:"regulate",j:"〜を規制する"},{e:"regulation",j:"規制・規則"},{e:"reluctant",j:"気が進まない"},{e:"remarkable",j:"注目すべき・素晴らしい"},{e:"resolve",j:"〜を解決する・決意する"},{e:"restrict",j:"〜を制限する"},{e:"revolution",j:"革命"},{e:"sacrifice",j:"犠牲・〜を犠牲にする"},{e:"significant",j:"重要な・著しい"},{e:"simultaneously",j:"同時に"},{e:"sophisticated",j:"洗練された・複雑な"},{e:"statistics",j:"統計"},{e:"stereotype",j:"固定観念"},{e:"stimulate",j:"〜を刺激する"},{e:"strategy",j:"戦略"},{e:"sufficient",j:"十分な"},{e:"sustainable",j:"持続可能な"},{e:"tackle",j:"〜に取り組む"},{e:"tendency",j:"傾向"},{e:"tension",j:"緊張・不安"},{e:"tolerate",j:"〜を我慢する"},{e:"transform",j:"〜を変える"},{e:"transition",j:"移行・変化"},{e:"tremendous",j:"ものすごい"},{e:"unemployment",j:"失業"},{e:"utilize",j:"〜を利用する"},{e:"vaccine",j:"ワクチン"},{e:"valid",j:"有効な"},{e:"vast",j:"広大な"},{e:"violation",j:"違反"},{e:"virtual",j:"仮想の・事実上の"},{e:"volunteer",j:"ボランティア"},{e:"vulnerable",j:"傷つきやすい・弱い"},{e:"welfare",j:"福祉・幸福"},{e:"whereas",j:"一方〜"},{e:"workforce",j:"労働力"}];
+const E2P=[{e:"a great deal of ~",j:"たくさんの〜"},{e:"a large amount of ~",j:"大量の〜"},{e:"a series of ~",j:"一連の〜"},{e:"a variety of ~",j:"様々な〜"},{e:"a wide range of ~",j:"幅広い〜"},{e:"according to ~",j:"〜によると・〜に従って"},{e:"adapt to ~",j:"〜に適応する"},{e:"all of a sudden",j:"突然に"},{e:"all the way",j:"ずっと・はるばる"},{e:"allow A to do",j:"Aが〜するのを許す"},{e:"along with ~",j:"〜と一緒に"},{e:"apart from ~",j:"〜のほかに・〜を除いて"},{e:"apply for ~",j:"〜に応募する"},{e:"as a matter of fact",j:"実のところ"},{e:"as a result",j:"その結果として"},{e:"as a whole",j:"全体として"},{e:"as far as ~",j:"〜する限りでは"},{e:"as if ~",j:"まるで〜のように"},{e:"as long as ~",j:"〜する限り・〜である間"},{e:"aside from ~",j:"〜を除いて"},{e:"at a loss",j:"途方に暮れて"},{e:"at least",j:"少なくとも"},{e:"at most",j:"多くても・せいぜい"},{e:"at the moment",j:"今のところ"},{e:"avoid doing",j:"〜するのを避ける"},{e:"be aware of ~",j:"〜に気づいている"},{e:"be based on ~",j:"〜に基づいている"},{e:"be capable of ~",j:"〜できる・〜する能力がある"},{e:"be concerned about ~",j:"〜を心配している"},{e:"be determined to do",j:"〜しようと決心している"},{e:"be expected to do",j:"〜することが期待されている"},{e:"be filled with ~",j:"〜でいっぱいである"},{e:"be involved in ~",j:"〜に関わっている"},{e:"be located in ~",j:"〜に位置している"},{e:"be made up of ~",j:"〜から成り立っている"},{e:"be related to ~",j:"〜に関係している"},{e:"be responsible for ~",j:"〜に責任がある"},{e:"be satisfied with ~",j:"〜に満足している"},{e:"be similar to ~",j:"〜に似ている"},{e:"be supposed to do",j:"〜することになっている"},{e:"be used to ~",j:"〜に慣れている"},{e:"be willing to do",j:"〜する気がある"},{e:"because of ~",j:"〜のために・〜のせいで"},{e:"benefit from ~",j:"〜から利益を得る"},{e:"break down",j:"故障する・崩れる"},{e:"break out",j:"勃発する・脱走する"},{e:"bring up ~",j:"〜を育てる・持ち出す"},{e:"by accident",j:"偶然に"},{e:"by all means",j:"もちろん・ぜひとも"},{e:"by contrast",j:"対照的に"},{e:"by far",j:"はるかに・断然"},{e:"by heart",j:"暗記して"},{e:"by mistake",j:"間違えて"},{e:"by no means",j:"決して〜でない"},{e:"call for ~",j:"〜を要求する・必要とする"},{e:"call off ~",j:"〜を中止する"},{e:"carry on ~",j:"〜を続ける"},{e:"carry out ~",j:"〜を実行する"},{e:"cause A to do",j:"Aに〜させる"},{e:"come across ~",j:"〜に偶然出会う"},{e:"come out",j:"出てくる・公表される"},{e:"come to an end",j:"終わりを迎える"},{e:"come up with ~",j:"〜を思いつく"},{e:"compared to ~",j:"〜と比べて"},{e:"complain about ~",j:"〜について不満を言う"},{e:"concentrate on ~",j:"〜に集中する"},{e:"consist of ~",j:"〜から成る"},{e:"contribute to ~",j:"〜に貢献する"},{e:"convince A to do",j:"Aを説得して〜させる"},{e:"cope with ~",j:"〜に対処する"},{e:"count on ~",j:"〜を頼りにする"},{e:"cut down on ~",j:"〜を減らす"},{e:"deal with ~",j:"〜に対処する"},{e:"depend on ~",j:"〜によって異なる・〜に頼る"},{e:"die out",j:"絶滅する"},{e:"distinguish A from B",j:"AをBと区別する"},{e:"do away with ~",j:"〜を廃止する"},{e:"due to ~",j:"〜のために・〜が原因で"},{e:"enable A to do",j:"Aが〜できるようにする"},{e:"encourage A to do",j:"Aに〜するよう促す"},{e:"end up doing",j:"結局〜することになる"},{e:"even if ~",j:"たとえ〜でも"},{e:"except for ~",j:"〜を除いて"},{e:"fail to do",j:"〜しそこなう・〜できない"},{e:"far from ~",j:"決して〜でない・〜から遠い"},{e:"figure out ~",j:"〜を理解する・解決する"},{e:"fill out ~",j:"〜に記入する"},{e:"find out ~",j:"〜を見つける・知る"},{e:"focus on ~",j:"〜に集中する"},{e:"for free",j:"無料で"},{e:"for good",j:"永久に"},{e:"for instance",j:"例えば"},{e:"for the time being",j:"当分の間"},{e:"force A to do",j:"Aに〜することを強いる"},{e:"from now on",j:"これから・今後は"},{e:"get along with ~",j:"〜と仲良くやっていく"},{e:"get lost",j:"迷子になる"},{e:"get out of ~",j:"〜から出る"},{e:"get over ~",j:"〜を乗り越える"},{e:"get rid of ~",j:"〜を取り除く"},{e:"get to ~",j:"〜に着く・〜できるようになる"},{e:"get used to ~",j:"〜に慣れる"},{e:"give rise to ~",j:"〜を生じさせる"},{e:"go through ~",j:"〜を経験する・通り抜ける"},{e:"hand in ~",j:"〜を提出する"},{e:"have no choice but to do",j:"〜するしかない"},{e:"have trouble doing",j:"〜するのに困る"},{e:"hesitate to do",j:"〜するのをためらう"},{e:"in a row",j:"続けて・一列に"},{e:"in addition to ~",j:"〜に加えて"},{e:"in advance",j:"前もって"},{e:"in charge of ~",j:"〜を担当して"},{e:"in detail",j:"詳しく"},{e:"in fact",j:"実際は"},{e:"in general",j:"一般的に"},{e:"in other words",j:"言い換えると"},{e:"in particular",j:"特に"},{e:"in place of ~",j:"〜の代わりに"},{e:"in practice",j:"実際には"},{e:"in public",j:"公衆の前で"},{e:"in return",j:"代わりに・お返しに"},{e:"in short",j:"要するに"},{e:"in spite of ~",j:"〜にもかかわらず"},{e:"in terms of ~",j:"〜の観点から"},{e:"in the end",j:"最終的に・結局"},{e:"in the long run",j:"長い目で見れば"},{e:"in time",j:"やがて・間に合って"},{e:"in total",j:"合計で"},{e:"in turn",j:"順番に・結果として"},{e:"in vain",j:"無駄に"},{e:"inform A of B",j:"AにBを知らせる"},{e:"insist on ~",j:"〜を主張する"},{e:"instead of ~",j:"〜の代わりに"},{e:"keep in touch",j:"連絡を取り合う"},{e:"keep up with ~",j:"〜に遅れないでついていく"},{e:"lead to ~",j:"〜につながる"},{e:"look forward to ~",j:"〜を楽しみにしている"},{e:"look into ~",j:"〜を調査する"},{e:"look up ~",j:"〜を調べる・上を向く"},{e:"look up to ~",j:"〜を尊敬する"},{e:"make a difference",j:"変化をもたらす・重要である"},{e:"make do with ~",j:"〜で間に合わせる"},{e:"make sure ~",j:"〜を確認する"},{e:"make the most of ~",j:"〜を最大限に活用する"},{e:"make up for ~",j:"〜を埋め合わせる"},{e:"make use of ~",j:"〜を利用する"},{e:"manage to do",j:"なんとか〜する"},{e:"needless to say",j:"言うまでもなく"},{e:"no longer ~",j:"もはや〜ない"},{e:"not to mention ~",j:"〜は言うまでもなく"},{e:"nothing but ~",j:"〜だけ・〜にすぎない"},{e:"now that ~",j:"今や〜なので"},{e:"on account of ~",j:"〜のために"},{e:"on average",j:"平均して"},{e:"on the contrary",j:"それどころか・反対に"},{e:"on the other hand",j:"一方では"},{e:"once in a while",j:"時々"},{e:"out of control",j:"制御できなくなって"},{e:"out of date",j:"時代遅れの"},{e:"out of order",j:"故障して"},{e:"out of stock",j:"在庫切れで"},{e:"participate in ~",j:"〜に参加する"},{e:"pass away",j:"亡くなる"},{e:"pass out",j:"気絶する・配る"},{e:"pay attention to ~",j:"〜に注意を払う"},{e:"persuade A to do",j:"Aを説得して〜させる"},{e:"point out ~",j:"〜を指摘する"},{e:"prefer to do",j:"〜するほうが好きだ"},{e:"prevent A from doing",j:"Aが〜するのを防ぐ"},{e:"provide A with B",j:"AにBを提供する"},{e:"put off ~",j:"〜を延期する"},{e:"put up with ~",j:"〜を我慢する"},{e:"rather than ~",j:"〜よりむしろ"},{e:"recover from ~",j:"〜から回復する"},{e:"refer to ~",j:"〜に言及する・参照する"},{e:"refrain from doing",j:"〜するのを控える"},{e:"refuse to do",j:"〜することを断る"},{e:"regard A as B",j:"AをBとみなす"},{e:"regardless of ~",j:"〜にかかわらず"},{e:"rely on ~",j:"〜に頼る"},{e:"remind A of B",j:"AにBを思い出させる"},{e:"replace A with B",j:"AをBと取り替える"},{e:"result in ~",j:"〜という結果になる"},{e:"right away",j:"すぐに"},{e:"run out of ~",j:"〜を使い果たす"},{e:"search for ~",j:"〜を探す"},{e:"set up ~",j:"〜を設置する・設立する"},{e:"settle down",j:"落ち着く・定住する"},{e:"show up",j:"現れる・姿を見せる"},{e:"so far",j:"今のところ・これまでのところ"},{e:"specialize in ~",j:"〜を専門にする"},{e:"stand for ~",j:"〜を表す・支持する"},{e:"stand out",j:"目立つ"},{e:"stay away from ~",j:"〜から離れている"},{e:"stick to ~",j:"〜に固執する・くっつく"},{e:"suffer from ~",j:"〜に苦しむ"},{e:"take A for granted",j:"Aを当然のことと思う"},{e:"take advantage of ~",j:"〜を活用する・につけ込む"},{e:"take off ~",j:"〜を脱ぐ・離陸する"},{e:"take on ~",j:"〜を引き受ける"},{e:"take part in ~",j:"〜に参加する"},{e:"take place",j:"起こる・行われる"},{e:"thanks to ~",j:"〜のおかげで"},{e:"think over ~",j:"〜をよく考える"},{e:"throw away ~",j:"〜を捨てる"},{e:"to some extent",j:"ある程度まで"},{e:"together with ~",j:"〜と一緒に"},{e:"translate A into B",j:"AをBに翻訳する"},{e:"turn A into B",j:"AをBに変える"},{e:"turn down ~",j:"〜を断る・下げる"},{e:"turn out ~",j:"〜と判明する"},{e:"turn to ~",j:"〜に頼る・向く"},{e:"up to ~",j:"〜まで・〜次第で"},{e:"use up ~",j:"〜を使い果たす"},{e:"watch out for ~",j:"〜に気をつける"},{e:"when it comes to ~",j:"〜のことになると"},{e:"work on ~",j:"〜に取り組む"},{e:"work out",j:"うまくいく・運動する"}];
 
-/* ═══ UTILS ═══ */
-function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+/* ═══ PANEL SETUP ═══ */
+const CONFIGS = [
+  {src:'V',  title:'準1級 単語', lv:'l2',  lvTxt:'準1級'},
+  {src:'P1W',title:'Pass単 単語',lv:'l-p1',lvTxt:'Pass単'},
+  {src:'P1P',title:'Pass単 熟語',lv:'l-pp',lvTxt:'熟語'},
+  {src:'ID', title:'イディオム', lv:'l-id',lvTxt:'IDM'},
+  {src:'E2W',title:'2級 単語',  lv:'l-e2',lvTxt:'英検2級'},
+  {src:'E2P',title:'2級 熟語',  lv:'l-ep',lvTxt:'2級熟語'},
+];
+const SRCS={V,P1W,P1P,ID:ID.map(d=>({e:d.w,j:d.m,_x:{ex:d.e,ej:d.ej,note:d.n}})),E2W,E2P};
 
-/* ═══ SHEET SYSTEM ═══ */
-const scrim=document.getElementById('scrim');
-let activeSheet=null;
-function openSheet(sh){
-  if(activeSheet&&activeSheet!==sh)_closeSheet(activeSheet);
-  sh.classList.add('open');scrim.classList.add('on');activeSheet=sh;
-}
-function _closeSheet(sh){
-  if(!sh)return;
-  sh.classList.remove('open');sh.style.transform='';sh.style.transition='';
-  scrim.classList.remove('on');activeSheet=null;
-}
-scrim.addEventListener('click',()=>{_closeSheet(activeSheet);haptic();});
-function makeSwipeable(shId,hdlId){
-  const sh=document.getElementById(shId),hdl=document.getElementById(hdlId);
-  let sy=0,drag=false;
-  const start=y=>{sy=y;drag=true;sh.style.transition='none';};
-  const move=y=>{if(!drag)return;const d=y-sy;if(d>0)sh.style.transform=`translateY(${d}px)`;};
-  const end=y=>{if(!drag)return;drag=false;sh.style.transition='';if(y-sy>60){_closeSheet(sh);haptic();}else sh.style.transform='';};
-  hdl.addEventListener('touchstart',e=>start(e.touches[0].clientY),{passive:true});
-  hdl.addEventListener('touchmove',e=>move(e.touches[0].clientY),{passive:true});
-  hdl.addEventListener('touchend',e=>end(e.changedTouches[0].clientY),{passive:true});
-  hdl.addEventListener('mousedown',e=>{sy=e.clientY;drag=true;sh.style.transition='none';});
-  window.addEventListener('mousemove',e=>{move(e.clientY);});
-  window.addEventListener('mouseup',e=>{end(e.clientY);});
-}
-makeSwipeable('tsheet','tsh-hdl');
-makeSwipeable('hsheet','hsh-hdl');
+/* Build card panel HTML */
+const track=document.getElementById('sw-track');
+CONFIGS.forEach((cfg,i)=>{
+  const panel=document.createElement('div');
+  panel.className='swipe-panel';
+  panel.innerHTML=`
+    <div class="pr-row"><div class="prb"><div class="prf" id="pf${i}" style="width:0%"></div></div><div class="prt" id="pt${i}">0/0</div></div>
+    <div class="sr">
+      <button class="ch ch-bk" id="cbk${i}" onclick="DK_Back(${i})" disabled>←</button>
+      <button class="ch" style="color:var(--g)" onclick="showH('g',${i})">✓ <span id="sg${i}">0</span></button>
+      <button class="ch" style="color:var(--y)" onclick="showH('h',${i})">△ <span id="sh${i}">0</span></button>
+      <button class="ch" style="color:var(--r)" onclick="showH('f',${i})">✗ <span id="sf${i}">0</span></button>
+      <button class="ch" style="margin-left:auto;font-size:15px" onclick="DK_Shuf(${i})">🔀</button>
+    </div>
+    <div class="ca"><div class="fw" id="fw${i}">
+      <div class="fc" id="fc${i}">
+        <div class="ff">
+          <div class="fmeta"><span class="lv ${cfg.lv}" id="flv${i}">${cfg.lvTxt}</span><span class="fcat" id="fca${i}"></span></div>
+          <div class="fword" id="fwd${i}"></div>
+          <div class="fpron" id="fpr${i}" style="display:none"></div>
+          <span class="fpos" id="fpo${i}" style="display:none"></span>
+          <div class="fh">タップで意味 · →✓ ←✗</div>
+        </div>
+        <div class="ff fb">
+          <div class="fmean" id="fme${i}"></div>
+          <div class="ffull" id="ffu${i}"></div>
+          <div class="fex" id="fex${i}"></div>
+          <div class="ftags" id="fta${i}"></div>
+          <div class="fidm" id="fid${i}"></div>
+        </div>
+      </div>
+    </div></div>
+    <div class="acts" id="acts${i}" style="display:none">
+      <button class="ab af" onclick="DK_Ans(${i},'f')"><span>😰</span>忘れた</button>
+      <button class="ab ah" onclick="DK_Ans(${i},'h')"><span>🤔</span>難しい</button>
+      <button class="ab ag" onclick="DK_Ans(${i},'g')"><span>✨</span>覚えた！</button>
+    </div>`;
+  track.appendChild(panel);
+});
 
-/* ═══ LOCAL LOOKUP ═══ */
-function localLookup(q){
-  const ql=q.toLowerCase().trim();
-  const vr=V.find(w=>w.w.toLowerCase()===ql);
-  if(vr)return`📚 <strong>${vr.w}</strong> [${vr.p}] — ${vr.m}${vr.pr?` <span style="color:var(--sub)">${vr.pr}</span>`:''}`;
-  const er=EX.find(e=>e.ph.toLowerCase()===ql||(ql.length>4&&e.ph.toLowerCase().includes(ql)));
-  if(er)return`📝 <strong>${er.ph}</strong> — ${er.ja}`;
-  const ir=IV.find(v=>v.b===ql||v.p===ql||v.pp===ql||v.p.split('/').some(x=>x.trim()===ql));
-  if(ir)return`🔄 <strong>${ir.b}</strong> → ${ir.p} → ${ir.pp} ／ ${ir.m}`;
-  const idr=ID.find(d=>d.w.toLowerCase().includes(ql)&&ql.length>4);
-  if(idr)return`💬 <strong>${idr.w}</strong> — ${idr.m}`;
-  if(typeof _p1LookupExt==='function'){const r=_p1LookupExt(q);if(r)return r;}
-  return null;
-}
+/* ═══ DECK STATE (one per panel) ═══ */
+function shuf(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+const DK=CONFIGS.map((cfg,i)=>({
+  deck:shuf([...SRCS[cfg.src]]),
+  idx:0,flipped:false,st:{g:0,h:0,f:0},hist:[],prev:null
+}));
 
 /* ═══ RENDER ═══ */
-function render(){
-  if(idx>=deck.length){done();return;}
-  const w=deck[idx];flipped=false;
-  document.getElementById('fc').classList.remove('fl');
-  document.getElementById('acts').style.display='none';
-  const lbl=['','Lv1 基礎','Lv2 中級','Lv3 上級'],lc=['','l1','l2','l3'];
-  const lv=document.getElementById('flv');
-  lv.textContent=lbl[w.l]||'';lv.className='lv '+(lc[w.l]||'l3');
-  document.getElementById('fca').textContent=w.c||'';
-  document.getElementById('fwo').textContent=w.w;
-  document.getElementById('fpr').textContent=w.pr||'';
-  const po=document.getElementById('fpo'),pl={n:'名詞',v:'動詞',adj:'形容詞',adv:'副詞'};
-  po.textContent=pl[w.p]||w.p;
-  po.className='fpos p'+(w.p==='adj'?'a':w.p==='adv'?'d':w.p==='n'?'n':w.p==='v'?'v':'o');
-  document.getElementById('fme').textContent=w.m;
-  document.getElementById('ffu').textContent=w.f||'';
-  document.getElementById('fex').innerHTML=w.e?`<div class="fexe">${w.e}</div><div class="fexj">${w.ej}</div>`:'';
-  document.getElementById('fta').innerHTML=(w.t||[]).map(t=>`<span class="ftag">${t}</span>`).join('');
-  document.getElementById('fid').innerHTML=(w.id||[]).map(i=>`<div class="fide">${i.e}</div><div>${i.j}</div>`).join('');
-  document.getElementById('pf').style.width=Math.round(idx/deck.length*100)+'%';
-  document.getElementById('pt').textContent=idx+'/'+deck.length;
-  document.getElementById('cbk').disabled=!prevState;
+function render(i){
+  const d=DK[i],cfg=CONFIGS[i];
+  if(d.idx>=d.deck.length){done(i);return;}
+  const w=d.deck[d.idx];
+  d.flipped=false;
+  document.getElementById('fc'+i).classList.remove('fl');
+  document.getElementById('acts'+i).style.display='none';
+
+  const isV=(cfg.src==='V'), isID=(cfg.src==='ID');
+  const word=w.e||w.w||'';
+  const mean=w.j||w.m||'';
+
+  document.getElementById('fwd'+i).textContent=word;
+
+  const pronEl=document.getElementById('fpr'+i);
+  const posEl=document.getElementById('fpo'+i);
+  if(isV&&w.pr){pronEl.textContent=w.pr;pronEl.style.display='';}else pronEl.style.display='none';
+  if(isV&&w.p){
+    posEl.style.display='inline-block';
+    posEl.textContent=({n:'名詞',v:'動詞',adj:'形容詞',adv:'副詞'})[w.p]||w.p;
+    posEl.className='fpos p'+({adj:'a',adv:'d',n:'n',v:'v'}[w.p]||'o');
+  }else posEl.style.display='none';
+  if(isV){
+    document.getElementById('fca'+i).textContent=w.c||'';
+    const lv=document.getElementById('flv'+i);
+    lv.textContent=['','Lv1','Lv2','Lv3'][w.l]||cfg.lvTxt;
+    lv.className='lv '+(['','l1','l2','l3'][w.l]||cfg.lv);
+  }else{
+    document.getElementById('fca'+i).textContent='';
+  }
+
+  document.getElementById('fme'+i).textContent=mean;
+  document.getElementById('ffu'+i).textContent=(isV&&w.f)||'';
+
+  const fex=document.getElementById('fex'+i);
+  if(isV&&w.e&&w.ej){
+    fex.style.display='';
+    fex.innerHTML=`<div class="fexe">${w.e}</div><div class="fexj">${w.ej}</div>`;
+  }else if(isID&&w._x&&w._x.ex){
+    fex.style.display='';
+    fex.innerHTML=`<div class="fexe">${w._x.ex}</div><div class="fexj">${w._x.ej||''}</div>`;
+  }else fex.style.display='none';
+
+  document.getElementById('fta'+i).innerHTML=isV?(w.t||[]).map(t=>`<span class="ftag">${t}</span>`).join(''):'';
+  document.getElementById('fid'+i).innerHTML=isV?(w.id||[]).map(x=>`<div class="fide">${x.e}</div><div style="color:var(--sub);font-size:10px">${x.j}</div>`).join(''):
+    (isID&&w._x&&w._x.note?`<div style="font-size:10px;color:var(--sub)">${w._x.note}</div>`:'');
+
+  document.getElementById('pf'+i).style.width=Math.round(d.idx/d.deck.length*100)+'%';
+  document.getElementById('pt'+i).textContent=d.idx+'/'+d.deck.length;
+  document.getElementById('cbk'+i).disabled=!d.prev;
 }
-window.FF=function(){
-  flipped=!flipped;
-  document.getElementById('fc').classList.toggle('fl',flipped);
+
+/* ═══ FLIP ═══ */
+window.DK_Flip=function(i){
+  const d=DK[i];d.flipped=!d.flipped;
+  document.getElementById('fc'+i).classList.toggle('fl',d.flipped);
   haptic();
-  document.getElementById('acts').style.display=flipped?'flex':'none';
+  document.getElementById('acts'+i).style.display=d.flipped?'flex':'none';
 };
-function updateStats(){
-  document.getElementById('sg').textContent=st.g;
-  document.getElementById('sh2').textContent=st.h;
-  document.getElementById('sf').textContent=st.f;
-}
 
 /* ═══ ANSWER ═══ */
-window.R=function(t){
-  if(idx>=deck.length)return;
-  haptic.confirm();
-  prevState={deck:[...deck],idx,st:{...st},hist:[...hist]};
-  const cur=deck[idx];
-  hist.unshift({w:cur.w,m:cur.m,r:t});
-  if(hist.length>80)hist.pop();
-  st[t]++;updateStats();
-  if(t==='f')deck.push({...deck[idx]});
-  else if(t==='h')deck.splice(Math.min(idx+4,deck.length),0,{...deck[idx]});
-  idx++;
-  const fw=document.getElementById('fw');
+window.DK_Ans=function(i,t){
+  const d=DK[i];
+  if(d.idx>=d.deck.length)return;
+  // Haptic patterns
+  if(t==='g')hRemember();
+  else if(t==='f')hForgot();
+  else hHard();
+  
+  d.prev={deck:[...d.deck],idx:d.idx,st:{...d.st},hist:[...d.hist]};
+  const cur=d.deck[d.idx];
+  d.hist.unshift({w:cur.e||cur.w,m:cur.j||cur.m,r:t});
+  if(d.hist.length>80)d.hist.pop();
+  d.st[t]++;updStats(i);
+  if(t==='f')d.deck.push({...cur});
+  else if(t==='h')d.deck.splice(Math.min(d.idx+4,d.deck.length),0,{...cur});
+  d.idx++;
+  const fw=document.getElementById('fw'+i);
   fw.classList.add('out');
-  setTimeout(()=>{fw.classList.remove('out');render();void fw.offsetWidth;fw.classList.add('in');setTimeout(()=>fw.classList.remove('in'),240);},190);
+  setTimeout(()=>{fw.classList.remove('out');render(i);void fw.offsetWidth;fw.classList.add('in');setTimeout(()=>fw.classList.remove('in'),180);},160);
 };
+
+function updStats(i){
+  const s=DK[i].st;
+  document.getElementById('sg'+i).textContent=s.g;
+  document.getElementById('sh'+i).textContent=s.h;
+  document.getElementById('sf'+i).textContent=s.f;
+}
 
 /* ═══ BACK ═══ */
-window.goBack=function(){
-  if(!prevState)return;
+window.DK_Back=function(i){
+  const d=DK[i];if(!d.prev)return;
   haptic.confirm();
-  deck=prevState.deck;idx=prevState.idx;st=prevState.st;hist=prevState.hist;
-  prevState=null;flipped=false;
-  updateStats();render();
+  d.deck=d.prev.deck;d.idx=d.prev.idx;d.st=d.prev.st;d.hist=d.prev.hist;d.prev=null;d.flipped=false;
+  updStats(i);render(i);
 };
 
-/* ═══ HISTORY SHEET ═══ */
-window.showHist=function(filter){
-  haptic();
-  const labels={g:'✓ 正解',h:'△ むずい',f:'✗ 忘れた'};
-  const filtered=hist.filter(h=>h.r===filter);
-  document.getElementById('htit').textContent=labels[filter]+' — '+filtered.length+'件';
-  document.getElementById('hlist').innerHTML=!filtered.length
-    ?'<div style="text-align:center;color:var(--sub);font-size:12px;padding:20px 0">まだ記録がありません</div>'
-    :filtered.map(h=>`<div class="hrow"><div class="hbdg ${h.r==='g'?'hg-b':h.r==='h'?'hh-b':'hf-b'}">${h.r==='g'?'✓':h.r==='h'?'△':'✗'}</div><div><div class="hw">${h.w}</div><div class="hm">${h.m}</div></div></div>`).join('');
-  openSheet(document.getElementById('hsheet'));
+/* ═══ SHUFFLE ═══ */
+window.DK_Shuf=function(i){
+  haptic.confirm();
+  const d=DK[i],cfg=CONFIGS[i];
+  d.deck=shuf([...SRCS[cfg.src]]);d.idx=0;d.st={g:0,h:0,f:0};d.hist=[];d.prev=null;
+  updStats(i);
+  // Reset card DOM
+  const fw=document.getElementById('fw'+i);
+  const fc=document.getElementById('fc'+i);
+  fc.classList.remove('fl');
+  document.getElementById('acts'+i).style.display='none';
+  render(i);
 };
 
-/* ═══ DONE ═══ */
-function done(){
-  document.getElementById('acts').style.display='none';
-  document.getElementById('pf').style.width='100%';
-  document.getElementById('fw').innerHTML=`<div class="cc"><div style="font-size:50px;margin-bottom:10px">🎉</div><div style="font-size:18px;font-weight:700;margin-bottom:4px">完了！</div><div style="font-size:12px;color:var(--sub);margin-bottom:16px">✓${st.g} △${st.h} ✗${st.f}</div><button onclick="SD()" style="background:var(--b);color:#fff;border:none;border-radius:11px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🔀 もう一度</button></div>`;
+/* ═══ DONE ─── */
+function done(i){
+  const d=DK[i],cfg=CONFIGS[i];
+  document.getElementById('acts'+i).style.display='none';
+  document.getElementById('pf'+i).style.width='100%';
+  const cols=['var(--b)','var(--p)','var(--r)','var(--y)','var(--g)','#5ac8fa'];
+  document.getElementById('fw'+i).innerHTML=`<div class="cc"><div style="font-size:44px;margin-bottom:8px">🎉</div><div style="font-size:17px;font-weight:800;margin-bottom:4px">完了！</div><div style="font-size:12px;color:var(--sub);margin-bottom:14px">✓${d.st.g} △${d.st.h} ✗${d.st.f}</div><button onclick="DK_Shuf(${i})" style="background:${cols[i]};color:#fff;border:none;border-radius:12px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🔀 もう一度</button></div>`;
 }
-window.SD=function(){
-  haptic.confirm();
-  deck=shuf([...V]);idx=0;st={g:0,h:0,f:0};hist=[];prevState=null;
-  updateStats();
-  document.getElementById('fw').innerHTML=`<div class="fc" id="fc" onclick="FF()"><div class="ff" id="ff"><div class="fmeta"><span class="lv l1" id="flv"></span><span class="fcat" id="fca"></span></div><div class="fword" id="fwo"></div><div class="fpron" id="fpr"></div><span class="fpos pv" id="fpo"></span><div class="fh">タップして意味を確認 · スワイプ →✓ ←✗</div></div><div class="ff fb" id="fba"><div class="fmean" id="fme"></div><div class="ffull" id="ffu"></div><div class="fex" id="fex"></div><div class="ftags" id="fta"></div><div class="fidm" id="fid"></div></div></div>`;
-  render();
-};
 
-/* ═══ TAB SWITCH ═══ */
-window.ST=function(t){
-  haptic();tab=t;
-  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
-  document.getElementById('t-'+t).classList.add('on');
-  const isF=t==='f', isP1=t==='1';
-  document.getElementById('ca').style.display=isF?'flex':'none';
-  document.getElementById('sr').style.display=isF?'flex':'none';
-  document.getElementById('prbar').style.display=isF?'flex':'none';
-  document.getElementById('acts').style.display=isF&&flipped?'flex':'none';
-  const p1Area=document.getElementById('p1-area');
-  if(p1Area){
-    p1Area.style.display=isP1?'flex':'none';
-    if(isP1&&p1deck.length===0)p1Init();
-  }
-  ['i','e','v','g','p','r','c','a'].forEach(x=>{
-    const el=document.getElementById('l-'+x);if(el)el.classList.toggle('on',x===t);
+/* ═══ SWIPE ON EACH CARD ═══ */
+CONFIGS.forEach((_,i)=>{
+  const fw=document.getElementById('fw'+i);
+  let sx=0;
+  fw.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;},{passive:true});
+  fw.addEventListener('touchend',e=>{
+    const d=DK[i];if(!d.flipped)return;
+    const dx=e.changedTouches[0].clientX-sx;
+    if(Math.abs(dx)>55){dx>0?DK_Ans(i,'g'):DK_Ans(i,'f');}
+  },{passive:true});
+  // onclick for flip
+  document.getElementById('fc'+i).onclick=()=>DK_Flip(i);
+});
+
+/* ═══ PANEL SWIPE NAV ═══ */
+let curPanel=0,pSx=0,pSy=0,pDir=null;
+const swWrap=document.getElementById('sw-wrap');
+swWrap.addEventListener('touchstart',e=>{pSx=e.touches[0].clientX;pSy=e.touches[0].clientY;pDir=null;},{passive:true});
+swWrap.addEventListener('touchmove',e=>{if(!pDir){const dx=Math.abs(e.touches[0].clientX-pSx),dy=Math.abs(e.touches[0].clientY-pSy);pDir=dx>dy?'h':'v';}},{passive:true});
+swWrap.addEventListener('touchend',e=>{
+  if(pDir!=='h')return;
+  const dx=e.changedTouches[0].clientX-pSx;
+  if(Math.abs(dx)>55){const nxt=curPanel+(dx<0?1:-1);if(nxt>=0&&nxt<6){jumpPanel(nxt);haptic();}}
+},{passive:true});
+
+function jumpPanel(idx,anim=true){
+  const track=document.getElementById('sw-track');
+  track.style.transition=anim?'transform .32s cubic-bezier(.4,0,.2,1)':'none';
+  curPanel=idx;
+  track.style.transform=`translateX(${-idx*100}%)`;
+  const dots=document.querySelectorAll('.dot');
+  dots.forEach((d,i)=>d.classList.toggle('on',i===idx));
+  document.getElementById('app-ttl').textContent=CONFIGS[idx].title;
+  if(!anim)requestAnimationFrame(()=>{track.style.transition='';});
+}
+
+/* ═══ HOME / APP NAV ═══ */
+const TITLES_LIST={ex:'入試で使える表現',v:'不規則動詞変化表',g:'重要文法',p:'言い換え表現',r:'長文読解 重要表現',c:'混同注意ペア',a:'頻出テーマ'};
+let _listBuilt=false,_listCache={};
+
+function ensureLists(){
+  if(_listBuilt)return;_listBuilt=true;
+  const ids=['i','e','v','g','p','r','c','a'];
+  // Create hidden containers
+  const frag=document.createDocumentFragment();
+  const tmpDivs={};
+  ids.forEach(id=>{
+    const d=document.createElement('div');
+    d.id='l-'+id;d.style.cssText='position:absolute;left:-9999px;top:-9999px;width:360px;visibility:hidden';
+    document.body.appendChild(d);
+    tmpDivs[id]=d;
   });
-};
-
-function buildLists(){
+  function buildLists(){
   // idioms
   document.getElementById('l-i').innerHTML='<div class="sh">イディオム '+ID.length+'個</div>'+
     ID.map(d=>`<div class="li"><div class="lw">${d.w}</div><div class="lm">${d.m}</div><div class="lnx">${d.n}</div><div class="le">"${d.e}"<br><span style="color:var(--sub)">${d.ej}</span></div></div>`).join('');
@@ -994,168 +1168,221 @@ function buildLists(){
   document.getElementById('l-a').innerHTML='<div class="sh">頻出アカデミックテーマ</div>'+
     TH.map(d=>`<div class="li"><div class="lw">${d.cat}</div>${d.items.map(i=>`<div style="font-size:12px;color:#555;padding:3px 0;border-bottom:1px solid var(--ln)">• ${i}</div>`).join('')}</div>`).join('');
 }
-
-
-/* ═══ PRE-1 PASS-TAN ═══ */
-let p1mode='w'; // 'w'=words, 'p'=phrases
-let p1deck=[],p1idx=0,p1flipped=false,p1st={g:0,h:0,f:0};
-let p1hist=[],p1prev=null;
-
-function p1Shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function p1Init(){
-  p1deck=p1Shuf([...( p1mode==='w' ? P1W : P1P )]);
-  p1idx=0;p1flipped=false;p1st={g:0,h:0,f:0};p1hist=[];p1prev=null;
-  p1UpdateStats();p1Render();
+  ids.forEach(id=>{
+    const d=document.getElementById('l-'+id);
+    if(d){_listCache[id]=d.innerHTML;d.remove();}
+  });
 }
 
-function p1Toggle(){
-  haptic();
-  p1mode=(p1mode==='w'?'p':'w');
-  document.getElementById('p1-mode-lbl').textContent=p1mode==='w'?'単語':'熟語';
-  document.getElementById('p1-lv').textContent=p1mode==='w'?'準1級 単語':'準1級 熟語';
-  document.getElementById('p1-cat').textContent=p1mode==='w'?'英単語':'イディオム・句動詞';
-  p1Init();
-}
-
-window.p1Shuffle=function(){
-  haptic.confirm();p1Init();
-};
-
-function p1Render(){
-  if(p1idx>=p1deck.length){p1Done();return;}
-  const w=p1deck[p1idx];
-  p1flipped=false;
-  document.getElementById('p1-fc').classList.remove('fl');
-  document.getElementById('p1-acts').style.display='none';
-  document.getElementById('p1-word').textContent=w.e;
-  document.getElementById('p1-mean').textContent=w.j;
-  document.getElementById('p1-extra').textContent='';
-  const pct=Math.round(p1idx/p1deck.length*100);
-  document.getElementById('p1-pf').style.width=pct+'%';
-  document.getElementById('p1-pt').textContent=p1idx+'/'+p1deck.length;
-  document.getElementById('p1-cbk').disabled=!p1prev;
-}
-
-window.p1Flip=function(){
-  p1flipped=!p1flipped;
-  document.getElementById('p1-fc').classList.toggle('fl',p1flipped);
-  haptic();
-  document.getElementById('p1-acts').style.display=p1flipped?'flex':'none';
-};
-
-function p1UpdateStats(){
-  document.getElementById('p1-sg').textContent=p1st.g;
-  document.getElementById('p1-sh').textContent=p1st.h;
-  document.getElementById('p1-sf').textContent=p1st.f;
-}
-
-window.p1Ans=function(t){
-  if(p1idx>=p1deck.length)return;
+window.openSection=function(type,arg){
   haptic.confirm();
-  p1prev={deck:[...p1deck],idx:p1idx,st:{...p1st},hist:[...p1hist]};
-  const cur=p1deck[p1idx];
-  p1hist.unshift({w:cur.e,m:cur.j,r:t});
-  if(p1hist.length>80)p1hist.pop();
-  p1st[t]++;p1UpdateStats();
-  if(t==='f')p1deck.push({...p1deck[p1idx]});
-  else if(t==='h')p1deck.splice(Math.min(p1idx+4,p1deck.length),0,{...p1deck[p1idx]});
-  p1idx++;
-  const fw=document.getElementById('p1-fw');
-  fw.classList.add('out');
-  setTimeout(()=>{fw.classList.remove('out');p1Render();void fw.offsetWidth;fw.classList.add('in');setTimeout(()=>fw.classList.remove('in'),240);},190);
+  document.getElementById('home').classList.add('hidden');
+  setTimeout(()=>document.getElementById('app').classList.add('vis'),30);
+  const isCard=type==='card';
+  document.getElementById('app-dots').style.display=isCard?'flex':'none';
+  document.getElementById('sw-wrap').style.display=isCard?'flex':'none';
+  document.getElementById('list-wrap').style.display=isCard?'none':'flex';
+  if(isCard){
+    jumpPanel(arg,false);
+    // Initialise all decks if not started
+    CONFIGS.forEach((_,i)=>{if(DK[i].idx===0&&DK[i].st.g===0)render(i);});
+  }else{
+    document.getElementById('app-ttl').textContent=TITLES_LIST[arg]||arg;
+    ensureLists();
+    const cnt=document.getElementById('list-cnt');
+    cnt.innerHTML=_listCache[arg]||'<div style="color:var(--sub);text-align:center;padding:40px">コンテンツが見つかりません</div>';
+    document.getElementById('list-wrap').scrollTop=0;
+  }
 };
 
-window.p1Back=function(){
-  if(!p1prev)return;
-  haptic.confirm();
-  p1deck=p1prev.deck;p1idx=p1prev.idx;p1st=p1prev.st;p1hist=p1prev.hist;
-  p1prev=null;p1flipped=false;
-  p1UpdateStats();p1Render();
-};
-
-window.p1ShowHist=function(filter){
+window.goHome=function(){
   haptic();
-  const labels={g:'✓ 正解',h:'△ むずい',f:'✗ 忘れた'};
-  const filtered=p1hist.filter(h=>h.r===filter);
-  document.getElementById('htit').textContent=labels[filter]+' — '+filtered.length+'件';
-  document.getElementById('hlist').innerHTML=!filtered.length
-    ?'<div style="text-align:center;color:var(--sub);font-size:12px;padding:20px 0">まだ記録がありません</div>'
-    :filtered.map(h=>`<div class="hrow"><div class="hbdg ${h.r==='g'?'hg-b':h.r==='h'?'hh-b':'hf-b'}">${h.r==='g'?'✓':h.r==='h'?'△':'✗'}</div><div><div class="hw">${h.e||h.w}</div><div class="hm">${h.m}</div></div></div>`).join('');
-  openSheet(document.getElementById('hsheet'));
+  document.getElementById('app').classList.remove('vis');
+  setTimeout(()=>document.getElementById('home').classList.remove('hidden'),220);
 };
 
-function p1Done(){
-  document.getElementById('p1-acts').style.display='none';
-  document.getElementById('p1-pf').style.width='100%';
-  document.getElementById('p1-fw').innerHTML=`
-    <div class="cc">
-      <div style="font-size:48px;margin-bottom:8px">🎉</div>
-      <div style="font-size:17px;font-weight:700;margin-bottom:4px">完了！</div>
-      <div style="font-size:12px;color:var(--sub);margin-bottom:14px">✓${p1st.g} △${p1st.h} ✗${p1st.f}</div>
-      <button onclick="p1Shuffle()" style="background:var(--b);color:#fff;border:none;border-radius:11px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🔀 もう一度</button>
-    </div>`;
-}
+// Update badge
+document.getElementById('bv').textContent=V.length+'語';
 
-/* P1 swipe */
-let p1sx=0;
-document.getElementById('p1-fw').addEventListener('touchstart',e=>{p1sx=e.touches[0].clientX;},{passive:true});
-document.getElementById('p1-fw').addEventListener('touchend',e=>{
-  if(!p1flipped)return;
-  const dx=e.changedTouches[0].clientX-p1sx;
-  if(Math.abs(dx)>55){dx>0?p1Ans('g'):p1Ans('f');}
-},{passive:true});
-
-/* Local lookup extension for P1 — patched into existing localLookup */
-const _p1LookupExt=(q)=>{
+/* ═══ LOCAL LOOKUP ═══ */
+function localLookup(q){
   const ql=q.toLowerCase().trim();
-  const wr=P1W.find(w=>w.e.toLowerCase()===ql);
-  if(wr)return`📗 <strong>${wr.e}</strong> — ${wr.j} <span style="font-size:10px;color:var(--sub)">[Pass単]</span>`;
-  const pr=P1P.find(p=>p.e.toLowerCase()===ql||(ql.length>4&&p.e.toLowerCase().includes(ql)));
-  if(pr)return`📗 <strong>${pr.e}</strong> — ${pr.j} <span style="font-size:10px;color:var(--sub)">[Pass単 熟語]</span>`;
-  return null;
-};
+  const isJa=/[ぁ-んァ-ヶー一-龠]/.test(q);
+  const results=[];
 
-/* ═══ TRANSLATOR ═══ */
+  if(!isJa){
+    // EN → JA exact match first
+    const sources=[
+      {arr:V,  getW:w=>w.w, getM:w=>w.m, badge:'準1'},
+      {arr:P1W,getW:w=>w.e, getM:w=>w.j, badge:'Pass単'},
+      {arr:E2W,getW:w=>w.e, getM:w=>w.j, badge:'2級'},
+    ];
+    sources.forEach(({arr,getW,getM,badge})=>{
+      const hit=arr.find(w=>getW(w).toLowerCase()===ql);
+      if(hit)results.push(`📚 <b>${getW(hit)}</b> — ${getM(hit)} <span style="font-size:9px;opacity:.6">[${badge}]</span>`);
+    });
+    // Phrase match
+    [
+      {arr:P1P,badge:'Pass単熟語'},
+      {arr:E2P,badge:'2級熟語'},
+    ].forEach(({arr,badge})=>{
+      const hit=arr.find(w=>w.e.toLowerCase()===ql||(ql.length>4&&w.e.toLowerCase().includes(ql)));
+      if(hit&&!results.find(r=>r.includes(hit.e)))
+        results.push(`🔗 <b>${hit.e}</b> — ${hit.j} <span style="font-size:9px;opacity:.6">[${badge}]</span>`);
+    });
+    // Irregular verbs
+    const ir=IV.find(v=>v.b===ql||v.p===ql||v.pp===ql||(v.p&&v.p.split('/').some(x=>x.trim()===ql)));
+    if(ir)results.push(`🔄 <b>${ir.b}</b> → ${ir.p} → ${ir.pp} ／ ${ir.m}`);
+    // Idiom
+    const idr=ID.find(d=>d.w.toLowerCase()===ql||(ql.length>4&&d.w.toLowerCase().includes(ql)));
+    if(idr)results.push(`💬 <b>${idr.w}</b> — ${idr.m}`);
+    // EX
+    const exr=EX.find(e=>e.ph.toLowerCase()===ql||(ql.length>4&&e.ph.toLowerCase().includes(ql)));
+    if(exr)results.push(`📝 <b>${exr.ph}</b> — ${exr.ja}`);
+  }else{
+    // JA → EN: search all arrays
+    const allWords=[
+      ...V.map(w=>({e:w.w,j:w.m,badge:'準1'})),
+      ...P1W.map(w=>({e:w.e,j:w.j,badge:'Pass単'})),
+      ...E2W.map(w=>({e:w.e,j:w.j,badge:'2級'})),
+      ...P1P.map(w=>({e:w.e,j:w.j,badge:'熟語'})),
+      ...E2P.map(w=>({e:w.e,j:w.j,badge:'2級熟語'})),
+      ...ID.map(d=>({e:d.w,j:d.m,badge:'IDM'})),
+    ];
+    const seen=new Set();
+    allWords.filter(w=>w.j.includes(q)).slice(0,5).forEach(w=>{
+      if(!seen.has(w.e)){seen.add(w.e);results.push(`🔎 <b>${w.e}</b> — ${w.j} <span style="font-size:9px;opacity:.6">[${w.badge}]</span>`);}
+    });
+  }
+  return results.length?results:null;
+}
+
+/* ═══ TRANSLATION ═══ */
 const inp=document.getElementById('ti');
-const ar=()=>{inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,window.innerHeight*.26)+'px';};
-inp.addEventListener('input',ar);
+const trScrim=document.getElementById('tr-scrim');
+const trSheet=document.getElementById('tr-sheet');
+const trBody=document.getElementById('tr-body');
+let trOpen=false,trTimer=null;
+
+inp.addEventListener('input',()=>{
+  inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,100)+'px';
+  const t=inp.value.trim();
+  clearTimeout(trTimer);
+  if(!t){closeTr();return;}
+  openTr(true);
+  trTimer=setTimeout(()=>doTr(t),280);
+});
 inp.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();haptic();const t=inp.value.trim();if(t)doTr(t);}
 });
 inp.addEventListener('focus',()=>haptic());
-async function doTr(t){
-  if(!t)return;
-  const tsh=document.getElementById('tsheet');
-  const tlEl=document.getElementById('tl'),trEl=document.getElementById('tr'),tsEl=document.getElementById('ts');
-  const lc=localLookup(t);
-  if(lc){tlEl.innerHTML=lc;tlEl.style.display='block';}else{tlEl.style.display='none';}
-  trEl.textContent='…';tsEl.textContent='';
-  openSheet(tsh);
-  try{
-    const j=/[ぁ-んァ-ヶー一-龠]/.test(t);
-    const res=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(t)}&langpair=${j?'ja|en':'en|ja'}`);
-    const d=await res.json();
-    const x=d.responseData?.translatedText;
-    if(x&&x!=='N/A'&&!x.toLowerCase().includes('mymemory')){
-      trEl.textContent=x;tsEl.textContent=j?'JA → EN':'EN → JA';haptic.confirm();
-    }else{trEl.textContent=lc?'':'翻訳できませんでした';}
-  }catch(err){trEl.textContent=lc?'':'オフラインです';}
+
+function openTr(spinner){
+  if(!trOpen){trOpen=true;trScrim.classList.add('on');trSheet.classList.add('open');}
+  if(spinner)trBody.innerHTML='<div class="tr-spin-wrap"><div class="tr-spin"></div>検索中...</div>';
 }
+function closeTr(){
+  if(!trOpen)return;
+  trOpen=false;trScrim.classList.remove('on');trSheet.classList.remove('open');
+  setTimeout(()=>{if(!trOpen)trBody.innerHTML='';},360);
+};
+trScrim.addEventListener('click',()=>{window.closeTr&&window.closeTr();haptic();});
+
+// Swipeable tr sheet
+(()=>{
+  const hdl=document.getElementById('tr-hdl');
+  let sy=0,drag=false;
+  hdl.addEventListener('click',closeTr);
+  hdl.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;drag=true;trSheet.style.transition='none';},{passive:true});
+  hdl.addEventListener('touchmove',e=>{if(!drag)return;const d=e.touches[0].clientY-sy;if(d>0)trSheet.style.transform=`translateY(${d}px)`;},{passive:true});
+  hdl.addEventListener('touchend',e=>{if(!drag)return;drag=false;trSheet.style.transition='';if(e.changedTouches[0].clientY-sy>60){closeTr();haptic();}else trSheet.style.transform='';},{passive:true});
+})();
+
+async function doTr(text){
+  const isJa=/[ぁ-んァ-ヶー一-龠]/.test(text);
+  const local=localLookup(text);
+  let html='';
+  if(local){
+    html+=local.map(l=>`<div class="tr-item"><div class="tr-local">${l}</div></div>`).join('');
+  }
+  html+='<div id="tr-api"><div class="tr-spin-wrap"><div class="tr-spin"></div>翻訳API...</div></div>';
+  trBody.innerHTML=html;
+
+  const results=[];
+  // MyMemory API – reliable free CDN
+  try{
+    const lp=isJa?'ja|en':'en|ja';
+    const url=`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${lp}`;
+    const res=await fetch(url);
+    const data=await res.json();
+    const main=data.responseData?.translatedText;
+    if(main&&main!=='N/A'&&!/mymemory/i.test(main)){
+      results.push({text:main,dir:isJa?'JA → EN':'EN → JA',q:'メイン'});
+    }
+    // Extra candidates from matches
+    if(Array.isArray(data.matches)){
+      const seen=new Set([main?.toLowerCase()]);
+      data.matches.slice(0,10).forEach(m=>{
+        const t2=m.translation;const q2=parseFloat(m.quality)||0;
+        if(t2&&!seen.has(t2.toLowerCase())&&!/mymemory/i.test(t2)&&q2>55){
+          seen.add(t2.toLowerCase());
+          results.push({text:t2,dir:isJa?'JA → EN (候補)':'EN → JA (候補)',q:`一致率 ${Math.round(q2)}%`});
+        }
+      });
+    }
+  }catch(e){/* network error */}
+
+  const apiEl=document.getElementById('tr-api');
+  if(apiEl){
+    if(results.length){
+      apiEl.innerHTML=results.map(r=>`<div class="tr-item"><div class="tr-dir">${r.dir}</div><div class="tr-txt">${r.text}</div><div class="tr-q">${r.q}</div></div>`).join('');
+      haptic.confirm();
+    }else if(!local){
+      apiEl.innerHTML='<div style="color:var(--sub);text-align:center;font-size:12px;padding:16px">翻訳できませんでした</div>';
+    }else{
+      apiEl.innerHTML='';
+    }
+  }
+}
+
 document.getElementById('bsr').addEventListener('click',()=>{
   haptic.confirm();const q=inp.value.trim();
   if(q)window.open(`https://www.google.com/search?q=${encodeURIComponent(q)}&hl=ja`,'_blank');
 });
-document.getElementById('bgo').addEventListener('click',()=>{haptic();const t=inp.value.trim();if(t)doTr(t);});
+document.getElementById('bgo').addEventListener('click',()=>{
+  haptic();const t=inp.value.trim();if(t){openTr(true);clearTimeout(trTimer);doTr(t);}
+});
 
-/* ═══ CARD SWIPE ═══ */
-let sx=0;
-document.getElementById('fw').addEventListener('touchstart',e=>{sx=e.touches[0].clientX;},{passive:true});
-document.getElementById('fw').addEventListener('touchend',e=>{
-  if(!flipped)return;const dx=e.changedTouches[0].clientX-sx;
-  if(Math.abs(dx)>55){dx>0?R('g'):R('f');}
-},{passive:true});
+/* ═══ HISTORY ═══ */
+window.showH=function(filter,pIdx){
+  haptic();
+  const hist=DK[pIdx].hist;
+  const fl=hist.filter(h=>h.r===filter);
+  const lb={g:'✓ 正解',h:'△ むずい',f:'✗ 忘れた'};
+  document.getElementById('hs-ttl').textContent=lb[filter]+' — '+fl.length+'件';
+  document.getElementById('hs-list').innerHTML=!fl.length
+    ?'<div style="color:var(--sub);text-align:center;font-size:12px;padding:20px">まだ記録がありません</div>'
+    :fl.map(h=>`<div class="hrow"><div class="hbdg ${h.r==='g'?'hg-b':h.r==='h'?'hh-b':'hf-b'}">${h.r==='g'?'✓':h.r==='h'?'△':'✗'}</div><div><div class="hw">${h.w}</div><div class="hm">${h.m}</div></div></div>`).join('');
+  document.getElementById('hsheet').classList.add('open');
+  document.getElementById('hs-scrim').classList.add('on');
+};
+document.getElementById('hs-scrim').addEventListener('click',()=>{
+  haptic();
+  document.getElementById('hsheet').classList.remove('open');
+  document.getElementById('hs-scrim').classList.remove('on');
+});
+(()=>{
+  const sh=document.getElementById('hsheet'),hdl=document.getElementById('hs-hdl');
+  let sy=0,drag=false;
+  hdl.addEventListener('click',()=>{sh.classList.remove('open');document.getElementById('hs-scrim').classList.remove('on');});
+  hdl.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;drag=true;sh.style.transition='none';},{passive:true});
+  hdl.addEventListener('touchmove',e=>{if(!drag)return;const d=e.touches[0].clientY-sy;if(d>0)sh.style.transform=`translateY(${d}px)`;},{passive:true});
+  hdl.addEventListener('touchend',e=>{if(!drag)return;drag=false;sh.style.transition='';if(e.changedTouches[0].clientY-sy>60){sh.classList.remove('open');document.getElementById('hs-scrim').classList.remove('on');haptic();}else sh.style.transform='';},{passive:true});
+})();
 
 /* ═══ INIT ═══ */
-buildLists();
-render();
-</script></body></html>
+setTimeout(()=>{const s=document.getElementById('splash');if(s)s.style.display='none';},960);
+</script>
+
+</body>
+</html>
