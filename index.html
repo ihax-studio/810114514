@@ -3,48 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Neosaurs - ローカル版</title>
+    <title>Neosaurs</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🦕%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r160/three.min.js"></script>
+    
     <style>
-        /* css2ファイルの内容 */
-        @font-face {
-            font-family: 'Orbitron';
-            font-style: normal;
-            font-weight: 400;
-            font-display: swap;
-            src: url(https://fonts.gstatic.com/s/orbitron/v35/yMJRMIlzdpvBhQQL_Qq7dy1biN15.woff2) format('woff2');
-            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
-        @font-face {
-            font-family: 'Orbitron';
-            font-style: normal;
+
+        html, body {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
+            touch-action: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro', sans-serif;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #fff;
+            transform: scale(0.8);
+            opacity: 0;
+            transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1), opacity 1s ease;
+            overscroll-behavior: none;
+            touch-action: manipulation;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+
+        body.loaded {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw !important;
+            width: 100dvw !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            touch-action: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        input, textarea {
+            -webkit-user-select: text !important;
+            user-select: text !important;
+        }
+
+        .menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 2rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .glow-text {
+            font-size: 4rem;
+            font-weight: 900;
+            color: #00ff88;
+            text-shadow: 0 0 40px rgba(0, 255, 136, 0.5), 0 0 80px rgba(0, 204, 255, 0.3);
+            margin-bottom: 0.5rem;
+            opacity: 1;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+            letter-spacing: 0.3em;
+            opacity: 1;
+        }
+
+        .platform-badge {
+            padding: 0.5rem 1.5rem;
+            background: rgba(0, 255, 136, 0.2);
+            border-radius: 30px;
+            border: 1px solid rgba(0, 255, 136, 0.4);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 1;
+        }
+
+        .liquid-button {
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
             font-weight: 700;
-            font-display: swap;
-            src: url(https://fonts.gstatic.com/s/orbitron/v35/yMJRMIlzdpvBhQQL_Qq7dy1biN15.woff2) format('woff2');
-            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            position: relative;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* スタイルシートの主要部分 */
-        .no-scroll{overflow:hidden;height:100vh;height:100dvh}
-        html{height:100%;height:100vh;height:100dvh;height:100lvh;height:-webkit-fill-available;width:100%;width:100vw;width:100dvw;overflow:hidden;position:fixed;top:0;left:0;right:0;bottom:0;overscroll-behavior:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);padding:0}
-        *{margin:0;padding:0;box-sizing:border-box;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
-        body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro',sans-serif;overflow:hidden;background:linear-gradient(135deg,#0a0a0a 0%,#1a1a2e 100%);color:#fff;transform:scale(0.8);opacity:0;transition:transform 1s cubic-bezier(0.22,1,0.36,1),opacity 1s ease;overscroll-behavior:none;touch-action:manipulation;height:100%;height:100vh;height:100dvh;height:100lvh;height:-webkit-fill-available;min-height:100vh;min-height:100dvh;min-height:100lvh;min-height:-webkit-fill-available;width:100%;width:100vw;width:100dvw;position:fixed;top:0;left:0;right:0;bottom:0;padding:0;margin:0;border:none;outline:none;box-shadow:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
-        body.loaded{transform:scale(1);opacity:1}
-        .sf-font{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro',sans-serif}
-        canvas{display:block;width:100vw !important;width:100dvw !important;height:100vh !important;height:100dvh !important;height:100lvh !important;max-width:none !important;max-height:none !important;touch-action:none;position:fixed;top:0;left:0;right:0;bottom:0}
-        input, textarea { -webkit-user-select: text !important; user-select: text !important; }
+        .liquid-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
 
-        .menu{position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:1000;padding:2rem;padding-top:calc(env(safe-area-inset-top,0px) + 2rem);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 70px);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
-        .glow-text{font-size:4rem;font-weight:900;color:#00ff88;text-shadow:0 0 40px rgba(0,255,136,0.5),0 0 80px rgba(0,204,255,0.3);margin-bottom:0.5rem;opacity:1}
-        .subtitle{font-size:1.5rem;color:rgba(255,255,255,0.7);margin-bottom:2rem;letter-spacing:0.3em;opacity:1}
-        .platform-badge{padding:0.5rem 1.5rem;background:rgba(0,255,136,0.2);border-radius:30px;border:1px solid rgba(0,255,136,0.4);font-size:0.9rem;margin-bottom:2rem;text-transform:uppercase;letter-spacing:0.1em;opacity:1;transition:height 0.3s ease,padding 0.3s ease,max-height 0.3s ease;text-align:center;max-width:90vw;word-break:break-word}
-        .liquid-button{padding:1rem 3rem;font-size:1.2rem;font-weight:700;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border:2px solid rgba(255,255,255,0.2);border-radius:50px;color:#fff;cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);margin:0.5rem;text-transform:uppercase;letter-spacing:0.1em;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;width:auto;max-width:90vw;flex-shrink:0}
-        .liquid-button::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,0.2);transform:translate(-50%,-50%);transition:width 0.6s,height 0.6s}
-        .liquid-button:hover::before{width:300px;height:300px}
-        .liquid-button:hover{transform:scale(1.05);box-shadow:0 10px 30px rgba(0,255,136,0.3);border-color:rgba(0,255,136,0.6);transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease}
-        .liquid-button:active{transform:translateY(0) scale(0.95)}
-        .liquid-button.primary{background:linear-gradient(135deg,rgba(0,255,136,0.3),rgba(0,204,255,0.3));border-color:rgba(0,255,136,0.5)}
+        .liquid-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
 
-        /* Rainbowモード */
+        .liquid-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+            border-color: rgba(0, 255, 136, 0.6);
+        }
+
+        .liquid-button:active {
+            transform: scale(0.95);
+        }
+
+        .liquid-button.primary {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), rgba(0, 204, 255, 0.3));
+            border-color: rgba(0, 255, 136, 0.5);
+        }
+
         @keyframes rainbowShift {
             0% { background-position: 0% 50%; }
             25% { background-position: 50% 100%; }
@@ -52,6 +181,7 @@
             75% { background-position: 50% 0%; }
             100% { background-position: 0% 50%; }
         }
+
         body.rainbow-bg {
             background: linear-gradient(135deg,
                 #ff006640, #ff880040, #ffff0040, #00ff0040,
@@ -59,133 +189,532 @@
             background-size: 400% 400% !important;
             animation: rainbowShift 8s ease infinite !important;
         }
-        body.rainbow-bg .menu {
-            background: rgba(0,0,0,0.3) !important;
+
+        .preloader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 1;
+            backdrop-filter: blur(12px);
+            transition: opacity 0.3s ease;
         }
 
-        .debug-info{
+        .preloader-overlay.loaded {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .preloader-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .preloader-status {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 0.1em;
+            opacity: 1;
+        }
+
+        .preloader-bar-container {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-top: 1rem;
+            overflow: hidden;
+            opacity: 1;
+        }
+
+        .preloader-bar-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            border-radius: 2px;
+        }
+
+        .hud {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 2rem;
+            padding: 1rem 2rem;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .hud-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hud-label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hud-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .debug-panel {
             position: fixed;
             bottom: 10px;
             left: 10px;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.8);
             color: #00ff88;
             padding: 10px 15px;
             border-radius: 8px;
             font-family: monospace;
             font-size: 12px;
             z-index: 10000;
-            max-width: 300px;
-            line-height: 1.5;
+            max-width: 280px;
+            line-height: 1.4;
+            border: 1px solid rgba(0, 255, 136, 0.3);
         }
-        .debug-status{
-            margin: 5px 0;
+
+        .debug-status {
+            margin: 4px 0;
         }
-        .status-ok{
+
+        .status-ok {
             color: #00ff88;
         }
-        .status-warn{
+
+        .status-warn {
             color: #ffaa00;
         }
-        .status-error{
+
+        .status-error {
             color: #ff4444;
+        }
+
+        .game-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+        }
+
+        .game-container.active {
+            display: block;
+        }
+
+        /* ゲーム画面 */
+        #gameScreen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+        }
+
+        /* ゲームUI */
+        .game-ui {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 500;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            z-index: 501;
+            pointer-events: auto;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .back-button:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+            .glow-text {
+                font-size: 3rem;
+            }
+
+            .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .liquid-button {
+                padding: 0.8rem 2rem;
+                font-size: 1rem;
+            }
+
+            .hud {
+                gap: 1rem;
+                padding: 0.8rem 1.5rem;
+            }
+
+            .debug-panel {
+                font-size: 10px;
+                max-width: 240px;
+            }
         }
     </style>
 </head>
 <body class="loaded">
-    <div class="menu">
-        <div class="glow-text">Neosaurs</div>
-        <div class="subtitle">GAME</div>
-        <div class="platform-badge">ローカルテスト版</div>
-        
-        <button class="liquid-button primary" id="welcomeStartButton">🎮 スタート</button>
-        <button class="liquid-button" id="welcomeEditorButton">✏️ エディタ</button>
-        <button class="liquid-button" id="welcomeSettingsButton">⚙️ 設定</button>
-        
-        <div style="margin-top: 2rem; font-size: 0.9rem; color: rgba(255,255,255,0.5);">
-            <p>デバッグ情報:</p>
-            <div id="debug-container"></div>
+    <!-- プリローダー -->
+    <div id="preloaderScreen" class="preloader-overlay loaded">
+        <div class="preloader-content">
+            <div id="preloaderStatus" class="preloader-status">読み込み中... 100%</div>
+            <div id="preloaderBar" class="preloader-bar-container">
+                <div id="preloaderBarFill" class="preloader-bar-fill"></div>
+            </div>
         </div>
     </div>
 
-    <div id="debug-panel" class="debug-info">
-        <div style="font-weight: bold; margin-bottom: 8px;">🔧 ローカル版</div>
-        <div class="debug-status status-ok">✓ HTMLロード完了</div>
-        <div class="debug-status status-ok">✓ CSSロード完了</div>
-        <div id="three-status" class="debug-status status-warn">⏳ Three.jsロード中...</div>
-        <div style="margin-top: 8px; font-size: 10px; opacity: 0.7;">
-            <div id="memory-info">メモリ: 測定中...</div>
-            <div id="fps-info">FPS: --</div>
+    <!-- メインメニュー -->
+    <div id="mainMenu" class="menu">
+        <div class="glow-text">Neosaurs</div>
+        <div class="subtitle">GAME</div>
+        <div class="platform-badge">🚀 Netlify Deployed</div>
+        
+        <button class="liquid-button primary" id="playButton">▶️ PLAY</button>
+        <button class="liquid-button" id="editorButton">✏️ EDITOR</button>
+        <button class="liquid-button" id="settingsButton">⚙️ SETTINGS</button>
+        
+        <div style="margin-top: 3rem; font-size: 0.9rem; color: rgba(255,255,255,0.5); text-align: center;">
+            <p>🎮 Tap to play</p>
+        </div>
+    </div>
+
+    <!-- ゲームコンテナ -->
+    <div id="gameContainer" class="game-container">
+        <canvas id="gameScreen"></canvas>
+        <div class="game-ui">
+            <button class="back-button" id="backButton">← BACK</button>
+            <div id="gameHUD" class="hud">
+                <div class="hud-item">
+                    <div class="hud-label">SCORE</div>
+                    <div class="hud-value" id="scoreDisplay">0</div>
+                </div>
+                <div class="hud-item">
+                    <div class="hud-label">TIME</div>
+                    <div class="hud-value" id="timeDisplay">0:00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- デバッグパネル -->
+    <div class="debug-panel">
+        <div style="font-weight: bold; margin-bottom: 6px;">🔧 DEBUG</div>
+        <div class="debug-status status-ok">✓ HTML</div>
+        <div class="debug-status status-ok">✓ CSS</div>
+        <div id="threeStatus" class="debug-status status-ok">✓ Three.js r160</div>
+        <div id="audioStatus" class="debug-status status-ok">✓ Audio API</div>
+        <div style="margin-top: 6px; font-size: 10px; opacity: 0.7; border-top: 1px solid rgba(0,255,136,0.2); padding-top: 4px;">
+            <div id="fpsInfo">FPS: 60</div>
+            <div id="memoryInfo">Memory: 0MB</div>
+            <div id="deviceInfo">Device: Desktop</div>
         </div>
     </div>
 
     <script>
-        // デバッグログシステム
-        const debugLog = {
-            addStatus: function(elementId, message, status = 'ok') {
-                const el = document.getElementById(elementId);
-                if (el) {
-                    const statusClass = status === 'ok' ? 'status-ok' : status === 'error' ? 'status-error' : 'status-warn';
-                    el.innerHTML = `<span class="${statusClass}">
-                        ${status === 'ok' ? '✓' : status === 'error' ? '✗' : '⏳'} ${message}
-                    </span>`;
-                }
-            },
-            init: function() {
-                console.log('[Neosaurs Local] スタート');
-                this.addStatus('three-status', 'Three.jsなし（スタブモード）', 'warn');
-            }
+        // ============================================
+        // グローバル変数
+        // ============================================
+        const game = {
+            isRunning: false,
+            score: 0,
+            startTime: 0,
+            renderer: null,
+            scene: null,
+            camera: null,
         };
 
-        debugLog.init();
-
-        // ボタンイベント
-        document.getElementById('welcomeStartButton')?.addEventListener('click', function() {
-            alert('🎮 ゲームモード\n\nローカル版ではまだ実装されていません。');
-        });
-
-        document.getElementById('welcomeEditorButton')?.addEventListener('click', function() {
-            alert('✏️ エディタモード\n\nローカル版ではまだ実装されていません。');
-        });
-
-        document.getElementById('welcomeSettingsButton')?.addEventListener('click', function() {
-            alert('⚙️ 設定\n\nローカル版ではまだ実装されていません。');
-        });
-
-        // FPS監視
-        let frameCount = 0;
-        let lastTime = performance.now();
-        function updateFPS() {
-            frameCount++;
-            const now = performance.now();
-            if (now - lastTime >= 1000) {
-                const fps = frameCount;
-                document.getElementById('fps-info').textContent = `FPS: ${fps}`;
-                frameCount = 0;
-                lastTime = now;
+        // ============================================
+        // 初期化
+        // ============================================
+        function init() {
+            console.log('[Neosaurs] Initializing...');
+            
+            // Three.js確認
+            if (window.THREE) {
+                console.log('✓ Three.js loaded: r' + window.THREE.REVISION);
+                document.getElementById('threeStatus').innerHTML = '<span class="status-ok">✓ Three.js r' + window.THREE.REVISION + '</span>';
+            } else {
+                console.warn('✗ Three.js not loaded');
+                document.getElementById('threeStatus').innerHTML = '<span class="status-error">✗ Three.js failed</span>';
             }
-            requestAnimationFrame(updateFPS);
-        }
-        requestAnimationFrame(updateFPS);
 
-        // メモリ情報（対応ブラウザのみ）
+            // Audio API確認
+            try {
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                new AudioContext();
+                console.log('✓ Web Audio API');
+                document.getElementById('audioStatus').innerHTML = '<span class="status-ok">✓ Audio API</span>';
+            } catch (e) {
+                console.warn('✗ Web Audio API:', e.message);
+                document.getElementById('audioStatus').innerHTML = '<span class="status-warn">⚠ Audio API</span>';
+            }
+
+            // デバイス情報
+            const ua = navigator.userAgent;
+            let device = 'Desktop';
+            if (/iPhone|iPad|iPod/.test(ua)) device = 'iOS';
+            else if (/Android/.test(ua)) device = 'Android';
+            
+            document.getElementById('deviceInfo').textContent = `Device: ${device}`;
+
+            // ボタンイベント
+            document.getElementById('playButton').addEventListener('click', startGame);
+            document.getElementById('editorButton').addEventListener('click', () => {
+                alert('📝 Editor mode coming soon!');
+            });
+            document.getElementById('settingsButton').addEventListener('click', () => {
+                alert('⚙️ Settings coming soon!');
+            });
+            document.getElementById('backButton').addEventListener('click', stopGame);
+
+            // ローディング完了
+            setTimeout(() => {
+                document.getElementById('preloaderScreen').classList.add('loaded');
+                document.body.classList.add('loaded');
+            }, 500);
+
+            // FPS監視
+            startFPSMonitor();
+        }
+
+        // ============================================
+        // ゲーム開始
+        // ============================================
+        function startGame() {
+            console.log('[Game] Starting...');
+            game.isRunning = true;
+            game.score = 0;
+            game.startTime = Date.now();
+
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('gameContainer').classList.add('active');
+
+            // Three.js初期化
+            initThreeJS();
+
+            // アニメーションループ
+            gameLoop();
+        }
+
+        // ============================================
+        // ゲーム停止
+        // ============================================
+        function stopGame() {
+            console.log('[Game] Stopping...');
+            game.isRunning = false;
+
+            document.getElementById('mainMenu').style.display = 'flex';
+            document.getElementById('gameContainer').classList.remove('active');
+
+            if (game.renderer) {
+                game.renderer.dispose();
+                game.renderer = null;
+            }
+        }
+
+        // ============================================
+        // Three.js初期化
+        // ============================================
+        function initThreeJS() {
+            if (!window.THREE) {
+                console.warn('Three.js not available');
+                return;
+            }
+
+            const canvas = document.getElementById('gameScreen');
+            
+            // シーン作成
+            game.scene = new THREE.Scene();
+            game.scene.background = new THREE.Color(0x0a0a1a);
+
+            // カメラ作成
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            game.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            game.camera.position.z = 5;
+
+            // レンダラー作成
+            game.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+            game.renderer.setSize(width, height);
+            game.renderer.setPixelRatio(window.devicePixelRatio);
+            game.renderer.shadowMap.enabled = true;
+
+            // ライト
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(5, 5, 5);
+            light.castShadow = true;
+            game.scene.add(light);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            game.scene.add(ambientLight);
+
+            // キューブ（テスト用）
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshStandardMaterial({ 
+                color: 0x00ff88,
+                metalness: 0.5,
+                roughness: 0.5
+            });
+            const cube = new THREE.Mesh(geometry, material);
+            cube.castShadow = true;
+            cube.receiveShadow = true;
+            game.scene.add(cube);
+
+            // ウィンドウリサイズ対応
+            window.addEventListener('resize', onWindowResize);
+
+            console.log('✓ Three.js scene initialized');
+        }
+
+        // ============================================
+        // ゲームループ
+        // ============================================
+        function gameLoop() {
+            if (!game.isRunning) return;
+
+            requestAnimationFrame(gameLoop);
+
+            // キューブ回転
+            if (game.scene && game.scene.children[game.scene.children.length - 1]) {
+                const cube = game.scene.children[game.scene.children.length - 1];
+                if (cube.rotation) {
+                    cube.rotation.x += 0.005;
+                    cube.rotation.y += 0.01;
+                }
+            }
+
+            // スコア更新
+            game.score += Math.floor(Math.random() * 10);
+            document.getElementById('scoreDisplay').textContent = game.score;
+
+            // タイム更新
+            const elapsed = Math.floor((Date.now() - game.startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('timeDisplay').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            // レンダリング
+            if (game.renderer && game.scene && game.camera) {
+                game.renderer.render(game.scene, game.camera);
+            }
+        }
+
+        // ============================================
+        // ウィンドウリサイズ
+        // ============================================
+        function onWindowResize() {
+            if (!game.renderer || !game.camera) return;
+
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            game.camera.aspect = width / height;
+            game.camera.updateProjectionMatrix();
+
+            game.renderer.setSize(width, height);
+        }
+
+        // ============================================
+        // FPS監視
+        // ============================================
+        function startFPSMonitor() {
+            let frameCount = 0;
+            let lastTime = performance.now();
+
+            function updateFPS() {
+                frameCount++;
+                const now = performance.now();
+
+                if (now - lastTime >= 1000) {
+                    document.getElementById('fpsInfo').textContent = `FPS: ${frameCount}`;
+                    frameCount = 0;
+                    lastTime = now;
+                }
+
+                requestAnimationFrame(updateFPS);
+            }
+
+            updateFPS();
+        }
+
+        // ============================================
+        // メモリ監視
+        // ============================================
         if (performance.memory) {
-            setInterval(function() {
+            setInterval(() => {
                 const used = Math.round(performance.memory.usedJSHeapSize / 1048576);
-                const limit = Math.round(performance.memory.jsHeapSizeLimit / 1048576);
-                document.getElementById('memory-info').textContent = `メモリ: ${used}MB/${limit}MB`;
+                document.getElementById('memoryInfo').textContent = `Memory: ${used}MB`;
             }, 1000);
         }
 
-        // ローカル環境確認
-        console.log('=== Neosaurs Local Debug ===');
-        console.log('Protocol:', window.location.protocol);
-        console.log('URL:', window.location.href);
-        console.log('Environment:', window.location.protocol === 'file:' ? 'File System' : 'HTTP Server');
-        
-        if (window.location.protocol === 'file:') {
-            console.warn('⚠️ File:// プロトコルで実行中です。いくつかのAPIが制限される可能性があります。');
-            debugLog.addStatus('three-status', 'File://プロトコル - 一部機能制限', 'warn');
+        // ============================================
+        // イベントリスナー
+        // ============================================
+        window.addEventListener('error', (event) => {
+            console.error('❌ Error:', event.error);
+            document.getElementById('threeStatus').innerHTML = 
+                '<span class="status-error">✗ Runtime Error</span>';
+        });
+
+        // ============================================
+        // 初期化開始
+        // ============================================
+        document.addEventListener('DOMContentLoaded', init);
+
+        // DOMが既に読み込まれている場合
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
         }
+
+        // コンソールログ
+        console.log('%c🎮 Neosaurs', 'color: #00ff88; font-size: 20px; font-weight: bold;');
+        console.log('%cNetlify Deployed Version', 'color: #00ccff; font-size: 14px;');
+        console.log('URL:', window.location.href);
+        console.log('Device:', navigator.userAgent);
     </script>
 </body>
 </html>
