@@ -24,7 +24,7 @@
   --sh:0 4px 20px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.07);
   --shl:0 12px 40px rgba(0,0,0,.15),0 2px 8px rgba(0,0,0,.08);
   /* Input bar fixed height for layout calculations */
-  --ib:calc(58px + 14px + var(--sab));
+  --ib:calc(62px + 20px + var(--sab));
   /* Action buttons height */
   --ab:74px;
 }
@@ -33,9 +33,9 @@ html,body{
   background:linear-gradient(150deg,#eef2f8 0%,#f8f2fc 50%,#edf7f2 100%);
   font-family:-apple-system,"Noto Sans JP",sans-serif;color:var(--tx);
 }
-/* Body reveal: scale 2→1 in 0.5s */
-body{animation:bReveal .5s ease both}
-@keyframes bReveal{from{transform:scale(2);opacity:0}to{transform:scale(1);opacity:1}}
+/* Body reveal: scale 2→0.95 in 0.5s — slight shrink keeps everything inside screen */
+body{animation:bReveal .5s ease both;transform-origin:center center}
+@keyframes bReveal{from{transform:scale(2);opacity:0}to{transform:scale(.95);opacity:1}}
 
 /* ════ GLASS HELPERS ════ */
 .g1{background:var(–gls);backdrop-filter:var(–blr);-webkit-backdrop-filter:var(–blr);border:1px solid var(–bdr)}
@@ -107,21 +107,21 @@ background:linear-gradient(150deg,#eef2f8 0%,#f8f2fc 50%,#edf7f2 100%);
 #app.vis{transform:translateY(0)}
 .app-hdr{
 display:flex;align-items:center;gap:10px;
-padding:calc(var(–sat) + 10px) 14px 10px;
+padding:calc(var(–sat) + 18px) 14px 12px;
 flex-shrink:0;
 background:var(–gls2);backdrop-filter:var(–blr);-webkit-backdrop-filter:var(–blr);
 border-bottom:1px solid var(–ln);
 box-shadow:0 1px 8px rgba(0,0,0,.06);
 }
 .app-back{
-width:32px;height:32px;border-radius:50%;
+width:38px;height:38px;border-radius:50%;
 background:rgba(0,122,255,.1);border:1px solid rgba(0,122,255,.15);
-color:var(–b);font-size:17px;cursor:pointer;
+color:var(–b);font-size:19px;cursor:pointer;
 display:flex;align-items:center;justify-content:center;
 transition:transform .1s;flex-shrink:0;
 }
 .app-back:active{transform:scale(.82)}
-.app-ttl{flex:1;text-align:center;font-size:15px;font-weight:700;color:var(–tx)}
+.app-ttl{flex:1;text-align:center;font-size:16px;font-weight:700;color:var(–tx)}
 .app-dots{
 display:flex;gap:5px;align-items:center;justify-content:center;
 padding:6px 0 4px;flex-shrink:0;
@@ -141,19 +141,20 @@ padding:6px 0 4px;flex-shrink:0;
 .prt{font-size:10px;font-weight:600;color:var(–sub);min-width:38px;text-align:right}
 
 /* ════ SCORE ROW ════ */
-.sr{display:flex;gap:5px;padding:0 12px 4px;flex-shrink:0;align-items:center}
+.sr{display:flex;gap:6px;padding:2px 12px 4px;flex-shrink:0;align-items:center}
 .ch{
 background:rgba(255,255,255,.8);backdrop-filter:var(–blr);-webkit-backdrop-filter:var(–blr);
-border-radius:10px;padding:6px 10px;
-display:flex;align-items:center;gap:4px;
-font-size:11px;font-weight:700;
+border-radius:12px;padding:8px 12px;
+display:flex;align-items:center;gap:5px;
+font-size:12px;font-weight:700;
 border:1px solid rgba(255,255,255,.9);
 cursor:pointer;transition:transform .12s,background .1s;
 font-family:inherit;color:var(–tx);
 box-shadow:0 1px 4px rgba(0,0,0,.08);
+min-height:40px;
 }
 .ch:active{transform:scale(.88);background:#fff}
-.ch-bk{font-size:15px;padding:5px 10px;background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.1)}
+.ch-bk{font-size:18px;padding:7px 14px;background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.1)}
 .ch-bk:disabled{opacity:.22;cursor:default;transform:none!important}
 
 /* ════ CARD AREA ════ */
@@ -234,22 +235,23 @@ border:1px solid var(–bdr);box-shadow:var(–shl);
 These live inside the swipe panel, at the bottom of the panel,
 ABOVE the fixed input bar. The panel itself accounts for –ib padding. */
 .acts{
-display:flex;gap:6px;
-padding:8px 0 0;
+display:flex;gap:8px;
+padding:10px 10px 4px;
 justify-content:center;
 }
 .ab{
-padding:8px 14px;border:none;border-radius:12px;
-font-family:inherit;font-size:10px;font-weight:800;
+padding:12px 20px;border:none;border-radius:14px;
+font-family:inherit;font-size:12px;font-weight:800;
 cursor:pointer;transition:transform .15s;
-display:flex;align-items:center;gap:4px;
-box-shadow:0 1px 6px rgba(0,0,0,.08);
+display:flex;align-items:center;gap:5px;
+box-shadow:0 2px 8px rgba(0,0,0,.10);
+min-height:44px;
 }
 .ab:active{transform:scale(.88)}
 .ab.af{background:rgba(255,59,48,.12);color:#c0001a;border:1px solid rgba(255,59,48,.2)}
 .ab.ah{background:rgba(255,149,0,.12);color:#7a4a00;border:1px solid rgba(255,149,0,.2)}
 .ab.ag{background:rgba(52,199,89,.12);color:#1a7a35;border:1px solid rgba(52,199,89,.2)}
-.ab span{font-size:20px;line-height:1}
+.ab span{font-size:22px;line-height:1}
 
 /* ════ LIST WRAP ════ */
 .lswrap{
@@ -289,10 +291,9 @@ Layout: [  textarea  ][🌐 flag btn]
 position:fixed;
 bottom:0;left:0;right:0;
 z-index:200;
-/* padding: top gap, sides, bottom = safe area */
-padding:8px 14px calc(10px + var(–sab));
-/* subtle gradient so content behind isn’t jarring */
-background:linear-gradient(to top,rgba(240,243,250,.98) 60%,rgba(240,243,250,0) 100%);
+/* Raised higher up from bottom */
+padding:8px 14px calc(16px + var(–sab));
+background:linear-gradient(to top,rgba(240,243,250,.98) 70%,rgba(240,243,250,0) 100%);
 }
 .ti-wrap{
 display:flex;
@@ -353,12 +354,17 @@ box-shadow:var(–shl);
 display:none;
 flex-direction:column;
 gap:4px;
-min-width:160px;
+min-width:170px;
+max-height:55dvh;
+overflow-y:auto;
+-webkit-overflow-scrolling:touch;
+scrollbar-width:none;
 z-index:210;
 transform:scale(.9) translateY(8px);
 opacity:0;
 transition:transform .2s cubic-bezier(.34,1.05,.64,1),opacity .15s;
 }
+#flag-picker::-webkit-scrollbar{display:none}
 #flag-picker.open{
 display:flex;
 opacity:1;
@@ -1406,12 +1412,21 @@ function done(i){
 /* ═══ CARD SWIPE PER PANEL ═══ */
 CFG.forEach((_,i)=>{
   const fw=document.getElementById('fw'+i);
-  let sx=0;
-  fw.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;},{passive:true});
+  let sx=0,sy=0;
+  fw.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
   fw.addEventListener('touchend',e=>{
-    const d=DK[i];if(!d.flipped)return;
+    const d=DK[i];
     const dx=e.changedTouches[0].clientX-sx;
-    if(Math.abs(dx)>55){dx>0?An(i,'g'):An(i,'f');}
+    const dy=e.changedTouches[0].clientY-sy;
+    const adx=Math.abs(dx),ady=Math.abs(dy);
+    // Swipe up on card (front or back) = go back to previous
+    if(ady>70&&ady>adx&&dy<0){
+      if(d.prev){Bk(i);haptic.confirm();}
+      return;
+    }
+    // Horizontal swipe only on flipped card
+    if(!d.flipped)return;
+    if(adx>55&&adx>ady){dx>0?An(i,'g'):An(i,'f');}
   },{passive:true});
   /* Only flip on front face tap; buttons on back face must not trigger flip */
   document.getElementById('fc'+i).onclick=(e)=>{
@@ -1555,12 +1570,26 @@ document.getElementById('bv').textContent=V.length+'語';
    Bonus: Local dictionary lookup
    ════════════════════════════════════════ */
 const LANGS=[
-{code:'en',flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'\u82F1\u8A9E'},
-{code:'ko',flag:'\uD83C\uDDF0\uD83C\uDDF7',name:'\u97D3\u56FD\u8A9E'},
-{code:'zh-CN',flag:'\uD83C\uDDE8\uD83C\uDDF3',name:'\u4E2D\u56FD\u8A9E'},
-{code:'fr',flag:'\uD83C\uDDEB\uD83C\uDDF7',name:'\u4ECF\u8A9E'},
-{code:'es',flag:'\uD83C\uDDEA\uD83C\uDDF8',name:'\u897F\u8A9E'},
-{code:'de',flag:'\uD83C\uDDE9\uD83C\uDDEA',name:'\u72EC\u8A9E'},
+{code:'en',flag:'🇺🇸',name:'英語'},
+{code:'ko',flag:'🇰🇷',name:'韓国語'},
+{code:'zh-CN',flag:'🇨🇳',name:'中国語(簡体)'},
+{code:'zh-TW',flag:'🇹🇼',name:'中国語(繁体)'},
+{code:'fr',flag:'🇫🇷',name:'仏語'},
+{code:'es',flag:'🇪🇸',name:'西語'},
+{code:'de',flag:'🇩🇪',name:'独語'},
+{code:'pt',flag:'🇧🇷',name:'ポルトガル語'},
+{code:'it',flag:'🇮🇹',name:'イタリア語'},
+{code:'ru',flag:'🇷🇺',name:'ロシア語'},
+{code:'ar',flag:'🇸🇦',name:'アラビア語'},
+{code:'hi',flag:'🇮🇳',name:'ヒンディー語'},
+{code:'th',flag:'🇹🇭',name:'タイ語'},
+{code:'vi',flag:'🇻🇳',name:'ベトナム語'},
+{code:'id',flag:'🇮🇩',name:'インドネシア語'},
+{code:'tr',flag:'🇹🇷',name:'トルコ語'},
+{code:'nl',flag:'🇳🇱',name:'オランダ語'},
+{code:'pl',flag:'🇵🇱',name:'ポーランド語'},
+{code:'sv',flag:'🇸🇪',name:'スウェーデン語'},
+{code:'uk',flag:'🇺🇦',name:'ウクライナ語'},
 ];
 let targetLang=LANGS[0];
 /* Flag picker system */
