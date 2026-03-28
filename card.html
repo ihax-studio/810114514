@@ -41,7 +41,7 @@ window.hap.error=()=>{try{window.H.error();}catch(e){}};
   </div>
 </div>
 
-<div class="memo-list" id="memo-list" style="padding-top:10px"></div>
+<div class="memo-list" id="memo-list" style="padding-top:52px"></div>
 
 <div class="bottom-nav">
   <div class="static-left"><button class="action-btn" id="file-toggle" style="font-size:26px">📁</button></div>
@@ -145,6 +145,7 @@ function render(){
     let timer;
     el.addEventListener('touchstart',()=>{if(m.locked)return;timer=setTimeout(()=>{hap();showMenu(m.id);},400);},{passive:true});
     el.addEventListener('touchend',()=>clearTimeout(timer));
+    el.addEventListener('contextmenu',e=>{e.preventDefault();if(!m.locked){hap();showMenu(m.id);}});
     el.querySelector('.like-btn').onclick=e=>{e.stopPropagation();m.liked=!m.liked;hap.confirm();if(m.liked)dots(e.target);save();render();};
     const lk=el.querySelector('.lock-action');
     if(lk)lk.onclick=e=>{e.stopPropagation();qLock(m.id);};
