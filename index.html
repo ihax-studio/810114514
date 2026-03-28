@@ -8,6 +8,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="in Glish">
 <title>iN glish</title>
+<link rel="manifest" href="manifest-inglish.json">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+<meta name="theme-color" content="#eef2f8">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;
@@ -903,21 +907,21 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ LOCK SCREEN (PWA only) ══════════ -->
-<div id="lockscreen" style="display:none;position:fixed;inset:0;z-index:10000;background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;-webkit-user-select:none;user-select:none;transform:scale(1);opacity:1;transition:transform .8s ease,opacity .5s ease" onclick="haptic()">
+<div id="lockscreen" style="display:none;position:fixed;inset:0;z-index:10000;background:#fff;color:#000;font-weight:300;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;-webkit-user-select:none;user-select:none;transform:scale(1);opacity:1;transition:transform .8s ease,opacity .5s ease" onclick="haptic()">
   <div style="display:flex;flex-direction:column;align-items:center;width:100%;height:100%;padding-top:calc(env(safe-area-inset-top,0px) + 60px)">
     <div id="lock-clock" style="font-size:76px;font-weight:200;letter-spacing:-2px;display:flex;overflow:hidden;justify-content:center">
       <span id="lc-h1" style="display:inline-block"></span><span id="lc-h2" style="display:inline-block"></span>
       <span>:</span>
       <span id="lc-m1" style="display:inline-block"></span><span id="lc-m2" style="display:inline-block"></span>
     </div>
-    <div id="lock-date" style="font-size:16px;font-weight:400;opacity:.7;margin-top:4px;text-align:center"></div>
+    <div id="lock-date" style="font-size:16px;font-weight:300;opacity:.5;margin-top:4px;text-align:center"></div>
     <div style="flex:1"></div>
     <div style="position:relative;width:280px;height:60px;margin-bottom:calc(env(safe-area-inset-bottom,0px) + 50px)" onclick="event.stopPropagation()">
-      <div style="position:absolute;inset:0;border-radius:55px;background:rgba(255,255,255,.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);overflow:hidden;box-shadow:inset 1px -1px 11px rgb(255 255 255/12%),inset 1px -1px 55px rgb(255 255 255/11%),1px -1px 1px rgb(243 243 243/22%),-1px 1px 1px rgb(225 225 225/22%),0 2px 18px #0000000d">
-        <div id="lock-slide-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:15px;font-weight:400;letter-spacing:.5px;user-select:none;pointer-events:none">スライドでロック解除</div>
+      <div style="position:absolute;inset:0;border-radius:55px;background:rgba(0,0,0,.08);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04)">
+        <div id="lock-slide-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(0,0,0,.35);font-size:15px;font-weight:400;letter-spacing:.5px;user-select:none;pointer-events:none">スライドでロック解除</div>
       </div>
-      <div id="lock-knob" style="position:absolute;top:4px;left:4px;width:52px;height:52px;background:rgba(255,255,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:10;cursor:pointer;user-select:none;will-change:left;transition:left .5s cubic-bezier(.62,0,.4,1);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:1.1px 1px 0 rgba(255,255,255,.6),-1px -.8px 0 rgba(255,255,255,.4),0 2px 8px rgba(0,0,0,.15)">
-        <svg width="24" height="24" viewBox="0 0 32 32"><polyline points="12,8 20,16 12,24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div id="lock-knob" style="position:absolute;top:4px;left:4px;width:52px;height:52px;background:rgba(0,0,0,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:10;cursor:pointer;user-select:none;will-change:left;transition:left .5s cubic-bezier(.62,0,.4,1);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(0,0,0,.1)">
+        <svg width="24" height="24" viewBox="0 0 32 32"><polyline points="12,8 20,16 12,24" fill="none" stroke="#000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
   </div>
@@ -933,6 +937,19 @@ overflow:hidden;
     <div style="border-top:1px solid rgba(0,0,0,.1);display:flex">
       <button id="lock-dlg-cancel" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;border-right:1px solid rgba(0,0,0,.1);cursor:pointer;font-family:inherit;font-weight:400">キャンセル</button>
       <button id="lock-dlg-ok" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">ロックする</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ NO-FORGOT DIALOG ══════════ -->
+<div id="no-forgot-dlg" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0);transition:background .5s ease;align-items:center;justify-content:center">
+  <div id="no-forgot-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.8);opacity:0;transition:transform .5s cubic-bezier(.34,1.05,.64,1),opacity .4s ease">
+    <div style="padding:22px 20px 10px">
+      <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">忘れた単語がありません</div>
+      <div style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5">クイズで 😰忘れた / 🤔難しい を<br>押してください</div>
+    </div>
+    <div style="border-top:1px solid rgba(0,0,0,.1)">
+      <button id="no-forgot-ok" style="width:100%;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">OK</button>
     </div>
   </div>
 </div>
@@ -1010,9 +1027,17 @@ document.addEventListener('touchstart',function(e){
   if(x<15||x>window.innerWidth-15)e.preventDefault();
 },{passive:false,capture:true});
 
+/* ═══ BLOCK CONTEXT MENU ON MAC (except inputs/textareas) ═══ */
+document.addEventListener('contextmenu',function(e){
+  const tag=e.target.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||e.target.isContentEditable)return;
+  e.preventDefault();
+});
+
 /* ═══ DEVICE DETECTION ═══ */
 const _isIPad=navigator.userAgent.includes('iPad')||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const _isMac=navigator.platform.startsWith('Mac')&&navigator.maxTouchPoints===0;
+const _isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(_isIPad);
 const _isWideScreen=_isIPad||_isMac||window.innerWidth>=768;
 // iPad/Mac: default icon mode, 6 columns. iPhone: default list, 4 columns
 const GRID_COLS=_isWideScreen?6:4;
@@ -2008,6 +2033,31 @@ function hideLockScreen(){
   if(!knob)return;
   let dragging=false,startX=0,knobLeft=4;
   const maxLeft=280-52-8;
+
+  async function doUnlock(){
+    knob.style.left=maxLeft+'px';haptic.confirm();
+    const ls=document.getElementById('lockscreen');
+    ls.style.transition='filter .5s ease';ls.style.filter='blur(12px)';
+    setTimeout(async()=>{
+      try{
+        const c=new Uint8Array(32);crypto.getRandomValues(c);
+        const u=new Uint8Array(16);crypto.getRandomValues(u);
+        await navigator.credentials.create({publicKey:{challenge:c,rp:{name:'iN glish'},user:{id:u,name:'u@l',displayName:'U'},pubKeyCredParams:[{type:'public-key',alg:-7}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000}});
+        haptic.confirm();ls.style.filter='';hideLockScreen();
+      }catch(e){
+        haptic.error();ls.style.filter='';
+        ls.style.animation='lockShake .5s ease';setTimeout(()=>{ls.style.animation='';},500);
+        knob.style.left='4px';knobLeft=4;
+        const lb=document.getElementById('lock-slide-label');if(lb)lb.style.opacity='1';
+      }
+    },600);
+  }
+
+  // Mac: click knob to unlock directly
+  if(_isMac){
+    knob.addEventListener('click',e=>{e.stopPropagation();doUnlock();});
+  }
+
   knob.addEventListener('touchstart',e=>{dragging=true;startX=e.touches[0].clientX-knobLeft;knob.style.transition='none';},{passive:true});
   document.addEventListener('touchmove',e=>{
     if(!dragging)return;
@@ -2020,24 +2070,8 @@ function hideLockScreen(){
   document.addEventListener('touchend',()=>{
     if(!dragging)return;dragging=false;
     knob.style.transition='left .5s cubic-bezier(.62,0,.4,1)';
-    if(knobLeft>maxLeft*0.75){
-      knob.style.left=maxLeft+'px';haptic.confirm();
-      const ls=document.getElementById('lockscreen');
-      ls.style.transition='filter .5s ease';ls.style.filter='blur(12px)';
-      setTimeout(async()=>{
-        try{
-          const c=new Uint8Array(32);crypto.getRandomValues(c);
-          const u=new Uint8Array(16);crypto.getRandomValues(u);
-          await navigator.credentials.create({publicKey:{challenge:c,rp:{name:'iN glish'},user:{id:u,name:'u@l',displayName:'U'},pubKeyCredParams:[{type:'public-key',alg:-7}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000}});
-          haptic.confirm();ls.style.filter='';hideLockScreen();
-        }catch(e){
-          haptic.error();ls.style.filter='';
-          ls.style.animation='lockShake .5s ease';setTimeout(()=>{ls.style.animation='';},500);
-          knob.style.left='4px';knobLeft=4;
-          const lb=document.getElementById('lock-slide-label');if(lb)lb.style.opacity='1';
-        }
-      },600);
-    }else{knob.style.left='4px';knobLeft=4;const lb=document.getElementById('lock-slide-label');if(lb)lb.style.opacity='1';}
+    if(knobLeft>maxLeft*0.75){doUnlock();}
+    else{knob.style.left='4px';knobLeft=4;const lb=document.getElementById('lock-slide-label');if(lb)lb.style.opacity='1';}
   });
 })();
 // Lock settings toggle
@@ -2055,6 +2089,9 @@ document.getElementById('lock-dlg-ok').addEventListener('click',()=>{
   hideDialog('lock-confirm-dlg','lock-confirm-card',()=>{closeSettings();setTimeout(()=>showLockScreen(),500);});
 });
 if(_isPWA&&localStorage.getItem(LOCK_KEY)==='1'){showLockScreen();}
+
+/* No-forgot dialog OK button */
+document.getElementById('no-forgot-ok').addEventListener('click',()=>{haptic();hideDialog('no-forgot-dlg','no-forgot-card');});
 
 /* ═══ NOTIFICATIONS ═══ */
 let _notifEnabled=localStorage.getItem('inglish_notif')==='1';
@@ -2111,8 +2148,9 @@ function openIframe(url,title){
   const ov=document.getElementById('iframe-overlay');
   document.getElementById('iframe-content').src=url;
   ov.style.visibility='visible';
-  ov.style.transform='translateX(100%)';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{ov.style.transform='translateX(0)';}));
+  ov.style.transform='translateX(100%) scale(0.8)';
+  ov.style.transition='transform .5s ease';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ov.style.transform='translateX(0) scale(1)';}));
 }
 document.getElementById('iframe-back').addEventListener('click',()=>{
   haptic();
@@ -2148,6 +2186,12 @@ function openSettings(){
     sidebar.style.display='none';
     // Show all sections on iPhone
     document.querySelectorAll('.s-section').forEach(s=>{s.style.display='';});
+  }
+  // Hide haptic settings on non-iOS
+  if(!_isIOS){
+    document.getElementById('ss-sound').style.display='none';
+    const sndNav=document.querySelector('.s-nav-item[data-section="sound"]');
+    if(sndNav)sndNav.style.display='none';
   }
   // Sync toggles
   document.getElementById('s-haptic').classList.toggle('on',localStorage.getItem('inglish_haptic')!=='0');
@@ -2871,6 +2915,7 @@ document.getElementById('ti').addEventListener('input',()=>{
   if(q.length>=1){
     const matches=SEARCH_APPS.filter(a=>a.name.toLowerCase().includes(q));
     if(matches.length>0){
+      closeTrOverlay();clearTimeout(trTimer);
       srDiv.style.display='block';
       srDiv.innerHTML=matches.map(a=>
         `<div data-act="${a.action}" style="padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.06);transition:transform .5s,opacity .3s"><span style="font-size:18px">${a.icon}</span><span style="font-size:13px;color:#000">${a.name}</span></div>`
@@ -3110,6 +3155,7 @@ if(listWrap&&listWrap.style.display!=='none'){
   });
 }
 if(!t){closeTrOverlay();return;}
+if(srDiv.style.display==='block')return;
 openTrOverlay();
 trCard.innerHTML='<div class="tr-handle"></div><div style="text-align:center;padding:24px"><div style="width:22px;height:22px;border:2.5px solid rgba(0,0,0,.1);border-top-color:var(--b);border-radius:50%;animation:spin .6s linear infinite;margin:0 auto"></div></div>';
 trTimer=setTimeout(()=>doTr(t),300);
@@ -3262,7 +3308,8 @@ function showIconGrid(){
   
   const grid=document.createElement('div');
   grid.id='icon-grid';
-  grid.style.cssText='display:grid;grid-template-columns:repeat('+GRID_COLS+',1fr);gap:'+gap+';padding:24px 10px 16px;justify-items:center;';
+  const iconPadH=_isWideScreen?'20px':'10px';
+  grid.style.cssText='display:grid;grid-template-columns:repeat('+GRID_COLS+',1fr);gap:'+gap+';padding:24px '+iconPadH+' 16px;justify-items:center;';
   
   const cards=[...document.querySelectorAll('.hcard')];
   const allIcons=[];
@@ -3555,7 +3602,7 @@ window.openS=function(type,arg){
       });
     });
     if(!items.length){
-      alert('忘れた単語がありません。クイズで😰忘れた/🤔難しいを押してください。');
+      showDialog('no-forgot-dlg','no-forgot-card');
       return;
     }
     // Inject into deck 0 temporarily for the retry
@@ -3707,6 +3754,11 @@ document.getElementById('g-star').addEventListener('click',()=>{
 const floatBar=document.getElementById('float-bar');
 
 // body animation handles splash — no separate element needed
+
+/* ═══ SERVICE WORKER REGISTRATION ═══ */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
 </script>
 
 </body>
