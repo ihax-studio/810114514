@@ -17,262 +17,205 @@ window.hap.error=()=>{try{window.H.error();}catch(e){}};
 body{background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;overflow:hidden;height:100dvh;display:flex;flex-direction:column;-webkit-user-select:none;user-select:none}
 #vf{flex:1;position:relative;overflow:hidden;background:#111}
 video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .15s;z-index:5}
-#flash.on{opacity:.6;transition:opacity 0s}
-#ctrls{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+20px);background:#000;flex-shrink:0}
-.ctrl-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:opacity .3s,transform .15s}
-.ctrl-btn:active{transform:scale(.88)}
-.ctrl-btn.dim{opacity:.3;pointer-events:none}
-#shutter{width:72px;height:72px;border-radius:50%;background:transparent;border:4px solid rgba(255,255,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s}
-#shutter:active{transform:scale(.88)}
-#shutter .inn{width:58px;height:58px;border-radius:50%;background:#fff}
-/* Top bar */
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:5}
+#ctrls{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+20px);background:#000;flex-shrink:0}
+.cb{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:opacity .3s,transform .15s}
+.cb:active{transform:scale(.88)}
+.cb.dim{opacity:.3;pointer-events:none}
+#sh{width:72px;height:72px;border-radius:50%;background:transparent;border:4px solid rgba(255,255,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s}
+#sh:active{transform:scale(.88)}
+#sh .inn{width:58px;height:58px;border-radius:50%;background:#fff}
 #top{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:flex-end;padding:calc(env(safe-area-inset-top,0px)+8px) 16px 8px;gap:10px}
-.top-btn{width:42px;height:42px;border-radius:50%;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:background .2s}
-.top-btn.active{background:rgba(255,204,0,.7);color:#000}
+.tb{width:42px;height:42px;border-radius:50%;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:background .2s}
+.tb.on{background:rgba(255,204,0,.7);color:#000}
 /* Preview */
 #pv{position:fixed;inset:0;z-index:100;background:#000;display:none;flex-direction:column}
 #pv.show{display:flex}
-#pv-top{display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px)+8px) 16px 8px;background:rgba(0,0,0,.8);z-index:2}
-#pv-wrap{flex:1;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
-#pv-img{max-width:100%;max-height:100%;transition:filter .3s}
-#pv-bottom{display:flex;align-items:center;justify-content:center;padding:16px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+16px);background:rgba(0,0,0,.8);gap:12px}
-#pv-bottom button{background:none;border:none;color:#fff;font-size:14px;font-family:inherit;cursor:pointer;padding:10px 20px;border-radius:55px}
-#pv-bottom .save{background:rgba(0,122,255,.9);font-weight:600}
+#pvw{flex:1;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
+#pvi{max-width:100%;max-height:100%;transition:filter .3s,transform .2s}
+#pvb{display:flex;align-items:center;justify-content:center;padding:16px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+16px);background:rgba(0,0,0,.8);gap:12px}
+#pvb button{background:none;border:none;color:#fff;font-size:14px;font-family:inherit;cursor:pointer;padding:10px 20px;border-radius:55px}
+#pvb .sv{background:rgba(0,122,255,.9);font-weight:600}
 /* Save dialog */
-#sdlg{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);align-items:center;justify-content:center;transition:background .3s}
-#sdlg.show{display:flex}
-#scard{width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .3s ease,opacity .3s ease}
-#sdlg.show #scard{transform:scale(1);opacity:1}
-/* Camera select */
-#cam-sel{display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,0);transition:background .5s ease;align-items:flex-end;justify-content:center;padding-bottom:calc(env(safe-area-inset-bottom,0px)+20px)}
-#cam-sel.show{display:flex;background:rgba(0,0,0,.5)}
-#cam-list{width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:translateY(100px);opacity:0;transition:transform .5s cubic-bezier(.34,1.05,.64,1),opacity .4s ease}
-#cam-sel.show #cam-list{transform:translateY(0);opacity:1}
-.cam-opt{padding:14px;font-size:16px;color:#007aff;border:none;background:none;width:100%;cursor:pointer;font-family:inherit;border-bottom:1px solid rgba(0,0,0,.1)}
-.cam-opt:last-child{border:none}
-.cam-opt.cancel{color:rgba(0,0,0,.4)}
+#sd{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0);align-items:center;justify-content:center;transition:background .3s;visibility:hidden;display:flex;pointer-events:none}
+#sd.show{visibility:visible;background:rgba(0,0,0,.5);pointer-events:auto}
+#sc{width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .3s ease,opacity .3s ease}
+#sd.show #sc{transform:scale(1);opacity:1}
+/* Camera select - visibility based for animation */
+#cs{position:fixed;inset:0;z-index:150;display:flex;align-items:flex-end;justify-content:center;padding-bottom:calc(env(safe-area-inset-bottom,0px)+20px);background:rgba(0,0,0,0);visibility:hidden;pointer-events:none;transition:background .5s ease}
+#cs.show{visibility:visible;pointer-events:auto;background:rgba(0,0,0,.5)}
+#cl{width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:translateY(120px);opacity:0;transition:transform .5s cubic-bezier(.34,1.05,.64,1),opacity .4s ease}
+#cs.show #cl{transform:translateY(0);opacity:1}
+.co{padding:14px;font-size:16px;color:#007aff;border:none;background:none;width:100%;cursor:pointer;font-family:inherit;border-bottom:1px solid rgba(0,0,0,.1)}
+.co:last-child{border:none}
+.co.x{color:rgba(0,0,0,.4)}
+/* Error overlay */
+#err{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+#err.show{display:flex}
 </style>
 </head>
 <body>
-
 <div id="vf">
   <video id="cam" autoplay playsinline muted></video>
   <div id="flash"></div>
-  <div id="top">
-    <button class="top-btn" id="wb-btn" onclick="toggleWB()">☀︎</button>
-  </div>
+  <div id="top"><button class="tb" id="wb" onclick="toggleWB()">☀︎</button></div>
 </div>
-
 <div id="ctrls">
-  <button class="ctrl-btn" id="split-btn" onclick="splitCapture()" title="2分割撮影">⬜⬛</button>
-  <div id="shutter" onclick="capture()"><div class="inn"></div></div>
-  <button class="ctrl-btn" id="sw-btn" onclick="openCamSelect()">↔︎</button>
+  <button class="cb" id="sp" onclick="splitCapture()">⬜⬛</button>
+  <div id="sh" onclick="capture()"><div class="inn"></div></div>
+  <button class="cb" id="sw" onclick="openCS()">↔︎</button>
 </div>
-
 <div id="pv">
-  <div id="pv-top">
+  <div style="display:flex;align-items:center;padding:calc(env(safe-area-inset-top,0px)+8px) 16px 8px;background:rgba(0,0,0,.8);z-index:2">
     <button onclick="closePV()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;font-family:inherit;padding:8px 12px">← 戻る</button>
-    <button class="top-btn" id="pv-wb" onclick="togglePVFilter()">☀︎</button>
+    <div style="flex:1"></div>
+    <button class="tb" id="pvw2" onclick="togglePVF()">☀︎</button>
   </div>
-  <div id="pv-wrap">
-    <img id="pv-img">
-  </div>
-  <div id="pv-bottom">
+  <div id="pvw"><img id="pvi"></div>
+  <div id="pvb">
     <button onclick="closePV()">キャンセル</button>
-    <button class="save" onclick="savePV()">写真を保存</button>
+    <button class="sv" onclick="savePV()">写真を保存</button>
   </div>
 </div>
-
-<div id="sdlg">
-  <div id="scard">
+<div id="sd">
+  <div id="sc">
     <div style="padding:22px 20px 10px">
       <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">まとめて保存</div>
-      <div id="sc-txt" style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5"></div>
+      <div id="st" style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5"></div>
     </div>
     <div style="border-top:1px solid rgba(0,0,0,.1);display:flex">
-      <button onclick="dismissS()" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;border-right:1px solid rgba(0,0,0,.1);cursor:pointer;font-family:inherit">あとで</button>
-      <button onclick="saveAllS()" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">保存</button>
+      <button onclick="dS()" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;border-right:1px solid rgba(0,0,0,.1);cursor:pointer;font-family:inherit">あとで</button>
+      <button onclick="sAll()" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">保存</button>
     </div>
   </div>
 </div>
-
-<div id="cam-sel">
-  <div id="cam-list"></div>
+<div id="cs"><div id="cl"></div></div>
+<div id="err">
+  <div style="font-size:48px">📷</div>
+  <div style="font-size:16px;text-align:center;padding:0 40px;opacity:.7">カメラへのアクセスが<br>拒否されました</div>
+  <button onclick="goBack()" style="margin-top:12px;padding:12px 28px;border-radius:55px;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:14px;cursor:pointer;font-family:inherit">ホームに戻る</button>
 </div>
-
 <script>
 const CK='cam_photos';
 let photos=[];try{photos=JSON.parse(localStorage.getItem(CK)||'[]');}catch(e){}
-let stream=null,curDeviceId=null,devices=[];
-let pvFilterOn=false,wbOn=false;
+let stream=null,curDev=null,devs=[],wbOn=false,pvFilt=false,pvIdx=-1,pvSc=1;
 
 const cam=document.getElementById('cam');
 
-async function startCam(deviceId){
+async function startCam(devId){
   if(stream)stream.getTracks().forEach(t=>t.stop());
-  const constraints={video:deviceId?{deviceId:{exact:deviceId}}:{facingMode:'environment',width:{ideal:1920}},audio:false};
   try{
-    stream=await navigator.mediaDevices.getUserMedia(constraints);
+    const c=devId?{video:{deviceId:{exact:devId}},audio:false}:{video:{facingMode:'environment',width:{ideal:1920}},audio:false};
+    stream=await navigator.mediaDevices.getUserMedia(c);
     cam.srcObject=stream;
-    curDeviceId=stream.getVideoTracks()[0]?.getSettings()?.deviceId||null;
-    const all=await navigator.mediaDevices.enumerateDevices();
-    devices=all.filter(d=>d.kind==='videoinput');
-    document.getElementById('sw-btn').classList.toggle('dim',devices.length<2);
-  }catch(e){console.log('Cam err:',e);}
+    curDev=stream.getVideoTracks()[0]?.getSettings()?.deviceId||null;
+    devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
+    document.getElementById('sw').classList.toggle('dim',devs.length<2);
+  }catch(e){
+    console.log('Cam err:',e);
+    // Permission denied → show error, go back
+    document.getElementById('err').classList.add('show');
+  }
 }
 
-// Camera select sheet
-function openCamSelect(){
-  hap();
-  if(devices.length<2)return;
-  const list=document.getElementById('cam-list');
-  list.innerHTML='';
-  devices.forEach((d,i)=>{
-    const b=document.createElement('button');
-    b.className='cam-opt';
-    b.textContent=d.label||`カメラ ${i+1}`;
-    b.onclick=()=>{hap.confirm();closeCamSel();startCam(d.deviceId);};
-    list.appendChild(b);
-  });
-  const cancel=document.createElement('button');
-  cancel.className='cam-opt cancel';cancel.textContent='キャンセル';
-  cancel.onclick=()=>{hap();closeCamSel();};
-  list.appendChild(cancel);
-  document.getElementById('cam-sel').classList.add('show');
-}
-function closeCamSel(){
-  const sel=document.getElementById('cam-sel');
-  sel.style.background='rgba(0,0,0,0)';
-  document.getElementById('cam-list').style.transform='translateY(100px)';
-  document.getElementById('cam-list').style.opacity='0';
-  setTimeout(()=>{sel.classList.remove('show');sel.style.background='';document.getElementById('cam-list').style.transform='';document.getElementById('cam-list').style.opacity='';},500);
+function goBack(){
+  // Tell parent iframe to go back
+  if(window.parent&&window.parent.document.getElementById('iframe-back')){
+    window.parent.document.getElementById('iframe-back').click();
+  }
 }
 
-function doFlash(){
+function flash(){
   const f=document.getElementById('flash');
-  f.classList.add('on');
-  setTimeout(()=>f.classList.remove('on'),300);
+  f.style.transition='none';f.style.opacity='.6';
+  requestAnimationFrame(()=>{f.style.transition='opacity .3s';f.style.opacity='0';});
 }
 
-function captureFrame(){
-  const c=document.createElement('canvas');
-  c.width=cam.videoWidth;c.height=cam.videoHeight;
-  const ctx=c.getContext('2d');
-  ctx.drawImage(cam,0,0);
+function grab(){
+  const c=document.createElement('canvas');c.width=cam.videoWidth;c.height=cam.videoHeight;
+  const ctx=c.getContext('2d');ctx.drawImage(cam,0,0);
   if(wbOn){ctx.globalCompositeOperation='overlay';ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(0,0,c.width,c.height);}
   return c.toDataURL('image/jpeg',.85);
 }
 
-function capture(){
-  hap.confirm();doFlash();
-  const d=captureFrame();
+window.capture=()=>{
+  hap.confirm();flash();
+  const d=grab();
   if(photos.length>=5)photos.shift();
   photos.push(d);
   try{localStorage.setItem(CK,JSON.stringify(photos));}catch(e){photos.shift();try{localStorage.setItem(CK,JSON.stringify(photos));}catch(e2){}}
   if(photos.length===3){
-    document.getElementById('sc-txt').textContent=photos.length+'枚の写真を撮影しました。まとめて保存しますか？';
-    document.getElementById('sdlg').classList.add('show');
+    document.getElementById('st').textContent=photos.length+'枚の写真を撮影しました。まとめて保存しますか？';
+    document.getElementById('sd').classList.add('show');
   }
-}
+};
 
-// Split capture (2 photos, top + bottom)
-async function splitCapture(){
-  hap.confirm();
-  doFlash();
-  const d1=captureFrame();
+window.splitCapture=async()=>{
+  hap.confirm();flash();
+  const d1=grab();
   await new Promise(r=>setTimeout(r,500));
-  doFlash();
-  const d2=captureFrame();
-  // Combine
-  const img1=new Image(),img2=new Image();
-  img1.src=d1;img2.src=d2;
-  await Promise.all([new Promise(r=>{img1.onload=r;}),new Promise(r=>{img2.onload=r;})]);
-  const c=document.createElement('canvas');
-  c.width=Math.max(img1.width,img2.width);
-  c.height=img1.height+img2.height;
-  const ctx=c.getContext('2d');
-  ctx.drawImage(img1,0,0,c.width,c.height/2);
-  ctx.drawImage(img2,0,c.height/2,c.width,c.height/2);
+  flash();
+  const d2=grab();
+  const i1=new Image(),i2=new Image();i1.src=d1;i2.src=d2;
+  await Promise.all([new Promise(r=>{i1.onload=r;}),new Promise(r=>{i2.onload=r;})]);
+  const c=document.createElement('canvas');c.width=Math.max(i1.width,i2.width);c.height=i1.height+i2.height;
+  const ctx=c.getContext('2d');ctx.drawImage(i1,0,0,c.width,c.height/2);ctx.drawImage(i2,0,c.height/2,c.width,c.height/2);
   const combined=c.toDataURL('image/jpeg',.85);
   if(photos.length>=5)photos.shift();
   photos.push(combined);
   try{localStorage.setItem(CK,JSON.stringify(photos));}catch(e){}
-  // Show preview
   showPV(photos.length-1);
-}
+};
 
-// White balance toggle
-function toggleWB(){
-  hap();wbOn=!wbOn;
-  document.getElementById('wb-btn').classList.toggle('active',wbOn);
-  cam.style.filter=wbOn?'contrast(1.15) brightness(1.08)':'';
+window.toggleWB=()=>{hap();wbOn=!wbOn;document.getElementById('wb').classList.toggle('on',wbOn);cam.style.filter=wbOn?'contrast(1.15) brightness(1.08)':'';};
+
+// Camera select - slide up/down
+window.openCS=()=>{
+  hap();if(devs.length<2)return;
+  const cl=document.getElementById('cl');cl.innerHTML='';
+  devs.forEach((d,i)=>{
+    const b=document.createElement('button');b.className='co';
+    b.textContent=d.label||'カメラ '+(i+1);
+    b.onclick=()=>{hap.confirm();closeCS();startCam(d.deviceId);};
+    cl.appendChild(b);
+  });
+  const x=document.createElement('button');x.className='co x';x.textContent='キャンセル';
+  x.onclick=()=>{hap();closeCS();};
+  cl.appendChild(x);
+  document.getElementById('cs').classList.add('show');
+};
+
+function closeCS(){
+  const cs=document.getElementById('cs');
+  cs.classList.remove('show');
+  // CSS transition handles slide-down (translateY back to 120px)
 }
+// Tap background to close
+document.getElementById('cs').addEventListener('click',e=>{if(e.target.id==='cs')closeCS();});
 
 // Preview
-let pvIdx=-1;
-function showPV(idx){
-  pvIdx=idx;pvFilterOn=false;
-  document.getElementById('pv-img').src=photos[idx];
-  document.getElementById('pv-img').style.filter='';
-  document.getElementById('pv-img').style.transform='scale(1)';
-  pvScale=1;
+function showPV(idx){pvIdx=idx;pvFilt=false;pvSc=1;
+  document.getElementById('pvi').src=photos[idx];
+  document.getElementById('pvi').style.filter='';
+  document.getElementById('pvi').style.transform='scale(1)';
   document.getElementById('pv').classList.add('show');
 }
-function closePV(){hap();document.getElementById('pv').classList.remove('show');}
-function savePV(){
-  hap.confirm();
-  if(pvIdx<0||!photos[pvIdx])return;
-  const a=document.createElement('a');a.href=photos[pvIdx];a.download='photo_'+Date.now()+'.jpg';a.click();
-}
-function togglePVFilter(){
-  hap();pvFilterOn=!pvFilterOn;
-  document.getElementById('pv-wb').classList.toggle('active',pvFilterOn);
-  document.getElementById('pv-img').style.filter=pvFilterOn?'contrast(1.2) brightness(1.1)':'';
-}
+window.closePV=()=>{hap();document.getElementById('pv').classList.remove('show');};
+window.savePV=()=>{hap.confirm();if(pvIdx<0||!photos[pvIdx])return;const a=document.createElement('a');a.href=photos[pvIdx];a.download='photo_'+Date.now()+'.jpg';a.click();};
+window.togglePVF=()=>{hap();pvFilt=!pvFilt;document.getElementById('pvw2').classList.toggle('on',pvFilt);document.getElementById('pvi').style.filter=pvFilt?'contrast(1.2) brightness(1.1)':'';};
 
-// Pinch zoom on preview
-let pvScale=1,pvPinchDist=null;
-const pvImg=document.getElementById('pv-img');
-pvImg.addEventListener('touchstart',e=>{
-  if(e.touches.length===2){
-    e.preventDefault();
-    pvPinchDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-  }
-},{passive:false});
-pvImg.addEventListener('touchmove',e=>{
-  if(e.touches.length===2&&pvPinchDist){
-    e.preventDefault();
-    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-    pvScale=Math.max(1,Math.min(5,pvScale*(d/pvPinchDist)));
-    pvPinchDist=d;
-    pvImg.style.transform='scale('+pvScale+')';
-  }
-},{passive:false});
-pvImg.addEventListener('touchend',e=>{if(e.touches.length<2)pvPinchDist=null;},{passive:true});
-// Double tap reset
-let pvTapT=0;
-pvImg.addEventListener('click',()=>{
-  const n=Date.now();
-  if(n-pvTapT<300){pvScale=1;pvImg.style.transform='scale(1)';hap();}
-  pvTapT=n;
-});
+// Pinch zoom preview
+let pd=null;const pi=document.getElementById('pvi');
+pi.addEventListener('touchstart',e=>{if(e.touches.length===2){e.preventDefault();pd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}},{passive:false});
+pi.addEventListener('touchmove',e=>{if(e.touches.length===2&&pd){e.preventDefault();const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);pvSc=Math.max(1,Math.min(5,pvSc*(d/pd)));pd=d;pi.style.transform='scale('+pvSc+')';}},{passive:false});
+pi.addEventListener('touchend',e=>{if(e.touches.length<2)pd=null;},{passive:true});
+let tt=0;pi.addEventListener('click',()=>{const n=Date.now();if(n-tt<300){pvSc=1;pi.style.transform='scale(1)';hap();}tt=n;});
 
 // Save dialog
-function dismissS(){hap();document.getElementById('sdlg').classList.remove('show');}
-function saveAllS(){
-  hap.confirm();
-  photos.forEach((p,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=p;a.download='photo_'+Date.now()+'_'+(i+1)+'.jpg';a.click();},i*200));
-  document.getElementById('sdlg').classList.remove('show');
-}
+window.dS=()=>{hap();document.getElementById('sd').classList.remove('show');};
+window.sAll=()=>{hap.confirm();photos.forEach((p,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=p;a.download='photo_'+Date.now()+'_'+(i+1)+'.jpg';a.click();},i*200));document.getElementById('sd').classList.remove('show');};
 
-// "写真を表示" button - replace split button with photo viewer when photos exist
-function updateUI(){
-  const sb=document.getElementById('split-btn');
-  sb.textContent='⬜⬛';sb.title='2分割撮影';
-}
-
-startCam();updateUI();
+startCam();
 </script>
 </body>
 </html>

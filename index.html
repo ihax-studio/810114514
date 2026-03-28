@@ -709,10 +709,6 @@ overflow:hidden;
     <div class="hm-ttl">English</div>
     <div class="hm-sub">Eiken Complete · 2級 / 準1級</div>
   </div>
-  <div style="padding:0 16px 8px">
-    <input id="home-search" type="text" placeholder="検索..." style="width:100%;padding:10px 16px;border:none;border-radius:12px;background:rgba(255,255,255,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);font-family:inherit;font-size:14px;color:var(--tx);outline:none;box-shadow:inset 0 1px 3px rgba(0,0,0,.06);-webkit-appearance:none;-webkit-user-select:text;user-select:text">
-    <div id="search-results" style="display:none;margin-top:8px;max-height:40dvh;overflow-y:auto;border-radius:12px;background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)"></div>
-  </div>
   <div class="hm-scroll">
     <div class="hg-lbl">クイズ · 準1級</div>
     <div class="hg-list">
@@ -2068,9 +2064,14 @@ function openSettings(){
 }
 
 function showSettingsSection(sec){
-  document.querySelectorAll('.s-section').forEach(s=>{s.style.display='none';});
-  const target=document.getElementById('ss-'+sec);
-  if(target)target.style.display='';
+  const content=document.querySelector('#settings-body > div:last-child');
+  if(content){content.style.transition='opacity .3s ease';content.style.opacity='0';}
+  setTimeout(()=>{
+    document.querySelectorAll('.s-section').forEach(s=>{s.style.display='none';});
+    const target=document.getElementById('ss-'+sec);
+    if(target)target.style.display='';
+    if(content){content.style.opacity='1';}
+  },300);
   document.querySelectorAll('.s-nav-item').forEach(n=>{
     n.classList.toggle('s-nav-active',n.dataset.section===sec);
   });
@@ -2724,9 +2725,7 @@ window.goHome=function(){
 };
 document.getElementById('bv').textContent=V.length+'語';
 
-/* ═══ HOME SEARCH ═══ */
-const homeSearch=document.getElementById('home-search');
-const searchResults=document.getElementById('search-results');
+/* ═══ HOME SEARCH (merged into #ti translation input) ═══ */
 const SEARCH_APPS=[
   {name:'準1 10年分の傾向から作成',icon:'🃏',action:"openS('card',0)"},
   {name:'Pass単 単語',icon:'📗',action:"openS('card',1)"},
@@ -2745,33 +2744,43 @@ const SEARCH_APPS=[
   {name:'頻出テーマ',icon:'🎯',action:"openS('list','th')"},
   {name:'忘れた単語だけ復習',icon:'🔄',action:"openS('card-forgot',0)"},
   {name:'設定',icon:'⚙️',action:"openSettings()"},
+  {name:'カメラ',icon:'📷',action:"openIframe('cam.html','カメラ')"},
+  {name:'メモ',icon:'📝',action:"openIframe('card.html','メモ')"},
+  {name:'時計',icon:'🕐',action:"openIframe('clock-ios26.html','時計')"},
 ];
+// Search results container (inject near ti)
+const srDiv=document.createElement('div');
+srDiv.id='sr';srDiv.style.cssText='display:none;position:absolute;bottom:calc(100% + 4px);left:0;right:0;max-height:40dvh;overflow-y:auto;border-radius:12px;background:rgba(255,255,255,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:50;box-shadow:0 -2px 12px rgba(0,0,0,.1)';
+document.getElementById('ti').parentElement.style.position='relative';
+document.getElementById('ti').parentElement.appendChild(srDiv);
 
-homeSearch.addEventListener('input',()=>{
-  const q=homeSearch.value.trim().toLowerCase();
-  if(!q){searchResults.style.display='none';return;}
-  const matches=SEARCH_APPS.filter(a=>a.name.toLowerCase().includes(q));
-  if(!matches.length){searchResults.style.display='none';return;}
-  searchResults.style.display='block';
-  searchResults.innerHTML=matches.map(a=>
-    `<div class="sr-item" data-action="${a.action}" style="padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.06);transition:transform .5s ease,opacity .3s ease">
-      <span style="font-size:20px">${a.icon}</span>
-      <span style="font-size:14px;color:var(--tx)">${a.name}</span>
-    </div>`
-  ).join('');
-  searchResults.querySelectorAll('.sr-item').forEach(el=>{
-    el.addEventListener('click',()=>{
-      haptic.confirm();
-      el.style.transform='scale(0.8)';el.style.opacity='0.5';
-      setTimeout(()=>{
-        try{eval(el.dataset.action);}catch(e){}
-        homeSearch.value='';searchResults.style.display='none';
-        el.style.transform='';el.style.opacity='';
-      },300);
-    });
-  });
+// Hook into existing ti input handler to add search
+const _origTiInput=document.getElementById('ti').oninput;
+document.getElementById('ti').addEventListener('input',()=>{
+  const q=document.getElementById('ti').value.trim().toLowerCase();
+  // Check for app/category search
+  if(q.length>=1){
+    const matches=SEARCH_APPS.filter(a=>a.name.toLowerCase().includes(q));
+    if(matches.length>0){
+      srDiv.style.display='block';
+      srDiv.innerHTML=matches.map(a=>
+        `<div data-act="${a.action}" style="padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.06);transition:transform .5s,opacity .3s"><span style="font-size:18px">${a.icon}</span><span style="font-size:13px;color:#000">${a.name}</span></div>`
+      ).join('');
+      srDiv.querySelectorAll('[data-act]').forEach(el=>{
+        el.addEventListener('click',()=>{
+          haptic.confirm();
+          el.style.transform='scale(0.8)';el.style.opacity='0.5';
+          setTimeout(()=>{
+            try{eval(el.dataset.act);}catch(e){}
+            document.getElementById('ti').value='';srDiv.style.display='none';
+          },300);
+        });
+      });
+      return;
+    }
+  }
+  srDiv.style.display='none';
 });
-homeSearch.addEventListener('touchstart',e=>e.stopPropagation(),{passive:true});
 
 /* ════════════════════════════════════════
    TRANSLATION SYSTEM
