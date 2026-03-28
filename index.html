@@ -38,8 +38,8 @@ html,body{
   -webkit-overflow-scrolling:auto;
 }
 /* Body reveal: scale 2→0.95 in 0.5s — slight shrink keeps everything inside screen */
-body{animation:bReveal .7s cubic-bezier(.4,0,.2,1) both;transform-origin:center center}
-@keyframes bReveal{0%{transform:scale(2);opacity:0}60%{transform:scale(.98);opacity:1}80%{transform:scale(1.02);opacity:1}100%{transform:scale(1);opacity:1}}
+body{animation:bReveal .8s ease both;transform-origin:center center}
+@keyframes bReveal{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
 
 /* ════ GLASS HELPERS ════ */
 .g1{background:var(–gls);backdrop-filter:var(–blr);-webkit-backdrop-filter:var(–blr);border:1px solid var(–bdr)}
@@ -111,18 +111,20 @@ background:linear-gradient(150deg,#eef2f8 0%,#f8f2fc 50%,#edf7f2 100%);
 #app.vis{transform:translateY(0)}
 .app-hdr{
 display:flex;align-items:center;gap:10px;
-padding:calc(var(–sat) + 18px) 14px 12px;
+padding:calc(var(--sat) + 14px) 16px 10px;
 flex-shrink:0;
-background:var(–gls2);backdrop-filter:var(–blr);-webkit-backdrop-filter:var(–blr);
-border-bottom:1px solid var(–ln);
+background:var(--gls2);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);
+border-bottom:1px solid var(--ln);
 box-shadow:0 1px 8px rgba(0,0,0,.06);
 }
 .app-back{
-width:38px;height:38px;border-radius:50%;
-background:rgba(0,122,255,.1);border:1px solid rgba(0,122,255,.15);
-color:var(–b);font-size:19px;cursor:pointer;
+width:36px;height:36px;border-radius:55px;
+background:rgba(255,255,255,.7);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);
+border:1px solid rgba(255,255,255,.85);
+color:var(--b);font-size:17px;cursor:pointer;
 display:flex;align-items:center;justify-content:center;
 transition:transform .1s;flex-shrink:0;
+box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 1px 4px rgba(0,0,0,.08);
 }
 .app-back:active{transform:scale(.82)}
 .app-ttl{flex:1;text-align:center;font-size:16px;font-weight:700;color:var(–tx)}
@@ -145,20 +147,21 @@ padding:6px 0 4px;flex-shrink:0;
 .prt{font-size:10px;font-weight:600;color:var(–sub);min-width:38px;text-align:right}
 
 /* ════ SCORE ROW ════ */
-.sr{display:flex;gap:6px;padding:2px 12px 4px;flex-shrink:0;align-items:center}
+.sr{display:flex;gap:4px;padding:2px 10px 4px;flex-shrink:0;align-items:center;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.sr::-webkit-scrollbar{display:none}
 .ch{
-background:rgba(255,255,255,.8);backdrop-filter:var(–blr);-webkit-backdrop-filter:var(–blr);
-border-radius:12px;padding:8px 12px;
+background:rgba(255,255,255,.7);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);
+border-radius:55px;padding:8px 12px;
 display:flex;align-items:center;gap:5px;
 font-size:12px;font-weight:700;
-border:1px solid rgba(255,255,255,.9);
+border:1px solid rgba(255,255,255,.85);
 cursor:pointer;transition:transform .12s,background .1s;
-font-family:inherit;color:var(–tx);
-box-shadow:0 1px 4px rgba(0,0,0,.08);
-min-height:40px;
+font-family:inherit;color:var(--tx);
+box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 1px 4px rgba(0,0,0,.08);
+min-height:36px;
 }
-.ch:active{transform:scale(.88);background:#fff}
-.ch-bk{font-size:18px;padding:7px 14px;background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.1)}
+.ch:active{transform:scale(.88);background:rgba(255,255,255,.95)}
+.ch-bk{font-size:16px;padding:7px 12px;width:36px;height:36px;justify-content:center;background:rgba(255,255,255,.6);border-color:rgba(255,255,255,.8)}
 .ch-bk:disabled{opacity:.22;cursor:default;transform:none!important}
 
 /* ════ CARD AREA ════ */
@@ -1830,23 +1833,39 @@ trOverlay.addEventListener('click',e=>{
   haptic();
 });
 
-/* Drag-down to close overlay */
+/* Drag-down to close overlay — only at scroll edges + strong swipe */
 (()=>{
-  let sy=0,dragging=false,cardEl=trCard;
+  let sy=0,dragging=false,cardEl=trCard,velocity=0,lastY=0,lastT=0;
   cardEl.addEventListener('touchstart',e=>{
-    sy=e.touches[0].clientY;dragging=true;
-    cardEl.style.transition='none';
+    sy=e.touches[0].clientY;lastY=sy;lastT=Date.now();
+    velocity=0;
+    // Only allow drag-close if at scroll top or bottom boundary
+    const atTop=cardEl.scrollTop<=0;
+    const atBot=cardEl.scrollTop+cardEl.clientHeight>=cardEl.scrollHeight-2;
+    dragging=atTop||atBot;
+    if(dragging)cardEl.style.transition='none';
   },{passive:true});
   cardEl.addEventListener('touchmove',e=>{
     if(!dragging)return;
-    const dy=e.touches[0].clientY-sy;
-    if(dy>0)cardEl.style.transform=`translateY(${dy}px) scale(1)`;
+    const cy=e.touches[0].clientY;
+    const now=Date.now();
+    if(now-lastT>0)velocity=(cy-lastY)/(now-lastT);
+    lastY=cy;lastT=now;
+    const dy=cy-sy;
+    // Only visually drag if pulling away from content
+    const atTop=cardEl.scrollTop<=0;
+    const atBot=cardEl.scrollTop+cardEl.clientHeight>=cardEl.scrollHeight-2;
+    if((atTop&&dy>0)||(atBot&&dy<0)){
+      cardEl.style.transform=`translateY(${dy*0.4}px) scale(1)`;
+    }
   },{passive:true});
   cardEl.addEventListener('touchend',e=>{
     if(!dragging)return;dragging=false;
     cardEl.style.transition='';
     const dy=e.changedTouches[0].clientY-sy;
-    if(dy>60){
+    const speed=Math.abs(velocity);
+    // Close only with strong velocity (>0.5px/ms) at boundary
+    if((dy>80&&speed>0.3)||(dy<-80&&speed>0.3)){
       closeTrOverlay();
       const inp=document.getElementById('ti');inp.value='';inp.style.height='auto';
       haptic();
@@ -1856,18 +1875,15 @@ trOverlay.addEventListener('click',e=>{
   },{passive:true});
   /* Card tap: speak text on .tr-txt/.tr-local, stop propagation to not close overlay */
   cardEl.addEventListener('click',e=>{
-    // Tap on translatable text → haptic + TTS
     const txt=e.target.closest('.tr-txt');
     const loc=e.target.closest('.tr-local');
     if(txt||loc){
       e.stopPropagation();
       haptic();
-      const raw=(txt||loc).textContent.replace(/[🔊📚🔗🔄💬🔎]/g,'').trim();
-      // Extract English from the text (first word or full text)
+      const raw=(txt||loc).textContent.replace(/[🔊📚🔗🔄💬🔎★☆]/g,'').replace(/✓追加済み|😰忘れた|★ 削除/g,'').trim();
       if(raw)speakEn(raw);
       return;
     }
-    // Any other tap inside card: just stop propagation (don't close)
     e.stopPropagation();
   });
 })();
