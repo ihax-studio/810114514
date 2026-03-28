@@ -613,6 +613,10 @@ border:6px solid transparent;border-top-color:rgba(255,255,255,.92);
 #icon-grid.wobbling .ig-cell:nth-child(odd){animation-delay:.07s}
 @keyframes iconWobble{from{transform:rotate(-1.5deg)}to{transform:rotate(1.5deg)}}
 
+/* Shake settings section wobble */
+.s-shake-section .s-group{animation:settingsShake 2s ease-in-out infinite}
+@keyframes settingsShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+
 @keyframes shakeIn{from{opacity:0;transform:translateX(-80%) scale(.8) translateY(4px)}to{opacity:1;transform:translateX(-80%) scale(1) translateY(0)}}
 @keyframes shakeOut{from{opacity:1}to{opacity:0;transform:translateX(-80%) scale(.8) translateY(4px)}}
 
@@ -700,20 +704,20 @@ overflow:hidden;
     <div class="hg-list">
       <div class="hcard" onclick="openS('card',0)"><div class="hi ib">🃏</div><div class="hcard-info"><div class="hcard-name">準1 10年分の傾向から作成</div><div class="hcard-desc">頻出 · 2015〜2025</div></div><div class="badge" id="bv">---</div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('card',1)"><div class="hi ip">📗</div><div class="hcard-info"><div class="hcard-name">Pass単 単語</div><div class="hcard-desc">でる順 1,488語</div></div><div class="badge">1488</div><div class="chev">›</div></div>
-      <div class="hcard" onclick="openS('card',2)"><div class="hi ir">🔗</div><div class="hcard-info"><div class="hcard-name">Pass単 熟語・句動詞</div><div class="hcard-desc">でる順 222句</div></div><div class="badge">222</div><div class="chev">›</div></div>
+      <div class="hcard" onclick="openS('card',2)"><div class="hi ir">📎</div><div class="hcard-info"><div class="hcard-name">Pass単 熟語・句動詞</div><div class="hcard-desc">でる順 222句</div></div><div class="badge">222</div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('card',3)"><div class="hi iy">💡</div><div class="hcard-info"><div class="hcard-name">準1 イディオム</div><div class="hcard-desc">重要30個</div></div><div class="badge">30</div><div class="chev">›</div></div>
     </div>
     <div class="hg-lbl">クイズ · 英検2級</div>
     <div class="hg-list">
       <div class="hcard" onclick="openS('card',4)"><div class="hi ig">🔤</div><div class="hcard-info"><div class="hcard-name">2級 単語</div><div class="hcard-desc">教科書索引 + 過去5年補足 699語</div></div><div class="badge">699</div><div class="chev">›</div></div>
-      <div class="hcard" onclick="openS('card',5)"><div class="hi it">🔗</div><div class="hcard-info"><div class="hcard-name">2級 熟語・句動詞</div><div class="hcard-desc">218フレーズ</div></div><div class="badge">218</div><div class="chev">›</div></div>
+      <div class="hcard" onclick="openS('card',5)"><div class="hi it">📌</div><div class="hcard-info"><div class="hcard-name">2級 熟語・句動詞</div><div class="hcard-desc">218フレーズ</div></div><div class="badge">218</div><div class="chev">›</div></div>
     </div>
     <div class="hg-lbl">参考書</div>
     <div class="hg-list">
       <div class="hcard" onclick="openS('list','all')"><div class="hi ib">📚</div><div class="hcard-info"><div class="hcard-name">全単語一覧</div><div class="hcard-desc">全データセットの単語を順番に表示</div></div><div class="badge" id="b-all">---</div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','forgot')"><div class="hi ir">😰</div><div class="hcard-info"><div class="hcard-name">忘れた・わからない</div><div class="hcard-desc">キャッシュされた要復習単語</div></div><div class="badge" id="b-forgot">---</div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','ex')"><div class="hi it">📝</div><div class="hcard-info"><div class="hcard-name">入試で使える表現</div><div class="hcard-desc">125フレーズ</div></div><div class="chev">›</div></div>
-      <div class="hcard" onclick="openS('list','v')"><div class="hi ig">🔄</div><div class="hcard-info"><div class="hcard-name">不規則動詞変化表</div><div class="hcard-desc">69語 完全版</div></div><div class="chev">›</div></div>
+      <div class="hcard" onclick="openS('list','v')"><div class="hi ig">📊</div><div class="hcard-info"><div class="hcard-name">不規則動詞変化表</div><div class="hcard-desc">69語 完全版</div></div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','g')"><div class="hi ii">📐</div><div class="hcard-info"><div class="hcard-name">重要文法</div><div class="hcard-desc">仮定法・強調・倒置 12項目</div></div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','p')"><div class="hi ib">✍️</div><div class="hcard-info"><div class="hcard-name">言い換え表現</div><div class="hcard-desc">12セット</div></div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','r')"><div class="hi it">📖</div><div class="hcard-info"><div class="hcard-name">長文読解 重要表現</div><div class="hcard-desc">15フレーズ</div></div><div class="chev">›</div></div>
@@ -1870,7 +1874,7 @@ function restoreHomeFromGrid(){
   document.querySelectorAll('.hg-lbl').forEach(l=>{l.style.display='';});
   document.querySelectorAll('.hg-list').forEach(l=>{l.style.display='';});
   const h=document.querySelector('.hm-hdr');
-  if(h){h.style.transition='opacity .3s';h.style.opacity='1';setTimeout(()=>{h.style.transition='';},350);}
+  if(h){h.style.display='';h.style.opacity='1';}
   const bb=document.getElementById('home-bottom-bar');
   if(bb)bb.style.display='';
 }
@@ -2113,7 +2117,7 @@ function startDrag(cell,grid,touch){
     document.removeEventListener('touchend',onEnd);
     // Save new order
     const newCells=[...grid.querySelectorAll('.ig-cell')];
-    const order=newCells.map(c=>c.querySelector('.ig-icon')?.textContent||'');
+    const order=newCells.map(c=>c.dataset.name||'');
     saveIconOrder(order);
   };
   document.addEventListener('touchmove',onMove,{passive:true});
@@ -2880,6 +2884,9 @@ function showIconGrid(){
   document.querySelectorAll('.hg-list').forEach(l=>{l.style.display='none';});
   const bb=document.getElementById('home-bottom-bar');
   if(bb)bb.style.display='none';
+  // Hide header text in icon mode
+  const hdr=document.querySelector('.hm-hdr');
+  if(hdr)hdr.style.display='none';
   const scroll=document.querySelector('.hm-scroll');
   let oldGrid=document.getElementById('icon-grid');
   if(oldGrid)oldGrid.remove();
@@ -2904,8 +2911,8 @@ function showIconGrid(){
   const savedOrder=getIconOrder();
   if(savedOrder&&savedOrder.length===allIcons.length){
     const ordered=[];
-    savedOrder.forEach(emoji=>{
-      const found=allIcons.find(ic=>ic.icon===emoji);
+    savedOrder.forEach(nm=>{
+      const found=allIcons.find(ic=>ic.name===nm);
       if(found)ordered.push(found);
     });
     if(ordered.length===allIcons.length)allIcons.splice(0,allIcons.length,...ordered);
@@ -2915,6 +2922,7 @@ function showIconGrid(){
     const cell=document.createElement('div');
     cell.className='ig-cell';
     cell.dataset.icon=d.icon;
+    cell.dataset.name=d.name;
     cell.style.cssText='display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;-webkit-user-select:none';
     const short=d.name.length>5?d.name.slice(0,4)+'\u2026':d.name;
     const labelHtml=bigMode?'':'<div style="font-size:8px;font-weight:600;color:var(--tx);text-align:center;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+short+'</div>';
