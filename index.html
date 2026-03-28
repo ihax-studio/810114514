@@ -724,7 +724,14 @@ overflow:hidden;
     <div class="hg-list">
       <div class="hcard" onclick="openS('card-forgot',0)"><div class="hi ir">🔄</div><div class="hcard-info"><div class="hcard-name">忘れた単語だけ復習</div><div class="hcard-desc">忘れた・難しいマークの単語だけ出題</div></div><div class="badge" id="b-retry">0</div><div class="chev">›</div></div>
     </div>
-    <div style="padding:20px 6px 40px;text-align:center">
+    <div style="padding:20px 16px 40px;display:flex;align-items:center;justify-content:center;gap:12px">
+      <button id="home-star-btn" style="
+        width:48px;height:48px;border-radius:55px;
+        background:rgba(255,255,255,.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+        border:1px solid rgba(255,255,255,.7);font-size:22px;cursor:pointer;font-family:inherit;
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 2px 8px rgba(0,0,0,.08);
+      ">★</button>
       <button id="btn-delete-all" style="
         background:rgba(255,255,255,.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
         color:#c0001a;border:1px solid rgba(255,255,255,.7);
@@ -733,6 +740,13 @@ overflow:hidden;
         display:inline-flex;align-items:center;gap:8px;
         box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 2px 8px rgba(0,0,0,.08);
       ">⚠️ セーブデータを全て削除</button>
+      <button id="home-icon-btn" style="
+        width:48px;height:48px;border-radius:55px;
+        background:rgba(255,255,255,.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+        border:1px solid rgba(255,255,255,.7);font-size:18px;cursor:pointer;font-family:inherit;
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 2px 8px rgba(0,0,0,.08);
+      ">→</button>
     </div>
   </div>
 </div>
@@ -773,6 +787,7 @@ overflow:hidden;
         <div class="s-row"><div class="s-label">はっきりとした触覚</div><div class="s-toggle" id="s-haptic-strong"><div class="s-knob"></div></div></div>
       </div>
       <!-- Shake -->
+      <div class="s-shake-section">
       <div class="s-sec">シェイク</div>
       <div class="s-group">
         <div class="s-row" id="s-shake-none"><div class="s-label">なし</div><div class="s-check s-on" id="sc-shake-none">✓</div></div>
@@ -786,6 +801,7 @@ overflow:hidden;
         <div class="s-row s-heavy-opt" id="s-heavy-check"><div class="s-label">答えを確認する</div><div class="s-check" id="sc-heavy-check">✓</div></div>
         <div class="s-row s-heavy-opt" id="s-heavy-shuffle"><div class="s-label">シャッフルする</div><div class="s-check" id="sc-heavy-shuffle">✓</div></div>
         <div class="s-row s-heavy-opt" id="s-heavy-back"><div class="s-label">1つ前に戻る</div><div class="s-check" id="sc-heavy-back">✓</div></div>
+      </div>
       </div>
       <!-- Delete -->
       <div style="padding:24px 0 10px;text-align:center">
@@ -1941,9 +1957,11 @@ function openSettings(){
   document.getElementById('s-check-list').classList.toggle('s-on',!isIcon);
   // Sync shake mode
   syncShakeChecks('shake',localStorage.getItem('inglish_shake_mode')||'none');
-  // Sync heavy shake mode
   syncShakeChecks('heavy',localStorage.getItem('inglish_heavy_mode')||'none');
   updateHeavyVisibility();
+  // Hide shake sections if permission not available
+  const shakeAvail=localStorage.getItem('inglish_shake_avail')!=='0';
+  document.querySelectorAll('.s-shake-section').forEach(el=>{el.style.display=shakeAvail?'':'none';});
 }
 function closeSettings(){
   document.getElementById('settings-card').style.transform='translateY(100%)';
@@ -2231,25 +2249,19 @@ let _shakeActive=false;
 function initShake(){
   if(_shakeActive)return;
   
-  // On non-iOS, just start directly
-  if(typeof DeviceMotionEvent==='undefined'){return;}
+  if(typeof DeviceMotionEvent==='undefined'){
+    localStorage.setItem('inglish_shake_avail','0');
+    return;
+  }
   if(typeof DeviceMotionEvent.requestPermission!=='function'){
     // Android/desktop - no permission needed
+    localStorage.setItem('inglish_shake_avail','1');
     _shakeActive=true;
     registerShakeListener();
     return;
   }
   
-  // iOS: need user gesture to request permission
-  // If already granted, try starting (will work if permission cached by browser)
-  if(localStorage.getItem(SHAKE_KEY)==='1'){
-    _shakeActive=true;
-    registerShakeListener();
-    return;
-  }
-  
-  // Not yet granted: show a button/use first meaningful tap
-  // We hook into multiple touch points to catch the first user gesture
+  // iOS: ALWAYS request permission on first user gesture (every page load)
   const reqPerm=async function(){
     document.removeEventListener('touchend',reqPerm);
     document.removeEventListener('click',reqPerm);
@@ -2257,15 +2269,23 @@ function initShake(){
       const p=await DeviceMotionEvent.requestPermission();
       if(p==='granted'){
         localStorage.setItem(SHAKE_KEY,'1');
+        localStorage.setItem('inglish_shake_avail','1');
         _shakeActive=true;
         registerShakeListener();
-        console.log('[SHAKE] Permission granted, listener active');
+        // Show shake settings if hidden
+        document.querySelectorAll('.s-shake-section').forEach(el=>{el.style.display='';});
+        console.log('[SHAKE] Permission granted');
       }else{
+        localStorage.setItem('inglish_shake_avail','0');
+        // Hide shake settings
+        document.querySelectorAll('.s-shake-section').forEach(el=>{el.style.display='none';});
         console.log('[SHAKE] Permission denied');
       }
-    }catch(e){console.log('[SHAKE] Permission error:',e);}
+    }catch(e){
+      localStorage.setItem('inglish_shake_avail','0');
+      console.log('[SHAKE] Permission error:',e);
+    }
   };
-  // Use touchend (not click) because iOS permission must be in user gesture
   document.addEventListener('touchend',reqPerm,{once:true});
   document.addEventListener('click',reqPerm,{once:true});
 }
@@ -2880,6 +2900,15 @@ function updateHomeBadges(){
   if(bRetry)bRetry.textContent=fc?fc+'語':'0';
 }
 updateHomeBadges();
+
+// Home ★ button → open star list
+document.getElementById('home-star-btn').addEventListener('click',()=>{
+  haptic();openStarList();
+});
+// Home → button → switch to icon mode
+document.getElementById('home-icon-btn').addEventListener('click',()=>{
+  haptic.confirm();localStorage.setItem('inglish_layout','icon');showIconGrid();
+});
 
 /* ═══ ICON MODE INIT ═══ */
 function showIconGrid(){
