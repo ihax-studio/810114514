@@ -56,6 +56,14 @@ body{animation:bReveal .8s ease both;transform-origin:center center}
 .g2{background:var(--gls2);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);border:1px solid var(--bdr);box-shadow:var(--sh)}
 .g3{background:var(--gls3);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);border:1px solid var(--bdr);box-shadow:var(--shl)}
 
+/* ════ HOME WALLPAPER BG ════ */
+#home-wp-bg{
+position:fixed;inset:-20px;z-index:99;
+background-size:cover;background-position:center;background-repeat:no-repeat;background-attachment:fixed;
+filter:blur(20px);-webkit-filter:blur(20px);
+transform:scale(1.05);
+pointer-events:none;
+}
 /* ════ HOME ════ */
 #home{
 position:fixed;inset:0;z-index:100;
@@ -707,6 +715,7 @@ overflow:hidden;
 <body>
 
 <!-- ══════════ HOME ══════════ -->
+<div id="home-wp-bg"></div>
 
 <div id="home">
   <div class="hm-hdr">
@@ -969,11 +978,12 @@ overflow:hidden;
 <!-- ══════════ LOCK SCREEN (PWA only) ══════════ -->
 <div id="lockscreen" style="display:none;position:fixed;inset:0;z-index:10000;background:#fff;color:#000;font-weight:300;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;-webkit-user-select:none;user-select:none;transform:scale(1);opacity:1;transition:transform .8s ease,opacity .5s ease" onclick="haptic()">
   <div style="display:flex;flex-direction:column;align-items:center;width:100%;height:100%;padding-top:calc(env(safe-area-inset-top,0px) + 60px)">
-    <div id="lock-clock" style="font-size:76px;font-weight:200;letter-spacing:-2px;display:flex;overflow:hidden;justify-content:center">
+    <div id="lock-clock" style="font-size:76px;font-weight:200;letter-spacing:-2px;display:flex;overflow:hidden;justify-content:center;cursor:pointer" onclick="event.stopPropagation();document.getElementById('lock-color-input').click();">
       <span id="lc-h1" style="display:inline-block"></span><span id="lc-h2" style="display:inline-block"></span>
       <span>:</span>
       <span id="lc-m1" style="display:inline-block"></span><span id="lc-m2" style="display:inline-block"></span>
     </div>
+    <input type="color" id="lock-color-input" value="#ffffff" style="position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;border:none;padding:0">
     <div id="lock-date" style="font-size:16px;font-weight:300;opacity:.5;margin-top:4px;text-align:center"></div>
     <div style="flex:1"></div>
     <div style="position:relative;width:280px;height:60px;margin-bottom:calc(env(safe-area-inset-bottom,0px) + 50px)" onclick="event.stopPropagation()">
@@ -2118,14 +2128,6 @@ function hideLockScreen(){
     knob.addEventListener('click',e=>{e.stopPropagation();doUnlock();});
   }
 
-  // Enter key to unlock
-  document.addEventListener('keydown',e=>{
-    if(e.key==='Enter'){
-      const ls=document.getElementById('lockscreen');
-      if(ls&&ls.style.display!=='none'&&ls.offsetParent!==null)doUnlock();
-    }
-  });
-
   knob.addEventListener('touchstart',e=>{dragging=true;startX=e.touches[0].clientX-knobLeft;knob.style.transition='none';},{passive:true});
   document.addEventListener('touchmove',e=>{
     if(!dragging)return;
@@ -2254,19 +2256,21 @@ function applyLockWP(){
 }
 function applyHomeWP(){
   const wp=loadWP(WP_HOME_KEY);
-  const body=document.querySelector('html');
   const preview=document.getElementById('wp-home-bg');
+  const bgLayer=document.getElementById('home-wp-bg');
   if(wp){
     if(wp.startsWith('#')||wp.startsWith('rgb')){
       document.body.style.background=wp;document.documentElement.style.background=wp;
+      if(bgLayer){bgLayer.style.display='none';bgLayer.style.backgroundImage='';}
       if(preview)preview.style.background=wp;
     }else{
-      document.body.style.background=`url("${wp}") center/cover no-repeat fixed`;
-      document.documentElement.style.background=`url("${wp}") center/cover no-repeat fixed`;
+      document.body.style.background='#000';document.documentElement.style.background='#000';
+      if(bgLayer){bgLayer.style.display='block';bgLayer.style.backgroundImage=`url("${wp}")`;}
       if(preview)preview.style.background=`url("${wp}") center/cover no-repeat`;
     }
   }else{
     document.body.style.background='';document.documentElement.style.background='';
+    if(bgLayer){bgLayer.style.display='none';bgLayer.style.backgroundImage='';}
     if(preview)preview.style.background='';
   }
 }
@@ -2371,6 +2375,26 @@ document.getElementById('wp-reset').addEventListener('click',()=>{
   else applyHomeWP();
   closeWPDialog();
 });
+
+// Lock screen clock tap → color picker
+(function(){
+  const ci=document.getElementById('lock-color-input');
+  if(!ci)return;
+  ci.addEventListener('click',function(e){e.stopPropagation();});
+  ci.addEventListener('input',function(e){
+    const color=e.target.value;
+    saveWP(WP_LOCK_KEY,color);
+    applyLockWP();
+  });
+  ci.addEventListener('change',function(e){
+    const color=e.target.value;
+    saveWP(WP_LOCK_KEY,color);
+    applyLockWP();
+  });
+  // Set initial value from saved
+  const cur=loadWP(WP_LOCK_KEY);
+  if(cur&&cur.startsWith('#'))ci.value=cur;
+})();
 
 // Apply on startup
 applyLockWP();
