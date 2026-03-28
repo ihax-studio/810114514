@@ -769,6 +769,16 @@ overflow:hidden;
   </div>
 </div>
 
+<!-- ══════════ IFRAME APP OVERLAY ══════════ -->
+<div id="iframe-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:#fff">
+  <div style="position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px 8px;background:rgba(255,255,255,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)">
+    <button id="iframe-back" style="width:36px;height:36px;border-radius:55px;background:rgba(0,0,0,.06);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--b)">←</button>
+    <div id="iframe-title" style="flex:1;text-align:center;font-size:15px;font-weight:700;color:#000"></div>
+    <div style="width:36px"></div>
+  </div>
+  <iframe id="iframe-content" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;padding-top:calc(env(safe-area-inset-top,0px) + 44px)" sandbox="allow-scripts allow-same-origin"></iframe>
+</div>
+
 <!-- Icon mode dialog -->
 <div id="icon-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background .5s ease;align-items:center;justify-content:center">
   <div id="icon-dialog-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .3s ease,opacity .3s ease">
@@ -1874,12 +1884,26 @@ function restoreHomeFromGrid(){
   document.querySelectorAll('.hg-lbl').forEach(l=>{l.style.display='';});
   document.querySelectorAll('.hg-list').forEach(l=>{l.style.display='';});
   const h=document.querySelector('.hm-hdr');
-  if(h){h.style.display='';h.style.opacity='1';}
+  if(h){h.style.display='';}
   const bb=document.getElementById('home-bottom-bar');
-  if(bb)bb.style.display='';
+  if(bb){bb.style.display='flex';}
+  // Clear any old icon order cache if emojis changed
+  localStorage.removeItem(ICON_ORDER_KEY);
 }
 
 /* ═══ SETTINGS ═══ */
+/* ═══ IFRAME APP ═══ */
+function openIframe(url,title){
+  document.getElementById('iframe-title').textContent=title;
+  document.getElementById('iframe-content').src=url;
+  document.getElementById('iframe-overlay').style.display='block';
+}
+document.getElementById('iframe-back').addEventListener('click',()=>{
+  haptic();
+  document.getElementById('iframe-content').src='';
+  document.getElementById('iframe-overlay').style.display='none';
+});
+
 function openSettings(){
   const ov=document.getElementById('settings-overlay');
   ov.style.display='flex';
@@ -2906,6 +2930,9 @@ function showIconGrid(){
     allIcons.push({icon:card.querySelector('.hi')?.textContent||'\u{1F4E6}',name:card.querySelector('.hcard-name')?.textContent||'',onclick:card.getAttribute('onclick')||''});
   });
   allIcons.push({icon:'\u2699\uFE0F',name:'\u8A2D\u5B9A',onclick:'__openSettings__'});
+  // Icon-only apps
+  allIcons.push({icon:'\uD83E\uDDEE',name:'\u6570\u5B66',onclick:'__iframe_math__'});
+  allIcons.push({icon:'\uD83E\uDD96',name:'Neosaurs',onclick:'__iframe_neo__'});
   
   // Apply saved order if exists
   const savedOrder=getIconOrder();
@@ -2938,6 +2965,8 @@ function showIconGrid(){
       setTimeout(()=>{
         allCells.forEach(c2=>{c2.style.transition='';c2.style.transform='';c2.style.opacity='';});
         if(d.onclick==='__openSettings__'){openSettings();}
+        else if(d.onclick==='__iframe_math__'){openIframe('math.html','\u6570\u5B66');}
+        else if(d.onclick==='__iframe_neo__'){openIframe('Neosaurs.html','Neosaurs');}
         else if(d.onclick){try{eval(d.onclick);}catch(e){}}
       },450);
     });
