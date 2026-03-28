@@ -608,6 +608,11 @@ border:6px solid transparent;border-top-color:rgba(255,255,255,.92);
 .s-knob{width:27px;height:27px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .3s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .s-toggle.on .s-knob{transform:translateX(20px)}
 
+/* ═══ ICON WOBBLE ═══ */
+#icon-grid.wobbling .ig-cell{animation:iconWobble .15s ease-in-out infinite alternate}
+#icon-grid.wobbling .ig-cell:nth-child(odd){animation-delay:.07s}
+@keyframes iconWobble{from{transform:rotate(-1.5deg)}to{transform:rotate(1.5deg)}}
+
 @keyframes shakeIn{from{opacity:0;transform:translateX(-80%) scale(.8) translateY(4px)}to{opacity:1;transform:translateX(-80%) scale(1) translateY(0)}}
 @keyframes shakeOut{from{opacity:1}to{opacity:0;transform:translateX(-80%) scale(.8) translateY(4px)}}
 
@@ -745,6 +750,7 @@ overflow:hidden;
       <div class="s-group">
         <div class="s-row" id="s-layout-icon"><div class="s-label">アイコン</div><div class="s-check" id="s-check-icon">✓</div></div>
         <div class="s-row" id="s-layout-list"><div class="s-label">リスト</div><div class="s-check s-on" id="s-check-list">✓</div></div>
+        <div class="s-row"><div class="s-label">大きいアイコン</div><div class="s-toggle" id="s-bigicon"><div class="s-knob"></div></div></div>
       </div>
       <!-- Haptic -->
       <div class="s-sec">触覚フィードバック</div>
@@ -1915,7 +1921,12 @@ function openSettings(){
 }
 function closeSettings(){
   document.getElementById('settings-card').style.transform='translateY(100%)';
-  setTimeout(()=>{document.getElementById('settings-overlay').style.display='none';},400);
+  setTimeout(()=>{
+    document.getElementById('settings-overlay').style.display='none';
+    // Apply layout
+    if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
+    else restoreHomeFromGrid();
+  },400);
 }
 function syncShakeChecks(prefix,val){
   ['none','check','shuffle','back'].forEach(v=>{
@@ -1942,13 +1953,11 @@ document.getElementById('s-layout-icon').addEventListener('click',()=>{
   haptic();localStorage.setItem('inglish_layout','icon');
   document.getElementById('s-check-icon').classList.add('s-on');
   document.getElementById('s-check-list').classList.remove('s-on');
-  closeSettings();setTimeout(()=>showIconGrid(),400);
 });
 document.getElementById('s-layout-list').addEventListener('click',()=>{
   haptic();localStorage.setItem('inglish_layout','list');
   document.getElementById('s-check-list').classList.add('s-on');
   document.getElementById('s-check-icon').classList.remove('s-on');
-  closeSettings();setTimeout(()=>restoreHomeFromGrid(),400);
 });
 // Haptic
 document.getElementById('s-haptic').addEventListener('click',function(){
@@ -1983,6 +1992,100 @@ document.getElementById('s-delete-btn').addEventListener('click',()=>{
   haptic();closeSettings();
   setTimeout(()=>{document.getElementById('btn-delete-all').click();},500);
 });
+// Big icon toggle
+document.getElementById('s-bigicon').addEventListener('click',function(){
+  this.classList.toggle('on');
+  localStorage.setItem('inglish_bigicon',this.classList.contains('on')?'1':'0');
+  haptic();
+});
+// Sync big icon on openSettings
+const _origOpenSettings=openSettings;
+openSettings=function(){
+  _origOpenSettings();
+  document.getElementById('s-bigicon').classList.toggle('on',localStorage.getItem('inglish_bigicon')==='1');
+};
+
+/* ═══ ICON LONG-PRESS WOBBLE + DRAG REORDER ═══ */
+const ICON_ORDER_KEY='inglish_icon_order';
+let wobbleMode=false;
+
+function getIconOrder(){
+  try{return JSON.parse(localStorage.getItem(ICON_ORDER_KEY));}catch(e){return null;}
+}
+function saveIconOrder(order){
+  localStorage.setItem(ICON_ORDER_KEY,JSON.stringify(order));
+}
+
+function enableWobble(grid){
+  if(wobbleMode)return;
+  wobbleMode=true;
+  haptic.confirm();
+  grid.classList.add('wobbling');
+  // Tap anywhere outside grid to stop wobble
+  const stopWobble=()=>{
+    wobbleMode=false;
+    grid.classList.remove('wobbling');
+    document.removeEventListener('click',stopWobble);
+  };
+  setTimeout(()=>document.addEventListener('click',stopWobble),100);
+}
+
+// Long press detection on icon grid
+document.addEventListener('touchstart',e=>{
+  const cell=e.target.closest('.ig-cell');
+  if(!cell)return;
+  const grid=cell.closest('#icon-grid');
+  if(!grid)return;
+  let timer=setTimeout(()=>{
+    enableWobble(grid);
+    // Start drag
+    startDrag(cell,grid,e.touches[0]);
+  },500);
+  const cancel=()=>{clearTimeout(timer);cell.removeEventListener('touchend',cancel);cell.removeEventListener('touchmove',moveCheck);};
+  const moveCheck=(ev)=>{
+    const dx=Math.abs(ev.touches[0].clientX-e.touches[0].clientX);
+    const dy=Math.abs(ev.touches[0].clientY-e.touches[0].clientY);
+    if(dx>8||dy>8)cancel();
+  };
+  cell.addEventListener('touchend',cancel,{once:true});
+  cell.addEventListener('touchmove',moveCheck,{passive:true});
+},{passive:true});
+
+function startDrag(cell,grid,touch){
+  if(!wobbleMode)return;
+  const cells=[...grid.querySelectorAll('.ig-cell')];
+  const idx=cells.indexOf(cell);
+  const rect=cell.getBoundingClientRect();
+  const ox=touch.clientX-rect.left,oy=touch.clientY-rect.top;
+  cell.style.zIndex='100';cell.style.position='relative';
+  
+  const onMove=(ev)=>{
+    const t=ev.touches[0];
+    cell.style.transform=`translate(${t.clientX-rect.left-ox}px,${t.clientY-rect.top-oy}px) scale(1.1)`;
+    // Find swap target
+    cells.forEach((c,i)=>{
+      if(c===cell)return;
+      const r=c.getBoundingClientRect();
+      if(t.clientX>r.left&&t.clientX<r.right&&t.clientY>r.top&&t.clientY<r.bottom){
+        // Swap in DOM
+        if(i<idx)grid.insertBefore(cell,c);
+        else grid.insertBefore(cell,c.nextSibling);
+        haptic();
+      }
+    });
+  };
+  const onEnd=()=>{
+    cell.style.transform='';cell.style.zIndex='';cell.style.position='';
+    document.removeEventListener('touchmove',onMove);
+    document.removeEventListener('touchend',onEnd);
+    // Save new order
+    const newCells=[...grid.querySelectorAll('.ig-cell')];
+    const order=newCells.map(c=>c.querySelector('.ig-icon')?.textContent||'');
+    saveIconOrder(order);
+  };
+  document.addEventListener('touchmove',onMove,{passive:true});
+  document.addEventListener('touchend',onEnd,{once:true});
+}
 
 function runPhysics(els,shakeX,shakeY,onSettle){
   if(!els.length){physicsRunning=false;if(onSettle)onSettle();return;}
@@ -2086,15 +2189,18 @@ function startShakeListener(){
     lx=a.x;ly=a.y;lz=a.z;
 
     if(force>15){
-      // Track peak force during this shake gesture
       if(force>peakForce){peakForce=force;peakAx=a.x;peakAy=a.y;}
       clearTimeout(shakeTimeout);
       shakeTimeout=setTimeout(()=>{
-        // Gesture ended, check intensity
-        if(peakForce>50){
-          onHeavyShake(peakAx,peakAy);
-        }else if(peakForce>12){
-          onLightShake();
+        const homeEl=document.getElementById('home');
+        const isHome=homeEl&&!homeEl.classList.contains('hidden');
+        if(isHome){
+          // Home: only heavy shake triggers (higher threshold)
+          if(peakForce>55){onHeavyShake(peakAx,peakAy);}
+        }else{
+          // Card screen: normal thresholds
+          if(peakForce>50){onHeavyShake(peakAx,peakAy);}
+          else if(peakForce>12){onLightShake();}
         }
         peakForce=0;peakAx=0;peakAy=0;
       },200);
@@ -2658,22 +2764,44 @@ function showIconGrid(){
   const scroll=document.querySelector('.hm-scroll');
   let oldGrid=document.getElementById('icon-grid');
   if(oldGrid)oldGrid.remove();
+  
+  const bigMode=localStorage.getItem('inglish_bigicon')==='1';
+  const iconSize=bigMode?66:56;
+  const fontSize=bigMode?28:24;
+  const gap=bigMode?'10px 6px':'12px 8px';
+  
   const grid=document.createElement('div');
   grid.id='icon-grid';
-  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:12px 8px;padding:20px 12px;justify-items:center;';
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:'+gap+';padding:16px 10px;justify-items:center;';
+  
   const cards=[...document.querySelectorAll('.hcard')];
   const allIcons=[];
   cards.forEach(card=>{
     allIcons.push({icon:card.querySelector('.hi')?.textContent||'\u{1F4E6}',name:card.querySelector('.hcard-name')?.textContent||'',onclick:card.getAttribute('onclick')||''});
   });
   allIcons.push({icon:'\u2699\uFE0F',name:'\u8A2D\u5B9A',onclick:'__openSettings__'});
+  
+  // Apply saved order if exists
+  const savedOrder=getIconOrder();
+  if(savedOrder&&savedOrder.length===allIcons.length){
+    const ordered=[];
+    savedOrder.forEach(emoji=>{
+      const found=allIcons.find(ic=>ic.icon===emoji);
+      if(found)ordered.push(found);
+    });
+    if(ordered.length===allIcons.length)allIcons.splice(0,allIcons.length,...ordered);
+  }
+  
   allIcons.forEach((d,idx)=>{
     const cell=document.createElement('div');
     cell.className='ig-cell';
+    cell.dataset.icon=d.icon;
     cell.style.cssText='display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;-webkit-user-select:none';
     const short=d.name.length>5?d.name.slice(0,4)+'\u2026':d.name;
-    cell.innerHTML='<div class="ig-icon" style="width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.85),-1px -.8px 0 rgba(255,255,255,.6),0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:24px;transition:transform .15s">'+d.icon+'</div><div style="font-size:8px;font-weight:600;color:var(--tx);text-align:center;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+short+'</div>';
+    const labelHtml=bigMode?'':'<div style="font-size:8px;font-weight:600;color:var(--tx);text-align:center;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+short+'</div>';
+    cell.innerHTML='<div class="ig-icon" style="width:'+iconSize+'px;height:'+iconSize+'px;border-radius:14px;background:rgba(255,255,255,.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.85),-1px -.8px 0 rgba(255,255,255,.6),0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:'+fontSize+'px;transition:transform .15s">'+d.icon+'</div>'+labelHtml;
     cell.addEventListener('click',()=>{
+      if(wobbleMode)return;
       haptic();
       const allCells=grid.querySelectorAll('.ig-cell');
       const thisIcon=cell.querySelector('.ig-icon');
@@ -2687,13 +2815,14 @@ function showIconGrid(){
       },450);
     });
     const ib=cell.querySelector('.ig-icon');
-    ib.addEventListener('touchstart',function(){this.style.transform='scale(0.85)';},{passive:true});
-    ib.addEventListener('touchend',function(){this.style.transform='';},{passive:true});
+    ib.addEventListener('touchstart',function(){if(!wobbleMode)this.style.transform='scale(0.85)';},{passive:true});
+    ib.addEventListener('touchend',function(){if(!wobbleMode)this.style.transform='';},{passive:true});
     grid.appendChild(cell);
   });
   scroll.prepend(grid);
 }
 if(localStorage.getItem('inglish_layout')==='icon'){showIconGrid();}
+
 
 /* ═══ STAR FAVORITES CACHE ═══ */
 const STAR_KEY='inglish_star_cache';
