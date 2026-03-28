@@ -459,15 +459,15 @@ backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
 #hs-scrim.on{opacity:1;pointer-events:auto}
 #hsheet{
 position:fixed;bottom:calc(var(--ib) + 10px);left:10px;right:10px;z-index:400;
-background:var(--gls3);
+background:rgba(255,255,255,.88);
 backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
-border:1px solid rgba(255,255,255,.9);
+border:1px solid rgba(255,255,255,.8);
 border-radius:22px;
 padding-bottom:10px;
 transform:translateY(120%);
 transition:transform .3s cubic-bezier(.4,0,.2,1);
 max-height:55dvh;display:flex;flex-direction:column;
-box-shadow:0 4px 30px rgba(0,0,0,.12);
+box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 4px 30px rgba(0,0,0,.12);
 }
 #hsheet.open{transform:translateY(0)}
 .hs-hdl{width:36px;height:4px;background:rgba(0,0,0,.15);border-radius:2px;margin:10px auto 4px;flex-shrink:0;touch-action:none;cursor:pointer}
@@ -539,7 +539,7 @@ transition:transform .5s cubic-bezier(.34,1.56,.64,1);
 -webkit-user-select:none;user-select:none;
 pointer-events:auto;
 }
-.float-btn:active{transform:scale(1.3)}
+.float-btn:active{transform:scale(3)}
 .float-btn.pop{animation:starPop .3s ease}
 
 /* ═══ SCORE BUTTONS (centered, bigger) ═══ */
@@ -593,9 +593,10 @@ display:flex;flex-direction:column;
 #star-list-overlay.on{opacity:1;pointer-events:auto}
 #star-list-card{
 flex:1;margin:calc(var(--sat) + 10px) 0 0;
-background:rgba(255,255,255,.97);
+background:rgba(255,255,255,.88);
+backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
 border-radius:22px 22px 0 0;
-box-shadow:0 -4px 30px rgba(0,0,0,.15);
+box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 -4px 30px rgba(0,0,0,.15);
 display:flex;flex-direction:column;
 transform:translateY(100%);
 transition:transform .5s cubic-bezier(.34,1.05,.64,1);
@@ -2457,32 +2458,7 @@ slOverlay.addEventListener('click',e=>{if(e.target===slOverlay)closeStarList();}
       target=null;
     },{passive:true});
   }
-  // Also for sl-body (star list)
-  const sb=document.getElementById('sl-body');
-  sb.addEventListener('touchstart',e=>{
-    const li=e.target.closest('.li');
-    if(!li||!li.querySelector('.star-remove-btn'))return;
-    target=li;sx=e.touches[0].clientX;moved=false;
-  },{passive:true});
-  sb.addEventListener('touchmove',e=>{
-    if(!target)return;
-    const dx=e.touches[0].clientX-sx;
-    if(dx<-20){moved=true;target.style.transform=`translateX(${dx}px)`;target.style.transition='none';}
-  },{passive:true});
-  sb.addEventListener('touchend',e=>{
-    if(!target)return;
-    const dx=e.changedTouches[0].clientX-sx;
-    target.style.transition='transform .3s ease';
-    if(dx<-60){
-      target.style.transform='translateX(-70px)';
-      clearTimeout(hideTimer);
-      const t=target;
-      hideTimer=setTimeout(()=>{t.style.transform='';},1500);
-    } else {
-      target.style.transform='';
-    }
-    target=null;
-  },{passive:true});
+  // Star list: button-only delete (swipe removed for reliability)
 })();
 
 // ← やり直す button: goes back one card in current panel
@@ -2493,7 +2469,7 @@ document.getElementById('btn-back').addEventListener('click',()=>{
 });
 
 // Global float buttons
-document.getElementById('g-sfb').addEventListener('click',()=>{Sf(curP);});
+document.getElementById('g-sfb').addEventListener('click',()=>{haptic();Sf(curP);});
 document.getElementById('g-star').addEventListener('click',()=>{
   const d=DK[curP];if(d.idx>=d.deck.length)return;
   const w=d.deck[d.idx];
