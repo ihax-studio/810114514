@@ -46,6 +46,7 @@ html,body{
   font-family:"SF Pro Display","SF Pro Text",-apple-system,"Noto Sans JP",sans-serif;color:var(--tx);
   overscroll-behavior:none;
   -webkit-overflow-scrolling:auto;
+  transition:background .5s ease;
 }
 /* Body reveal: scale 2→0.95 in 0.5s — slight shrink keeps everything inside screen */
 body{animation:bReveal .8s ease both;transform-origin:center center}
@@ -63,6 +64,7 @@ background-size:cover;background-position:center;background-repeat:no-repeat;bac
 filter:blur(20px);-webkit-filter:blur(20px);
 transform:scale(1.05);
 pointer-events:none;
+transition:background .5s ease,filter .5s ease,opacity .5s ease;
 }
 /* ════ HOME ════ */
 #home{
@@ -976,7 +978,7 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ LOCK SCREEN (PWA only) ══════════ -->
-<div id="lockscreen" style="display:none;position:fixed;inset:0;z-index:10000;background:#fff;color:#000;font-weight:300;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;-webkit-user-select:none;user-select:none;transform:scale(1);opacity:1;transition:transform .8s ease,opacity .5s ease" onclick="haptic()">
+<div id="lockscreen" style="display:none;position:fixed;inset:0;z-index:10000;background:#fff;color:#000;font-weight:300;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;-webkit-user-select:none;user-select:none;transform:scale(1);opacity:1;transition:transform .8s ease,opacity .5s ease,background .5s ease" onclick="haptic()">
   <div style="display:flex;flex-direction:column;align-items:center;width:100%;height:100%;padding-top:calc(env(safe-area-inset-top,0px) + 60px)">
     <div id="lock-clock" style="font-size:76px;font-weight:200;letter-spacing:-2px;display:flex;overflow:hidden;justify-content:center;cursor:pointer" onclick="event.stopPropagation();document.getElementById('lock-color-input').click();">
       <span id="lc-h1" style="display:inline-block"></span><span id="lc-h2" style="display:inline-block"></span>
