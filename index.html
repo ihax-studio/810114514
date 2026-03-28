@@ -514,14 +514,8 @@ display:inline-block;width:6px;height:6px;border-radius:50%;
 background:var(–r);margin-left:4px;vertical-align:middle;
 }
 /* ═══ STAR FAVORITES ═══ */
-.star-btn{
-position:absolute;top:12px;right:14px;
-font-size:22px;cursor:pointer;z-index:5;
--webkit-user-select:none;user-select:none;
-transition:transform .3s cubic-bezier(.34,1.56,.64,1);
-filter:drop-shadow(0 1px 2px rgba(0,0,0,.1));
-}
-.star-btn.pop{animation:starPop .3s ease}
+.star-deck-btn{transition:transform .3s cubic-bezier(.34,1.56,.64,1)!important}
+.star-deck-btn.pop{animation:starPop .3s ease}
 @keyframes starPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
 .star-tr{
 font-size:18px;cursor:pointer;flex-shrink:0;
@@ -536,8 +530,53 @@ display:flex;align-items:center;justify-content:center;
 font-size:20px;cursor:pointer;flex-shrink:0;
 background:rgba(255,200,0,.1);border:1.5px solid rgba(255,200,0,.3);
 transition:transform .12s;-webkit-user-select:none;user-select:none;
+position:relative;
 }
 .star-input-btn:active{transform:scale(.84)}
+/* Star tooltip bubble */
+.star-tooltip{
+position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+background:rgba(255,255,255,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+border:1px solid rgba(255,200,0,.4);border-radius:14px;
+padding:10px 16px;white-space:nowrap;
+font-size:12px;font-weight:600;color:var(--tx);
+box-shadow:0 4px 20px rgba(0,0,0,.12);
+pointer-events:none;
+animation:starTooltipIn .5s ease forwards,starTooltipOut .5s ease 1.1s forwards;
+}
+.star-tooltip::after{
+content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+border:6px solid transparent;border-top-color:rgba(255,255,255,.95);
+}
+@keyframes starTooltipIn{from{opacity:0;transform:translateX(-50%) scale(.8) translateY(4px)}to{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}}
+@keyframes starTooltipOut{from{opacity:1;transform:translateX(-50%) scale(1)}to{opacity:0;transform:translateX(-50%) scale(.8) translateY(4px)}}
+/* Star list overlay */
+#star-list-overlay{
+position:fixed;inset:0;z-index:600;
+background:rgba(0,0,0,.80);
+backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+opacity:0;pointer-events:none;
+transition:opacity .3s;
+display:flex;flex-direction:column;
+}
+#star-list-overlay.on{opacity:1;pointer-events:auto}
+#star-list-card{
+flex:1;margin:calc(var(--sat) + 10px) 0 0;
+background:rgba(255,255,255,.97);
+border-radius:22px 22px 0 0;
+box-shadow:0 -4px 30px rgba(0,0,0,.15);
+display:flex;flex-direction:column;
+transform:translateY(100%);
+transition:transform .5s cubic-bezier(.34,1.05,.64,1);
+overflow:hidden;
+}
+#star-list-overlay.on #star-list-card{transform:translateY(0)}
+.sl-hdr{display:flex;align-items:center;gap:10px;padding:14px 18px 10px;border-bottom:1px solid var(--ln);flex-shrink:0}
+.sl-close{width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.06);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--tx)}
+.sl-close:active{transform:scale(.85)}
+.sl-ttl{flex:1;font-size:15px;font-weight:700;color:var(--tx)}
+.sl-body{flex:1;overflow-y:auto;padding:8px 14px calc(var(--ib) + 16px);-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.sl-body::-webkit-scrollbar{display:none}
 </style>
 
 </head>
@@ -667,6 +706,18 @@ transition:transform .12s;-webkit-user-select:none;user-select:none;
   <div class="hs-hdl" id="hs-hdl"></div>
   <div class="hs-ttl" id="hs-ttl">履歴</div>
   <div class="hs-body" id="hs-list"></div>
+</div>
+
+<!-- ══ STAR LIST OVERLAY ══ -->
+<div id="star-list-overlay">
+  <div id="star-list-card">
+    <div class="sl-hdr">
+      <button class="sl-close" id="sl-close">✕</button>
+      <div class="sl-ttl">⭐ お気に入り</div>
+      <div id="sl-count" style="font-size:11px;color:var(--sub);font-weight:600">0語</div>
+    </div>
+    <div class="sl-body" id="sl-body"></div>
+  </div>
 </div>
 
 <script type="module">
@@ -1291,11 +1342,11 @@ CFG.forEach((c,i)=>{
   <button class="ch" style="color:var(--y)" onclick="Hs('h',${i})">△<span id="sh${i}">0</span></button>
   <button class="ch" style="color:var(--r)" onclick="Hs('f',${i})">✗<span id="sf${i}">0</span></button>
   <button class="ch" style="margin-left:auto" id="sfb${i}" onclick="Sf(${i})">🔀</button>
+  <button class="ch star-deck-btn" id="star${i}" data-deck="${i}" style="font-size:18px;padding:7px 10px">☆</button>
 </div>
 <div class="ca"><div class="fw" id="fw${i}">
   <div class="fc" id="fc${i}">
-    <div class="ff" style="position:relative">
-      <div class="star-btn" id="star${i}" data-deck="${i}">☆</div>
+    <div class="ff">
       <div class="fmeta"><span class="lv ${c.lv}" id="lv${i}">${c.lvT}</span><span class="fcat" id="ca${i}"></span></div>
       <div class="fword" id="wd${i}"></div>
       <div class="fpron" id="pr${i}"></div>
@@ -1526,11 +1577,9 @@ CFG.forEach((_,i)=>{
     if(!d.flipped)return;
     if(adx>55&&adx>ady){dx>0?An(i,'g'):An(i,'f');}
   },{passive:true});
-  /* Only flip on front face tap; buttons on back face must not trigger flip */
+  /* Tap card: front→flip to back, back→flip to front (unless tapping a button) */
   document.getElementById('fc'+i).onclick=(e)=>{
-    const d=DK[i];
-    /* If already flipped (back face showing), ignore card tap — let buttons handle */
-    if(d.flipped)return;
+    if(e.target.closest('button,.ans-tap,.ans-en,.ans-ja,.hl-word'))return;
     Fl(i);
   };
 });
@@ -2009,8 +2058,8 @@ function buildStarList(){
 
 /* ═══ TAP-TO-SPEAK DELEGATION ═══ */
 document.addEventListener('click',e=>{
-  // Handle .star-btn (card star toggle)
-  const star=e.target.closest('.star-btn');
+  // Handle .star-deck-btn (card star toggle)
+  const star=e.target.closest('.star-deck-btn');
   if(star){
     e.stopPropagation();
     const i=parseInt(star.dataset.deck,10);
@@ -2018,8 +2067,10 @@ document.addEventListener('click',e=>{
     const w=d.deck[d.idx];
     toggleStar(w.e||w.w, w.j||w.m||'');
     haptic.confirm();
-    star.textContent=isStarred(w.e||w.w)?'★':'☆';
+    const nowStarred=isStarred(w.e||w.w);
+    star.textContent=nowStarred?'★':'☆';
     star.classList.remove('pop');void star.offsetWidth;star.classList.add('pop');
+    if(nowStarred)showStarTooltip();
     return;
   }
   // Handle .star-tr (translation result star toggle)
@@ -2030,8 +2081,10 @@ document.addEventListener('click',e=>{
     const meaning=starTr.dataset.meaning||'';
     toggleStar(word,meaning);
     haptic.confirm();
-    starTr.textContent=isStarred(word)?'★':'☆';
+    const nowS=isStarred(word);
+    starTr.textContent=nowS?'★':'☆';
     starTr.classList.remove('pop');void starTr.offsetWidth;starTr.classList.add('pop');
+    if(nowS)showStarTooltip();
     return;
   }
   // Handle .star-remove-btn (remove from star list)
@@ -2111,7 +2164,7 @@ document.addEventListener('click',e=>{
 
   function doDeleteAll(){
     haptic.error();haptic.error();haptic.error();
-    try{localStorage.removeItem(CACHE_KEY);localStorage.removeItem(STAR_KEY);}catch(_){}
+    try{localStorage.removeItem(CACHE_KEY);localStorage.removeItem(STAR_KEY);localStorage.removeItem(STAR_TOOLTIP_KEY);}catch(_){}
     fCache={};starCache={};
     // Scale 1→1.2 zoom out effect then reload
     ov.style.background='rgba(0,0,0,1)';
@@ -2226,18 +2279,56 @@ window.openS=function(type,arg){
 };
 
 /* ═══ INIT ═══ */
-// Star list button
-document.getElementById('btn-star-list').addEventListener('click',()=>{
+// Star tooltip tracking
+const STAR_TOOLTIP_KEY='inglish_star_tooltip_shown';
+let starTooltipShown=false;
+try{starTooltipShown=!!localStorage.getItem(STAR_TOOLTIP_KEY);}catch(_){}
+
+function showStarTooltip(){
+  if(starTooltipShown)return;
+  starTooltipShown=true;
+  try{localStorage.setItem(STAR_TOOLTIP_KEY,'1');}catch(_){}
+  const btn=document.getElementById('btn-star-list');
+  const tip=document.createElement('div');
+  tip.className='star-tooltip';
+  tip.textContent='ここから★追加した単語を見れます';
+  btn.appendChild(tip);
+  setTimeout(()=>{if(tip.parentNode)tip.remove();},1800);
+}
+
+// Star list overlay
+const slOverlay=document.getElementById('star-list-overlay');
+const slBody=document.getElementById('sl-body');
+const slCount=document.getElementById('sl-count');
+
+function openStarList(){
   haptic.confirm();
-  document.getElementById('home').classList.add('hidden');
-  setTimeout(()=>document.getElementById('app').classList.add('vis'),30);
-  document.getElementById('app-dots').style.display='none';
-  document.getElementById('sw-wrap').style.display='none';
-  document.getElementById('list-wrap').style.display='flex';
-  document.getElementById('app-ttl').textContent='⭐ お気に入り';
-  document.getElementById('list-cnt').innerHTML=buildStarList();
-  document.getElementById('list-wrap').scrollTop=0;
-});
+  starCache=loadStars();
+  const items=Object.entries(starCache).sort((a,b)=>b[1].t-a[1].t);
+  slCount.textContent=items.length+'語';
+  if(!items.length){
+    slBody.innerHTML='<div style="color:var(--sub);text-align:center;font-size:13px;padding:40px 20px">⭐ お気に入りはまだありません<br><br><span style="font-size:11px">単語カードの☆や翻訳結果の☆をタップして追加</span></div>';
+  } else {
+    let html='';
+    items.forEach(([word,data])=>{
+      const enText=word.replace(/"/g,'&quot;');
+      html+=`<div class="li ans-row" data-en="${enText}" style="position:relative"><div class="lw">${word}</div><div class="lm">${data.m||''}</div><div style="display:flex;justify-content:flex-end;margin-top:4px"><button class="ch star-remove-btn" data-word="${enText}" style="font-size:9px;padding:3px 8px;color:var(--r)">★ 削除</button></div></div>`;
+    });
+    slBody.innerHTML=html;
+  }
+  slOverlay.classList.add('on');
+}
+function closeStarList(){
+  haptic();
+  slOverlay.classList.remove('on');
+}
+document.getElementById('btn-star-list').addEventListener('click',openStarList);
+document.getElementById('sl-close').addEventListener('click',closeStarList);
+slOverlay.addEventListener('click',e=>{if(e.target===slOverlay)closeStarList();});
+
+// Also clear tooltip flag on data reset
+// (handled in doDeleteAll via localStorage.removeItem(STAR_KEY) + reload)
+
 // body animation handles splash — no separate element needed
 </script>
 
