@@ -596,6 +596,7 @@ content:'';position:absolute;top:100%;left:75%;
 border:6px solid transparent;border-top-color:rgba(255,255,255,.92);
 }
 /* ═══ SETTINGS ═══ */
+.s-sec{font-size:12px;font-weight:600;color:rgba(0,0,0,.4);padding:12px 4px 4px;text-transform:uppercase;letter-spacing:.05em}
 .s-group{background:rgba(255,255,255,.8);border-radius:12px;overflow:hidden;margin-bottom:2px}
 .s-row{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid rgba(0,0,0,.06)}
 .s-row:last-child{border-bottom:none}
@@ -733,30 +734,40 @@ overflow:hidden;
 
 <!-- ══════════ SETTINGS OVERLAY ══════════ -->
 <div id="settings-overlay" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">
-  <div id="settings-card" style="position:absolute;bottom:0;left:0;right:0;max-height:80dvh;background:rgba(245,245,247,.95);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.05,.64,1)">
+  <div id="settings-card" style="position:absolute;bottom:0;left:0;right:0;max-height:85dvh;background:rgba(245,245,247,.95);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.05,.64,1)">
     <div style="display:flex;align-items:center;padding:16px 20px 12px">
       <div style="flex:1;font-size:17px;font-weight:700;color:#000">設定</div>
       <button id="settings-close" style="width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.06);border:none;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:#000">✕</button>
     </div>
     <div style="overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px 20px">
       <!-- Home Layout -->
-      <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,.4);padding:8px 4px 4px;text-transform:uppercase;letter-spacing:.05em">ホーム画面</div>
+      <div class="s-sec">ホーム画面</div>
       <div class="s-group">
         <div class="s-row" id="s-layout-icon"><div class="s-label">アイコン</div><div class="s-check" id="s-check-icon">✓</div></div>
         <div class="s-row" id="s-layout-list"><div class="s-label">リスト</div><div class="s-check s-on" id="s-check-list">✓</div></div>
       </div>
       <!-- Haptic -->
-      <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,.4);padding:12px 4px 4px;text-transform:uppercase;letter-spacing:.05em">触覚フィードバック</div>
+      <div class="s-sec">触覚フィードバック</div>
       <div class="s-group">
         <div class="s-row"><div class="s-label">触覚</div><div class="s-toggle on" id="s-haptic"><div class="s-knob"></div></div></div>
       </div>
       <!-- Shake -->
-      <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,.4);padding:12px 4px 4px;text-transform:uppercase;letter-spacing:.05em">シェイクでシャッフル</div>
+      <div class="s-sec">シェイク</div>
       <div class="s-group">
-        <div class="s-row"><div class="s-label">シェイクでシャッフル</div><div class="s-toggle on" id="s-shake"><div class="s-knob"></div></div></div>
+        <div class="s-row" id="s-shake-none"><div class="s-label">なし</div><div class="s-check s-on" id="sc-shake-none">✓</div></div>
+        <div class="s-row s-shake-opt" id="s-shake-check"><div class="s-label">答えを確認する</div><div class="s-check" id="sc-shake-check">✓</div></div>
+        <div class="s-row s-shake-opt" id="s-shake-shuffle"><div class="s-label">シャッフルする</div><div class="s-check" id="sc-shake-shuffle">✓</div></div>
+        <div class="s-row s-shake-opt" id="s-shake-back"><div class="s-label">1つ前に戻る</div><div class="s-check" id="sc-shake-back">✓</div></div>
+      </div>
+      <div class="s-sec">強いシェイク</div>
+      <div class="s-group">
+        <div class="s-row" id="s-heavy-none"><div class="s-label">なし</div><div class="s-check s-on" id="sc-heavy-none">✓</div></div>
+        <div class="s-row s-heavy-opt" id="s-heavy-check"><div class="s-label">答えを確認する</div><div class="s-check" id="sc-heavy-check">✓</div></div>
+        <div class="s-row s-heavy-opt" id="s-heavy-shuffle"><div class="s-label">シャッフルする</div><div class="s-check" id="sc-heavy-shuffle">✓</div></div>
+        <div class="s-row s-heavy-opt" id="s-heavy-back"><div class="s-label">1つ前に戻る</div><div class="s-check" id="sc-heavy-back">✓</div></div>
       </div>
       <!-- Delete -->
-      <div style="padding:20px 0 10px;text-align:center">
+      <div style="padding:24px 0 10px;text-align:center">
         <button id="s-delete-btn" style="background:rgba(255,59,48,.08);color:#ff3b30;border:1px solid rgba(255,59,48,.15);border-radius:55px;padding:14px 32px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">セーブデータを全て削除</button>
       </div>
     </div>
@@ -765,7 +776,7 @@ overflow:hidden;
 
 <!-- ══════════ DELETE SLIDER OVERLAY ══════════ -->
 <div id="del-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0);transition:background .4s;">
-  <div id="del-content" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity .4s;">
+  <div id="del-content" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:30dvh;opacity:0;transition:opacity .4s;">
     <div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:20px;text-shadow:0 2px 10px #000b">⚠️ 全てのセーブデータが削除されます</div>
     <div id="del-slider-wrap" style="position:relative;width:310px;height:64px;">
       <div style="
@@ -789,7 +800,7 @@ overflow:hidden;
         <svg width="32" height="32" viewBox="0 0 32 32"><polyline points="12,8 20,16 12,24" fill="none" stroke="#ff3b30" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
-    <button id="btn-cancel-delete" style="margin-top:24px;background:rgba(255,255,255,.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:55px;padding:12px 28px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:1.1px 1px 0 rgba(255,255,255,.6),-1px -.8px 0 rgba(255,255,255,.4);">キャンセル</button>
+    <button id="btn-cancel-delete" style="margin-top:40px;width:48px;height:48px;background:rgba(255,255,255,.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:50%;font-size:18px;font-weight:400;cursor:pointer;font-family:inherit;box-shadow:1.1px 1px 0 rgba(255,255,255,.6),-1px -.8px 0 rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center">✕</button>
   </div>
 </div>
 
@@ -1717,39 +1728,52 @@ function doShuffle(){
   render(curP);
 }
 
-// Light shake → always shuffle (even if currently ordered)
+// Light shake → action based on settings
 function onLightShake(){
   const now=Date.now();
   if(now-lastShakeT<700)return;
   lastShakeT=now;
   haptic.confirm();
-  // Force shuffle mode
-  const d=DK[curP];
-  if(!d.shuffled){d.shuffled=true;} // switch to shuffle if ordered
-  doShuffle();
-  const fw=document.getElementById('fw'+curP);
-  if(fw&&!fw.classList.contains('card-shaking')){
-    fw.classList.add('card-shaking');
-    setTimeout(()=>fw.classList.remove('card-shaking'),500);
+  const mode=localStorage.getItem('inglish_shake_mode')||'none';
+  if(mode==='none')return;
+  if(mode==='shuffle'){
+    const d=DK[curP];d.shuffled=true;
+    doShuffle();
+    const fw=document.getElementById('fw'+curP);
+    if(fw&&!fw.classList.contains('card-shaking')){fw.classList.add('card-shaking');setTimeout(()=>fw.classList.remove('card-shaking'),500);}
+  }else if(mode==='check'){
+    // Flip card to show answer
+    const d=DK[curP];
+    if(!d.flipped&&d.idx<d.deck.length){d.flipped=true;render(curP);}
+  }else if(mode==='back'){
+    Bk(curP);
   }
 }
 
-// Heavy shake → physics drop on all visible UI elements
+// Heavy shake → action based on settings (default: none = physics drop)
 function onHeavyShake(ax,ay){
   const now=Date.now();
   if(now-lastShakeT<1200||physicsRunning)return;
   lastShakeT=now;
   haptic.confirm();
+  const mode=localStorage.getItem('inglish_heavy_mode')||'none';
   
-  // Check if on home screen or card screen
   const homeEl=document.getElementById('home');
   const isHome=homeEl&&!homeEl.classList.contains('hidden');
   
-  if(isHome){
-    runHomePhysicsDrop(ax,ay);
-  }else{
-    doShuffle();
-    runCardPhysicsDrop(ax,ay);
+  if(mode==='none'){
+    // Physics drop (default)
+    if(isHome){runHomePhysicsDrop(ax,ay);}
+    else{doShuffle();runCardPhysicsDrop(ax,ay);}
+  }else if(mode==='shuffle'){
+    if(!isHome){const d=DK[curP];d.shuffled=true;doShuffle();
+      const fw=document.getElementById('fw'+curP);
+      if(fw&&!fw.classList.contains('card-shaking-hard')){fw.classList.add('card-shaking-hard');setTimeout(()=>fw.classList.remove('card-shaking-hard'),600);}
+    }
+  }else if(mode==='check'){
+    if(!isHome){const d=DK[curP];if(!d.flipped&&d.idx<d.deck.length){d.flipped=true;render(curP);}}
+  }else if(mode==='back'){
+    if(!isHome)Bk(curP);
   }
 }
 
@@ -1876,54 +1900,85 @@ function restoreHomeFromGrid(){
 function openSettings(){
   const ov=document.getElementById('settings-overlay');
   ov.style.display='flex';
-  requestAnimationFrame(()=>{
-    document.getElementById('settings-card').style.transform='translateY(0)';
-  });
-  // Sync toggles
+  requestAnimationFrame(()=>{document.getElementById('settings-card').style.transform='translateY(0)';});
+  // Sync haptic
   document.getElementById('s-haptic').classList.toggle('on',localStorage.getItem('inglish_haptic')!=='0');
-  document.getElementById('s-shake').classList.toggle('on',shakeEnabled);
   // Sync layout
-  const isIconMode=localStorage.getItem('inglish_layout')==='icon';
-  document.getElementById('s-check-icon').classList.toggle('s-on',isIconMode);
-  document.getElementById('s-check-list').classList.toggle('s-on',!isIconMode);
+  const isIcon=localStorage.getItem('inglish_layout')==='icon';
+  document.getElementById('s-check-icon').classList.toggle('s-on',isIcon);
+  document.getElementById('s-check-list').classList.toggle('s-on',!isIcon);
+  // Sync shake mode
+  syncShakeChecks('shake',localStorage.getItem('inglish_shake_mode')||'none');
+  // Sync heavy shake mode
+  syncShakeChecks('heavy',localStorage.getItem('inglish_heavy_mode')||'none');
+  updateHeavyVisibility();
 }
 function closeSettings(){
   document.getElementById('settings-card').style.transform='translateY(100%)';
   setTimeout(()=>{document.getElementById('settings-overlay').style.display='none';},400);
 }
+function syncShakeChecks(prefix,val){
+  ['none','check','shuffle','back'].forEach(v=>{
+    const el=document.getElementById('sc-'+prefix+'-'+v);
+    if(el)el.classList.toggle('s-on',v===val);
+  });
+}
+function updateHeavyVisibility(){
+  const shakeMode=localStorage.getItem('inglish_shake_mode')||'none';
+  // Hide heavy option that matches current shake selection (when shake != none)
+  document.querySelectorAll('.s-heavy-opt').forEach(row=>{
+    row.style.display='';row.style.transition='opacity .5s';row.style.opacity='1';
+  });
+  if(shakeMode!=='none'){
+    const hideEl=document.getElementById('s-heavy-'+shakeMode);
+    if(hideEl){hideEl.style.opacity='0';setTimeout(()=>{hideEl.style.display='none';},500);}
+  }
+}
+
 document.getElementById('settings-close').addEventListener('click',()=>{haptic();closeSettings();});
 document.getElementById('settings-overlay').addEventListener('click',e=>{if(e.target.id==='settings-overlay')closeSettings();});
-// Layout toggle
+// Layout
 document.getElementById('s-layout-icon').addEventListener('click',()=>{
   haptic();localStorage.setItem('inglish_layout','icon');
   document.getElementById('s-check-icon').classList.add('s-on');
   document.getElementById('s-check-list').classList.remove('s-on');
-  closeSettings();
-  setTimeout(()=>showIconGrid(),400);
+  closeSettings();setTimeout(()=>showIconGrid(),400);
 });
 document.getElementById('s-layout-list').addEventListener('click',()=>{
   haptic();localStorage.setItem('inglish_layout','list');
   document.getElementById('s-check-list').classList.add('s-on');
   document.getElementById('s-check-icon').classList.remove('s-on');
-  closeSettings();
-  setTimeout(()=>restoreHomeFromGrid(),400);
+  closeSettings();setTimeout(()=>restoreHomeFromGrid(),400);
 });
-// Haptic toggle
+// Haptic
 document.getElementById('s-haptic').addEventListener('click',function(){
   this.classList.toggle('on');
-  const on=this.classList.contains('on');
-  localStorage.setItem('inglish_haptic',on?'1':'0');
-  if(on)haptic();
+  localStorage.setItem('inglish_haptic',this.classList.contains('on')?'1':'0');
+  if(this.classList.contains('on'))haptic();
 });
-// Shake toggle
-document.getElementById('s-shake').addEventListener('click',function(){
-  this.classList.toggle('on');
-  const on=this.classList.contains('on');
-  if(on){shakeEnabled=true;localStorage.setItem(SHAKE_KEY,'1');startShakeListener();}
-  else{shakeEnabled=false;localStorage.setItem(SHAKE_KEY,'0');}
-  haptic();
+// Shake radio
+['none','check','shuffle','back'].forEach(v=>{
+  const el=document.getElementById('s-shake-'+v);
+  if(el)el.addEventListener('click',()=>{
+    haptic();
+    localStorage.setItem('inglish_shake_mode',v);
+    syncShakeChecks('shake',v);
+    // Enable/disable shake listener
+    if(v==='none'){shakeEnabled=false;localStorage.setItem(SHAKE_KEY,'0');}
+    else{shakeEnabled=true;localStorage.setItem(SHAKE_KEY,'1');startShakeListener();}
+    updateHeavyVisibility();
+  });
 });
-// Delete button → open delete slider
+// Heavy shake radio
+['none','check','shuffle','back'].forEach(v=>{
+  const el=document.getElementById('s-heavy-'+v);
+  if(el)el.addEventListener('click',()=>{
+    haptic();
+    localStorage.setItem('inglish_heavy_mode',v);
+    syncShakeChecks('heavy',v);
+  });
+});
+// Delete
 document.getElementById('s-delete-btn').addEventListener('click',()=>{
   haptic();closeSettings();
   setTimeout(()=>{document.getElementById('btn-delete-all').click();},500);
