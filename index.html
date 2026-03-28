@@ -1673,12 +1673,15 @@ function doShuffle(){
   render(curP);
 }
 
-// Light shake → shuffle + card wobble
+// Light shake → always shuffle (even if currently ordered)
 function onLightShake(){
   const now=Date.now();
   if(now-lastShakeT<700)return;
   lastShakeT=now;
   haptic.confirm();
+  // Force shuffle mode
+  const d=DK[curP];
+  if(!d.shuffled){d.shuffled=true;} // switch to shuffle if ordered
   doShuffle();
   const fw=document.getElementById('fw'+curP);
   if(fw&&!fw.classList.contains('card-shaking')){
@@ -1687,30 +1690,98 @@ function onLightShake(){
   }
 }
 
-// Heavy shake → shuffle + physics drop on all UI elements
+// Heavy shake → physics drop on all visible UI elements
 function onHeavyShake(ax,ay){
   const now=Date.now();
   if(now-lastShakeT<1200||physicsRunning)return;
   lastShakeT=now;
   haptic.confirm();
-  doShuffle();
-  runPhysicsDrop(ax,ay);
+  
+  // Check if on home screen or card screen
+  const homeEl=document.getElementById('home');
+  const isHome=homeEl&&!homeEl.classList.contains('hidden');
+  
+  if(isHome){
+    runHomePhysicsDrop(ax,ay);
+  }else{
+    doShuffle();
+    runCardPhysicsDrop(ax,ay);
+  }
 }
 
-function runPhysicsDrop(shakeX,shakeY){
+function runCardPhysicsDrop(shakeX,shakeY){
   physicsRunning=true;
-  // Collect all UI elements to animate
   const i=curP;
   const els=[];
   const fw=document.getElementById('fw'+i);
   if(fw)els.push({el:fw,mass:1.0});
-  // Score buttons
   document.querySelectorAll('.ch-score').forEach(el=>els.push({el,mass:0.6}));
-  // Float buttons
   document.querySelectorAll('.float-btn').forEach(el=>els.push({el,mass:0.5}));
-  // Progress row
   const pr=document.querySelector('.pr-row');
   if(pr)els.push({el:pr,mass:0.4});
+  runPhysics(els,shakeX,shakeY,null);
+}
+
+function runHomePhysicsDrop(shakeX,shakeY){
+  physicsRunning=true;
+  const els=[];
+  // Header
+  const hdr=document.querySelector('.hm-hdr');
+  if(hdr)els.push({el:hdr,mass:0.3});
+  // All hcards
+  document.querySelectorAll('.hcard').forEach((el,idx)=>els.push({el,mass:0.4+idx*0.03}));
+  // Group labels
+  document.querySelectorAll('.hg-lbl').forEach(el=>els.push({el,mass:0.2}));
+  
+  runPhysics(els,shakeX,shakeY,()=>{
+    // After settle: iPhone-style icon reveal
+    const cards=document.querySelectorAll('.hcard');
+    cards.forEach((card,idx)=>{
+      card.style.opacity='0';
+      card.style.transform='scale(0.3)';
+      // Outer cards (first/last few): scale 1.8→1, 0.8s
+      // Middle cards: scale 1.7→1, 0.7s
+      // Inner cards: scale 0.7→1, 0.3s
+      const total=cards.length;
+      const center=total/2;
+      const dist=Math.abs(idx-center)/center; // 0=center, 1=edge
+      let fromScale, dur;
+      if(dist>0.7){fromScale=1.8;dur=0.8;}
+      else if(dist>0.3){fromScale=1.7;dur=0.7;}
+      else{fromScale=0.7;dur=0.3;}
+      
+      const delay=idx*30; // stagger
+      setTimeout(()=>{
+        card.style.transition=`transform ${dur}s ease, opacity ${dur*0.5}s ease`;
+        card.style.transform=`scale(${fromScale})`;
+        card.style.opacity='1';
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(()=>{
+            card.style.transform='scale(1)';
+          });
+        });
+        setTimeout(()=>{card.style.transition='';card.style.transform='';card.style.opacity='';},dur*1000+100);
+      },delay);
+    });
+    // Reveal labels too
+    document.querySelectorAll('.hg-lbl').forEach((lbl,idx)=>{
+      lbl.style.opacity='0';
+      setTimeout(()=>{
+        lbl.style.transition='opacity .3s ease';
+        lbl.style.opacity='1';
+        setTimeout(()=>{lbl.style.transition='';lbl.style.opacity='';},350);
+      },idx*50);
+    });
+    if(hdr){
+      hdr.style.transition='opacity .4s ease';
+      hdr.style.opacity='1';
+      setTimeout(()=>{hdr.style.transition='';hdr.style.opacity='';},450);
+    }
+  });
+}
+
+function runPhysics(els,shakeX,shakeY,onSettle){
+  if(!els.length){physicsRunning=false;if(onSettle)onSettle();return;}
 
   // Init physics state per element
   const states=els.map(({el,mass})=>{
@@ -1772,26 +1843,26 @@ function runPhysicsDrop(shakeX,shakeY){
 
     // If all settled or timeout, spring back
     if(settled>=states.length){
-      springBack(states);
+      springBack(states,onSettle);
       return;
     }
     requestAnimationFrame(step);
   }
 
   // Safety timeout
-  setTimeout(()=>{if(physicsRunning)springBack(states);},2500);
+  setTimeout(()=>{if(physicsRunning)springBack(states,onSettle);},2500);
   requestAnimationFrame(step);
 }
 
-function springBack(states){
+function springBack(states,onSettle){
   physicsRunning=false;
   states.forEach(s=>{
     s.el.style.transition='transform .5s cubic-bezier(.34,1.56,.64,1)';
     s.el.style.transform='';
   });
-  // Clean up transition after animation
   setTimeout(()=>{
     states.forEach(s=>{s.el.style.transition='';});
+    if(onSettle)onSettle();
   },550);
 }
 
@@ -1816,9 +1887,9 @@ function startShakeListener(){
       clearTimeout(shakeTimeout);
       shakeTimeout=setTimeout(()=>{
         // Gesture ended, check intensity
-        if(peakForce>60){
+        if(peakForce>45){
           onHeavyShake(peakAx,peakAy);
-        }else if(peakForce>15){
+        }else if(peakForce>12){
           onLightShake();
         }
         peakForce=0;peakAx=0;peakAy=0;
