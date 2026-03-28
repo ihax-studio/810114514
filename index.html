@@ -623,6 +623,9 @@ border:6px solid transparent;border-top-color:rgba(255,255,255,.92);
 /* Shake settings section wobble */
 .s-shake-section .s-group{animation:settingsShake 2s ease-in-out infinite}
 @keyframes settingsShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+/* Lock screen */
+@keyframes lockDigitIn{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes lockShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-15px)}40%{transform:translateX(12px)}60%{transform:translateX(-8px)}80%{transform:translateX(5px)}}
 
 @keyframes shakeIn{from{opacity:0;transform:translateX(-80%) scale(.8) translateY(4px)}to{opacity:1;transform:translateX(-80%) scale(1) translateY(0)}}
 @keyframes shakeOut{from{opacity:1}to{opacity:0;transform:translateX(-80%) scale(.8) translateY(4px)}}
@@ -861,6 +864,7 @@ overflow:hidden;
             <div class="s-row" id="s-layout-icon"><div class="s-label">アイコン</div><div class="s-check" id="s-check-icon">✓</div></div>
             <div class="s-row" id="s-layout-list"><div class="s-label">リスト</div><div class="s-check s-on" id="s-check-list">✓</div></div>
             <div class="s-row"><div class="s-label">大きいアイコン</div><div class="s-toggle" id="s-bigicon"><div class="s-knob"></div></div></div>
+            <div class="s-row"><div class="s-label">ロック画面</div><div class="s-toggle" id="s-lockscreen"><div class="s-knob"></div></div></div>
           </div>
         </div>
         <!-- Sound & Haptic -->
@@ -933,6 +937,41 @@ overflow:hidden;
     </div>
     <div style="color:#fff;font-size:14px;font-weight:600;margin-top:20px;text-shadow:0 2px 10px #000b;text-align:center">⚠️ 全てのセーブデータが削除されます</div>
     <button id="btn-cancel-delete" style="margin-top:auto;margin-bottom:calc(env(safe-area-inset-bottom,0px) + 50px);width:56px;height:56px;background:rgba(255,255,255,.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:50%;font-size:28px;font-weight:300;cursor:pointer;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;box-shadow:1.1px 1px 0 rgba(255,255,255,.6),-1px -.8px 0 rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+  </div>
+</div>
+
+<!-- ══════════ LOCK SCREEN ══════════ -->
+<div id="lockscreen" style="display:none;position:fixed;inset:0;z-index:10000;background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;-webkit-user-select:none;user-select:none">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:0 40px">
+    <div id="lock-clock" style="font-size:76px;font-weight:200;letter-spacing:-2px;margin-bottom:6px;overflow:hidden;display:flex">
+      <div id="lc-h" style="display:flex"></div>
+      <div>:</div>
+      <div id="lc-m" style="display:flex"></div>
+    </div>
+    <div id="lock-date" style="font-size:16px;font-weight:400;opacity:.7;margin-bottom:auto"></div>
+    <div style="position:relative;width:300px;height:60px;margin-bottom:calc(env(safe-area-inset-bottom,0px) + 40px)">
+      <div style="position:absolute;inset:0;border-radius:55px;background:rgba(255,255,255,.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;overflow:hidden">
+        <div id="lock-slide-inner" style="position:absolute;top:0;left:-5px;height:60px;border-radius:55px;z-index:1;width:68px;pointer-events:none"></div>
+        <div id="lock-slide-label" style="position:absolute;left:76px;top:0;height:60px;line-height:60px;color:rgba(255,255,255,.6);font-size:16px;font-weight:400;letter-spacing:.5px;z-index:2;user-select:none;pointer-events:none">スライドでロック解除</div>
+      </div>
+      <div id="lock-knob" style="position:absolute;top:4px;left:4px;width:52px;height:52px;background:rgba(255,255,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;z-index:10;cursor:pointer;user-select:none;will-change:left;transition:left .5s cubic-bezier(.62,0,.4,1)">
+        <svg width="24" height="24" viewBox="0 0 32 32"><polyline points="12,8 20,16 12,24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ LOCK CONFIRM DIALOG ══════════ -->
+<div id="lock-confirm-dlg" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0);transition:background .5s ease;align-items:center;justify-content:center">
+  <div id="lock-confirm-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .3s ease,opacity .3s ease">
+    <div style="padding:22px 20px 10px">
+      <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">パスコードが必要</div>
+      <div style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5">Face ID/Optic IDまたはTouch IDを<br>設定している必要があります😰</div>
+    </div>
+    <div style="border-top:1px solid rgba(0,0,0,.1);display:flex">
+      <button id="lock-dlg-cancel" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;border-right:1px solid rgba(0,0,0,.1);cursor:pointer;font-family:inherit;font-weight:400">キャンセル</button>
+      <button id="lock-dlg-ok" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">ロックする</button>
+    </div>
   </div>
 </div>
 
@@ -2080,6 +2119,148 @@ document.getElementById('memo-translate').addEventListener('click',async()=>{
     trResult.textContent=data[0].map(s=>s[0]).join('');
   }catch(e){trResult.textContent='翻訳エラー';}
 });
+
+/* ═══ LOCK SCREEN ═══ */
+const LOCK_KEY='inglish_lockscreen';
+
+function updateLockClock(){
+  const now=new Date();
+  const h=String(now.getHours()).padStart(2,'0');
+  const m=String(now.getMinutes()).padStart(2,'0');
+  const days=['日','月','火','水','木','金','土'];
+  const months=['1','2','3','4','5','6','7','8','9','10','11','12'];
+  
+  // Update digits with slide animation on change
+  ['lc-h','lc-m'].forEach((id,gi)=>{
+    const el=document.getElementById(id);
+    const digits=gi===0?h:m;
+    if(el.dataset.val!==digits){
+      el.dataset.val=digits;
+      el.innerHTML='';
+      for(let i=0;i<2;i++){
+        const d=document.createElement('span');
+        d.textContent=digits[i];
+        d.style.cssText='display:inline-block;animation:lockDigitIn .5s ease both';
+        el.appendChild(d);
+      }
+    }
+  });
+  document.getElementById('lock-date').textContent=
+    `${now.getMonth()+1}月${now.getDate()}日 ${days[now.getDay()]}曜日`;
+}
+
+function showLockScreen(){
+  const ls=document.getElementById('lockscreen');
+  ls.style.display='flex';
+  updateLockClock();
+  // Start clock update
+  if(!window._lockClockInterval)window._lockClockInterval=setInterval(updateLockClock,1000);
+  // Reset slider
+  const knob=document.getElementById('lock-knob');
+  knob.style.left='4px';
+}
+
+function hideLockScreen(){
+  document.getElementById('lockscreen').style.display='none';
+  if(window._lockClockInterval){clearInterval(window._lockClockInterval);window._lockClockInterval=null;}
+}
+
+// Lock screen slider
+(function(){
+  const knob=document.getElementById('lock-knob');
+  if(!knob)return;
+  let dragging=false,startX=0,knobLeft=4;
+  const maxLeft=300-56-4;
+  
+  knob.addEventListener('touchstart',e=>{
+    dragging=true;startX=e.touches[0].clientX-knobLeft;
+    knob.style.transition='none';
+  },{passive:true});
+  
+  document.addEventListener('touchmove',e=>{
+    if(!dragging)return;
+    let x=e.touches[0].clientX-startX;
+    if(x<4)x=4;if(x>maxLeft)x=maxLeft;
+    knobLeft=x;knob.style.left=x+'px';
+    // Fade label
+    const pct=x/maxLeft;
+    document.getElementById('lock-slide-label').style.opacity=String(1-pct);
+  },{passive:true});
+  
+  document.addEventListener('touchend',()=>{
+    if(!dragging)return;
+    dragging=false;
+    knob.style.transition='left .5s cubic-bezier(.62,0,.4,1)';
+    if(knobLeft>maxLeft*0.8){
+      // Slid far enough — attempt Face ID
+      knob.style.left=maxLeft+'px';
+      haptic.confirm();
+      // Blur transition then Face ID
+      const ls=document.getElementById('lockscreen');
+      ls.style.transition='filter .5s ease';ls.style.filter='blur(12px)';
+      setTimeout(async()=>{
+        try{
+          const c=new Uint8Array(32);crypto.getRandomValues(c);
+          const u=new Uint8Array(16);crypto.getRandomValues(u);
+          await navigator.credentials.create({publicKey:{challenge:c,rp:{name:'iN glish Lock'},user:{id:u,name:'u@lock',displayName:'U'},pubKeyCredParams:[{type:'public-key',alg:-7}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000}});
+          haptic.confirm();
+          ls.style.transition='opacity .5s ease';ls.style.opacity='0';
+          setTimeout(()=>{hideLockScreen();ls.style.filter='';ls.style.opacity='';ls.style.transition='';},500);
+        }catch(e){
+          haptic.error();
+          ls.style.filter='';ls.style.transition='';
+          // Shake the lock screen
+          ls.style.animation='lockShake .5s ease';
+          setTimeout(()=>{ls.style.animation='';},500);
+          knob.style.left='4px';knobLeft=4;
+          document.getElementById('lock-slide-label').style.opacity='1';
+        }
+      },600);
+    }else{
+      knob.style.left='4px';knobLeft=4;
+      document.getElementById('lock-slide-label').style.opacity='1';
+    }
+  });
+})();
+
+// Lock screen toggle in settings
+document.getElementById('s-lockscreen').addEventListener('click',function(){
+  haptic();
+  const isOn=this.classList.contains('on');
+  if(!isOn){
+    // Turning ON — show confirm dialog
+    showDialog('lock-confirm-dlg','lock-confirm-card');
+  }else{
+    // Turning OFF
+    this.classList.remove('on');
+    localStorage.setItem(LOCK_KEY,'0');
+  }
+});
+document.getElementById('lock-dlg-cancel').addEventListener('click',()=>{
+  haptic();hideDialog('lock-confirm-dlg','lock-confirm-card');
+});
+document.getElementById('lock-dlg-ok').addEventListener('click',()=>{
+  haptic.confirm();
+  localStorage.setItem(LOCK_KEY,'1');
+  document.getElementById('s-lockscreen').classList.add('on');
+  hideDialog('lock-confirm-dlg','lock-confirm-card',()=>{
+    // Show lock screen immediately
+    closeSettings();
+    setTimeout(()=>showLockScreen(),500);
+  });
+});
+
+// On page load, show lock screen if enabled
+if(localStorage.getItem(LOCK_KEY)==='1'){
+  showLockScreen();
+}
+
+// Sync in openSettings
+const _origOpen2=openSettings;
+openSettings=function(){
+  _origOpen2();
+  document.getElementById('s-lockscreen').classList.toggle('on',localStorage.getItem(LOCK_KEY)==='1');
+};
 
 /* ═══ KEYBOARD SHORTCUTS (PC) ═══ */
 document.addEventListener('keydown',e=>{
