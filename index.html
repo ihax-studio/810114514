@@ -14,6 +14,11 @@
 -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 html{overscroll-behavior:none;position:fixed;inset:0;touch-action:pan-y}
 body{overscroll-behavior:none;position:fixed;inset:0;overflow:hidden;touch-action:pan-y}
+/* iPad/Mac: narrower content */
+@media(min-width:768px){
+  #app,#home{max-width:680px;margin:0 auto}
+  .hm-scroll{max-width:680px;margin:0 auto}
+}
 :root{
   --sat:env(safe-area-inset-top,0px);
   --sab:env(safe-area-inset-bottom,0px);
@@ -2120,10 +2125,10 @@ function openSettings(){
     // iPad/Mac: settings card is centered dialog, not bottom sheet
     const card=document.getElementById('settings-card');
     card.style.position='relative';card.style.margin='auto';
-    card.style.maxWidth='700px';card.style.maxHeight='80dvh';
+    card.style.maxWidth='800px';card.style.width='90%';card.style.maxHeight='80dvh';
     card.style.borderRadius='22px';card.style.bottom='auto';
+    card.style.transition='transform .5s ease, opacity .3s ease, width .5s ease, max-width .5s ease';
     card.style.transform='scale(0.9)';card.style.opacity='0';
-    card.style.transition='transform .3s ease, opacity .3s ease';
     requestAnimationFrame(()=>{card.style.transform='scale(1)';card.style.opacity='1';});
     // Show only first section on iPad
     showSettingsSection('home');
@@ -2180,7 +2185,7 @@ function closeSettings(){
     // Reset card styles
     card.style.position='';card.style.margin='';card.style.maxWidth='';
     card.style.maxHeight='';card.style.borderRadius='';card.style.bottom='';
-    card.style.opacity='';
+    card.style.opacity='';card.style.width='';card.style.transition='';
     if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
     else restoreHomeFromGrid();
   },400);
