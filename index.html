@@ -553,7 +553,7 @@ background:var(–r);margin-left:4px;vertical-align:middle;
       <div class="hcard" onclick="openS('card-forgot',0)"><div class="hi ir">🔄</div><div class="hcard-info"><div class="hcard-name">忘れた単語だけ復習</div><div class="hcard-desc">忘れた・難しいマークの単語だけ出題</div></div><div class="badge" id="b-retry">0</div><div class="chev">›</div></div>
     </div>
     <div style="padding:20px 6px 40px;text-align:center">
-      <button id="btn-delete-all" onclick="haptic.error();showDeleteSlider()" style="
+      <button id="btn-delete-all" style="
         background:rgba(255,59,48,.10);color:#c0001a;border:1.5px solid rgba(255,59,48,.25);
         border-radius:14px;padding:14px 28px;font-size:13px;font-weight:700;
         cursor:pointer;font-family:inherit;transition:transform .12s;
@@ -589,7 +589,7 @@ background:var(–r);margin-left:4px;vertical-align:middle;
         <svg width="32" height="32" viewBox="0 0 32 32"><polyline points="12,8 20,16 12,24" fill="none" stroke="#ff3b30" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
-    <button onclick="hideDeleteSlider()" style="margin-top:24px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">キャンセル</button>
+    <button id="btn-cancel-delete" style="margin-top:24px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">キャンセル</button>
   </div>
 </div>
 
@@ -1932,100 +1932,105 @@ document.addEventListener('click',e=>{
 });
 
 /* ═══ DELETE SLIDER ═══ */
-window.showDeleteSlider=function(){
-  haptic.error();
+/* ═══ DELETE SLIDER ═══ */
+(()=>{
   const ov=document.getElementById('del-overlay');
-  ov.style.display='block';
-  requestAnimationFrame(()=>{
-    ov.style.background='rgba(0,0,0,.75)';
-    document.getElementById('del-content').style.opacity='1';
-  });
-  // Setup drag
+  const content=document.getElementById('del-content');
   const knob=document.getElementById('del-knob');
   const inner=document.getElementById('del-inner');
   const label=document.getElementById('del-label');
   const wrap=document.getElementById('del-slider-wrap');
-  let dragging=false,sx=0,kx=0,maxOff=310-56-4;
-  function setPos(x){knob.style.left=x+'px';inner.style.width=(72+x)+'px';label.style.opacity=1-x/maxOff;}
-  function reset(){knob.style.left='4px';inner.style.width='72px';label.style.opacity=1;}
+  const btnOpen=document.getElementById('btn-delete-all');
+  const btnCancel=document.getElementById('btn-cancel-delete');
+  const maxOff=310-56-4;
+  let dragging=false,sx=0,kx=0;
 
-  knob.ontouchstart=e=>{
+  function setPos(x){knob.style.left=x+'px';inner.style.width=(72+x)+'px';label.style.opacity=1-x/maxOff;}
+  function resetSlider(){
+    knob.style.transition='left .5s cubic-bezier(.62,0,.4,1)';
+    inner.style.transition='width .13s';
+    knob.style.left='4px';inner.style.width='72px';label.style.opacity=1;
+  }
+
+  function doDeleteAll(){
+    haptic.error();haptic.error();haptic.error();
+    try{localStorage.removeItem(CACHE_KEY);}catch(_){}
+    fCache={};
+    DK.forEach((d,i)=>{
+      d.deck=[...SRC[CFG[i].src]];d.idx=0;d.flipped=false;
+      d.st={g:0,h:0,f:0};d.hist=[];d.prev=null;d.shuffled=false;
+      document.getElementById('sg'+i).textContent=0;
+      document.getElementById('sh'+i).textContent=0;
+      document.getElementById('sf'+i).textContent=0;
+      render(i);
+    });
+    updateHomeBadges();
+    setTimeout(hideSlider,300);
+  }
+
+  function showSlider(){
+    haptic.error();
+    ov.style.display='block';
+    requestAnimationFrame(()=>{
+      ov.style.background='rgba(0,0,0,.75)';
+      content.style.opacity='1';
+    });
+    resetSlider();
+  }
+  function hideSlider(){
+    ov.style.background='rgba(0,0,0,0)';
+    content.style.opacity='0';
+    resetSlider();
+    setTimeout(()=>{ov.style.display='none';},400);
+    haptic();
+  }
+
+  // Open button
+  btnOpen.addEventListener('click',showSlider);
+  // Cancel button
+  btnCancel.addEventListener('click',hideSlider);
+
+  // Touch drag on knob
+  knob.addEventListener('touchstart',e=>{
     dragging=true;sx=e.touches[0].clientX;kx=0;
     knob.style.transition='none';inner.style.transition='none';
     haptic();
-  };
-  wrap.ontouchmove=e=>{
+  },{passive:true});
+  wrap.addEventListener('touchmove',e=>{
     if(!dragging)return;
     let dx=e.touches[0].clientX-sx;if(dx<0)dx=0;
     kx=Math.min(dx,maxOff);setPos(kx);
-  };
-  wrap.ontouchend=e=>{
+  },{passive:true});
+  wrap.addEventListener('touchend',e=>{
     if(!dragging)return;dragging=false;
     knob.style.transition='left .5s cubic-bezier(.62,0,.4,1)';
     inner.style.transition='width .13s';
-    if(kx>=maxOff*.9){
-      // DELETE ALL
-      haptic.error();haptic.error();haptic.error();
-      try{localStorage.removeItem(CACHE_KEY);}catch(_){}
-      fCache={};
-      // Reset all deck states
-      DK.forEach((d,i)=>{
-        d.deck=[...SRC[CFG[i].src]];d.idx=0;d.flipped=false;
-        d.st={g:0,h:0,f:0};d.hist=[];d.prev=null;d.shuffled=false;
-        document.getElementById('sg'+i).textContent=0;
-        document.getElementById('sh'+i).textContent=0;
-        document.getElementById('sf'+i).textContent=0;
-        render(i);
-      });
-      updateHomeBadges();
-      setTimeout(()=>hideDeleteSlider(),300);
-    } else {
-      for(let i=0;i<9;i++)setTimeout(()=>haptic.error(),i*45);
-      reset();
-    }
-  };
-  // Mouse fallback
-  knob.onmousedown=e=>{
+    if(kx>=maxOff*.9){doDeleteAll();}
+    else{for(let i=0;i<9;i++)setTimeout(()=>haptic.error(),i*45);resetSlider();}
+  },{passive:true});
+
+  // Mouse drag fallback (desktop)
+  knob.addEventListener('mousedown',e=>{
     dragging=true;sx=e.clientX;kx=0;
     knob.style.transition='none';inner.style.transition='none';
-  };
-  window.onmousemove=e=>{
+  });
+  window.addEventListener('mousemove',e=>{
     if(!dragging)return;
     let dx=e.clientX-sx;if(dx<0)dx=0;
     kx=Math.min(dx,maxOff);setPos(kx);
-  };
-  window.onmouseup=e=>{
+  });
+  window.addEventListener('mouseup',e=>{
     if(!dragging)return;dragging=false;
     knob.style.transition='left .5s cubic-bezier(.62,0,.4,1)';
     inner.style.transition='width .13s';
-    if(kx>=maxOff*.9){
-      try{localStorage.removeItem(CACHE_KEY);}catch(_){}
-      fCache={};
-      DK.forEach((d,i)=>{
-        d.deck=[...SRC[CFG[i].src]];d.idx=0;d.flipped=false;
-        d.st={g:0,h:0,f:0};d.hist=[];d.prev=null;d.shuffled=false;
-        document.getElementById('sg'+i).textContent=0;
-        document.getElementById('sh'+i).textContent=0;
-        document.getElementById('sf'+i).textContent=0;
-        render(i);
-      });
-      updateHomeBadges();
-      setTimeout(()=>hideDeleteSlider(),300);
-    } else {
-      reset();
-    }
-  };
-};
-window.hideDeleteSlider=function(){
-  const ov=document.getElementById('del-overlay');
-  ov.style.background='rgba(0,0,0,0)';
-  document.getElementById('del-content').style.opacity='0';
-  document.getElementById('del-knob').style.left='4px';
-  document.getElementById('del-inner').style.width='72px';
-  document.getElementById('del-label').style.opacity=1;
-  setTimeout(()=>{ov.style.display='none';},400);
-  haptic();
-};
+    if(kx>=maxOff*.9){doDeleteAll();}
+    else{resetSlider();}
+  });
+
+  // Expose for other code
+  window.showDeleteSlider=showSlider;
+  window.hideDeleteSlider=hideSlider;
+})();
 
 /* ═══ RETRY FORGOT QUIZ (card-forgot mode) ═══ */
 // Override openS to handle card-forgot
