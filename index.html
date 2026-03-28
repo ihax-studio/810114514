@@ -595,6 +595,18 @@ animation:shakeIn .5s ease forwards,shakeOut .5s ease 2s forwards;
 content:'';position:absolute;top:100%;left:75%;
 border:6px solid transparent;border-top-color:rgba(255,255,255,.92);
 }
+/* ═══ SETTINGS ═══ */
+.s-group{background:rgba(255,255,255,.8);border-radius:12px;overflow:hidden;margin-bottom:2px}
+.s-row{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid rgba(0,0,0,.06)}
+.s-row:last-child{border-bottom:none}
+.s-label{flex:1;font-size:15px;color:#000}
+.s-check{width:22px;text-align:center;font-size:15px;font-weight:700;color:transparent}
+.s-check.s-on{color:#007aff}
+.s-toggle{width:51px;height:31px;border-radius:16px;background:#e0e0e0;position:relative;cursor:pointer;transition:background .3s;flex-shrink:0}
+.s-toggle.on{background:#34c759}
+.s-knob{width:27px;height:27px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .3s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.s-toggle.on .s-knob{transform:translateX(20px)}
+
 @keyframes shakeIn{from{opacity:0;transform:translateX(-80%) scale(.8) translateY(4px)}to{opacity:1;transform:translateX(-80%) scale(1) translateY(0)}}
 @keyframes shakeOut{from{opacity:1}to{opacity:0;transform:translateX(-80%) scale(.8) translateY(4px)}}
 
@@ -715,6 +727,38 @@ overflow:hidden;
         display:inline-flex;align-items:center;gap:8px;
         box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 2px 8px rgba(0,0,0,.08);
       ">⚠️ セーブデータを全て削除</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SETTINGS OVERLAY ══════════ -->
+<div id="settings-overlay" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">
+  <div id="settings-card" style="position:absolute;bottom:0;left:0;right:0;max-height:80dvh;background:rgba(245,245,247,.95);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.05,.64,1)">
+    <div style="display:flex;align-items:center;padding:16px 20px 12px">
+      <div style="flex:1;font-size:17px;font-weight:700;color:#000">設定</div>
+      <button id="settings-close" style="width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.06);border:none;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:#000">✕</button>
+    </div>
+    <div style="overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px 20px">
+      <!-- Home Layout -->
+      <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,.4);padding:8px 4px 4px;text-transform:uppercase;letter-spacing:.05em">ホーム画面</div>
+      <div class="s-group">
+        <div class="s-row" id="s-layout-icon"><div class="s-label">アイコン</div><div class="s-check" id="s-check-icon">✓</div></div>
+        <div class="s-row" id="s-layout-list"><div class="s-label">リスト</div><div class="s-check s-on" id="s-check-list">✓</div></div>
+      </div>
+      <!-- Haptic -->
+      <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,.4);padding:12px 4px 4px;text-transform:uppercase;letter-spacing:.05em">触覚フィードバック</div>
+      <div class="s-group">
+        <div class="s-row"><div class="s-label">触覚</div><div class="s-toggle on" id="s-haptic"><div class="s-knob"></div></div></div>
+      </div>
+      <!-- Shake -->
+      <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,.4);padding:12px 4px 4px;text-transform:uppercase;letter-spacing:.05em">シェイクでシャッフル</div>
+      <div class="s-group">
+        <div class="s-row"><div class="s-label">シェイクでシャッフル</div><div class="s-toggle on" id="s-shake"><div class="s-knob"></div></div></div>
+      </div>
+      <!-- Delete -->
+      <div style="padding:20px 0 10px;text-align:center">
+        <button id="s-delete-btn" style="background:rgba(255,59,48,.08);color:#ff3b30;border:1px solid rgba(255,59,48,.15);border-radius:55px;padding:14px 32px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">セーブデータを全て削除</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1731,45 +1775,84 @@ function runHomePhysicsDrop(shakeX,shakeY){
   document.querySelectorAll('.hg-lbl').forEach(el=>els.push({el,mass:0.2}));
   
   runPhysics(els,shakeX,shakeY,()=>{
-    // Hide normal layout
     document.querySelectorAll('.hg-lbl').forEach(l=>{l.style.display='none';});
     document.querySelectorAll('.hg-list').forEach(l=>{l.style.display='none';});
     if(hdr)hdr.style.opacity='0';
 
-    // Build iPhone 4-column icon grid
     const scroll=document.querySelector('.hm-scroll');
     let oldGrid=document.getElementById('icon-grid');
     if(oldGrid)oldGrid.remove();
     const grid=document.createElement('div');
     grid.id='icon-grid';
-    grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:24px 16px;justify-items:center;';
+    grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:12px 8px;padding:20px 12px;justify-items:center;';
     
     const cards=[...document.querySelectorAll('.hcard')];
-    cards.forEach((card,idx)=>{
-      const icon=card.querySelector('.hi')?.textContent||'\u{1F4E6}';
-      const nm=card.querySelector('.hcard-name')?.textContent||'';
-      const oc=card.getAttribute('onclick')||'';
+    // Build icon data from cards + add settings
+    const allIcons=[];
+    cards.forEach(card=>{
+      allIcons.push({
+        icon:card.querySelector('.hi')?.textContent||'\u{1F4E6}',
+        name:card.querySelector('.hcard-name')?.textContent||'',
+        onclick:card.getAttribute('onclick')||''
+      });
+    });
+    allIcons.push({icon:'\u2699\uFE0F',name:'\u8A2D\u5B9A',onclick:'__openSettings__'});
+    
+    // Zone mapping for animations:
+    // outer(0-3,4,7,8,11,12,15,16-20): 1.8->1 0.8s
+    // inner(5,6,9,10): 0.7->1 0.3s  
+    // settings(last): 1.7->1 0.7s
+    const innerSet=new Set([5,6,9,10]);
+    
+    allIcons.forEach((d,idx)=>{
       const cell=document.createElement('div');
-      cell.style.cssText='display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;-webkit-user-select:none;opacity:0;transform:scale(0.3)';
-      const short=nm.length>6?nm.slice(0,5)+'\u2026':nm;
-      cell.innerHTML='<div style="width:60px;height:60px;border-radius:16px;background:rgba(255,255,255,.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.65);box-shadow:1.1px 1px 0 rgba(255,255,255,.85),-1px -.8px 0 rgba(255,255,255,.6),0 2px 10px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:26px;transition:transform .15s">'+icon+'</div><div style="font-size:9px;font-weight:600;color:var(--tx);text-align:center;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+short+'</div>';
-      cell.addEventListener('click',()=>{haptic();restoreHomeFromGrid();if(oc){try{eval(oc);}catch(e){}}});
-      const ib=cell.querySelector('div');
+      cell.className='ig-cell';
+      cell.style.cssText='display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;-webkit-user-select:none;opacity:0;transform:scale(0.3)';
+      const short=d.name.length>5?d.name.slice(0,4)+'\u2026':d.name;
+      cell.innerHTML='<div class="ig-icon" style="width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.85),-1px -.8px 0 rgba(255,255,255,.6),0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:24px;transition:transform .15s">'+d.icon+'</div><div style="font-size:8px;font-weight:600;color:var(--tx);text-align:center;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+short+'</div>';
+      
+      // Tap: tapped icon scales 1->5+fade, others scale 1->0.8
+      cell.addEventListener('click',()=>{
+        haptic();
+        const allCells=grid.querySelectorAll('.ig-cell');
+        const thisIcon=cell.querySelector('.ig-icon');
+        // Tapped icon: expand + fade out
+        thisIcon.style.transition='transform .5s ease, opacity .4s ease';
+        thisIcon.style.transform='scale(5)';
+        thisIcon.style.opacity='0';
+        // Others: shrink
+        allCells.forEach(c2=>{
+          if(c2===cell)return;
+          c2.style.transition='transform .5s ease, opacity .4s ease';
+          c2.style.transform='scale(0.8)';
+          c2.style.opacity='0.3';
+        });
+        setTimeout(()=>{
+          restoreHomeFromGrid();
+          if(d.onclick==='__openSettings__'){
+            openSettings();
+          }else if(d.onclick){
+            try{eval(d.onclick);}catch(e){}
+          }
+        },450);
+      });
+      
+      const ib=cell.querySelector('.ig-icon');
       ib.addEventListener('touchstart',function(){this.style.transform='scale(0.85)';},{passive:true});
       ib.addEventListener('touchend',function(){this.style.transform='';},{passive:true});
       grid.appendChild(cell);
 
-      // Scale animation: outer=1.8, middle=1.7, inner=0.7
-      const row=Math.floor(idx/4),col=idx%4;
-      const d=Math.abs(col-1.5)+Math.abs(row-1.5);
+      // Reveal animation
       let fs,du;
-      if(d>2){fs=1.8;du=0.8;}else if(d>1){fs=1.7;du=0.7;}else{fs=0.7;du=0.3;}
+      if(idx===allIcons.length-1){fs=1.7;du=0.7;} // settings = middle
+      else if(innerSet.has(idx)){fs=0.7;du=0.3;}    // inner
+      else{fs=1.8;du=0.8;}                            // outer
       setTimeout(()=>{
         cell.style.transition='transform '+du+'s ease, opacity '+(du*0.4)+'s ease';
         cell.style.transform='scale('+fs+')';cell.style.opacity='1';
         requestAnimationFrame(()=>requestAnimationFrame(()=>{cell.style.transform='scale(1)';}));
         setTimeout(()=>{cell.style.transition='';},du*1000+100);
-      },idx*40);
+      },idx*35);
     });
     scroll.prepend(grid);
   });
@@ -1782,6 +1865,59 @@ function restoreHomeFromGrid(){
   const h=document.querySelector('.hm-hdr');
   if(h){h.style.transition='opacity .3s';h.style.opacity='1';setTimeout(()=>{h.style.transition='';},350);}
 }
+
+/* ═══ SETTINGS ═══ */
+function openSettings(){
+  const ov=document.getElementById('settings-overlay');
+  ov.style.display='flex';
+  requestAnimationFrame(()=>{
+    document.getElementById('settings-card').style.transform='translateY(0)';
+  });
+  // Sync toggles
+  document.getElementById('s-haptic').classList.toggle('on',localStorage.getItem('inglish_haptic')!=='0');
+  document.getElementById('s-shake').classList.toggle('on',shakeEnabled);
+  // Sync layout
+  const isIconMode=localStorage.getItem('inglish_layout')==='icon';
+  document.getElementById('s-check-icon').classList.toggle('s-on',isIconMode);
+  document.getElementById('s-check-list').classList.toggle('s-on',!isIconMode);
+}
+function closeSettings(){
+  document.getElementById('settings-card').style.transform='translateY(100%)';
+  setTimeout(()=>{document.getElementById('settings-overlay').style.display='none';},400);
+}
+document.getElementById('settings-close').addEventListener('click',()=>{haptic();closeSettings();});
+document.getElementById('settings-overlay').addEventListener('click',e=>{if(e.target.id==='settings-overlay')closeSettings();});
+// Layout toggle
+document.getElementById('s-layout-icon').addEventListener('click',()=>{
+  haptic();localStorage.setItem('inglish_layout','icon');
+  document.getElementById('s-check-icon').classList.add('s-on');
+  document.getElementById('s-check-list').classList.remove('s-on');
+});
+document.getElementById('s-layout-list').addEventListener('click',()=>{
+  haptic();localStorage.setItem('inglish_layout','list');
+  document.getElementById('s-check-list').classList.add('s-on');
+  document.getElementById('s-check-icon').classList.remove('s-on');
+});
+// Haptic toggle
+document.getElementById('s-haptic').addEventListener('click',function(){
+  this.classList.toggle('on');
+  const on=this.classList.contains('on');
+  localStorage.setItem('inglish_haptic',on?'1':'0');
+  if(on)haptic();
+});
+// Shake toggle
+document.getElementById('s-shake').addEventListener('click',function(){
+  this.classList.toggle('on');
+  const on=this.classList.contains('on');
+  if(on){shakeEnabled=true;localStorage.setItem(SHAKE_KEY,'1');startShakeListener();}
+  else{shakeEnabled=false;localStorage.setItem(SHAKE_KEY,'0');}
+  haptic();
+});
+// Delete button → open delete slider
+document.getElementById('s-delete-btn').addEventListener('click',()=>{
+  haptic();closeSettings();
+  setTimeout(()=>{document.getElementById('btn-delete-all').click();},500);
+});
 
 function runPhysics(els,shakeX,shakeY,onSettle){
   if(!els.length){physicsRunning=false;if(onSettle)onSettle();return;}
