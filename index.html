@@ -780,45 +780,6 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ MEMO OVERLAY ══════════ -->
-<div id="memo-overlay" style="position:fixed;inset:0;z-index:900;background:rgba(245,245,247,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.05,.64,1);visibility:hidden">
-  <div style="display:flex;flex-direction:column;height:100%;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 8px)">
-    <div style="display:flex;align-items:center;margin-bottom:8px">
-      <button id="memo-back" style="font-size:15px;color:var(--b);background:none;border:none;cursor:pointer;font-family:inherit;padding:8px 12px">← 戻る</button>
-      <div style="flex:1;text-align:center;font-size:16px;font-weight:700">📝 メモ</div>
-      <button id="memo-translate" style="font-size:12px;color:var(--b);background:rgba(0,122,255,.08);border:1px solid rgba(0,122,255,.12);border-radius:55px;padding:6px 14px;cursor:pointer;font-family:inherit">翻訳</button>
-    </div>
-    <!-- Lock banner (first time) -->
-    <div id="memo-lock-banner" style="display:none;background:rgba(0,122,255,.06);border:1px solid rgba(0,122,255,.12);border-radius:14px;padding:14px;margin-bottom:10px;text-align:center">
-      <div style="font-size:28px;margin-bottom:6px">🔒</div>
-      <div style="font-size:14px;font-weight:600;color:#000;margin-bottom:4px">メモはロックして使用できます</div>
-      <div style="font-size:11px;color:rgba(0,0,0,.45);line-height:1.5;margin-bottom:12px">Face ID・Touch ID・Optic IDと連携すると<br>メモを安全にロックできます</div>
-      <div style="display:flex;gap:8px;justify-content:center">
-        <button id="memo-lock-later" style="padding:10px 20px;font-size:13px;background:rgba(0,0,0,.05);border:none;border-radius:55px;cursor:pointer;font-family:inherit;color:var(--sub)">今は使わない</button>
-        <button id="memo-lock-enable" style="padding:10px 20px;font-size:13px;background:var(--b);color:#fff;border:none;border-radius:55px;cursor:pointer;font-family:inherit;font-weight:600">使う</button>
-      </div>
-    </div>
-    <!-- Memo content (blurred when locked) -->
-    <div id="memo-content-area" style="flex:1;display:flex;flex-direction:column;min-height:0;position:relative">
-      <textarea id="memo-text" style="flex:1;border:none;outline:none;background:rgba(255,255,255,.5);border-radius:14px;font-family:inherit;font-size:15px;color:var(--tx);resize:none;padding:14px;line-height:1.8;-webkit-user-select:text;user-select:text;transition:filter .5s ease" placeholder="ここにメモを書く..."></textarea>
-      <!-- Lock overlay (shown when locked) -->
-      <div id="memo-lock-overlay" style="display:none;position:absolute;inset:0;background:rgba(255,255,255,.4);backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);border-radius:14px;display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;transition:backdrop-filter .5s ease,-webkit-backdrop-filter .5s ease">
-        <div style="font-size:40px">🔒</div>
-        <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,.6)">タップでロック解除</div>
-      </div>
-    </div>
-    <!-- Translation result -->
-    <div id="memo-translation" style="display:none;background:rgba(255,255,255,.7);border-radius:14px;padding:12px;margin-top:8px;max-height:20dvh;overflow-y:auto">
-      <div style="font-size:10px;font-weight:700;color:var(--sub);margin-bottom:4px">翻訳結果</div>
-      <div id="memo-tr-result" style="font-size:13px;color:var(--tx);line-height:1.6"></div>
-    </div>
-    <!-- Bottom bar -->
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 4px 0;flex-shrink:0">
-      <button id="memo-lock-btn" style="font-size:22px;background:none;border:none;cursor:pointer;padding:6px">🔓</button>
-      <button id="memo-delete-btn" style="font-size:22px;background:none;border:none;cursor:pointer;padding:6px">🗑️</button>
-    </div>
-  </div>
-</div>
-
 <!-- ══════════ IFRAME APP OVERLAY ══════════ -->
 <div id="iframe-overlay" style="position:fixed;inset:0;z-index:900;background:#fff;transform:translateX(100%);transition:transform .4s ease;visibility:hidden">
   <button id="iframe-back" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:10;width:42px;height:42px;border-radius:55px;background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--b);box-shadow:0 2px 8px rgba(0,0,0,.1)">←</button>
@@ -942,20 +903,20 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ LOCK SCREEN (PWA only) ══════════ -->
-<div id="lockscreen" style="display:none;position:fixed;inset:0;z-index:10000;background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;-webkit-user-select:none;user-select:none;transform:scale(1);opacity:1;transition:transform .8s ease,opacity .5s ease">
-  <div style="display:flex;flex-direction:column;align-items:center;height:100%;padding-top:calc(env(safe-area-inset-top,0px) + 60px)">
-    <div id="lock-clock" style="font-size:76px;font-weight:200;letter-spacing:-2px;display:flex;overflow:hidden">
-      <span id="lc-h1"></span><span id="lc-h2"></span>
+<div id="lockscreen" style="display:none;position:fixed;inset:0;z-index:10000;background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;-webkit-user-select:none;user-select:none;transform:scale(1);opacity:1;transition:transform .8s ease,opacity .5s ease" onclick="haptic()">
+  <div style="display:flex;flex-direction:column;align-items:center;width:100%;height:100%;padding-top:calc(env(safe-area-inset-top,0px) + 60px)">
+    <div id="lock-clock" style="font-size:76px;font-weight:200;letter-spacing:-2px;display:flex;overflow:hidden;justify-content:center">
+      <span id="lc-h1" style="display:inline-block"></span><span id="lc-h2" style="display:inline-block"></span>
       <span>:</span>
-      <span id="lc-m1"></span><span id="lc-m2"></span>
+      <span id="lc-m1" style="display:inline-block"></span><span id="lc-m2" style="display:inline-block"></span>
     </div>
-    <div id="lock-date" style="font-size:16px;font-weight:400;opacity:.7;margin-top:4px"></div>
+    <div id="lock-date" style="font-size:16px;font-weight:400;opacity:.7;margin-top:4px;text-align:center"></div>
     <div style="flex:1"></div>
-    <div style="position:relative;width:280px;height:60px;margin-bottom:calc(env(safe-area-inset-bottom,0px) + 50px)">
-      <div style="position:absolute;inset:0;border-radius:55px;background:rgba(255,255,255,.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);overflow:hidden">
+    <div style="position:relative;width:280px;height:60px;margin-bottom:calc(env(safe-area-inset-bottom,0px) + 50px)" onclick="event.stopPropagation()">
+      <div style="position:absolute;inset:0;border-radius:55px;background:rgba(255,255,255,.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);overflow:hidden;box-shadow:inset 1px -1px 11px rgb(255 255 255/12%),inset 1px -1px 55px rgb(255 255 255/11%),1px -1px 1px rgb(243 243 243/22%),-1px 1px 1px rgb(225 225 225/22%),0 2px 18px #0000000d">
         <div id="lock-slide-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:15px;font-weight:400;letter-spacing:.5px;user-select:none;pointer-events:none">スライドでロック解除</div>
       </div>
-      <div id="lock-knob" style="position:absolute;top:4px;left:4px;width:52px;height:52px;background:rgba(255,255,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:10;cursor:pointer;user-select:none;will-change:left;transition:left .5s cubic-bezier(.62,0,.4,1);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">
+      <div id="lock-knob" style="position:absolute;top:4px;left:4px;width:52px;height:52px;background:rgba(255,255,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:10;cursor:pointer;user-select:none;will-change:left;transition:left .5s cubic-bezier(.62,0,.4,1);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:1.1px 1px 0 rgba(255,255,255,.6),-1px -.8px 0 rgba(255,255,255,.4),0 2px 8px rgba(0,0,0,.15)">
         <svg width="24" height="24" viewBox="0 0 32 32"><polyline points="12,8 20,16 12,24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
@@ -2009,324 +1970,6 @@ function restoreHomeFromGrid(){
 }
 
 /* ═══ SETTINGS ═══ */
-/* ═══ MEMO ═══ */
-const MEMO_KEY='inglish_memo';
-const MEMO_LOCK_KEY='inglish_memo_locked';
-let memoLocked=localStorage.getItem(MEMO_LOCK_KEY)==='1';
-
-function updateMemoLockUI(){
-  const ta=document.getElementById('memo-text');
-  const lockOv=document.getElementById('memo-lock-overlay');
-  const lockBtn=document.getElementById('memo-lock-btn');
-  if(memoLocked){
-    ta.style.filter='blur(12px)';ta.style.pointerEvents='none';
-    lockOv.style.display='flex';
-    requestAnimationFrame(()=>{lockOv.style.backdropFilter='blur(12px)';lockOv.style.webkitBackdropFilter='blur(12px)';});
-    lockBtn.textContent='🔒';
-  }else{
-    ta.style.filter='';ta.style.pointerEvents='';
-    lockOv.style.backdropFilter='blur(0)';lockOv.style.webkitBackdropFilter='blur(0)';
-    setTimeout(()=>{lockOv.style.display='none';},500);
-    lockBtn.textContent='🔓';
-  }
-}
-
-function openMemo(){
-  const ov=document.getElementById('memo-overlay');
-  ov.style.visibility='visible';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{ov.style.transform='translateY(0)';}));
-  document.getElementById('memo-text').value=localStorage.getItem(MEMO_KEY)||'';
-  document.getElementById('memo-translation').style.display='none';
-  if(!localStorage.getItem('inglish_memo_lock_dismissed')){
-    document.getElementById('memo-lock-banner').style.display='block';
-  }
-  updateMemoLockUI();
-}
-function closeMemo(){
-  if(!memoLocked)localStorage.setItem(MEMO_KEY,document.getElementById('memo-text').value);
-  const ov=document.getElementById('memo-overlay');
-  ov.style.transform='translateY(100%)';
-  setTimeout(()=>{ov.style.visibility='hidden';},400);
-}
-document.getElementById('memo-back').addEventListener('click',()=>{haptic();closeMemo();});
-document.getElementById('memo-text').addEventListener('input',()=>{
-  if(!memoLocked)localStorage.setItem(MEMO_KEY,document.getElementById('memo-text').value);
-});
-document.getElementById('memo-lock-later').addEventListener('click',()=>{
-  haptic();localStorage.setItem('inglish_memo_lock_dismissed','1');
-  document.getElementById('memo-lock-banner').style.display='none';
-});
-document.getElementById('memo-lock-enable').addEventListener('click',()=>{
-  haptic.confirm();
-  localStorage.setItem('inglish_memo_lock_dismissed','1');
-  document.getElementById('memo-lock-banner').style.display='none';
-});
-// Lock/unlock toggle with WebAuthn (Face ID/Touch ID)
-document.getElementById('memo-lock-btn').addEventListener('click',async()=>{
-  haptic();
-  if(!memoLocked){
-    // Lock: just blur
-    memoLocked=true;localStorage.setItem(MEMO_LOCK_KEY,'1');
-    updateMemoLockUI();
-    haptic.confirm();
-  }else{
-    // Unlock: require biometric
-    await unlockMemoWithBiometric();
-  }
-});
-// Tap lock overlay to unlock
-document.getElementById('memo-lock-overlay').addEventListener('click',async()=>{
-  haptic();await unlockMemoWithBiometric();
-});
-async function unlockMemoWithBiometric(){
-  try{
-    const challenge=new Uint8Array(32);crypto.getRandomValues(challenge);
-    const userId=new Uint8Array(16);crypto.getRandomValues(userId);
-    await navigator.credentials.create({publicKey:{
-      challenge,rp:{name:'iN glish Memo'},
-      user:{id:userId,name:'user@inglish',displayName:'User'},
-      pubKeyCredParams:[{type:'public-key',alg:-7}],
-      authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},
-      timeout:60000
-    }});
-    haptic.confirm();
-    memoLocked=false;localStorage.setItem(MEMO_LOCK_KEY,'0');
-    updateMemoLockUI();
-  }catch(e){
-    haptic.error();console.log('Auth failed:',e);
-  }
-}
-// Delete
-document.getElementById('memo-delete-btn').addEventListener('click',()=>{
-  haptic();
-  if(confirm('全て削除しますか？😔')){
-    localStorage.removeItem(MEMO_KEY);
-    document.getElementById('memo-text').value='';haptic.confirm();
-  }
-});
-// Translate
-document.getElementById('memo-translate').addEventListener('click',async()=>{
-  haptic();
-  const text=document.getElementById('memo-text').value.trim();
-  if(!text)return;
-  const isJa=/[\u3041-\u3093\u30A1-\u30F6\u4E00-\u9FFF]/.test(text);
-  const sl=isJa?'ja':'en';const tl=isJa?'en':'ja';
-  const trDiv=document.getElementById('memo-translation');
-  const trResult=document.getElementById('memo-tr-result');
-  trDiv.style.display='block';trResult.textContent='翻訳中...';
-  try{
-    const url='https://translate.googleapis.com/translate_a/single?client=gtx&sl='+sl+'&tl='+tl+'&dt=t&q='+encodeURIComponent(text);
-    const res=await fetch(url);const data=await res.json();
-    trResult.textContent=data[0].map(s=>s[0]).join('');
-  }catch(e){trResult.textContent='翻訳エラー';}
-});
-
-/* ═══ LOCK SCREEN ═══ */
-/* ═══ LOCK SCREEN ═══ */
-const LOCK_KEY='inglish_lockscreen';
-const _isPWA=window.matchMedia('(display-mode:standalone)').matches||navigator.standalone===true;
-
-function updateLockClock(){
-  const now=new Date();
-  const h=String(now.getHours()).padStart(2,'0');
-  const m=String(now.getMinutes()).padStart(2,'0');
-  const days=['日','月','火','水','木','金','土'];
-  // Update each digit with slide animation
-  const ids=['lc-h1','lc-h2','lc-m1','lc-m2'];
-  const vals=[h[0],h[1],m[0],m[1]];
-  ids.forEach((id,i)=>{
-    const el=document.getElementById(id);
-    if(el.textContent!==vals[i]){
-      el.style.transition='none';el.style.transform='translateY(0)';el.style.opacity='1';
-      requestAnimationFrame(()=>{
-        el.style.transition='transform .5s ease,opacity .3s ease';
-        el.style.transform='translateY(-100%)';el.style.opacity='0';
-        setTimeout(()=>{
-          el.textContent=vals[i];
-          el.style.transition='none';el.style.transform='translateY(100%)';el.style.opacity='0';
-          requestAnimationFrame(()=>{
-            el.style.transition='transform .5s ease,opacity .3s ease';
-            el.style.transform='translateY(0)';el.style.opacity='1';
-          });
-        },300);
-      });
-    }
-  });
-  document.getElementById('lock-date').textContent=
-    `${now.getMonth()+1}月${now.getDate()}日 ${days[now.getDay()]}曜日`;
-}
-
-function showLockScreen(){
-  if(!_isPWA)return; // Only in PWA mode
-  const ls=document.getElementById('lockscreen');
-  ls.style.display='flex';ls.style.transform='scale(1)';ls.style.opacity='1';
-  updateLockClock();
-  if(!window._lockClockIv)window._lockClockIv=setInterval(updateLockClock,1000);
-  document.getElementById('lock-knob').style.left='4px';
-  document.getElementById('lock-slide-label').style.opacity='1';
-}
-
-function hideLockScreen(){
-  const ls=document.getElementById('lockscreen');
-  // Scale 1→1.8 + fade out
-  ls.style.transition='transform .8s ease,opacity .5s ease';
-  ls.style.transform='scale(1.8)';ls.style.opacity='0';
-  setTimeout(()=>{
-    ls.style.display='none';
-    ls.style.transform='scale(1)';ls.style.opacity='1';ls.style.transition='';
-  },800);
-  if(window._lockClockIv){clearInterval(window._lockClockIv);window._lockClockIv=null;}
-}
-
-// Lock screen slider
-(function(){
-  const knob=document.getElementById('lock-knob');
-  if(!knob)return;
-  let dragging=false,startX=0,knobLeft=4;
-  const maxLeft=280-52-8;
-  
-  knob.addEventListener('touchstart',e=>{
-    dragging=true;startX=e.touches[0].clientX-knobLeft;
-    knob.style.transition='none';
-  },{passive:true});
-  
-  document.addEventListener('touchmove',e=>{
-    if(!dragging)return;
-    let x=e.touches[0].clientX-startX;
-    if(x<4)x=4;if(x>maxLeft)x=maxLeft;
-    knobLeft=x;knob.style.left=x+'px';
-    document.getElementById('lock-slide-label').style.opacity=String(Math.max(0,1-knobLeft/maxLeft));
-  },{passive:true});
-  
-  document.addEventListener('touchend',()=>{
-    if(!dragging)return;
-    dragging=false;
-    knob.style.transition='left .5s cubic-bezier(.62,0,.4,1)';
-    if(knobLeft>maxLeft*0.75){
-      knob.style.left=maxLeft+'px';
-      haptic.confirm();
-      const ls=document.getElementById('lockscreen');
-      ls.style.transition='filter .5s ease';ls.style.filter='blur(12px)';
-      setTimeout(async()=>{
-        try{
-          const c=new Uint8Array(32);crypto.getRandomValues(c);
-          const u=new Uint8Array(16);crypto.getRandomValues(u);
-          await navigator.credentials.create({publicKey:{challenge:c,rp:{name:'iN glish'},user:{id:u,name:'u@l',displayName:'U'},pubKeyCredParams:[{type:'public-key',alg:-7}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000}});
-          haptic.confirm();ls.style.filter='';
-          hideLockScreen();
-        }catch(e){
-          haptic.error();
-          ls.style.filter='';ls.style.animation='lockShake .5s ease';
-          setTimeout(()=>{ls.style.animation='';},500);
-          knob.style.left='4px';knobLeft=4;
-          document.getElementById('lock-slide-label').style.opacity='1';
-        }
-      },600);
-    }else{
-      knob.style.left='4px';knobLeft=4;
-      document.getElementById('lock-slide-label').style.opacity='1';
-    }
-  });
-})();
-
-// Settings toggle (PWA only)
-document.getElementById('s-lockscreen').addEventListener('click',function(){
-  haptic();
-  if(!_isPWA){return;} // Silently ignore on browser
-  const isOn=this.classList.contains('on');
-  if(!isOn){
-    showDialog('lock-confirm-dlg','lock-confirm-card');
-  }else{
-    this.classList.remove('on');
-    localStorage.setItem(LOCK_KEY,'0');
-  }
-});
-document.getElementById('lock-dlg-cancel').addEventListener('click',()=>{
-  haptic();hideDialog('lock-confirm-dlg','lock-confirm-card');
-});
-document.getElementById('lock-dlg-ok').addEventListener('click',()=>{
-  haptic.confirm();
-  localStorage.setItem(LOCK_KEY,'1');
-  document.getElementById('s-lockscreen').classList.add('on');
-  hideDialog('lock-confirm-dlg','lock-confirm-card',()=>{
-    closeSettings();setTimeout(()=>showLockScreen(),500);
-  });
-});
-
-// On page load
-if(_isPWA&&localStorage.getItem(LOCK_KEY)==='1'){showLockScreen();}
-
-// Sync in openSettings
-const _origOpen2=openSettings;
-openSettings=function(){
-  _origOpen2();
-  const lockRow=document.getElementById('s-lockscreen').closest('.s-row');
-  if(lockRow)lockRow.style.display=_isPWA?'':'none';
-  document.getElementById('s-lockscreen').classList.toggle('on',localStorage.getItem(LOCK_KEY)==='1');
-};
-
-/* ═══ NOTIFICATIONS ═══ */
-let _notifEnabled=localStorage.getItem('inglish_notif')==='1';
-
-async function requestNotifPermission(){
-  if(!('Notification' in window)||!_isPWA)return false;
-  if(Notification.permission==='granted')return true;
-  if(Notification.permission==='denied')return false;
-  const p=await Notification.requestPermission();
-  return p==='granted';
-}
-
-function sendStudyNotif(){
-  if(!_notifEnabled||!_isPWA)return;
-  if(Notification.permission!=='granted')return;
-  try{new Notification('iN glish',{body:'勉強お疲れ様✨',icon:'icon-192.png'});}catch(e){}
-}
-
-// Send notification when returning to home
-const _origGoHome=typeof goHome==='function'?goHome:null;
-if(_origGoHome){
-  window._goHomeOrig=_origGoHome;
-  goHome=function(){_origGoHome.apply(this,arguments);sendStudyNotif();};
-}
-
-// Notification toggle in settings
-document.getElementById('s-notif').addEventListener('click',async function(){
-  haptic();
-  if(!_isPWA)return;
-  if(!this.classList.contains('on')){
-    const ok=await requestNotifPermission();
-    if(ok){this.classList.add('on');localStorage.setItem('inglish_notif','1');_notifEnabled=true;haptic.confirm();}
-    else{haptic.error();}
-  }else{
-    this.classList.remove('on');localStorage.setItem('inglish_notif','0');_notifEnabled=false;
-  }
-});
-// Sync notification + lock in openSettings
-const _origOpen3=openSettings;
-openSettings=function(){
-  _origOpen3();
-  const notifRow=document.getElementById('s-notif').closest('.s-row');
-  if(notifRow)notifRow.style.display=_isPWA?'':'none';
-  document.getElementById('s-notif').classList.toggle('on',localStorage.getItem('inglish_notif')==='1');
-};
-
-/* ═══ KEYBOARD SHORTCUTS (PC) ═══ */
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    // Close any open overlay, or go home
-    const iframe=document.getElementById('iframe-overlay');
-    if(iframe&&iframe.style.visibility==='visible'){
-      document.getElementById('iframe-back').click();return;
-    }
-    const settings=document.getElementById('settings-overlay');
-    if(settings&&settings.style.display!=='none'&&settings.style.display!==''){
-      closeSettings();return;
-    }
-    const home=document.getElementById('home');
-    if(home&&home.classList.contains('hidden')){goHome();return;}
-  }
-});
-
 /* ═══ CRASH RECOVERY ═══ */
 // Save app state periodically for crash recovery
 setInterval(()=>{
@@ -2395,6 +2038,15 @@ function openSettings(){
   updateHeavyVisibility();
   const shakeAvail=localStorage.getItem('inglish_shake_avail')!=='0';
   document.querySelectorAll('.s-shake-section').forEach(el=>{el.style.display=shakeAvail?'':'none';});
+  // Big icon sync
+  document.getElementById('s-bigicon').classList.toggle('on',localStorage.getItem('inglish_bigicon')==='1');
+  // PWA-only toggles
+  const lockRow=document.getElementById('s-lockscreen').closest('.s-row');
+  if(lockRow)lockRow.style.display=_isPWA?'':'none';
+  document.getElementById('s-lockscreen').classList.toggle('on',localStorage.getItem(LOCK_KEY)==='1');
+  const notifRow=document.getElementById('s-notif').closest('.s-row');
+  if(notifRow)notifRow.style.display=_isPWA?'':'none';
+  document.getElementById('s-notif').classList.toggle('on',localStorage.getItem('inglish_notif')==='1');
 }
 
 function showSettingsSection(sec){
@@ -2567,11 +2219,6 @@ document.getElementById('s-bigicon').addEventListener('click',function(){
   haptic();
 });
 // Sync big icon on openSettings
-const _origOpenSettings=openSettings;
-openSettings=function(){
-  _origOpenSettings();
-  document.getElementById('s-bigicon').classList.toggle('on',localStorage.getItem('inglish_bigicon')==='1');
-};
 
 /* ═══ ICON LONG-PRESS WOBBLE + DRAG REORDER ═══ */
 const ICON_ORDER_KEY='inglish_icon_order';
@@ -3048,6 +2695,7 @@ window.openS=function(type,arg){
 };
 window.goHome=function(){
   haptic();
+  sendStudyNotif();
   document.getElementById('app').classList.remove('vis');
   document.getElementById('float-bar').style.display='none';
   setTimeout(()=>{
