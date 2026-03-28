@@ -1725,59 +1725,62 @@ function runCardPhysicsDrop(shakeX,shakeY){
 function runHomePhysicsDrop(shakeX,shakeY){
   physicsRunning=true;
   const els=[];
-  // Header
   const hdr=document.querySelector('.hm-hdr');
   if(hdr)els.push({el:hdr,mass:0.3});
-  // All hcards
   document.querySelectorAll('.hcard').forEach((el,idx)=>els.push({el,mass:0.4+idx*0.03}));
-  // Group labels
   document.querySelectorAll('.hg-lbl').forEach(el=>els.push({el,mass:0.2}));
   
   runPhysics(els,shakeX,shakeY,()=>{
-    // After settle: iPhone-style icon reveal
-    const cards=document.querySelectorAll('.hcard');
+    // Hide normal layout
+    document.querySelectorAll('.hg-lbl').forEach(l=>{l.style.display='none';});
+    document.querySelectorAll('.hg-list').forEach(l=>{l.style.display='none';});
+    if(hdr)hdr.style.opacity='0';
+
+    // Build iPhone 4-column icon grid
+    const scroll=document.querySelector('.hm-scroll');
+    let oldGrid=document.getElementById('icon-grid');
+    if(oldGrid)oldGrid.remove();
+    const grid=document.createElement('div');
+    grid.id='icon-grid';
+    grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:24px 16px;justify-items:center;';
+    
+    const cards=[...document.querySelectorAll('.hcard')];
     cards.forEach((card,idx)=>{
-      card.style.opacity='0';
-      card.style.transform='scale(0.3)';
-      // Outer cards (first/last few): scale 1.8→1, 0.8s
-      // Middle cards: scale 1.7→1, 0.7s
-      // Inner cards: scale 0.7→1, 0.3s
-      const total=cards.length;
-      const center=total/2;
-      const dist=Math.abs(idx-center)/center; // 0=center, 1=edge
-      let fromScale, dur;
-      if(dist>0.7){fromScale=1.8;dur=0.8;}
-      else if(dist>0.3){fromScale=1.7;dur=0.7;}
-      else{fromScale=0.7;dur=0.3;}
-      
-      const delay=idx*30; // stagger
+      const icon=card.querySelector('.hi')?.textContent||'\u{1F4E6}';
+      const nm=card.querySelector('.hcard-name')?.textContent||'';
+      const oc=card.getAttribute('onclick')||'';
+      const cell=document.createElement('div');
+      cell.style.cssText='display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;-webkit-user-select:none;opacity:0;transform:scale(0.3)';
+      const short=nm.length>6?nm.slice(0,5)+'\u2026':nm;
+      cell.innerHTML='<div style="width:60px;height:60px;border-radius:16px;background:rgba(255,255,255,.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.65);box-shadow:1.1px 1px 0 rgba(255,255,255,.85),-1px -.8px 0 rgba(255,255,255,.6),0 2px 10px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:26px;transition:transform .15s">'+icon+'</div><div style="font-size:9px;font-weight:600;color:var(--tx);text-align:center;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+short+'</div>';
+      cell.addEventListener('click',()=>{haptic();restoreHomeFromGrid();if(oc){try{eval(oc);}catch(e){}}});
+      const ib=cell.querySelector('div');
+      ib.addEventListener('touchstart',function(){this.style.transform='scale(0.85)';},{passive:true});
+      ib.addEventListener('touchend',function(){this.style.transform='';},{passive:true});
+      grid.appendChild(cell);
+
+      // Scale animation: outer=1.8, middle=1.7, inner=0.7
+      const row=Math.floor(idx/4),col=idx%4;
+      const d=Math.abs(col-1.5)+Math.abs(row-1.5);
+      let fs,du;
+      if(d>2){fs=1.8;du=0.8;}else if(d>1){fs=1.7;du=0.7;}else{fs=0.7;du=0.3;}
       setTimeout(()=>{
-        card.style.transition=`transform ${dur}s ease, opacity ${dur*0.5}s ease`;
-        card.style.transform=`scale(${fromScale})`;
-        card.style.opacity='1';
-        requestAnimationFrame(()=>{
-          requestAnimationFrame(()=>{
-            card.style.transform='scale(1)';
-          });
-        });
-        setTimeout(()=>{card.style.transition='';card.style.transform='';card.style.opacity='';},dur*1000+100);
-      },delay);
+        cell.style.transition='transform '+du+'s ease, opacity '+(du*0.4)+'s ease';
+        cell.style.transform='scale('+fs+')';cell.style.opacity='1';
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{cell.style.transform='scale(1)';}));
+        setTimeout(()=>{cell.style.transition='';},du*1000+100);
+      },idx*40);
     });
-    // Reveal labels too
-    document.querySelectorAll('.hg-lbl').forEach((lbl,idx)=>{
-      lbl.style.opacity='0';
-      setTimeout(()=>{
-        lbl.style.transition='opacity .3s ease';
-        lbl.style.opacity='1';
-        setTimeout(()=>{lbl.style.transition='';lbl.style.opacity='';},350);
-      },idx*50);
-    });
-    if(hdr){
-      hdr.style.transition='opacity .4s ease';
-      hdr.style.opacity='1';
-      setTimeout(()=>{hdr.style.transition='';hdr.style.opacity='';},450);
-    }
+    scroll.prepend(grid);
   });
+}
+
+function restoreHomeFromGrid(){
+  const g=document.getElementById('icon-grid');if(g)g.remove();
+  document.querySelectorAll('.hg-lbl').forEach(l=>{l.style.display='';});
+  document.querySelectorAll('.hg-list').forEach(l=>{l.style.display='';});
+  const h=document.querySelector('.hm-hdr');
+  if(h){h.style.transition='opacity .3s';h.style.opacity='1';setTimeout(()=>{h.style.transition='';},350);}
 }
 
 function runPhysics(els,shakeX,shakeY,onSettle){
@@ -1887,7 +1890,7 @@ function startShakeListener(){
       clearTimeout(shakeTimeout);
       shakeTimeout=setTimeout(()=>{
         // Gesture ended, check intensity
-        if(peakForce>45){
+        if(peakForce>50){
           onHeavyShake(peakAx,peakAy);
         }else if(peakForce>12){
           onLightShake();
