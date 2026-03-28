@@ -104,11 +104,11 @@ flex-shrink:0;
 #app{
 position:fixed;inset:0;z-index:50;
 display:flex;flex-direction:column;
-transform:translateY(105%);
-transition:transform .36s cubic-bezier(.4,0,.2,1);
+transform:translateY(105%) scale(.7);
+transition:transform .5s cubic-bezier(.34,1.05,.64,1);
 background:linear-gradient(150deg,#eef2f8 0%,#f8f2fc 50%,#edf7f2 100%);
 }
-#app.vis{transform:translateY(0)}
+#app.vis{transform:translateY(0) scale(1)}
 .app-hdr{
 display:flex;align-items:center;gap:10px;
 padding:calc(var(--sat) + 14px) 16px 8px;
@@ -452,9 +452,8 @@ background:rgba(0,0,0,.05);border-radius:8px;padding:2px 8px;
 
 /* ════ HISTORY SHEET ════ */
 #hs-scrim{
-position:fixed;inset:0;background:rgba(0,0,0,.15);z-index:395;
+position:fixed;inset:0;background:rgba(0,0,0,.10);z-index:395;
 opacity:0;pointer-events:none;transition:opacity .22s;
-backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
 }
 #hs-scrim.on{opacity:1;pointer-events:auto}
 #hsheet{
@@ -585,25 +584,25 @@ border:6px solid transparent;border-top-color:rgba(255,255,255,.95);
 /* Star list overlay */
 #star-list-overlay{
 position:fixed;inset:0;z-index:600;
-background:rgba(0,0,0,.80);
-backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+background:rgba(0,0,0,.10);
 opacity:0;pointer-events:none;
 transition:opacity .3s;
-display:flex;flex-direction:column;
+display:flex;flex-direction:column;justify-content:flex-end;
 }
 #star-list-overlay.on{opacity:1;pointer-events:auto}
 #star-list-card{
-flex:1;margin:calc(var(--sat) + 10px) 0 0;
+max-height:55dvh;
+margin:0 8px calc(var(--ib) + 10px);
 background:rgba(255,255,255,.80);
 backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
-border-radius:22px 22px 0 0;
-box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 -4px 30px rgba(0,0,0,.15);
+border-radius:22px;
+box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 4px 30px rgba(0,0,0,.12);
 display:flex;flex-direction:column;
-transform:translateY(100%) scale(.7);
-transition:transform .5s cubic-bezier(.34,1.05,.64,1);
+transform:translateY(40px) scale(.7);opacity:0;
+transition:transform .5s cubic-bezier(.34,1.05,.64,1),opacity .3s;
 overflow:hidden;
 }
-#star-list-overlay.on #star-list-card{transform:translateY(0) scale(1)}
+#star-list-overlay.on #star-list-card{transform:translateY(0) scale(1);opacity:1}
 .sl-hdr{display:flex;align-items:center;gap:10px;padding:14px 18px 10px;border-bottom:1px solid var(--ln);flex-shrink:0}
 .sl-close{width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.06);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--tx)}
 .sl-close:active{transform:scale(.85)}
@@ -653,10 +652,12 @@ overflow:hidden;
     </div>
     <div style="padding:20px 6px 40px;text-align:center">
       <button id="btn-delete-all" style="
-        background:rgba(255,59,48,.10);color:#c0001a;border:1.5px solid rgba(255,59,48,.25);
-        border-radius:14px;padding:14px 28px;font-size:13px;font-weight:700;
+        background:rgba(255,255,255,.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+        color:#c0001a;border:1px solid rgba(255,255,255,.7);
+        border-radius:55px;padding:14px 28px;font-size:13px;font-weight:700;
         cursor:pointer;font-family:inherit;transition:transform .12s;
         display:inline-flex;align-items:center;gap:8px;
+        box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 2px 8px rgba(0,0,0,.08);
       ">⚠️ セーブデータを全て削除</button>
     </div>
   </div>
@@ -688,7 +689,7 @@ overflow:hidden;
         <svg width="32" height="32" viewBox="0 0 32 32"><polyline points="12,8 20,16 12,24" fill="none" stroke="#ff3b30" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
-    <button id="btn-cancel-delete" style="margin-top:24px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">キャンセル</button>
+    <button id="btn-cancel-delete" style="margin-top:24px;background:rgba(255,255,255,.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:55px;padding:12px 28px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:1.1px 1px 0 rgba(255,255,255,.6),-1px -.8px 0 rgba(255,255,255,.4);">キャンセル</button>
   </div>
 </div>
 
@@ -1517,6 +1518,9 @@ function render(i){
   document.getElementById('pf'+i).style.width=Math.round(d.idx/d.deck.length*100)+'%';
   document.getElementById('pt'+i).textContent=d.idx+'/'+d.deck.length;
   const cbkEl=document.getElementById('cbk'+i);if(cbkEl)cbkEl.disabled=!d.prev;
+  // やり直す semi-transparent when nothing to go back to
+  const btnBack=document.getElementById('btn-back');
+  if(btnBack)btnBack.style.opacity=d.prev?'1':'.35';
 
   // Update shuffle button text
   const gSfb=document.getElementById('g-sfb');
