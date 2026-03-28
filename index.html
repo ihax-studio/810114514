@@ -1889,7 +1889,7 @@ function buildForgotList(){
   let html=`<div class="sh">要復習 ${items.length}語</div>`;
   items.forEach(w=>{
     const enText=(w.en||'').replace(/"/g,'&quot;');
-    html+=`<div class="li ans-row" data-en="${enText}" style="position:relative"><div class="lw">${w.en}</div><div class="lm">${w.ja}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:9px;color:var(--sub)">${w.deck}</span><button class="ch" style="font-size:9px;padding:3px 8px;color:var(--g)" onclick="event.stopPropagation();unmarkForgot('${enText}',${w.deckIdx});this.closest('.li').remove();haptic.confirm()">✓覚えた</button></div></div>`;
+    html+=`<div class="li ans-row" data-en="${enText}" style="position:relative"><div class="lw">${w.en}</div><div class="lm">${w.ja}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:9px;color:var(--sub)">${w.deck}</span><button class="ch forgot-clear-btn" data-word="${enText}" data-deck="${w.deckIdx}" style="font-size:9px;padding:3px 8px;color:var(--g)">✓覚えた</button></div></div>`;
   });
   return html;
 }
@@ -1913,6 +1913,21 @@ updateHomeBadges();
 
 /* ═══ TAP-TO-SPEAK DELEGATION ═══ */
 document.addEventListener('click',e=>{
+  // Handle .forgot-clear-btn (覚えた button in forgot list)
+  const clr=e.target.closest('.forgot-clear-btn');
+  if(clr){
+    e.stopPropagation();
+    const word=clr.dataset.word;
+    const deckIdx=parseInt(clr.dataset.deck,10);
+    unmarkForgot(word,deckIdx);
+    haptic.confirm();
+    // Animate out
+    const li=clr.closest('.li');
+    if(li){li.style.transition='opacity .25s,transform .25s';li.style.opacity='0';li.style.transform='translateX(60px)';setTimeout(()=>li.remove(),260);}
+    // Update badge
+    updateHomeBadges();
+    return;
+  }
   // Handle .ans-tap (card answer items)
   const tap=e.target.closest('.ans-tap');
   if(tap){
@@ -1956,16 +1971,13 @@ document.addEventListener('click',e=>{
     haptic.error();haptic.error();haptic.error();
     try{localStorage.removeItem(CACHE_KEY);}catch(_){}
     fCache={};
-    DK.forEach((d,i)=>{
-      d.deck=[...SRC[CFG[i].src]];d.idx=0;d.flipped=false;
-      d.st={g:0,h:0,f:0};d.hist=[];d.prev=null;d.shuffled=false;
-      document.getElementById('sg'+i).textContent=0;
-      document.getElementById('sh'+i).textContent=0;
-      document.getElementById('sf'+i).textContent=0;
-      render(i);
-    });
-    updateHomeBadges();
-    setTimeout(hideSlider,300);
+    // Scale 1→1.2 zoom out effect then reload
+    ov.style.background='rgba(0,0,0,1)';
+    content.style.opacity='0';
+    document.body.style.transition='transform .5s ease, opacity .5s ease';
+    document.body.style.transform='scale(1.2)';
+    document.body.style.opacity='0';
+    setTimeout(()=>{window.location.reload();},550);
   }
 
   function showSlider(){
