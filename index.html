@@ -10,9 +10,10 @@
 <title>iN glish</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
-html{overscroll-behavior:none;position:fixed;inset:0}
-body{overscroll-behavior:none;position:fixed;inset:0;overflow:hidden}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;
+-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html{overscroll-behavior:none;position:fixed;inset:0;touch-action:pan-y}
+body{overscroll-behavior:none;position:fixed;inset:0;overflow:hidden;touch-action:pan-y}
 :root{
   --sat:env(safe-area-inset-top,0px);
   --sab:env(safe-area-inset-bottom,0px);
@@ -319,6 +320,7 @@ border:none;outline:none;
 background:transparent;
 font-family:inherit;font-size:16px;color:var(--tx);
 resize:none;
+-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;
 min-height:28px;max-height:88px;
 line-height:1.5;
 overflow-y:auto;
@@ -763,6 +765,12 @@ overflow:hidden;
 </div>
 
 <script type="module">
+/* ═══ BLOCK iOS EDGE SWIPE (safe, no scroll impact) ═══ */
+document.addEventListener('touchstart',function(e){
+  const x=e.touches[0].pageX;
+  if(x<15||x>window.innerWidth-15)e.preventDefault();
+},{passive:false,capture:true});
+
 /* ═══ HAPTIC ═══ */
 let _h=null;
 (()=>{import('https://esm.sh/ios-haptics').then(m=>{_h=m.haptic;}).catch(()=>{});})();
@@ -1674,10 +1682,10 @@ function ensureLists(){
   function liWrap(en,ja,extra,opts){
     const esc=(s)=>(s||'').replace(/"/g,'&quot;');
     const st=isStarred(en)?'★':'☆';
-    let btns=`<span class="star-tr" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:14px;cursor:pointer">⭐${st}</span>`;
+    let btns=`<span class="star-tr" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:16px;cursor:pointer;padding:4px 8px;background:rgba(255,255,255,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:55px;border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.8),-1px -.8px 0 rgba(255,255,255,.5)">${st}</span>`;
     if(opts&&opts.forgot){
       const isFg=isForgot(en,0);
-      btns+=` <button class="tr-forgot-btn" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:8px;padding:2px 6px;border:1px solid rgba(255,59,48,.2);background:rgba(255,59,48,.06);color:#c0001a;border-radius:6px;cursor:pointer;font-family:inherit">${isFg?'✓済':'😰忘れた'}</button>`;
+      btns+=` <button class="tr-forgot-btn" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:10px;padding:4px 10px;background:rgba(255,255,255,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,59,48,.2);color:#c0001a;border-radius:55px;cursor:pointer;font-family:inherit;box-shadow:1.1px 1px 0 rgba(255,255,255,.8),-1px -.8px 0 rgba(255,255,255,.5)">${isFg?'✓済':'😰忘れた'}</button>`;
     }
     return `<div class="li">${extra}<div style="display:flex;justify-content:flex-end;gap:6px;margin-top:4px">${btns}</div></div>`;
   }
@@ -2069,7 +2077,8 @@ document.addEventListener('click',function(e){
     items.forEach(w=>{
       const en=(w.en||'').replace(/"/g,'&quot;');
       const ja=(w.ja||'').replace(/"/g,'&quot;');
-      h+=`<div class="li ans-row" data-en="${en}"><div class="lw">${w.en||''}</div><div class="lm">${w.ja||''}</div></div>`;
+      const st=isStarred(w.en||'')?'★':'☆';
+      h+=`<div class="li ans-row" data-en="${en}"><div class="lw">${w.en||''}</div><div class="lm">${w.ja||''}</div><div style="display:flex;justify-content:flex-end;margin-top:3px"><span class="star-tr" data-word="${en}" data-meaning="${ja}" style="font-size:14px;cursor:pointer;padding:2px 8px;background:rgba(255,255,255,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:55px;border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.8),-1px -.8px 0 rgba(255,255,255,.5)">${st}</span></div></div>`;
     });
     container.innerHTML=h;
   }
