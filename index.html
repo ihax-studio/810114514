@@ -260,14 +260,16 @@ min-height:44px;
 /* ════ LIST WRAP ════ */
 .lswrap{
 flex:1;overflow-y:auto;
-padding:8px 10px calc(var(--ib) + 16px);
+padding:6px 8px calc(var(--ib) + 16px);
 -webkit-overflow-scrolling:touch;min-height:0;scrollbar-width:none;
 }
 .lswrap::-webkit-scrollbar{display:none}
 .li{
-background:var(--gls);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);
-border-radius:14px;padding:10px 12px;margin-bottom:6px;
-border:1px solid rgba(255,255,255,.8);box-shadow:var(--sh);
+width:100%;
+background:rgba(255,255,255,.66);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+border-radius:14px;padding:10px 14px;margin:0 0 6px 0;
+border:1px solid rgba(255,255,255,.7);
+box-shadow:1.1px 1px 0 rgba(255,255,255,.8),-1px -.8px 0 rgba(255,255,255,.6),0 1px 4px rgba(0,0,0,.06);
 word-break:break-word;overflow-wrap:break-word;
 }
 .lw{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:1px}
@@ -1746,7 +1748,7 @@ window.openS=function(type,arg){
   const isCard=type==='card';
   document.getElementById('app-dots').style.display=isCard?'flex':'none';
   document.getElementById('sw-wrap').style.display=isCard?'flex':'none';
-  document.getElementById('list-wrap').style.display=isCard?'none':'flex';
+  document.getElementById('list-wrap').style.display=isCard?'none':'block';
   document.getElementById('float-bar').style.display=isCard?'flex':'none';
   if(isCard){
     jPanel(arg,false);
@@ -2067,7 +2069,7 @@ document.addEventListener('click',function(e){
     items.forEach(w=>{
       const en=(w.en||'').replace(/"/g,'&quot;');
       const ja=(w.ja||'').replace(/"/g,'&quot;');
-      h+=`<div class="li ans-row" data-en="${en}" style="position:relative;padding:8px 12px"><div class="lw" style="font-size:13px">${w.en||''}</div><div class="lm" style="font-size:11px">${w.ja||''}</div></div>`;
+      h+=`<div class="li ans-row" data-en="${en}"><div class="lw">${w.en||''}</div><div class="lm">${w.ja||''}</div></div>`;
     });
     container.innerHTML=h;
   }
