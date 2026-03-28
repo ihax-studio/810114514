@@ -520,6 +520,30 @@ background:var(–r);margin-left:4px;vertical-align:middle;
 .star-deck-btn{transition:transform .3s cubic-bezier(.34,1.56,.64,1)!important}
 .star-deck-btn.pop{animation:starPop .3s ease}
 @keyframes starPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+/* ═══ FLOAT BAR (🔀 ★ bottom) ═══ */
+.float-bar{
+display:flex;justify-content:center;gap:16px;
+padding:6px 0 2px;flex-shrink:0;
+}
+.float-btn{
+width:48px;height:48px;border-radius:55px;
+background:rgba(255,255,255,.7);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);
+border:1px solid rgba(255,255,255,.85);
+font-size:20px;cursor:pointer;
+display:flex;align-items:center;justify-content:center;
+box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 2px 8px rgba(0,0,0,.08);
+transition:transform .5s cubic-bezier(.34,1.56,.64,1);
+-webkit-user-select:none;user-select:none;
+}
+.float-btn:active{transform:scale(1.15)}
+
+/* ═══ SCORE BUTTONS (centered, bigger) ═══ */
+.ch-score{
+min-width:48px;min-height:42px;
+padding:8px 14px;font-size:13px;
+justify-content:center;
+}
 .star-tr{
 font-size:18px;cursor:pointer;flex-shrink:0;
 -webkit-user-select:none;user-select:none;
@@ -666,9 +690,9 @@ overflow:hidden;
 
 <div id="app">
   <div class="app-hdr">
-    <button class="app-back" onclick="goHome()">↓</button>
+    <button class="app-back" id="btn-back" style="font-size:13px;gap:2px;width:auto;padding:0 12px;height:36px"><span style="font-size:16px">←</span> やり直す</button>
     <div class="app-ttl" id="app-ttl">カード</div>
-    <div style="width:32px"></div>
+    <button class="app-back" onclick="goHome()" style="font-size:12px;gap:2px;width:auto;padding:0 12px;height:36px">完了 <span style="font-size:16px">↓</span></button>
   </div>
   <div class="app-dots" id="app-dots" style="display:none">
     <div class="dot"></div><div class="dot"></div><div class="dot"></div>
@@ -1341,11 +1365,11 @@ CFG.forEach((c,i)=>{
 <div class="pr-row"><div class="prb"><div class="prf" id="pf${i}" style="width:0%"></div></div><div class="prt" id="pt${i}">0/0</div></div>
 <div class="sr">
   <button class="ch ch-bk" id="cbk${i}" onclick="Bk(${i})" disabled>←</button>
-  <button class="ch" style="color:var(--g)" onclick="Hs('g',${i})">✓<span id="sg${i}">0</span></button>
-  <button class="ch" style="color:var(--y)" onclick="Hs('h',${i})">△<span id="sh${i}">0</span></button>
-  <button class="ch" style="color:var(--r)" onclick="Hs('f',${i})">✗<span id="sf${i}">0</span></button>
-  <button class="ch" style="margin-left:auto" id="sfb${i}" onclick="Sf(${i})">🔀</button>
-  <button class="ch star-deck-btn" id="star${i}" data-deck="${i}" style="font-size:18px;padding:7px 10px">☆</button>
+  <div style="flex:1;display:flex;justify-content:center;gap:8px">
+    <button class="ch ch-score" style="color:var(--g)" onclick="Hs('g',${i})">✓<span id="sg${i}">0</span></button>
+    <button class="ch ch-score" style="color:var(--y)" onclick="Hs('h',${i})">△<span id="sh${i}">0</span></button>
+    <button class="ch ch-score" style="color:var(--r)" onclick="Hs('f',${i})">✗<span id="sf${i}">0</span></button>
+  </div>
 </div>
 <div class="ca"><div class="fw" id="fw${i}">
   <div class="fc" id="fc${i}">
@@ -1369,7 +1393,11 @@ CFG.forEach((c,i)=>{
       </div>
     </div>
   </div>
-</div></div>`;
+</div></div>
+<div class="float-bar">
+  <button class="float-btn" id="sfb${i}" onclick="Sf(${i})">🔀</button>
+  <button class="float-btn star-deck-btn" id="star${i}" data-deck="${i}">☆</button>
+</div>`;
   track.appendChild(p);
 });
 
@@ -1618,10 +1646,22 @@ swWrap.addEventListener('touchend',e=>{
 
 function jPanel(idx,anim=true){
   const tr=document.getElementById('sw-track');
+  const ttl=document.getElementById('app-ttl');
+  const oldP=curP;
   tr.style.transition=anim?'transform .32s cubic-bezier(.4,0,.2,1)':'none';
   curP=idx;tr.style.transform=`translateX(${-idx*100}%)`;
   document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===idx));
-  document.getElementById('app-ttl').textContent=CFG[idx].title;
+  // Title slide animation
+  if(anim&&oldP!==idx){
+    const dir=idx>oldP?1:-1;
+    ttl.style.transition='none';
+    ttl.style.transform=`translateX(${dir*40}px)`;ttl.style.opacity='0';
+    requestAnimationFrame(()=>{
+      ttl.style.transition='transform .3s ease,opacity .3s ease';
+      ttl.style.transform='translateX(0)';ttl.style.opacity='1';
+    });
+  }
+  ttl.textContent=CFG[idx].title;
   if(!anim)requestAnimationFrame(()=>{tr.style.transition='';});
 }
 
@@ -2012,7 +2052,9 @@ function buildAllWords(){
     html+=`<div style="font-size:10px;font-weight:700;color:var(--sub);background:var(--ln);border-radius:8px;padding:4px 10px;margin:8px 0 4px;letter-spacing:.04em">${srcLabels[src]||src} · ${items.length}件</div>`;
     items.forEach(w=>{
       const enText=(w.en||'').replace(/"/g,'&quot;');
-      html+=`<div class="li ans-row" data-en="${enText}"><div class="lw">${w.en||''}</div><div class="lm">${w.ja}</div><div style="font-size:9px;color:var(--sub);margin-top:2px">${w.cat}</div></div>`;
+      const mText=(w.ja||'').replace(/"/g,'&quot;');
+      const starred=isStarred(w.en||'')?'★':'☆';
+      html+=`<div class="li ans-row" data-en="${enText}" style="display:flex;align-items:center;gap:8px"><div style="flex:1"><div class="lw">${w.en||''}</div><div class="lm">${w.ja}</div><div style="font-size:9px;color:var(--sub);margin-top:2px">${w.cat}</div></div><span class="star-tr" data-word="${enText}" data-meaning="${mText}" style="font-size:18px;flex-shrink:0">${starred}</span></div>`;
     });
   });
   return html;
@@ -2437,6 +2479,11 @@ slOverlay.addEventListener('click',e=>{if(e.target===slOverlay)closeStarList();}
     target=null;
   },{passive:true});
 })();
+
+// ← やり直す button: goes back one card in current panel
+document.getElementById('btn-back').addEventListener('click',()=>{
+  Bk(curP);
+});
 
 // body animation handles splash — no separate element needed
 </script>
