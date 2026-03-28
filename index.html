@@ -398,20 +398,20 @@ position:fixed;inset:0;z-index:500;
 background:rgba(0,0,0,.12);
 backdrop-filter:blur(8px) saturate(130%);
 -webkit-backdrop-filter:blur(8px) saturate(130%);
-display:flex;align-items:center;justify-content:center;
-padding:0 14px;
+display:flex;align-items:flex-end;justify-content:center;
+padding:0 14px calc(var(--ib) + 10px);
 opacity:0;pointer-events:none;
 transition:opacity .25s;
 }
 #tr-overlay.on{opacity:1;pointer-events:auto}
 #tr-card{
-width:100%;max-width:420px;max-height:70dvh;
-background:#fff;
+width:100%;max-width:420px;max-height:65dvh;
+background:rgba(255,255,255,.50);
 backdrop-filter:blur(40px) saturate(200%);
 -webkit-backdrop-filter:blur(40px) saturate(200%);
-border:1px solid rgba(255,255,255,.95);
+border:1px solid rgba(255,255,255,.7);
 border-radius:22px;
-box-shadow:0 8px 40px rgba(0,0,0,.15),0 2px 8px rgba(0,0,0,.08);
+box-shadow:0 8px 40px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06);
 overflow-y:auto;padding:0 18px 20px;
 transform:translateY(30px) scale(.95);opacity:0;
 transition:transform .3s cubic-bezier(.34,1.05,.64,1),opacity .2s;
@@ -618,7 +618,7 @@ background:var(–r);margin-left:4px;vertical-align:middle;
 
 <div id="tr-bar">
   <div class="ti-wrap">
-    <textarea id="ti" placeholder="Type English to translate..." rows="1"></textarea>
+    <textarea id="ti" placeholder="Type to here..." rows="1"></textarea>
     <div id="flag-row">
       <div id="flag-active"></div>
       <div id="flag-picker"></div>
