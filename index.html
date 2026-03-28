@@ -752,8 +752,8 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ LIST SWITCH DIALOG ══════════ -->
-<div id="list-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,.4);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center">
-  <div id="list-dialog-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .8s ease,opacity .3s ease">
+<div id="list-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,.4);align-items:center;justify-content:center">
+  <div id="list-dialog-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .3s ease,opacity .3s ease">
     <div style="padding:22px 20px 10px">
       <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">リスト表示</div>
       <div style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5">アイコン表示と設定を表示するにはホーム画面でシェイクします</div>
@@ -1845,90 +1845,9 @@ function runHomePhysicsDrop(shakeX,shakeY){
   document.querySelectorAll('.hg-lbl').forEach(el=>els.push({el,mass:0.2}));
   
   runPhysics(els,shakeX,shakeY,()=>{
-    document.querySelectorAll('.hg-lbl').forEach(l=>{l.style.display='none';});
-    document.querySelectorAll('.hg-list').forEach(l=>{l.style.display='none';});
-    if(hdr)hdr.style.opacity='0';
-
-    const scroll=document.querySelector('.hm-scroll');
-    let oldGrid=document.getElementById('icon-grid');
-    if(oldGrid)oldGrid.remove();
-    const grid=document.createElement('div');
-    grid.id='icon-grid';
-    grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:12px 8px;padding:20px 12px;justify-items:center;';
-    
-    const cards=[...document.querySelectorAll('.hcard')];
-    // Build icon data from cards + add settings
-    const allIcons=[];
-    cards.forEach(card=>{
-      allIcons.push({
-        icon:card.querySelector('.hi')?.textContent||'\u{1F4E6}',
-        name:card.querySelector('.hcard-name')?.textContent||'',
-        onclick:card.getAttribute('onclick')||''
-      });
-    });
-    allIcons.push({icon:'\u2699\uFE0F',name:'\u8A2D\u5B9A',onclick:'__openSettings__'});
-    
-    // Zone mapping for animations:
-    // outer(0-3,4,7,8,11,12,15,16-20): 1.8->1 0.8s
-    // inner(5,6,9,10): 0.7->1 0.3s  
-    // settings(last): 1.7->1 0.7s
-    const innerSet=new Set([5,6,9,10]);
-    
-    allIcons.forEach((d,idx)=>{
-      const cell=document.createElement('div');
-      cell.className='ig-cell';
-      cell.style.cssText='display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;-webkit-user-select:none;opacity:0;transform:scale(0.3)';
-      const short=d.name.length>5?d.name.slice(0,4)+'\u2026':d.name;
-      cell.innerHTML='<div class="ig-icon" style="width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.85),-1px -.8px 0 rgba(255,255,255,.6),0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:24px;transition:transform .15s">'+d.icon+'</div><div style="font-size:8px;font-weight:600;color:var(--tx);text-align:center;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+short+'</div>';
-      
-      // Tap: tapped icon scales 1->5+fade, others scale 1->0.8
-      cell.addEventListener('click',()=>{
-        haptic();
-        const allCells=grid.querySelectorAll('.ig-cell');
-        const thisIcon=cell.querySelector('.ig-icon');
-        // Tapped icon: expand + fade out
-        thisIcon.style.transition='transform .5s ease, opacity .4s ease';
-        thisIcon.style.transform='scale(5)';
-        thisIcon.style.opacity='0';
-        // Others: shrink
-        allCells.forEach(c2=>{
-          if(c2===cell)return;
-          c2.style.transition='transform .5s ease, opacity .4s ease';
-          c2.style.transform='scale(0.8)';
-          c2.style.opacity='0.3';
-        });
-        setTimeout(()=>{
-          restoreHomeFromGrid();
-          if(d.onclick==='__openSettings__'){
-            openSettings();
-          }else if(d.onclick){
-            try{eval(d.onclick);}catch(e){}
-          }
-        },450);
-      });
-      
-      const ib=cell.querySelector('.ig-icon');
-      ib.addEventListener('touchstart',function(){this.style.transform='scale(0.85)';},{passive:true});
-      ib.addEventListener('touchend',function(){this.style.transform='';},{passive:true});
-      grid.appendChild(cell);
-
-      // Reveal animation
-      let fs,du;
-      if(idx===allIcons.length-1){fs=1.7;du=0.7;} // settings = middle
-      else if(innerSet.has(idx)){fs=0.7;du=0.3;}    // inner
-      else{fs=1.8;du=0.8;}                            // outer
-      setTimeout(()=>{
-        cell.style.transition='transform '+du+'s ease, opacity '+(du*0.4)+'s ease';
-        cell.style.transform='scale('+fs+')';cell.style.opacity='1';
-        requestAnimationFrame(()=>requestAnimationFrame(()=>{cell.style.transform='scale(1)';}));
-        setTimeout(()=>{cell.style.transition='';},du*1000+100);
-      },idx*35);
-    });
-    scroll.prepend(grid);
-    // Cache icon mode + hide delete button
+    // After physics settle, switch to icon grid using shared function
     localStorage.setItem('inglish_layout','icon');
-    const delWrap=document.getElementById('btn-delete-all');
-    if(delWrap&&delWrap.parentElement)delWrap.parentElement.style.display='none';
+    showIconGrid();
   });
 }
 
@@ -2907,7 +2826,20 @@ document.getElementById('home-star-btn').addEventListener('click',()=>{
 });
 // Home → button → switch to icon mode
 document.getElementById('home-icon-btn').addEventListener('click',()=>{
-  haptic.confirm();localStorage.setItem('inglish_layout','icon');showIconGrid();
+  haptic.confirm();localStorage.setItem('inglish_layout','icon');
+  // Slide list left-to-right out
+  const scroll=document.querySelector('.hm-scroll');
+  scroll.style.transition='transform .4s ease, opacity .3s ease';
+  scroll.style.transform='translateX(100%)';scroll.style.opacity='0';
+  setTimeout(()=>{
+    scroll.style.transition='none';scroll.style.transform='translateX(-100%)';scroll.style.opacity='0';
+    showIconGrid();
+    requestAnimationFrame(()=>{
+      scroll.style.transition='transform .4s ease, opacity .3s ease';
+      scroll.style.transform='';scroll.style.opacity='1';
+    });
+    setTimeout(()=>{scroll.style.transition='';},500);
+  },400);
 });
 
 /* ═══ ICON MODE INIT ═══ */
