@@ -527,12 +527,33 @@ background:var(--r);margin-left:4px;vertical-align:middle;
 .card-shaking{animation:cardShake .45s ease}
 @keyframes cardShake{
 0%{transform:translateX(0)}
-15%{transform:translateX(-12px) rotate(-1.5deg)}
-30%{transform:translateX(10px) rotate(1.2deg)}
-45%{transform:translateX(-8px) rotate(-1deg)}
+15%{transform:translateX(-10px) rotate(-1deg)}
+30%{transform:translateX(8px) rotate(.8deg)}
+45%{transform:translateX(-6px) rotate(-.6deg)}
+60%{transform:translateX(4px) rotate(.4deg)}
+75%{transform:translateX(-2px)}
+100%{transform:translateX(0)}
+}
+/* Stronger shake for physical device shake */
+.card-shaking-hard{animation:cardShakeHard .55s ease}
+@keyframes cardShakeHard{
+0%{transform:translateX(0)}
+10%{transform:translateX(-18px) rotate(-2.5deg)}
+20%{transform:translateX(16px) rotate(2deg)}
+30%{transform:translateX(-14px) rotate(-1.8deg)}
+40%{transform:translateX(12px) rotate(1.5deg)}
+50%{transform:translateX(-8px) rotate(-1deg)}
 60%{transform:translateX(6px) rotate(.7deg)}
 75%{transform:translateX(-3px)}
 100%{transform:translateX(0)}
+}
+/* Card text slide-up on shuffle */
+.card-slide-up .fword,.card-slide-up .fmean,.card-slide-up .fpron,.card-slide-up .fmeta{
+animation:txtSlideUp .35s ease both;
+}
+@keyframes txtSlideUp{
+from{transform:translateY(20px);opacity:0}
+to{transform:translateY(0);opacity:1}
 }
 
 /* ═══ FLOAT BAR (🔀 ★ bottom) ═══ */
@@ -1615,6 +1636,10 @@ window.Sf=i=>{
     fw.classList.add('card-shaking');
     setTimeout(()=>fw.classList.remove('card-shaking'),500);
   }
+  // Text slide-up
+  const fc=document.getElementById('fc'+i);
+  if(fc){fc.classList.remove('card-slide-up');void fc.offsetWidth;fc.classList.add('card-slide-up');
+    setTimeout(()=>fc.classList.remove('card-slide-up'),400);}
   render(i);
   // Play sound if unshuffling
   if(!d.shuffled){try{const a=new Audio('not-shake.mp3');a.play().catch(()=>{});}catch(e){}}
@@ -1627,11 +1652,29 @@ let lastShakeT=0;
 
 function onShake(){
   const now=Date.now();
-  if(now-lastShakeT<800)return; // debounce
+  if(now-lastShakeT<800)return;
   lastShakeT=now;
   haptic.confirm();
-  const d=DK[curP];
-  if(!d.shuffled)Sf(curP); // shuffle if not already
+  // Always reshuffle (keep shuffled state, just re-randomize)
+  const d=DK[curP],c=CFG[curP];
+  d.shuffled=true;
+  d.deck=shuf([...SRC[c.src]]);
+  d.idx=0;d.st={g:0,h:0,f:0};d.hist=[];d.prev=null;
+  document.getElementById('sg'+curP).textContent=0;
+  document.getElementById('sh'+curP).textContent=0;
+  document.getElementById('sf'+curP).textContent=0;
+  document.getElementById('ac'+curP).style.display='none';
+  // Strong shake animation for physical shake
+  const fw=document.getElementById('fw'+curP);
+  if(fw&&!fw.classList.contains('card-shaking-hard')){
+    fw.classList.add('card-shaking-hard');
+    setTimeout(()=>fw.classList.remove('card-shaking-hard'),600);
+  }
+  // Text slide-up
+  const fc=document.getElementById('fc'+curP);
+  if(fc){fc.classList.remove('card-slide-up');void fc.offsetWidth;fc.classList.add('card-slide-up');
+    setTimeout(()=>fc.classList.remove('card-slide-up'),400);}
+  render(curP);
 }
 
 function startShakeListener(){
