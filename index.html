@@ -33,13 +33,13 @@ body{overscroll-behavior:none;position:fixed;inset:0;overflow:hidden}
 html,body{
   height:100dvh;overflow:hidden;
   background:linear-gradient(150deg,#eef2f8 0%,#f8f2fc 50%,#edf7f2 100%);
-  font-family:-apple-system,"Noto Sans JP",sans-serif;color:var(--tx);
+  font-family:"SF Pro Display","SF Pro Text",-apple-system,"Noto Sans JP",sans-serif;color:var(--tx);
   overscroll-behavior:none;
   -webkit-overflow-scrolling:auto;
 }
 /* Body reveal: scale 2→0.95 in 0.5s — slight shrink keeps everything inside screen */
 body{animation:bReveal .7s cubic-bezier(.4,0,.2,1) both;transform-origin:center center}
-@keyframes bReveal{0%{transform:scale(2);opacity:0}60%{transform:scale(.98);opacity:1}80%{transform:scale(1.02);opacity:1}100%{transform:scale(1.01);opacity:1}}
+@keyframes bReveal{0%{transform:scale(2);opacity:0}60%{transform:scale(.98);opacity:1}80%{transform:scale(1.02);opacity:1}100%{transform:scale(1);opacity:1}}
 
 /* ════ GLASS HELPERS ════ */
 .g1{background:var(–gls);backdrop-filter:var(–blr);-webkit-backdrop-filter:var(–blr);border:1px solid var(–bdr)}
@@ -663,7 +663,7 @@ overflow:hidden;
 
 <div id="app">
   <div class="app-hdr">
-    <button class="app-back" onclick="goHome()">←</button>
+    <button class="app-back" onclick="goHome()">↓</button>
     <div class="app-ttl" id="app-ttl">カード</div>
     <div style="width:32px"></div>
   </div>
@@ -1597,20 +1597,19 @@ swWrap.addEventListener('touchend',e=>{
   if(Math.abs(dx)>55){const n=curP+(dx<0?1:-1);if(n>=0&&n<6){jPanel(n);haptic();}}
 },{passive:true});
 
-/* Swipe right on app area (outside card) → go home */
+/* Swipe down on app area (outside card) → go home */
 (()=>{
   const app=document.getElementById('app');
   let sx=0,sy=0;
   app.addEventListener('touchstart',e=>{
-    // Only track if touch is NOT inside the card (.fw)
     if(e.target.closest('.fw,.lswrap,#list-wrap'))return;
     sx=e.touches[0].clientX;sy=e.touches[0].clientY;
   },{passive:true});
   app.addEventListener('touchend',e=>{
     if(e.target.closest('.fw,.lswrap,#list-wrap'))return;
-    const dx=e.changedTouches[0].clientX-sx;
-    const dy=Math.abs(e.changedTouches[0].clientY-sy);
-    if(dx>80&&dy<60){goHome();}
+    const dy=e.changedTouches[0].clientY-sy;
+    const dx=Math.abs(e.changedTouches[0].clientX-sx);
+    if(dy>80&&dx<60){goHome();}
   },{passive:true});
 })();
 
