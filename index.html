@@ -111,20 +111,19 @@ background:linear-gradient(150deg,#eef2f8 0%,#f8f2fc 50%,#edf7f2 100%);
 #app.vis{transform:translateY(0)}
 .app-hdr{
 display:flex;align-items:center;gap:10px;
-padding:calc(var(--sat) + 14px) 16px 10px;
+padding:calc(var(--sat) + 14px) 16px 8px;
 flex-shrink:0;
-background:var(--gls2);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);
+background:transparent;
 }
 .app-back{
-width:36px;height:36px;border-radius:55px;
-background:rgba(255,255,255,.7);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);
-border:1px solid rgba(255,255,255,.85);
-color:var(--b);font-size:17px;cursor:pointer;
-display:flex;align-items:center;justify-content:center;
+width:auto;height:36px;border-radius:55px;padding:0 12px;
+background:transparent;
+border:none;
+color:var(--b);font-size:13px;cursor:pointer;
+display:flex;align-items:center;justify-content:center;gap:3px;
 transition:transform .1s;flex-shrink:0;
-box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 1px 4px rgba(0,0,0,.08);
 }
-.app-back:active{transform:scale(.82)}
+.app-back:active{transform:scale(.88)}
 .app-ttl{flex:1;text-align:center;font-size:16px;font-weight:700;color:var(–tx)}
 .app-dots{
 display:flex;gap:5px;align-items:center;justify-content:center;
@@ -459,16 +458,16 @@ backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
 }
 #hs-scrim.on{opacity:1;pointer-events:auto}
 #hsheet{
-position:fixed;bottom:0;left:0;right:0;z-index:400;
-background:var(–gls3);
+position:fixed;bottom:calc(var(--ib) + 10px);left:10px;right:10px;z-index:400;
+background:var(--gls3);
 backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
-border:1px solid rgba(255,255,255,.9);border-bottom:none;
-border-radius:22px 22px 0 0;
-padding-bottom:var(–sab);
-transform:translateY(105%);
+border:1px solid rgba(255,255,255,.9);
+border-radius:22px;
+padding-bottom:10px;
+transform:translateY(120%);
 transition:transform .3s cubic-bezier(.4,0,.2,1);
-max-height:72dvh;display:flex;flex-direction:column;
-box-shadow:0 -4px 30px rgba(0,0,0,.10);
+max-height:55dvh;display:flex;flex-direction:column;
+box-shadow:0 4px 30px rgba(0,0,0,.12);
 }
 #hsheet.open{transform:translateY(0)}
 .hs-hdl{width:36px;height:4px;background:rgba(0,0,0,.15);border-radius:2px;margin:10px auto 4px;flex-shrink:0;touch-action:none;cursor:pointer}
@@ -521,10 +520,11 @@ background:var(–r);margin-left:4px;vertical-align:middle;
 
 /* ═══ FLOAT BAR (🔀 ★ bottom) ═══ */
 .float-bar{
-display:flex;justify-content:center;gap:40px;
+display:flex;justify-content:space-between;
 position:fixed;
 bottom:calc(var(--ib) + 8px);
 left:0;right:0;
+padding:0 50px;
 z-index:190;
 pointer-events:none;
 }
@@ -539,7 +539,7 @@ transition:transform .5s cubic-bezier(.34,1.56,.64,1);
 -webkit-user-select:none;user-select:none;
 pointer-events:auto;
 }
-.float-btn:active{transform:scale(1.15)}
+.float-btn:active{transform:scale(1.3)}
 .float-btn.pop{animation:starPop .3s ease}
 
 /* ═══ SCORE BUTTONS (centered, bigger) ═══ */
@@ -694,9 +694,9 @@ overflow:hidden;
 
 <div id="app">
   <div class="app-hdr">
-    <button class="app-back" id="btn-back" style="font-size:13px;gap:2px;width:auto;padding:0 12px;height:36px"><span style="font-size:16px">←</span> やり直す</button>
+    <button class="app-back" id="btn-back"><span style="font-size:16px">←</span> やり直す</button>
     <div class="app-ttl" id="app-ttl">カード</div>
-    <button class="app-back" onclick="goHome()" style="font-size:12px;gap:2px;width:auto;padding:0 12px;height:36px">完了 <span style="font-size:16px">↓</span></button>
+    <button class="app-back" onclick="goHome()">完了 <span style="font-size:16px">↓</span></button>
   </div>
   <div class="app-dots" id="app-dots" style="display:none">
     <div class="dot"></div><div class="dot"></div><div class="dot"></div>
