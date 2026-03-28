@@ -1970,6 +1970,18 @@ function restoreHomeFromGrid(){
 }
 
 /* ═══ SETTINGS ═══ */
+/* ═══ KEYBOARD SHORTCUTS (PC) ═══ */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    const iframe=document.getElementById('iframe-overlay');
+    if(iframe&&iframe.style.visibility==='visible'){document.getElementById('iframe-back').click();return;}
+    const settings=document.getElementById('settings-overlay');
+    if(settings&&settings.style.display==='flex'){closeSettings();return;}
+    const home=document.getElementById('home');
+    if(home&&home.classList.contains('hidden')){goHome();return;}
+  }
+});
+
 /* ═══ CRASH RECOVERY ═══ */
 // Save app state periodically for crash recovery
 setInterval(()=>{
@@ -2000,6 +2012,8 @@ document.getElementById('iframe-back').addEventListener('click',()=>{
   setTimeout(()=>{
     document.getElementById('iframe-content').src='';
     ov.style.visibility='hidden';
+    // Restore icon grid if in icon mode
+    if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
   },400);
 });
 
@@ -2042,10 +2056,10 @@ function openSettings(){
   document.getElementById('s-bigicon').classList.toggle('on',localStorage.getItem('inglish_bigicon')==='1');
   // PWA-only toggles
   const lockRow=document.getElementById('s-lockscreen').closest('.s-row');
-  if(lockRow)lockRow.style.display=_isPWA?'':'none';
+  if(lockRow){lockRow.style.opacity=_isPWA?'1':'.2';lockRow.style.pointerEvents=_isPWA?'':'none';}
   document.getElementById('s-lockscreen').classList.toggle('on',localStorage.getItem(LOCK_KEY)==='1');
   const notifRow=document.getElementById('s-notif').closest('.s-row');
-  if(notifRow)notifRow.style.display=_isPWA?'':'none';
+  if(notifRow){notifRow.style.opacity=_isPWA?'1':'.2';notifRow.style.pointerEvents=_isPWA?'':'none';}
   document.getElementById('s-notif').classList.toggle('on',localStorage.getItem('inglish_notif')==='1');
 }
 
