@@ -280,10 +280,10 @@ word-break:break-word;overflow-wrap:break-word;
 .exn{font-size:9px;font-weight:700;color:var(--sub);min-width:28px;padding-top:2px}
 .exph{font-size:12px;font-weight:700;color:var(--b)}.exja{font-size:10px;color:var(--sub);margin-top:1px}
 .exe{font-size:10px;color:rgba(0,0,0,.4);font-style:italic;margin-top:2px;line-height:1.5}
-.ivwrap{overflow-x:auto;border-radius:12px;margin-bottom:8px;border:1px solid var(--ln)}
-.ivt{width:100%;border-collapse:collapse;font-size:11px;background:rgba(255,255,255,.7)}
-.ivt th{background:rgba(0,122,255,.12);color:var(--b);padding:6px 4px;text-align:center;font-weight:700;font-size:9px;white-space:nowrap;border-bottom:1px solid rgba(0,122,255,.15)}
-.ivt td{padding:4px;border-bottom:1px solid rgba(0,0,0,.05);text-align:center;white-space:nowrap;color:var(--tx)}
+.ivwrap{overflow-x:auto;border-radius:12px;margin-bottom:8px;border:1px solid var(--ln);-webkit-overflow-scrolling:touch}
+.ivt{width:100%;border-collapse:collapse;font-size:11px;background:rgba(255,255,255,.7);table-layout:fixed}
+.ivt th{background:rgba(0,122,255,.12);color:var(--b);padding:6px 4px;text-align:center;font-weight:700;font-size:9px;border-bottom:1px solid rgba(0,122,255,.15)}
+.ivt td{padding:4px 3px;border-bottom:1px solid rgba(0,0,0,.05);text-align:center;color:var(--tx);font-size:10px;word-break:break-all}
 .ivt tr:nth-child(even) td{background:rgba(0,0,0,.03)}
 .ivp{color:var(--r);font-weight:700}.ivpp{color:var(--b);font-weight:700}.ivb{font-weight:700}
 
@@ -536,11 +536,11 @@ border:1px solid rgba(255,255,255,.6);
 font-size:22px;cursor:pointer;
 display:flex;align-items:center;justify-content:center;
 box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 4px 16px rgba(0,0,0,.10);
-transition:transform .5s cubic-bezier(.34,1.56,.64,1);
+transition:transform .3s ease;
 -webkit-user-select:none;user-select:none;
 pointer-events:auto;
 }
-.float-btn:active{transform:scale(3)}
+.float-btn:active{transform:scale(1.8)}
 .float-btn.pop{animation:starPop .3s ease}
 
 /* ═══ SCORE BUTTONS (centered, bigger) ═══ */
@@ -1672,12 +1672,12 @@ function ensureLists(){
   function liWrap(en,ja,extra,opts){
     const esc=(s)=>(s||'').replace(/"/g,'&quot;');
     const st=isStarred(en)?'★':'☆';
-    let btns=`<span class="star-tr" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:15px;cursor:pointer;-webkit-user-select:none">${st}</span>`;
+    let btns=`<span class="star-tr" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:14px;cursor:pointer">⭐${st}</span>`;
     if(opts&&opts.forgot){
       const isFg=isForgot(en,0);
-      btns+=` <button class="tr-forgot-btn" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:8px;padding:2px 6px;border:1px solid rgba(255,59,48,.2);background:rgba(255,59,48,.06);color:#c0001a;border-radius:6px;cursor:pointer;font-family:inherit">${isFg?'✓済':'😰'}</button>`;
+      btns+=` <button class="tr-forgot-btn" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:8px;padding:2px 6px;border:1px solid rgba(255,59,48,.2);background:rgba(255,59,48,.06);color:#c0001a;border-radius:6px;cursor:pointer;font-family:inherit">${isFg?'✓済':'😰忘れた'}</button>`;
     }
-    return `<div class="li" style="position:relative"><div style="position:absolute;top:8px;right:10px;display:flex;align-items:center;gap:4px">${btns}</div><div style="padding-right:50px">${extra}</div></div>`;
+    return `<div class="li">${extra}<div style="display:flex;justify-content:flex-end;gap:6px;margin-top:4px">${btns}</div></div>`;
   }
   function buildLists(){
   // idioms
@@ -1698,8 +1698,7 @@ function ensureLists(){
     exHtml+=`<div style="font-size:10px;font-weight:700;color:var(--sub);background:var(--ln);border-radius:8px;padding:4px 10px;margin:6px 0 4px">${g.label}</div>`;
     const items=EX.filter(e=>e.n>=g.range[0]&&e.n<=g.range[1]);
     items.forEach(d=>{
-      const st=isStarred(d.ph)?'★':'☆';
-      exHtml+=`<div class="li" style="position:relative"><span class="star-tr" data-word="${(d.ph||'').replace(/"/g,'&quot;')}" data-meaning="${(d.ja||'').replace(/"/g,'&quot;')}" style="position:absolute;top:8px;right:10px;font-size:15px;cursor:pointer">${st}</span><div style="padding-right:30px"><div class="exph">${d.ph}</div><div class="exja">${d.ja}</div>${d.e?`<div style="font-size:10px;color:rgba(0,0,0,.4);margin-top:2px">${d.e} <span style="color:var(--sub)">${d.ej}</span></div>`:''}</div></div>`;
+      exHtml+=`<div class="li"><div class="exph">${d.ph}</div><div class="exja">${d.ja}</div>${d.e?`<div style="font-size:10px;color:rgba(0,0,0,.4);margin-top:2px">${d.e} <span style="color:var(--sub)">${d.ej}</span></div>`:''}</div>`;
     });
   });
   document.getElementById('l-ex').innerHTML=exHtml;
@@ -2091,7 +2090,7 @@ function buildForgotList(){
   let html=`<div class="sh">要復習 ${items.length}語</div>`;
   items.forEach(w=>{
     const enText=(w.en||'').replace(/"/g,'&quot;');
-    html+=`<div class="li ans-row" data-en="${enText}" style="position:relative"><button class="ch forgot-clear-btn" data-word="${enText}" data-deck="${w.deckIdx}" style="position:absolute;top:8px;right:8px;font-size:9px;padding:3px 8px;color:var(--g)">✓覚えた</button><div style="padding-right:60px"><div class="lw">${w.en}</div><div class="lm">${w.ja||''}</div><div style="font-size:9px;color:var(--sub);margin-top:1px">${w.deck}</div></div></div>`;
+    html+=`<div class="li ans-row" data-en="${enText}"><div class="lw">${w.en}</div><div class="lm">${w.ja||''}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px"><span style="font-size:9px;color:var(--sub)">${w.deck}</span><button class="ch forgot-clear-btn" data-word="${enText}" data-deck="${w.deckIdx}" style="font-size:9px;padding:3px 10px;color:var(--g)">✓覚えた</button></div></div>`;
   });
   return html;
 }
@@ -2384,7 +2383,7 @@ function openStarList(){
     let html='';
     items.forEach(([word,data])=>{
       const enText=word.replace(/"/g,'&quot;');
-      html+=`<div class="li ans-row" data-en="${enText}" style="position:relative"><button class="ch star-remove-btn" data-word="${enText}" style="position:absolute;top:8px;right:8px;font-size:9px;padding:3px 8px;color:var(--r)">★ 削除</button><div style="padding-right:55px"><div class="lw">${word}</div><div class="lm">${data.m||''}</div></div></div>`;
+      html+=`<div class="li ans-row" data-en="${enText}"><div class="lw">${word}</div><div class="lm">${data.m||''}</div><div style="display:flex;justify-content:flex-end;margin-top:3px"><button class="ch star-remove-btn" data-word="${enText}" style="font-size:9px;padding:3px 10px;color:var(--r)">★ 削除</button></div></div>`;
     });
     slBody.innerHTML=html;
   }
