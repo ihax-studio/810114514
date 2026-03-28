@@ -11,7 +11,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
-html{overscroll-behavior:none;-webkit-overflow-scrolling:touch;touch-action:pan-y;position:fixed;inset:0}
+html{overscroll-behavior:none;position:fixed;inset:0}
 body{overscroll-behavior:none;position:fixed;inset:0;overflow:hidden}
 :root{
   --sat:env(safe-area-inset-top,0px);
@@ -761,26 +761,6 @@ overflow:hidden;
 </div>
 
 <script type="module">
-/* ═══ BLOCK iOS SAFARI GESTURES ═══ */
-// Block swipe-back/forward (edge swipe)
-document.addEventListener('touchstart',function(e){
-  const x=e.touches[0].pageX;
-  // Block edge swipes (within 25px of left/right edge)
-  if(x<25||x>window.innerWidth-25){e.preventDefault();}
-},{passive:false});
-// Block pull-to-refresh (overscroll top)
-let _ptry=0;
-document.addEventListener('touchstart',function(e){_ptry=e.touches[0].clientY;},{passive:true});
-document.addEventListener('touchmove',function(e){
-  // If scrolling up at top of page, prevent
-  const el=e.target.closest('.hm-scroll,.lswrap,.hs-body,#tr-card,#flag-picker');
-  if(el&&el.scrollTop>0)return; // allow normal scroll
-  if(e.touches[0].clientY>_ptry+5){
-    // pulling down — only block if at top
-    if(!el||el.scrollTop<=0)e.preventDefault();
-  }
-},{passive:false});
-
 /* ═══ HAPTIC ═══ */
 let _h=null;
 (()=>{import('https://esm.sh/ios-haptics').then(m=>{_h=m.haptic;}).catch(()=>{});})();
@@ -2145,18 +2125,6 @@ function toggleStar(word,meaning){
 // Star update now handled via global g-star button in render()
 
 /* ═══ STAR FAVORITES LIST ═══ */
-function buildStarList(){
-  starCache=loadStars();
-  const items=Object.entries(starCache).sort((a,b)=>b[1].t-a[1].t);
-  if(!items.length)return '<div style="color:var(--sub);text-align:center;font-size:13px;padding:40px 20px">⭐ お気に入りはまだありません<br><br><span style="font-size:11px">単語カードの☆をタップして追加</span></div>';
-  let html=`<div class="sh">⭐ お気に入り ${items.length}語</div>`;
-  items.forEach(([word,data])=>{
-    const enText=word.replace(/"/g,'&quot;');
-    html+=`<div class="li ans-row" data-en="${enText}" style="position:relative"><div class="lw">${word}</div><div class="lm">${data.m||''}</div><div style="display:flex;justify-content:flex-end;margin-top:4px"><button class="ch star-remove-btn" data-word="${enText}" style="font-size:9px;padding:3px 8px;color:var(--r)">★ 削除</button></div></div>`;
-  });
-  return html;
-}
-
 /* ═══ TAP-TO-SPEAK DELEGATION ═══ */
 document.addEventListener('click',e=>{
   // Handle .star-deck-btn (card star toggle)
@@ -2414,7 +2382,7 @@ function openStarList(){
     let html='';
     items.forEach(([word,data])=>{
       const enText=word.replace(/"/g,'&quot;');
-      html+=`<div class="li ans-row" data-en="${enText}" style="position:relative"><div class="lw">${word}</div><div class="lm">${data.m||''}</div><div style="display:flex;justify-content:flex-end;margin-top:4px"><button class="ch star-remove-btn" data-word="${enText}" style="font-size:9px;padding:3px 8px;color:var(--r)">★ 削除</button></div></div>`;
+      html+=`<div class="li ans-row" data-en="${enText}"><div style="display:flex;align-items:flex-start;gap:6px"><div style="flex:1;min-width:0"><div class="lw">${word}</div><div class="lm">${data.m||''}</div></div><button class="ch star-remove-btn" data-word="${enText}" style="font-size:9px;padding:4px 10px;color:var(--r);flex-shrink:0">★ 削除</button></div></div>`;
     });
     slBody.innerHTML=html;
   }
