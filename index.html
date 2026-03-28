@@ -260,21 +260,21 @@ min-height:44px;
 /* ════ LIST WRAP ════ */
 .lswrap{
 flex:1;overflow-y:auto;
-padding:8px 14px calc(var(--ib) + 16px);
+padding:8px 10px calc(var(--ib) + 16px);
 -webkit-overflow-scrolling:touch;min-height:0;scrollbar-width:none;
 }
 .lswrap::-webkit-scrollbar{display:none}
 .li{
 background:var(--gls);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);
-border-radius:14px;padding:12px 14px;margin-bottom:7px;
+border-radius:14px;padding:10px 12px;margin-bottom:6px;
 border:1px solid rgba(255,255,255,.8);box-shadow:var(--sh);
 word-break:break-word;overflow-wrap:break-word;
 }
-.lw{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:2px;word-break:break-word}
-.lm{font-size:12px;color:var(--b);font-weight:600;margin-bottom:3px;word-break:break-word}
-.lnx{font-size:11px;color:var(--sub);line-height:1.7;background:rgba(0,0,0,.04);border-radius:8px;padding:6px 8px;margin-top:4px;border:1px solid rgba(0,0,0,.06);word-break:break-word}
-.le{font-size:11px;color:rgba(0,0,0,.45);font-style:italic;margin-top:4px;line-height:1.5;word-break:break-word}
-.sh{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);padding:8px 0 5px}
+.lw{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:1px}
+.lm{font-size:12px;color:var(--b);font-weight:600;margin-bottom:2px}
+.lnx{font-size:11px;color:var(--sub);line-height:1.6;background:rgba(0,0,0,.03);border-radius:8px;padding:5px 8px;margin-top:3px;border:1px solid rgba(0,0,0,.05)}
+.le{font-size:11px;color:rgba(0,0,0,.4);font-style:italic;margin-top:3px;line-height:1.5}
+.sh{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);padding:8px 2px 5px}
 .exr{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--ln)}
 .exr:last-child{border-bottom:none}
 .exn{font-size:9px;font-weight:700;color:var(--sub);min-width:28px;padding-top:2px}
@@ -1672,12 +1672,12 @@ function ensureLists(){
   function liWrap(en,ja,extra,opts){
     const esc=(s)=>(s||'').replace(/"/g,'&quot;');
     const st=isStarred(en)?'★':'☆';
-    let btns=`<span class="star-tr" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:16px;flex-shrink:0;padding:2px">${st}</span>`;
+    let btns=`<span class="star-tr" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:15px;cursor:pointer;-webkit-user-select:none">${st}</span>`;
     if(opts&&opts.forgot){
       const isFg=isForgot(en,0);
-      btns+=`<button class="tr-forgot-btn" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:9px;padding:2px 7px;border:1px solid rgba(255,59,48,.2);background:rgba(255,59,48,.06);color:#c0001a;border-radius:8px;cursor:pointer;font-family:inherit;flex-shrink:0">${isFg?'✓済':'😰'}</button>`;
+      btns+=` <button class="tr-forgot-btn" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:8px;padding:2px 6px;border:1px solid rgba(255,59,48,.2);background:rgba(255,59,48,.06);color:#c0001a;border-radius:6px;cursor:pointer;font-family:inherit">${isFg?'✓済':'😰'}</button>`;
     }
-    return `<div class="li"><div style="display:flex;align-items:flex-start;gap:6px"><div style="flex:1;min-width:0">${extra}</div><div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">${btns}</div></div></div>`;
+    return `<div class="li" style="position:relative"><div style="position:absolute;top:8px;right:10px;display:flex;align-items:center;gap:4px">${btns}</div><div style="padding-right:50px">${extra}</div></div>`;
   }
   function buildLists(){
   // idioms
@@ -1698,7 +1698,8 @@ function ensureLists(){
     exHtml+=`<div style="font-size:10px;font-weight:700;color:var(--sub);background:var(--ln);border-radius:8px;padding:4px 10px;margin:6px 0 4px">${g.label}</div>`;
     const items=EX.filter(e=>e.n>=g.range[0]&&e.n<=g.range[1]);
     items.forEach(d=>{
-      exHtml+=`<div class="li" style="padding:10px 12px"><div style="display:flex;align-items:flex-start;gap:6px"><div style="flex:1;min-width:0"><div class="exph">${d.ph}</div><div class="exja">${d.ja}</div>${d.e?`<div class="exe" style="font-size:10px;color:rgba(0,0,0,.4);margin-top:2px">${d.e} <span style="color:var(--sub)">${d.ej}</span></div>`:''}</div><span class="star-tr" data-word="${(d.ph||'').replace(/"/g,'&quot;')}" data-meaning="${(d.ja||'').replace(/"/g,'&quot;')}" style="font-size:16px;flex-shrink:0">☆</span></div></div>`;
+      const st=isStarred(d.ph)?'★':'☆';
+      exHtml+=`<div class="li" style="position:relative"><span class="star-tr" data-word="${(d.ph||'').replace(/"/g,'&quot;')}" data-meaning="${(d.ja||'').replace(/"/g,'&quot;')}" style="position:absolute;top:8px;right:10px;font-size:15px;cursor:pointer">${st}</span><div style="padding-right:30px"><div class="exph">${d.ph}</div><div class="exja">${d.ja}</div>${d.e?`<div style="font-size:10px;color:rgba(0,0,0,.4);margin-top:2px">${d.e} <span style="color:var(--sub)">${d.ej}</span></div>`:''}</div></div>`;
     });
   });
   document.getElementById('l-ex').innerHTML=exHtml;
@@ -2067,7 +2068,7 @@ function buildAllWords(){
       const enText=(w.en||'').replace(/"/g,'&quot;');
       const mText=(w.ja||'').replace(/"/g,'&quot;');
       const starred=isStarred(w.en||'')?'★':'☆';
-      html+=`<div class="li ans-row" data-en="${enText}"><div style="display:flex;align-items:flex-start;gap:6px"><div style="flex:1;min-width:0"><div class="lw">${w.en||''}</div><div class="lm">${w.ja}</div><div style="font-size:9px;color:var(--sub);margin-top:2px">${w.cat}</div></div><span class="star-tr" data-word="${enText}" data-meaning="${mText}" style="font-size:16px;flex-shrink:0;padding:2px">${starred}</span></div></div>`;
+      html+=`<div class="li ans-row" data-en="${enText}" style="position:relative"><span class="star-tr" data-word="${enText}" data-meaning="${mText}" style="position:absolute;top:8px;right:10px;font-size:15px;cursor:pointer">${starred}</span><div style="padding-right:30px"><div class="lw">${w.en||''}</div><div class="lm">${w.ja}</div><div style="font-size:9px;color:var(--sub);margin-top:1px">${w.cat}</div></div></div>`;
     });
   });
   return html;
@@ -2089,7 +2090,7 @@ function buildForgotList(){
   let html=`<div class="sh">要復習 ${items.length}語</div>`;
   items.forEach(w=>{
     const enText=(w.en||'').replace(/"/g,'&quot;');
-    html+=`<div class="li ans-row" data-en="${enText}"><div style="display:flex;align-items:flex-start;gap:6px"><div style="flex:1;min-width:0"><div class="lw">${w.en}</div><div class="lm">${w.ja||''}</div><div style="font-size:9px;color:var(--sub);margin-top:2px">${w.deck}</div></div><button class="ch forgot-clear-btn" data-word="${enText}" data-deck="${w.deckIdx}" style="font-size:9px;padding:4px 10px;color:var(--g);flex-shrink:0">✓覚えた</button></div></div>`;
+    html+=`<div class="li ans-row" data-en="${enText}" style="position:relative"><button class="ch forgot-clear-btn" data-word="${enText}" data-deck="${w.deckIdx}" style="position:absolute;top:8px;right:8px;font-size:9px;padding:3px 8px;color:var(--g)">✓覚えた</button><div style="padding-right:60px"><div class="lw">${w.en}</div><div class="lm">${w.ja||''}</div><div style="font-size:9px;color:var(--sub);margin-top:1px">${w.deck}</div></div></div>`;
   });
   return html;
 }
@@ -2382,7 +2383,7 @@ function openStarList(){
     let html='';
     items.forEach(([word,data])=>{
       const enText=word.replace(/"/g,'&quot;');
-      html+=`<div class="li ans-row" data-en="${enText}"><div style="display:flex;align-items:flex-start;gap:6px"><div style="flex:1;min-width:0"><div class="lw">${word}</div><div class="lm">${data.m||''}</div></div><button class="ch star-remove-btn" data-word="${enText}" style="font-size:9px;padding:4px 10px;color:var(--r);flex-shrink:0">★ 削除</button></div></div>`;
+      html+=`<div class="li ans-row" data-en="${enText}" style="position:relative"><button class="ch star-remove-btn" data-word="${enText}" style="position:absolute;top:8px;right:8px;font-size:9px;padding:3px 8px;color:var(--r)">★ 削除</button><div style="padding-right:55px"><div class="lw">${word}</div><div class="lm">${data.m||''}</div></div></div>`;
     });
     slBody.innerHTML=html;
   }
