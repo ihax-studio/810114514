@@ -711,7 +711,7 @@ overflow:hidden;
     <div class="hg-lbl">参考書</div>
     <div class="hg-list">
       <div class="hcard" onclick="openS('list','all')"><div class="hi ib">📚</div><div class="hcard-info"><div class="hcard-name">全単語一覧</div><div class="hcard-desc">全データセットの単語を順番に表示</div></div><div class="badge" id="b-all">---</div><div class="chev">›</div></div>
-      <div class="hcard" onclick="openS('list','forgot')"><div class="hi ir">🧠</div><div class="hcard-info"><div class="hcard-name">忘れた・わからない</div><div class="hcard-desc">キャッシュされた要復習単語</div></div><div class="badge" id="b-forgot">---</div><div class="chev">›</div></div>
+      <div class="hcard" onclick="openS('list','forgot')"><div class="hi ir">😰</div><div class="hcard-info"><div class="hcard-name">忘れた・わからない</div><div class="hcard-desc">キャッシュされた要復習単語</div></div><div class="badge" id="b-forgot">---</div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','ex')"><div class="hi it">📝</div><div class="hcard-info"><div class="hcard-name">入試で使える表現</div><div class="hcard-desc">125フレーズ</div></div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','v')"><div class="hi ig">🔄</div><div class="hcard-info"><div class="hcard-name">不規則動詞変化表</div><div class="hcard-desc">69語 完全版</div></div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','g')"><div class="hi ii">📐</div><div class="hcard-info"><div class="hcard-name">重要文法</div><div class="hcard-desc">仮定法・強調・倒置 12項目</div></div><div class="chev">›</div></div>
@@ -737,6 +737,20 @@ overflow:hidden;
   </div>
 </div>
 
+<!-- ══════════ LIST SWITCH DIALOG ══════════ -->
+<div id="list-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,.4);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center">
+  <div id="list-dialog-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .8s ease,opacity .3s ease">
+    <div style="padding:22px 20px 10px">
+      <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">リスト表示</div>
+      <div style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5">アイコン表示と設定を表示するにはホーム画面でシェイクします</div>
+    </div>
+    <div style="border-top:1px solid rgba(0,0,0,.1);display:flex">
+      <button id="list-dialog-cancel" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;border-right:1px solid rgba(0,0,0,.1);cursor:pointer;font-family:inherit;font-weight:400">今はしない</button>
+      <button id="list-dialog-ok" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">変更</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════ SETTINGS OVERLAY ══════════ -->
 <div id="settings-overlay" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">
   <div id="settings-card" style="position:absolute;bottom:0;left:0;right:0;max-height:85dvh;background:rgba(245,245,247,.95);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.05,.64,1)">
@@ -756,6 +770,7 @@ overflow:hidden;
       <div class="s-sec">触覚フィードバック</div>
       <div class="s-group">
         <div class="s-row"><div class="s-label">触覚</div><div class="s-toggle on" id="s-haptic"><div class="s-knob"></div></div></div>
+        <div class="s-row"><div class="s-label">はっきりとした触覚</div><div class="s-toggle" id="s-haptic-strong"><div class="s-knob"></div></div></div>
       </div>
       <!-- Shake -->
       <div class="s-sec">シェイク</div>
@@ -783,7 +798,6 @@ overflow:hidden;
 <!-- ══════════ DELETE SLIDER OVERLAY ══════════ -->
 <div id="del-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0);transition:background .4s;">
   <div id="del-content" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:20dvh;opacity:0;transition:opacity .4s;">
-    <div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:20px;text-shadow:0 2px 10px #000b">⚠️ 全てのセーブデータが削除されます</div>
     <div id="del-slider-wrap" style="position:relative;width:310px;height:64px;">
       <div style="
         position:absolute;inset:0;border-radius:36px;
@@ -806,7 +820,8 @@ overflow:hidden;
         <svg width="32" height="32" viewBox="0 0 32 32"><polyline points="12,8 20,16 12,24" fill="none" stroke="#ff3b30" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
-    <button id="btn-cancel-delete" style="margin-top:auto;margin-bottom:calc(env(safe-area-inset-bottom,0px) + 50px);width:52px;height:52px;background:rgba(255,255,255,.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:50%;font-size:24px;font-weight:300;cursor:pointer;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;box-shadow:1.1px 1px 0 rgba(255,255,255,.6),-1px -.8px 0 rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+    <div style="color:#fff;font-size:14px;font-weight:600;margin-top:20px;text-shadow:0 2px 10px #000b;text-align:center">⚠️ 全てのセーブデータが削除されます</div>
+    <button id="btn-cancel-delete" style="margin-top:auto;margin-bottom:calc(env(safe-area-inset-bottom,0px) + 50px);width:56px;height:56px;background:rgba(255,255,255,.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:50%;font-size:28px;font-weight:300;cursor:pointer;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;box-shadow:1.1px 1px 0 rgba(255,255,255,.6),-1px -.8px 0 rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
   </div>
 </div>
 
@@ -886,8 +901,18 @@ document.addEventListener('touchstart',function(e){
 /* ═══ HAPTIC ═══ */
 let _h=null;
 (()=>{import('https://esm.sh/ios-haptics').then(m=>{_h=m.haptic;}).catch(()=>{});})();
-const haptic  = ()=>{try{_h&&_h();}catch(_){}};
-haptic.confirm= ()=>{try{_h&&_h.confirm&&_h.confirm();}catch(_){}};
+const _hapticOrig  = ()=>{try{_h&&_h();}catch(_){}};
+const _hapticConfirmOrig= ()=>{try{_h&&_h.confirm&&_h.confirm();}catch(_){}};
+const haptic  = ()=>{
+  if(localStorage.getItem('inglish_haptic')==='0')return;
+  _hapticOrig();
+  if(localStorage.getItem('inglish_haptic_strong')==='1'){for(let i=0;i<5;i++)setTimeout(()=>{try{_h&&_h.error&&_h.error();}catch(_){}},i*30);}
+};
+haptic.confirm= ()=>{
+  if(localStorage.getItem('inglish_haptic')==='0')return;
+  _hapticConfirmOrig();
+  if(localStorage.getItem('inglish_haptic_strong')==='1'){for(let i=0;i<5;i++)setTimeout(()=>{try{_h&&_h.error&&_h.error();}catch(_){}},i*30);}
+};
 haptic.error  = ()=>{try{_h&&_h.error&&_h.error();}catch(_){}};
 const hRemember = ()=>{ const d=30;  for(let i=0;i<5;   i++) setTimeout(()=>haptic.error(),i*d); };
 const hForgot   = ()=>{ const d=18;  for(let i=0;i<1100;i++) setTimeout(()=>haptic.error(),i*d); };
@@ -1908,6 +1933,8 @@ function openSettings(){
   requestAnimationFrame(()=>{document.getElementById('settings-card').style.transform='translateY(0)';});
   // Sync haptic
   document.getElementById('s-haptic').classList.toggle('on',localStorage.getItem('inglish_haptic')!=='0');
+  document.getElementById('s-haptic-strong').classList.toggle('on',localStorage.getItem('inglish_haptic_strong')==='1');
+  document.getElementById('s-bigicon').classList.toggle('on',localStorage.getItem('inglish_bigicon')==='1');
   // Sync layout
   const isIcon=localStorage.getItem('inglish_layout')==='icon';
   document.getElementById('s-check-icon').classList.toggle('s-on',isIcon);
@@ -1949,20 +1976,46 @@ document.getElementById('settings-close').addEventListener('click',()=>{haptic()
 document.getElementById('settings-overlay').addEventListener('click',e=>{if(e.target.id==='settings-overlay')closeSettings();});
 // Layout
 document.getElementById('s-layout-icon').addEventListener('click',()=>{
-  haptic();localStorage.setItem('inglish_layout','icon');
+  haptic.confirm();localStorage.setItem('inglish_layout','icon');
   document.getElementById('s-check-icon').classList.add('s-on');
   document.getElementById('s-check-list').classList.remove('s-on');
 });
 document.getElementById('s-layout-list').addEventListener('click',()=>{
-  haptic();localStorage.setItem('inglish_layout','list');
+  haptic();
+  // Show confirmation dialog
+  const dlg=document.getElementById('list-dialog');
+  const card=document.getElementById('list-dialog-card');
+  dlg.style.display='flex';
+  requestAnimationFrame(()=>{card.style.transform='scale(1)';card.style.opacity='1';});
+});
+// List dialog handlers
+document.getElementById('list-dialog-cancel').addEventListener('click',()=>{
+  haptic();
+  const card=document.getElementById('list-dialog-card');
+  card.style.transform='scale(1.3)';card.style.opacity='0';
+  setTimeout(()=>{document.getElementById('list-dialog').style.display='none';},300);
+});
+document.getElementById('list-dialog-ok').addEventListener('click',()=>{
+  haptic.confirm();
+  localStorage.setItem('inglish_layout','list');
   document.getElementById('s-check-list').classList.add('s-on');
   document.getElementById('s-check-icon').classList.remove('s-on');
+  const card=document.getElementById('list-dialog-card');
+  card.style.transform='scale(1.3)';card.style.opacity='0';
+  setTimeout(()=>{document.getElementById('list-dialog').style.display='none';restoreHomeFromGrid();},300);
 });
 // Haptic
 document.getElementById('s-haptic').addEventListener('click',function(){
   this.classList.toggle('on');
   localStorage.setItem('inglish_haptic',this.classList.contains('on')?'1':'0');
   if(this.classList.contains('on'))haptic();
+});
+// Strong haptic
+document.getElementById('s-haptic-strong').addEventListener('click',function(){
+  this.classList.toggle('on');
+  const on=this.classList.contains('on');
+  localStorage.setItem('inglish_haptic_strong',on?'1':'0');
+  if(on){for(let i=0;i<5;i++)setTimeout(()=>haptic.error(),i*30);}
 });
 // Shake radio
 ['none','check','shuffle','back'].forEach(v=>{
