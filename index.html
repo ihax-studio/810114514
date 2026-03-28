@@ -421,13 +421,13 @@ background:rgba(0,0,0,.12);
 backdrop-filter:blur(8px) saturate(130%);
 -webkit-backdrop-filter:blur(8px) saturate(130%);
 display:flex;align-items:flex-end;justify-content:center;
-padding:0 14px calc(var(--ib) + 10px);
+padding:0 14px calc(var(--ib) + 14px);
 opacity:0;pointer-events:none;
 transition:opacity .25s;
 }
 #tr-overlay.on{opacity:1;pointer-events:auto}
 #tr-card{
-width:100%;max-width:420px;max-height:65dvh;
+width:100%;max-width:420px;max-height:55dvh;
 background:rgba(255,255,255,.50);
 backdrop-filter:blur(40px) saturate(200%);
 -webkit-backdrop-filter:blur(40px) saturate(200%);
@@ -2128,9 +2128,11 @@ function hideLockScreen(){
     knob.addEventListener('click',e=>{e.stopPropagation();doUnlock();});
   }
 
-  knob.addEventListener('touchstart',e=>{dragging=true;startX=e.touches[0].clientX-knobLeft;knob.style.transition='none';},{passive:true});
+  let _touchMoved=false;
+  knob.addEventListener('touchstart',e=>{dragging=true;_touchMoved=false;startX=e.touches[0].clientX-knobLeft;knob.style.transition='none';haptic();},{passive:true});
   document.addEventListener('touchmove',e=>{
     if(!dragging)return;
+    _touchMoved=true;
     let x=e.touches[0].clientX-startX;
     if(x<4)x=4;if(x>maxLeft)x=maxLeft;
     knobLeft=x;knob.style.left=x+'px';
@@ -2140,7 +2142,8 @@ function hideLockScreen(){
   document.addEventListener('touchend',()=>{
     if(!dragging)return;dragging=false;
     knob.style.transition='left .5s cubic-bezier(.62,0,.4,1)';
-    if(knobLeft>maxLeft*0.75){doUnlock();}
+    if(!_touchMoved){haptic.confirm();doUnlock();}
+    else if(knobLeft>maxLeft*0.75){doUnlock();}
     else{knob.style.left='4px';knobLeft=4;const lb=document.getElementById('lock-slide-label');if(lb)lb.style.opacity='1';}
   });
 })();
@@ -2429,6 +2432,7 @@ document.addEventListener('visibilitychange',()=>{
 
 /* ═══ IFRAME APP ═══ */
 function openIframe(url,title){
+  haptic.confirm();
   const ov=document.getElementById('iframe-overlay');
   document.getElementById('iframe-content').src=url;
   ov.style.visibility='visible';
@@ -3187,7 +3191,7 @@ const SEARCH_APPS=[
 ];
 // Search results container (inject near ti)
 const srDiv=document.createElement('div');
-srDiv.id='sr';srDiv.style.cssText='display:none;position:absolute;bottom:calc(100% + 4px);left:0;right:0;max-height:40dvh;overflow-y:auto;border-radius:12px;background:rgba(255,255,255,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:50;box-shadow:0 -2px 12px rgba(0,0,0,.1)';
+srDiv.id='sr';srDiv.style.cssText='display:none;position:absolute;bottom:calc(100% + 4px);left:0;right:0;max-height:40dvh;overflow-y:auto;border-radius:12px;background:rgba(255,255,255,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:530;box-shadow:0 -2px 12px rgba(0,0,0,.1)';
 document.getElementById('ti').parentElement.style.position='relative';
 document.getElementById('ti').parentElement.appendChild(srDiv);
 
