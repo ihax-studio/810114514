@@ -770,7 +770,7 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ MEMO OVERLAY ══════════ -->
-<div id="memo-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(245,245,247,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.05,.64,1)">
+<div id="memo-overlay" style="position:fixed;inset:0;z-index:900;background:rgba(245,245,247,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.05,.64,1);visibility:hidden">
   <div style="display:flex;flex-direction:column;height:100%;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 8px)">
     <div style="display:flex;align-items:center;margin-bottom:8px">
       <button id="memo-back" style="font-size:15px;color:var(--b);background:none;border:none;cursor:pointer;font-family:inherit;padding:8px 12px">← 戻る</button>
@@ -810,7 +810,7 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ IFRAME APP OVERLAY ══════════ -->
-<div id="iframe-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:#fff;transition:transform .4s ease">
+<div id="iframe-overlay" style="position:fixed;inset:0;z-index:900;background:#fff;transform:translateX(100%);transition:transform .4s ease;visibility:hidden">
   <button id="iframe-back" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:10;width:42px;height:42px;border-radius:55px;background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--b);box-shadow:0 2px 8px rgba(0,0,0,.1)">←</button>
   <iframe id="iframe-content" style="position:absolute;inset:0;width:100%;height:100%;border:none" sandbox="allow-scripts allow-same-origin"></iframe>
 </div>
@@ -1952,8 +1952,8 @@ function updateMemoLockUI(){
 
 function openMemo(){
   const ov=document.getElementById('memo-overlay');
-  ov.style.display='flex';
-  requestAnimationFrame(()=>{ov.style.transform='translateY(0)';});
+  ov.style.visibility='visible';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ov.style.transform='translateY(0)';}));
   document.getElementById('memo-text').value=localStorage.getItem(MEMO_KEY)||'';
   document.getElementById('memo-translation').style.display='none';
   if(!localStorage.getItem('inglish_memo_lock_dismissed')){
@@ -1965,7 +1965,7 @@ function closeMemo(){
   if(!memoLocked)localStorage.setItem(MEMO_KEY,document.getElementById('memo-text').value);
   const ov=document.getElementById('memo-overlay');
   ov.style.transform='translateY(100%)';
-  setTimeout(()=>{ov.style.display='none';},400);
+  setTimeout(()=>{ov.style.visibility='hidden';},400);
 }
 document.getElementById('memo-back').addEventListener('click',()=>{haptic();closeMemo();});
 document.getElementById('memo-text').addEventListener('input',()=>{
@@ -2059,9 +2059,9 @@ document.addEventListener('visibilitychange',()=>{
 function openIframe(url,title){
   const ov=document.getElementById('iframe-overlay');
   document.getElementById('iframe-content').src=url;
-  ov.style.display='block';
+  ov.style.visibility='visible';
   ov.style.transform='translateX(100%)';
-  requestAnimationFrame(()=>{ov.style.transform='translateX(0)';});
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ov.style.transform='translateX(0)';}));
 }
 document.getElementById('iframe-back').addEventListener('click',()=>{
   haptic();
@@ -2069,7 +2069,7 @@ document.getElementById('iframe-back').addEventListener('click',()=>{
   ov.style.transform='translateX(100%)';
   setTimeout(()=>{
     document.getElementById('iframe-content').src='';
-    ov.style.display='none';ov.style.transform='';
+    ov.style.visibility='hidden';
   },400);
 });
 
@@ -3136,7 +3136,7 @@ function showIconGrid(){
         if(d.onclick==='__openSettings__'){openSettings();}
         else if(d.onclick==='__iframe_math__'){openIframe('math.html','\u6570\u5B66');}
         else if(d.onclick==='__iframe_neo__'){openIframe('Neosaurs.html','Neosaurs');}
-        else if(d.onclick==='__openMemo__'){openMemo();}
+        else if(d.onclick==='__openMemo__'){openIframe('card.html','メモ');}
         else if(d.onclick){try{eval(d.onclick);}catch(e){}}
       },450);
     });

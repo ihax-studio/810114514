@@ -1,0 +1,122 @@
+:root {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Hiragino Sans", sans-serif;
+    --bg-gray: #eff3f4;
+    --lock-color: #333;
+}
+body {
+    font-family: inherit;
+    font-weight: 100;
+    background-color: #ffffff;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    z-index: 0;
+    -webkit-font-smoothing: antialiased;
+}
+#bg-layer {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-size: cover; background-position: center center;
+    background-repeat: no-repeat;
+    filter: blur(33px);
+    z-index: -1;
+    opacity: 0;
+    transform: scale(1.1);
+    transition: opacity 0.3s ease, transform 0.8s ease;
+}
+#bg-layer.active { opacity: 1; transform: scale(1.3); }
+.memo-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.memo-item {
+    padding: 15px;
+    border-radius: 38px;
+    backdrop-filter: blur(22px) saturate(185%);
+    -webkit-backdrop-filter: blur(22px) saturate(185%);
+    box-shadow: inset 1px -1px 1px rgb(255 255 255 / 12%), inset 1px -1px 335px rgb(0 0 0 / 11%), 1px -1px 1px rgb(243 243 243 / 22%), -1px 1px 1px rgb(255 255 255 / 19%), 0 2px 1px #ffffff0d;
+    color: white;
+    background: rgba(0, 0, 0, 0.05);
+    text-shadow: 0 0 22px black;
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px) scale(1.2);
+    transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+    font-weight: 100;
+}
+.memo-item.visible { opacity: 1; transform: translateY(0) scale(1); }
+.memo-content { flex-grow: 1; padding-right: 10px; transition: filter 0.5s ease; font-weight: 100; }
+.memo-item.locked .memo-content, .memo-item.locked .memo-actions { filter: blur(8px); pointer-events: none; user-select: none; }
+.lock-overlay-display {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.4);
+    opacity: 0; transform: scale(1.2);
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.memo-item.locked .lock-overlay-display { opacity: 1; transform: scale(1); pointer-events: auto; cursor: pointer; }
+.lock-icon-img { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)); transition: transform 0.2s; }
+.lock-icon-img:active { transform: scale(0.9); }
+.memo-actions { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 40px; }
+.action-btn { color: white; text-shadow: 0 0 22px #0000001f; font-family: inherit; font-weight: 100; background: none; border: none; font-size: 18px; cursor: pointer; padding: 3px; transition: transform 0.3s, opacity 0.25s; }
+.bottom-nav {
+    backdrop-filter: blur(22px) saturate(95%);
+    -webkit-backdrop-filter: blur(22px) saturate(95%);
+    margin: 11px;
+    border-radius: 55px;
+    box-shadow: inset .1px -1px 1px rgb(255 255 255 / 58%), inset 1px -1px 85px rgb(0 0 0 / 13%), .1px -1px 3px rgb(255 255 255 / 55%), -1px -1px 1px rgb(255 255 255 / 46%), 0 2px 1px #ffffff0d;
+    background: rgba(0, 0, 0, 0.06);
+    padding: 5px 8px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    position: relative;
+    overflow: hidden;
+    min-height: 5px;
+    z-index: 1000;
+}
+.static-left { position: absolute; left: 15px; bottom: calc(15px + env(safe-area-inset-bottom)); z-index: 100; }
+.content-layers { margin-left: 45px; position: relative; height: 44px; overflow: hidden; }
+.nav-wrapper { display: flex; align-items: center; gap: 8px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: absolute; inset: 0; }
+.nav-wrapper.file-mode { transform: translateY(80px); opacity: 0; pointer-events: none; }
+.file-actions-layer { display: flex; gap: 10px; position: absolute; inset: 0; transform: translateY(-80px); opacity: 0; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }
+.file-actions-layer.visible { transform: translateY(0); opacity: 1; pointer-events: auto; }
+.file-btn-item { font-family: inherit; font-weight: 100; flex: 1; background: var(--bg-gray); border: none; border-radius: 1px; font-size: 35px; height: 42px; }
+.input-stack { flex-grow: 1; position: relative; height: 40px; overflow: hidden; }
+#memo-input { font-family: inherit; position: absolute; width: 100%; border: none; padding: 10px 15px; font-weight: 100; font-size: 19px; background: none; resize: none; height: 40px; box-sizing: border-box; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s; color: white; }
+#file-name-display { position: absolute; width: 100%; height: 40px; background: transparent; border-radius: 25px; display: flex; align-items: center; padding: 0 15px; color: white; font-size: 15px; font-weight: 100; text-shadow: 0 0 22px #00000073; box-sizing: border-box; transform: translateY(40px); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.attaching #memo-input { transform: translateY(-40px); opacity: 0; }
+.attaching #file-name-display { transform: translateY(0); }
+#action-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.1); backdrop-filter: blur(33px); -webkit-backdrop-filter: blur(8px); z-index: 5000; display: none; align-items: center; justify-content: center; opacity: 0; transform: scale(1.2); transition: opacity 0.3s, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+#action-overlay.visible { display: flex; opacity: 1; transform: scale(1); }
+.action-card { text-align: center; width: 220px; display: flex; flex-direction: column; gap: 10px; }
+.menu-btn { box-shadow: inset .2px -.8px .1px rgb(255 255 255 / 64%), inset -.2px 1.5px 1px rgb(255 255 255 / 55%); background: none; color: white; border: none; padding: 12px; border-radius: 32px; width: 100%; font-family: inherit; font-weight: 100; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.menu-btn.lock { box-shadow: inset .2px -.8px .1px rgb(255 187 199 / 64%), inset -.2px 1.5px 1px rgb(255 255 255 / 55%); }
+.menu-btn.delete { color: #ffa4c1cc; box-shadow: inset 1px -1px .1px rgb(255 0 145 / 64%), inset -2px 1px 1px rgb(255 43 134 / 55%); }
+#lock-confirm-overlay { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(22px) saturate(377%); -webkit-backdrop-filter: blur(22px) saturate(377%); z-index: 5500; display: none; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transform: scale(1.2); transition: opacity 0.3s, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+#lock-confirm-overlay.visible { display: flex; opacity: 1; transform: scale(1); }
+.lock-confirm-content { text-align: center; width: 80%; max-width: 300px; }
+.lock-confirm-img { width: 80px; height: 80px; margin-bottom: 77px; }
+.lock-confirm-title { font-family: inherit; font-weight: 100; font-size: 17px; margin-bottom: 22px; color: #000; }
+.lock-confirm-desc { font-family: inherit; font-weight: 100; font-size: 13px; color: #00000096; margin-bottom: 33px; line-height: 1.6; }
+.slide-up-btn { font-family: inherit; font-weight: 100; width: 100%; padding: 14px; border-radius: 88px; border: none; font-size: 17px; margin-bottom: 15px; opacity: 0; transform: translateY(20px) scale(1.2); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.slide-up-btn.primary { background: #ffffff52; color: #000000; box-shadow: inset .5px -.8px .1px rgb(255 255 255), inset -.2px 1.5px 1px rgb(255 255 255 / 75%); }
+.slide-up-btn.secondary { box-shadow: inset .5px -.8px .1px rgb(255 255 255), inset -.2px 1.5px 1px rgb(255 255 255 / 75%); background: transparent; color: #000000; }
+#lock-confirm-overlay.visible .slide-up-btn { opacity: 1; transform: translateY(0) scale(1); }
+@keyframes shake-horizontal { 10%, 90% { transform: translateX(-5px); } 20%, 80% { transform: translateX(7px); } 30%, 50%, 70% { transform: translateX(-10px); } 40%, 60% { transform: translateX(8px); } }
+.shake-error { animation: shake-horizontal 0.7s ease both; }
+#save-btn, #load-btn { font-family: inherit; font-weight: 100; border-radius: 55px; background: none; color: white; }
+#file-toggle { margin-bottom: -8px; }
+#add-btn { font-family: inherit; font-weight: 100; background: none; }
