@@ -547,6 +547,24 @@ pointer-events:auto;
 .float-btn:active{transform:scale(1.8)}
 .float-btn.pop{animation:starPop .3s ease}
 
+/* ═══ SHAKE TOOLTIP ═══ */
+.shake-tooltip{
+position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-80%);
+background:rgba(255,255,255,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+border:1px solid rgba(255,255,255,.8);border-radius:14px;
+padding:10px 16px;white-space:nowrap;
+font-size:12px;font-weight:600;color:var(--tx);
+box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 4px 16px rgba(0,0,0,.1);
+pointer-events:none;z-index:200;
+animation:shakeIn .5s ease forwards,shakeOut .5s ease 2s forwards;
+}
+.shake-tooltip::after{
+content:'';position:absolute;top:100%;left:75%;
+border:6px solid transparent;border-top-color:rgba(255,255,255,.92);
+}
+@keyframes shakeIn{from{opacity:0;transform:translateX(-80%) scale(.8) translateY(4px)}to{opacity:1;transform:translateX(-80%) scale(1) translateY(0)}}
+@keyframes shakeOut{from{opacity:1}to{opacity:0;transform:translateX(-80%) scale(.8) translateY(4px)}}
+
 /* ═══ SCORE BUTTONS (centered, bigger) ═══ */
 .ch-score{
 min-width:48px;min-height:42px;
@@ -1515,7 +1533,7 @@ function render(i){
 
   // Update shuffle button text
   const gSfb=document.getElementById('g-sfb');
-  if(gSfb)gSfb.textContent=d.shuffled?'📋':'🔀';
+  if(gSfb)gSfb.textContent=d.shuffled?'⇆':'🔀';
 
   // Update star on global button
   const gStar=document.getElementById('g-star');
@@ -1579,8 +1597,44 @@ window.Sf=i=>{
   document.getElementById('sh'+i).textContent=0;
   document.getElementById('sf'+i).textContent=0;
   document.getElementById('ac'+i).style.display='none';
+  // Card flip animation
+  const fw=document.getElementById('fw'+i);
+  if(fw){fw.style.transition='transform .6s ease';fw.style.transform='rotateX(360deg)';
+    setTimeout(()=>{fw.style.transition='';fw.style.transform='';},650);}
   render(i);
+  // Play sound if unshuffling
+  if(!d.shuffled){try{const a=new Audio('not-shake.mp3');a.play().catch(()=>{});}catch(e){}}
 };
+
+/* ═══ SHAKE DETECTION ═══ */
+const SHAKE_KEY='inglish_shake_granted';
+let shakeEnabled=localStorage.getItem(SHAKE_KEY)==='1';
+let lastShakeT=0;
+
+function onShake(){
+  const now=Date.now();
+  if(now-lastShakeT<1500)return; // debounce
+  lastShakeT=now;
+  haptic.confirm();
+  const d=DK[curP];
+  if(!d.shuffled)Sf(curP); // shuffle if not already
+}
+
+function startShakeListener(){
+  let lx=0,ly=0,lz=0,lastT=0;
+  window.addEventListener('devicemotion',e=>{
+    const a=e.accelerationIncludingGravity;
+    if(!a)return;
+    const now=Date.now();
+    if(now-lastT<100)return;
+    lastT=now;
+    const dx=Math.abs(a.x-lx),dy=Math.abs(a.y-ly),dz=Math.abs(a.z-lz);
+    lx=a.x;ly=a.y;lz=a.z;
+    if((dx+dy+dz)>35)onShake();
+  });
+}
+
+if(shakeEnabled)startShakeListener();
 
 function done(i){
   const d=DK[i];
@@ -2471,7 +2525,50 @@ document.getElementById('btn-back').addEventListener('click',()=>{
 });
 
 // Global float buttons
-document.getElementById('g-sfb').addEventListener('click',()=>{haptic();Sf(curP);});
+// 🔀 button: first tap requests shake permission, subsequent taps toggle
+document.getElementById('g-sfb').addEventListener('click',async()=>{
+  haptic();
+  const d=DK[curP];
+  
+  // If currently shuffled (showing ⇆), unshuffle + play sound
+  if(d.shuffled){
+    Sf(curP); // toggles back to ordered
+    return;
+  }
+  
+  // If shake not yet granted, request permission
+  if(!shakeEnabled){
+    let granted=false;
+    if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
+      try{
+        const perm=await DeviceMotionEvent.requestPermission();
+        granted=(perm==='granted');
+      }catch(e){granted=false;}
+    }else{
+      // Non-iOS or no permission needed
+      granted=true;
+    }
+    if(granted){
+      shakeEnabled=true;
+      localStorage.setItem(SHAKE_KEY,'1');
+      startShakeListener();
+      // Show tooltip
+      const sfb=document.getElementById('g-sfb');
+      const tip=document.createElement('div');
+      tip.className='shake-tooltip';
+      tip.textContent='📳 シェイクで単語をシャッフル';
+      sfb.parentElement.style.position='relative';
+      sfb.parentElement.appendChild(tip);
+      setTimeout(()=>tip.remove(),2500);
+    }
+    // Shuffle now
+    Sf(curP);
+    return;
+  }
+  
+  // Already granted, just shuffle
+  Sf(curP);
+});
 document.getElementById('g-star').addEventListener('click',()=>{
   const d=DK[curP];if(d.idx>=d.deck.length)return;
   const w=d.deck[d.idx];
