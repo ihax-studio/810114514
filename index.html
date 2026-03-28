@@ -1733,7 +1733,7 @@ function ensureLists(){
   document.getElementById('l-a').innerHTML='<div class="sh">頻出アカデミックテーマ</div>'+
     TH.map(d=>`<div class="li"><div class="lw">${d.cat}</div>${d.items.map(i=>`<div style="font-size:12px;color:#555;padding:4px 0;border-bottom:1px solid var(--ln)">• ${i}</div>`).join('')}</div>`).join('');
 }
-  buildLists();
+  try{buildLists();}catch(e){console.error('buildLists error:',e);}
   ['i','ex','v','g','p','r','c','a'].forEach(id=>{
     const el=document.getElementById('l-'+id);
     if(el){_lc[id]=el.innerHTML;el.remove();}
@@ -2029,50 +2029,51 @@ hsScrim.addEventListener('click',()=>{haptic();hSheet.classList.remove('open');h
 
 /* ═══ BUILD ALL WORDS LIST ═══ */
 function buildAllWords(){
-  const allWords=[];
-  // V
-  V.forEach(w=>allWords.push({en:w.w,ja:w.m,cat:w.c||'準1級',pr:w.pr||'',src:'V'}));
-  // P1W
-  P1W.forEach(w=>allWords.push({en:w.e,ja:w.j,cat:'Pass単',pr:'',src:'P1W'}));
-  // P1P
-  P1P.forEach(w=>allWords.push({en:w.e,ja:w.j,cat:'Pass単熟語',pr:'',src:'P1P'}));
-  // ID
-  ID.forEach(w=>allWords.push({en:w.w,ja:w.m,cat:'イディオム',pr:'',src:'ID'}));
-  // E2W
-  E2W.forEach(w=>allWords.push({en:w.e,ja:w.j,cat:'2級単語',pr:'',src:'E2W'}));
-  // E2P
-  E2P.forEach(w=>allWords.push({en:w.e,ja:w.j,cat:'2級熟語',pr:'',src:'E2P'}));
-  // IV
-  IV.forEach(w=>allWords.push({en:`${w.b} → ${w.p} → ${w.pp}`,ja:w.m,cat:'不規則動詞',pr:'',src:'IV'}));
-  // GR
-  GR.forEach(w=>allWords.push({en:w.e,ja:w.ej,cat:'文法: '+w.h,pr:'',src:'GR'}));
-  // EX
-  EX.forEach(w=>allWords.push({en:w.ph,ja:w.ja,cat:'表現'+w.n,pr:'',src:'EX'}));
-  // RE
-  RE.forEach(w=>allWords.push({en:w.p,ja:w.m,cat:'読解: '+w.s,pr:'',src:'RE'}));
-  // CP
-  CP.forEach(w=>{allWords.push({en:w.a.replace(/（.*）/,''),ja:w.a,cat:'混同注意',pr:'',src:'CP'});allWords.push({en:w.b.replace(/（.*）/,''),ja:w.b,cat:'混同注意',pr:'',src:'CP'});});
-  // PA
-  PA.forEach(w=>w.b.forEach(b=>allWords.push({en:b,ja:w.o+'の言い換え',cat:'言い換え',pr:'',src:'PA'})));
-  // TH
-  TH.forEach(w=>w.items.forEach(i=>allWords.push({en:'',ja:i,cat:'テーマ: '+w.cat,pr:'',src:'TH'})));
-
-  let html=`<div class="sh">全データ ${allWords.length}件</div>`;
-  const catGroups={};
-  allWords.forEach(w=>{if(!catGroups[w.src])catGroups[w.src]=[];catGroups[w.src].push(w);});
+  const counts={V:V.length,P1W:P1W.length,P1P:P1P.length,ID:ID.length,E2W:E2W.length,E2P:E2P.length,IV:IV.length,GR:GR.length,EX:EX.length,RE:RE.length,CP:CP.length*2,PA:PA.reduce((s,p)=>s+p.b.length,0),TH:TH.reduce((s,t)=>s+t.items.length,0)};
+  const total=Object.values(counts).reduce((a,b)=>a+b,0);
   const srcLabels={V:'準1級 単語',P1W:'Pass単 単語',P1P:'Pass単 熟語',ID:'イディオム',E2W:'2級 単語',E2P:'2級 熟語',IV:'不規則動詞',GR:'文法',EX:'表現',RE:'読解表現',CP:'混同注意',PA:'言い換え',TH:'テーマ'};
-  Object.keys(catGroups).forEach(src=>{
-    const items=catGroups[src];
-    html+=`<div style="font-size:10px;font-weight:700;color:var(--sub);background:var(--ln);border-radius:8px;padding:4px 10px;margin:8px 0 4px;letter-spacing:.04em">${srcLabels[src]||src} · ${items.length}件</div>`;
-    items.forEach(w=>{
-      const enText=(w.en||'').replace(/"/g,'&quot;');
-      const mText=(w.ja||'').replace(/"/g,'&quot;');
-      const starred=isStarred(w.en||'')?'★':'☆';
-      html+=`<div class="li ans-row" data-en="${enText}" style="position:relative"><span class="star-tr" data-word="${enText}" data-meaning="${mText}" style="position:absolute;top:8px;right:10px;font-size:15px;cursor:pointer">${starred}</span><div style="padding-right:30px"><div class="lw">${w.en||''}</div><div class="lm">${w.ja}</div><div style="font-size:9px;color:var(--sub);margin-top:1px">${w.cat}</div></div></div>`;
-    });
+  let html=`<div class="sh">全データ ${total}件 · タップで展開</div>`;
+  Object.keys(counts).forEach(src=>{
+    html+=`<div class="li aw-cat" data-src="${src}" style="cursor:pointer"><div style="display:flex;justify-content:space-between;align-items:center"><div class="lw">${srcLabels[src]||src}</div><div style="font-size:11px;color:var(--sub)">${counts[src]}件 ▸</div></div></div><div class="aw-items" id="aw-${src}" style="display:none"></div>`;
   });
   return html;
 }
+// Expand accordion on tap
+document.addEventListener('click',function(e){
+  const cat=e.target.closest('.aw-cat');
+  if(!cat)return;
+  const src=cat.dataset.src;
+  const container=document.getElementById('aw-'+src);
+  if(!container)return;
+  if(container.style.display!=='none'){container.style.display='none';return;}
+  haptic();
+  // Build items on demand (lazy)
+  if(!container.dataset.built){
+    container.dataset.built='1';
+    let items=[];
+    if(src==='V')V.forEach(w=>items.push({en:w.w,ja:w.m,cat:w.c||''}));
+    else if(src==='P1W')P1W.forEach(w=>items.push({en:w.e,ja:w.j}));
+    else if(src==='P1P')P1P.forEach(w=>items.push({en:w.e,ja:w.j}));
+    else if(src==='ID')ID.forEach(w=>items.push({en:w.w,ja:w.m}));
+    else if(src==='E2W')E2W.forEach(w=>items.push({en:w.e,ja:w.j}));
+    else if(src==='E2P')E2P.forEach(w=>items.push({en:w.e,ja:w.j}));
+    else if(src==='IV')IV.forEach(w=>items.push({en:w.b+' → '+w.p+' → '+w.pp,ja:w.m}));
+    else if(src==='GR')GR.forEach(w=>items.push({en:w.e,ja:w.h+': '+w.ej}));
+    else if(src==='EX')EX.forEach(w=>items.push({en:w.ph,ja:w.ja}));
+    else if(src==='RE')RE.forEach(w=>items.push({en:w.p,ja:w.m}));
+    else if(src==='CP')CP.forEach(w=>{items.push({en:w.a.replace(/（.*）/,''),ja:w.a});items.push({en:w.b.replace(/（.*）/,''),ja:w.b});});
+    else if(src==='PA')PA.forEach(w=>w.b.forEach(b=>items.push({en:b,ja:w.o+'→'+b})));
+    else if(src==='TH')TH.forEach(w=>w.items.forEach(i=>items.push({en:'',ja:i})));
+    let h='';
+    items.forEach(w=>{
+      const en=(w.en||'').replace(/"/g,'&quot;');
+      const ja=(w.ja||'').replace(/"/g,'&quot;');
+      h+=`<div class="li ans-row" data-en="${en}" style="position:relative;padding:8px 12px"><div class="lw" style="font-size:13px">${w.en||''}</div><div class="lm" style="font-size:11px">${w.ja||''}</div></div>`;
+    });
+    container.innerHTML=h;
+  }
+  container.style.display='';
+});
 
 /* ═══ BUILD FORGOT LIST (from cache) ═══ */
 function buildForgotList(){
