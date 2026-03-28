@@ -10,23 +10,15 @@
 <title>iN glish</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;
--webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-html{overscroll-behavior:none;position:fixed;inset:0;touch-action:pan-y}
-body{overscroll-behavior:none;position:fixed;inset:0;overflow:hidden;touch-action:pan-y}
-/* iPad/Mac: narrower content */
-@media(min-width:768px){
-  #app,#home{max-width:680px;margin:0 auto}
-  .hm-scroll{max-width:680px;margin:0 auto}
-}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
 :root{
   --sat:env(safe-area-inset-top,0px);
   --sab:env(safe-area-inset-bottom,0px);
   --b:#007aff;--g:#34c759;--y:#ff9500;--r:#ff3b30;--p:#5856d6;
   --tx:#1c1c1e;--sub:#8e8e93;--ln:rgba(0,0,0,.08);
-  --gls:rgba(255,255,255,.66);
-  --gls2:rgba(255,255,255,.81);
-  --gls3:rgba(255,255,255,.85);
+  --gls:rgba(255,255,255,.75);
+  --gls2:rgba(255,255,255,.92);
+  --gls3:rgba(255,255,255,.97);
   --bdr:rgba(255,255,255,.85);
   --blr:blur(28px) saturate(180%);
   --sh:0 4px 20px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.07);
@@ -39,49 +31,47 @@ body{overscroll-behavior:none;position:fixed;inset:0;overflow:hidden;touch-actio
 html,body{
   height:100dvh;overflow:hidden;
   background:linear-gradient(150deg,#eef2f8 0%,#f8f2fc 50%,#edf7f2 100%);
-  font-family:"SF Pro Display","SF Pro Text",-apple-system,"Noto Sans JP",sans-serif;color:var(--tx);
-  overscroll-behavior:none;
-  -webkit-overflow-scrolling:auto;
+  font-family:-apple-system,"Noto Sans JP",sans-serif;color:var(--tx);
 }
 /* Body reveal: scale 2→0.95 in 0.5s — slight shrink keeps everything inside screen */
-body{animation:bReveal .8s ease both;transform-origin:center center}
-@keyframes bReveal{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+body{animation:bReveal .5s ease both;transform-origin:center center}
+@keyframes bReveal{from{transform:scale(2);opacity:0}to{transform:scale(.95);opacity:1}}
 
 /* ════ GLASS HELPERS ════ */
-.g1{background:var(--gls);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);border:1px solid var(--bdr)}
-.g2{background:var(--gls2);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);border:1px solid var(--bdr);box-shadow:var(--sh)}
-.g3{background:var(--gls3);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);border:1px solid var(--bdr);box-shadow:var(--shl)}
+.g1{background:var(–gls);backdrop-filter:var(–blr);-webkit-backdrop-filter:var(–blr);border:1px solid var(–bdr)}
+.g2{background:var(–gls2);backdrop-filter:var(–blr);-webkit-backdrop-filter:var(–blr);border:1px solid var(–bdr);box-shadow:var(–sh)}
+.g3{background:var(–gls3);backdrop-filter:var(–blr);-webkit-backdrop-filter:var(–blr);border:1px solid var(–bdr);box-shadow:var(–shl)}
 
 /* ════ HOME ════ */
 #home{
 position:fixed;inset:0;z-index:100;
 display:flex;flex-direction:column;
-padding-top:var(--sat);
+padding-top:var(–sat);
 transition:opacity .28s,transform .28s cubic-bezier(.4,0,.2,1);
 }
 #home.hidden{opacity:0;transform:scale(.96);pointer-events:none}
 .hm-hdr{padding:22px 20px 8px}
-.hm-ttl{font-size:30px;font-weight:800;letter-spacing:-.05em;color:var(--tx)}
-.hm-sub{font-size:11px;color:var(--sub);margin-top:3px;letter-spacing:.05em;text-transform:uppercase}
+.hm-ttl{font-size:30px;font-weight:800;letter-spacing:-.05em;color:var(–tx)}
+.hm-sub{font-size:11px;color:var(–sub);margin-top:3px;letter-spacing:.05em;text-transform:uppercase}
 .hm-scroll{
 flex:1;overflow-y:auto;
-padding:0 14px calc(var(--ib) + 20px);
+padding:0 14px calc(var(–ib) + 20px);
 -webkit-overflow-scrolling:touch;scrollbar-width:none;
 }
 .hm-scroll::-webkit-scrollbar{display:none}
 .hg-lbl{
 font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
-color:var(--sub);padding:14px 6px 6px;
+color:var(–sub);padding:14px 6px 6px;
 }
 .hg-list{
 border-radius:16px;overflow:hidden;
 border:1px solid rgba(255,255,255,.75);
-box-shadow:var(--sh);
+box-shadow:var(–sh);
 }
 .hcard{
 display:flex;align-items:center;gap:13px;padding:12px 14px;
-background:var(--gls);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);
-border-bottom:1px solid var(--ln);
+background:var(–gls);backdrop-filter:var(–blr);-webkit-backdrop-filter:var(–blr);
+border-bottom:1px solid var(–ln);
 cursor:pointer;user-select:none;-webkit-user-select:none;
 transition:background .1s;
 }
@@ -97,11 +87,11 @@ transition:background .1s;
 .ii{background:linear-gradient(145deg,#5856d6,#3634a3)}
 .id2{background:linear-gradient(145deg,#8e8e93,#636366)}
 .hcard-info{flex:1;min-width:0}
-.hcard-name{font-size:14px;font-weight:600;color:var(--tx)}
-.hcard-desc{font-size:11px;color:var(--sub);margin-top:1px}
+.hcard-name{font-size:14px;font-weight:600;color:var(–tx)}
+.hcard-desc{font-size:11px;color:var(–sub);margin-top:1px}
 .badge{
 background:rgba(0,0,0,.07);border-radius:20px;
-padding:2px 9px;font-size:10px;font-weight:700;color:var(--sub);
+padding:2px 9px;font-size:10px;font-weight:700;color:var(–sub);
 flex-shrink:0;
 }
 .chev{color:rgba(0,0,0,.2);font-size:14px;margin-left:2px}
@@ -110,61 +100,61 @@ flex-shrink:0;
 #app{
 position:fixed;inset:0;z-index:50;
 display:flex;flex-direction:column;
-transform:translateY(105%) scale(.7);
-transition:transform .5s cubic-bezier(.34,1.05,.64,1);
+transform:translateY(105%);
+transition:transform .36s cubic-bezier(.4,0,.2,1);
 background:linear-gradient(150deg,#eef2f8 0%,#f8f2fc 50%,#edf7f2 100%);
 }
-#app.vis{transform:translateY(0) scale(1)}
+#app.vis{transform:translateY(0)}
 .app-hdr{
 display:flex;align-items:center;gap:10px;
-padding:calc(var(--sat) + 14px) 16px 8px;
+padding:calc(var(–sat) + 18px) 14px 12px;
 flex-shrink:0;
-background:transparent;
+background:var(–gls2);backdrop-filter:var(–blr);-webkit-backdrop-filter:var(–blr);
+border-bottom:1px solid var(–ln);
+box-shadow:0 1px 8px rgba(0,0,0,.06);
 }
 .app-back{
-width:auto;height:36px;border-radius:55px;padding:0 12px;
-background:transparent;
-border:none;
-color:var(--b);font-size:13px;cursor:pointer;
-display:flex;align-items:center;justify-content:center;gap:3px;
+width:38px;height:38px;border-radius:50%;
+background:rgba(0,122,255,.1);border:1px solid rgba(0,122,255,.15);
+color:var(–b);font-size:19px;cursor:pointer;
+display:flex;align-items:center;justify-content:center;
 transition:transform .1s;flex-shrink:0;
 }
-.app-back:active{transform:scale(.88)}
-.app-ttl{flex:1;text-align:center;font-size:16px;font-weight:700;color:var(--tx)}
+.app-back:active{transform:scale(.82)}
+.app-ttl{flex:1;text-align:center;font-size:16px;font-weight:700;color:var(–tx)}
 .app-dots{
 display:flex;gap:5px;align-items:center;justify-content:center;
 padding:6px 0 4px;flex-shrink:0;
 }
 .dot{width:5px;height:5px;border-radius:50%;background:rgba(0,0,0,.15);transition:all .22s}
-.dot.on{background:var(--b);width:16px;border-radius:3px}
+.dot.on{background:var(–b);width:16px;border-radius:3px}
 
 /* ════ SWIPE PANELS ════ */
 .sw-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
 .sw-track{display:flex;height:100%;transition:transform .32s cubic-bezier(.4,0,.2,1);will-change:transform}
-.sw-panel{flex-shrink:0;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;padding-bottom:calc(var(--ib) + 70px)}
+.sw-panel{flex-shrink:0;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;padding-bottom:var(–ib)}
 
 /* ════ PROGRESS ROW ════ */
 .pr-row{display:flex;align-items:center;gap:8px;padding:5px 14px 2px;flex-shrink:0}
 .prb{flex:1;height:2px;background:rgba(0,0,0,.08);border-radius:1px;overflow:hidden}
-.prf{height:100%;background:linear-gradient(90deg,var(--b),var(--p));border-radius:1px;transition:width .4s}
-.prt{font-size:10px;font-weight:600;color:var(--sub);min-width:38px;text-align:right}
+.prf{height:100%;background:linear-gradient(90deg,var(–b),var(–p));border-radius:1px;transition:width .4s}
+.prt{font-size:10px;font-weight:600;color:var(–sub);min-width:38px;text-align:right}
 
 /* ════ SCORE ROW ════ */
-.sr{display:flex;gap:4px;padding:2px 10px 4px;flex-shrink:0;align-items:center;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-.sr::-webkit-scrollbar{display:none}
+.sr{display:flex;gap:6px;padding:2px 12px 4px;flex-shrink:0;align-items:center}
 .ch{
-background:rgba(255,255,255,.7);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);
-border-radius:55px;padding:8px 12px;
+background:rgba(255,255,255,.8);backdrop-filter:var(–blr);-webkit-backdrop-filter:var(–blr);
+border-radius:12px;padding:8px 12px;
 display:flex;align-items:center;gap:5px;
 font-size:12px;font-weight:700;
-border:1px solid rgba(255,255,255,.85);
+border:1px solid rgba(255,255,255,.9);
 cursor:pointer;transition:transform .12s,background .1s;
-font-family:inherit;color:var(--tx);
-box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 1px 4px rgba(0,0,0,.08);
-min-height:36px;
+font-family:inherit;color:var(–tx);
+box-shadow:0 1px 4px rgba(0,0,0,.08);
+min-height:40px;
 }
-.ch:active{transform:scale(.88);background:rgba(255,255,255,.95)}
-.ch-bk{font-size:16px;padding:7px 12px;width:36px;height:36px;justify-content:center;background:rgba(255,255,255,.6);border-color:rgba(255,255,255,.8)}
+.ch:active{transform:scale(.88);background:#fff}
+.ch-bk{font-size:18px;padding:7px 14px;background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.1)}
 .ch-bk:disabled{opacity:.22;cursor:default;transform:none!important}
 
 /* ════ CARD AREA ════ */
@@ -190,10 +180,10 @@ position:absolute;inset:0;
 backface-visibility:hidden;-webkit-backface-visibility:hidden;
 border-radius:22px;padding:18px 18px 14px;
 display:flex;flex-direction:column;
-background:var(--gls2);
+background:var(–gls2);
 backdrop-filter:blur(32px) saturate(200%);-webkit-backdrop-filter:blur(32px) saturate(200%);
-border:1px solid var(--bdr);
-box-shadow:var(--shl),inset 0 1px 0 #fff;
+border:1px solid var(–bdr);
+box-shadow:var(–shl),inset 0 1px 0 #fff;
 }
 .fb{transform:rotateY(180deg);background:rgba(255,255,255,.96);justify-content:flex-start}
 .fmeta{display:flex;align-items:center;justify-content:space-between;margin-bottom:auto}
@@ -205,40 +195,40 @@ padding:3px 9px;border-radius:20px;text-transform:uppercase;
 .l2{background:rgba(255,149,0,.15);color:#7a4a00;border:1px solid rgba(255,149,0,.3)}
 .l3{background:rgba(88,86,214,.15);color:#2a2880;border:1px solid rgba(88,86,214,.3)}
 .le2{background:rgba(0,122,255,.12);color:#003fa0;border:1px solid rgba(0,122,255,.25)}
-.fcat{font-size:10px;color:var(--sub)}
+.fcat{font-size:10px;color:var(–sub)}
 .fword{
-font-size:clamp(21px,6vw,34px);font-weight:700;color:var(--tx);
+font-size:clamp(21px,6vw,34px);font-weight:700;color:var(–tx);
 letter-spacing:-.02em;margin:10px 0 3px;line-height:1.15;
 }
-.fpron{font-size:11px;color:var(--sub);margin-bottom:3px;display:none}
+.fpron{font-size:11px;color:var(–sub);margin-bottom:3px;display:none}
 .fpos{display:none;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px}
 .pn{background:rgba(0,122,255,.1);color:#0056cc;border:1px solid rgba(0,122,255,.2)}
 .pv{background:rgba(52,199,89,.1);color:#1a7a35;border:1px solid rgba(52,199,89,.2)}
 .pa{background:rgba(255,149,0,.1);color:#7a4a00;border:1px solid rgba(255,149,0,.2)}
 .pd{background:rgba(255,59,48,.1);color:#900028;border:1px solid rgba(255,59,48,.2)}
 .po{background:rgba(88,86,214,.1);color:#2a2880;border:1px solid rgba(88,86,214,.2)}
-.fh{font-size:9px;color:var(--sub);margin-top:auto;text-align:center;opacity:.5;padding-top:6px}
-.fmean{font-size:17px;font-weight:700;color:var(--tx);margin-bottom:4px}
-.ffull{font-size:11px;color:var(--sub);line-height:1.7;margin-bottom:5px}
+.fh{font-size:9px;color:var(–sub);margin-top:auto;text-align:center;opacity:.5;padding-top:6px}
+.fmean{font-size:17px;font-weight:700;color:var(–tx);margin-bottom:4px}
+.ffull{font-size:11px;color:var(–sub);line-height:1.7;margin-bottom:5px}
 .fex{
 background:rgba(0,0,0,.04);border-radius:10px;padding:8px 10px;
 margin-bottom:5px;font-size:11px;line-height:1.6;
 border:1px solid rgba(0,0,0,.07);display:none;
 }
-.fexe{color:var(--tx)}.fexj{color:var(--sub);margin-top:2px;font-size:10px}
+.fexe{color:var(–tx)}.fexj{color:var(–sub);margin-top:2px;font-size:10px}
 .ftags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px}
-.ftag{background:rgba(0,0,0,.06);border-radius:6px;padding:1px 6px;font-size:9px;color:var(--sub);border:1px solid rgba(0,0,0,.08)}
-.fidm{font-size:10px;line-height:1.8;color:var(--sub)}
-.fide{font-style:italic;color:var(--tx);opacity:.75}
+.ftag{background:rgba(0,0,0,.06);border-radius:6px;padding:1px 6px;font-size:9px;color:var(–sub);border:1px solid rgba(0,0,0,.08)}
+.fidm{font-size:10px;line-height:1.8;color:var(–sub)}
+.fide{font-style:italic;color:var(–tx);opacity:.75}
 .fw.out{animation:co .17s ease forwards}
 .fw.in{animation:ci .17s ease forwards}
 @keyframes co{to{opacity:0;transform:scale(.93) translateY(10px)}}
 @keyframes ci{from{opacity:0;transform:scale(.93) translateY(-10px)}to{opacity:1;transform:none}}
 .cc{
 width:100%;max-width:400px;
-background:var(--gls2);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
+background:var(–gls2);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
 border-radius:22px;padding:26px 18px;text-align:center;
-border:1px solid var(--bdr);box-shadow:var(--shl);
+border:1px solid var(–bdr);box-shadow:var(–shl);
 }
 
 /* ════ ACTION BUTTONS ════
@@ -266,34 +256,31 @@ min-height:44px;
 /* ════ LIST WRAP ════ */
 .lswrap{
 flex:1;overflow-y:auto;
-padding:6px 8px calc(var(--ib) + 16px);
+padding:8px 14px calc(var(–ib) + 16px);
 -webkit-overflow-scrolling:touch;min-height:0;scrollbar-width:none;
 }
 .lswrap::-webkit-scrollbar{display:none}
 .li{
-width:100%;
-background:rgba(255,255,255,.66);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-border-radius:14px;padding:10px 14px;margin:0 0 6px 0;
-border:1px solid rgba(255,255,255,.7);
-box-shadow:1.1px 1px 0 rgba(255,255,255,.8),-1px -.8px 0 rgba(255,255,255,.6),0 1px 4px rgba(0,0,0,.06);
-word-break:break-word;overflow-wrap:break-word;
+background:var(–gls);backdrop-filter:var(–blr);-webkit-backdrop-filter:var(–blr);
+border-radius:14px;padding:12px 14px;margin-bottom:7px;
+border:1px solid rgba(255,255,255,.8);box-shadow:var(–sh);
 }
-.lw{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:1px}
-.lm{font-size:12px;color:var(--b);font-weight:600;margin-bottom:2px}
-.lnx{font-size:11px;color:var(--sub);line-height:1.6;background:rgba(0,0,0,.03);border-radius:8px;padding:5px 8px;margin-top:3px;border:1px solid rgba(0,0,0,.05)}
-.le{font-size:11px;color:rgba(0,0,0,.4);font-style:italic;margin-top:3px;line-height:1.5}
-.sh{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);padding:8px 2px 5px}
-.exr{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--ln)}
+.lw{font-size:14px;font-weight:700;color:var(–tx);margin-bottom:2px}
+.lm{font-size:12px;color:var(–b);font-weight:600;margin-bottom:3px}
+.lnx{font-size:11px;color:var(–sub);line-height:1.7;background:rgba(0,0,0,.04);border-radius:8px;padding:6px 8px;margin-top:4px;border:1px solid rgba(0,0,0,.06)}
+.le{font-size:11px;color:rgba(0,0,0,.45);font-style:italic;margin-top:4px;line-height:1.5}
+.sh{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(–sub);padding:8px 0 5px}
+.exr{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(–ln)}
 .exr:last-child{border-bottom:none}
-.exn{font-size:9px;font-weight:700;color:var(--sub);min-width:28px;padding-top:2px}
-.exph{font-size:12px;font-weight:700;color:var(--b)}.exja{font-size:10px;color:var(--sub);margin-top:1px}
+.exn{font-size:9px;font-weight:700;color:var(–sub);min-width:28px;padding-top:2px}
+.exph{font-size:12px;font-weight:700;color:var(–b)}.exja{font-size:10px;color:var(–sub);margin-top:1px}
 .exe{font-size:10px;color:rgba(0,0,0,.4);font-style:italic;margin-top:2px;line-height:1.5}
-.ivwrap{overflow-x:auto;border-radius:12px;margin-bottom:8px;border:1px solid var(--ln);-webkit-overflow-scrolling:touch}
-.ivt{width:100%;border-collapse:collapse;font-size:11px;background:rgba(255,255,255,.7);table-layout:fixed}
-.ivt th{background:rgba(0,122,255,.12);color:var(--b);padding:6px 4px;text-align:center;font-weight:700;font-size:9px;border-bottom:1px solid rgba(0,122,255,.15)}
-.ivt td{padding:4px 3px;border-bottom:1px solid rgba(0,0,0,.05);text-align:center;color:var(--tx);font-size:10px;word-break:break-all}
+.ivwrap{overflow-x:auto;border-radius:12px;margin-bottom:8px;border:1px solid var(–ln)}
+.ivt{width:100%;border-collapse:collapse;font-size:11px;background:rgba(255,255,255,.7)}
+.ivt th{background:rgba(0,122,255,.12);color:var(–b);padding:6px 4px;text-align:center;font-weight:700;font-size:9px;white-space:nowrap;border-bottom:1px solid rgba(0,122,255,.15)}
+.ivt td{padding:4px;border-bottom:1px solid rgba(0,0,0,.05);text-align:center;white-space:nowrap;color:var(–tx)}
 .ivt tr:nth-child(even) td{background:rgba(0,0,0,.03)}
-.ivp{color:var(--r);font-weight:700}.ivpp{color:var(--b);font-weight:700}.ivb{font-weight:700}
+.ivp{color:var(–r);font-weight:700}.ivpp{color:var(–b);font-weight:700}.ivb{font-weight:700}
 
 /* ════════════════════════════════════
 TRANSLATION INPUT BAR
@@ -303,17 +290,17 @@ Layout: [  textarea  ][🌐 flag btn]
 #tr-bar{
 position:fixed;
 bottom:0;left:0;right:0;
-z-index:520;
+z-index:200;
 /* Raised higher up from bottom */
-padding:8px 14px calc(16px + var(--sab));
+padding:8px 14px calc(16px + var(–sab));
 background:linear-gradient(to top,rgba(240,243,250,.98) 70%,rgba(240,243,250,0) 100%);
 }
 .ti-wrap{
 display:flex;
 align-items:flex-end;  /* align items to bottom so send btn stays low */
 gap:8px;
-background:var(--gls3);
-backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);
+background:var(–gls3);
+backdrop-filter:var(–blr);-webkit-backdrop-filter:var(–blr);
 border:1px solid rgba(255,255,255,.95);
 border-radius:24px;
 padding:10px 10px 10px 16px;
@@ -323,9 +310,8 @@ box-shadow:0 4px 20px rgba(0,0,0,.12),0 1px 4px rgba(0,0,0,.06),inset 0 1px 0 #f
 flex:1;
 border:none;outline:none;
 background:transparent;
-font-family:inherit;font-size:16px;color:var(--tx);
+font-family:inherit;font-size:16px;color:var(–tx);
 resize:none;
--webkit-user-select:text;user-select:text;-webkit-touch-callout:default;
 min-height:28px;max-height:88px;
 line-height:1.5;
 overflow-y:auto;
@@ -359,12 +345,12 @@ flex-shrink:0;
 position:absolute;
 bottom:calc(100% + 10px);
 right:0;
-background:var(--gls3);
+background:var(–gls3);
 backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);
 border:1px solid rgba(255,255,255,.9);
 border-radius:18px;
 padding:10px;
-box-shadow:var(--shl);
+box-shadow:var(–shl);
 display:none;
 flex-direction:column;
 gap:4px;
@@ -373,7 +359,7 @@ max-height:55dvh;
 overflow-y:auto;
 -webkit-overflow-scrolling:touch;
 scrollbar-width:none;
-z-index:510;
+z-index:210;
 transform:scale(.9) translateY(8px);
 opacity:0;
 transition:transform .2s cubic-bezier(.34,1.05,.64,1),opacity .15s;
@@ -395,9 +381,9 @@ user-select:none;-webkit-user-select:none;
 .fp-item:active{background:rgba(0,0,0,.08)}
 .fp-item.sel{background:rgba(0,122,255,.1)}
 .fp-flag{font-size:24px;line-height:1}
-.fp-name{font-size:13px;font-weight:600;color:var(--tx)}
+.fp-name{font-size:13px;font-weight:600;color:var(–tx)}
 #flag-scrim{
-position:fixed;inset:0;z-index:505;
+position:fixed;inset:0;z-index:205;
 display:none;
 }
 #flag-scrim.on{display:block}
@@ -405,31 +391,32 @@ display:none;
 /* ════ TRANSLATION OVERLAY (blur + centered card) ════ */
 #tr-overlay{
 position:fixed;inset:0;z-index:500;
-background:rgba(0,0,0,.12);
-backdrop-filter:blur(8px) saturate(130%);
--webkit-backdrop-filter:blur(8px) saturate(130%);
+background:rgba(0,0,0,.2);
+backdrop-filter:blur(20px) saturate(150%);
+-webkit-backdrop-filter:blur(20px) saturate(150%);
 display:flex;align-items:flex-end;justify-content:center;
-padding:0 14px calc(var(--ib) + 10px);
+padding:0;
 opacity:0;pointer-events:none;
 transition:opacity .25s;
 }
 #tr-overlay.on{opacity:1;pointer-events:auto}
 #tr-card{
-width:100%;max-width:420px;max-height:65dvh;
-background:rgba(255,255,255,.50);
+width:100%;max-width:420px;max-height:80dvh;
+background:var(–gls3);
 backdrop-filter:blur(40px) saturate(200%);
 -webkit-backdrop-filter:blur(40px) saturate(200%);
-border:1px solid rgba(255,255,255,.7);
-border-radius:22px;
-box-shadow:0 8px 40px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06);
+border:1px solid rgba(255,255,255,.9);
+border-bottom:none;
+border-radius:22px 22px 0 0;
+box-shadow:0 -4px 30px rgba(0,0,0,.12);
 overflow-y:auto;padding:0 18px 20px;
-transform:translateY(30px) scale(.95);opacity:0;
-transition:transform .3s cubic-bezier(.34,1.05,.64,1),opacity .2s;
+transform:translateY(100%);
+transition:transform .3s cubic-bezier(.34,1.05,.64,1);
 -webkit-overflow-scrolling:touch;scrollbar-width:none;
-margin-bottom:4px;
+padding-bottom:calc(20px + var(–sab));
 }
 #tr-card::-webkit-scrollbar{display:none}
-#tr-overlay.on #tr-card{transform:translateY(0) scale(1);opacity:1}
+#tr-overlay.on #tr-card{transform:translateY(0)}
 .tr-handle{
 width:36px;height:4px;background:rgba(0,0,0,.15);border-radius:2px;
 margin:10px auto 8px;flex-shrink:0;cursor:pointer;
@@ -437,61 +424,58 @@ display:block;
 }
 .tr-bonus-hdr{
 font-size:9px;font-weight:800;letter-spacing:.08em;
-color:var(--sub);text-transform:uppercase;
-padding:10px 0 4px;border-top:1px solid var(--ln);margin-top:8px;
+color:var(–sub);text-transform:uppercase;
+padding:10px 0 4px;border-top:1px solid var(–ln);margin-top:8px;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 .tr-item{padding:11px 0;border-bottom:1px solid rgba(0,0,0,.07)}
 .tr-item:last-child{border-bottom:none}
 .tr-local{
-font-size:12.5px;color:var(--b);
+font-size:12.5px;color:var(–b);
 background:rgba(0,122,255,.07);border-radius:10px;
 padding:9px 12px;margin-bottom:10px;line-height:1.7;
 border:1px solid rgba(0,122,255,.15);
-cursor:pointer;-webkit-user-select:none;user-select:none;transition:background .12s;
 }
-.tr-local:active{background:rgba(0,122,255,.18)}
-.tr-dir{font-size:9px;font-weight:800;letter-spacing:.08em;color:var(--sub);text-transform:uppercase;margin-bottom:4px}
-.tr-txt{font-size:clamp(16px,4.5vw,28px);font-weight:300;color:var(--tx);line-height:1.5;word-break:break-word;cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:10px;padding:4px 6px;margin:-4px -6px;transition:background .12s}
-.tr-txt:active{background:rgba(0,122,255,.10)}
+.tr-dir{font-size:9px;font-weight:800;letter-spacing:.08em;color:var(–sub);text-transform:uppercase;margin-bottom:4px}
+.tr-txt{font-size:clamp(16px,4.5vw,28px);font-weight:300;color:var(–tx);line-height:1.5;word-break:break-word}
 .tr-badge{
 display:inline-block;margin-top:5px;
-font-size:10px;font-weight:600;color:var(--sub);
+font-size:10px;font-weight:600;color:var(–sub);
 background:rgba(0,0,0,.05);border-radius:8px;padding:2px 8px;
 }
 
 /* ════ HISTORY SHEET ════ */
 #hs-scrim{
-position:fixed;inset:0;background:rgba(0,0,0,.10);z-index:395;
+position:fixed;inset:0;background:rgba(0,0,0,.15);z-index:395;
 opacity:0;pointer-events:none;transition:opacity .22s;
+backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
 }
 #hs-scrim.on{opacity:1;pointer-events:auto}
 #hsheet{
-position:fixed;bottom:calc(var(--ib) + 10px);left:10px;right:10px;z-index:400;
-background:rgba(255,255,255,.80);
+position:fixed;bottom:0;left:0;right:0;z-index:400;
+background:var(–gls3);
 backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
-border:1px solid rgba(255,255,255,.8);
-border-radius:22px;
-padding-bottom:10px;
-transform:translateY(120%) scale(.7);opacity:0;
-transition:transform .5s cubic-bezier(.34,1.05,.64,1),opacity .5s ease;
-max-height:55dvh;display:flex;flex-direction:column;
-box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 4px 30px rgba(0,0,0,.12);
-pointer-events:none;
+border:1px solid rgba(255,255,255,.9);border-bottom:none;
+border-radius:22px 22px 0 0;
+padding-bottom:var(–sab);
+transform:translateY(105%);
+transition:transform .3s cubic-bezier(.4,0,.2,1);
+max-height:72dvh;display:flex;flex-direction:column;
+box-shadow:0 -4px 30px rgba(0,0,0,.10);
 }
-#hsheet.open{transform:translateY(0) scale(1);opacity:1;pointer-events:auto}
+#hsheet.open{transform:translateY(0)}
 .hs-hdl{width:36px;height:4px;background:rgba(0,0,0,.15);border-radius:2px;margin:10px auto 4px;flex-shrink:0;touch-action:none;cursor:pointer}
-.hs-ttl{font-size:10px;font-weight:800;color:var(--sub);letter-spacing:.09em;text-transform:uppercase;text-align:center;padding:4px 0 8px;flex-shrink:0}
+.hs-ttl{font-size:10px;font-weight:800;color:var(–sub);letter-spacing:.09em;text-transform:uppercase;text-align:center;padding:4px 0 8px;flex-shrink:0}
 .hs-body{flex:1;overflow-y:auto;padding:4px 18px 14px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .hs-body::-webkit-scrollbar{display:none}
-.hrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--ln)}
+.hrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(–ln)}
 .hrow:last-child{border-bottom:none}
 .hbdg{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
 .hg-b{background:rgba(52,199,89,.15);color:#1a7a35}
 .hh-b{background:rgba(255,149,0,.15);color:#7a4a00}
 .hf-b{background:rgba(255,59,48,.15);color:#900028}
-.hw{font-size:13px;font-weight:700;color:var(--tx)}
-.hm{font-size:11px;color:var(--sub);margin-top:1px}
+.hw{font-size:13px;font-weight:700;color:var(–tx)}
+.hm{font-size:11px;color:var(–sub);margin-top:1px}
 /* ═══ HIGHLIGHT WORD MARKER ═══ */
 .hl-word{
 background:linear-gradient(180deg,transparent 55%,rgba(255,230,0,.45) 55%,rgba(255,230,0,.45) 90%,transparent 90%);
@@ -506,13 +490,13 @@ cursor:pointer;transition:background .12s;border-radius:6px;padding:1px 3px;
 }
 .ans-tap:active{background:rgba(0,122,255,.12)}
 .ans-en{
-font-size:15px;font-weight:700;color:var(--b);display:inline-block;
+font-size:15px;font-weight:700;color:var(–b);display:inline-block;
 background:rgba(0,122,255,.07);border-radius:8px;padding:4px 10px;margin-bottom:4px;
 border:1px solid rgba(0,122,255,.15);
 }
 .ans-en:active{background:rgba(0,122,255,.2)}
 .ans-ja{
-font-size:16px;font-weight:700;color:var(--tx);display:inline-block;
+font-size:16px;font-weight:700;color:var(–tx);display:inline-block;
 padding:2px 6px;
 }
 .ans-ja:active{background:rgba(0,0,0,.06)}
@@ -521,182 +505,8 @@ padding:2px 6px;
 /* ═══ FORGOT CACHE BADGE ═══ */
 .forgot-dot{
 display:inline-block;width:6px;height:6px;border-radius:50%;
-background:var(--r);margin-left:4px;vertical-align:middle;
+background:var(–r);margin-left:4px;vertical-align:middle;
 }
-/* ═══ STAR FAVORITES ═══ */
-.star-deck-btn{transition:transform .3s cubic-bezier(.34,1.56,.64,1)!important}
-.star-deck-btn.pop{animation:starPop .3s ease}
-@keyframes starPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
-
-/* ═══ CARD SHAKE ANIM ═══ */
-.card-shaking{animation:cardShake .45s ease}
-@keyframes cardShake{
-0%{transform:translateX(0)}
-15%{transform:translateX(-10px) rotate(-1deg)}
-30%{transform:translateX(8px) rotate(.8deg)}
-45%{transform:translateX(-6px) rotate(-.6deg)}
-60%{transform:translateX(4px) rotate(.4deg)}
-75%{transform:translateX(-2px)}
-100%{transform:translateX(0)}
-}
-/* Stronger shake for physical device shake */
-.card-shaking-hard{animation:cardShakeHard .55s ease}
-@keyframes cardShakeHard{
-0%{transform:translateX(0)}
-10%{transform:translateX(-18px) rotate(-2.5deg)}
-20%{transform:translateX(16px) rotate(2deg)}
-30%{transform:translateX(-14px) rotate(-1.8deg)}
-40%{transform:translateX(12px) rotate(1.5deg)}
-50%{transform:translateX(-8px) rotate(-1deg)}
-60%{transform:translateX(6px) rotate(.7deg)}
-75%{transform:translateX(-3px)}
-100%{transform:translateX(0)}
-}
-/* Card text slide-up on shuffle */
-.card-slide-up .fword,.card-slide-up .fmean,.card-slide-up .fpron,.card-slide-up .fmeta{
-animation:txtSlideUp .35s ease both;
-}
-@keyframes txtSlideUp{
-from{transform:translateY(20px);opacity:0}
-to{transform:translateY(0);opacity:1}
-}
-
-/* ═══ FLOAT BAR (🔀 ★ bottom) ═══ */
-.float-bar{
-display:flex;justify-content:space-between;
-position:fixed;
-bottom:calc(var(--ib) + 8px);
-left:0;right:0;
-padding:0 50px;
-z-index:190;
-pointer-events:none;
-}
-.float-btn{
-width:52px;height:52px;border-radius:55px;
-background:rgba(255,255,255,.55);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);
-border:1px solid rgba(255,255,255,.6);
-font-size:22px;cursor:pointer;
-display:flex;align-items:center;justify-content:center;
-box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 4px 16px rgba(0,0,0,.10);
-transition:transform .3s ease;
--webkit-user-select:none;user-select:none;
-pointer-events:auto;
-}
-.float-btn:active{transform:scale(1.8)}
-.float-btn.pop{animation:starPop .3s ease}
-
-/* ═══ SHAKE TOOLTIP ═══ */
-.shake-tooltip{
-position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-80%);
-background:rgba(255,255,255,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-border:1px solid rgba(255,255,255,.8);border-radius:14px;
-padding:10px 16px;white-space:nowrap;
-font-size:12px;font-weight:600;color:var(--tx);
-box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 4px 16px rgba(0,0,0,.1);
-pointer-events:none;z-index:200;
-animation:shakeIn .5s ease forwards,shakeOut .5s ease 2s forwards;
-}
-.shake-tooltip::after{
-content:'';position:absolute;top:100%;left:75%;
-border:6px solid transparent;border-top-color:rgba(255,255,255,.92);
-}
-/* ═══ SETTINGS ═══ */
-.s-sec{font-size:12px;font-weight:600;color:rgba(0,0,0,.4);padding:12px 4px 4px;text-transform:uppercase;letter-spacing:.05em}
-.s-group{background:rgba(255,255,255,.8);border-radius:12px;overflow:hidden;margin-bottom:2px}
-.s-nav-item{padding:10px 14px;border-radius:10px;font-size:14px;color:#000;cursor:pointer;margin-bottom:2px;transition:background .2s}
-.s-nav-item:active,.s-nav-item.s-nav-active{background:rgba(0,122,255,.12);color:var(--b);font-weight:600}
-.s-row{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid rgba(0,0,0,.06)}
-.s-row:last-child{border-bottom:none}
-.s-label{flex:1;font-size:15px;color:#000}
-.s-check{width:22px;text-align:center;font-size:15px;font-weight:700;color:transparent}
-.s-check.s-on{color:#007aff}
-.s-toggle{width:51px;height:31px;border-radius:16px;background:#e0e0e0;position:relative;cursor:pointer;transition:background .3s;flex-shrink:0}
-.s-toggle.on{background:#34c759}
-.s-knob{width:27px;height:27px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .3s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
-.s-toggle.on .s-knob{transform:translateX(20px)}
-
-/* ═══ ICON WOBBLE ═══ */
-#icon-grid.wobbling .ig-cell{animation:iconWobble .15s ease-in-out infinite alternate}
-#icon-grid.wobbling .ig-cell:nth-child(odd){animation-delay:.07s}
-@keyframes iconWobble{from{transform:rotate(-1.5deg)}to{transform:rotate(1.5deg)}}
-
-/* Shake settings section wobble */
-.s-shake-section .s-group{animation:settingsShake 2s ease-in-out infinite}
-@keyframes settingsShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
-/* Lock screen */
-@keyframes lockDigitIn{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
-@keyframes lockShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-15px)}40%{transform:translateX(12px)}60%{transform:translateX(-8px)}80%{transform:translateX(5px)}}
-
-@keyframes shakeIn{from{opacity:0;transform:translateX(-80%) scale(.8) translateY(4px)}to{opacity:1;transform:translateX(-80%) scale(1) translateY(0)}}
-@keyframes shakeOut{from{opacity:1}to{opacity:0;transform:translateX(-80%) scale(.8) translateY(4px)}}
-
-/* ═══ SCORE BUTTONS (centered, bigger) ═══ */
-.ch-score{
-min-width:48px;min-height:42px;
-padding:8px 14px;font-size:13px;
-justify-content:center;
-}
-.star-tr{
-font-size:18px;cursor:pointer;flex-shrink:0;
--webkit-user-select:none;user-select:none;
-transition:transform .3s cubic-bezier(.34,1.56,.64,1);
-margin-left:auto;padding:4px;
-}
-.star-tr.pop{animation:starPop .3s ease}
-.star-input-btn{
-width:40px;height:40px;border-radius:50%;
-display:flex;align-items:center;justify-content:center;
-font-size:20px;cursor:pointer;flex-shrink:0;
-background:rgba(255,200,0,.1);border:1.5px solid rgba(255,200,0,.3);
-transition:transform .12s;-webkit-user-select:none;user-select:none;
-position:relative;
-}
-.star-input-btn:active{transform:scale(.84)}
-/* Star tooltip bubble */
-.star-tooltip{
-position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-35%);
-background:rgba(255,255,255,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-border:1px solid rgba(255,200,0,.4);border-radius:14px;
-padding:10px 16px;white-space:nowrap;
-font-size:12px;font-weight:600;color:var(--tx);
-box-shadow:0 4px 20px rgba(0,0,0,.12);
-pointer-events:none;
-animation:starTooltipIn .5s ease forwards,starTooltipOut .5s ease 1.1s forwards;
-}
-.star-tooltip::after{
-content:'';position:absolute;top:100%;left:40%;transform:translateX(-50%);
-border:6px solid transparent;border-top-color:rgba(255,255,255,.95);
-}
-@keyframes starTooltipIn{from{opacity:0;transform:translateX(-35%) scale(.8) translateY(4px)}to{opacity:1;transform:translateX(-35%) scale(1) translateY(0)}}
-@keyframes starTooltipOut{from{opacity:1;transform:translateX(-35%) scale(1)}to{opacity:0;transform:translateX(-35%) scale(.8) translateY(4px)}}
-/* Star list overlay */
-#star-list-overlay{
-position:fixed;inset:0;z-index:600;
-background:rgba(0,0,0,.80);
-backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-opacity:0;pointer-events:none;
-transition:opacity .3s;
-display:flex;flex-direction:column;
-}
-#star-list-overlay.on{opacity:1;pointer-events:auto}
-#star-list-card{
-flex:1;margin:calc(var(--sat) + 120px) 0 0;
-background:rgba(255,255,255,.80);
-backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
-border-radius:22px 22px 0 0;
-box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 -4px 30px rgba(0,0,0,.15);
-display:flex;flex-direction:column;
-transform:translateY(100%) scale(.7);
-transition:transform .5s cubic-bezier(.34,1.05,.64,1);
-overflow:hidden;
-}
-#star-list-overlay.on #star-list-card{transform:translateY(0) scale(1)}
-.sl-hdr{display:flex;align-items:center;gap:10px;padding:14px 18px 10px;border-bottom:1px solid var(--ln);flex-shrink:0}
-.sl-close{width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.06);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--tx)}
-.sl-close:active{transform:scale(.85)}
-.sl-ttl{flex:1;font-size:15px;font-weight:700;color:var(--tx)}
-.sl-body{flex:1;overflow-y:auto;padding:8px 14px calc(var(--ib) + 16px);-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.sl-body::-webkit-scrollbar{display:none}
 </style>
 
 </head>
@@ -714,225 +524,25 @@ overflow:hidden;
     <div class="hg-list">
       <div class="hcard" onclick="openS('card',0)"><div class="hi ib">🃏</div><div class="hcard-info"><div class="hcard-name">準1 10年分の傾向から作成</div><div class="hcard-desc">頻出 · 2015〜2025</div></div><div class="badge" id="bv">---</div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('card',1)"><div class="hi ip">📗</div><div class="hcard-info"><div class="hcard-name">Pass単 単語</div><div class="hcard-desc">でる順 1,488語</div></div><div class="badge">1488</div><div class="chev">›</div></div>
-      <div class="hcard" onclick="openS('card',2)"><div class="hi ir">📎</div><div class="hcard-info"><div class="hcard-name">Pass単 熟語・句動詞</div><div class="hcard-desc">でる順 222句</div></div><div class="badge">222</div><div class="chev">›</div></div>
+      <div class="hcard" onclick="openS('card',2)"><div class="hi ir">🔗</div><div class="hcard-info"><div class="hcard-name">Pass単 熟語・句動詞</div><div class="hcard-desc">でる順 222句</div></div><div class="badge">222</div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('card',3)"><div class="hi iy">💡</div><div class="hcard-info"><div class="hcard-name">準1 イディオム</div><div class="hcard-desc">重要30個</div></div><div class="badge">30</div><div class="chev">›</div></div>
     </div>
     <div class="hg-lbl">クイズ · 英検2級</div>
     <div class="hg-list">
       <div class="hcard" onclick="openS('card',4)"><div class="hi ig">🔤</div><div class="hcard-info"><div class="hcard-name">2級 単語</div><div class="hcard-desc">教科書索引 + 過去5年補足 699語</div></div><div class="badge">699</div><div class="chev">›</div></div>
-      <div class="hcard" onclick="openS('card',5)"><div class="hi it">📌</div><div class="hcard-info"><div class="hcard-name">2級 熟語・句動詞</div><div class="hcard-desc">218フレーズ</div></div><div class="badge">218</div><div class="chev">›</div></div>
+      <div class="hcard" onclick="openS('card',5)"><div class="hi it">🔗</div><div class="hcard-info"><div class="hcard-name">2級 熟語・句動詞</div><div class="hcard-desc">218フレーズ</div></div><div class="badge">218</div><div class="chev">›</div></div>
     </div>
     <div class="hg-lbl">参考書</div>
     <div class="hg-list">
       <div class="hcard" onclick="openS('list','all')"><div class="hi ib">📚</div><div class="hcard-info"><div class="hcard-name">全単語一覧</div><div class="hcard-desc">全データセットの単語を順番に表示</div></div><div class="badge" id="b-all">---</div><div class="chev">›</div></div>
-      <div class="hcard" onclick="openS('list','forgot')"><div class="hi ir">😰</div><div class="hcard-info"><div class="hcard-name">忘れた・わからない</div><div class="hcard-desc">キャッシュされた要復習単語</div></div><div class="badge" id="b-forgot">---</div><div class="chev">›</div></div>
+      <div class="hcard" onclick="openS('list','forgot')"><div class="hi ir">🧠</div><div class="hcard-info"><div class="hcard-name">忘れた・わからない</div><div class="hcard-desc">キャッシュされた要復習単語</div></div><div class="badge" id="b-forgot">---</div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','ex')"><div class="hi it">📝</div><div class="hcard-info"><div class="hcard-name">入試で使える表現</div><div class="hcard-desc">125フレーズ</div></div><div class="chev">›</div></div>
-      <div class="hcard" onclick="openS('list','v')"><div class="hi ig">📊</div><div class="hcard-info"><div class="hcard-name">不規則動詞変化表</div><div class="hcard-desc">69語 完全版</div></div><div class="chev">›</div></div>
+      <div class="hcard" onclick="openS('list','v')"><div class="hi ig">🔄</div><div class="hcard-info"><div class="hcard-name">不規則動詞変化表</div><div class="hcard-desc">69語 完全版</div></div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','g')"><div class="hi ii">📐</div><div class="hcard-info"><div class="hcard-name">重要文法</div><div class="hcard-desc">仮定法・強調・倒置 12項目</div></div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','p')"><div class="hi ib">✍️</div><div class="hcard-info"><div class="hcard-name">言い換え表現</div><div class="hcard-desc">12セット</div></div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','r')"><div class="hi it">📖</div><div class="hcard-info"><div class="hcard-name">長文読解 重要表現</div><div class="hcard-desc">15フレーズ</div></div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','c')"><div class="hi ir">⚠️</div><div class="hcard-info"><div class="hcard-name">混同注意ペア</div><div class="hcard-desc">10ペア</div></div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','a')"><div class="hi id2">🎯</div><div class="hcard-info"><div class="hcard-name">頻出テーマ</div><div class="hcard-desc">環境・社会・ビジネス</div></div><div class="chev">›</div></div>
-    </div>
-    <div class="hg-lbl">やり直し</div>
-    <div class="hg-list">
-      <div class="hcard" onclick="openS('card-forgot',0)"><div class="hi ir">🔄</div><div class="hcard-info"><div class="hcard-name">忘れた単語だけ復習</div><div class="hcard-desc">忘れた・難しいマークの単語だけ出題</div></div><div class="badge" id="b-retry">0</div><div class="chev">›</div></div>
-    </div>
-    <div id="home-bottom-bar" style="padding:20px 16px 40px;display:flex;align-items:center;justify-content:center;gap:12px">
-      <button id="home-star-btn" style="
-        width:48px;height:48px;border-radius:55px;
-        background:rgba(255,255,255,.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-        border:1px solid rgba(255,255,255,.7);font-size:22px;cursor:pointer;font-family:inherit;
-        display:flex;align-items:center;justify-content:center;
-        box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 2px 8px rgba(0,0,0,.08);
-      ">★</button>
-      <button id="btn-delete-all" style="
-        background:rgba(255,255,255,.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-        color:#c0001a;border:1px solid rgba(255,255,255,.7);
-        border-radius:55px;padding:14px 28px;font-size:13px;font-weight:700;
-        cursor:pointer;font-family:inherit;transition:transform .12s;
-        display:inline-flex;align-items:center;gap:8px;
-        box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 2px 8px rgba(0,0,0,.08);
-      ">⚠️ セーブデータを全て削除</button>
-      <button id="home-icon-btn" style="
-        width:48px;height:48px;border-radius:55px;
-        background:rgba(255,255,255,.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-        border:1px solid rgba(255,255,255,.7);font-size:18px;cursor:pointer;font-family:inherit;
-        display:flex;align-items:center;justify-content:center;
-        box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 2px 8px rgba(0,0,0,.08);
-      ">→</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ LIST SWITCH DIALOG ══════════ -->
-<div id="list-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background .5s ease;align-items:center;justify-content:center">
-  <div id="list-dialog-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .3s ease,opacity .3s ease">
-    <div style="padding:22px 20px 10px">
-      <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">リスト表示</div>
-      <div style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5">アイコン表示と設定を表示するにはホーム画面でシェイクします</div>
-    </div>
-    <div style="border-top:1px solid rgba(0,0,0,.1);display:flex">
-      <button id="list-dialog-cancel" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;border-right:1px solid rgba(0,0,0,.1);cursor:pointer;font-family:inherit;font-weight:400">今はしない</button>
-      <button id="list-dialog-ok" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">変更</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ MEMO OVERLAY ══════════ -->
-<!-- ══════════ IFRAME APP OVERLAY ══════════ -->
-<div id="iframe-overlay" style="position:fixed;inset:0;z-index:900;background:#fff;transform:translateX(100%);transition:transform .4s ease;visibility:hidden">
-  <button id="iframe-back" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:10;width:42px;height:42px;border-radius:55px;background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--b);box-shadow:0 2px 8px rgba(0,0,0,.1)">←</button>
-  <iframe id="iframe-content" style="position:absolute;inset:0;width:100%;height:100%;border:none" sandbox="allow-scripts allow-same-origin allow-downloads allow-modals" allow="camera;microphone"></iframe>
-</div>
-
-<!-- Icon mode dialog -->
-<div id="icon-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background .5s ease;align-items:center;justify-content:center">
-  <div id="icon-dialog-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .3s ease,opacity .3s ease">
-    <div style="padding:22px 20px 10px">
-      <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">アイコン表示</div>
-      <div style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5">リスト表示に戻すには設定から変更します😰</div>
-    </div>
-    <div style="border-top:1px solid rgba(0,0,0,.1);display:flex">
-      <button id="icon-dialog-cancel" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;border-right:1px solid rgba(0,0,0,.1);cursor:pointer;font-family:inherit;font-weight:400">今はしない</button>
-      <button id="icon-dialog-ok" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">変更</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ SETTINGS OVERLAY ══════════ -->
-<div id="settings-overlay" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">
-  <div id="settings-card" style="position:absolute;bottom:0;left:0;right:0;max-height:85dvh;background:rgba(245,245,247,.95);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.05,.64,1)">
-    <div style="display:flex;align-items:center;padding:16px 20px 12px">
-      <div style="flex:1;font-size:17px;font-weight:700;color:#000">設定</div>
-      <button id="settings-close" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.06);border:none;font-size:18px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'SF Pro Display',system-ui,sans-serif;color:#000;line-height:1">✕</button>
-    </div>
-    <div id="settings-body" style="display:flex;flex:1;overflow:hidden">
-      <!-- Sidebar (iPad/Mac only, JS toggles visibility) -->
-      <div id="settings-sidebar" style="display:none;width:220px;border-right:1px solid rgba(0,0,0,.08);padding:8px;overflow-y:auto;flex-shrink:0">
-        <div class="s-nav-item s-nav-active" data-section="home">ホーム画面</div>
-        <div class="s-nav-item" data-section="sound">サウンドと触覚</div>
-        <div class="s-nav-item" data-section="gesture">ジェスチャ</div>
-        <div class="s-nav-item" data-section="wallpaper">壁紙</div>
-        <div class="s-nav-item" data-section="danger" style="color:#ff3b30">セーブデータを全て削除</div>
-      </div>
-      <!-- Content -->
-      <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px 20px">
-        <!-- Home -->
-        <div class="s-section" id="ss-home">
-          <div class="s-sec">ホーム画面</div>
-          <div class="s-group">
-            <div class="s-row" id="s-layout-icon"><div class="s-label">アイコン</div><div class="s-check" id="s-check-icon">✓</div></div>
-            <div class="s-row" id="s-layout-list"><div class="s-label">リスト</div><div class="s-check s-on" id="s-check-list">✓</div></div>
-            <div class="s-row"><div class="s-label">大きいアイコン</div><div class="s-toggle" id="s-bigicon"><div class="s-knob"></div></div></div>
-            <div class="s-row"><div class="s-label">ロック画面</div><div class="s-toggle" id="s-lockscreen"><div class="s-knob"></div></div></div>
-            <div class="s-row"><div class="s-label">通知</div><div class="s-toggle" id="s-notif"><div class="s-knob"></div></div></div>
-          </div>
-        </div>
-        <!-- Sound & Haptic -->
-        <div class="s-section" id="ss-sound">
-          <div class="s-sec">触覚フィードバック</div>
-          <div class="s-group">
-            <div class="s-row"><div class="s-label">触覚</div><div class="s-toggle on" id="s-haptic"><div class="s-knob"></div></div></div>
-            <div class="s-row"><div class="s-label">はっきりとした触覚</div><div class="s-toggle" id="s-haptic-strong"><div class="s-knob"></div></div></div>
-          </div>
-        </div>
-        <!-- Gesture -->
-        <div class="s-section" id="ss-gesture">
-          <div class="s-shake-section">
-          <div class="s-sec">シェイク</div>
-          <div class="s-group">
-            <div class="s-row" id="s-shake-none"><div class="s-label">なし</div><div class="s-check s-on" id="sc-shake-none">✓</div></div>
-            <div class="s-row s-shake-opt" id="s-shake-check"><div class="s-label">答えを確認する</div><div class="s-check" id="sc-shake-check">✓</div></div>
-            <div class="s-row s-shake-opt" id="s-shake-shuffle"><div class="s-label">シャッフルする</div><div class="s-check" id="sc-shake-shuffle">✓</div></div>
-            <div class="s-row s-shake-opt" id="s-shake-back"><div class="s-label">1つ前に戻る</div><div class="s-check" id="sc-shake-back">✓</div></div>
-          </div>
-          <div class="s-sec">強いシェイク</div>
-          <div class="s-group">
-            <div class="s-row" id="s-heavy-none"><div class="s-label">なし</div><div class="s-check s-on" id="sc-heavy-none">✓</div></div>
-            <div class="s-row s-heavy-opt" id="s-heavy-check"><div class="s-label">答えを確認する</div><div class="s-check" id="sc-heavy-check">✓</div></div>
-            <div class="s-row s-heavy-opt" id="s-heavy-shuffle"><div class="s-label">シャッフルする</div><div class="s-check" id="sc-heavy-shuffle">✓</div></div>
-            <div class="s-row s-heavy-opt" id="s-heavy-back"><div class="s-label">1つ前に戻る</div><div class="s-check" id="sc-heavy-back">✓</div></div>
-          </div>
-          </div>
-        </div>
-        <!-- Wallpaper (placeholder) -->
-        <div class="s-section" id="ss-wallpaper" style="display:none">
-          <div class="s-sec">壁紙</div>
-          <div style="padding:20px;text-align:center;color:var(--sub);font-size:13px">Coming soon</div>
-        </div>
-        <!-- Delete (iPhone only, iPad uses sidebar) -->
-        <div class="s-section" id="ss-danger">
-          <div style="padding:24px 0 10px;text-align:center">
-            <button id="s-delete-btn" style="background:rgba(255,59,48,.08);color:#ff3b30;border:1px solid rgba(255,59,48,.15);border-radius:55px;padding:14px 32px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">セーブデータを全て削除</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ DELETE SLIDER OVERLAY ══════════ -->
-<div id="del-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0);transition:background .4s;">
-  <div id="del-content" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:15dvh;opacity:0;transition:opacity .4s;">
-    <div id="del-slider-wrap" style="position:relative;width:310px;height:64px;">
-      <div style="
-        position:absolute;inset:0;border-radius:36px;
-        backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
-        box-shadow:inset 1px -1px 11px rgb(255 255 255/12%),inset 1px -1px 55px rgb(255 255 255/11%),1px -1px 1px rgb(243 243 243/62%),-1px 1px 1px rgb(225 225 225/62%),0 2px 18px #0000000d;
-        display:flex;align-items:center;overflow:visible;
-      ">
-        <div id="del-inner" style="position:absolute;top:0;left:-5px;height:64px;border-radius:36px;z-index:1;transition:width .13s;pointer-events:none;width:72px;"></div>
-        <div id="del-label" style="position:absolute;left:88px;top:0;height:64px;line-height:64px;color:#fff;font-size:19px;font-weight:500;letter-spacing:1px;z-index:2;opacity:.83;user-select:none;pointer-events:none;text-shadow:0 2px 10px #000b;">スライドで全て削除</div>
-      </div>
-      <div id="del-knob" style="
-        position:absolute;top:4px;left:4px;width:56px;height:56px;
-        background:#ffffff8c;border-radius:50%;display:flex;align-items:center;justify-content:center;
-        font-size:33px;font-weight:bold;z-index:10;
-        backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
-        border:none;outline:none;cursor:pointer;user-select:none;
-        box-shadow:1px -1px 1px rgb(255 255 255/62%),-1px 1px 1px rgb(255 255 255/62%),0 2px 18px #00000015;
-        will-change:left;transition:left .5s cubic-bezier(.62,0,.4,1);
-      ">
-        <svg width="32" height="32" viewBox="0 0 32 32"><polyline points="12,8 20,16 12,24" fill="none" stroke="#ff3b30" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-    </div>
-    <div style="color:#fff;font-size:14px;font-weight:600;margin-top:20px;text-shadow:0 2px 10px #000b;text-align:center">⚠️ 全てのセーブデータが削除されます</div>
-    <button id="btn-cancel-delete" style="margin-top:auto;margin-bottom:calc(env(safe-area-inset-bottom,0px) + 50px);width:56px;height:56px;background:rgba(255,255,255,.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:50%;font-size:28px;font-weight:300;cursor:pointer;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;box-shadow:1.1px 1px 0 rgba(255,255,255,.6),-1px -.8px 0 rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
-  </div>
-</div>
-
-<!-- ══════════ LOCK SCREEN (PWA only) ══════════ -->
-<div id="lockscreen" style="display:none;position:fixed;inset:0;z-index:10000;background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;-webkit-user-select:none;user-select:none;transform:scale(1);opacity:1;transition:transform .8s ease,opacity .5s ease" onclick="haptic()">
-  <div style="display:flex;flex-direction:column;align-items:center;width:100%;height:100%;padding-top:calc(env(safe-area-inset-top,0px) + 60px)">
-    <div id="lock-clock" style="font-size:76px;font-weight:200;letter-spacing:-2px;display:flex;overflow:hidden;justify-content:center">
-      <span id="lc-h1" style="display:inline-block"></span><span id="lc-h2" style="display:inline-block"></span>
-      <span>:</span>
-      <span id="lc-m1" style="display:inline-block"></span><span id="lc-m2" style="display:inline-block"></span>
-    </div>
-    <div id="lock-date" style="font-size:16px;font-weight:400;opacity:.7;margin-top:4px;text-align:center"></div>
-    <div style="flex:1"></div>
-    <div style="position:relative;width:280px;height:60px;margin-bottom:calc(env(safe-area-inset-bottom,0px) + 50px)" onclick="event.stopPropagation()">
-      <div style="position:absolute;inset:0;border-radius:55px;background:rgba(255,255,255,.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);overflow:hidden;box-shadow:inset 1px -1px 11px rgb(255 255 255/12%),inset 1px -1px 55px rgb(255 255 255/11%),1px -1px 1px rgb(243 243 243/22%),-1px 1px 1px rgb(225 225 225/22%),0 2px 18px #0000000d">
-        <div id="lock-slide-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:15px;font-weight:400;letter-spacing:.5px;user-select:none;pointer-events:none">スライドでロック解除</div>
-      </div>
-      <div id="lock-knob" style="position:absolute;top:4px;left:4px;width:52px;height:52px;background:rgba(255,255,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:10;cursor:pointer;user-select:none;will-change:left;transition:left .5s cubic-bezier(.62,0,.4,1);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:1.1px 1px 0 rgba(255,255,255,.6),-1px -.8px 0 rgba(255,255,255,.4),0 2px 8px rgba(0,0,0,.15)">
-        <svg width="24" height="24" viewBox="0 0 32 32"><polyline points="12,8 20,16 12,24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ LOCK CONFIRM DIALOG ══════════ -->
-<div id="lock-confirm-dlg" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0);transition:background .5s ease;align-items:center;justify-content:center">
-  <div id="lock-confirm-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .3s ease,opacity .3s ease">
-    <div style="padding:22px 20px 10px">
-      <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">パスコードが必要</div>
-      <div style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5">Face ID/Optic IDまたはTouch IDを<br>設定している必要があります😰</div>
-    </div>
-    <div style="border-top:1px solid rgba(0,0,0,.1);display:flex">
-      <button id="lock-dlg-cancel" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;border-right:1px solid rgba(0,0,0,.1);cursor:pointer;font-family:inherit;font-weight:400">キャンセル</button>
-      <button id="lock-dlg-ok" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">ロックする</button>
     </div>
   </div>
 </div>
@@ -941,9 +551,9 @@ overflow:hidden;
 
 <div id="app">
   <div class="app-hdr">
-    <button class="app-back" id="btn-back"><span style="font-size:16px">←</span> やり直す</button>
+    <button class="app-back" onclick="goHome()">←</button>
     <div class="app-ttl" id="app-ttl">カード</div>
-    <button class="app-back" onclick="goHome()">完了 <span style="font-size:16px">↓</span></button>
+    <div style="width:32px"></div>
   </div>
   <div class="app-dots" id="app-dots" style="display:none">
     <div class="dot"></div><div class="dot"></div><div class="dot"></div>
@@ -951,11 +561,6 @@ overflow:hidden;
   </div>
   <div class="sw-wrap" id="sw-wrap" style="display:none">
     <div class="sw-track" id="sw-track"></div>
-  </div>
-  <!-- FLOAT BAR (fixed, global for card mode) -->
-  <div class="float-bar" id="float-bar" style="display:none">
-    <button class="float-btn" id="g-sfb" title="シャッフル">🔀</button>
-    <button class="float-btn" id="g-star" title="お気に入り">☆</button>
   </div>
   <div class="lswrap" id="list-wrap" style="display:none">
     <div id="list-cnt"></div>
@@ -966,8 +571,7 @@ overflow:hidden;
 
 <div id="tr-bar">
   <div class="ti-wrap">
-    <div class="star-input-btn" id="btn-star-list">⭐</div>
-    <textarea id="ti" placeholder="Type to here..." rows="1"></textarea>
+    <textarea id="ti" placeholder="Type English to translate..." rows="1"></textarea>
     <div id="flag-row">
       <div id="flag-active"></div>
       <div id="flag-picker"></div>
@@ -991,50 +595,12 @@ overflow:hidden;
   <div class="hs-body" id="hs-list"></div>
 </div>
 
-<!-- ══ STAR LIST OVERLAY ══ -->
-<div id="star-list-overlay">
-  <div id="star-list-card">
-    <div class="sl-hdr">
-      <button class="sl-close" id="sl-close">✕</button>
-      <div class="sl-ttl">⭐ お気に入り</div>
-      <div id="sl-count" style="font-size:11px;color:var(--sub);font-weight:600">0語</div>
-    </div>
-    <div class="sl-body" id="sl-body"></div>
-  </div>
-</div>
-
 <script type="module">
-/* ═══ BLOCK iOS EDGE SWIPE (safe, no scroll impact) ═══ */
-document.addEventListener('touchstart',function(e){
-  const x=e.touches[0].pageX;
-  if(x<15||x>window.innerWidth-15)e.preventDefault();
-},{passive:false,capture:true});
-
-/* ═══ DEVICE DETECTION ═══ */
-const _isIPad=navigator.userAgent.includes('iPad')||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-const _isMac=navigator.platform.startsWith('Mac')&&navigator.maxTouchPoints===0;
-const _isWideScreen=_isIPad||_isMac||window.innerWidth>=768;
-// iPad/Mac: default icon mode, 6 columns. iPhone: default list, 4 columns
-const GRID_COLS=_isWideScreen?6:4;
-if(_isWideScreen&&!localStorage.getItem('inglish_layout')){
-  localStorage.setItem('inglish_layout','icon');
-}
-
 /* ═══ HAPTIC ═══ */
 let _h=null;
 (()=>{import('https://esm.sh/ios-haptics').then(m=>{_h=m.haptic;}).catch(()=>{});})();
-const _hapticOrig  = ()=>{try{_h&&_h();}catch(_){}};
-const _hapticConfirmOrig= ()=>{try{_h&&_h.confirm&&_h.confirm();}catch(_){}};
-const haptic  = ()=>{
-  if(localStorage.getItem('inglish_haptic')==='0')return;
-  _hapticOrig();
-  if(localStorage.getItem('inglish_haptic_strong')==='1'){for(let i=0;i<5;i++)setTimeout(()=>{try{_h&&_h.error&&_h.error();}catch(_){}},i*30);}
-};
-haptic.confirm= ()=>{
-  if(localStorage.getItem('inglish_haptic')==='0')return;
-  _hapticConfirmOrig();
-  if(localStorage.getItem('inglish_haptic_strong')==='1'){for(let i=0;i<5;i++)setTimeout(()=>{try{_h&&_h.error&&_h.error();}catch(_){}},i*30);}
-};
+const haptic  = ()=>{try{_h&&_h();}catch(_){}};
+haptic.confirm= ()=>{try{_h&&_h.confirm&&_h.confirm();}catch(_){}};
 haptic.error  = ()=>{try{_h&&_h.error&&_h.error();}catch(_){}};
 const hRemember = ()=>{ const d=30;  for(let i=0;i<5;   i++) setTimeout(()=>haptic.error(),i*d); };
 const hForgot   = ()=>{ const d=18;  for(let i=0;i<1100;i++) setTimeout(()=>haptic.error(),i*d); };
@@ -1042,25 +608,25 @@ const hHard     = ()=> haptic.error();
 
 /* ═══ DATA ═══ */
 const V=[
-{w:"allege",p:"v",l:3,c:"2015動詞",m:"主張する・断言する",pr:"/əˈledʒ/",f:"💡 a-LEDGE（崖の上で叫ぶ→）主張する。that節をとる。allocate（割り当て）と混同注意。",e:"He alleged that the company was guilty.",ej:"彼はその会社に罪があると主張した。",t:["allegation (n)"],id:[]},
-{w:"allocate",p:"v",l:3,c:"2015動詞",m:"割り当てる・配分する",pr:"/ˈæləkeɪt/",f:"💡 ALL-O-CAKE（ケーキを全員に分ける→）割り当てる。allocate A to Bの形。",e:"The government allocated funds to the project.",ej:"政府はそのプロジェクトに資金を割り当てた。",t:["allocation (n)"],id:[]},
-{w:"apprehend",p:"v",l:3,c:"2015動詞",m:"逮捕する・理解する",pr:"/ˌæprɪˈhend/",f:"💡 APPで犯人をRE-HAND（再び手に）→逮捕する。comprehend（理解）と区別。",e:"The police apprehended the suspect.",ej:"警察は容疑者を逮捕した。",t:["apprehension (n)"],id:[]},
-{w:"ascertain",p:"v",l:3,c:"2015動詞",m:"確認する・確かめる",pr:"/ˌæsərˈteɪn/",f:"💡 A-CERTAIN（確かにする→）確認する。≒make sure。",e:"We need to ascertain the facts.",ej:"事実を確認する必要がある。",t:[],id:[]},
-{w:"eradicate",p:"v",l:3,c:"2015動詞",m:"根絶する・撲滅する",pr:"/ɪˈrædɪkeɪt/",f:"💡 E-RADICAL-ATE（根本から食い尽くす→）根絶する。病気・社会問題の文脈。",e:"Scientists aim to eradicate malaria.",ej:"科学者たちはマラリアの根絶を目指している。",t:["eradication (n)"],id:[]},
-{w:"facilitate",p:"v",l:3,c:"2015動詞",m:"促進する・容易にする",pr:"/fəˈsɪlɪteɪt/",f:"💡 FACIL=easy（簡単にする→）促進する。facility（施設）と同語源。",e:"Technology facilitates communication.",ej:"技術はコミュニケーションを促進する。",t:["facilitation (n)","facility (n)"],id:[]},
+{w:"allege",p:"v",l:3,c:"2015動詞",m:"主張する・断言する",pr:"/əˈledʒ/",f:"that節をとる。allocate（割り当てる）と混同注意。",e:"He alleged that the company was guilty.",ej:"彼はその会社に罪があると主張した。",t:["allegation (n)"],id:[]},
+{w:"allocate",p:"v",l:3,c:"2015動詞",m:"割り当てる・配分する",pr:"/ˈæləkeɪt/",f:"allocate A to B の形。allege（主張する）と混同注意。",e:"The government allocated funds to the project.",ej:"政府はそのプロジェクトに資金を割り当てた。",t:["allocation (n)"],id:[]},
+{w:"apprehend",p:"v",l:3,c:"2015動詞",m:"逮捕する・理解する",pr:"/ˌæprɪˈhend/",f:"comprehend（理解する）と区別。警察文脈では逮捕。",e:"The police apprehended the suspect.",ej:"警察は容疑者を逮捕した。",t:["apprehension (n)"],id:[]},
+{w:"ascertain",p:"v",l:3,c:"2015動詞",m:"確認する・確かめる",pr:"/ˌæsərˈteɪn/",f:"≒make sure。that節と共に使う。",e:"We need to ascertain the facts.",ej:"事実を確認する必要がある。",t:[],id:[]},
+{w:"eradicate",p:"v",l:3,c:"2015動詞",m:"根絶する・撲滅する",pr:"/ɪˈrædɪkeɪt/",f:"病気・社会問題の文脈。",e:"Scientists aim to eradicate malaria.",ej:"科学者たちはマラリアの根絶を目指している。",t:["eradication (n)"],id:[]},
+{w:"facilitate",p:"v",l:3,c:"2015動詞",m:"促進する・容易にする",pr:"/fəˈsɪlɪteɪt/",f:"≒make easier。直接目的語をとる。",e:"Technology facilitates communication.",ej:"技術はコミュニケーションを促進する。",t:["facilitation (n)","facility (n)"],id:[]},
 {w:"extradite",p:"v",l:3,c:"2015動詞",m:"引き渡す・送還する",pr:"/ˈekstrədaɪt/",f:"犯罪者を外国へ引き渡す。",e:"The criminal was extradited to face trial.",ej:"犯人は裁判を受けるために引き渡された。",t:["extradition (n)"],id:[]},
-{w:"illuminate",p:"v",l:3,c:"2015動詞",m:"照らす・明らかにする",pr:"/ɪˈluːmɪneɪt/",f:"💡 ILL+UMI（海の光→）照らす・明らかにする。比喩的にも使う。",e:"The study illuminated a key issue.",ej:"その研究は重要な問題を明らかにした。",t:["illumination (n)"],id:[]},
-{w:"dominate",p:"v",l:3,c:"2015動詞",m:"支配する・優位を占める",pr:"/ˈdɒmɪneɪt/",f:"💡 DOMI=主人（ドミネーター→）支配する。domesticate（飼いならす）と混同注意。",e:"One company dominates the market.",ej:"1つの会社が市場を支配している。",t:["dominance (n)","dominant (adj)"],id:[]},
-{w:"impede",p:"v",l:3,c:"2015動詞",m:"妨げる・邪魔する",pr:"/ɪmˈpiːd/",f:"💡 IM+PED=足（足を縛る→）妨げる。impediment（障害）はここから。",e:"Bad weather impeded the rescue.",ej:"悪天候が救助を妨げた。",t:["impediment (n)"],id:[]},
-{w:"disrupt",p:"v",l:3,c:"2015動詞",m:"混乱させる・分断する",pr:"/dɪsˈrʌpt/",f:"💡 DIS+RUPT=壊す（バラバラに壊す→）混乱させる。disruptive=破壊的な。",e:"The storm disrupted power supplies.",ej:"嵐が電力供給を混乱させた。",t:["disruption (n)","disruptive (adj)"],id:[]},
+{w:"illuminate",p:"v",l:3,c:"2015動詞",m:"照らす・明らかにする",pr:"/ɪˈluːmɪneɪt/",f:"比喩的に「問題を明らかにする」。",e:"The study illuminated a key issue.",ej:"その研究は重要な問題を明らかにした。",t:["illumination (n)"],id:[]},
+{w:"dominate",p:"v",l:3,c:"2015動詞",m:"支配する・優位を占める",pr:"/ˈdɒmɪneɪt/",f:"domesticate（飼いならす）と混同注意。",e:"One company dominates the market.",ej:"1つの会社が市場を支配している。",t:["dominance (n)","dominant (adj)"],id:[]},
+{w:"impede",p:"v",l:3,c:"2015動詞",m:"妨げる・邪魔する",pr:"/ɪmˈpiːd/",f:"≒hinder, obstruct。",e:"Bad weather impeded the rescue.",ej:"悪天候が救助を妨げた。",t:["impediment (n)"],id:[]},
+{w:"disrupt",p:"v",l:3,c:"2015動詞",m:"混乱させる・分断する",pr:"/dɪsˈrʌpt/",f:"disrupt traffic/service 文脈が多い。",e:"The storm disrupted power supplies.",ej:"嵐が電力供給を混乱させた。",t:["disruption (n)","disruptive (adj)"],id:[]},
 {w:"dismiss",p:"v",l:3,c:"2015動詞",m:"解雇する・退ける",pr:"/dɪsˈmɪs/",f:"dismiss an idea（考えを退ける）も重要。",e:"The manager dismissed the idea.",ej:"マネージャーはそのアイデアを退けた。",t:["dismissal (n)"],id:[]},
-{w:"negotiate",p:"v",l:2,c:"2015動詞",m:"交渉する",pr:"/nɪˈɡoʊʃieɪt/",f:"💡 NEGO=商売（ネゴシエーター→）交渉する。negotiate with A。",e:"They negotiated a new contract.",ej:"彼らは新しい契約を交渉した。",t:["negotiation (n)","negotiator (n)"],id:[]},
-{w:"cherish",p:"v",l:3,c:"2015動詞",m:"大事にする・かわいがる",pr:"/ˈtʃerɪʃ/",f:"💡 CHERry+ISH（チェリーを大事にする→）大事にする。perish（滅びる）と混同注意。",e:"She cherished her childhood memories.",ej:"彼女は子供時代の思い出を大事にしていた。",t:[],id:[]},
+{w:"negotiate",p:"v",l:2,c:"2015動詞",m:"交渉する",pr:"/nɪˈɡoʊʃieɪt/",f:"negotiate with A / negotiate A。",e:"They negotiated a new contract.",ej:"彼らは新しい契約を交渉した。",t:["negotiation (n)","negotiator (n)"],id:[]},
+{w:"cherish",p:"v",l:3,c:"2015動詞",m:"大事にする・かわいがる",pr:"/ˈtʃerɪʃ/",f:"perish（死ぬ・滅びる）と混同注意。",e:"She cherished her childhood memories.",ej:"彼女は子供時代の思い出を大事にしていた。",t:[],id:[]},
 {w:"utilize",p:"v",l:2,c:"2015動詞",m:"利用する",pr:"/ˈjuːtəlaɪz/",f:"≒use。やや硬い表現。",e:"We should utilize renewable energy.",ej:"再生可能エネルギーを利用すべきだ。",t:["utilization (n)"],id:[]},
 {w:"excel",p:"v",l:2,c:"2015動詞",m:"〜にまさる・優れる",pr:"/ɪkˈsel/",f:"excel at/in + 分野。",e:"She excels at mathematics.",ej:"彼女は数学に秀でている。",t:["excellent (adj)"],id:[{e:"excel at",j:"〜に秀でる"}]},
-{w:"bestow",p:"v",l:3,c:"2015動詞",m:"与える・授ける",pr:"/bɪˈstoʊ/",f:"💡 BEST+OW（最高のものを渡す→）授ける。bestow A on B。",e:"The king bestowed the medal on the hero.",ej:"王はその英雄にメダルを授けた。",t:[],id:[{e:"bestow A on B",j:"AをBに授ける"}]},
-{w:"penetrate",p:"v",l:3,c:"2015動詞",m:"貫通する・理解する",pr:"/ˈpenɪtreɪt/",f:"💡 PEN=ペンが紙をETRATE（突き通す→）貫通する。penalize（罰する）と区別。",e:"The bullet penetrated the wall.",ej:"弾丸が壁を貫通した。",t:["penetration (n)"],id:[]},
-{w:"abide",p:"v",l:3,c:"2015動詞",m:"とどまる・従う",pr:"/əˈbaɪd/",f:"💡 A+BIDE=待つ（じっと待ち続ける→）従う。abide by=ルールを守る。",e:"You must abide by the rules.",ej:"ルールを守らなければならない。",t:[],id:[{e:"abide by",j:"〜を守る・従う"}]},
+{w:"bestow",p:"v",l:3,c:"2015動詞",m:"与える・授ける",pr:"/bɪˈstoʊ/",f:"bestow A on B（AをBに与える）。≒grant, award。",e:"The king bestowed the medal on the hero.",ej:"王はその英雄にメダルを授けた。",t:[],id:[{e:"bestow A on B",j:"AをBに授ける"}]},
+{w:"penetrate",p:"v",l:3,c:"2015動詞",m:"貫通する・理解する",pr:"/ˈpenɪtreɪt/",f:"penalize（罰則を科す）と混同注意。",e:"The bullet penetrated the wall.",ej:"弾丸が壁を貫通した。",t:["penetration (n)"],id:[]},
+{w:"abide",p:"v",l:3,c:"2015動詞",m:"とどまる・従う",pr:"/əˈbaɪd/",f:"abide by ～（〜を守る）が重要熟語。",e:"You must abide by the rules.",ej:"ルールを守らなければならない。",t:[],id:[{e:"abide by",j:"〜を守る・従う"}]},
 {w:"boost",p:"v",l:2,c:"2015動詞",m:"強化する・押し上げる",pr:"/buːst/",f:"boost sales / confidence / morale。",e:"The new policy boosted the economy.",ej:"新しい政策は経済を押し上げた。",t:["booster (n)"],id:[]},
 {w:"elevate",p:"v",l:3,c:"2015動詞",m:"高める・上昇させる",pr:"/ˈeləveɪt/",f:"≒raise, enhance。elicit（引き出す）と混同注意。",e:"She elevated the company's reputation.",ej:"彼女は会社の評判を高めた。",t:["elevation (n)"],id:[]},
 {w:"aftermath",p:"n",l:3,c:"2015名詞",m:"結果・余波",pr:"/ˈæftərmæθ/",f:"in the aftermath of ～（〜の直後）頻出。",e:"In the aftermath of the disaster, many were homeless.",ej:"災害の余波で多くの人がホームレスになった。",t:[],id:[{e:"in the aftermath of",j:"〜の直後に"}]},
@@ -1074,28 +640,28 @@ const V=[
 {w:"mediator",p:"n",l:3,c:"2015名詞",m:"仲裁人・調停者",pr:"/ˈmiːdieɪtər/",f:"meditate（瞑想する）と混同注意。",e:"A mediator resolved the dispute.",ej:"仲裁人が紛争を解決した。",t:["mediate (v)","mediation (n)"],id:[]},
 {w:"contamination",p:"n",l:3,c:"2015名詞",m:"汚染",pr:"/kənˌtæmɪˈneɪʃən/",f:"water contamination = 水質汚染。",e:"The water contamination made people sick.",ej:"水質汚染が人々を病気にした。",t:["contaminate (v)"],id:[]},
 {w:"alienation",p:"n",l:3,c:"2015名詞",m:"疎外・疎遠",pr:"/ˌeɪliəˈneɪʃən/",f:"emotional agitation（精神的興奮）と区別。",e:"Social alienation is a growing problem.",ej:"社会的疎外は深刻化する問題だ。",t:["alienate (v)"],id:[]},
-{w:"comprehensive",p:"adj",l:3,c:"2015形容詞",m:"包括的な",pr:"/ˌkɒmprɪˈhensɪv/",f:"💡 COM+PREHEND+SIVE（全部つかむ→）包括的な。⚠️comprehensible（理解できる）は別語！準1最頻出混同。",e:"A comprehensive review was conducted.",ej:"包括的なレビューが行われた。",t:["comprehend (v)"],id:[]},
-{w:"considerate",p:"adj",l:3,c:"2015形容詞",m:"思いやりのある",pr:"/kənˈsɪdərɪt/",f:"💡 CONSIDER+ATE（よく考える人→）思いやりのある。⚠️considerable（かなりの）は量！",e:"She is always considerate of others.",ej:"彼女はいつも他人に思いやりがある。",t:["considerable (adj)"],id:[]},
+{w:"comprehensive",p:"adj",l:3,c:"2015形容詞",m:"包括的な",pr:"/ˌkɒmprɪˈhensɪv/",f:"⚠️ comprehensible（理解できる）と混同注意！最頻出ミス。",e:"A comprehensive review was conducted.",ej:"包括的なレビューが行われた。",t:["comprehend (v)"],id:[]},
+{w:"considerate",p:"adj",l:3,c:"2015形容詞",m:"思いやりのある",pr:"/kənˈsɪdərɪt/",f:"⚠️ considerable（かなりの）と混同注意！",e:"She is always considerate of others.",ej:"彼女はいつも他人に思いやりがある。",t:["considerable (adj)"],id:[]},
 {w:"drastic",p:"adj",l:3,c:"2015形容詞",m:"抜本的な・思い切った",pr:"/ˈdræstɪk/",f:"drastic measures（抜本的な対策）。",e:"Drastic measures were needed.",ej:"抜本的な対策が必要だった。",t:["drastically (adv)"],id:[]},
 {w:"legitimate",p:"adj",l:3,c:"2015形容詞",m:"正当な・合法の",pr:"/lɪˈdʒɪtɪmɪt/",f:"≒legal, lawful。illegitimate（違法な）が対義語。",e:"He had a legitimate reason to leave.",ej:"彼には去る正当な理由があった。",t:["legitimacy (n)"],id:[]},
-{w:"skeptical",p:"adj",l:3,c:"2015形容詞",m:"懐疑的な",pr:"/ˈskeptɪkəl/",f:"💡 スケプティカル（疑う顔→）懐疑的な。be skeptical about～。",e:"Scientists are skeptical about the results.",ej:"科学者たちはその結果に懐疑的だ。",t:["skepticism (n)"],id:[]},
-{w:"obsolete",p:"adj",l:3,c:"2015形容詞",m:"時代遅れの",pr:"/ˌɒbsəˈliːt/",f:"💡 OB+SO+LETE（もう消えた→）時代遅れの。≒outdated。",e:"The technology is now obsolete.",ej:"その技術は今や時代遅れだ。",t:["obsolescence (n)"],id:[]},
-{w:"vulnerable",p:"adj",l:3,c:"2015形容詞",m:"傷つきやすい・脆弱な",pr:"/ˈvʌlnərəbl/",f:"💡 VULNER=傷（バルネラブル＝傷つきやすい→）脆弱な。be vulnerable to～。",e:"Children are vulnerable to infections.",ej:"子供は感染症に対して脆弱だ。",t:["vulnerability (n)"],id:[{e:"be vulnerable to",j:"〜に脆弱である"}]},
+{w:"skeptical",p:"adj",l:3,c:"2015形容詞",m:"懐疑的な",pr:"/ˈskeptɪkəl/",f:"be skeptical about ～。≒doubtful。",e:"Scientists are skeptical about the results.",ej:"科学者たちはその結果に懐疑的だ。",t:["skepticism (n)"],id:[]},
+{w:"obsolete",p:"adj",l:3,c:"2015形容詞",m:"時代遅れの",pr:"/ˌɒbsəˈliːt/",f:"≒outdated, old-fashioned。",e:"The technology is now obsolete.",ej:"その技術は今や時代遅れだ。",t:["obsolescence (n)"],id:[]},
+{w:"vulnerable",p:"adj",l:3,c:"2015形容詞",m:"傷つきやすい・脆弱な",pr:"/ˈvʌlnərəbl/",f:"be vulnerable to ～（〜に脆弱）。",e:"Children are vulnerable to infections.",ej:"子供は感染症に対して脆弱だ。",t:["vulnerability (n)"],id:[{e:"be vulnerable to",j:"〜に脆弱である"}]},
 {w:"impartial",p:"adj",l:3,c:"2015形容詞",m:"公平な",pr:"/ɪmˈpɑːrʃəl/",f:"≒fair, unbiased。≠partial（偏った）。",e:"The judge must be impartial.",ej:"裁判官は公平でなければならない。",t:["impartiality (n)"],id:[]},
-{w:"spontaneous",p:"adj",l:3,c:"2015形容詞",m:"自発的な・自然発生の",pr:"/spɒnˈteɪniəs/",f:"💡 SPONT=自分から（自分から湧き出る→）自発的な。spontaneous combustion=自然発火。",e:"The audience gave a spontaneous cheer.",ej:"観客は自然に歓声を上げた。",t:["spontaneity (n)"],id:[]},
+{w:"spontaneous",p:"adj",l:3,c:"2015形容詞",m:"自発的な・自然発生の",pr:"/spɒnˈteɪniəs/",f:"spontaneous combustion（自然発火）。",e:"The audience gave a spontaneous cheer.",ej:"観客は自然に歓声を上げた。",t:["spontaneity (n)"],id:[]},
 {w:"lucid",p:"adj",l:3,c:"2015形容詞",m:"明快な・わかりやすい",pr:"/ˈluːsɪd/",f:"≒clear。legible（読みやすい）と区別。",e:"Her explanation was lucid and helpful.",ej:"彼女の説明は明快で役に立った。",t:["lucidity (n)"],id:[]},
-{w:"subsequent",p:"adj",l:3,c:"2015形容詞",m:"後の・その後に続く",pr:"/ˈsʌbsɪkwənt/",f:"💡 SUB+SEQU=後に続く（サブシーケント→）後の・その後の。subsequently（副）。",e:"Subsequent events proved him right.",ej:"その後の出来事が彼の正しさを証明した。",t:["subsequently (adv)"],id:[]},
-{w:"evade",p:"v",l:3,c:"2025出題",m:"逃れる・回避する",pr:"/ɪˈveɪd/",f:"💡 E+VADE=行く（外に逃げる→）逃れる。invade（IN+VADE=侵入）と逆！2025出題。",e:"The prisoners evaded the police for weeks.",ej:"囚人たちは数週間警察から逃れた。",t:["evasion (n)","evasive (adj)"],id:[]},
-{w:"compress",p:"v",l:3,c:"2025出題",m:"圧縮する・凝縮する",pr:"/kəmˈpres/",f:"💡 COM+PRESS（一緒に押す→）圧縮する。compression（名）。",e:"He compressed all events into one day.",ej:"彼はすべての出来事を1日に凝縮した。",t:["compression (n)"],id:[]},
+{w:"subsequent",p:"adj",l:3,c:"2015形容詞",m:"後の・その後に続く",pr:"/ˈsʌbsɪkwənt/",f:"subsequent to ～（〜の後に）。",e:"Subsequent events proved him right.",ej:"その後の出来事が彼の正しさを証明した。",t:["subsequently (adv)"],id:[]},
+{w:"evade",p:"v",l:3,c:"2025出題",m:"逃れる・回避する",pr:"/ɪˈveɪd/",f:"invade（侵略）と混同注意！",e:"The prisoners evaded the police for weeks.",ej:"囚人たちは数週間警察から逃れた。",t:["evasion (n)","evasive (adj)"],id:[]},
+{w:"compress",p:"v",l:3,c:"2025出題",m:"圧縮する・凝縮する",pr:"/kəmˈpres/",f:"情報・データを小さくまとめる。",e:"He compressed all events into one day.",ej:"彼はすべての出来事を1日に凝縮した。",t:["compression (n)"],id:[]},
 {w:"enroll",p:"v",l:2,c:"2025出題",m:"入学する・登録する",pr:"/ɪnˈroʊl/",f:"enroll in a school/course。",e:"She enrolled in the university last year.",ej:"彼女は去年その大学に入学した。",t:["enrollment (n)"],id:[]},
-{w:"detach",p:"v",l:3,c:"2025出題",m:"取り外す・分離する",pr:"/dɪˈtætʃ/",f:"💡 DE+TACH=くっつく（くっつきを外す→）取り外す。attach（取り付け）の反対。",e:"He detached the old battery carefully.",ej:"彼は古いバッテリーを慎重に取り外した。",t:["detachment (n)"],id:[]},
-{w:"collide",p:"v",l:3,c:"2025出題",m:"衝突する",pr:"/kəˈlaɪd/",f:"💡 CO+LLIDE=滑る（二つが滑って当たる→）衝突する。collision（名）。",e:"The two cars nearly collided.",ej:"2台の車はもう少しで衝突するところだった。",t:["collision (n)"],id:[]},
+{w:"detach",p:"v",l:3,c:"2025出題",m:"取り外す・分離する",pr:"/dɪˈtætʃ/",f:"attach（取り付ける）の反対。",e:"He detached the old battery carefully.",ej:"彼は古いバッテリーを慎重に取り外した。",t:["detachment (n)"],id:[]},
+{w:"collide",p:"v",l:3,c:"2025出題",m:"衝突する",pr:"/kəˈlaɪd/",f:"collision（衝突・名）。物理的にも比喩的にも使う。",e:"The two cars nearly collided.",ej:"2台の車はもう少しで衝突するところだった。",t:["collision (n)"],id:[]},
 {w:"spacious",p:"adj",l:2,c:"2025出題",m:"広々とした",pr:"/ˈspeɪʃəs/",f:"部屋・建物の広さを形容。",e:"The apartment was spacious and bright.",ej:"そのアパートは広々として明るかった。",t:[],id:[]},
-{w:"tentative",p:"adj",l:3,c:"2025出題",m:"仮の・暫定的な",pr:"/ˈtentətɪv/",f:"💡 TENT=テント（仮のテント→）仮の・暫定的な。⚠️attentive（注意深い）と混同注意！",e:"We have tentative plans for next week.",ej:"来週の仮の予定がある。",t:["tentatively (adv)"],id:[]},
-{w:"cosmopolitan",p:"adj",l:3,c:"2025出題",m:"国際的な・世界主義の",pr:"/ˌkɒzməˈpɒlɪtən/",f:"💡 COSMO+POLITAN=都市（宇宙の都市人→）国際的な。Tokyo is cosmopolitan。",e:"Tokyo is a cosmopolitan city.",ej:"東京は国際的な都市だ。",t:[],id:[]},
+{w:"tentative",p:"adj",l:3,c:"2025出題",m:"仮の・暫定的な",pr:"/ˈtentətɪv/",f:"⚠️ attentive（注意深い）と混同注意！",e:"We have tentative plans for next week.",ej:"来週の仮の予定がある。",t:["tentatively (adv)"],id:[]},
+{w:"cosmopolitan",p:"adj",l:3,c:"2025出題",m:"国際的な・世界主義の",pr:"/ˌkɒzməˈpɒlɪtən/",f:"cosmos（世界）+ polis（都市）。",e:"Tokyo is a cosmopolitan city.",ej:"東京は国際的な都市だ。",t:[],id:[]},
 {w:"anatomy",p:"n",l:3,c:"2025出題",m:"解剖学・構造",pr:"/əˈnætəmi/",f:"物事の詳細構造にも使う。",e:"Students must study human anatomy.",ej:"学生は人体解剖学を学ばなければならない。",t:["anatomical (adj)"],id:[]},
 {w:"ascent",p:"n",l:3,c:"2025出題",m:"登頂・上昇",pr:"/əˈsent/",f:"ascend（登る）の名詞形。descent（下降）が反意語。",e:"The ascent took two days.",ej:"登頂に2日かかった。",t:["ascend (v)"],id:[]},
-{w:"autonomy",p:"n",l:3,c:"2025出題",m:"自律性・自治権",pr:"/ɔːˈtɒnəmi/",f:"💡 AUTO+NOMY=法（自分で法を決める→）自律性。⚠️astronomy（天文学）と混同注意！",e:"Workers were given more autonomy.",ej:"労働者にはより多くの自律性が与えられた。",t:["autonomous (adj)"],id:[]},
+{w:"autonomy",p:"n",l:3,c:"2025出題",m:"自律性・自治権",pr:"/ɔːˈtɒnəmi/",f:"⚠️ astronomy（天文学）と混同注意！",e:"Workers were given more autonomy.",ej:"労働者にはより多くの自律性が与えられた。",t:["autonomous (adj)"],id:[]},
 {w:"rivalry",p:"n",l:3,c:"2025出題",m:"ライバル関係・競争",pr:"/ˈraɪvəlri/",f:"rival → rivalry。",e:"The rivalry between the teams is fierce.",ej:"チーム間の競争は激しい。",t:["rival (n/v)"],id:[]},
 {w:"make for",p:"v",l:2,c:"2025句動詞",m:"〜に向かう",pr:"",f:"≒head for。目的地に向かう。",e:"They made for the nearest town.",ej:"彼らは最寄りの町に向かった。",t:[],id:[]},
 {w:"take on",p:"v",l:2,c:"2025句動詞",m:"引き受ける・取り組む",pr:"",f:"take on responsibilities / challenges。",e:"She took on new responsibilities.",ej:"彼女は新しい責任を引き受けた。",t:[],id:[]},
@@ -1131,71 +697,71 @@ const V=[
 {w:"perceive",p:"v",l:3,c:"上級",m:"知覚する・〜とみなす",pr:"/pəˈsiːv/",f:"perceive A as B = AをBとみなす。",e:"Time is perceived differently by everyone.",ej:"時間の感じ方は人それぞれ違う。",t:["perception (n)"],id:[{e:"perceive A as B",j:"AをBとみなす"}]},
 {w:"persist",p:"v",l:3,c:"上級",m:"持続する・こだわり続ける",pr:"/pəˈsɪst/",f:"persist in = 〜に固執する。",e:"If you persist, you will succeed.",ej:"粘り強く続ければ成功する。",t:["persistence (n)","persistent (adj)"],id:[]},
 {w:"sustainable",p:"adj",l:3,c:"上級",m:"持続可能な",pr:"/səˈsteɪnəbl/",f:"sustainable development = 持続可能な発展。",e:"We need sustainable energy sources.",ej:"持続可能なエネルギー源が必要だ。",t:["sustainability (n)","sustain (v)"],id:[]},
-{w:"crucial",p:"adj",l:3,c:"上級",m:"極めて重要な・決定的な",pr:"/ˈkruːʃəl/",f:"💡 CRUC=十字架（クルーシャル＝十字路の決断→）極めて重要な。crucially（副）。",e:"Education is crucial for success.",ej:"教育は成功に極めて重要だ。",t:["crucially (adv)"],id:[]},
-{w:"inevitable",p:"adj",l:3,c:"上級",m:"避けられない・必然的な",pr:"/ɪnˈevɪtəbl/",f:"💡 IN+EVIT+ABLE（避けられ+ない→）避けられない。inevitably（副）。",e:"Change is inevitable.",ej:"変化は避けられない。",t:["inevitably (adv)"],id:[]},
-{w:"detrimental",p:"adj",l:3,c:"上級",m:"有害な・悪影響の",pr:"/ˌdetrɪˈmentəl/",f:"💡 DETRI=すり減る+MENTAL（精神をすり減らす→）有害な。detrimental to health。",e:"Smoking is detrimental to health.",ej:"喫煙は健康に有害だ。",t:[],id:[{e:"detrimental to",j:"〜に有害な"}]},
-{w:"elaborate",p:"adj",l:3,c:"上級",m:"精巧な / 詳しく説明する（動詞）",pr:"/ɪˈlæbərɪt/",f:"💡 E+LABOR+ATE（労力をかけた→）精巧な。elaborate on=詳しく述べる。",e:"Could you elaborate on that point?",ej:"その点を詳しく説明できますか？",t:["elaboration (n)"],id:[{e:"elaborate on",j:"〜について詳しく述べる"}]},
+{w:"crucial",p:"adj",l:3,c:"上級",m:"極めて重要な・決定的な",pr:"/ˈkruːʃəl/",f:"importantより強い。",e:"Education is crucial for success.",ej:"教育は成功に極めて重要だ。",t:["crucially (adv)"],id:[]},
+{w:"inevitable",p:"adj",l:3,c:"上級",m:"避けられない・必然的な",pr:"/ɪnˈevɪtəbl/",f:"どうやっても起こること。",e:"Change is inevitable.",ej:"変化は避けられない。",t:["inevitably (adv)"],id:[]},
+{w:"detrimental",p:"adj",l:3,c:"上級",m:"有害な・悪影響の",pr:"/ˌdetrɪˈmentəl/",f:"harmful/badのフォーマル版。英作文で差がつく語。",e:"Smoking is detrimental to health.",ej:"喫煙は健康に有害だ。",t:[],id:[{e:"detrimental to",j:"〜に有害な"}]},
+{w:"elaborate",p:"adj",l:3,c:"上級",m:"精巧な / 詳しく説明する（動詞）",pr:"/ɪˈlæbərɪt/",f:"elaborate on = 〜について詳しく述べる。",e:"Could you elaborate on that point?",ej:"その点を詳しく説明できますか？",t:["elaboration (n)"],id:[{e:"elaborate on",j:"〜について詳しく述べる"}]},
 {w:"numerous",p:"adj",l:2,c:"言い換え",m:"多数の・たくさんの",pr:"/ˈnjuːmərəs/",f:"many / a lot of のフォーマル版。",e:"There are numerous benefits.",ej:"数多くの利点がある。",t:[],id:[]},
 {w:"claim",p:"v",l:2,c:"言い換え",m:"主張する・断言する",pr:"/kleɪm/",f:"say/thinkのフォーマル版。that節をとる。",e:"He claims that the data is incorrect.",ej:"彼はデータが不正確だと主張する。",t:["claim (n)"],id:[]},
 {w:"illustrate",p:"v",l:2,c:"言い換え",m:"説明する・例証する",pr:"/ˈɪləstreɪt/",f:"showのフォーマル版。具体例で示す。",e:"This example illustrates the problem.",ej:"この例は問題を明確に示す。",t:["illustration (n)"],id:[]},
 {w:"tackle",p:"v",l:2,c:"言い換え",m:"取り組む・対処する",pr:"/ˈtækəl/",f:"address / cope with と同義。",e:"We must tackle climate change.",ej:"気候変動に取り組まなければならない。",t:[],id:[{e:"tackle a problem",j:"問題に取り組む"}]},
 
 // ── 英検準1級 頻出動詞 追加 ──
-{w:"abolish",p:"v",l:3,c:"準1必須動詞",m:"廃止する・撤廃する",pr:"/əˈbɒlɪʃ/",f:"💡 A+BOLISH=壊す（アボリッシュ＝壊して廃止→）廃止する。abolition（名）。",e:"The law was finally abolished.",ej:"その法律はついに廃止された。",t:["abolition (n)"],id:[]},
-{w:"abstain",p:"v",l:3,c:"準1必須動詞",m:"控える・棄権する",pr:"/əbˈsteɪn/",f:"💡 ABS+TAIN=離れて保つ（アブステイン→）控える。abstain from voting=棄権。",e:"He abstained from alcohol for a month.",ej:"彼は1ヶ月間アルコールを控えた。",t:["abstinence (n)"],id:[{e:"abstain from",j:"〜を控える"}]},
+{w:"abolish",p:"v",l:3,c:"準1必須動詞",m:"廃止する・撤廃する",pr:"/əˈbɒlɪʃ/",f:"abolish the law（法律を廃止する）。abolition（名）。",e:"The law was finally abolished.",ej:"その法律はついに廃止された。",t:["abolition (n)"],id:[]},
+{w:"abstain",p:"v",l:3,c:"準1必須動詞",m:"控える・棄権する",pr:"/əbˈsteɪn/",f:"abstain from ～（〜を控える）。abstain from voting（棄権）。",e:"He abstained from alcohol for a month.",ej:"彼は1ヶ月間アルコールを控えた。",t:["abstinence (n)"],id:[{e:"abstain from",j:"〜を控える"}]},
 {w:"accelerate",p:"v",l:3,c:"準1必須動詞",m:"加速する・促進する",pr:"/əkˈseləreɪt/",f:"acceleration（名）。decelerate（減速）が反意語。",e:"Technology has accelerated social change.",ej:"技術は社会変化を加速させた。",t:["acceleration (n)"],id:[]},
-{w:"accommodate",p:"v",l:3,c:"準1必須動詞",m:"収容する・適応させる",pr:"/əˈkɒmədeɪt/",f:"💡 AC+COMMO+DATE（相手にコモディティ=場所を→）収容する。accommodation=宿泊施設。",e:"The hotel accommodates 300 guests.",ej:"そのホテルは300人の宿泊客を収容できる。",t:["accommodation (n)"],id:[]},
-{w:"accumulate",p:"v",l:3,c:"準1必須動詞",m:"蓄積する・積み重なる",pr:"/əˈkjuːmjəleɪt/",f:"💡 AC+CUMUL=山（山を積み上げ→）蓄積する。cumulus=積乱雲も同語源。",e:"Debts accumulated over the years.",ej:"借金は何年にもわたって蓄積した。",t:["accumulation (n)"],id:[]},
-{w:"adhere",p:"v",l:3,c:"準1必須動詞",m:"固執する・付着する",pr:"/ədˈhɪər/",f:"💡 AD+HERE=くっつく（ここにくっつく→）固執する。adhesive=接着剤。adhere to～。",e:"You must adhere to the contract.",ej:"契約を遵守しなければならない。",t:["adherence (n)","adhesive (adj)"],id:[{e:"adhere to",j:"〜を守る"}]},
+{w:"accommodate",p:"v",l:3,c:"準1必須動詞",m:"収容する・適応させる",pr:"/əˈkɒmədeɪt/",f:"accommodation（名）=宿泊施設。",e:"The hotel accommodates 300 guests.",ej:"そのホテルは300人の宿泊客を収容できる。",t:["accommodation (n)"],id:[]},
+{w:"accumulate",p:"v",l:3,c:"準1必須動詞",m:"蓄積する・積み重なる",pr:"/əˈkjuːmjəleɪt/",f:"accumulation（名）。",e:"Debts accumulated over the years.",ej:"借金は何年にもわたって蓄積した。",t:["accumulation (n)"],id:[]},
+{w:"adhere",p:"v",l:3,c:"準1必須動詞",m:"固執する・付着する",pr:"/ədˈhɪər/",f:"adhere to ～（〜を守る・固執する）。",e:"You must adhere to the contract.",ej:"契約を遵守しなければならない。",t:["adherence (n)","adhesive (adj)"],id:[{e:"adhere to",j:"〜を守る"}]},
 {w:"advocate",p:"v",l:3,c:"準1必須動詞",m:"主張する・支持する",pr:"/ˈædvəkeɪt/",f:"advocate for ～（〜を擁護する）。名詞形は/ˈædvəkɪt/。",e:"She advocates for environmental protection.",ej:"彼女は環境保護を主張している。",t:["advocacy (n)"],id:[]},
-{w:"aggravate",p:"v",l:3,c:"準1必須動詞",m:"悪化させる・いらだたせる",pr:"/ˈæɡrəveɪt/",f:"💡 AG+GRAVE=重い（さらに重くする→）悪化させる。↔ alleviate（軽減）。",e:"Stress can aggravate health problems.",ej:"ストレスは健康問題を悪化させる。",t:["aggravation (n)"],id:[]},
-{w:"alleviate",p:"v",l:3,c:"準1必須動詞",m:"軽減する・和らげる",pr:"/əˈliːvieɪt/",f:"💡 AL+LEVI=軽い（アリーヴィエイト＝軽くする→）軽減する。↔ aggravate（悪化）。",e:"Music can alleviate stress.",ej:"音楽はストレスを和らげることができる。",t:["alleviation (n)"],id:[]},
+{w:"aggravate",p:"v",l:3,c:"準1必須動詞",m:"悪化させる・いらだたせる",pr:"/ˈæɡrəveɪt/",f:"alleviate（軽減する）が反意語。",e:"Stress can aggravate health problems.",ej:"ストレスは健康問題を悪化させる。",t:["aggravation (n)"],id:[]},
+{w:"alleviate",p:"v",l:3,c:"準1必須動詞",m:"軽減する・和らげる",pr:"/əˈliːvieɪt/",f:"alleviate pain/poverty（痛み・貧困を和らげる）。",e:"Music can alleviate stress.",ej:"音楽はストレスを和らげることができる。",t:["alleviation (n)"],id:[]},
 {w:"assert",p:"v",l:3,c:"準1必須動詞",m:"断言する・主張する",pr:"/əˈsɜːrt/",f:"assert that = 〜と断言する。assertive（積極的な）。",e:"He asserted his innocence.",ej:"彼は無実を主張した。",t:["assertion (n)","assertive (adj)"],id:[]},
-{w:"attribute",p:"v",l:3,c:"準1必須動詞",m:"〜のせいにする・帰する",pr:"/əˈtrɪbjuːt/",f:"💡 AT+TRIBUTE=与える（AのせいをBに与える→）帰する。attribute A to B。",e:"The success was attributed to teamwork.",ej:"成功はチームワークのおかげとされた。",t:["attribution (n)"],id:[{e:"attribute A to B",j:"AはBのおかげ（せい）だとする"}]},
-{w:"cease",p:"v",l:3,c:"準1必須動詞",m:"やめる・止まる",pr:"/siːs/",f:"💡 シーズ（止まれ！→）やめる・止まる。cease to exist=存在しなくなる。",e:"The fighting ceased after negotiations.",ej:"交渉の後、戦闘は止まった。",t:["ceaseless (adj)"],id:[{e:"cease to exist",j:"存在しなくなる"}]},
-{w:"compensate",p:"v",l:3,c:"準1必須動詞",m:"補償する・埋め合わせる",pr:"/ˈkɒmpənseɪt/",f:"💡 COM+PENS=重さ（釣り合いを取る→）補償する。compensate for～。",e:"Nothing can compensate for the loss.",ej:"何もその損失を補うことはできない。",t:["compensation (n)"],id:[{e:"compensate for",j:"〜を補償する"}]},
-{w:"conceal",p:"v",l:3,c:"準1必須動詞",m:"隠す・秘密にする",pr:"/kənˈsiːl/",f:"💡 CON+CEAL=隠す（コンシール＝ファンデ→）隠す。↔ reveal（明らかに）。",e:"She concealed her feelings.",ej:"彼女は感情を隠した。",t:["concealment (n)"],id:[]},
+{w:"attribute",p:"v",l:3,c:"準1必須動詞",m:"〜のせいにする・帰する",pr:"/əˈtrɪbjuːt/",f:"attribute A to B = AをBのせいにする。",e:"The success was attributed to teamwork.",ej:"成功はチームワークのおかげとされた。",t:["attribution (n)"],id:[{e:"attribute A to B",j:"AはBのおかげ（せい）だとする"}]},
+{w:"cease",p:"v",l:3,c:"準1必須動詞",m:"やめる・止まる",pr:"/siːs/",f:"cease to do / cease doing。≒stop。フォーマル。",e:"The fighting ceased after negotiations.",ej:"交渉の後、戦闘は止まった。",t:["ceaseless (adj)"],id:[{e:"cease to exist",j:"存在しなくなる"}]},
+{w:"compensate",p:"v",l:3,c:"準1必須動詞",m:"補償する・埋め合わせる",pr:"/ˈkɒmpənseɪt/",f:"compensate for ～（〜を補う）。compensation（名）。",e:"Nothing can compensate for the loss.",ej:"何もその損失を補うことはできない。",t:["compensation (n)"],id:[{e:"compensate for",j:"〜を補償する"}]},
+{w:"conceal",p:"v",l:3,c:"準1必須動詞",m:"隠す・秘密にする",pr:"/kənˈsiːl/",f:"reveal（明らかにする）が反意語。",e:"She concealed her feelings.",ej:"彼女は感情を隠した。",t:["concealment (n)"],id:[]},
 {w:"condemn",p:"v",l:3,c:"準1必須動詞",m:"非難する・有罪宣告する",pr:"/kənˈdem/",f:"condemn A for B（AをBのことで非難する）。",e:"The action was condemned internationally.",ej:"その行為は国際的に非難された。",t:["condemnation (n)"],id:[]},
 {w:"confiscate",p:"v",l:3,c:"準1必須動詞",m:"没収する・押収する",pr:"/ˈkɒnfɪskeɪt/",f:"confiscation（名）。",e:"Police confiscated the weapons.",ej:"警察は武器を没収した。",t:["confiscation (n)"],id:[]},
-{w:"contemplate",p:"v",l:3,c:"準1必須動詞",m:"熟考する・検討する",pr:"/ˈkɒntəmpleɪt/",f:"💡 CON+TEMPLE（寺で深く考える→）熟考する。contemplation（名）。",e:"He contemplated changing careers.",ej:"彼はキャリアチェンジを検討した。",t:["contemplation (n)"],id:[]},
-{w:"convey",p:"v",l:3,c:"準1必須動詞",m:"伝える・運ぶ",pr:"/kənˈveɪ/",f:"💡 CON+VEY=運ぶ（コンベアー→）伝える・運ぶ。convey a message。",e:"Words cannot convey my gratitude.",ej:"言葉では感謝の気持ちを伝えられない。",t:["conveyance (n)"],id:[]},
+{w:"contemplate",p:"v",l:3,c:"準1必須動詞",m:"熟考する・検討する",pr:"/ˈkɒntəmpleɪt/",f:"≒consider carefully。contemplation（名）。",e:"He contemplated changing careers.",ej:"彼はキャリアチェンジを検討した。",t:["contemplation (n)"],id:[]},
+{w:"convey",p:"v",l:3,c:"準1必須動詞",m:"伝える・運ぶ",pr:"/kənˈveɪ/",f:"convey a message/meaning（意味・メッセージを伝える）。",e:"Words cannot convey my gratitude.",ej:"言葉では感謝の気持ちを伝えられない。",t:["conveyance (n)"],id:[]},
 {w:"correlate",p:"v",l:3,c:"準1必須動詞",m:"相関する・関連付ける",pr:"/ˈkɒrəleɪt/",f:"correlate with ～（〜と相関する）。",e:"Income correlates with education level.",ej:"収入は教育レベルと相関する。",t:["correlation (n)"],id:[{e:"correlate with",j:"〜と相関する"}]},
-{w:"cultivate",p:"v",l:3,c:"準1必須動詞",m:"育む・耕す",pr:"/ˈkʌltɪveɪt/",f:"💡 CULT=耕す（カルチベイト→）育む・耕す。culture（文化）と同語源。",e:"It's important to cultivate good habits.",ej:"良い習慣を育むことが大切だ。",t:["cultivation (n)"],id:[]},
+{w:"cultivate",p:"v",l:3,c:"準1必須動詞",m:"育む・耕す",pr:"/ˈkʌltɪveɪt/",f:"cultivate relationships（関係を築く）。",e:"It's important to cultivate good habits.",ej:"良い習慣を育むことが大切だ。",t:["cultivation (n)"],id:[]},
 {w:"depict",p:"v",l:3,c:"準1必須動詞",m:"描写する・表現する",pr:"/dɪˈpɪkt/",f:"depict A as B（AをBとして描写する）。",e:"The film depicts life in wartime.",ej:"その映画は戦時中の生活を描写している。",t:["depiction (n)"],id:[]},
-{w:"deplete",p:"v",l:3,c:"準1必須動詞",m:"使い果たす・枯渇させる",pr:"/dɪˈpliːt/",f:"💡 DE+PLETE=満たす（満ちたものを空にする→）使い果たす。depletion（名）。",e:"Overuse is depleting natural resources.",ej:"乱用が天然資源を枯渇させている。",t:["depletion (n)"],id:[]},
+{w:"deplete",p:"v",l:3,c:"準1必須動詞",m:"使い果たす・枯渇させる",pr:"/dɪˈpliːt/",f:"deplete resources（資源を枯渇させる）。",e:"Overuse is depleting natural resources.",ej:"乱用が天然資源を枯渇させている。",t:["depletion (n)"],id:[]},
 {w:"derive",p:"v",l:3,c:"準1必須動詞",m:"引き出す・由来する",pr:"/dɪˈraɪv/",f:"derive A from B（BからAを引き出す）。",e:"English derives many words from Latin.",ej:"英語は多くの語をラテン語から引き出している。",t:["derivation (n)"],id:[{e:"derive from",j:"〜に由来する"}]},
-{w:"deteriorate",p:"v",l:3,c:"準1必須動詞",m:"悪化する・劣化する",pr:"/dɪˈtɪəriəreɪt/",f:"💡 DE+TERIOR=悪い（デテリオレイト＝どんどん悪く→）悪化する。≒worsen。",e:"His health deteriorated rapidly.",ej:"彼の健康状態は急速に悪化した。",t:["deterioration (n)"],id:[]},
-{w:"deter",p:"v",l:3,c:"準1必須動詞",m:"思いとどまらせる・抑止する",pr:"/dɪˈtɜːr/",f:"💡 DE+TER=怖がらせる（ディター＝怖がらせて止める→）抑止する。deterrent（抑止力）。",e:"Fear of punishment deters crime.",ej:"処罰への恐れが犯罪を抑止する。",t:["deterrence (n)","deterrent (n)"],id:[]},
-{w:"diminish",p:"v",l:3,c:"準1必須動詞",m:"減少する・小さくする",pr:"/dɪˈmɪnɪʃ/",f:"💡 DI+MINI+SH（ミニにする→）減少する。≒decrease。",e:"His influence gradually diminished.",ej:"彼の影響力は徐々に低下した。",t:["diminishment (n)"],id:[]},
+{w:"deteriorate",p:"v",l:3,c:"準1必須動詞",m:"悪化する・劣化する",pr:"/dɪˈtɪəriəreɪt/",f:"≒worsen。deterioration（名）。",e:"His health deteriorated rapidly.",ej:"彼の健康状態は急速に悪化した。",t:["deterioration (n)"],id:[]},
+{w:"deter",p:"v",l:3,c:"準1必須動詞",m:"思いとどまらせる・抑止する",pr:"/dɪˈtɜːr/",f:"deter A from B（AがBするのを思いとどまらせる）。",e:"Fear of punishment deters crime.",ej:"処罰への恐れが犯罪を抑止する。",t:["deterrence (n)","deterrent (n)"],id:[]},
+{w:"diminish",p:"v",l:3,c:"準1必須動詞",m:"減少する・小さくする",pr:"/dɪˈmɪnɪʃ/",f:"≒decrease, reduce。",e:"His influence gradually diminished.",ej:"彼の影響力は徐々に低下した。",t:["diminishment (n)"],id:[]},
 {w:"discern",p:"v",l:3,c:"準1必須動詞",m:"識別する・見分ける",pr:"/dɪˈsɜːrn/",f:"discerning（眼識のある）も頻出。",e:"She could discern subtle differences.",ej:"彼女は微妙な違いを識別できた。",t:["discernment (n)","discerning (adj)"],id:[]},
 {w:"dispatch",p:"v",l:3,c:"準1必須動詞",m:"派遣する・発送する",pr:"/dɪˈspætʃ/",f:"dispatch troops/goods（軍・物資を派遣・発送）。",e:"Aid workers were dispatched to the region.",ej:"援助要員がその地域に派遣された。",t:[],id:[]},
-{w:"dispose",p:"v",l:3,c:"準1必須動詞",m:"処分する・配置する",pr:"/dɪˈspoʊz/",f:"💡 DIS+POSE=置く（離して置く→）処分する。dispose of～=処分する。",e:"Batteries should be disposed of properly.",ej:"電池は適切に処分すべきだ。",t:["disposal (n)"],id:[{e:"dispose of",j:"〜を処分する"}]},
+{w:"dispose",p:"v",l:3,c:"準1必須動詞",m:"処分する・配置する",pr:"/dɪˈspoʊz/",f:"dispose of ～（〜を処分する）。",e:"Batteries should be disposed of properly.",ej:"電池は適切に処分すべきだ。",t:["disposal (n)"],id:[{e:"dispose of",j:"〜を処分する"}]},
 {w:"divert",p:"v",l:3,c:"準1必須動詞",m:"そらす・転換する",pr:"/daɪˈvɜːrt/",f:"divert attention（注意をそらす）。",e:"The road was diverted for repairs.",ej:"道路は修理のため迂回された。",t:["diversion (n)"],id:[]},
-{w:"embrace",p:"v",l:3,c:"準1必須動詞",m:"受け入れる・抱擁する",pr:"/ɪmˈbreɪs/",f:"💡 EM+BRACE=腕（エンブレイス＝腕で抱く→）受け入れる・抱擁。embrace diversity。",e:"We should embrace new technology.",ej:"新しい技術を受け入れるべきだ。",t:[],id:[]},
+{w:"embrace",p:"v",l:3,c:"準1必須動詞",m:"受け入れる・抱擁する",pr:"/ɪmˈbreɪs/",f:"embrace diversity（多様性を受け入れる）。",e:"We should embrace new technology.",ej:"新しい技術を受け入れるべきだ。",t:[],id:[]},
 {w:"endure",p:"v",l:3,c:"準1必須動詞",m:"耐える・持続する",pr:"/ɪnˈdjʊər/",f:"endurance（名）。",e:"She endured years of hardship.",ej:"彼女は何年もの苦難に耐えた。",t:["endurance (n)"],id:[]},
-{w:"enforce",p:"v",l:3,c:"準1必須動詞",m:"執行する・強制する",pr:"/ɪnˈfɔːrs/",f:"💡 EN+FORCE（力を入れる→）執行する・強制する。enforcement（名）。",e:"Police enforce traffic regulations.",ej:"警察は交通規制を執行する。",t:["enforcement (n)"],id:[]},
-{w:"enhance",p:"v",l:3,c:"準1必須動詞",m:"高める・強化する",pr:"/ɪnˈhæns/",f:"💡 EN+HANCE=高い（エンハンス＝高める→）強化する。enhancement（名）。",e:"Exercise enhances mental well-being.",ej:"運動は精神的健康を高める。",t:["enhancement (n)"],id:[]},
+{w:"enforce",p:"v",l:3,c:"準1必須動詞",m:"執行する・強制する",pr:"/ɪnˈfɔːrs/",f:"enforce the law（法律を執行する）。",e:"Police enforce traffic regulations.",ej:"警察は交通規制を執行する。",t:["enforcement (n)"],id:[]},
+{w:"enhance",p:"v",l:3,c:"準1必須動詞",m:"高める・強化する",pr:"/ɪnˈhæns/",f:"enhance performance/image（性能・イメージを高める）。",e:"Exercise enhances mental well-being.",ej:"運動は精神的健康を高める。",t:["enhancement (n)"],id:[]},
 {w:"ensure",p:"v",l:3,c:"準1必須動詞",m:"確保する・保証する",pr:"/ɪnˈʃʊər/",f:"ensure that = 〜を確実にする。≒make sure。",e:"Ensure that all doors are locked.",ej:"すべてのドアに鍵がかかっているか確認せよ。",t:[],id:[]},
 {w:"establish",p:"v",l:3,c:"準1必須動詞",m:"設立する・確立する",pr:"/ɪˈstæblɪʃ/",f:"establish a company/rule（会社・ルールを設立・確立）。",e:"The company was established in 1990.",ej:"その会社は1990年に設立された。",t:["establishment (n)"],id:[]},
 {w:"evaluate",p:"v",l:3,c:"準1必須動詞",m:"評価する・査定する",pr:"/ɪˈvæljueɪt/",f:"evaluation（名）。≒assess。",e:"Teachers evaluate students regularly.",ej:"教師は定期的に生徒を評価する。",t:["evaluation (n)"],id:[]},
 {w:"execute",p:"v",l:3,c:"準1必須動詞",m:"実行する・処刑する",pr:"/ˈeksɪkjuːt/",f:"execute a plan（計画を実行する）。",e:"The plan was executed perfectly.",ej:"計画は完璧に実行された。",t:["execution (n)"],id:[]},
 {w:"exhaust",p:"v",l:3,c:"準1必須動詞",m:"使い果たす・疲弊させる",pr:"/ɪɡˈzɔːst/",f:"exhaustion（名）。exhaust all options（すべての選択肢を試す）。",e:"The long journey exhausted them.",ej:"長旅で彼らは疲れ果てた。",t:["exhaustion (n)"],id:[]},
-{w:"exploit",p:"v",l:3,c:"準1必須動詞",m:"利用する・搾取する",pr:"/ɪkˈsplɔɪt/",f:"💡 EX+PLOIT=折りたたむ（広げて使う→）利用する・搾取する。exploitation（名）。",e:"Companies should not exploit workers.",ej:"企業は労働者を搾取すべきでない。",t:["exploitation (n)"],id:[]},
+{w:"exploit",p:"v",l:3,c:"準1必須動詞",m:"利用する・搾取する",pr:"/ɪkˈsplɔɪt/",f:"exploit resources（資源を活用する）。exploitation（名）。",e:"Companies should not exploit workers.",ej:"企業は労働者を搾取すべきでない。",t:["exploitation (n)"],id:[]},
 {w:"expose",p:"v",l:3,c:"準1必須動詞",m:"さらす・暴露する",pr:"/ɪkˈspoʊz/",f:"be exposed to ～（〜にさらされる）。exposure（名）。",e:"Children should be exposed to art.",ej:"子供たちは芸術に触れるべきだ。",t:["exposure (n)"],id:[{e:"be exposed to",j:"〜にさらされる"}]},
-{w:"fluctuate",p:"v",l:3,c:"準1必須動詞",m:"変動する・上下する",pr:"/ˈflʌktʃueɪt/",f:"💡 FLUCT=流れ（フラクチュエイト＝波のように上下→）変動する。fluctuation（名）。",e:"Prices fluctuate with the seasons.",ej:"価格は季節によって変動する。",t:["fluctuation (n)"],id:[]},
-{w:"foster",p:"v",l:3,c:"準1必須動詞",m:"育む・促進する",pr:"/ˈfɒstər/",f:"💡 FOSTER=育ての親（フォスター＝大事に育てる→）育む。foster creativity。",e:"Good teachers foster curiosity.",ej:"良い教師は好奇心を育む。",t:[],id:[]},
+{w:"fluctuate",p:"v",l:3,c:"準1必須動詞",m:"変動する・上下する",pr:"/ˈflʌktʃueɪt/",f:"fluctuation（名）。",e:"Prices fluctuate with the seasons.",ej:"価格は季節によって変動する。",t:["fluctuation (n)"],id:[]},
+{w:"foster",p:"v",l:3,c:"準1必須動詞",m:"育む・促進する",pr:"/ˈfɒstər/",f:"foster creativity/growth（創造性・成長を育む）。",e:"Good teachers foster curiosity.",ej:"良い教師は好奇心を育む。",t:[],id:[]},
 {w:"generate",p:"v",l:3,c:"準1必須動詞",m:"生み出す・発生させる",pr:"/ˈdʒenəreɪt/",f:"generate electricity/income（電力・収入を生み出す）。",e:"Solar panels generate clean energy.",ej:"太陽光パネルはクリーンエネルギーを生み出す。",t:["generation (n)","generator (n)"],id:[]},
-{w:"hamper",p:"v",l:3,c:"準1必須動詞",m:"妨げる・邪魔する",pr:"/ˈhæmpər/",f:"💡 ハンパー（中途半端にされる→）妨げる。≒hinder, impede。",e:"Bad weather hampered rescue efforts.",ej:"悪天候が救助活動を妨げた。",t:[],id:[]},
-{w:"implement",p:"v",l:3,c:"準1必須動詞",m:"実施する・実行する",pr:"/ˈɪmplɪment/",f:"💡 IMPLE+MENT（インプリメント＝中に入れて実行→）実施する。implementation（名）。",e:"The new system was implemented last year.",ej:"新しいシステムは昨年実施された。",t:["implementation (n)"],id:[]},
-{w:"impose",p:"v",l:3,c:"準1必須動詞",m:"課す・押しつける",pr:"/ɪmˈpoʊz/",f:"💡 IM+POSE=置く（上に置く→）課す。impose A on B。",e:"A new tax was imposed on luxury goods.",ej:"高級品に新たな税が課された。",t:["imposition (n)"],id:[{e:"impose A on B",j:"AをBに課す"}]},
-{w:"inhibit",p:"v",l:3,c:"準1必須動詞",m:"阻害する・抑制する",pr:"/ɪnˈhɪbɪt/",f:"💡 IN+HIBIT=持つ（抑え持つ→）抑制する。inhibition（名）。",e:"Fear inhibits creative thinking.",ej:"恐れは創造的思考を阻害する。",t:["inhibition (n)"],id:[]},
+{w:"hamper",p:"v",l:3,c:"準1必須動詞",m:"妨げる・邪魔する",pr:"/ˈhæmpər/",f:"≒hinder, impede。",e:"Bad weather hampered rescue efforts.",ej:"悪天候が救助活動を妨げた。",t:[],id:[]},
+{w:"implement",p:"v",l:3,c:"準1必須動詞",m:"実施する・実行する",pr:"/ˈɪmplɪment/",f:"implement a policy/plan（政策・計画を実施）。",e:"The new system was implemented last year.",ej:"新しいシステムは昨年実施された。",t:["implementation (n)"],id:[]},
+{w:"impose",p:"v",l:3,c:"準1必須動詞",m:"課す・押しつける",pr:"/ɪmˈpoʊz/",f:"impose a tax/fine（税金・罰金を課す）。",e:"A new tax was imposed on luxury goods.",ej:"高級品に新たな税が課された。",t:["imposition (n)"],id:[{e:"impose A on B",j:"AをBに課す"}]},
+{w:"inhibit",p:"v",l:3,c:"準1必須動詞",m:"阻害する・抑制する",pr:"/ɪnˈhɪbɪt/",f:"inhibit growth（成長を阻害する）。",e:"Fear inhibits creative thinking.",ej:"恐れは創造的思考を阻害する。",t:["inhibition (n)"],id:[]},
 {w:"initiate",p:"v",l:3,c:"準1必須動詞",m:"開始する・始める",pr:"/ɪˈnɪʃieɪt/",f:"initiate a project（プロジェクトを開始する）。",e:"She initiated the peace talks.",ej:"彼女が和平交渉を開始した。",t:["initiative (n)"],id:[]},
-{w:"integrate",p:"v",l:3,c:"準1必須動詞",m:"統合する・一体化する",pr:"/ˈɪntɪɡreɪt/",f:"💡 INTEGR=全体（インテグレイト＝一つにする→）統合する。integration（名）。",e:"Technology has integrated into daily life.",ej:"技術は日常生活に統合されている。",t:["integration (n)"],id:[]},
+{w:"integrate",p:"v",l:3,c:"準1必須動詞",m:"統合する・一体化する",pr:"/ˈɪntɪɡreɪt/",f:"integration（名）。",e:"Technology has integrated into daily life.",ej:"技術は日常生活に統合されている。",t:["integration (n)"],id:[]},
 {w:"invoke",p:"v",l:3,c:"準1必須動詞",m:"援用する・呼び起こす",pr:"/ɪnˈvoʊk/",f:"invoke a law（法律を援用する）。",e:"He invoked the right to remain silent.",ej:"彼は黙秘権を援用した。",t:[],id:[]},
 {w:"isolate",p:"v",l:3,c:"準1必須動詞",m:"孤立させる・隔離する",pr:"/ˈaɪsəleɪt/",f:"isolation（名）。isolate A from B（AをBから隔離）。",e:"The patient was isolated to prevent infection.",ej:"感染を防ぐため患者は隔離された。",t:["isolation (n)"],id:[]},
 {w:"justify",p:"v",l:3,c:"準1必須動詞",m:"正当化する",pr:"/ˈdʒʌstɪfaɪ/",f:"justify doing = 〜することを正当化する。",e:"Nothing can justify violence.",ej:"何も暴力を正当化できない。",t:["justification (n)"],id:[]},
-{w:"manipulate",p:"v",l:3,c:"準1必須動詞",m:"操作する・巧みに扱う",pr:"/məˈnɪpjuleɪt/",f:"💡 MANI=手（マニピュレイト＝手で操る→）操作する。manipulation（名）。",e:"The media can manipulate public opinion.",ej:"メディアは世論を操作できる。",t:["manipulation (n)"],id:[]},
-{w:"mitigate",p:"v",l:3,c:"準1必須動詞",m:"緩和する・軽減する",pr:"/ˈmɪtɪɡeɪt/",f:"💡 MITI=やさしい（ミティゲイト＝優しくする→）緩和する。mitigation（名）。",e:"Trees mitigate the effects of flooding.",ej:"木は洪水の影響を緩和する。",t:["mitigation (n)"],id:[]},
+{w:"manipulate",p:"v",l:3,c:"準1必須動詞",m:"操作する・巧みに扱う",pr:"/məˈnɪpjuleɪt/",f:"manipulate data/people（データ・人を操作）。",e:"The media can manipulate public opinion.",ej:"メディアは世論を操作できる。",t:["manipulation (n)"],id:[]},
+{w:"mitigate",p:"v",l:3,c:"準1必須動詞",m:"緩和する・軽減する",pr:"/ˈmɪtɪɡeɪt/",f:"mitigate risk/damage（リスク・被害を軽減）。",e:"Trees mitigate the effects of flooding.",ej:"木は洪水の影響を緩和する。",t:["mitigation (n)"],id:[]},
 {w:"modify",p:"v",l:3,c:"準1必須動詞",m:"修正する・変更する",pr:"/ˈmɒdɪfaɪ/",f:"modification（名）。",e:"The plan was modified after feedback.",ej:"計画はフィードバックを受けて修正された。",t:["modification (n)"],id:[]},
 {w:"motivate",p:"v",l:3,c:"準1必須動詞",m:"動機づける・やる気にさせる",pr:"/ˈmoʊtɪveɪt/",f:"motivation（名）。",e:"Good leaders motivate their team.",ej:"良いリーダーはチームを動機づける。",t:["motivation (n)"],id:[]},
 {w:"neglect",p:"v",l:3,c:"準1必須動詞",m:"怠る・無視する",pr:"/nɪˈɡlekt/",f:"neglect one's health（健康を怠る）。",e:"He neglected his responsibilities.",ej:"彼は責任を怠った。",t:["negligence (n)","negligent (adj)"],id:[]},
@@ -1203,21 +769,21 @@ const V=[
 {w:"oppose",p:"v",l:3,c:"準1必須動詞",m:"反対する・抵抗する",pr:"/əˈpoʊz/",f:"opposition（名）。",e:"Many citizens opposed the new law.",ej:"多くの市民が新しい法律に反対した。",t:["opposition (n)"],id:[]},
 {w:"overcome",p:"v",l:3,c:"準1必須動詞",m:"克服する・乗り越える",pr:"/ˌoʊvərˈkʌm/",f:"overcome obstacles/difficulties（障害・困難を克服）。",e:"She overcame many challenges.",ej:"彼女は多くの困難を克服した。",t:[],id:[]},
 {w:"overlook",p:"v",l:3,c:"準1必須動詞",m:"見落とす・見渡す",pr:"/ˌoʊvərˈlʊk/",f:"overlook a mistake（ミスを見落とす）。",e:"Don't overlook the details.",ej:"細部を見落としてはいけない。",t:[],id:[]},
-{w:"preserve",p:"v",l:3,c:"準1必須動詞",m:"保存する・保護する",pr:"/prɪˈzɜːrv/",f:"💡 PRE+SERVE=守る（プリザーブ＝前もって守る→）保存する。preservation（名）。",e:"We must preserve biodiversity.",ej:"生物多様性を保護しなければならない。",t:["preservation (n)"],id:[]},
+{w:"preserve",p:"v",l:3,c:"準1必須動詞",m:"保存する・保護する",pr:"/prɪˈzɜːrv/",f:"preserve traditions/nature（伝統・自然を保護）。",e:"We must preserve biodiversity.",ej:"生物多様性を保護しなければならない。",t:["preservation (n)"],id:[]},
 {w:"prevent",p:"v",l:3,c:"準1必須動詞",m:"防ぐ・妨げる",pr:"/prɪˈvent/",f:"prevent A from doing（AがするのをB）。",e:"Vaccines prevent disease.",ej:"ワクチンは病気を防ぐ。",t:["prevention (n)"],id:[{e:"prevent A from doing",j:"AがするのをBで防ぐ"}]},
-{w:"prohibit",p:"v",l:3,c:"準1必須動詞",m:"禁止する",pr:"/prəˈhɪbɪt/",f:"💡 PRO+HIBIT=持つ（前で止めて持つ→）禁止する。prohibition（名）。",e:"Smoking is prohibited in public places.",ej:"公共の場での喫煙は禁止されている。",t:["prohibition (n)"],id:[]},
+{w:"prohibit",p:"v",l:3,c:"準1必須動詞",m:"禁止する",pr:"/prəˈhɪbɪt/",f:"prohibit A from doing（AがするのをBで禁じる）。",e:"Smoking is prohibited in public places.",ej:"公共の場での喫煙は禁止されている。",t:["prohibition (n)"],id:[]},
 {w:"propose",p:"v",l:2,c:"準1必須動詞",m:"提案する",pr:"/prəˈpoʊz/",f:"propose a solution（解決策を提案する）。",e:"She proposed a new approach.",ej:"彼女は新しいアプローチを提案した。",t:["proposal (n)"],id:[]},
-{w:"reinforce",p:"v",l:3,c:"準1必須動詞",m:"強化する・補強する",pr:"/ˌriːɪnˈfɔːrs/",f:"💡 RE+IN+FORCE（力を再び入れる→）強化する。reinforcement（名）。",e:"The results reinforce our hypothesis.",ej:"結果は我々の仮説を強化する。",t:["reinforcement (n)"],id:[]},
-{w:"reluctant",p:"adj",l:3,c:"準1必須形容詞",m:"気乗りしない・いやいやな",pr:"/rɪˈlʌktənt/",f:"💡 RE+LUCT=戦う（リラクタント＝抵抗して嫌がる→）気乗りしない。be reluctant to do。",e:"He was reluctant to accept help.",ej:"彼は援助を受け入れることをいやがった。",t:["reluctance (n)"],id:[{e:"be reluctant to",j:"〜するのを嫌がる"}]},
+{w:"reinforce",p:"v",l:3,c:"準1必須動詞",m:"強化する・補強する",pr:"/ˌriːɪnˈfɔːrs/",f:"reinforce a belief/structure（信念・構造を強化）。",e:"The results reinforce our hypothesis.",ej:"結果は我々の仮説を強化する。",t:["reinforcement (n)"],id:[]},
+{w:"reluctant",p:"adj",l:3,c:"準1必須形容詞",m:"気乗りしない・いやいやな",pr:"/rɪˈlʌktənt/",f:"be reluctant to do（〜するのをいやがる）。",e:"He was reluctant to accept help.",ej:"彼は援助を受け入れることをいやがった。",t:["reluctance (n)"],id:[{e:"be reluctant to",j:"〜するのを嫌がる"}]},
 {w:"restrict",p:"v",l:2,c:"準1必須動詞",m:"制限する・規制する",pr:"/rɪˈstrɪkt/",f:"restrict access/movement（アクセス・移動を制限）。",e:"Access is restricted to staff only.",ej:"入場はスタッフのみに制限されている。",t:["restriction (n)"],id:[]},
 {w:"retrieve",p:"v",l:3,c:"準1必須動詞",m:"取り戻す・検索する",pr:"/rɪˈtriːv/",f:"retrieve data（データを取り出す）。",e:"She retrieved the lost document.",ej:"彼女は紛失した書類を取り戻した。",t:["retrieval (n)"],id:[]},
-{w:"stimulate",p:"v",l:3,c:"準1必須動詞",m:"刺激する・活性化する",pr:"/ˈstɪmjuleɪt/",f:"💡 STIMUL=刺す（スティミュレイト＝チクチク刺激→）刺激する。stimulus（名）。",e:"Exercise stimulates the immune system.",ej:"運動は免疫系を刺激する。",t:["stimulation (n)","stimulus (n)"],id:[]},
+{w:"stimulate",p:"v",l:3,c:"準1必須動詞",m:"刺激する・活性化する",pr:"/ˈstɪmjuleɪt/",f:"stimulate growth/economy（成長・経済を刺激）。",e:"Exercise stimulates the immune system.",ej:"運動は免疫系を刺激する。",t:["stimulation (n)","stimulus (n)"],id:[]},
 {w:"substitute",p:"v",l:3,c:"準1必須動詞",m:"代替する・取り替える",pr:"/ˈsʌbstɪtjuːt/",f:"substitute A for B（AをBの代わりにする）。",e:"You can substitute honey for sugar.",ej:"砂糖の代わりにはちみつを使えます。",t:["substitution (n)"],id:[{e:"substitute A for B",j:"BのかわりにAを使う"}]},
-{w:"suppress",p:"v",l:3,c:"準1必須動詞",m:"抑圧する・抑制する",pr:"/səˈpres/",f:"💡 SUP+PRESS（下に押す→）抑圧する。suppression（名）。",e:"The government suppressed protests.",ej:"政府は抗議運動を抑圧した。",t:["suppression (n)"],id:[]},
-{w:"sustain",p:"v",l:3,c:"準1必須動詞",m:"持続する・支える",pr:"/səˈsteɪn/",f:"💡 SUS+TAIN=保つ（サステイン＝下から支える→）持続する。sustainable=持続可能な。",e:"Economic growth cannot be sustained forever.",ej:"経済成長は永遠に持続できない。",t:["sustainable (adj)","sustainability (n)"],id:[]},
+{w:"suppress",p:"v",l:3,c:"準1必須動詞",m:"抑圧する・抑制する",pr:"/səˈpres/",f:"suppress emotions/rebellion（感情・反乱を抑圧）。",e:"The government suppressed protests.",ej:"政府は抗議運動を抑圧した。",t:["suppression (n)"],id:[]},
+{w:"sustain",p:"v",l:3,c:"準1必須動詞",m:"持続する・支える",pr:"/səˈsteɪn/",f:"sustainable（形）はここから。",e:"Economic growth cannot be sustained forever.",ej:"経済成長は永遠に持続できない。",t:["sustainable (adj)","sustainability (n)"],id:[]},
 {w:"transform",p:"v",l:2,c:"準1必須動詞",m:"変革する・一変させる",pr:"/trænsˈfɔːrm/",f:"transformation（名）。",e:"Digital tech has transformed society.",ej:"デジタル技術は社会を一変させた。",t:["transformation (n)"],id:[]},
 {w:"transmit",p:"v",l:3,c:"準1必須動詞",m:"伝達する・感染させる",pr:"/trænsˈmɪt/",f:"transmit information/disease（情報・病気を伝達・感染）。",e:"Viruses are transmitted through contact.",ej:"ウイルスは接触によって感染する。",t:["transmission (n)"],id:[]},
-{w:"undermine",p:"v",l:3,c:"準1必須動詞",m:"損なう・弱体化させる",pr:"/ˌʌndərˈmaɪn/",f:"💡 UNDER+MINE（下から地雷→）損なう。undermine confidence=信頼を損なう。",e:"Corruption undermines democracy.",ej:"汚職は民主主義を損なう。",t:[],id:[]},
+{w:"undermine",p:"v",l:3,c:"準1必須動詞",m:"損なう・弱体化させる",pr:"/ˌʌndərˈmaɪn/",f:"undermine confidence/authority（信頼・権威を損なう）。",e:"Corruption undermines democracy.",ej:"汚職は民主主義を損なう。",t:[],id:[]},
 // ── 準1必須名詞 追加 ──
 {w:"abundance",p:"n",l:3,c:"準1必須名詞",m:"豊富・十分な量",pr:"/əˈbʌndəns/",f:"abundant（形）の名詞形。",e:"There is an abundance of evidence.",ej:"証拠は豊富にある。",t:["abundant (adj)"],id:[{e:"in abundance",j:"豊富に"}]},
 {w:"alliance",p:"n",l:3,c:"準1必須名詞",m:"同盟・連携",pr:"/əˈlaɪəns/",f:"form an alliance（同盟を結ぶ）。",e:"The two countries formed a military alliance.",ej:"両国は軍事同盟を結んだ。",t:["allied (adj)"],id:[]},
@@ -1626,11 +1192,11 @@ CFG.forEach((c,i)=>{
   p.innerHTML=`
 <div class="pr-row"><div class="prb"><div class="prf" id="pf${i}" style="width:0%"></div></div><div class="prt" id="pt${i}">0/0</div></div>
 <div class="sr">
-  <div style="flex:1;display:flex;justify-content:center;gap:8px">
-    <button class="ch ch-score" style="color:var(--g)" onclick="Hs('g',${i})">✓<span id="sg${i}">0</span></button>
-    <button class="ch ch-score" style="color:var(--y)" onclick="Hs('h',${i})">△<span id="sh${i}">0</span></button>
-    <button class="ch ch-score" style="color:var(--r)" onclick="Hs('f',${i})">✗<span id="sf${i}">0</span></button>
-  </div>
+  <button class="ch ch-bk" id="cbk${i}" onclick="Bk(${i})" disabled>←</button>
+  <button class="ch" style="color:var(--g)" onclick="Hs('g',${i})">✓<span id="sg${i}">0</span></button>
+  <button class="ch" style="color:var(--y)" onclick="Hs('h',${i})">△<span id="sh${i}">0</span></button>
+  <button class="ch" style="color:var(--r)" onclick="Hs('f',${i})">✗<span id="sf${i}">0</span></button>
+  <button class="ch" style="margin-left:auto" id="sfb${i}" onclick="Sf(${i})">🔀</button>
 </div>
 <div class="ca"><div class="fw" id="fw${i}">
   <div class="fc" id="fc${i}">
@@ -1767,21 +1333,11 @@ function render(i){
 
   document.getElementById('pf'+i).style.width=Math.round(d.idx/d.deck.length*100)+'%';
   document.getElementById('pt'+i).textContent=d.idx+'/'+d.deck.length;
-  const cbkEl=document.getElementById('cbk'+i);if(cbkEl)cbkEl.disabled=!d.prev;
-  // やり直す semi-transparent when nothing to go back to
-  const btnBack=document.getElementById('btn-back');
-  if(btnBack)btnBack.style.opacity=d.prev?'1':'.35';
+  document.getElementById('cbk'+i).disabled=!d.prev;
 
   // Update shuffle button text
-  const gSfb=document.getElementById('g-sfb');
-  if(gSfb)gSfb.textContent=d.shuffled?'⇆':'🔀';
-
-  // Update star on global button
-  const gStar=document.getElementById('g-star');
-  if(gStar&&d.idx<d.deck.length){
-    const w=d.deck[d.idx];
-    gStar.textContent=isStarred(w.e||w.w)?'★':'☆';
-  }
+  const sfBtn=document.getElementById('sfb'+i);
+  if(sfBtn)sfBtn.textContent=d.shuffled?'📋':'🔀';
 }
 
 /* ═══ CONTROLS ═══ */
@@ -1831,803 +1387,15 @@ window.Bk=i=>{
 window.Sf=i=>{
   haptic.confirm();
   const d=DK[i],c=CFG[i];
-  if(!d.shuffled){
-    // Shuffle
-    d.shuffled=true;
-    d.deck=shuf([...SRC[c.src]]);
-  }else{
-    // Unshuffle (back to order)
-    d.shuffled=false;
-    d.deck=[...SRC[c.src]];
-    try{const a=new Audio('not-shake.mp3');a.play().catch(()=>{});}catch(e){}
-  }
+  d.shuffled=!d.shuffled;
+  d.deck=d.shuffled?shuf([...SRC[c.src]]):[...SRC[c.src]];
   d.idx=0;d.st={g:0,h:0,f:0};d.hist=[];d.prev=null;
   document.getElementById('sg'+i).textContent=0;
   document.getElementById('sh'+i).textContent=0;
   document.getElementById('sf'+i).textContent=0;
   document.getElementById('ac'+i).style.display='none';
-  // Card shake animation
-  const fw=document.getElementById('fw'+i);
-  if(fw&&!fw.classList.contains('card-shaking')){
-    fw.classList.add('card-shaking');
-    setTimeout(()=>fw.classList.remove('card-shaking'),500);
-  }
-  // Text slide-up
-  const fc=document.getElementById('fc'+i);
-  if(fc){fc.classList.remove('card-slide-up');void fc.offsetWidth;fc.classList.add('card-slide-up');
-    setTimeout(()=>fc.classList.remove('card-slide-up'),400);}
   render(i);
 };
-
-/* ═══ SHAKE DETECTION + PHYSICS ═══ */
-const SHAKE_KEY='inglish_shake_granted';
-let lastShakeT=0;
-let physicsRunning=false;
-
-function doShuffle(){
-  const d=DK[curP],c=CFG[curP];
-  d.shuffled=true;
-  d.deck=shuf([...SRC[c.src]]);
-  d.idx=0;d.st={g:0,h:0,f:0};d.hist=[];d.prev=null;
-  document.getElementById('sg'+curP).textContent=0;
-  document.getElementById('sh'+curP).textContent=0;
-  document.getElementById('sf'+curP).textContent=0;
-  document.getElementById('ac'+curP).style.display='none';
-  // Text slide-up
-  const fc=document.getElementById('fc'+curP);
-  if(fc){fc.classList.remove('card-slide-up');void fc.offsetWidth;fc.classList.add('card-slide-up');
-    setTimeout(()=>fc.classList.remove('card-slide-up'),400);}
-  render(curP);
-}
-
-// Light shake → action based on settings
-function onLightShake(){
-  const now=Date.now();
-  if(now-lastShakeT<700)return;
-  lastShakeT=now;
-  haptic.confirm();
-  const mode=localStorage.getItem('inglish_shake_mode')||'none';
-  if(mode==='none')return;
-  if(mode==='shuffle'){
-    const d=DK[curP];d.shuffled=true;
-    doShuffle();
-    const fw=document.getElementById('fw'+curP);
-    if(fw&&!fw.classList.contains('card-shaking')){fw.classList.add('card-shaking');setTimeout(()=>fw.classList.remove('card-shaking'),500);}
-  }else if(mode==='check'){
-    // Flip card to show answer
-    const d=DK[curP];
-    if(!d.flipped&&d.idx<d.deck.length){d.flipped=true;render(curP);}
-  }else if(mode==='back'){
-    Bk(curP);
-  }
-}
-
-// Heavy shake → action based on settings (default: none = physics drop)
-function onHeavyShake(ax,ay){
-  const now=Date.now();
-  if(now-lastShakeT<1200||physicsRunning)return;
-  lastShakeT=now;
-  haptic.confirm();
-  const mode=localStorage.getItem('inglish_heavy_mode')||'none';
-  
-  const homeEl=document.getElementById('home');
-  const isHome=homeEl&&!homeEl.classList.contains('hidden');
-  
-  if(mode==='none'){
-    // Physics drop (default)
-    if(isHome){runHomePhysicsDrop(ax,ay);}
-    else{doShuffle();runCardPhysicsDrop(ax,ay);}
-  }else if(mode==='shuffle'){
-    if(!isHome){const d=DK[curP];d.shuffled=true;doShuffle();
-      const fw=document.getElementById('fw'+curP);
-      if(fw&&!fw.classList.contains('card-shaking-hard')){fw.classList.add('card-shaking-hard');setTimeout(()=>fw.classList.remove('card-shaking-hard'),600);}
-    }
-  }else if(mode==='check'){
-    if(!isHome){const d=DK[curP];if(!d.flipped&&d.idx<d.deck.length){d.flipped=true;render(curP);}}
-  }else if(mode==='back'){
-    if(!isHome)Bk(curP);
-  }
-}
-
-function runCardPhysicsDrop(shakeX,shakeY){
-  physicsRunning=true;
-  const i=curP;
-  const els=[];
-  const fw=document.getElementById('fw'+i);
-  if(fw)els.push({el:fw,mass:1.0});
-  document.querySelectorAll('.ch-score').forEach(el=>els.push({el,mass:0.6}));
-  document.querySelectorAll('.float-btn').forEach(el=>els.push({el,mass:0.5}));
-  const pr=document.querySelector('.pr-row');
-  if(pr)els.push({el:pr,mass:0.4});
-  runPhysics(els,shakeX,shakeY,null);
-}
-
-function runHomePhysicsDrop(shakeX,shakeY){
-  physicsRunning=true;
-  const els=[];
-  const hdr=document.querySelector('.hm-hdr');
-  if(hdr)els.push({el:hdr,mass:0.3});
-  document.querySelectorAll('.hcard').forEach((el,idx)=>els.push({el,mass:0.4+idx*0.03}));
-  document.querySelectorAll('.hg-lbl').forEach(el=>els.push({el,mass:0.2}));
-  
-  runPhysics(els,shakeX,shakeY,()=>{
-    // After physics settle, switch to icon grid using shared function
-    localStorage.setItem('inglish_layout','icon');
-    showIconGrid();
-  });
-}
-
-function restoreHomeFromGrid(){
-  const g=document.getElementById('icon-grid');if(g)g.remove();
-  document.querySelectorAll('.hg-lbl').forEach(l=>{l.style.display='';});
-  document.querySelectorAll('.hg-list').forEach(l=>{l.style.display='';});
-  const h=document.querySelector('.hm-hdr');
-  if(h){h.style.display='';}
-  const bb=document.getElementById('home-bottom-bar');
-  if(bb){bb.style.display='flex';}
-  // Clear any old icon order cache if emojis changed
-  localStorage.removeItem(ICON_ORDER_KEY);
-}
-
-/* ═══ SETTINGS ═══ */
-/* ═══ LOCK SCREEN ═══ */
-const LOCK_KEY='inglish_lockscreen';
-const _isPWA=window.matchMedia('(display-mode:standalone)').matches||navigator.standalone===true;
-
-function updateLockClock(){
-  const now=new Date();
-  const h=String(now.getHours()).padStart(2,'0');
-  const m=String(now.getMinutes()).padStart(2,'0');
-  const ids=['lc-h1','lc-h2','lc-m1','lc-m2'];
-  [h[0],h[1],m[0],m[1]].forEach((v,i)=>{
-    const el=document.getElementById(ids[i]);
-    if(el&&el.textContent!==v){el.textContent=v;}
-  });
-  const days=['日','月','火','水','木','金','土'];
-  document.getElementById('lock-date').textContent=`${now.getMonth()+1}月${now.getDate()}日 ${days[now.getDay()]}曜日`;
-}
-function showLockScreen(){
-  if(!_isPWA)return;
-  const ls=document.getElementById('lockscreen');
-  ls.style.display='flex';ls.style.transform='scale(1)';ls.style.opacity='1';
-  updateLockClock();
-  if(!window._lockIv)window._lockIv=setInterval(updateLockClock,1000);
-  const k=document.getElementById('lock-knob');if(k)k.style.left='4px';
-  const lb=document.getElementById('lock-slide-label');if(lb)lb.style.opacity='1';
-}
-function hideLockScreen(){
-  const ls=document.getElementById('lockscreen');
-  ls.style.transition='transform .8s ease,opacity .5s ease';
-  ls.style.transform='scale(1.8)';ls.style.opacity='0';
-  setTimeout(()=>{ls.style.display='none';ls.style.transform='';ls.style.opacity='';ls.style.transition='';},800);
-  if(window._lockIv){clearInterval(window._lockIv);window._lockIv=null;}
-}
-// Lock slider
-(function(){
-  const knob=document.getElementById('lock-knob');
-  if(!knob)return;
-  let dragging=false,startX=0,knobLeft=4;
-  const maxLeft=280-52-8;
-  knob.addEventListener('touchstart',e=>{dragging=true;startX=e.touches[0].clientX-knobLeft;knob.style.transition='none';},{passive:true});
-  document.addEventListener('touchmove',e=>{
-    if(!dragging)return;
-    let x=e.touches[0].clientX-startX;
-    if(x<4)x=4;if(x>maxLeft)x=maxLeft;
-    knobLeft=x;knob.style.left=x+'px';
-    const lb=document.getElementById('lock-slide-label');
-    if(lb)lb.style.opacity=String(Math.max(0,1-knobLeft/maxLeft));
-  },{passive:true});
-  document.addEventListener('touchend',()=>{
-    if(!dragging)return;dragging=false;
-    knob.style.transition='left .5s cubic-bezier(.62,0,.4,1)';
-    if(knobLeft>maxLeft*0.75){
-      knob.style.left=maxLeft+'px';haptic.confirm();
-      const ls=document.getElementById('lockscreen');
-      ls.style.transition='filter .5s ease';ls.style.filter='blur(12px)';
-      setTimeout(async()=>{
-        try{
-          const c=new Uint8Array(32);crypto.getRandomValues(c);
-          const u=new Uint8Array(16);crypto.getRandomValues(u);
-          await navigator.credentials.create({publicKey:{challenge:c,rp:{name:'iN glish'},user:{id:u,name:'u@l',displayName:'U'},pubKeyCredParams:[{type:'public-key',alg:-7}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000}});
-          haptic.confirm();ls.style.filter='';hideLockScreen();
-        }catch(e){
-          haptic.error();ls.style.filter='';
-          ls.style.animation='lockShake .5s ease';setTimeout(()=>{ls.style.animation='';},500);
-          knob.style.left='4px';knobLeft=4;
-          const lb=document.getElementById('lock-slide-label');if(lb)lb.style.opacity='1';
-        }
-      },600);
-    }else{knob.style.left='4px';knobLeft=4;const lb=document.getElementById('lock-slide-label');if(lb)lb.style.opacity='1';}
-  });
-})();
-// Lock settings toggle
-document.getElementById('s-lockscreen').addEventListener('click',function(){
-  haptic();
-  if(!this.classList.contains('on')){
-    if(!_isPWA)return;
-    showDialog('lock-confirm-dlg','lock-confirm-card');
-  }else{this.classList.remove('on');localStorage.setItem(LOCK_KEY,'0');}
-});
-document.getElementById('lock-dlg-cancel').addEventListener('click',()=>{haptic();hideDialog('lock-confirm-dlg','lock-confirm-card');});
-document.getElementById('lock-dlg-ok').addEventListener('click',()=>{
-  haptic.confirm();localStorage.setItem(LOCK_KEY,'1');
-  document.getElementById('s-lockscreen').classList.add('on');
-  hideDialog('lock-confirm-dlg','lock-confirm-card',()=>{closeSettings();setTimeout(()=>showLockScreen(),500);});
-});
-if(_isPWA&&localStorage.getItem(LOCK_KEY)==='1'){showLockScreen();}
-
-/* ═══ NOTIFICATIONS ═══ */
-let _notifEnabled=localStorage.getItem('inglish_notif')==='1';
-async function requestNotifPermission(){
-  if(!('Notification' in window)||!_isPWA)return false;
-  if(Notification.permission==='granted')return true;
-  if(Notification.permission==='denied')return false;
-  return (await Notification.requestPermission())==='granted';
-}
-function sendStudyNotif(){
-  if(!_notifEnabled||!_isPWA)return;
-  if(Notification.permission!=='granted')return;
-  try{new Notification('iN glish',{body:'勉強お疲れ様✨',icon:'icon-192.png'});}catch(e){}
-}
-document.getElementById('s-notif').addEventListener('click',async function(){
-  haptic();
-  if(!_isPWA)return;
-  if(!this.classList.contains('on')){
-    const ok=await requestNotifPermission();
-    if(ok){this.classList.add('on');localStorage.setItem('inglish_notif','1');_notifEnabled=true;haptic.confirm();}
-    else{haptic.error();}
-  }else{this.classList.remove('on');localStorage.setItem('inglish_notif','0');_notifEnabled=false;}
-});
-
-/* ═══ KEYBOARD SHORTCUTS (PC) ═══ */
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    const iframe=document.getElementById('iframe-overlay');
-    if(iframe&&iframe.style.visibility==='visible'){document.getElementById('iframe-back').click();return;}
-    const settings=document.getElementById('settings-overlay');
-    if(settings&&settings.style.display==='flex'){closeSettings();return;}
-    const home=document.getElementById('home');
-    if(home&&home.classList.contains('hidden')){goHome();return;}
-  }
-});
-
-/* ═══ CRASH RECOVERY ═══ */
-// Save app state periodically for crash recovery
-setInterval(()=>{
-  try{
-    localStorage.setItem('inglish_last_active',Date.now().toString());
-  }catch(e){}
-},5000);
-// On visibility change (app comes back from background)
-document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible'){
-    // Re-init shake if needed
-    if(!_shakeActive)initShake();
-  }
-});
-
-/* ═══ IFRAME APP ═══ */
-function openIframe(url,title){
-  const ov=document.getElementById('iframe-overlay');
-  document.getElementById('iframe-content').src=url;
-  ov.style.visibility='visible';
-  ov.style.transform='translateX(100%)';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{ov.style.transform='translateX(0)';}));
-}
-document.getElementById('iframe-back').addEventListener('click',()=>{
-  haptic();
-  const ov=document.getElementById('iframe-overlay');
-  ov.style.transform='translateX(100%)';
-  setTimeout(()=>{
-    document.getElementById('iframe-content').src='';
-    ov.style.visibility='hidden';
-    // Restore icon grid if in icon mode
-    if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
-  },400);
-});
-
-function openSettings(){
-  const ov=document.getElementById('settings-overlay');
-  ov.style.display='flex';
-  requestAnimationFrame(()=>{document.getElementById('settings-card').style.transform='translateY(0)';});
-  // Show sidebar on iPad/Mac
-  const sidebar=document.getElementById('settings-sidebar');
-  if(_isWideScreen&&sidebar){
-    sidebar.style.display='block';
-    // iPad/Mac: settings card is centered dialog, not bottom sheet
-    const card=document.getElementById('settings-card');
-    card.style.position='relative';card.style.margin='auto';
-    card.style.maxWidth='800px';card.style.width='90%';card.style.maxHeight='80dvh';
-    card.style.borderRadius='22px';card.style.bottom='auto';
-    card.style.transition='transform .5s ease, opacity .3s ease, width .5s ease, max-width .5s ease';
-    card.style.transform='scale(0.9)';card.style.opacity='0';
-    requestAnimationFrame(()=>{card.style.transform='scale(1)';card.style.opacity='1';});
-    // Show only first section on iPad
-    showSettingsSection('home');
-  }else{
-    sidebar.style.display='none';
-    // Show all sections on iPhone
-    document.querySelectorAll('.s-section').forEach(s=>{s.style.display='';});
-  }
-  // Sync toggles
-  document.getElementById('s-haptic').classList.toggle('on',localStorage.getItem('inglish_haptic')!=='0');
-  document.getElementById('s-haptic-strong').classList.toggle('on',localStorage.getItem('inglish_haptic_strong')==='1');
-  document.getElementById('s-bigicon').classList.toggle('on',localStorage.getItem('inglish_bigicon')==='1');
-  const isIcon=localStorage.getItem('inglish_layout')==='icon';
-  document.getElementById('s-check-icon').classList.toggle('s-on',isIcon);
-  document.getElementById('s-check-list').classList.toggle('s-on',!isIcon);
-  syncShakeChecks('shake',localStorage.getItem('inglish_shake_mode')||'none');
-  syncShakeChecks('heavy',localStorage.getItem('inglish_heavy_mode')||'none');
-  updateHeavyVisibility();
-  const shakeAvail=localStorage.getItem('inglish_shake_avail')!=='0';
-  document.querySelectorAll('.s-shake-section').forEach(el=>{el.style.display=shakeAvail?'':'none';});
-  // Big icon sync
-  document.getElementById('s-bigicon').classList.toggle('on',localStorage.getItem('inglish_bigicon')==='1');
-  // PWA-only toggles
-  const lockRow=document.getElementById('s-lockscreen').closest('.s-row');
-  if(lockRow){lockRow.style.opacity=_isPWA?'1':'.2';lockRow.style.pointerEvents=_isPWA?'':'none';}
-  document.getElementById('s-lockscreen').classList.toggle('on',localStorage.getItem(LOCK_KEY)==='1');
-  const notifRow=document.getElementById('s-notif').closest('.s-row');
-  if(notifRow){notifRow.style.opacity=_isPWA?'1':'.2';notifRow.style.pointerEvents=_isPWA?'':'none';}
-  document.getElementById('s-notif').classList.toggle('on',localStorage.getItem('inglish_notif')==='1');
-}
-
-function showSettingsSection(sec){
-  const content=document.querySelector('#settings-body > div:last-child');
-  if(content){content.style.transition='opacity .3s ease';content.style.opacity='0';}
-  setTimeout(()=>{
-    document.querySelectorAll('.s-section').forEach(s=>{s.style.display='none';});
-    const target=document.getElementById('ss-'+sec);
-    if(target)target.style.display='';
-    if(content){content.style.opacity='1';}
-  },300);
-  document.querySelectorAll('.s-nav-item').forEach(n=>{
-    n.classList.toggle('s-nav-active',n.dataset.section===sec);
-  });
-}
-
-// Sidebar nav clicks
-document.getElementById('settings-sidebar')?.addEventListener('click',e=>{
-  const item=e.target.closest('.s-nav-item');
-  if(!item)return;
-  haptic();
-  const sec=item.dataset.section;
-  if(sec==='danger'){
-    closeSettings();
-    setTimeout(()=>{document.getElementById('btn-delete-all').click();},500);
-    return;
-  }
-  showSettingsSection(sec);
-});
-function closeSettings(){
-  const card=document.getElementById('settings-card');
-  if(_isWideScreen){
-    card.style.transform='scale(0.9)';card.style.opacity='0';
-  }else{
-    card.style.transform='translateY(100%)';
-  }
-  setTimeout(()=>{
-    document.getElementById('settings-overlay').style.display='none';
-    if(_isWideScreen){
-      // Reset iPad/Mac specific styles
-      card.style.position='';card.style.margin='';card.style.maxWidth='';
-      card.style.maxHeight='';card.style.borderRadius='';card.style.bottom='';
-      card.style.opacity='';card.style.width='';
-    }
-    // Always reset transition but keep transform for iPhone reopen
-    card.style.transition='transform .4s cubic-bezier(.34,1.05,.64,1)';
-    if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
-    else restoreHomeFromGrid();
-  },400);
-}
-function syncShakeChecks(prefix,val){
-  ['none','check','shuffle','back'].forEach(v=>{
-    const el=document.getElementById('sc-'+prefix+'-'+v);
-    if(el)el.classList.toggle('s-on',v===val);
-  });
-}
-function updateHeavyVisibility(){
-  const shakeMode=localStorage.getItem('inglish_shake_mode')||'none';
-  // Hide heavy option that matches current shake selection (when shake != none)
-  document.querySelectorAll('.s-heavy-opt').forEach(row=>{
-    row.style.display='';row.style.transition='opacity .5s';row.style.opacity='1';
-  });
-  if(shakeMode!=='none'){
-    const hideEl=document.getElementById('s-heavy-'+shakeMode);
-    if(hideEl){hideEl.style.opacity='0';setTimeout(()=>{hideEl.style.display='none';},500);}
-  }
-}
-
-document.getElementById('settings-close').addEventListener('click',()=>{haptic();closeSettings();});
-document.getElementById('settings-overlay').addEventListener('click',e=>{if(e.target.id==='settings-overlay'){haptic();closeSettings();}});
-// Layout
-document.getElementById('s-layout-icon').addEventListener('click',()=>{
-  haptic.confirm();localStorage.setItem('inglish_layout','icon');
-  document.getElementById('s-check-icon').classList.add('s-on');
-  document.getElementById('s-check-list').classList.remove('s-on');
-});
-document.getElementById('s-layout-list').addEventListener('click',()=>{
-  haptic();
-  showDialog('list-dialog','list-dialog-card');
-});
-// Dialog helper
-function showDialog(dlgId,cardId){
-  const dlg=document.getElementById(dlgId);
-  const card=document.getElementById(cardId);
-  dlg.style.display='flex';
-  requestAnimationFrame(()=>{
-    dlg.style.background='rgba(0,0,0,.4)';
-    card.style.transform='scale(1)';card.style.opacity='1';
-  });
-}
-function hideDialog(dlgId,cardId,cb){
-  const dlg=document.getElementById(dlgId);
-  const card=document.getElementById(cardId);
-  card.style.transform='scale(1.3)';card.style.opacity='0';
-  dlg.style.background='rgba(0,0,0,0)';
-  setTimeout(()=>{dlg.style.display='none';if(cb)cb();},400);
-}
-// List dialog handlers
-document.getElementById('list-dialog-cancel').addEventListener('click',()=>{
-  haptic();hideDialog('list-dialog','list-dialog-card');
-});
-document.getElementById('list-dialog-ok').addEventListener('click',()=>{
-  haptic.confirm();
-  localStorage.setItem('inglish_layout','list');
-  document.getElementById('s-check-list').classList.add('s-on');
-  document.getElementById('s-check-icon').classList.remove('s-on');
-  hideDialog('list-dialog','list-dialog-card',()=>restoreHomeFromGrid());
-});
-// Icon dialog handlers
-document.getElementById('icon-dialog-cancel').addEventListener('click',()=>{
-  haptic();hideDialog('icon-dialog','icon-dialog-card');
-});
-document.getElementById('icon-dialog-ok').addEventListener('click',()=>{
-  haptic.confirm();
-  localStorage.setItem('inglish_layout','icon');
-  hideDialog('icon-dialog','icon-dialog-card',()=>{
-    const scroll=document.querySelector('.hm-scroll');
-    scroll.style.transition='transform .4s ease, opacity .3s ease';
-    scroll.style.transform='translateX(100%)';scroll.style.opacity='0';
-    setTimeout(()=>{
-      scroll.style.transition='none';scroll.style.transform='translateX(-100%)';
-      showIconGrid();
-      requestAnimationFrame(()=>{
-        scroll.style.transition='transform .4s ease, opacity .3s ease';
-        scroll.style.transform='';scroll.style.opacity='1';
-      });
-      setTimeout(()=>{scroll.style.transition='';},500);
-    },400);
-  });
-});
-// Haptic
-document.getElementById('s-haptic').addEventListener('click',function(){
-  this.classList.toggle('on');
-  localStorage.setItem('inglish_haptic',this.classList.contains('on')?'1':'0');
-  if(this.classList.contains('on'))haptic();
-});
-// Strong haptic
-document.getElementById('s-haptic-strong').addEventListener('click',function(){
-  this.classList.toggle('on');
-  const on=this.classList.contains('on');
-  localStorage.setItem('inglish_haptic_strong',on?'1':'0');
-  if(on){for(let i=0;i<5;i++)setTimeout(()=>haptic.error(),i*30);}
-});
-// Shake radio
-['none','check','shuffle','back'].forEach(v=>{
-  const el=document.getElementById('s-shake-'+v);
-  if(el)el.addEventListener('click',()=>{
-    haptic();
-    localStorage.setItem('inglish_shake_mode',v);
-    syncShakeChecks('shake',v);
-    // Enable/disable shake listener
-    if(v==='none'){localStorage.setItem('inglish_shake_mode','none');}
-    else{localStorage.setItem('inglish_shake_mode',v);}
-    updateHeavyVisibility();
-  });
-});
-// Heavy shake radio
-['none','check','shuffle','back'].forEach(v=>{
-  const el=document.getElementById('s-heavy-'+v);
-  if(el)el.addEventListener('click',()=>{
-    haptic();
-    localStorage.setItem('inglish_heavy_mode',v);
-    syncShakeChecks('heavy',v);
-  });
-});
-// Delete
-document.getElementById('s-delete-btn').addEventListener('click',()=>{
-  haptic();closeSettings();
-  setTimeout(()=>{document.getElementById('btn-delete-all').click();},500);
-});
-// Big icon toggle
-document.getElementById('s-bigicon').addEventListener('click',function(){
-  this.classList.toggle('on');
-  localStorage.setItem('inglish_bigicon',this.classList.contains('on')?'1':'0');
-  haptic();
-});
-// Sync big icon on openSettings
-
-/* ═══ ICON LONG-PRESS WOBBLE + DRAG REORDER ═══ */
-const ICON_ORDER_KEY='inglish_icon_order';
-let wobbleMode=false;
-
-function getIconOrder(){
-  try{return JSON.parse(localStorage.getItem(ICON_ORDER_KEY));}catch(e){return null;}
-}
-function saveIconOrder(order){
-  localStorage.setItem(ICON_ORDER_KEY,JSON.stringify(order));
-}
-
-function enableWobble(grid){
-  if(wobbleMode)return;
-  wobbleMode=true;
-  haptic.confirm();
-  grid.classList.add('wobbling');
-  // Tap anywhere outside grid to stop wobble
-  const stopWobble=()=>{
-    wobbleMode=false;
-    grid.classList.remove('wobbling');
-    document.removeEventListener('click',stopWobble);
-  };
-  setTimeout(()=>document.addEventListener('click',stopWobble),100);
-}
-
-// Long press detection on icon grid
-document.addEventListener('touchstart',e=>{
-  const cell=e.target.closest('.ig-cell');
-  if(!cell)return;
-  const grid=cell.closest('#icon-grid');
-  if(!grid)return;
-  let timer=setTimeout(()=>{
-    enableWobble(grid);
-    // Start drag
-    startDrag(cell,grid,e.touches[0]);
-  },500);
-  const cancel=()=>{clearTimeout(timer);cell.removeEventListener('touchend',cancel);cell.removeEventListener('touchmove',moveCheck);};
-  const moveCheck=(ev)=>{
-    const dx=Math.abs(ev.touches[0].clientX-e.touches[0].clientX);
-    const dy=Math.abs(ev.touches[0].clientY-e.touches[0].clientY);
-    if(dx>8||dy>8)cancel();
-  };
-  cell.addEventListener('touchend',cancel,{once:true});
-  cell.addEventListener('touchmove',moveCheck,{passive:true});
-},{passive:true});
-
-function startDrag(cell,grid,touch){
-  if(!wobbleMode)return;
-  const cells=[...grid.querySelectorAll('.ig-cell')];
-  const idx=cells.indexOf(cell);
-  const rect=cell.getBoundingClientRect();
-  const ox=touch.clientX-rect.left,oy=touch.clientY-rect.top;
-  cell.style.zIndex='100';cell.style.position='relative';
-  
-  const onMove=(ev)=>{
-    const t=ev.touches[0];
-    cell.style.transform=`translate(${t.clientX-rect.left-ox}px,${t.clientY-rect.top-oy}px) scale(1.1)`;
-    // Find swap target
-    cells.forEach((c,i)=>{
-      if(c===cell)return;
-      const r=c.getBoundingClientRect();
-      if(t.clientX>r.left&&t.clientX<r.right&&t.clientY>r.top&&t.clientY<r.bottom){
-        // Swap in DOM
-        if(i<idx)grid.insertBefore(cell,c);
-        else grid.insertBefore(cell,c.nextSibling);
-        haptic();
-      }
-    });
-  };
-  const onEnd=()=>{
-    cell.style.transform='';cell.style.zIndex='';cell.style.position='';
-    document.removeEventListener('touchmove',onMove);
-    document.removeEventListener('touchend',onEnd);
-    // Save new order
-    const newCells=[...grid.querySelectorAll('.ig-cell')];
-    const order=newCells.map(c=>c.dataset.name||'');
-    saveIconOrder(order);
-  };
-  document.addEventListener('touchmove',onMove,{passive:true});
-  document.addEventListener('touchend',onEnd,{once:true});
-}
-
-function runPhysics(els,shakeX,shakeY,onSettle){
-  if(!els.length){physicsRunning=false;if(onSettle)onSettle();return;}
-
-  // Init physics state per element
-  const states=els.map(({el,mass})=>{
-    const rect=el.getBoundingClientRect();
-    return {
-      el, mass,
-      x:0, y:0, // offset from original position
-      vx: (shakeX||0) * (0.5+Math.random()*0.8) * -3,
-      vy: Math.abs(shakeY||5) * (1+Math.random()*0.5) * 2,
-      rot:0,
-      vr:(Math.random()-0.5)*8,
-      origY:rect.top,
-      maxFall:window.innerHeight-rect.bottom+rect.height*0.3
-    };
-  });
-
-  const gravity=1800; // px/s^2
-  const bounce=0.35;
-  const friction=0.92;
-  const rotFriction=0.94;
-  let lastFrame=performance.now();
-  let settled=0;
-
-  function step(t){
-    const dt=Math.min((t-lastFrame)/1000, 0.05); // cap at 50ms
-    lastFrame=t;
-    settled=0;
-
-    states.forEach(s=>{
-      // Apply gravity
-      s.vy+=gravity*dt;
-      s.x+=s.vx*dt;
-      s.y+=s.vy*dt;
-      s.rot+=s.vr;
-
-      // Floor bounce
-      if(s.y>s.maxFall){
-        s.y=s.maxFall;
-        s.vy=-s.vy*bounce;
-        s.vr*=0.5;
-        if(Math.abs(s.vy)<15)s.vy=0;
-      }
-      // Ceiling
-      if(s.y<-50){s.y=-50;s.vy=Math.abs(s.vy)*bounce;}
-      // Walls
-      if(Math.abs(s.x)>120){
-        s.x=Math.sign(s.x)*120;
-        s.vx=-s.vx*bounce;
-      }
-      // Friction
-      s.vx*=friction;
-      s.vr*=rotFriction;
-      // Settle check
-      if(Math.abs(s.vx)<1&&Math.abs(s.vy)<2&&s.y>=s.maxFall-2)settled++;
-
-      s.el.style.transform=`translate(${s.x.toFixed(1)}px,${s.y.toFixed(1)}px) rotate(${s.rot.toFixed(1)}deg)`;
-      s.el.style.transition='none';
-    });
-
-    // If all settled or timeout, spring back
-    if(settled>=states.length){
-      springBack(states,onSettle);
-      return;
-    }
-    requestAnimationFrame(step);
-  }
-
-  // Safety timeout
-  setTimeout(()=>{if(physicsRunning)springBack(states,onSettle);},2500);
-  requestAnimationFrame(step);
-}
-
-function springBack(states,onSettle){
-  physicsRunning=false;
-  states.forEach(s=>{
-    s.el.style.transition='transform .5s cubic-bezier(.34,1.56,.64,1)';
-    s.el.style.transform='';
-  });
-  setTimeout(()=>{
-    states.forEach(s=>{s.el.style.transition='';});
-    if(onSettle)onSettle();
-  },550);
-}
-
-/* ═══ SHAKE SYSTEM (single, clean) ═══ */
-let _shakeActive=false;
-
-function initShake(){
-  if(_shakeActive)return;
-  
-  if(typeof DeviceMotionEvent==='undefined'){
-    localStorage.setItem('inglish_shake_avail','0');
-    return;
-  }
-  if(typeof DeviceMotionEvent.requestPermission!=='function'){
-    // Android/desktop - no permission needed
-    localStorage.setItem('inglish_shake_avail','1');
-    _shakeActive=true;
-    registerShakeListener();
-    return;
-  }
-  
-  // iOS: ALWAYS request permission on first user gesture (every page load)
-  const reqPerm=async function(){
-    document.removeEventListener('touchend',reqPerm);
-    document.removeEventListener('click',reqPerm);
-    try{
-      const p=await DeviceMotionEvent.requestPermission();
-      if(p==='granted'){
-        localStorage.setItem(SHAKE_KEY,'1');
-        localStorage.setItem('inglish_shake_avail','1');
-        _shakeActive=true;
-        registerShakeListener();
-        // Show shake settings if hidden
-        document.querySelectorAll('.s-shake-section').forEach(el=>{el.style.display='';});
-        console.log('[SHAKE] Permission granted');
-      }else{
-        localStorage.setItem('inglish_shake_avail','0');
-        // Hide shake settings
-        document.querySelectorAll('.s-shake-section').forEach(el=>{el.style.display='none';});
-        console.log('[SHAKE] Permission denied');
-      }
-    }catch(e){
-      localStorage.setItem('inglish_shake_avail','0');
-      console.log('[SHAKE] Permission error:',e);
-    }
-  };
-  document.addEventListener('touchend',reqPerm,{once:true});
-  document.addEventListener('click',reqPerm,{once:true});
-}
-
-function registerShakeListener(){
-  let lx=0,ly=0,lz=0,lastT=0;
-  let peakForce=0,peakAx=0,peakAy=0,shakeTimeout=null;
-  
-  window.addEventListener('devicemotion',e=>{
-    const a=e.accelerationIncludingGravity;
-    if(!a)return;
-    const now=Date.now();
-    if(now-lastT<50)return;
-    lastT=now;
-    const dx=Math.abs(a.x-lx),dy=Math.abs(a.y-ly),dz=Math.abs(a.z-lz);
-    const force=dx+dy+dz;
-    lx=a.x;ly=a.y;lz=a.z;
-    
-    if(force>8){
-      if(force>peakForce){peakForce=force;peakAx=a.x;peakAy=a.y;}
-      clearTimeout(shakeTimeout);
-      shakeTimeout=setTimeout(()=>{
-        const pk=peakForce;
-        const ax=peakAx,ay=peakAy;
-        peakForce=0;peakAx=0;peakAy=0;
-        
-        if(pk<10)return; // too weak
-        
-        const homeEl=document.getElementById('home');
-        const isHome=homeEl&&!homeEl.classList.contains('hidden');
-        
-        console.log('[SHAKE] peak:'+pk.toFixed(1)+' isHome:'+isHome);
-        
-        if(isHome){
-          if(pk>45){onHeavyShake(ax,ay);}
-          else if(pk>15){
-            haptic.confirm();
-            localStorage.setItem('inglish_layout','icon');
-            showIconGrid();
-          }
-        }else{
-          if(pk>40){onHeavyShake(ax,ay);}
-          else if(pk>10){onLightShake();}
-        }
-      },150);
-    }
-  });
-  console.log('[SHAKE] Listener registered');
-}
-
-// Also allow 🔀 button to trigger permission if needed
-document.getElementById('g-sfb').addEventListener('click',async()=>{
-  haptic();
-  // Try to init shake on this user gesture if not yet active
-  if(!_shakeActive&&typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
-    try{
-      const p=await DeviceMotionEvent.requestPermission();
-      if(p==='granted'){
-        localStorage.setItem(SHAKE_KEY,'1');
-        _shakeActive=true;
-        registerShakeListener();
-      }
-    }catch(e){}
-  }
-  Sf(curP);
-});
-
-// Init on load
-initShake();
 
 function done(i){
   const d=DK[i];
@@ -2660,9 +1428,11 @@ CFG.forEach((_,i)=>{
     if(!d.flipped)return;
     if(adx>55&&adx>ady){dx>0?An(i,'g'):An(i,'f');}
   },{passive:true});
-  /* Tap card: front→flip to back, back→flip to front (unless tapping a button) */
+  /* Only flip on front face tap; buttons on back face must not trigger flip */
   document.getElementById('fc'+i).onclick=(e)=>{
-    if(e.target.closest('button,.ans-tap,.ans-en,.ans-ja,.hl-word'))return;
+    const d=DK[i];
+    /* If already flipped (back face showing), ignore card tap — let buttons handle */
+    if(d.flipped)return;
     Fl(i);
   };
 });
@@ -2680,40 +1450,12 @@ swWrap.addEventListener('touchend',e=>{
   if(Math.abs(dx)>55){const n=curP+(dx<0?1:-1);if(n>=0&&n<6){jPanel(n);haptic();}}
 },{passive:true});
 
-/* Swipe down on app area (outside card) → go home */
-(()=>{
-  const app=document.getElementById('app');
-  let sx=0,sy=0;
-  app.addEventListener('touchstart',e=>{
-    if(e.target.closest('.fw,.lswrap,#list-wrap'))return;
-    sx=e.touches[0].clientX;sy=e.touches[0].clientY;
-  },{passive:true});
-  app.addEventListener('touchend',e=>{
-    if(e.target.closest('.fw,.lswrap,#list-wrap'))return;
-    const dy=e.changedTouches[0].clientY-sy;
-    const dx=Math.abs(e.changedTouches[0].clientX-sx);
-    if(dy>80&&dx<60){goHome();}
-  },{passive:true});
-})();
-
 function jPanel(idx,anim=true){
   const tr=document.getElementById('sw-track');
-  const ttl=document.getElementById('app-ttl');
-  const oldP=curP;
   tr.style.transition=anim?'transform .32s cubic-bezier(.4,0,.2,1)':'none';
   curP=idx;tr.style.transform=`translateX(${-idx*100}%)`;
   document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===idx));
-  // Title slide animation
-  if(anim&&oldP!==idx){
-    const dir=idx>oldP?1:-1;
-    ttl.style.transition='none';
-    ttl.style.transform=`translateX(${dir*40}px)`;ttl.style.opacity='0';
-    requestAnimationFrame(()=>{
-      ttl.style.transition='transform .8s ease,opacity .8s ease';
-      ttl.style.transform='translateX(0)';ttl.style.opacity='1';
-    });
-  }
-  ttl.textContent=CFG[idx].title;
+  document.getElementById('app-ttl').textContent=CFG[idx].title;
   if(!anim)requestAnimationFrame(()=>{tr.style.transition='';});
 }
 
@@ -2726,70 +1468,65 @@ function ensureLists(){
     d.style.cssText='position:fixed;left:-9999px;top:0;width:380px;visibility:hidden';
     document.body.appendChild(d);
   });
-  function liWrap(en,ja,extra,opts){
-    const esc=(s)=>(s||'').replace(/"/g,'&quot;');
-    const st=isStarred(en)?'★':'☆';
-    let btns=`<span class="star-tr" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:16px;cursor:pointer;padding:4px 8px;background:rgba(255,255,255,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:55px;border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.8),-1px -.8px 0 rgba(255,255,255,.5)">${st}</span>`;
-    if(opts&&opts.forgot){
-      const isFg=isForgot(en,0);
-      btns+=` <button class="tr-forgot-btn" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:10px;padding:4px 10px;background:rgba(255,255,255,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,59,48,.2);color:#c0001a;border-radius:55px;cursor:pointer;font-family:inherit;box-shadow:1.1px 1px 0 rgba(255,255,255,.8),-1px -.8px 0 rgba(255,255,255,.5)">${isFg?'✓済':'😰忘れた'}</button>`;
-    }
-    return `<div class="li">${extra}<div style="display:flex;justify-content:flex-end;gap:6px;margin-top:4px">${btns}</div></div>`;
-  }
   function buildLists(){
   // idioms
   document.getElementById('l-i').innerHTML='<div class="sh">イディオム '+ID.length+'個</div>'+
-    ID.map(d=>liWrap(d.w,d.m,`<div class="lw">${d.w}</div><div class="lm">${d.m}</div><div class="lnx">${d.n}</div><div class="le">${d.e}<br><span style="color:var(--sub)">${d.ej}</span></div>`,{forgot:true})).join('');
+    ID.map(d=>`<div class="li"><div class="lw">${d.w}</div><div class="lm">${d.m}</div><div class="lnx">${d.n}</div><div class="le">"${d.e}"<br><span style="color:var(--sub)">${d.ej}</span></div></div>`).join('');
 
   // expressions
   const exByGroup=[
-    {label:'「人」や「もの」を伝える表現',range:[1,13]},
-    {label:'「〜する」を伝える表現',range:[14,40]},
-    {label:'メッセージ・動作表現',range:[41,55]},
-    {label:'「〜である」を伝える表現',range:[56,71]},
-    {label:'「どのように」「どこで」「いつ」を伝える表現',range:[72,113]},
-    {label:'日常会話でよく使う表現',range:[114,125]},
+    {label:"「人」や「もの」を伝える表現",range:[1,13]},
+    {label:"「〜する」を伝える表現",range:[14,40]},
+    {label:"メッセージ・動作表現",range:[41,55]},
+    {label:"「〜である」を伝える表現",range:[56,71]},
+    {label:"「どのように」「どこで」「いつ」を伝える表現",range:[72,113]},
+    {label:"日常会話でよく使う表現",range:[114,125]},
   ];
   let exHtml='<div class="sh">入試で使える表現リスト '+EX.length+'個</div>';
   exByGroup.forEach(g=>{
-    exHtml+=`<div style="font-size:10px;font-weight:700;color:var(--sub);background:var(--ln);border-radius:8px;padding:4px 10px;margin:6px 0 4px">${g.label}</div>`;
+    exHtml+=`<div style="font-size:10px;font-weight:700;color:var(--sub);background:var(--ln);border-radius:8px;padding:4px 10px;margin:6px 0 4px;letter-spacing:.04em">${g.label}</div>`;
     const items=EX.filter(e=>e.n>=g.range[0]&&e.n<=g.range[1]);
-    items.forEach(d=>{
-      exHtml+=`<div class="li"><div class="exph">${d.ph}</div><div class="exja">${d.ja}</div>${d.e?`<div style="font-size:10px;color:rgba(0,0,0,.4);margin-top:2px">${d.e} <span style="color:var(--sub)">${d.ej}</span></div>`:''}</div>`;
-    });
+    exHtml+=`<div class="li" style="padding:8px 12px">`;
+    exHtml+=items.map(d=>`<div class="exr"><div class="exn">${String(d.n).padStart(3,'0')}</div><div style="flex:1"><div class="exph">${d.ph}</div><div class="exja">${d.ja}</div>${d.e?`<div class="exe">${d.e} <span style="color:var(--sub)">${d.ej}</span></div>`:''}</div></div>`).join('');
+    exHtml+='</div>';
   });
   document.getElementById('l-ex').innerHTML=exHtml;
 
   // irregular verbs
   document.getElementById('l-v').innerHTML=`<div class="sh">不規則動詞の変化表 ${IV.length}語</div>
     <div class="ivwrap"><table class="ivt">
-    <thead><tr><th>原形</th><th>過去</th><th>過去分詞</th><th>意味</th></tr></thead>
-    <tbody>${IV.map(v=>`<tr><td class="ivb">${v.b}</td><td class="ivp">${v.p}</td><td class="ivpp">${v.pp}</td><td>${v.m}</td></tr>`).join('')}</tbody></table></div>`;
+    <thead><tr><th>原形</th><th>過去形</th><th>過去分詞</th><th>意味</th><th>3単現</th><th>現在分詞</th></tr></thead>
+    <tbody>${IV.map(v=>`<tr>
+      <td class="ivb">${v.b}</td>
+      <td class="ivp">${v.p}</td>
+      <td class="ivpp">${v.pp}</td>
+      <td>${v.m}</td>
+      <td>${v.s}</td>
+      <td>${v.g}</td>
+    </tr>`).join('')}</tbody></table></div>
+    <div style="font-size:10px;color:var(--sub);padding:4px 2px">※ burnの過去形・過去分詞はburned、forgetの過去分詞はforgot、getの過去分詞はgotとなることもあります。</div>`;
 
   // grammar
   document.getElementById('l-g').innerHTML='<div class="sh">重要文法 '+GR.length+'項目</div>'+
-    GR.map(d=>liWrap(d.h,d.e,`<div class="lw">${d.h}</div><div class="lnx">${d.n}<br><span style="color:var(--y);font-size:11px">💡 ${d.tip}</span></div><div class="le">${d.e}<br><span style="color:var(--sub)">${d.ej}</span></div>`)).join('');
+    GR.map(d=>`<div class="li"><div class="lw">${d.h}</div><div class="lnx">${d.n}<br><span style="color:var(--y);font-size:11px">💡 ${d.tip}</span></div><div class="le">"${d.e}"<br><span style="color:var(--sub)">${d.ej}</span></div></div>`).join('');
 
   // paraphrase
   document.getElementById('l-p').innerHTML='<div class="sh">言い換え表現 '+PA.length+'セット</div>'+
-    PA.map(d=>`<div class="li"><div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:4px"><span style="font-size:11px;background:rgba(0,0,0,.06);padding:2px 8px;border-radius:20px;color:var(--sub)">${d.o}</span><span style="color:var(--sub);font-size:10px">→</span>${d.b.map(b=>`<span style="background:var(--b);color:#fff;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600">${b}</span>`).join('')}</div><div class="lnx" style="margin-top:4px">${d.n}</div><div class="le">${d.e}</div></div>`).join('');
+    PA.map(d=>`<div class="li"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:12px;background:#f0f0ee;padding:2px 9px;border-radius:20px;color:var(--sub)">${d.o}</span><span style="color:var(--sub)">→</span>${d.b.map(b=>`<span style="background:var(--b);color:#fff;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600">${b}</span>`).join('')}</div><div class="lnx" style="margin-top:6px">${d.n}</div><div class="le">"${d.e}"</div></div>`).join('');
 
   // reading
   document.getElementById('l-r').innerHTML='<div class="sh">長文読解 重要表現 '+RE.length+'個</div>'+
-    RE.map(d=>liWrap(d.p,d.m,`<div class="lw">${d.p}</div><div class="lm">${d.m}</div><div class="le">${d.e}</div><div style="font-size:10px;color:var(--sub);margin-top:2px">出典: ${d.s}</div>`,{forgot:true})).join('');
+    RE.map(d=>`<div class="li"><div class="lw">${d.p}</div><div class="lm">${d.m}</div><div class="le">"${d.e}"</div><div style="font-size:10px;color:var(--sub);margin-top:3px">出典: ${d.s}</div></div>`).join('');
 
   // confused
   document.getElementById('l-c').innerHTML='<div class="sh">混同ペア '+CP.length+'組</div>'+
-    CP.map(d=>{
-      const w=d.a.replace(/（.*）/,'');
-      return liWrap(w,d.n,`<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-bottom:4px"><span style="background:#fef2f2;border:1px solid #fecaca;color:var(--r);padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700">${d.a}</span><span style="color:var(--sub);font-size:10px">vs</span><span style="background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700">${d.b}</span></div><div style="font-size:11px;color:#555">📌 ${d.n}</div>`,{forgot:true});
-    }).join('');
+    CP.map(d=>`<div class="li"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px"><span style="background:#fef2f2;border:1px solid #fecaca;color:var(--r);padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700">${d.a}</span><span style="color:var(--sub);font-size:11px">vs</span><span style="background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700">${d.b}</span></div><div style="font-size:11px;color:#555">📌 ${d.n}</div></div>`).join('');
 
   // themes
   document.getElementById('l-a').innerHTML='<div class="sh">頻出アカデミックテーマ</div>'+
-    TH.map(d=>`<div class="li"><div class="lw">${d.cat}</div>${d.items.map(i=>`<div style="font-size:12px;color:#555;padding:4px 0;border-bottom:1px solid var(--ln)">• ${i}</div>`).join('')}</div>`).join('');
+    TH.map(d=>`<div class="li"><div class="lw">${d.cat}</div>${d.items.map(i=>`<div style="font-size:12px;color:#555;padding:3px 0;border-bottom:1px solid var(--ln)">• ${i}</div>`).join('')}</div>`).join('');
 }
-  try{buildLists();}catch(e){console.error('buildLists error:',e);}
+  buildLists();
   ['i','ex','v','g','p','r','c','a'].forEach(id=>{
     const el=document.getElementById('l-'+id);
     if(el){_lc[id]=el.innerHTML;el.remove();}
@@ -2803,8 +1540,7 @@ window.openS=function(type,arg){
   const isCard=type==='card';
   document.getElementById('app-dots').style.display=isCard?'flex':'none';
   document.getElementById('sw-wrap').style.display=isCard?'flex':'none';
-  document.getElementById('list-wrap').style.display=isCard?'none':'block';
-  document.getElementById('float-bar').style.display=isCard?'flex':'none';
+  document.getElementById('list-wrap').style.display=isCard?'none':'flex';
   if(isCard){
     jPanel(arg,false);
     CFG.forEach((_,i)=>{if(DK[i].idx===0&&DK[i].st.g===0)render(i);});
@@ -2823,73 +1559,10 @@ window.openS=function(type,arg){
 };
 window.goHome=function(){
   haptic();
-  sendStudyNotif();
   document.getElementById('app').classList.remove('vis');
-  document.getElementById('float-bar').style.display='none';
-  setTimeout(()=>{
-    document.getElementById('home').classList.remove('hidden');
-    updateHomeBadges();
-    if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
-  },220);
+  setTimeout(()=>{document.getElementById('home').classList.remove('hidden');updateHomeBadges();},220);
 };
 document.getElementById('bv').textContent=V.length+'語';
-
-/* ═══ HOME SEARCH (merged into #ti translation input) ═══ */
-const SEARCH_APPS=[
-  {name:'準1 10年分の傾向から作成',icon:'🃏',action:"openS('card',0)"},
-  {name:'Pass単 単語',icon:'📗',action:"openS('card',1)"},
-  {name:'Pass単 熟語・句動詞',icon:'📎',action:"openS('card',2)"},
-  {name:'準1 イディオム',icon:'💡',action:"openS('list','id')"},
-  {name:'2級 単語',icon:'🔤',action:"openS('card',3)"},
-  {name:'2級 熟語・句動詞',icon:'📌',action:"openS('card',5)"},
-  {name:'全単語一覧',icon:'📚',action:"openS('list','all')"},
-  {name:'忘れた・わからない',icon:'😰',action:"openS('list','forgot')"},
-  {name:'入試で使える表現',icon:'📝',action:"openS('list','ex')"},
-  {name:'不規則動詞変化表',icon:'📊',action:"openS('list','v')"},
-  {name:'重要文法',icon:'📐',action:"openS('list','gr')"},
-  {name:'言い換え表現',icon:'✍️',action:"openS('list','re')"},
-  {name:'長文読解 重要表現',icon:'📖',action:"openS('list','cp')"},
-  {name:'混同注意ペア',icon:'⚠️',action:"openS('list','pa')"},
-  {name:'頻出テーマ',icon:'🎯',action:"openS('list','th')"},
-  {name:'忘れた単語だけ復習',icon:'🔄',action:"openS('card-forgot',0)"},
-  {name:'設定',icon:'⚙️',action:"openSettings()"},
-  {name:'カメラ',icon:'📷',action:"openIframe('cam.html','カメラ')"},
-  {name:'メモ',icon:'📝',action:"openIframe('card.html','メモ')"},
-  {name:'時計',icon:'🕐',action:"openIframe('clock-ios26.html','時計')"},
-];
-// Search results container (inject near ti)
-const srDiv=document.createElement('div');
-srDiv.id='sr';srDiv.style.cssText='display:none;position:absolute;bottom:calc(100% + 4px);left:0;right:0;max-height:40dvh;overflow-y:auto;border-radius:12px;background:rgba(255,255,255,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:50;box-shadow:0 -2px 12px rgba(0,0,0,.1)';
-document.getElementById('ti').parentElement.style.position='relative';
-document.getElementById('ti').parentElement.appendChild(srDiv);
-
-// Hook into existing ti input handler to add search
-const _origTiInput=document.getElementById('ti').oninput;
-document.getElementById('ti').addEventListener('input',()=>{
-  const q=document.getElementById('ti').value.trim().toLowerCase();
-  // Check for app/category search
-  if(q.length>=1){
-    const matches=SEARCH_APPS.filter(a=>a.name.toLowerCase().includes(q));
-    if(matches.length>0){
-      srDiv.style.display='block';
-      srDiv.innerHTML=matches.map(a=>
-        `<div data-act="${a.action}" style="padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.06);transition:transform .5s,opacity .3s"><span style="font-size:18px">${a.icon}</span><span style="font-size:13px;color:#000">${a.name}</span></div>`
-      ).join('');
-      srDiv.querySelectorAll('[data-act]').forEach(el=>{
-        el.addEventListener('click',()=>{
-          haptic.confirm();
-          el.style.transform='scale(0.8)';el.style.opacity='0.5';
-          setTimeout(()=>{
-            try{eval(el.dataset.act);}catch(e){}
-            document.getElementById('ti').value='';srDiv.style.display='none';
-          },300);
-        });
-      });
-      return;
-    }
-  }
-  srDiv.style.display='none';
-});
 
 /* ════════════════════════════════════════
    TRANSLATION SYSTEM
@@ -2994,39 +1667,23 @@ trOverlay.addEventListener('click',e=>{
   haptic();
 });
 
-/* Drag-down to close overlay — only at scroll edges + strong swipe */
+/* Drag-down to close overlay */
 (()=>{
-  let sy=0,dragging=false,cardEl=trCard,velocity=0,lastY=0,lastT=0;
+  let sy=0,dragging=false,cardEl=trCard;
   cardEl.addEventListener('touchstart',e=>{
-    sy=e.touches[0].clientY;lastY=sy;lastT=Date.now();
-    velocity=0;
-    // Only allow drag-close if at scroll top or bottom boundary
-    const atTop=cardEl.scrollTop<=0;
-    const atBot=cardEl.scrollTop+cardEl.clientHeight>=cardEl.scrollHeight-2;
-    dragging=atTop||atBot;
-    if(dragging)cardEl.style.transition='none';
+    sy=e.touches[0].clientY;dragging=true;
+    cardEl.style.transition='none';
   },{passive:true});
   cardEl.addEventListener('touchmove',e=>{
     if(!dragging)return;
-    const cy=e.touches[0].clientY;
-    const now=Date.now();
-    if(now-lastT>0)velocity=(cy-lastY)/(now-lastT);
-    lastY=cy;lastT=now;
-    const dy=cy-sy;
-    // Only visually drag if pulling away from content
-    const atTop=cardEl.scrollTop<=0;
-    const atBot=cardEl.scrollTop+cardEl.clientHeight>=cardEl.scrollHeight-2;
-    if((atTop&&dy>0)||(atBot&&dy<0)){
-      cardEl.style.transform=`translateY(${dy*0.4}px) scale(1)`;
-    }
+    const dy=e.touches[0].clientY-sy;
+    if(dy>0)cardEl.style.transform=`translateY(${dy}px)`;
   },{passive:true});
   cardEl.addEventListener('touchend',e=>{
     if(!dragging)return;dragging=false;
     cardEl.style.transition='';
     const dy=e.changedTouches[0].clientY-sy;
-    const speed=Math.abs(velocity);
-    // Close only with strong velocity (>0.5px/ms) at boundary
-    if((dy>80&&speed>0.3)||(dy<-80&&speed>0.3)){
+    if(dy>60){
       closeTrOverlay();
       const inp=document.getElementById('ti');inp.value='';inp.style.height='auto';
       haptic();
@@ -3034,19 +1691,8 @@ trOverlay.addEventListener('click',e=>{
       cardEl.style.transform='';
     }
   },{passive:true});
-  /* Card tap: speak text on .tr-txt/.tr-local, stop propagation to not close overlay */
-  cardEl.addEventListener('click',e=>{
-    const txt=e.target.closest('.tr-txt');
-    const loc=e.target.closest('.tr-local');
-    if(txt||loc){
-      e.stopPropagation();
-      haptic();
-      const raw=(txt||loc).textContent.replace(/[🔊📚🔗🔄💬🔎★☆]/g,'').replace(/✓追加済み|😰忘れた|★ 削除/g,'').trim();
-      if(raw)speakEn(raw);
-      return;
-    }
-    e.stopPropagation();
-  });
+  /* Prevent click-to-close when tapping inside card content */
+  cardEl.addEventListener('click',e=>e.stopPropagation());
 })();
 
 
@@ -3068,27 +1714,9 @@ trCard.innerHTML='<div class="tr-handle"></div><div style="text-align:center;pad
 const gResult=await googleTranslate(text,sl,tl);
 const local=localLookup(text);
 let html='';
-const inputText=text.trim();
-if(gResult){
-  const starState=isStarred(inputText)?'★':'☆';
-  html+=`<div class="tr-item" style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1"><div class="tr-dir">${dirLabel}</div><div class="tr-txt">${gResult}</div><div class="tr-badge">Google Translate</div></div><span class="star-tr" data-word="${inputText.replace(/"/g,'&quot;')}" data-meaning="${gResult.replace(/"/g,'&quot;')}">${starState}</span></div>`;
-}
+if(gResult){html+=`<div class="tr-item"><div class="tr-dir">${dirLabel}</div><div class="tr-txt">${gResult}</div><div class="tr-badge">Google Translate</div></div>`;}
 else{html+='<div style="color:var(--sub);text-align:center;font-size:12px;padding:10px">\u7FFB\u8A33\u7D50\u679C\u304C\u3042\u308A\u307E\u305B\u3093\u3067\u3057\u305F</div>';}
-if(local){
-  html+='<div class="tr-bonus-hdr">\uD83D\uDCD6 \u53CE\u9332\u5358\u8A9E\u304B\u3089</div>';
-  html+=local.map(l=>{
-    // Extract the word from the local result for forgot/star
-    const m=l.match(/<b>([^<]+)<\/b>/);
-    const w=m?m[1]:'';
-    const wEsc=w.replace(/"/g,'&quot;');
-    const mText=l.replace(/<[^>]+>/g,'').trim();
-    const isForgotten=isForgot(w,0);
-    const forgotBtn=w?`<button class="tr-forgot-btn" data-word="${wEsc}" data-meaning="${mText}" style="font-size:9px;padding:2px 8px;border:1px solid rgba(255,59,48,.2);background:rgba(255,59,48,.08);color:#c0001a;border-radius:8px;cursor:pointer;font-family:inherit;margin-left:6px">${isForgotten?'✓追加済み':'😰忘れた'}</button>`:'';
-    const starState2=isStarred(w)?'★':'☆';
-    const starBtn=w?`<span class="star-tr" data-word="${wEsc}" data-meaning="${mText}" style="font-size:16px">${starState2}</span>`:'';
-    return `<div class="tr-item"><div class="tr-local" style="display:flex;align-items:center;gap:4px"><div style="flex:1">${l}</div>${starBtn}${forgotBtn}</div></div>`;
-  }).join('');
-}
+if(local){html+='<div class="tr-bonus-hdr">\uD83D\uDCD6 \u53CE\u9332\u5358\u8A9E\u304B\u3089</div>';html+=local.map(l=>`<div class="tr-item"><div class="tr-local">${l}</div></div>`).join('');}
 trCard.innerHTML='<div class="tr-handle"></div>'+html;haptic.confirm();
 }
 
@@ -3098,17 +1726,6 @@ let trTimer=null;
 inp.addEventListener('input',()=>{
 inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,88)+'px';
 const t=inp.value.trim();clearTimeout(trTimer);
-// Filter list items if list view is visible
-const listWrap=document.getElementById('list-wrap');
-if(listWrap&&listWrap.style.display!=='none'){
-  const items=listWrap.querySelectorAll('.li');
-  const q=t.toLowerCase();
-  items.forEach(li=>{
-    if(!q){li.style.display='';return;}
-    const txt=(li.textContent||'').toLowerCase();
-    li.style.display=txt.includes(q)?'':'none';
-  });
-}
 if(!t){closeTrOverlay();return;}
 openTrOverlay();
 trCard.innerHTML='<div class="tr-handle"></div><div style="text-align:center;padding:24px"><div style="width:22px;height:22px;border:2.5px solid rgba(0,0,0,.1);border-top-color:var(--b);border-radius:50%;animation:spin .6s linear infinite;margin:0 auto"></div></div>';
@@ -3147,52 +1764,48 @@ hsScrim.addEventListener('click',()=>{haptic();hSheet.classList.remove('open');h
 
 /* ═══ BUILD ALL WORDS LIST ═══ */
 function buildAllWords(){
-  const counts={V:V.length,P1W:P1W.length,P1P:P1P.length,ID:ID.length,E2W:E2W.length,E2P:E2P.length,IV:IV.length,GR:GR.length,EX:EX.length,RE:RE.length,CP:CP.length*2,PA:PA.reduce((s,p)=>s+p.b.length,0),TH:TH.reduce((s,t)=>s+t.items.length,0)};
-  const total=Object.values(counts).reduce((a,b)=>a+b,0);
+  const allWords=[];
+  // V
+  V.forEach(w=>allWords.push({en:w.w,ja:w.m,cat:w.c||'準1級',pr:w.pr||'',src:'V'}));
+  // P1W
+  P1W.forEach(w=>allWords.push({en:w.e,ja:w.j,cat:'Pass単',pr:'',src:'P1W'}));
+  // P1P
+  P1P.forEach(w=>allWords.push({en:w.e,ja:w.j,cat:'Pass単熟語',pr:'',src:'P1P'}));
+  // ID
+  ID.forEach(w=>allWords.push({en:w.w,ja:w.m,cat:'イディオム',pr:'',src:'ID'}));
+  // E2W
+  E2W.forEach(w=>allWords.push({en:w.e,ja:w.j,cat:'2級単語',pr:'',src:'E2W'}));
+  // E2P
+  E2P.forEach(w=>allWords.push({en:w.e,ja:w.j,cat:'2級熟語',pr:'',src:'E2P'}));
+  // IV
+  IV.forEach(w=>allWords.push({en:`${w.b} → ${w.p} → ${w.pp}`,ja:w.m,cat:'不規則動詞',pr:'',src:'IV'}));
+  // GR
+  GR.forEach(w=>allWords.push({en:w.e,ja:w.ej,cat:'文法: '+w.h,pr:'',src:'GR'}));
+  // EX
+  EX.forEach(w=>allWords.push({en:w.ph,ja:w.ja,cat:'表現'+w.n,pr:'',src:'EX'}));
+  // RE
+  RE.forEach(w=>allWords.push({en:w.p,ja:w.m,cat:'読解: '+w.s,pr:'',src:'RE'}));
+  // CP
+  CP.forEach(w=>{allWords.push({en:w.a.replace(/（.*）/,''),ja:w.a,cat:'混同注意',pr:'',src:'CP'});allWords.push({en:w.b.replace(/（.*）/,''),ja:w.b,cat:'混同注意',pr:'',src:'CP'});});
+  // PA
+  PA.forEach(w=>w.b.forEach(b=>allWords.push({en:b,ja:w.o+'の言い換え',cat:'言い換え',pr:'',src:'PA'})));
+  // TH
+  TH.forEach(w=>w.items.forEach(i=>allWords.push({en:'',ja:i,cat:'テーマ: '+w.cat,pr:'',src:'TH'})));
+
+  let html=`<div class="sh">全データ ${allWords.length}件</div>`;
+  const catGroups={};
+  allWords.forEach(w=>{if(!catGroups[w.src])catGroups[w.src]=[];catGroups[w.src].push(w);});
   const srcLabels={V:'準1級 単語',P1W:'Pass単 単語',P1P:'Pass単 熟語',ID:'イディオム',E2W:'2級 単語',E2P:'2級 熟語',IV:'不規則動詞',GR:'文法',EX:'表現',RE:'読解表現',CP:'混同注意',PA:'言い換え',TH:'テーマ'};
-  let html=`<div class="sh">全データ ${total}件 · タップで展開</div>`;
-  Object.keys(counts).forEach(src=>{
-    html+=`<div class="li aw-cat" data-src="${src}" style="cursor:pointer"><div style="display:flex;justify-content:space-between;align-items:center"><div class="lw">${srcLabels[src]||src}</div><div style="font-size:11px;color:var(--sub)">${counts[src]}件 ▸</div></div></div><div class="aw-items" id="aw-${src}" style="display:none"></div>`;
+  Object.keys(catGroups).forEach(src=>{
+    const items=catGroups[src];
+    html+=`<div style="font-size:10px;font-weight:700;color:var(--sub);background:var(--ln);border-radius:8px;padding:4px 10px;margin:8px 0 4px;letter-spacing:.04em">${srcLabels[src]||src} · ${items.length}件</div>`;
+    items.forEach(w=>{
+      const enText=(w.en||'').replace(/"/g,'&quot;');
+      html+=`<div class="li ans-row" data-en="${enText}"><div class="lw">${w.en||''}</div><div class="lm">${w.ja}</div><div style="font-size:9px;color:var(--sub);margin-top:2px">${w.cat}</div></div>`;
+    });
   });
   return html;
 }
-// Expand accordion on tap
-document.addEventListener('click',function(e){
-  const cat=e.target.closest('.aw-cat');
-  if(!cat)return;
-  const src=cat.dataset.src;
-  const container=document.getElementById('aw-'+src);
-  if(!container)return;
-  if(container.style.display!=='none'){container.style.display='none';return;}
-  haptic();
-  // Build items on demand (lazy)
-  if(!container.dataset.built){
-    container.dataset.built='1';
-    let items=[];
-    if(src==='V')V.forEach(w=>items.push({en:w.w,ja:w.m,cat:w.c||''}));
-    else if(src==='P1W')P1W.forEach(w=>items.push({en:w.e,ja:w.j}));
-    else if(src==='P1P')P1P.forEach(w=>items.push({en:w.e,ja:w.j}));
-    else if(src==='ID')ID.forEach(w=>items.push({en:w.w,ja:w.m}));
-    else if(src==='E2W')E2W.forEach(w=>items.push({en:w.e,ja:w.j}));
-    else if(src==='E2P')E2P.forEach(w=>items.push({en:w.e,ja:w.j}));
-    else if(src==='IV')IV.forEach(w=>items.push({en:w.b+' → '+w.p+' → '+w.pp,ja:w.m}));
-    else if(src==='GR')GR.forEach(w=>items.push({en:w.e,ja:w.h+': '+w.ej}));
-    else if(src==='EX')EX.forEach(w=>items.push({en:w.ph,ja:w.ja}));
-    else if(src==='RE')RE.forEach(w=>items.push({en:w.p,ja:w.m}));
-    else if(src==='CP')CP.forEach(w=>{items.push({en:w.a.replace(/（.*）/,''),ja:w.a});items.push({en:w.b.replace(/（.*）/,''),ja:w.b});});
-    else if(src==='PA')PA.forEach(w=>w.b.forEach(b=>items.push({en:b,ja:w.o+'→'+b})));
-    else if(src==='TH')TH.forEach(w=>w.items.forEach(i=>items.push({en:'',ja:i})));
-    let h='';
-    items.forEach(w=>{
-      const en=(w.en||'').replace(/"/g,'&quot;');
-      const ja=(w.ja||'').replace(/"/g,'&quot;');
-      const st=isStarred(w.en||'')?'★':'☆';
-      h+=`<div class="li ans-row" data-en="${en}"><div class="lw">${w.en||''}</div><div class="lm">${w.ja||''}</div><div style="display:flex;justify-content:flex-end;margin-top:3px"><span class="star-tr" data-word="${en}" data-meaning="${ja}" style="font-size:14px;cursor:pointer;padding:2px 8px;background:rgba(255,255,255,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:55px;border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.8),-1px -.8px 0 rgba(255,255,255,.5)">${st}</span></div></div>`;
-    });
-    container.innerHTML=h;
-  }
-  container.style.display='';
-});
 
 /* ═══ BUILD FORGOT LIST (from cache) ═══ */
 function buildForgotList(){
@@ -3210,7 +1823,7 @@ function buildForgotList(){
   let html=`<div class="sh">要復習 ${items.length}語</div>`;
   items.forEach(w=>{
     const enText=(w.en||'').replace(/"/g,'&quot;');
-    html+=`<div class="li ans-row" data-en="${enText}"><div class="lw">${w.en}</div><div class="lm">${w.ja||''}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px"><span style="font-size:9px;color:var(--sub)">${w.deck}</span><button class="ch forgot-clear-btn" data-word="${enText}" data-deck="${w.deckIdx}" style="font-size:9px;padding:3px 10px;color:var(--g)">✓覚えた</button></div></div>`;
+    html+=`<div class="li ans-row" data-en="${enText}" style="position:relative"><div class="lw">${w.en}</div><div class="lm">${w.ja}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:9px;color:var(--sub)">${w.deck}</span><button class="ch" style="font-size:9px;padding:3px 8px;color:var(--g)" onclick="event.stopPropagation();unmarkForgot('${enText}',${w.deckIdx});this.closest('.li').remove();haptic.confirm()">✓覚えた</button></div></div>`;
   });
   return html;
 }
@@ -3227,202 +1840,11 @@ function updateHomeBadges(){
   Object.values(fCache).forEach(d=>{fc+=Object.keys(d).length;});
   const bForgot=document.getElementById('b-forgot');
   if(bForgot)bForgot.textContent=fc?fc+'語':'0';
-  const bRetry=document.getElementById('b-retry');
-  if(bRetry)bRetry.textContent=fc?fc+'語':'0';
 }
 updateHomeBadges();
 
-// Home ★ button → open star list
-document.getElementById('home-star-btn').addEventListener('click',()=>{
-  haptic();openStarList();
-});
-// Home → button → switch to icon mode
-document.getElementById('home-icon-btn').addEventListener('click',()=>{
-  haptic();
-  showDialog('icon-dialog','icon-dialog-card');
-});
-
-/* ═══ ICON MODE INIT ═══ */
-function showIconGrid(){
-  document.querySelectorAll('.hg-lbl').forEach(l=>{l.style.display='none';});
-  document.querySelectorAll('.hg-list').forEach(l=>{l.style.display='none';});
-  const bb=document.getElementById('home-bottom-bar');
-  if(bb)bb.style.display='none';
-  // Hide header text in icon mode
-  const hdr=document.querySelector('.hm-hdr');
-  if(hdr)hdr.style.display='none';
-  const scroll=document.querySelector('.hm-scroll');
-  let oldGrid=document.getElementById('icon-grid');
-  if(oldGrid)oldGrid.remove();
-  
-  const bigMode=localStorage.getItem('inglish_bigicon')==='1';
-  const iconSize=bigMode?66:56;
-  const fontSize=bigMode?28:24;
-  const gap=bigMode?'22px 6px':'24px 8px';
-  
-  const grid=document.createElement('div');
-  grid.id='icon-grid';
-  grid.style.cssText='display:grid;grid-template-columns:repeat('+GRID_COLS+',1fr);gap:'+gap+';padding:24px 10px 16px;justify-items:center;';
-  
-  const cards=[...document.querySelectorAll('.hcard')];
-  const allIcons=[];
-  cards.forEach(card=>{
-    allIcons.push({icon:card.querySelector('.hi')?.textContent||'\u{1F4E6}',name:card.querySelector('.hcard-name')?.textContent||'',onclick:card.getAttribute('onclick')||''});
-  });
-  allIcons.push({icon:'\u2699\uFE0F',name:'\u8A2D\u5B9A',onclick:'__openSettings__'});
-  allIcons.push({icon:'\uD83E\uDDEE',name:'\u6570\u5B66',onclick:'__iframe_math__'});
-  allIcons.push({icon:'\uD83E\uDD96',name:'Neosaurs',onclick:'__iframe_neo__'});
-  allIcons.push({icon:'\uD83D\uDCDD',name:'\u30E1\u30E2',onclick:'__openMemo__'});
-  allIcons.push({icon:'__clock__',name:'\u6642\u8A08',onclick:'__iframe_clock__'});
-  allIcons.push({icon:'\uD83D\uDCF7',name:'\u30AB\u30E1\u30E9',onclick:'__iframe_cam__'});
-  
-  // Apply saved order if exists
-  const savedOrder=getIconOrder();
-  if(savedOrder&&savedOrder.length===allIcons.length){
-    const ordered=[];
-    savedOrder.forEach(nm=>{
-      const found=allIcons.find(ic=>ic.name===nm);
-      if(found)ordered.push(found);
-    });
-    if(ordered.length===allIcons.length)allIcons.splice(0,allIcons.length,...ordered);
-  }
-  
-  allIcons.forEach((d,idx)=>{
-    const cell=document.createElement('div');
-    cell.className='ig-cell';
-    cell.dataset.icon=d.icon;
-    cell.dataset.name=d.name;
-    cell.style.cssText='display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;-webkit-user-select:none';
-    const short=d.name.length>5?d.name.slice(0,4)+'\u2026':d.name;
-    const labelHtml=bigMode?'':'<div style="font-size:8px;font-weight:600;color:var(--tx);text-align:center;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+short+'</div>';
-    const iconContent=d.icon==='__clock__'?'<svg class="live-clock-svg" viewBox="0 0 40 40" width="'+(fontSize+4)+'" height="'+(fontSize+4)+'"><circle cx="20" cy="20" r="18" fill="none" stroke="rgba(0,0,0,.3)" stroke-width="1.5"/><line class="clk-h" x1="20" y1="20" x2="20" y2="10" stroke="#333" stroke-width="2.5" stroke-linecap="round"/><line class="clk-m" x1="20" y1="20" x2="20" y2="7" stroke="#333" stroke-width="1.5" stroke-linecap="round"/><line class="clk-s" x1="20" y1="20" x2="20" y2="6" stroke="#ff3b30" stroke-width=".8" stroke-linecap="round"/><circle cx="20" cy="20" r="1.5" fill="#333"/></svg>':d.icon;
-    cell.innerHTML='<div class="ig-icon" style="width:'+iconSize+'px;height:'+iconSize+'px;border-radius:14px;background:rgba(255,255,255,.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.85),-1px -.8px 0 rgba(255,255,255,.6),0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:'+fontSize+'px;transition:transform .15s">'+iconContent+'</div>'+labelHtml;
-    cell.addEventListener('click',()=>{
-      if(wobbleMode)return;
-      haptic();
-      const allCells=grid.querySelectorAll('.ig-cell');
-      const thisIcon=cell.querySelector('.ig-icon');
-      thisIcon.style.transition='transform .5s ease, opacity .4s ease';
-      thisIcon.style.transform='scale(5)';thisIcon.style.opacity='0';
-      allCells.forEach(c2=>{if(c2===cell)return;c2.style.transition='transform .5s ease, opacity .4s ease';c2.style.transform='scale(0.8)';c2.style.opacity='0.3';});
-      setTimeout(()=>{
-        allCells.forEach(c2=>{c2.style.transition='';c2.style.transform='';c2.style.opacity='';});
-        if(d.onclick==='__openSettings__'){openSettings();}
-        else if(d.onclick==='__iframe_math__'){openIframe('math.html','\u6570\u5B66');}
-        else if(d.onclick==='__iframe_neo__'){openIframe('Neosaurs.html','Neosaurs');}
-        else if(d.onclick==='__openMemo__'){openIframe('card.html','メモ');}
-        else if(d.onclick==='__iframe_clock__'){openIframe('clock-ios26.html','時計');}
-        else if(d.onclick==='__iframe_cam__'){openIframe('cam.html','カメラ');}
-        else if(d.onclick){try{eval(d.onclick);}catch(e){}}
-      },450);
-    });
-    const ib=cell.querySelector('.ig-icon');
-    ib.addEventListener('touchstart',function(){if(!wobbleMode)this.style.transform='scale(0.85)';},{passive:true});
-    ib.addEventListener('touchend',function(){if(!wobbleMode)this.style.transform='';},{passive:true});
-    grid.appendChild(cell);
-  });
-  scroll.prepend(grid);
-  // Live clock icon update
-  if(window._clockIconIv)clearInterval(window._clockIconIv);
-  function updateClockIcon(){
-    const svgs=grid.querySelectorAll('.live-clock-svg');
-    if(!svgs.length)return;
-    const now=new Date();
-    const h=now.getHours()%12,m=now.getMinutes(),s=now.getSeconds();
-    svgs.forEach(svg=>{
-      const hh=svg.querySelector('.clk-h'),mm=svg.querySelector('.clk-m'),ss=svg.querySelector('.clk-s');
-      if(hh)hh.setAttribute('transform','rotate('+(h*30+m*0.5)+' 20 20)');
-      if(mm)mm.setAttribute('transform','rotate('+(m*6+s*0.1)+' 20 20)');
-      if(ss)ss.setAttribute('transform','rotate('+(s*6)+' 20 20)');
-    });
-  }
-  updateClockIcon();
-  window._clockIconIv=setInterval(updateClockIcon,1000);
-}
-if(localStorage.getItem('inglish_layout')==='icon'){showIconGrid();}
-
-
-/* ═══ STAR FAVORITES CACHE ═══ */
-const STAR_KEY='inglish_star_cache';
-function loadStars(){try{return JSON.parse(localStorage.getItem(STAR_KEY))||{};}catch(_){return {};}}
-function saveStars(s){try{localStorage.setItem(STAR_KEY,JSON.stringify(s));}catch(_){}}
-let starCache=loadStars();
-function isStarred(word){return !!starCache[word];}
-function toggleStar(word,meaning){
-  if(starCache[word]){delete starCache[word];}
-  else{starCache[word]={m:meaning,t:Date.now()};}
-  saveStars(starCache);
-}
-// Star update now handled via global g-star button in render()
-
-/* ═══ STAR FAVORITES LIST ═══ */
 /* ═══ TAP-TO-SPEAK DELEGATION ═══ */
 document.addEventListener('click',e=>{
-  // Handle .star-deck-btn (card star toggle)
-  const star=e.target.closest('.star-deck-btn');
-  if(star){
-    e.stopPropagation();
-    const i=parseInt(star.dataset.deck,10);
-    const d=DK[i];if(d.idx>=d.deck.length)return;
-    const w=d.deck[d.idx];
-    toggleStar(w.e||w.w, w.j||w.m||'');
-    haptic.confirm();
-    const nowStarred=isStarred(w.e||w.w);
-    star.textContent=nowStarred?'★':'☆';
-    star.classList.remove('pop');void star.offsetWidth;star.classList.add('pop');
-    if(nowStarred)showStarTooltip();
-    return;
-  }
-  // Handle .star-tr (translation result star toggle)
-  const starTr=e.target.closest('.star-tr');
-  if(starTr){
-    e.stopPropagation();
-    const word=starTr.dataset.word;
-    const meaning=starTr.dataset.meaning||'';
-    toggleStar(word,meaning);
-    haptic.confirm();
-    const nowS=isStarred(word);
-    starTr.textContent=nowS?'★':'☆';
-    starTr.classList.remove('pop');void starTr.offsetWidth;starTr.classList.add('pop');
-    if(nowS)showStarTooltip();
-    return;
-  }
-  // Handle .star-remove-btn (remove from star list)
-  const starRm=e.target.closest('.star-remove-btn');
-  if(starRm){
-    e.stopPropagation();
-    const word=starRm.dataset.word;
-    if(starCache[word]){delete starCache[word];saveStars(starCache);}
-    haptic.confirm();
-    const li=starRm.closest('.li');
-    if(li){li.style.transition='opacity .25s,transform .25s';li.style.opacity='0';li.style.transform='translateX(60px)';setTimeout(()=>li.remove(),260);}
-    return;
-  }
-  // Handle .tr-forgot-btn (add to forgot from translation local result)
-  const trForgot=e.target.closest('.tr-forgot-btn');
-  if(trForgot){
-    e.stopPropagation();
-    const word=trForgot.dataset.word;
-    const meaning=trForgot.dataset.meaning||'';
-    markForgot(word,meaning,0);
-    haptic.error();
-    trForgot.textContent='✓追加済み';trForgot.style.color='var(--sub)';trForgot.style.pointerEvents='none';
-    updateHomeBadges();
-    return;
-  }
-  // Handle .forgot-clear-btn (覚えた button in forgot list)
-  const clr=e.target.closest('.forgot-clear-btn');
-  if(clr){
-    e.stopPropagation();
-    const word=clr.dataset.word;
-    const deckIdx=parseInt(clr.dataset.deck,10);
-    unmarkForgot(word,deckIdx);
-    haptic.confirm();
-    const li=clr.closest('.li');
-    if(li){li.style.transition='opacity .25s,transform .25s';li.style.opacity='0';li.style.transform='translateX(60px)';setTimeout(()=>li.remove(),260);}
-    updateHomeBadges();
-    return;
-  }
   // Handle .ans-tap (card answer items)
   const tap=e.target.closest('.ans-tap');
   if(tap){
@@ -3441,271 +1863,7 @@ document.addEventListener('click',e=>{
   }
 });
 
-/* ═══ DELETE SLIDER ═══ */
-/* ═══ DELETE SLIDER ═══ */
-(()=>{
-  const ov=document.getElementById('del-overlay');
-  const content=document.getElementById('del-content');
-  const knob=document.getElementById('del-knob');
-  const inner=document.getElementById('del-inner');
-  const label=document.getElementById('del-label');
-  const wrap=document.getElementById('del-slider-wrap');
-  const btnOpen=document.getElementById('btn-delete-all');
-  const btnCancel=document.getElementById('btn-cancel-delete');
-  const maxOff=310-56-4;
-  let dragging=false,sx=0,kx=0;
-
-  function setPos(x){knob.style.left=x+'px';inner.style.width=(72+x)+'px';label.style.opacity=1-x/maxOff;}
-  function resetSlider(){
-    knob.style.transition='left .5s cubic-bezier(.62,0,.4,1)';
-    inner.style.transition='width .13s';
-    knob.style.left='4px';inner.style.width='72px';label.style.opacity=1;
-  }
-
-  function doDeleteAll(){
-    haptic.error();haptic.error();haptic.error();
-    try{localStorage.removeItem(CACHE_KEY);localStorage.removeItem(STAR_KEY);localStorage.removeItem(STAR_TOOLTIP_KEY);}catch(_){}
-    fCache={};starCache={};
-    // Scale 1→1.2 zoom out effect then reload
-    ov.style.background='rgba(0,0,0,1)';
-    content.style.opacity='0';
-    document.body.style.transition='transform .5s ease, opacity .5s ease';
-    document.body.style.transform='scale(1.2)';
-    document.body.style.opacity='0';
-    setTimeout(()=>{window.location.reload();},550);
-  }
-
-  function showSlider(){
-    haptic.error();
-    ov.style.display='block';
-    requestAnimationFrame(()=>{
-      ov.style.background='rgba(0,0,0,.75)';
-      content.style.opacity='1';
-    });
-    resetSlider();
-  }
-  function hideSlider(){
-    ov.style.background='rgba(0,0,0,0)';
-    content.style.opacity='0';
-    resetSlider();
-    setTimeout(()=>{ov.style.display='none';},400);
-    haptic();
-  }
-
-  // Open button
-  btnOpen.addEventListener('click',showSlider);
-  // Cancel button
-  btnCancel.addEventListener('click',hideSlider);
-
-  // Touch drag on knob
-  knob.addEventListener('touchstart',e=>{
-    dragging=true;sx=e.touches[0].clientX;kx=0;
-    knob.style.transition='none';inner.style.transition='none';
-    haptic();
-  },{passive:true});
-  wrap.addEventListener('touchmove',e=>{
-    if(!dragging)return;
-    let dx=e.touches[0].clientX-sx;if(dx<0)dx=0;
-    kx=Math.min(dx,maxOff);setPos(kx);
-  },{passive:true});
-  wrap.addEventListener('touchend',e=>{
-    if(!dragging)return;dragging=false;
-    knob.style.transition='left .5s cubic-bezier(.62,0,.4,1)';
-    inner.style.transition='width .13s';
-    if(kx>=maxOff*.9){doDeleteAll();}
-    else{for(let i=0;i<9;i++)setTimeout(()=>haptic.error(),i*45);resetSlider();}
-  },{passive:true});
-
-  // Mouse drag fallback (desktop)
-  knob.addEventListener('mousedown',e=>{
-    dragging=true;sx=e.clientX;kx=0;
-    knob.style.transition='none';inner.style.transition='none';
-  });
-  window.addEventListener('mousemove',e=>{
-    if(!dragging)return;
-    let dx=e.clientX-sx;if(dx<0)dx=0;
-    kx=Math.min(dx,maxOff);setPos(kx);
-  });
-  window.addEventListener('mouseup',e=>{
-    if(!dragging)return;dragging=false;
-    knob.style.transition='left .5s cubic-bezier(.62,0,.4,1)';
-    inner.style.transition='width .13s';
-    if(kx>=maxOff*.9){doDeleteAll();}
-    else{resetSlider();}
-  });
-
-  // Expose for other code
-  window.showDeleteSlider=showSlider;
-  window.hideDeleteSlider=hideSlider;
-})();
-
-/* ═══ RETRY FORGOT QUIZ (card-forgot mode) ═══ */
-// Override openS to handle card-forgot
-const _origOpenS=window.openS;
-window.openS=function(type,arg){
-  if(type==='card-forgot'){
-    haptic.confirm();
-    // Build a deck from forgot cache
-    fCache=loadCache();
-    const items=[];
-    Object.keys(fCache).forEach(deckIdx=>{
-      const deck=fCache[deckIdx];
-      Object.keys(deck).forEach(word=>{
-        items.push({e:word,j:deck[word].m||'',w:word,m:deck[word].m||'',p:'',l:1,c:'復習',pr:'',f:'忘れた/難しいマーク',t:[],id:[]});
-      });
-    });
-    if(!items.length){
-      alert('忘れた単語がありません。クイズで😰忘れた/🤔難しいを押してください。');
-      return;
-    }
-    // Inject into deck 0 temporarily for the retry
-    document.getElementById('home').classList.add('hidden');
-    setTimeout(()=>document.getElementById('app').classList.add('vis'),30);
-    document.getElementById('app-dots').style.display='none';
-    document.getElementById('sw-wrap').style.display='flex';
-    document.getElementById('list-wrap').style.display='none';
-    document.getElementById('float-bar').style.display='flex';
-    document.getElementById('app-ttl').textContent='忘れた単語 復習 ('+items.length+'語)';
-    // Use panel 0 but override deck
-    DK[0].deck=items;DK[0].idx=0;DK[0].flipped=false;
-    DK[0].st={g:0,h:0,f:0};DK[0].hist=[];DK[0].prev=null;DK[0].shuffled=false;
-    document.getElementById('sg0').textContent=0;
-    document.getElementById('sh0').textContent=0;
-    document.getElementById('sf0').textContent=0;
-    jPanel(0,false);
-    render(0);
-    return;
-  }
-  _origOpenS(type,arg);
-};
-
 /* ═══ INIT ═══ */
-// Star tooltip tracking
-const STAR_TOOLTIP_KEY='inglish_star_tooltip_shown';
-let starTooltipShown=false;
-try{starTooltipShown=!!localStorage.getItem(STAR_TOOLTIP_KEY);}catch(_){}
-
-function showStarTooltip(){
-  if(starTooltipShown)return;
-  starTooltipShown=true;
-  try{localStorage.setItem(STAR_TOOLTIP_KEY,'1');}catch(_){}
-  const btn=document.getElementById('btn-star-list');
-  const tip=document.createElement('div');
-  tip.className='star-tooltip';
-  tip.textContent='ここから★追加した単語を見れます';
-  btn.appendChild(tip);
-  setTimeout(()=>{if(tip.parentNode)tip.remove();},1800);
-}
-
-// Star list overlay
-const slOverlay=document.getElementById('star-list-overlay');
-const slBody=document.getElementById('sl-body');
-const slCount=document.getElementById('sl-count');
-
-function openStarList(){
-  haptic.confirm();
-  starCache=loadStars();
-  const items=Object.entries(starCache).sort((a,b)=>b[1].t-a[1].t);
-  slCount.textContent=items.length+'語';
-  if(!items.length){
-    slBody.innerHTML='<div style="color:var(--sub);text-align:center;font-size:13px;padding:40px 20px">⭐ お気に入りはまだありません<br><br><span style="font-size:11px">単語カードの☆や翻訳結果の☆をタップして追加</span></div>';
-  } else {
-    let html='';
-    items.forEach(([word,data])=>{
-      const enText=word.replace(/"/g,'&quot;');
-      html+=`<div class="li ans-row" data-en="${enText}"><div class="lw">${word}</div><div class="lm">${data.m||''}</div><div style="display:flex;justify-content:flex-end;margin-top:3px"><button class="ch star-remove-btn" data-word="${enText}" style="font-size:9px;padding:3px 10px;color:var(--r)">★ 削除</button></div></div>`;
-    });
-    slBody.innerHTML=html;
-  }
-  slOverlay.classList.add('on');
-}
-function closeStarList(){
-  haptic();
-  slOverlay.classList.remove('on');
-}
-document.getElementById('btn-star-list').addEventListener('click',openStarList);
-document.getElementById('sl-close').addEventListener('click',closeStarList);
-slOverlay.addEventListener('click',e=>{if(e.target===slOverlay)closeStarList();});
-
-// Tap title or swipe left/right on title to close star list
-(()=>{
-  const ttl=document.querySelector('.sl-ttl');
-  let sx=0;
-  ttl.style.cursor='pointer';
-  ttl.addEventListener('click',closeStarList);
-  ttl.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;},{passive:true});
-  ttl.addEventListener('touchend',e=>{
-    const dx=e.changedTouches[0].clientX-sx;
-    if(Math.abs(dx)>50)closeStarList();
-  },{passive:true});
-})();
-
-/* ═══ FORGOT LIST: SWIPE-TO-DELETE ═══ */
-(()=>{
-  let target=null,sx=0,moved=false,delBtn=null,hideTimer=null;
-  document.addEventListener('touchstart',e=>{
-    const li=e.target.closest('.forgot-clear-btn')?.closest('.li')||null;
-    if(!li)return;
-    // Actually we want swipe on the .li row in forgot list
-  },{passive:true});
-  // Delegate on list-cnt for forgot items
-  const lc=document.getElementById('list-cnt');
-  if(lc){
-    lc.addEventListener('touchstart',e=>{
-      const li=e.target.closest('.li');
-      if(!li||!li.querySelector('.forgot-clear-btn'))return;
-      target=li;sx=e.touches[0].clientX;moved=false;
-    },{passive:true});
-    lc.addEventListener('touchmove',e=>{
-      if(!target)return;
-      const dx=e.touches[0].clientX-sx;
-      if(dx<-20){moved=true;target.style.transform=`translateX(${dx}px)`;target.style.transition='none';}
-    },{passive:true});
-    lc.addEventListener('touchend',e=>{
-      if(!target)return;
-      const dx=e.changedTouches[0].clientX-sx;
-      target.style.transition='transform .3s ease';
-      if(dx<-60){
-        // Show delete button
-        target.style.transform='translateX(-70px)';
-        const btn=target.querySelector('.forgot-clear-btn');
-        if(btn){btn.style.position='absolute';btn.style.right='-66px';btn.style.top='50%';btn.style.transform='translateY(-50%)';btn.style.display='block';btn.style.opacity='1';}
-        const t=target;
-        clearTimeout(hideTimer);
-        hideTimer=setTimeout(()=>{t.style.transform='';},1500);
-      } else {
-        target.style.transform='';
-      }
-      target=null;
-    },{passive:true});
-  }
-  // Star list: button-only delete (swipe removed for reliability)
-})();
-
-// ← やり直す button: goes back one card in current panel
-document.getElementById('btn-back').addEventListener('click',()=>{
-  const d=DK[curP];
-  if(d.prev){Bk(curP);}
-  else{haptic();} // shake when nothing to go back to
-});
-
-// Global float buttons
-// 🔀 button: first tap requests shake permission, subsequent taps toggle
-document.getElementById('g-star').addEventListener('click',()=>{
-  const d=DK[curP];if(d.idx>=d.deck.length)return;
-  const w=d.deck[d.idx];
-  toggleStar(w.e||w.w, w.j||w.m||'');
-  haptic.confirm();
-  const el=document.getElementById('g-star');
-  const nowS=isStarred(w.e||w.w);
-  el.textContent=nowS?'★':'☆';
-  el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');
-  if(nowS)showStarTooltip();
-});
-
-// Show/hide float-bar based on card mode
-const floatBar=document.getElementById('float-bar');
-
 // body animation handles splash — no separate element needed
 </script>
 
