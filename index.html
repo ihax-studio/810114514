@@ -1974,7 +1974,7 @@ document.getElementById('s-haptic').addEventListener('click',function(){
     syncShakeChecks('shake',v);
     // Enable/disable shake listener
     if(v==='none'){shakeEnabled=false;localStorage.setItem(SHAKE_KEY,'0');}
-    else{shakeEnabled=true;localStorage.setItem(SHAKE_KEY,'1');startShakeListener();}
+    else{shakeEnabled=true;localStorage.setItem(SHAKE_KEY,'1');}
     updateHeavyVisibility();
   });
 });
@@ -3198,47 +3198,8 @@ document.getElementById('btn-back').addEventListener('click',()=>{
 
 // Global float buttons
 // 🔀 button: first tap requests shake permission, subsequent taps toggle
-document.getElementById('g-sfb').addEventListener('click',async()=>{
+document.getElementById('g-sfb').addEventListener('click',()=>{
   haptic();
-  const d=DK[curP];
-  
-  // If currently shuffled (showing ⇆), unshuffle + play sound
-  if(d.shuffled){
-    Sf(curP); // toggles back to ordered
-    return;
-  }
-  
-  // If shake not yet granted, request permission
-  if(!shakeEnabled){
-    let granted=false;
-    if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
-      try{
-        const perm=await DeviceMotionEvent.requestPermission();
-        granted=(perm==='granted');
-      }catch(e){granted=false;}
-    }else{
-      // Non-iOS or no permission needed
-      granted=true;
-    }
-    if(granted){
-      shakeEnabled=true;
-      localStorage.setItem(SHAKE_KEY,'1');
-      startShakeListener();
-      // Show tooltip
-      const sfb=document.getElementById('g-sfb');
-      const tip=document.createElement('div');
-      tip.className='shake-tooltip';
-      tip.textContent='📳 シェイクで単語をシャッフル';
-      sfb.parentElement.style.position='relative';
-      sfb.parentElement.appendChild(tip);
-      setTimeout(()=>tip.remove(),2500);
-    }
-    // Shuffle now
-    Sf(curP);
-    return;
-  }
-  
-  // Already granted, just shuffle
   Sf(curP);
 });
 document.getElementById('g-star').addEventListener('click',()=>{
