@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>カメラ</title>
+<script type="module">
+import{haptic}from"https://esm.sh/ios-haptics";
+const n=()=>{};window.H=haptic||{};
+['error','success','warning','impact','selection','notification','confirm'].forEach(m=>{if(typeof window.H[m]!=='function')window.H[m]=n;});
+window.hap=()=>{try{window.H();}catch(e){}};
+window.hap.confirm=()=>{try{window.H.confirm();}catch(e){}};
+window.hap.error=()=>{try{window.H.error();}catch(e){}};
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;overflow:hidden;height:100dvh;display:flex;flex-direction:column;-webkit-user-select:none;user-select:none}
+#viewfinder{flex:1;position:relative;overflow:hidden;background:#111}
+#viewfinder video{width:100%;height:100%;object-fit:cover}
+#controls{display:flex;align-items:center;justify-content:center;padding:20px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+20px);background:#000;gap:40px;flex-shrink:0}
+#shutter{width:72px;height:72px;border-radius:50%;background:#fff;border:4px solid rgba(255,255,255,.3);cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center}
+#shutter:active{transform:scale(.88)}
+#shutter .inner{width:60px;height:60px;border-radius:50%;background:#fff;transition:transform .15s}
+#switch-btn{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:opacity .3s}
+#switch-btn.disabled{opacity:.3;pointer-events:none}
+#thumb-btn{width:40px;height:40px;border-radius:8px;overflow:hidden;border:2px solid rgba(255,255,255,.4);cursor:pointer;background:#222}
+#thumb-btn img{width:100%;height:100%;object-fit:cover}
+/* Preview overlay */
+#preview{display:none;position:fixed;inset:0;z-index:100;background:#000;flex-direction:column}
+#preview.show{display:flex}
+#preview-img{flex:1;object-fit:contain;background:#000}
+#preview-bar{display:flex;align-items:center;justify-content:space-between;padding:16px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+16px);background:#000}
+#preview-bar button{background:none;border:none;color:#fff;font-size:15px;font-family:inherit;cursor:pointer;padding:10px 16px;border-radius:55px}
+#preview-bar .save-btn{background:rgba(0,122,255,.9);font-weight:600}
+/* Loupe */
+#loupe{display:none;position:absolute;width:120px;height:120px;border-radius:50%;border:2px solid rgba(255,255,255,.6);overflow:hidden;pointer-events:none;z-index:50;box-shadow:0 4px 20px rgba(0,0,0,.5)}
+#loupe canvas{width:100%;height:100%}
+/* Save dialog */
+#save-dlg{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);align-items:center;justify-content:center}
+#save-dlg.show{display:flex}
+#save-card{width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .3s ease,opacity .3s ease}
+#save-dlg.show #save-card{transform:scale(1);opacity:1}
+</style>
+</head>
+<body>
+<div id="viewfinder">
+  <video id="cam" autoplay playsinline muted></video>
+  <div id="loupe"><canvas id="loupe-canvas" width="240" height="240"></canvas></div>
+</div>
+<div id="controls">
+  <div id="thumb-btn" onclick="showLastPhoto()"><img id="thumb-img" src="" style="display:none"></div>
+  <div id="shutter" onclick="capture()"><div class="inner"></div></div>
+  <button id="switch-btn" onclick="switchCam()">↔︎</button>
+</div>
+
+<div id="preview">
+  <div style="display:flex;align-items:center;padding:12px;padding-top:calc(env(safe-area-inset-top,0px)+12px)">
+    <button onclick="closePreview()" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;font-family:inherit;padding:8px">← 戻る</button>
+  </div>
+  <img id="preview-img">
+  <div id="preview-bar">
+    <button onclick="closePreview()">キャンセル</button>
+    <button class="save-btn" onclick="savePhoto()">写真を保存</button>
+  </div>
+</div>
+
+<div id="save-dlg">
+  <div id="save-card">
+    <div style="padding:22px 20px 10px">
+      <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">まとめて保存</div>
+      <div id="save-count" style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5"></div>
+    </div>
+    <div style="border-top:1px solid rgba(0,0,0,.1);display:flex">
+      <button onclick="dismissSave()" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;border-right:1px solid rgba(0,0,0,.1);cursor:pointer;font-family:inherit">あとで</button>
+      <button onclick="saveAll()" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CACHE_KEY='cam_photos';
+let photos=JSON.parse(localStorage.getItem(CACHE_KEY)||'[]');
+let stream=null,facingMode='environment',devices=[];
+let previewIdx=-1,loupeActive=false,loupeTimer=null;
+
+const cam=document.getElementById('cam');
+
+async function startCam(){
+  if(stream){stream.getTracks().forEach(t=>t.stop());}
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode,width:{ideal:1920},height:{ideal:1080}},audio:false});
+    cam.srcObject=stream;
+    // Enumerate devices for switch button
+    const all=await navigator.mediaDevices.enumerateDevices();
+    devices=all.filter(d=>d.kind==='videoinput');
+    document.getElementById('switch-btn').classList.toggle('disabled',devices.length<2);
+  }catch(e){console.log('Camera error:',e);}
+}
+
+async function switchCam(){
+  hap.confirm();
+  facingMode=facingMode==='environment'?'user':'environment';
+  await startCam();
+}
+
+function capture(){
+  hap.confirm();
+  // Flash effect
+  const vf=document.getElementById('viewfinder');
+  vf.style.transition='none';vf.style.opacity='0';
+  requestAnimationFrame(()=>{vf.style.transition='opacity .3s';vf.style.opacity='1';});
+  
+  const canvas=document.createElement('canvas');
+  canvas.width=cam.videoWidth;canvas.height=cam.videoHeight;
+  canvas.getContext('2d').drawImage(cam,0,0);
+  const dataUrl=canvas.toDataURL('image/jpeg',0.85);
+  
+  if(photos.length>=5)photos.shift(); // Max 5
+  photos.push(dataUrl);
+  try{localStorage.setItem(CACHE_KEY,JSON.stringify(photos));}catch(e){photos.shift();try{localStorage.setItem(CACHE_KEY,JSON.stringify(photos));}catch(e2){}}
+  
+  updateThumb();
+  
+  // Show save dialog at 3 photos
+  if(photos.length===3){
+    document.getElementById('save-count').textContent=`${photos.length}枚の写真を撮影しました。まとめて保存しますか？`;
+    document.getElementById('save-dlg').classList.add('show');
+  }
+}
+
+function updateThumb(){
+  const img=document.getElementById('thumb-img');
+  if(photos.length>0){img.src=photos[photos.length-1];img.style.display='block';}
+  else{img.style.display='none';}
+}
+
+function showLastPhoto(){
+  hap();
+  if(!photos.length)return;
+  previewIdx=photos.length-1;
+  document.getElementById('preview-img').src=photos[previewIdx];
+  document.getElementById('preview').classList.add('show');
+}
+
+function closePreview(){
+  hap();
+  document.getElementById('preview').classList.remove('show');
+}
+
+function savePhoto(){
+  hap.confirm();
+  if(previewIdx<0||!photos[previewIdx])return;
+  const a=document.createElement('a');
+  a.href=photos[previewIdx];
+  a.download=`photo_${Date.now()}.jpg`;
+  a.click();
+  closePreview();
+}
+
+function dismissSave(){
+  hap();
+  document.getElementById('save-dlg').classList.remove('show');
+}
+
+function saveAll(){
+  hap.confirm();
+  photos.forEach((p,i)=>{
+    setTimeout(()=>{
+      const a=document.createElement('a');a.href=p;a.download=`photo_${Date.now()}_${i+1}.jpg`;a.click();
+    },i*200);
+  });
+  document.getElementById('save-dlg').classList.remove('show');
+}
+
+// Pinch zoom on preview
+let pinchDist0=null,curScale=1;
+const pImg=document.getElementById('preview-img');
+pImg.addEventListener('touchstart',e=>{
+  if(e.touches.length===2){
+    pinchDist0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  }
+},{passive:true});
+pImg.addEventListener('touchmove',e=>{
+  if(e.touches.length===2&&pinchDist0){
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    curScale=Math.max(1,Math.min(5,curScale*(d/pinchDist0)));
+    pinchDist0=d;
+    pImg.style.transform=`scale(${curScale})`;
+  }
+},{passive:true});
+pImg.addEventListener('touchend',e=>{if(e.touches.length<2)pinchDist0=null;},{passive:true});
+// Double tap to reset zoom
+let tapTime=0;
+pImg.addEventListener('click',()=>{
+  const now=Date.now();
+  if(now-tapTime<300){curScale=1;pImg.style.transform='scale(1)';hap();}
+  tapTime=now;
+});
+
+// Long press loupe on viewfinder
+const vf=document.getElementById('viewfinder');
+const loupe=document.getElementById('loupe');
+const loupeCanvas=document.getElementById('loupe-canvas');
+const loupeCtx=loupeCanvas.getContext('2d');
+
+vf.addEventListener('touchstart',e=>{
+  if(e.target===cam||e.target===vf){
+    const t=e.touches[0];
+    loupeTimer=setTimeout(()=>{
+      hap.confirm();
+      loupeActive=true;
+      updateLoupe(t.clientX,t.clientY);
+      loupe.style.display='block';
+    },500);
+  }
+},{passive:true});
+
+vf.addEventListener('touchmove',e=>{
+  if(loupeActive&&e.touches[0]){
+    updateLoupe(e.touches[0].clientX,e.touches[0].clientY);
+  }else{
+    clearTimeout(loupeTimer);
+  }
+},{passive:true});
+
+vf.addEventListener('touchend',()=>{
+  clearTimeout(loupeTimer);
+  if(loupeActive){
+    loupeActive=false;
+    loupe.style.display='none';
+    // Capture zoomed area
+    hap.confirm();
+  }
+},{passive:true});
+
+function updateLoupe(cx,cy){
+  const rect=vf.getBoundingClientRect();
+  // Position loupe above finger
+  loupe.style.left=(cx-rect.left-60)+'px';
+  loupe.style.top=(cy-rect.top-140)+'px';
+  // Draw zoomed portion of video
+  const vw=cam.videoWidth,vh=cam.videoHeight;
+  const rx=(cx-rect.left)/rect.width,ry=(cy-rect.top)/rect.height;
+  const srcX=rx*vw-vw*0.05,srcY=ry*vh-vh*0.05;
+  const srcW=vw*0.1,srcH=vh*0.1;
+  loupeCtx.drawImage(cam,srcX,srcY,srcW,srcH,0,0,240,240);
+}
+
+// Double tap on viewfinder outside loupe = haptic
+let vfTapTime=0;
+vf.addEventListener('click',()=>{
+  if(!loupeActive){
+    const now=Date.now();
+    if(now-vfTapTime<300){hap();}
+    vfTapTime=now;
+  }
+});
+
+updateThumb();
+startCam();
+</script>
+</body>
+</html>

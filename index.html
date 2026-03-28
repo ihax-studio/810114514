@@ -783,7 +783,7 @@ overflow:hidden;
 <!-- ══════════ IFRAME APP OVERLAY ══════════ -->
 <div id="iframe-overlay" style="position:fixed;inset:0;z-index:900;background:#fff;transform:translateX(100%);transition:transform .4s ease;visibility:hidden">
   <button id="iframe-back" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:10;width:42px;height:42px;border-radius:55px;background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--b);box-shadow:0 2px 8px rgba(0,0,0,.1)">←</button>
-  <iframe id="iframe-content" style="position:absolute;inset:0;width:100%;height:100%;border:none" sandbox="allow-scripts allow-same-origin"></iframe>
+  <iframe id="iframe-content" style="position:absolute;inset:0;width:100%;height:100%;border:none" sandbox="allow-scripts allow-same-origin allow-downloads allow-modals" allow="camera;microphone"></iframe>
 </div>
 
 <!-- Icon mode dialog -->
@@ -3089,6 +3089,7 @@ function showIconGrid(){
   allIcons.push({icon:'\uD83E\uDD96',name:'Neosaurs',onclick:'__iframe_neo__'});
   allIcons.push({icon:'\uD83D\uDCDD',name:'\u30E1\u30E2',onclick:'__openMemo__'});
   allIcons.push({icon:'__clock__',name:'\u6642\u8A08',onclick:'__iframe_clock__'});
+  allIcons.push({icon:'\uD83D\uDCF7',name:'\u30AB\u30E1\u30E9',onclick:'__iframe_cam__'});
   
   // Apply saved order if exists
   const savedOrder=getIconOrder();
@@ -3126,6 +3127,7 @@ function showIconGrid(){
         else if(d.onclick==='__iframe_neo__'){openIframe('Neosaurs.html','Neosaurs');}
         else if(d.onclick==='__openMemo__'){openIframe('card.html','メモ');}
         else if(d.onclick==='__iframe_clock__'){openIframe('clock-ios26.html','時計');}
+        else if(d.onclick==='__iframe_cam__'){openIframe('cam.html','カメラ');}
         else if(d.onclick){try{eval(d.onclick);}catch(e){}}
       },450);
     });
