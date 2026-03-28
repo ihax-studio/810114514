@@ -268,11 +268,12 @@ padding:8px 14px calc(var(--ib) + 16px);
 background:var(--gls);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);
 border-radius:14px;padding:12px 14px;margin-bottom:7px;
 border:1px solid rgba(255,255,255,.8);box-shadow:var(--sh);
+word-break:break-word;overflow-wrap:break-word;
 }
-.lw{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:2px}
-.lm{font-size:12px;color:var(--b);font-weight:600;margin-bottom:3px}
-.lnx{font-size:11px;color:var(--sub);line-height:1.7;background:rgba(0,0,0,.04);border-radius:8px;padding:6px 8px;margin-top:4px;border:1px solid rgba(0,0,0,.06)}
-.le{font-size:11px;color:rgba(0,0,0,.45);font-style:italic;margin-top:4px;line-height:1.5}
+.lw{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:2px;word-break:break-word}
+.lm{font-size:12px;color:var(--b);font-weight:600;margin-bottom:3px;word-break:break-word}
+.lnx{font-size:11px;color:var(--sub);line-height:1.7;background:rgba(0,0,0,.04);border-radius:8px;padding:6px 8px;margin-top:4px;border:1px solid rgba(0,0,0,.06);word-break:break-word}
+.le{font-size:11px;color:rgba(0,0,0,.45);font-style:italic;margin-top:4px;line-height:1.5;word-break:break-word}
 .sh{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);padding:8px 0 5px}
 .exr{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--ln)}
 .exr:last-child{border-bottom:none}
@@ -1688,63 +1689,68 @@ function ensureLists(){
     d.style.cssText='position:fixed;left:-9999px;top:0;width:380px;visibility:hidden';
     document.body.appendChild(d);
   });
+  function liWrap(en,ja,extra,opts){
+    const esc=(s)=>(s||'').replace(/"/g,'&quot;');
+    const st=isStarred(en)?'★':'☆';
+    let btns=`<span class="star-tr" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:16px;flex-shrink:0;padding:2px">${st}</span>`;
+    if(opts&&opts.forgot){
+      const isFg=isForgot(en,0);
+      btns+=`<button class="tr-forgot-btn" data-word="${esc(en)}" data-meaning="${esc(ja)}" style="font-size:9px;padding:2px 7px;border:1px solid rgba(255,59,48,.2);background:rgba(255,59,48,.06);color:#c0001a;border-radius:8px;cursor:pointer;font-family:inherit;flex-shrink:0">${isFg?'✓済':'😰'}</button>`;
+    }
+    return `<div class="li"><div style="display:flex;align-items:flex-start;gap:6px"><div style="flex:1;min-width:0">${extra}</div><div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">${btns}</div></div></div>`;
+  }
   function buildLists(){
   // idioms
   document.getElementById('l-i').innerHTML='<div class="sh">イディオム '+ID.length+'個</div>'+
-    ID.map(d=>{const s=isStarred(d.w)?'★':'☆';return `<div class="li" style="position:relative"><div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1"><div class="lw">${d.w}</div><div class="lm">${d.m}</div><div class="lnx">${d.n}</div><div class="le">"${d.e}"<br><span style="color:var(--sub)">${d.ej}</span></div></div><span class="star-tr" data-word="${d.w.replace(/"/g,'&quot;')}" data-meaning="${d.m.replace(/"/g,'&quot;')}" style="font-size:18px">${s}</span></div></div>`;}).join('');
+    ID.map(d=>liWrap(d.w,d.m,`<div class="lw">${d.w}</div><div class="lm">${d.m}</div><div class="lnx">${d.n}</div><div class="le">${d.e}<br><span style="color:var(--sub)">${d.ej}</span></div>`,{forgot:true})).join('');
 
   // expressions
   const exByGroup=[
-    {label:"「人」や「もの」を伝える表現",range:[1,13]},
-    {label:"「〜する」を伝える表現",range:[14,40]},
-    {label:"メッセージ・動作表現",range:[41,55]},
-    {label:"「〜である」を伝える表現",range:[56,71]},
-    {label:"「どのように」「どこで」「いつ」を伝える表現",range:[72,113]},
-    {label:"日常会話でよく使う表現",range:[114,125]},
+    {label:'「人」や「もの」を伝える表現',range:[1,13]},
+    {label:'「〜する」を伝える表現',range:[14,40]},
+    {label:'メッセージ・動作表現',range:[41,55]},
+    {label:'「〜である」を伝える表現',range:[56,71]},
+    {label:'「どのように」「どこで」「いつ」を伝える表現',range:[72,113]},
+    {label:'日常会話でよく使う表現',range:[114,125]},
   ];
   let exHtml='<div class="sh">入試で使える表現リスト '+EX.length+'個</div>';
   exByGroup.forEach(g=>{
-    exHtml+=`<div style="font-size:10px;font-weight:700;color:var(--sub);background:var(--ln);border-radius:8px;padding:4px 10px;margin:6px 0 4px;letter-spacing:.04em">${g.label}</div>`;
+    exHtml+=`<div style="font-size:10px;font-weight:700;color:var(--sub);background:var(--ln);border-radius:8px;padding:4px 10px;margin:6px 0 4px">${g.label}</div>`;
     const items=EX.filter(e=>e.n>=g.range[0]&&e.n<=g.range[1]);
-    exHtml+=`<div class="li" style="padding:8px 12px">`;
-    exHtml+=items.map(d=>`<div class="exr"><div class="exn">${String(d.n).padStart(3,'0')}</div><div style="flex:1"><div class="exph">${d.ph}</div><div class="exja">${d.ja}</div>${d.e?`<div class="exe">${d.e} <span style="color:var(--sub)">${d.ej}</span></div>`:''}</div></div>`).join('');
-    exHtml+='</div>';
+    items.forEach(d=>{
+      exHtml+=`<div class="li" style="padding:10px 12px"><div style="display:flex;align-items:flex-start;gap:6px"><div style="flex:1;min-width:0"><div class="exph">${d.ph}</div><div class="exja">${d.ja}</div>${d.e?`<div class="exe" style="font-size:10px;color:rgba(0,0,0,.4);margin-top:2px">${d.e} <span style="color:var(--sub)">${d.ej}</span></div>`:''}</div><span class="star-tr" data-word="${(d.ph||'').replace(/"/g,'&quot;')}" data-meaning="${(d.ja||'').replace(/"/g,'&quot;')}" style="font-size:16px;flex-shrink:0">☆</span></div></div>`;
+    });
   });
   document.getElementById('l-ex').innerHTML=exHtml;
 
   // irregular verbs
   document.getElementById('l-v').innerHTML=`<div class="sh">不規則動詞の変化表 ${IV.length}語</div>
     <div class="ivwrap"><table class="ivt">
-    <thead><tr><th>原形</th><th>過去形</th><th>過去分詞</th><th>意味</th><th>3単現</th><th>現在分詞</th></tr></thead>
-    <tbody>${IV.map(v=>`<tr>
-      <td class="ivb">${v.b}</td>
-      <td class="ivp">${v.p}</td>
-      <td class="ivpp">${v.pp}</td>
-      <td>${v.m}</td>
-      <td>${v.s}</td>
-      <td>${v.g}</td>
-    </tr>`).join('')}</tbody></table></div>
-    <div style="font-size:10px;color:var(--sub);padding:4px 2px">※ burnの過去形・過去分詞はburned、forgetの過去分詞はforgot、getの過去分詞はgotとなることもあります。</div>`;
+    <thead><tr><th>原形</th><th>過去</th><th>過去分詞</th><th>意味</th></tr></thead>
+    <tbody>${IV.map(v=>`<tr><td class="ivb">${v.b}</td><td class="ivp">${v.p}</td><td class="ivpp">${v.pp}</td><td>${v.m}</td></tr>`).join('')}</tbody></table></div>`;
 
   // grammar
   document.getElementById('l-g').innerHTML='<div class="sh">重要文法 '+GR.length+'項目</div>'+
-    GR.map(d=>{const s=isStarred(d.h)?'★':'☆';return `<div class="li"><div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1"><div class="lw">${d.h}</div><div class="lnx">${d.n}<br><span style="color:var(--y);font-size:11px">💡 ${d.tip}</span></div><div class="le">"${d.e}"<br><span style="color:var(--sub)">${d.ej}</span></div></div><span class="star-tr" data-word="${d.h.replace(/"/g,'&quot;')}" data-meaning="${d.e.replace(/"/g,'&quot;')}" style="font-size:18px">${s}</span></div></div>`;}).join('');
+    GR.map(d=>liWrap(d.h,d.e,`<div class="lw">${d.h}</div><div class="lnx">${d.n}<br><span style="color:var(--y);font-size:11px">💡 ${d.tip}</span></div><div class="le">${d.e}<br><span style="color:var(--sub)">${d.ej}</span></div>`)).join('');
 
   // paraphrase
   document.getElementById('l-p').innerHTML='<div class="sh">言い換え表現 '+PA.length+'セット</div>'+
-    PA.map(d=>`<div class="li"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:12px;background:#f0f0ee;padding:2px 9px;border-radius:20px;color:var(--sub)">${d.o}</span><span style="color:var(--sub)">→</span>${d.b.map(b=>`<span style="background:var(--b);color:#fff;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600">${b}</span>`).join('')}</div><div class="lnx" style="margin-top:6px">${d.n}</div><div class="le">"${d.e}"</div></div>`).join('');
+    PA.map(d=>`<div class="li"><div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:4px"><span style="font-size:11px;background:rgba(0,0,0,.06);padding:2px 8px;border-radius:20px;color:var(--sub)">${d.o}</span><span style="color:var(--sub);font-size:10px">→</span>${d.b.map(b=>`<span style="background:var(--b);color:#fff;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600">${b}</span>`).join('')}</div><div class="lnx" style="margin-top:4px">${d.n}</div><div class="le">${d.e}</div></div>`).join('');
 
   // reading
   document.getElementById('l-r').innerHTML='<div class="sh">長文読解 重要表現 '+RE.length+'個</div>'+
-    RE.map(d=>{const s=isStarred(d.p)?'★':'☆';return `<div class="li"><div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1"><div class="lw">${d.p}</div><div class="lm">${d.m}</div><div class="le">"${d.e}"</div><div style="font-size:10px;color:var(--sub);margin-top:3px">出典: ${d.s}</div></div><span class="star-tr" data-word="${d.p.replace(/"/g,'&quot;')}" data-meaning="${d.m.replace(/"/g,'&quot;')}" style="font-size:18px">${s}</span></div></div>`;}).join('');
+    RE.map(d=>liWrap(d.p,d.m,`<div class="lw">${d.p}</div><div class="lm">${d.m}</div><div class="le">${d.e}</div><div style="font-size:10px;color:var(--sub);margin-top:2px">出典: ${d.s}</div>`,{forgot:true})).join('');
 
   // confused
   document.getElementById('l-c').innerHTML='<div class="sh">混同ペア '+CP.length+'組</div>'+
-    CP.map(d=>`<div class="li"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px"><span style="background:#fef2f2;border:1px solid #fecaca;color:var(--r);padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700">${d.a}</span><span style="color:var(--sub);font-size:11px">vs</span><span style="background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;padding:3px 10px;border-radius:8px;font-size:12px;font-weight:700">${d.b}</span></div><div style="font-size:11px;color:#555">📌 ${d.n}</div></div>`).join('');
+    CP.map(d=>{
+      const w=d.a.replace(/（.*）/,'');
+      return liWrap(w,d.n,`<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-bottom:4px"><span style="background:#fef2f2;border:1px solid #fecaca;color:var(--r);padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700">${d.a}</span><span style="color:var(--sub);font-size:10px">vs</span><span style="background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700">${d.b}</span></div><div style="font-size:11px;color:#555">📌 ${d.n}</div>`,{forgot:true});
+    }).join('');
 
   // themes
   document.getElementById('l-a').innerHTML='<div class="sh">頻出アカデミックテーマ</div>'+
-    TH.map(d=>`<div class="li"><div class="lw">${d.cat}</div>${d.items.map(i=>`<div style="font-size:12px;color:#555;padding:3px 0;border-bottom:1px solid var(--ln)">• ${i}</div>`).join('')}</div>`).join('');
+    TH.map(d=>`<div class="li"><div class="lw">${d.cat}</div>${d.items.map(i=>`<div style="font-size:12px;color:#555;padding:4px 0;border-bottom:1px solid var(--ln)">• ${i}</div>`).join('')}</div>`).join('');
 }
   buildLists();
   ['i','ex','v','g','p','r','c','a'].forEach(id=>{
@@ -2081,7 +2087,7 @@ function buildAllWords(){
       const enText=(w.en||'').replace(/"/g,'&quot;');
       const mText=(w.ja||'').replace(/"/g,'&quot;');
       const starred=isStarred(w.en||'')?'★':'☆';
-      html+=`<div class="li ans-row" data-en="${enText}" style="display:flex;align-items:center;gap:8px"><div style="flex:1"><div class="lw">${w.en||''}</div><div class="lm">${w.ja}</div><div style="font-size:9px;color:var(--sub);margin-top:2px">${w.cat}</div></div><span class="star-tr" data-word="${enText}" data-meaning="${mText}" style="font-size:18px;flex-shrink:0">${starred}</span></div>`;
+      html+=`<div class="li ans-row" data-en="${enText}"><div style="display:flex;align-items:flex-start;gap:6px"><div style="flex:1;min-width:0"><div class="lw">${w.en||''}</div><div class="lm">${w.ja}</div><div style="font-size:9px;color:var(--sub);margin-top:2px">${w.cat}</div></div><span class="star-tr" data-word="${enText}" data-meaning="${mText}" style="font-size:16px;flex-shrink:0;padding:2px">${starred}</span></div></div>`;
     });
   });
   return html;
@@ -2103,7 +2109,7 @@ function buildForgotList(){
   let html=`<div class="sh">要復習 ${items.length}語</div>`;
   items.forEach(w=>{
     const enText=(w.en||'').replace(/"/g,'&quot;');
-    html+=`<div class="li ans-row" data-en="${enText}" style="position:relative"><div class="lw">${w.en}</div><div class="lm">${w.ja}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:9px;color:var(--sub)">${w.deck}</span><button class="ch forgot-clear-btn" data-word="${enText}" data-deck="${w.deckIdx}" style="font-size:9px;padding:3px 8px;color:var(--g)">✓覚えた</button></div></div>`;
+    html+=`<div class="li ans-row" data-en="${enText}"><div style="display:flex;align-items:flex-start;gap:6px"><div style="flex:1;min-width:0"><div class="lw">${w.en}</div><div class="lm">${w.ja||''}</div><div style="font-size:9px;color:var(--sub);margin-top:2px">${w.deck}</div></div><button class="ch forgot-clear-btn" data-word="${enText}" data-deck="${w.deckIdx}" style="font-size:9px;padding:4px 10px;color:var(--g);flex-shrink:0">✓覚えた</button></div></div>`;
   });
   return html;
 }
