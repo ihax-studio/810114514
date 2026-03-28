@@ -724,7 +724,7 @@ overflow:hidden;
     <div class="hg-list">
       <div class="hcard" onclick="openS('card-forgot',0)"><div class="hi ir">🔄</div><div class="hcard-info"><div class="hcard-name">忘れた単語だけ復習</div><div class="hcard-desc">忘れた・難しいマークの単語だけ出題</div></div><div class="badge" id="b-retry">0</div><div class="chev">›</div></div>
     </div>
-    <div style="padding:20px 16px 40px;display:flex;align-items:center;justify-content:center;gap:12px">
+    <div id="home-bottom-bar" style="padding:20px 16px 40px;display:flex;align-items:center;justify-content:center;gap:12px">
       <button id="home-star-btn" style="
         width:48px;height:48px;border-radius:55px;
         background:rgba(255,255,255,.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
@@ -752,7 +752,7 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ LIST SWITCH DIALOG ══════════ -->
-<div id="list-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,.4);align-items:center;justify-content:center">
+<div id="list-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background .5s ease;align-items:center;justify-content:center">
   <div id="list-dialog-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .3s ease,opacity .3s ease">
     <div style="padding:22px 20px 10px">
       <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">リスト表示</div>
@@ -761,6 +761,20 @@ overflow:hidden;
     <div style="border-top:1px solid rgba(0,0,0,.1);display:flex">
       <button id="list-dialog-cancel" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;border-right:1px solid rgba(0,0,0,.1);cursor:pointer;font-family:inherit;font-weight:400">今はしない</button>
       <button id="list-dialog-ok" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">変更</button>
+    </div>
+  </div>
+</div>
+
+<!-- Icon mode dialog -->
+<div id="icon-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background .5s ease;align-items:center;justify-content:center">
+  <div id="icon-dialog-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .3s ease,opacity .3s ease">
+    <div style="padding:22px 20px 10px">
+      <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">アイコン表示</div>
+      <div style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5">リスト表示に戻すには設定から変更します😰</div>
+    </div>
+    <div style="border-top:1px solid rgba(0,0,0,.1);display:flex">
+      <button id="icon-dialog-cancel" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;border-right:1px solid rgba(0,0,0,.1);cursor:pointer;font-family:inherit;font-weight:400">今はしない</button>
+      <button id="icon-dialog-ok" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">変更</button>
     </div>
   </div>
 </div>
@@ -1857,8 +1871,8 @@ function restoreHomeFromGrid(){
   document.querySelectorAll('.hg-list').forEach(l=>{l.style.display='';});
   const h=document.querySelector('.hm-hdr');
   if(h){h.style.transition='opacity .3s';h.style.opacity='1';setTimeout(()=>{h.style.transition='';},350);}
-  const delWrap=document.getElementById('btn-delete-all');
-  if(delWrap&&delWrap.parentElement)delWrap.parentElement.style.display='';
+  const bb=document.getElementById('home-bottom-bar');
+  if(bb)bb.style.display='';
 }
 
 /* ═══ SETTINGS ═══ */
@@ -1919,27 +1933,57 @@ document.getElementById('s-layout-icon').addEventListener('click',()=>{
 });
 document.getElementById('s-layout-list').addEventListener('click',()=>{
   haptic();
-  // Show confirmation dialog
-  const dlg=document.getElementById('list-dialog');
-  const card=document.getElementById('list-dialog-card');
-  dlg.style.display='flex';
-  requestAnimationFrame(()=>{card.style.transform='scale(1)';card.style.opacity='1';});
+  showDialog('list-dialog','list-dialog-card');
 });
+// Dialog helper
+function showDialog(dlgId,cardId){
+  const dlg=document.getElementById(dlgId);
+  const card=document.getElementById(cardId);
+  dlg.style.display='flex';
+  requestAnimationFrame(()=>{
+    dlg.style.background='rgba(0,0,0,.4)';
+    card.style.transform='scale(1)';card.style.opacity='1';
+  });
+}
+function hideDialog(dlgId,cardId,cb){
+  const dlg=document.getElementById(dlgId);
+  const card=document.getElementById(cardId);
+  card.style.transform='scale(1.3)';card.style.opacity='0';
+  dlg.style.background='rgba(0,0,0,0)';
+  setTimeout(()=>{dlg.style.display='none';if(cb)cb();},400);
+}
 // List dialog handlers
 document.getElementById('list-dialog-cancel').addEventListener('click',()=>{
-  haptic();
-  const card=document.getElementById('list-dialog-card');
-  card.style.transform='scale(1.3)';card.style.opacity='0';
-  setTimeout(()=>{document.getElementById('list-dialog').style.display='none';},300);
+  haptic();hideDialog('list-dialog','list-dialog-card');
 });
 document.getElementById('list-dialog-ok').addEventListener('click',()=>{
   haptic.confirm();
   localStorage.setItem('inglish_layout','list');
   document.getElementById('s-check-list').classList.add('s-on');
   document.getElementById('s-check-icon').classList.remove('s-on');
-  const card=document.getElementById('list-dialog-card');
-  card.style.transform='scale(1.3)';card.style.opacity='0';
-  setTimeout(()=>{document.getElementById('list-dialog').style.display='none';restoreHomeFromGrid();},300);
+  hideDialog('list-dialog','list-dialog-card',()=>restoreHomeFromGrid());
+});
+// Icon dialog handlers
+document.getElementById('icon-dialog-cancel').addEventListener('click',()=>{
+  haptic();hideDialog('icon-dialog','icon-dialog-card');
+});
+document.getElementById('icon-dialog-ok').addEventListener('click',()=>{
+  haptic.confirm();
+  localStorage.setItem('inglish_layout','icon');
+  hideDialog('icon-dialog','icon-dialog-card',()=>{
+    const scroll=document.querySelector('.hm-scroll');
+    scroll.style.transition='transform .4s ease, opacity .3s ease';
+    scroll.style.transform='translateX(100%)';scroll.style.opacity='0';
+    setTimeout(()=>{
+      scroll.style.transition='none';scroll.style.transform='translateX(-100%)';
+      showIconGrid();
+      requestAnimationFrame(()=>{
+        scroll.style.transition='transform .4s ease, opacity .3s ease';
+        scroll.style.transform='';scroll.style.opacity='1';
+      });
+      setTimeout(()=>{scroll.style.transition='';},500);
+    },400);
+  });
 });
 // Haptic
 document.getElementById('s-haptic').addEventListener('click',function(){
@@ -2826,28 +2870,16 @@ document.getElementById('home-star-btn').addEventListener('click',()=>{
 });
 // Home → button → switch to icon mode
 document.getElementById('home-icon-btn').addEventListener('click',()=>{
-  haptic.confirm();localStorage.setItem('inglish_layout','icon');
-  // Slide list left-to-right out
-  const scroll=document.querySelector('.hm-scroll');
-  scroll.style.transition='transform .4s ease, opacity .3s ease';
-  scroll.style.transform='translateX(100%)';scroll.style.opacity='0';
-  setTimeout(()=>{
-    scroll.style.transition='none';scroll.style.transform='translateX(-100%)';scroll.style.opacity='0';
-    showIconGrid();
-    requestAnimationFrame(()=>{
-      scroll.style.transition='transform .4s ease, opacity .3s ease';
-      scroll.style.transform='';scroll.style.opacity='1';
-    });
-    setTimeout(()=>{scroll.style.transition='';},500);
-  },400);
+  haptic();
+  showDialog('icon-dialog','icon-dialog-card');
 });
 
 /* ═══ ICON MODE INIT ═══ */
 function showIconGrid(){
   document.querySelectorAll('.hg-lbl').forEach(l=>{l.style.display='none';});
   document.querySelectorAll('.hg-list').forEach(l=>{l.style.display='none';});
-  const delWrap=document.getElementById('btn-delete-all');
-  if(delWrap&&delWrap.parentElement)delWrap.parentElement.style.display='none';
+  const bb=document.getElementById('home-bottom-bar');
+  if(bb)bb.style.display='none';
   const scroll=document.querySelector('.hm-scroll');
   let oldGrid=document.getElementById('icon-grid');
   if(oldGrid)oldGrid.remove();
