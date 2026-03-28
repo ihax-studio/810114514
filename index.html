@@ -395,9 +395,9 @@ display:none;
 /* ════ TRANSLATION OVERLAY (blur + centered card) ════ */
 #tr-overlay{
 position:fixed;inset:0;z-index:500;
-background:rgba(0,0,0,.2);
-backdrop-filter:blur(20px) saturate(150%);
--webkit-backdrop-filter:blur(20px) saturate(150%);
+background:rgba(0,0,0,.12);
+backdrop-filter:blur(8px) saturate(130%);
+-webkit-backdrop-filter:blur(8px) saturate(130%);
 display:flex;align-items:flex-end;justify-content:center;
 padding:0;
 opacity:0;pointer-events:none;
@@ -439,9 +439,12 @@ font-size:12.5px;color:var(–b);
 background:rgba(0,122,255,.07);border-radius:10px;
 padding:9px 12px;margin-bottom:10px;line-height:1.7;
 border:1px solid rgba(0,122,255,.15);
+cursor:pointer;-webkit-user-select:none;user-select:none;transition:background .12s;
 }
+.tr-local:active{background:rgba(0,122,255,.18)}
 .tr-dir{font-size:9px;font-weight:800;letter-spacing:.08em;color:var(–sub);text-transform:uppercase;margin-bottom:4px}
-.tr-txt{font-size:clamp(16px,4.5vw,28px);font-weight:300;color:var(–tx);line-height:1.5;word-break:break-word}
+.tr-txt{font-size:clamp(16px,4.5vw,28px);font-weight:300;color:var(–tx);line-height:1.5;word-break:break-word;cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:10px;padding:4px 6px;margin:-4px -6px;transition:background .12s}
+.tr-txt:active{background:rgba(0,122,255,.10)}
 .tr-badge{
 display:inline-block;margin-top:5px;
 font-size:10px;font-weight:600;color:var(–sub);
@@ -1757,8 +1760,22 @@ trOverlay.addEventListener('click',e=>{
       cardEl.style.transform='';
     }
   },{passive:true});
-  /* Prevent click-to-close when tapping inside card content */
-  cardEl.addEventListener('click',e=>e.stopPropagation());
+  /* Card tap: speak text on .tr-txt/.tr-local, stop propagation to not close overlay */
+  cardEl.addEventListener('click',e=>{
+    // Tap on translatable text → haptic + TTS
+    const txt=e.target.closest('.tr-txt');
+    const loc=e.target.closest('.tr-local');
+    if(txt||loc){
+      e.stopPropagation();
+      haptic();
+      const raw=(txt||loc).textContent.replace(/[🔊📚🔗🔄💬🔎]/g,'').trim();
+      // Extract English from the text (first word or full text)
+      if(raw)speakEn(raw);
+      return;
+    }
+    // Any other tap inside card: just stop propagation (don't close)
+    e.stopPropagation();
+  });
 })();
 
 
