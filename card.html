@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-<title>iScribe</title>
+<title>メモ</title>
 <script type="module">
 import { haptic } from "https://esm.sh/ios-haptics";
 const noop = () => {};
@@ -13,134 +13,126 @@ window.haptic = haptic || {};
 });
 </script>
 <link rel="stylesheet" href="cards.css">
+<style>
+.lock-banner{background:rgba(255,255,255,.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:22px;margin:12px 15px;padding:20px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.06);transform:translateY(30px);opacity:0;transition:transform .5s cubic-bezier(.34,1.05,.64,1),opacity .4s ease}
+.lock-banner.show{transform:translateY(0);opacity:1}
+.lock-banner h3{font-size:16px;font-weight:700;margin:0 0 6px;color:#000}
+.lock-banner p{font-size:12px;color:rgba(0,0,0,.5);margin:0 0 14px;line-height:1.5}
+.lock-banner button{padding:10px 24px;border-radius:55px;border:none;font-size:13px;cursor:pointer;font-family:inherit;margin:0 4px}
+.lock-banner .btn-use{background:#007aff;color:#fff;font-weight:600}
+.lock-banner .btn-skip{background:rgba(0,0,0,.06);color:rgba(0,0,0,.5)}
+.memo-actions{gap:8px!important}
+.lock-action{width:22px;height:22px;object-fit:contain;cursor:pointer;opacity:.7;transition:transform .2s,opacity .2s}
+.lock-action:active{transform:scale(.85);opacity:1}
+</style>
 </head>
 <body>
 <div id="bg-layer"></div>
 <div id="thanks-dots"></div>
-<div class="memo-list" id="memo-list"></div>
+<div class="lock-banner" id="lock-banner">
+  <div style="font-size:36px;margin-bottom:8px">🔒</div>
+  <h3>メモをロックして使用できます</h3>
+  <p>Face ID・Touch ID・Optic IDを使って<br>メモを安全に保護できます。ロックされたメモは<br>認証なしでは表示されません。</p>
+  <button class="btn-skip" id="banner-skip">今は使わない</button>
+  <button class="btn-use" id="banner-use">使う</button>
+</div>
+<div class="memo-list" id="memo-list" style="padding-top:8px"></div>
 <div class="bottom-nav">
-    <div class="static-left">
-        <button class="action-btn" id="file-toggle" style="font-size:26px;">📁</button>
+  <div class="static-left"><button class="action-btn" id="file-toggle" style="font-size:26px">📁</button></div>
+  <div class="content-layers">
+    <div class="file-actions-layer" id="file-layer">
+      <button class="file-btn-item" id="load-btn">↑</button>
+      <button class="file-btn-item" id="save-btn">↓</button>
     </div>
-    <div class="content-layers">
-        <div class="file-actions-layer" id="file-layer">
-            <button class="file-btn-item" id="load-btn">↑</button>
-            <button class="file-btn-item" id="save-btn">↓</button>
-        </div>
-        <div class="nav-wrapper" id="nav-wrapper">
-            <div class="input-stack" id="input-stack">
-                <textarea id="memo-input" placeholder="いまどうしてる？" rows="1"></textarea>
-                <div id="file-name-display"></div>
-            </div>
-            <button class="action-btn" id="comp-btn" style="font-size:22px;">📎</button>
-            <button id="add-btn" style="background:var(--twitter-blue);color:white;border:none;width:40px;height:40px;border-radius:50%;font-size:20px;cursor:pointer;">→</button>
-        </div>
+    <div class="nav-wrapper" id="nav-wrapper">
+      <div class="input-stack" id="input-stack">
+        <textarea id="memo-input" placeholder="いまどうしてる？" rows="1"></textarea>
+        <div id="file-name-display"></div>
+      </div>
+      <button class="action-btn" id="comp-btn" style="font-size:22px">📎</button>
+      <button id="add-btn" style="background:#007aff;color:white;border:none;width:40px;height:40px;border-radius:50%;font-size:20px;cursor:pointer">→</button>
     </div>
+  </div>
 </div>
 <div id="action-overlay">
-    <div class="action-card">
-        <p style="margin:0 0 5px 0;font-weight:bold;font-size:14px;color:#888;">メニュー</p>
-        <button class="menu-btn lock" id="trigger-lock">🔒 ロック</button>
-        <button class="menu-btn delete" id="trigger-delete">🗑 削除</button>
-        <button class="menu-btn cancel" id="cancel-action">キャンセル</button>
-    </div>
+  <div class="action-card">
+    <p style="margin:0 0 5px;font-weight:bold;font-size:14px;color:#888">メニュー</p>
+    <button class="menu-btn lock" id="trigger-lock">🔒 ロック</button>
+    <button class="menu-btn delete" id="trigger-delete">🗑 削除</button>
+    <button class="menu-btn cancel" id="cancel-action">キャンセル</button>
+  </div>
 </div>
 <div id="lock-confirm-overlay">
-    <div class="lock-confirm-content">
-        <div style="font-size:60px;margin-bottom:40px">🔒</div>
-        <div class="lock-confirm-title">Face ID/Optic ID でロックされます...</div>
-        <div class="lock-confirm-desc">Touch ID/Face ID/Optic IDが設定されていない場合<br>メモはロックされ、表示できなくなります</div>
-        <div style="width:100%">
-            <button class="slide-up-btn primary" id="lock-confirm-btn">続ける</button>
-            <button class="slide-up-btn secondary" id="lock-cancel-btn">キャンセル</button>
-        </div>
+  <div class="lock-confirm-content">
+    <div style="font-size:60px;margin-bottom:40px">🔒</div>
+    <div class="lock-confirm-title">Face ID/Optic ID でロックされます...</div>
+    <div class="lock-confirm-desc">Touch ID/Face ID/Optic IDが設定されていない場合<br>メモはロックされ、表示できなくなります</div>
+    <div style="width:100%">
+      <button class="slide-up-btn primary" id="lock-confirm-btn">続ける</button>
+      <button class="slide-up-btn secondary" id="lock-cancel-btn">キャンセル</button>
     </div>
+  </div>
 </div>
-<input type="file" id="load-file-input" accept=".json,.png" style="display:none;">
-<input type="file" id="iframe-file-input" accept=".html,.mp3,.wav" style="display:none;">
+<input type="file" id="load-file-input" accept=".json,.png" style="display:none">
+<input type="file" id="iframe-file-input" accept=".html,.mp3,.wav" style="display:none">
 <script>
-const CACHE_KEY='memo-pro-v6-data';
-let memos=[];let currentBgData=null;let iframeFile=null;let selectedMemoId=null;
-const fileToggle=document.getElementById('file-toggle');
-const navWrapper=document.getElementById('nav-wrapper');
-const memoInput=document.getElementById('memo-input');
-const addBtn=document.getElementById('add-btn');
-const compBtn=document.getElementById('comp-btn');
-const inputStack=document.getElementById('input-stack');
-const fileNameDisplay=document.getElementById('file-name-display');
-const bottomNav=document.querySelector('.bottom-nav');
-const bgLayer=document.getElementById('bg-layer');
-const hapticConfirm=()=>window.haptic.confirm();
-const hapticSelect=()=>window.haptic.selection();
-const hapticError=()=>window.haptic.error();
-fileToggle.onclick=()=>{
-    const o=!navWrapper.classList.contains('file-mode');
-    navWrapper.classList.toggle('file-mode');
-    document.getElementById('file-layer').classList.toggle('visible');
-    fileToggle.style.opacity=0;
-    setTimeout(()=>{fileToggle.innerText=o?'📂':'📁';fileToggle.style.opacity=1;},250);
-    hapticSelect();
-};
-function setBackground(d){currentBgData=d;bgLayer.style.backgroundImage=`url("${d}")`;bgLayer.classList.remove('active');setTimeout(()=>bgLayer.classList.add('active'),50);}
-addBtn.onclick=()=>{
-    const text=memoInput.value.trim();
-    if(text===''&&!iframeFile){hapticError();bottomNav.classList.add('shake-error');setTimeout(()=>bottomNav.classList.remove('shake-error'),500);return;}
-    hapticConfirm();
-    const m={id:Date.now().toString(),text,createdAt:new Date().toISOString(),liked:false,locked:false,htmlContent:null,audioSrc:null,fileType:null};
-    if(iframeFile){
-        const r=new FileReader();const isA=iframeFile.type.startsWith('audio/');m.fileType=iframeFile.type;
-        r.onload=e=>{if(isA)m.audioSrc=e.target.result;else m.htmlContent=e.target.result;memos.unshift(m);finishPost();};
-        if(isA)r.readAsDataURL(iframeFile);else r.readAsText(iframeFile);
-    }else{memos.unshift(m);finishPost();}
-};
-function finishPost(){memoInput.value='';iframeFile=null;compBtn.innerText='📎';inputStack.classList.remove('attaching');memoInput.style.height='40px';saveData();renderMemos();}
-function renderMemos(){
-    const list=document.getElementById('memo-list');list.innerHTML='';
-    memos.forEach(memo=>{
-        const el=document.createElement('div');
-        el.className=`memo-item ${memo.locked?'locked':''}`;
-        let fc='';
-        if(!memo.locked){
-            if(memo.htmlContent)fc=`<iframe class="memo-iframe" srcdoc="${memo.htmlContent.replace(/"/g,'&quot;')}"></iframe>`;
-            else if(memo.audioSrc)fc=`<audio controls src="${memo.audioSrc}" style="width:100%;margin-top:8px;"></audio>`;
-        }
-        el.innerHTML=`<div class="memo-content"><p style="margin:0;font-size:15px;white-space:pre-wrap;">${memo.locked?'Locked Content':memo.text}</p>${fc}</div><div class="memo-actions"><button class="action-btn like-btn">${memo.liked?'❤️':'🤍'}</button></div>${memo.locked?`<div class="lock-overlay-display" onclick="unlockMemo('${memo.id}',this)"><div style="font-size:40px">🔒</div></div>`:''}`;
-        let timer;
-        const start=()=>{if(memo.locked)return;timer=setTimeout(()=>{window.haptic.impact();showActionMenu(memo.id);},400);};
-        el.addEventListener('touchstart',start,{passive:true});el.addEventListener('touchend',()=>clearTimeout(timer));
-        el.querySelector('.like-btn').onclick=e=>{e.stopPropagation();memo.liked=!memo.liked;saveData();renderMemos();hapticSelect();};
-        list.appendChild(el);
-        setTimeout(()=>{el.style.opacity='1';el.style.transform='translateY(0) scale(1)';},10);
-    });
+const CK='memo-pro-v6-data',BK='memo-lock-banner-seen';
+let memos=[],bgData=null,iframeFile=null,selId=null;
+const $=id=>document.getElementById(id);
+const ft=$('file-toggle'),nw=$('nav-wrapper'),mi=$('memo-input'),ab=$('add-btn'),cb=$('comp-btn'),is=$('input-stack'),fn=$('file-name-display'),bn=document.querySelector('.bottom-nav'),bg=$('bg-layer');
+if(!localStorage.getItem(BK)){const b=$('lock-banner');b.style.display='block';setTimeout(()=>b.classList.add('show'),100);}else{$('lock-banner').style.display='none';}
+$('banner-skip').onclick=()=>{window.haptic.selection();localStorage.setItem(BK,'1');const b=$('lock-banner');b.classList.remove('show');setTimeout(()=>b.style.display='none',500);};
+$('banner-use').onclick=()=>{window.haptic.confirm();localStorage.setItem(BK,'1');const b=$('lock-banner');b.classList.remove('show');setTimeout(()=>b.style.display='none',500);};
+ft.onclick=()=>{const o=!nw.classList.contains('file-mode');nw.classList.toggle('file-mode');$('file-layer').classList.toggle('visible');ft.style.opacity=0;setTimeout(()=>{ft.innerText=o?'📂':'📁';ft.style.opacity=1;},250);window.haptic.selection();};
+function setBg(d){bgData=d;bg.style.backgroundImage=`url("${d}")`;bg.classList.remove('active');setTimeout(()=>bg.classList.add('active'),50);}
+ab.onclick=()=>{const t=mi.value.trim();if(t===''&&!iframeFile){window.haptic.error();bn.classList.add('shake-error');setTimeout(()=>bn.classList.remove('shake-error'),500);return;}window.haptic.confirm();const m={id:Date.now().toString(),text:t,createdAt:new Date().toISOString(),liked:false,locked:false,htmlContent:null,audioSrc:null,fileType:null};if(iframeFile){const r=new FileReader();const isA=iframeFile.type.startsWith('audio/');m.fileType=iframeFile.type;r.onload=e=>{if(isA)m.audioSrc=e.target.result;else m.htmlContent=e.target.result;memos.unshift(m);done();};if(isA)r.readAsDataURL(iframeFile);else r.readAsText(iframeFile);}else{memos.unshift(m);done();}};
+function done(){mi.value='';iframeFile=null;cb.innerText='📎';is.classList.remove('attaching');mi.style.height='40px';save();render();}
+function render(){
+  const l=$('memo-list');l.innerHTML='';
+  memos.forEach((m,i)=>{
+    const el=document.createElement('div');
+    el.className=`memo-item ${m.locked?'locked':''}`;
+    if(m.htmlContent||m.audioSrc)el.classList.add('has-iframe');
+    let fc='';
+    if(!m.locked){if(m.htmlContent)fc=`<iframe class="memo-iframe" srcdoc="${m.htmlContent.replace(/"/g,'&quot;')}"></iframe>`;else if(m.audioSrc)fc=`<audio controls src="${m.audioSrc}" style="width:100%;margin-top:8px"></audio>`;}else{fc='<div style="height:50px"></div>';}
+    el.innerHTML=`<div class="memo-content"><p style="margin:0;font-size:15px;white-space:pre-wrap">${m.locked?'Locked Content':m.text}</p>${fc}</div><div class="memo-actions"><button class="action-btn like-btn">${m.liked?'❤️':'🤍'}</button><img src="Lock.png" class="lock-action" onerror="this.textContent='🔒';this.style.fontSize='18px';this.style.width='auto'" data-id="${m.id}"></div>${m.locked?`<div class="lock-overlay-display" onclick="unlock('${m.id}',this)"><div style="font-size:40px">🔒</div></div>`:''}`;
+    let timer;
+    el.addEventListener('touchstart',()=>{if(m.locked)return;timer=setTimeout(()=>{window.haptic.impact();showMenu(m.id);},400);},{passive:true});
+    el.addEventListener('touchend',()=>clearTimeout(timer));
+    el.querySelector('.like-btn').onclick=e=>{e.stopPropagation();m.liked=!m.liked;window.haptic.selection();if(m.liked)dots(e.target);save();render();};
+    const lockImg=el.querySelector('.lock-action');
+    if(lockImg)lockImg.onclick=e=>{e.stopPropagation();qLock(m.id);};
+    l.appendChild(el);
+    setTimeout(()=>{el.style.opacity='1';el.style.transform='translateY(0) scale(1)';},i*30+10);
+  });
 }
-function showActionMenu(id){selectedMemoId=id;const o=document.getElementById('action-overlay');o.style.display='flex';setTimeout(()=>o.classList.add('visible'),10);}
-function hideActionMenu(){const o=document.getElementById('action-overlay');o.classList.remove('visible');setTimeout(()=>{o.style.display='none';},300);}
-document.getElementById('cancel-action').onclick=()=>{hapticConfirm();hideActionMenu();};
-document.getElementById('trigger-delete').onclick=()=>{hapticConfirm();memos=memos.filter(m=>m.id!==selectedMemoId);saveData();renderMemos();hideActionMenu();};
-const lockOv=document.getElementById('lock-confirm-overlay');
-document.getElementById('trigger-lock').onclick=()=>{hapticConfirm();hideActionMenu();lockOv.style.display='flex';setTimeout(()=>lockOv.classList.add('visible'),10);};
-document.getElementById('lock-cancel-btn').onclick=()=>{hapticConfirm();lockOv.classList.remove('visible');setTimeout(()=>{lockOv.style.display='none';},300);};
-document.getElementById('lock-confirm-btn').onclick=()=>{hapticConfirm();const m=memos.find(m=>m.id===selectedMemoId);if(m){m.locked=true;saveData();renderMemos();}document.getElementById('lock-cancel-btn').click();};
-window.unlockMemo=async(id,el)=>{
-    hapticSelect();
-    try{
-        const c=new Uint8Array(32);crypto.getRandomValues(c);
-        const u=new Uint8Array(16);crypto.getRandomValues(u);
-        await navigator.credentials.create({publicKey:{challenge:c,rp:{name:'Memo Pro'},user:{id:u,name:'user@memo.pro',displayName:'User'},pubKeyCredParams:[{type:'public-key',alg:-7}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000}});
-        window.haptic.success();
-        el.style.transition='opacity 0.5s';el.style.opacity='0';
-        setTimeout(()=>{const m=memos.find(m=>m.id===id);if(m){m.locked=false;saveData();renderMemos();}},500);
-    }catch(e){hapticError();const p=el.parentElement;p.classList.add('shake-error');setTimeout(()=>p.classList.remove('shake-error'),500);}
+window.qLock=id=>{window.haptic.confirm();selId=id;const o=$('lock-confirm-overlay');o.style.display='flex';setTimeout(()=>o.classList.add('visible'),10);};
+function showMenu(id){selId=id;const o=$('action-overlay');o.style.display='flex';setTimeout(()=>o.classList.add('visible'),10);}
+function hideMenu(){const o=$('action-overlay');o.classList.remove('visible');setTimeout(()=>{o.style.display='none';},300);}
+$('cancel-action').onclick=()=>{window.haptic.confirm();hideMenu();};
+$('trigger-delete').onclick=()=>{window.haptic.confirm();memos=memos.filter(m=>m.id!==selId);save();render();hideMenu();};
+const lo=$('lock-confirm-overlay');
+$('trigger-lock').onclick=()=>{window.haptic.confirm();hideMenu();lo.style.display='flex';setTimeout(()=>lo.classList.add('visible'),10);};
+$('lock-cancel-btn').onclick=()=>{window.haptic.confirm();lo.classList.remove('visible');setTimeout(()=>{lo.style.display='none';},300);};
+$('lock-confirm-btn').onclick=()=>{window.haptic.confirm();const m=memos.find(m=>m.id===selId);if(m){m.locked=true;save();render();}$('lock-cancel-btn').click();};
+window.unlock=async(id,el)=>{
+  window.haptic.selection();
+  try{const c=new Uint8Array(32);crypto.getRandomValues(c);const u=new Uint8Array(16);crypto.getRandomValues(u);
+  await navigator.credentials.create({publicKey:{challenge:c,rp:{name:'iN glish'},user:{id:u,name:'u@m',displayName:'U'},pubKeyCredParams:[{type:'public-key',alg:-7}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000}});
+  window.haptic.success();el.style.transition='opacity .5s';el.style.opacity='0';
+  setTimeout(()=>{const m=memos.find(m=>m.id===id);if(m){m.locked=false;save();render();}},500);
+  }catch(e){window.haptic.error();el.parentElement.classList.add('shake-error');setTimeout(()=>el.parentElement.classList.remove('shake-error'),500);}
 };
-function saveData(){localStorage.setItem(CACHE_KEY,JSON.stringify(memos));}
-function loadData(){const d=localStorage.getItem(CACHE_KEY);if(d){memos=JSON.parse(d);renderMemos();}}
-document.getElementById('save-btn').onclick=()=>{hapticError();const d={version:2.1,background:currentBgData,memos};const b=new Blob([JSON.stringify(d)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`memo_${Date.now()}.json`;a.click();fileToggle.click();};
-document.getElementById('load-btn').onclick=()=>{hapticError();document.getElementById('load-file-input').click();};
-document.getElementById('load-file-input').onchange=e=>{const f=e.target.files[0];if(!f)return;if(f.name.endsWith('.json')){const r=new FileReader();r.onload=ev=>{try{const p=JSON.parse(ev.target.result);memos=p.memos||p;if(p.background)setBackground(p.background);saveData();renderMemos();fileToggle.click();}catch(err){alert('Invalid');}};r.readAsText(f);}else if(f.type==='image/png'){const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');const s=150/img.height;c.width=img.width*s;c.height=150;c.getContext('2d').drawImage(img,0,0,c.width,150);setBackground(c.toDataURL('image/png'));};img.src=ev.target.result;};r.readAsDataURL(f);fileToggle.click();}e.target.value='';};
-compBtn.onclick=()=>{hapticError();if(iframeFile){iframeFile=null;compBtn.innerText='📎';inputStack.classList.remove('attaching');}else{document.getElementById('iframe-file-input').click();}};
-document.getElementById('iframe-file-input').onchange=e=>{if(e.target.files[0]){const f=e.target.files[0];iframeFile=f;compBtn.innerText='🖇️';fileNameDisplay.innerText=`📄 ${f.name}`;inputStack.classList.add('attaching');hapticSelect();}};
-memoInput.oninput=()=>{memoInput.style.height='40px';memoInput.style.height=Math.min(memoInput.scrollHeight,120)+'px';};
-loadData();
+function dots(t){const r=t.getBoundingClientRect();for(let i=0;i<8;i++){const d=document.createElement('div');d.className='dot';d.style.background='#f91880';d.style.left=`${r.left+15}px`;d.style.top=`${r.top+15}px`;const a=(Math.PI*2/8)*i;d.style.setProperty('--tx',`${Math.cos(a)*50}px`);d.style.setProperty('--ty',`${Math.sin(a)*50}px`);$('thanks-dots').appendChild(d);setTimeout(()=>d.remove(),1000);}}
+function save(){localStorage.setItem(CK,JSON.stringify(memos));}
+function load(){const d=localStorage.getItem(CK);if(d){memos=JSON.parse(d);render();}}
+$('save-btn').onclick=()=>{window.haptic.error();const d={version:2.1,background:bgData,memos};const b=new Blob([JSON.stringify(d)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`memo_${Date.now()}.json`;a.click();ft.click();};
+$('load-btn').onclick=()=>{window.haptic.error();$('load-file-input').click();};
+$('load-file-input').onchange=e=>{const f=e.target.files[0];if(!f)return;if(f.name.endsWith('.json')){const r=new FileReader();r.onload=ev=>{try{const p=JSON.parse(ev.target.result);memos=p.memos||p;if(p.background)setBg(p.background);save();render();ft.click();}catch(err){alert('Invalid');}};r.readAsText(f);}e.target.value='';};
+cb.onclick=()=>{window.haptic.error();if(iframeFile){iframeFile=null;cb.innerText='📎';is.classList.remove('attaching');}else{$('iframe-file-input').click();}};
+$('iframe-file-input').onchange=e=>{if(e.target.files[0]){const f=e.target.files[0];iframeFile=f;cb.innerText='🖇️';fn.innerText=`📄 ${f.name}`;is.classList.add('attaching');window.haptic.selection();}};
+mi.oninput=()=>{mi.style.height='40px';mi.style.height=Math.min(mi.scrollHeight,120)+'px';};
+load();
 </script>
 </body>
 </html>
