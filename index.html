@@ -1714,7 +1714,6 @@ window.Sf=i=>{
 
 /* ═══ SHAKE DETECTION + PHYSICS ═══ */
 const SHAKE_KEY='inglish_shake_granted';
-let shakeEnabled=true; // Always listen, actions depend on settings
 let lastShakeT=0;
 let physicsRunning=false;
 
@@ -1973,8 +1972,8 @@ document.getElementById('s-haptic').addEventListener('click',function(){
     localStorage.setItem('inglish_shake_mode',v);
     syncShakeChecks('shake',v);
     // Enable/disable shake listener
-    if(v==='none'){shakeEnabled=false;localStorage.setItem(SHAKE_KEY,'0');}
-    else{shakeEnabled=true;localStorage.setItem(SHAKE_KEY,'1');}
+    if(v==='none'){localStorage.setItem('inglish_shake_mode','none');}
+    else{localStorage.setItem('inglish_shake_mode',v);}
     updateHeavyVisibility();
   });
 });
@@ -2173,67 +2172,116 @@ function springBack(states,onSettle){
   },550);
 }
 
-let _shakeListenerActive=false;
-async function startShakeListener(){
-  if(_shakeListenerActive)return; // Prevent duplicate listeners
-  // iOS 13+ needs permission
-  if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
-    try{
-      const perm=await DeviceMotionEvent.requestPermission();
-      if(perm!=='granted')return;
-    }catch(e){return;}
-  }
-  _shakeListenerActive=true;
-  localStorage.setItem(SHAKE_KEY,'1');
-  let lx=0,ly=0,lz=0,lastT=0;
-  let peakForce=0,peakAx=0,peakAy=0;
-  let shakeTimeout=null;
+/* ═══ SHAKE SYSTEM (single, clean) ═══ */
+let _shakeActive=false;
 
+function initShake(){
+  if(_shakeActive)return;
+  
+  // On non-iOS, just start directly
+  if(typeof DeviceMotionEvent==='undefined'){return;}
+  if(typeof DeviceMotionEvent.requestPermission!=='function'){
+    // Android/desktop - no permission needed
+    _shakeActive=true;
+    registerShakeListener();
+    return;
+  }
+  
+  // iOS: need user gesture to request permission
+  // If already granted, try starting (will work if permission cached by browser)
+  if(localStorage.getItem(SHAKE_KEY)==='1'){
+    _shakeActive=true;
+    registerShakeListener();
+    return;
+  }
+  
+  // Not yet granted: show a button/use first meaningful tap
+  // We hook into multiple touch points to catch the first user gesture
+  const reqPerm=async function(){
+    document.removeEventListener('touchend',reqPerm);
+    document.removeEventListener('click',reqPerm);
+    try{
+      const p=await DeviceMotionEvent.requestPermission();
+      if(p==='granted'){
+        localStorage.setItem(SHAKE_KEY,'1');
+        _shakeActive=true;
+        registerShakeListener();
+        console.log('[SHAKE] Permission granted, listener active');
+      }else{
+        console.log('[SHAKE] Permission denied');
+      }
+    }catch(e){console.log('[SHAKE] Permission error:',e);}
+  };
+  // Use touchend (not click) because iOS permission must be in user gesture
+  document.addEventListener('touchend',reqPerm,{once:true});
+  document.addEventListener('click',reqPerm,{once:true});
+}
+
+function registerShakeListener(){
+  let lx=0,ly=0,lz=0,lastT=0;
+  let peakForce=0,peakAx=0,peakAy=0,shakeTimeout=null;
+  
   window.addEventListener('devicemotion',e=>{
     const a=e.accelerationIncludingGravity;
     if(!a)return;
     const now=Date.now();
-    if(now-lastT<60)return;
+    if(now-lastT<50)return;
     lastT=now;
     const dx=Math.abs(a.x-lx),dy=Math.abs(a.y-ly),dz=Math.abs(a.z-lz);
     const force=dx+dy+dz;
     lx=a.x;ly=a.y;lz=a.z;
-
-    if(force>10){
+    
+    if(force>8){
       if(force>peakForce){peakForce=force;peakAx=a.x;peakAy=a.y;}
       clearTimeout(shakeTimeout);
       shakeTimeout=setTimeout(()=>{
+        const pk=peakForce;
+        const ax=peakAx,ay=peakAy;
+        peakForce=0;peakAx=0;peakAy=0;
+        
+        if(pk<10)return; // too weak
+        
         const homeEl=document.getElementById('home');
         const isHome=homeEl&&!homeEl.classList.contains('hidden');
-        console.log('[SHAKE] peak:',peakForce.toFixed(1),'isHome:',isHome);
+        
+        console.log('[SHAKE] peak:'+pk.toFixed(1)+' isHome:'+isHome);
+        
         if(isHome){
-          if(peakForce>50){onHeavyShake(peakAx,peakAy);}
-          else if(peakForce>18){
+          if(pk>45){onHeavyShake(ax,ay);}
+          else if(pk>15){
             haptic.confirm();
             localStorage.setItem('inglish_layout','icon');
             showIconGrid();
           }
         }else{
-          if(peakForce>45){onHeavyShake(peakAx,peakAy);}
-          else if(peakForce>10){onLightShake();}
+          if(pk>40){onHeavyShake(ax,ay);}
+          else if(pk>10){onLightShake();}
         }
-        peakForce=0;peakAx=0;peakAy=0;
-      },200);
+      },150);
     }
   });
+  console.log('[SHAKE] Listener registered');
 }
 
-// Start shake listener - if already granted, start immediately
-// On iOS, first user gesture triggers permission request
-if(localStorage.getItem(SHAKE_KEY)==='1'){
-  startShakeListener();
-}else{
-  // First tap anywhere triggers permission request
-  document.addEventListener('click',function shakeInit(){
-    document.removeEventListener('click',shakeInit);
-    startShakeListener();
-  },{once:true});
-}
+// Also allow 🔀 button to trigger permission if needed
+document.getElementById('g-sfb').addEventListener('click',async()=>{
+  haptic();
+  // Try to init shake on this user gesture if not yet active
+  if(!_shakeActive&&typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
+    try{
+      const p=await DeviceMotionEvent.requestPermission();
+      if(p==='granted'){
+        localStorage.setItem(SHAKE_KEY,'1');
+        _shakeActive=true;
+        registerShakeListener();
+      }
+    }catch(e){}
+  }
+  Sf(curP);
+});
+
+// Init on load
+initShake();
 
 function done(i){
   const d=DK[i];
@@ -3198,10 +3246,6 @@ document.getElementById('btn-back').addEventListener('click',()=>{
 
 // Global float buttons
 // 🔀 button: first tap requests shake permission, subsequent taps toggle
-document.getElementById('g-sfb').addEventListener('click',()=>{
-  haptic();
-  Sf(curP);
-});
 document.getElementById('g-star').addEventListener('click',()=>{
   const d=DK[curP];if(d.idx>=d.deck.length)return;
   const w=d.deck[d.idx];
