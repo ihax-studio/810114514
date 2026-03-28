@@ -523,6 +523,18 @@ background:var(--r);margin-left:4px;vertical-align:middle;
 .star-deck-btn.pop{animation:starPop .3s ease}
 @keyframes starPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
 
+/* ═══ CARD SHAKE ANIM ═══ */
+.card-shaking{animation:cardShake .45s ease}
+@keyframes cardShake{
+0%{transform:translateX(0)}
+15%{transform:translateX(-12px) rotate(-1.5deg)}
+30%{transform:translateX(10px) rotate(1.2deg)}
+45%{transform:translateX(-8px) rotate(-1deg)}
+60%{transform:translateX(6px) rotate(.7deg)}
+75%{transform:translateX(-3px)}
+100%{transform:translateX(0)}
+}
+
 /* ═══ FLOAT BAR (🔀 ★ bottom) ═══ */
 .float-bar{
 display:flex;justify-content:space-between;
@@ -1597,10 +1609,12 @@ window.Sf=i=>{
   document.getElementById('sh'+i).textContent=0;
   document.getElementById('sf'+i).textContent=0;
   document.getElementById('ac'+i).style.display='none';
-  // Card flip animation
+  // Card shake animation (left-right), locked during anim
   const fw=document.getElementById('fw'+i);
-  if(fw){fw.style.transition='transform .6s ease';fw.style.transform='rotateX(360deg)';
-    setTimeout(()=>{fw.style.transition='';fw.style.transform='';},650);}
+  if(fw&&!fw.classList.contains('card-shaking')){
+    fw.classList.add('card-shaking');
+    setTimeout(()=>fw.classList.remove('card-shaking'),500);
+  }
   render(i);
   // Play sound if unshuffling
   if(!d.shuffled){try{const a=new Audio('not-shake.mp3');a.play().catch(()=>{});}catch(e){}}
@@ -1613,7 +1627,7 @@ let lastShakeT=0;
 
 function onShake(){
   const now=Date.now();
-  if(now-lastShakeT<1500)return; // debounce
+  if(now-lastShakeT<800)return; // debounce
   lastShakeT=now;
   haptic.confirm();
   const d=DK[curP];
@@ -1630,7 +1644,7 @@ function startShakeListener(){
     lastT=now;
     const dx=Math.abs(a.x-lx),dy=Math.abs(a.y-ly),dz=Math.abs(a.z-lz);
     lx=a.x;ly=a.y;lz=a.z;
-    if((dx+dy+dz)>35)onShake();
+    if((dx+dy+dz)>20)onShake();
   });
 }
 
