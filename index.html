@@ -598,6 +598,8 @@ border:6px solid transparent;border-top-color:rgba(255,255,255,.92);
 /* ═══ SETTINGS ═══ */
 .s-sec{font-size:12px;font-weight:600;color:rgba(0,0,0,.4);padding:12px 4px 4px;text-transform:uppercase;letter-spacing:.05em}
 .s-group{background:rgba(255,255,255,.8);border-radius:12px;overflow:hidden;margin-bottom:2px}
+.s-nav-item{padding:10px 14px;border-radius:10px;font-size:14px;color:#000;cursor:pointer;margin-bottom:2px;transition:background .2s}
+.s-nav-item:active,.s-nav-item.s-nav-active{background:rgba(0,122,255,.12);color:var(--b);font-weight:600}
 .s-row{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid rgba(0,0,0,.06)}
 .s-row:last-child{border-bottom:none}
 .s-label{flex:1;font-size:15px;color:#000}
@@ -836,40 +838,64 @@ overflow:hidden;
       <div style="flex:1;font-size:17px;font-weight:700;color:#000">設定</div>
       <button id="settings-close" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.06);border:none;font-size:18px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'SF Pro Display',system-ui,sans-serif;color:#000;line-height:1">✕</button>
     </div>
-    <div style="overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px 20px">
-      <!-- Home Layout -->
-      <div class="s-sec">ホーム画面</div>
-      <div class="s-group">
-        <div class="s-row" id="s-layout-icon"><div class="s-label">アイコン</div><div class="s-check" id="s-check-icon">✓</div></div>
-        <div class="s-row" id="s-layout-list"><div class="s-label">リスト</div><div class="s-check s-on" id="s-check-list">✓</div></div>
-        <div class="s-row"><div class="s-label">大きいアイコン</div><div class="s-toggle" id="s-bigicon"><div class="s-knob"></div></div></div>
+    <div id="settings-body" style="display:flex;flex:1;overflow:hidden">
+      <!-- Sidebar (iPad/Mac only, JS toggles visibility) -->
+      <div id="settings-sidebar" style="display:none;width:220px;border-right:1px solid rgba(0,0,0,.08);padding:8px;overflow-y:auto;flex-shrink:0">
+        <div class="s-nav-item s-nav-active" data-section="home">ホーム画面</div>
+        <div class="s-nav-item" data-section="sound">サウンドと触覚</div>
+        <div class="s-nav-item" data-section="gesture">ジェスチャ</div>
+        <div class="s-nav-item" data-section="wallpaper">壁紙</div>
+        <div class="s-nav-item" data-section="danger" style="color:#ff3b30">セーブデータを全て削除</div>
       </div>
-      <!-- Haptic -->
-      <div class="s-sec">触覚フィードバック</div>
-      <div class="s-group">
-        <div class="s-row"><div class="s-label">触覚</div><div class="s-toggle on" id="s-haptic"><div class="s-knob"></div></div></div>
-        <div class="s-row"><div class="s-label">はっきりとした触覚</div><div class="s-toggle" id="s-haptic-strong"><div class="s-knob"></div></div></div>
-      </div>
-      <!-- Shake -->
-      <div class="s-shake-section">
-      <div class="s-sec">シェイク</div>
-      <div class="s-group">
-        <div class="s-row" id="s-shake-none"><div class="s-label">なし</div><div class="s-check s-on" id="sc-shake-none">✓</div></div>
-        <div class="s-row s-shake-opt" id="s-shake-check"><div class="s-label">答えを確認する</div><div class="s-check" id="sc-shake-check">✓</div></div>
-        <div class="s-row s-shake-opt" id="s-shake-shuffle"><div class="s-label">シャッフルする</div><div class="s-check" id="sc-shake-shuffle">✓</div></div>
-        <div class="s-row s-shake-opt" id="s-shake-back"><div class="s-label">1つ前に戻る</div><div class="s-check" id="sc-shake-back">✓</div></div>
-      </div>
-      <div class="s-sec">強いシェイク</div>
-      <div class="s-group">
-        <div class="s-row" id="s-heavy-none"><div class="s-label">なし</div><div class="s-check s-on" id="sc-heavy-none">✓</div></div>
-        <div class="s-row s-heavy-opt" id="s-heavy-check"><div class="s-label">答えを確認する</div><div class="s-check" id="sc-heavy-check">✓</div></div>
-        <div class="s-row s-heavy-opt" id="s-heavy-shuffle"><div class="s-label">シャッフルする</div><div class="s-check" id="sc-heavy-shuffle">✓</div></div>
-        <div class="s-row s-heavy-opt" id="s-heavy-back"><div class="s-label">1つ前に戻る</div><div class="s-check" id="sc-heavy-back">✓</div></div>
-      </div>
-      </div>
-      <!-- Delete -->
-      <div style="padding:24px 0 10px;text-align:center">
-        <button id="s-delete-btn" style="background:rgba(255,59,48,.08);color:#ff3b30;border:1px solid rgba(255,59,48,.15);border-radius:55px;padding:14px 32px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">セーブデータを全て削除</button>
+      <!-- Content -->
+      <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px 20px">
+        <!-- Home -->
+        <div class="s-section" id="ss-home">
+          <div class="s-sec">ホーム画面</div>
+          <div class="s-group">
+            <div class="s-row" id="s-layout-icon"><div class="s-label">アイコン</div><div class="s-check" id="s-check-icon">✓</div></div>
+            <div class="s-row" id="s-layout-list"><div class="s-label">リスト</div><div class="s-check s-on" id="s-check-list">✓</div></div>
+            <div class="s-row"><div class="s-label">大きいアイコン</div><div class="s-toggle" id="s-bigicon"><div class="s-knob"></div></div></div>
+          </div>
+        </div>
+        <!-- Sound & Haptic -->
+        <div class="s-section" id="ss-sound">
+          <div class="s-sec">触覚フィードバック</div>
+          <div class="s-group">
+            <div class="s-row"><div class="s-label">触覚</div><div class="s-toggle on" id="s-haptic"><div class="s-knob"></div></div></div>
+            <div class="s-row"><div class="s-label">はっきりとした触覚</div><div class="s-toggle" id="s-haptic-strong"><div class="s-knob"></div></div></div>
+          </div>
+        </div>
+        <!-- Gesture -->
+        <div class="s-section" id="ss-gesture">
+          <div class="s-shake-section">
+          <div class="s-sec">シェイク</div>
+          <div class="s-group">
+            <div class="s-row" id="s-shake-none"><div class="s-label">なし</div><div class="s-check s-on" id="sc-shake-none">✓</div></div>
+            <div class="s-row s-shake-opt" id="s-shake-check"><div class="s-label">答えを確認する</div><div class="s-check" id="sc-shake-check">✓</div></div>
+            <div class="s-row s-shake-opt" id="s-shake-shuffle"><div class="s-label">シャッフルする</div><div class="s-check" id="sc-shake-shuffle">✓</div></div>
+            <div class="s-row s-shake-opt" id="s-shake-back"><div class="s-label">1つ前に戻る</div><div class="s-check" id="sc-shake-back">✓</div></div>
+          </div>
+          <div class="s-sec">強いシェイク</div>
+          <div class="s-group">
+            <div class="s-row" id="s-heavy-none"><div class="s-label">なし</div><div class="s-check s-on" id="sc-heavy-none">✓</div></div>
+            <div class="s-row s-heavy-opt" id="s-heavy-check"><div class="s-label">答えを確認する</div><div class="s-check" id="sc-heavy-check">✓</div></div>
+            <div class="s-row s-heavy-opt" id="s-heavy-shuffle"><div class="s-label">シャッフルする</div><div class="s-check" id="sc-heavy-shuffle">✓</div></div>
+            <div class="s-row s-heavy-opt" id="s-heavy-back"><div class="s-label">1つ前に戻る</div><div class="s-check" id="sc-heavy-back">✓</div></div>
+          </div>
+          </div>
+        </div>
+        <!-- Wallpaper (placeholder) -->
+        <div class="s-section" id="ss-wallpaper" style="display:none">
+          <div class="s-sec">壁紙</div>
+          <div style="padding:20px;text-align:center;color:var(--sub);font-size:13px">Coming soon</div>
+        </div>
+        <!-- Delete (iPhone only, iPad uses sidebar) -->
+        <div class="s-section" id="ss-danger">
+          <div style="padding:24px 0 10px;text-align:center">
+            <button id="s-delete-btn" style="background:rgba(255,59,48,.08);color:#ff3b30;border:1px solid rgba(255,59,48,.15);border-radius:55px;padding:14px 32px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">セーブデータを全て削除</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -977,6 +1003,16 @@ document.addEventListener('touchstart',function(e){
   const x=e.touches[0].pageX;
   if(x<15||x>window.innerWidth-15)e.preventDefault();
 },{passive:false,capture:true});
+
+/* ═══ DEVICE DETECTION ═══ */
+const _isIPad=navigator.userAgent.includes('iPad')||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const _isMac=navigator.platform.startsWith('Mac')&&navigator.maxTouchPoints===0;
+const _isWideScreen=_isIPad||_isMac||window.innerWidth>=768;
+// iPad/Mac: default icon mode, 6 columns. iPhone: default list, 4 columns
+const GRID_COLS=_isWideScreen?6:4;
+if(_isWideScreen&&!localStorage.getItem('inglish_layout')){
+  localStorage.setItem('inglish_layout','icon');
+}
 
 /* ═══ HAPTIC ═══ */
 let _h=null;
@@ -2077,27 +2113,74 @@ function openSettings(){
   const ov=document.getElementById('settings-overlay');
   ov.style.display='flex';
   requestAnimationFrame(()=>{document.getElementById('settings-card').style.transform='translateY(0)';});
-  // Sync haptic
+  // Show sidebar on iPad/Mac
+  const sidebar=document.getElementById('settings-sidebar');
+  if(_isWideScreen&&sidebar){
+    sidebar.style.display='block';
+    // iPad/Mac: settings card is centered dialog, not bottom sheet
+    const card=document.getElementById('settings-card');
+    card.style.position='relative';card.style.margin='auto';
+    card.style.maxWidth='700px';card.style.maxHeight='80dvh';
+    card.style.borderRadius='22px';card.style.bottom='auto';
+    card.style.transform='scale(0.9)';card.style.opacity='0';
+    card.style.transition='transform .3s ease, opacity .3s ease';
+    requestAnimationFrame(()=>{card.style.transform='scale(1)';card.style.opacity='1';});
+    // Show only first section on iPad
+    showSettingsSection('home');
+  }else{
+    sidebar.style.display='none';
+    // Show all sections on iPhone
+    document.querySelectorAll('.s-section').forEach(s=>{s.style.display='';});
+  }
+  // Sync toggles
   document.getElementById('s-haptic').classList.toggle('on',localStorage.getItem('inglish_haptic')!=='0');
   document.getElementById('s-haptic-strong').classList.toggle('on',localStorage.getItem('inglish_haptic_strong')==='1');
   document.getElementById('s-bigicon').classList.toggle('on',localStorage.getItem('inglish_bigicon')==='1');
-  // Sync layout
   const isIcon=localStorage.getItem('inglish_layout')==='icon';
   document.getElementById('s-check-icon').classList.toggle('s-on',isIcon);
   document.getElementById('s-check-list').classList.toggle('s-on',!isIcon);
-  // Sync shake mode
   syncShakeChecks('shake',localStorage.getItem('inglish_shake_mode')||'none');
   syncShakeChecks('heavy',localStorage.getItem('inglish_heavy_mode')||'none');
   updateHeavyVisibility();
-  // Hide shake sections if permission not available
   const shakeAvail=localStorage.getItem('inglish_shake_avail')!=='0';
   document.querySelectorAll('.s-shake-section').forEach(el=>{el.style.display=shakeAvail?'':'none';});
 }
+
+function showSettingsSection(sec){
+  document.querySelectorAll('.s-section').forEach(s=>{s.style.display='none';});
+  const target=document.getElementById('ss-'+sec);
+  if(target)target.style.display='';
+  document.querySelectorAll('.s-nav-item').forEach(n=>{
+    n.classList.toggle('s-nav-active',n.dataset.section===sec);
+  });
+}
+
+// Sidebar nav clicks
+document.getElementById('settings-sidebar')?.addEventListener('click',e=>{
+  const item=e.target.closest('.s-nav-item');
+  if(!item)return;
+  haptic();
+  const sec=item.dataset.section;
+  if(sec==='danger'){
+    closeSettings();
+    setTimeout(()=>{document.getElementById('btn-delete-all').click();},500);
+    return;
+  }
+  showSettingsSection(sec);
+});
 function closeSettings(){
-  document.getElementById('settings-card').style.transform='translateY(100%)';
+  const card=document.getElementById('settings-card');
+  if(_isWideScreen){
+    card.style.transform='scale(0.9)';card.style.opacity='0';
+  }else{
+    card.style.transform='translateY(100%)';
+  }
   setTimeout(()=>{
     document.getElementById('settings-overlay').style.display='none';
-    // Apply layout
+    // Reset card styles
+    card.style.position='';card.style.margin='';card.style.maxWidth='';
+    card.style.maxHeight='';card.style.borderRadius='';card.style.bottom='';
+    card.style.opacity='';
     if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
     else restoreHomeFromGrid();
   },400);
@@ -3091,7 +3174,7 @@ function showIconGrid(){
   
   const grid=document.createElement('div');
   grid.id='icon-grid';
-  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:'+gap+';padding:24px 10px 16px;justify-items:center;';
+  grid.style.cssText='display:grid;grid-template-columns:repeat('+GRID_COLS+',1fr);gap:'+gap+';padding:24px 10px 16px;justify-items:center;';
   
   const cards=[...document.querySelectorAll('.hcard')];
   const allIcons=[];
