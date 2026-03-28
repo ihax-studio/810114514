@@ -1623,14 +1623,22 @@ window.Bk=i=>{
 window.Sf=i=>{
   haptic.confirm();
   const d=DK[i],c=CFG[i];
-  d.shuffled=!d.shuffled;
-  d.deck=d.shuffled?shuf([...SRC[c.src]]):[...SRC[c.src]];
+  if(!d.shuffled){
+    // Shuffle
+    d.shuffled=true;
+    d.deck=shuf([...SRC[c.src]]);
+  }else{
+    // Unshuffle (back to order)
+    d.shuffled=false;
+    d.deck=[...SRC[c.src]];
+    try{const a=new Audio('not-shake.mp3');a.play().catch(()=>{});}catch(e){}
+  }
   d.idx=0;d.st={g:0,h:0,f:0};d.hist=[];d.prev=null;
   document.getElementById('sg'+i).textContent=0;
   document.getElementById('sh'+i).textContent=0;
   document.getElementById('sf'+i).textContent=0;
   document.getElementById('ac'+i).style.display='none';
-  // Card shake animation (left-right), locked during anim
+  // Card shake animation
   const fw=document.getElementById('fw'+i);
   if(fw&&!fw.classList.contains('card-shaking')){
     fw.classList.add('card-shaking');
@@ -1641,21 +1649,15 @@ window.Sf=i=>{
   if(fc){fc.classList.remove('card-slide-up');void fc.offsetWidth;fc.classList.add('card-slide-up');
     setTimeout(()=>fc.classList.remove('card-slide-up'),400);}
   render(i);
-  // Play sound if unshuffling
-  if(!d.shuffled){try{const a=new Audio('not-shake.mp3');a.play().catch(()=>{});}catch(e){}}
 };
 
-/* ═══ SHAKE DETECTION ═══ */
+/* ═══ SHAKE DETECTION + PHYSICS ═══ */
 const SHAKE_KEY='inglish_shake_granted';
 let shakeEnabled=localStorage.getItem(SHAKE_KEY)==='1';
 let lastShakeT=0;
+let physicsRunning=false;
 
-function onShake(){
-  const now=Date.now();
-  if(now-lastShakeT<800)return;
-  lastShakeT=now;
-  haptic.confirm();
-  // Always reshuffle (keep shuffled state, just re-randomize)
+function doShuffle(){
   const d=DK[curP],c=CFG[curP];
   d.shuffled=true;
   d.deck=shuf([...SRC[c.src]]);
@@ -1664,12 +1666,6 @@ function onShake(){
   document.getElementById('sh'+curP).textContent=0;
   document.getElementById('sf'+curP).textContent=0;
   document.getElementById('ac'+curP).style.display='none';
-  // Strong shake animation for physical shake
-  const fw=document.getElementById('fw'+curP);
-  if(fw&&!fw.classList.contains('card-shaking-hard')){
-    fw.classList.add('card-shaking-hard');
-    setTimeout(()=>fw.classList.remove('card-shaking-hard'),600);
-  }
   // Text slide-up
   const fc=document.getElementById('fc'+curP);
   if(fc){fc.classList.remove('card-slide-up');void fc.offsetWidth;fc.classList.add('card-slide-up');
@@ -1677,17 +1673,157 @@ function onShake(){
   render(curP);
 }
 
+// Light shake → shuffle + card wobble
+function onLightShake(){
+  const now=Date.now();
+  if(now-lastShakeT<700)return;
+  lastShakeT=now;
+  haptic.confirm();
+  doShuffle();
+  const fw=document.getElementById('fw'+curP);
+  if(fw&&!fw.classList.contains('card-shaking')){
+    fw.classList.add('card-shaking');
+    setTimeout(()=>fw.classList.remove('card-shaking'),500);
+  }
+}
+
+// Heavy shake → shuffle + physics drop on all UI elements
+function onHeavyShake(ax,ay){
+  const now=Date.now();
+  if(now-lastShakeT<1200||physicsRunning)return;
+  lastShakeT=now;
+  haptic.confirm();
+  doShuffle();
+  runPhysicsDrop(ax,ay);
+}
+
+function runPhysicsDrop(shakeX,shakeY){
+  physicsRunning=true;
+  // Collect all UI elements to animate
+  const i=curP;
+  const els=[];
+  const fw=document.getElementById('fw'+i);
+  if(fw)els.push({el:fw,mass:1.0});
+  // Score buttons
+  document.querySelectorAll('.ch-score').forEach(el=>els.push({el,mass:0.6}));
+  // Float buttons
+  document.querySelectorAll('.float-btn').forEach(el=>els.push({el,mass:0.5}));
+  // Progress row
+  const pr=document.querySelector('.pr-row');
+  if(pr)els.push({el:pr,mass:0.4});
+
+  // Init physics state per element
+  const states=els.map(({el,mass})=>{
+    const rect=el.getBoundingClientRect();
+    return {
+      el, mass,
+      x:0, y:0, // offset from original position
+      vx: (shakeX||0) * (0.5+Math.random()*0.8) * -3,
+      vy: Math.abs(shakeY||5) * (1+Math.random()*0.5) * 2,
+      rot:0,
+      vr:(Math.random()-0.5)*8,
+      origY:rect.top,
+      maxFall:window.innerHeight-rect.bottom+rect.height*0.3
+    };
+  });
+
+  const gravity=1800; // px/s^2
+  const bounce=0.35;
+  const friction=0.92;
+  const rotFriction=0.94;
+  let lastFrame=performance.now();
+  let settled=0;
+
+  function step(t){
+    const dt=Math.min((t-lastFrame)/1000, 0.05); // cap at 50ms
+    lastFrame=t;
+    settled=0;
+
+    states.forEach(s=>{
+      // Apply gravity
+      s.vy+=gravity*dt;
+      s.x+=s.vx*dt;
+      s.y+=s.vy*dt;
+      s.rot+=s.vr;
+
+      // Floor bounce
+      if(s.y>s.maxFall){
+        s.y=s.maxFall;
+        s.vy=-s.vy*bounce;
+        s.vr*=0.5;
+        if(Math.abs(s.vy)<15)s.vy=0;
+      }
+      // Ceiling
+      if(s.y<-50){s.y=-50;s.vy=Math.abs(s.vy)*bounce;}
+      // Walls
+      if(Math.abs(s.x)>120){
+        s.x=Math.sign(s.x)*120;
+        s.vx=-s.vx*bounce;
+      }
+      // Friction
+      s.vx*=friction;
+      s.vr*=rotFriction;
+      // Settle check
+      if(Math.abs(s.vx)<1&&Math.abs(s.vy)<2&&s.y>=s.maxFall-2)settled++;
+
+      s.el.style.transform=`translate(${s.x.toFixed(1)}px,${s.y.toFixed(1)}px) rotate(${s.rot.toFixed(1)}deg)`;
+      s.el.style.transition='none';
+    });
+
+    // If all settled or timeout, spring back
+    if(settled>=states.length){
+      springBack(states);
+      return;
+    }
+    requestAnimationFrame(step);
+  }
+
+  // Safety timeout
+  setTimeout(()=>{if(physicsRunning)springBack(states);},2500);
+  requestAnimationFrame(step);
+}
+
+function springBack(states){
+  physicsRunning=false;
+  states.forEach(s=>{
+    s.el.style.transition='transform .5s cubic-bezier(.34,1.56,.64,1)';
+    s.el.style.transform='';
+  });
+  // Clean up transition after animation
+  setTimeout(()=>{
+    states.forEach(s=>{s.el.style.transition='';});
+  },550);
+}
+
 function startShakeListener(){
   let lx=0,ly=0,lz=0,lastT=0;
+  let peakForce=0,peakAx=0,peakAy=0;
+  let shakeTimeout=null;
+
   window.addEventListener('devicemotion',e=>{
     const a=e.accelerationIncludingGravity;
     if(!a)return;
     const now=Date.now();
-    if(now-lastT<100)return;
+    if(now-lastT<60)return;
     lastT=now;
     const dx=Math.abs(a.x-lx),dy=Math.abs(a.y-ly),dz=Math.abs(a.z-lz);
+    const force=dx+dy+dz;
     lx=a.x;ly=a.y;lz=a.z;
-    if((dx+dy+dz)>20)onShake();
+
+    if(force>15){
+      // Track peak force during this shake gesture
+      if(force>peakForce){peakForce=force;peakAx=a.x;peakAy=a.y;}
+      clearTimeout(shakeTimeout);
+      shakeTimeout=setTimeout(()=>{
+        // Gesture ended, check intensity
+        if(peakForce>60){
+          onHeavyShake(peakAx,peakAy);
+        }else if(peakForce>15){
+          onLightShake();
+        }
+        peakForce=0;peakAx=0;peakAy=0;
+      },200);
+    }
   });
 }
 
