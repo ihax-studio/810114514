@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Clock iOS 26</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
+<style>
+:root {
+  --font: "SF Pro Display","SF Pro Text",-apple-system,system-ui,sans-serif;
+  --dh: 90px;
+  --dfs: 4.2rem;
+  --dgap: 0.02em;
+}
+*,*::before,*::after { box-sizing: border-box; }
+
+body {
+  margin: 0; padding: 0;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  min-height: 100dvh; overflow: hidden;
+  color: #fff; font-family: var(--font);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none; -webkit-user-select: none;
+  touch-action: none;
+}
+
+/* ── Backgrounds ── */
+.bg-layer {
+  position: fixed; inset: 0; z-index: -2;
+  background-size: cover; background-position: center;
+  background-attachment: fixed;
+  transition: opacity .5s ease;
+}
+#bg-a {
+  opacity: 1;
+  background: linear-gradient(135deg,#ff4e00,#ea38ff,#5ca7ff);
+}
+#bg-b { opacity: 0; }
+
+#bg-blur {
+  position: fixed; inset: 0; z-index: -1;
+  pointer-events: none; opacity: 0;
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  background: rgba(0,0,0,0);
+  transition: opacity .3s ease, backdrop-filter .3s ease, background .3s ease;
+}
+#bg-blur.on {
+  opacity: 1;
+  backdrop-filter: blur(22px) brightness(.82);
+  -webkit-backdrop-filter: blur(22px) brightness(.82);
+  background: rgba(0,0,0,.15);
+}
+
+/* ── Timer-end overlay ── */
+#end-ov {
+  position: fixed; inset: 0; z-index: 400;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none; opacity: 0;
+  backdrop-filter: blur(0px) brightness(1);
+  -webkit-backdrop-filter: blur(0px) brightness(1);
+  background: rgba(0,0,0,0);
+  transition: opacity .5s ease, backdrop-filter .5s ease, background .5s ease;
+}
+#end-ov.on {
+  opacity: 1; pointer-events: all;
+  backdrop-filter: blur(28px) brightness(.75);
+  -webkit-backdrop-filter: blur(28px) brightness(.75);
+  background: rgba(0,0,0,.3);
+}
+#end-txt {
+  font-size: 2rem; font-weight: 300; letter-spacing: .22em;
+  opacity: 0; transform: translateY(44px);
+  transition: opacity .5s ease .1s, transform .52s cubic-bezier(.15,1.3,.4,1) .1s;
+}
+#end-ov.on #end-txt { opacity: 1; transform: translateY(0); }
+
+/* ── Input area ── */
+#input-area {
+  position: relative;
+  width: min(78vmin, 430px);
+  margin-top: 12px;
+}
+#result-disp {
+  position: absolute;
+  bottom: calc(100% + 6px); left: 0; right: 0;
+  font-size: 1.32rem; font-weight: 500; letter-spacing: .04em;
+  text-align: center;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity .4s ease, transform .42s cubic-bezier(.15,1.3,.4,1);
+  pointer-events: none; white-space: nowrap;
+  text-shadow: 0 0 20px rgba(255,255,255,.4);
+}
+#result-disp.show { opacity: 1; transform: translateY(0); }
+#result-disp.math-result {
+  background: linear-gradient(90deg, #4fc3f7, #7c4dff, #f06292);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 8px rgba(124,77,255,.4));
+}
+#result-disp.translate-result {
+  color: rgba(255,255,255,.92);
+  -webkit-text-fill-color: rgba(255,255,255,.92);
+}
+
+/* Input row */
+#inp-row {
+  display: flex; align-items: center;
+  background: none;
+  border: none;
+  border-radius: 16px;
+  padding: 2px 6px;
+  gap: 2px;
+  box-shadow: none;
+}
+#mode-inp {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: #fff; font-size: 1.08rem; font-weight: 400;
+  letter-spacing: .04em;
+  padding: 11px 10px;
+  font-family: var(--font);
+  caret-color: rgba(255,255,255,.8);
+  -webkit-appearance: none;
+  touch-action: auto;
+}
+#mode-inp::placeholder {
+  color: rgba(255,255,255,.42);
+  font-weight: 300;
+}
+#sym-toggle-btn {
+  background: none; border: none; color: rgba(255,255,255,.7);
+  font-size: 1.5rem; font-weight: 300; padding: 4px 8px;
+  cursor: pointer; line-height: 1; flex-shrink: 0;
+  transition: color .2s;
+}
+#sym-toggle-btn:active { color: #fff; }
+
+/* Symbol flyout */
+#sym-flyout {
+  position: absolute; top: calc(100% + 6px); right: 0;
+  display: flex; gap: 6px; align-items: center;
+  background: rgba(255,255,255,.16);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 12px;
+  padding: 6px 10px;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  transform-origin: top right;
+  transform: scale(0.85) translateY(-4px);
+  opacity: 0; pointer-events: none;
+  transition: transform .28s cubic-bezier(.15,1.3,.4,1), opacity .22s ease;
+  z-index: 50;
+}
+#sym-flyout.on {
+  transform: scale(1) translateY(0);
+  opacity: 1; pointer-events: auto;
+}
+.sym-btn {
+  background: rgba(255,255,255,.18); border: none;
+  border-radius: 8px; padding: 7px 11px;
+  color: #fff; font-size: 1rem; cursor: pointer;
+  font-family: var(--font);
+  transition: background .15s;
+  touch-action: auto;
+}
+.sym-btn:active { background: rgba(255,255,255,.35); }
+
+/* ── Clock + Graph wrap ── */
+#clock-graph-wrap {
+  position: relative;
+  width: 70vmin; height: 70vmin;
+  margin-bottom: 44px;
+  flex-shrink: 0;
+}
+
+/* ── Analog clock ── */
+#analog-clock {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  box-shadow: inset 1px -.8px .5px rgba(255,255,255,.64),
+              inset -1.8px 1.5px 1px rgba(255,255,255,.55);
+  display: flex; justify-content: center; align-items: center;
+  transition: opacity .5s ease;
+}
+#analog-clock::after {
+  content: ''; position: absolute;
+  width: 8px; height: 8px;
+  background: #fff; border-radius: 50%; z-index: 10;
+}
+
+/* Timer arc + knob (SVG overlay) */
+#timer-svg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  overflow: visible;
+  z-index: 22; pointer-events: none;
+}
+#timer-arc { pointer-events: none; }
+#timer-knob-circle {
+  pointer-events: all; cursor: grab;
+  transition: r .15s ease;
+}
+#timer-knob-circle:active { cursor: grabbing; }
+
+.hand {
+  position: absolute; bottom: 50%; left: 50%;
+  transform-origin: 50% 100%; translate: -50% 0; border-radius: 10px;
+}
+.hour   { width: 8px;  height: 22%; background: rgba(255,255,255,.5);  z-index: 3; }
+.minute { width: 5px;  height: 35%; background: rgba(255,255,255,.72); z-index: 4; }
+.second { width: 2px;  height: 40%; background: rgba(255,255,255,.5);  z-index: 5;
+          transition: transform .2s cubic-bezier(.1,2.7,.58,1); }
+
+/* ── Graph panel (slides up over clock) ── */
+#graph-panel {
+  position: absolute; inset: 0;
+  border-radius: 50%; overflow: hidden;
+  transform: translateY(10%) scale(0.8);
+  opacity: 0;
+  transition: transform .4s cubic-bezier(.4,0,.6,1), opacity .35s ease;
+  z-index: 20;
+  background: rgba(2, 6, 30, 0.25);
+  backdrop-filter: blur(4px) saturate(1.2);
+  -webkit-backdrop-filter: blur(4px) saturate(1.2);
+  box-shadow: inset 0 0 40px rgba(100,120,255,.15);
+}
+#graph-panel.visible {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  transition: transform .6s cubic-bezier(.15,1.2,.35,1), opacity .4s ease;
+}
+#graph-panel canvas {
+  width: 100%; height: 100%; display: block; cursor: pointer;
+}
+
+/* Graph scale indicator */
+#graph-scale-ind {
+  position: fixed; top: 120px; left: 50%; transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.204); color: #fff; padding: 6px 16px;
+  border-radius: 20px; font-size: .85rem; z-index: 600;
+  opacity: 0; pointer-events: none;
+  backdrop-filter: blur(6px);
+  transition: opacity .4s ease;
+  white-space: nowrap;
+}
+#graph-scale-ind.show { opacity: 1; }
+
+/* ── Digital clock ── */
+#digital-display { text-align: center; position: relative; overflow: hidden; }
+#digital-clock {
+  display: flex; align-items: center;
+  height: var(--dh); cursor: ns-resize;
+}
+/* Translation overlay — slides up over the entire clock */
+#xl-overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; font-weight: 300; letter-spacing: .04em;
+  font-family: var(--font); color: rgba(255,255,255,.92);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform .5s cubic-bezier(.22,1,.36,1), opacity .4s ease;
+}
+#xl-overlay.show {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+#xl-overlay.hiding {
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform .45s cubic-bezier(.55,0,.67,.5), opacity .35s ease;
+}
+/* Fade out entire clock when translation is shown */
+#digital-clock { transition: opacity .4s ease; }
+#digital-clock.hide-clock { opacity: 0; }
+.dzone { display: flex; align-items: center; gap: var(--dgap); cursor: ns-resize; }
+.drum-wrap {
+  display: inline-block; position: relative;
+  width: 3.2em; height: var(--dh);
+  perspective: 500px; perspective-origin: 50% 50%; overflow: hidden;
+}
+.drum-list {
+  width: 100%; height: 100%; position: relative;
+  transform-style: preserve-3d; -webkit-transform-style: preserve-3d; will-change: transform;
+}
+.drum-item {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--dfs); font-weight: 200; letter-spacing: -.025em; font-family: var(--font);
+  backface-visibility: hidden; -webkit-backface-visibility: hidden; color: #fff;
+}
+.drum-wrap::before,.drum-wrap::after {
+  content: ''; position: absolute; left: 0; right: 0; z-index: 2;
+  pointer-events: none; height: 34%;
+}
+.drum-wrap::before { top: 0;    background: none; }
+.drum-wrap::after  { bottom: 0; background: none; }
+.sep {
+  font-size: var(--dfs); font-weight: 200; letter-spacing: -.025em; font-family: var(--font);
+  width: 0.24em; display: flex; align-items: center; justify-content: center; opacity: .75;
+}
+
+/* ── Alarm picker ── */
+#alarm-ov {
+  position: fixed; inset: 0; z-index: 500;
+  display: flex; align-items: flex-end; justify-content: center;
+  pointer-events: none; opacity: 0;
+  backdrop-filter: blur(0px) brightness(1);
+  -webkit-backdrop-filter: blur(0px) brightness(1);
+  background: rgba(0, 0, 0, 0.025);
+  transition: opacity .5s ease, backdrop-filter .5s ease, background .5s ease;
+  padding-bottom: max(env(safe-area-inset-bottom,0px),16px);
+}
+#alarm-ov.on {
+  opacity: 1; pointer-events: all;
+  backdrop-filter: blur(32px) brightness(.7);
+  -webkit-backdrop-filter: blur(32px) brightness(.7);
+  background: rgba(0,0,0,.28);
+}
+#alarm-sheet {
+  width: min(92vw,420px);
+  background: rgba(255, 255, 255, 0); border: 1px solid rgba(255,255,255,.22);
+  border-radius: 24px 24px 18px 18px; margin-bottom: 12px; padding: 22px 18px 18px;
+  backdrop-filter: blur(50px) saturate(1.4); -webkit-backdrop-filter: blur(50px) saturate(1.4);
+  transform: translateY(70px); opacity: 0;
+  transition: transform .46s cubic-bezier(.15,1.3,.4,1) .05s, opacity .36s ease .05s;
+}
+#alarm-ov.on #alarm-sheet { transform: translateY(0); opacity: 1; }
+#alarm-sheet-title {
+  margin: 0 0 16px; font-size: .8rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .24em; opacity: .7;
+  text-align: center; font-family: var(--font); color: #fff;
+}
+#alarm-list {
+  display: flex; flex-direction: column; gap: 7px;
+  max-height: 220px; overflow-y: auto; scrollbar-width: none;
+}
+#alarm-list::-webkit-scrollbar { display: none; }
+.alarm-item {
+  display: flex; align-items: center; gap: 11px; padding: 11px 13px;
+  background: rgba(255,255,255,.09); border-radius: 13px; cursor: pointer;
+  transition: background .18s, border-color .18s;
+  border: 1.5px solid transparent; font-family: var(--font); color: #fff;
+}
+.alarm-item.selected { border-color: rgba(255, 255, 255, 0.024); background: rgba(255,255,255,.17); }
+.alarm-item:active   { background: rgba(255, 255, 255, 0); }
+.alarm-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: rgba(255, 255, 255, 0); transition: background .2s; }
+.alarm-item.selected .alarm-dot { background: #ffffff00; }
+.alarm-name { flex: 1; font-size: .9rem; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.alarm-preview {
+  font-size: .72rem; opacity: .5; flex-shrink: 0;
+  padding: 3px 8px; background: rgba(255,255,255,.1); border-radius: 6px;
+}
+.alarm-preview:active { opacity: .9; background: rgba(255,255,255,.2); }
+.alarm-empty { text-align: center; opacity: .45; font-size: .88rem; padding: 18px 0; font-style: italic; font-family: var(--font); color: #fff; }
+#alarm-add-btn {
+  margin-top: 11px; width: 100%; padding: 12px;
+  background: rgba(255,255,255,.1); border: 1.5px dashed rgba(255,255,255,.3);
+  border-radius: 13px; color: rgba(255,255,255,.85); font-family: var(--font);
+  font-size: .88rem; letter-spacing: .06em; cursor: pointer; -webkit-appearance: none;
+}
+#alarm-add-btn:active { background: rgba(255,255,255,.2); }
+#alarm-close-btn {
+  margin-top: 9px; width: 100%; padding: 10px;
+  background: transparent; border: none; color: rgba(255,255,255,.52);
+  font-family: var(--font); font-size: .82rem; letter-spacing: .14em;
+  cursor: pointer; text-transform: uppercase; -webkit-appearance: none;
+}
+#alarm-file-inp { display: none; }
+</style>
+</head>
+<body id="main-body">
+
+<div id="bg-a" class="bg-layer"></div>
+<div id="bg-b" class="bg-layer"></div>
+<div id="bg-blur"></div>
+
+<div id="end-ov"><div id="end-txt">タイマー終了</div></div>
+
+<div id="alarm-ov">
+  <div id="alarm-sheet">
+    <div id="alarm-sheet-title">アラーム音</div>
+    <div id="alarm-list"><div class="alarm-empty">.m4r ファイルを追加してください</div></div>
+    <button id="alarm-add-btn">＋　.m4r ファイルを追加</button>
+    <input id="alarm-file-inp" type="file" accept=".m4r,.m4a,audio/*" multiple>
+    <button id="alarm-close-btn">閉じる</button>
+  </div>
+</div>
+
+<div id="graph-scale-ind">Scale: 1.0×</div>
+
+<!-- Clock + Graph combined area -->
+<div id="clock-graph-wrap">
+  <div id="analog-clock">
+    <svg id="timer-svg" viewBox="0 0 200 200">
+      <defs>
+        <radialGradient id="knob-glass" cx="40%" cy="35%" r="60%">
+          <stop offset="0%" stop-color="rgba(255,255,255,.1)"/>
+          <stop offset="100%" stop-color="rgba(255,255,255,.01)"/>
+        </radialGradient>
+      </defs>
+      <circle id="timer-arc" cx="100" cy="100" r="96"
+              fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1"
+              stroke-dasharray="0 9999" stroke-linecap="round"
+              transform="rotate(-90 100 100)"/>
+      <circle id="timer-knob-circle" cx="100" cy="4" r="10"
+              fill="url(#knob-glass)"
+              stroke="rgba(255,255,255,.7)" stroke-width=".1"
+              style="filter: drop-shadow(0 .5px .3px rgba(255,255,255,.5)) drop-shadow(0 -.5px .5px rgba(0,0,0,.2))"/>
+    </svg>
+    <div class="hand hour"   id="hour-hand"></div>
+    <div class="hand minute" id="minute-hand"></div>
+    <div class="hand second" id="second-hand"></div>
+  </div>
+  <!-- Graph panel slides up over the clock -->
+  <div id="graph-panel">
+    <canvas id="graph-canvas"></canvas>
+  </div>
+</div>
+
+<!-- Digital display -->
+<div id="digital-display">
+  <div id="digital-clock"></div>
+  <div id="xl-overlay"></div>
+</div>
+
+<!-- Input area (below digital) -->
+<div id="input-area">
+  <div id="result-disp"></div>
+  <div id="inp-row">
+    <input id="mode-inp" type="text" autocomplete="off" autocorrect="off"
+           autocapitalize="off" spellcheck="false" inputmode="text"
+           placeholder="計算と翻訳">
+    <button id="sym-toggle-btn">→</button>
+  </div>
+  <div id="sym-flyout">
+    <button class="sym-btn" data-s="Σ">Σ</button>
+    <button class="sym-btn" data-s="√">√</button>
+    <button class="sym-btn" data-s="π">π</button>
+    <button class="sym-btn" data-s="^2">x²</button>
+    <button class="sym-btn" data-s="!">!</button>
+  </div>
+</div>
+
+<!-- ios-haptics -->
+<script type="module">
+try {
+  const { haptic } = await import('https://cdn.jsdelivr.net/npm/ios-haptics/+esm');
+  window.__hc = () => haptic.confirm();
+  window.__hl = () => haptic.light();
+  window.__hs = () => haptic.selection();
+} catch(_) {}
+</script>
+
+<script>
+(function(){
+"use strict";
+
+/* ── Haptics ── */
+function hConfirm(){ if(window.__hc){window.__hc();return;} if(navigator.vibrate)navigator.vibrate([10,4,10]); }
+function hLight()  { if(window.__hl){window.__hl();return;} if(navigator.vibrate)navigator.vibrate(8); }
+function hSel()    { if(window.__hs){window.__hs();return;} if(navigator.vibrate)navigator.vibrate(5); }
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function getJST(){
+  const n=new Date();
+  return new Date(n.toLocaleString('en-US',{timeZone:'Asia/Tokyo'}));
+}
+
+/* ═══════════════════════════════════
+   DRUM DIGIT
+═══════════════════════════════════ */
+const DH=90, DR=Math.round(90*5/Math.PI), DEG=36;
+
+class Drum {
+  constructor(){
+    this.prev=null; this.ang=0;
+    this.wrap=document.createElement('div'); this.wrap.className='drum-wrap';
+    this.list=document.createElement('div'); this.list.className='drum-list';
+    this.wrap.appendChild(this.list);
+    for(let i=0;i<10;i++){
+      const el=document.createElement('div');
+      el.className='drum-item'; el.textContent=String(i);
+      el.style.transform=`rotateX(${i*DEG}deg) translateZ(${DR}px)`;
+      this.list.appendChild(el);
+    }
+  }
+  set(v,anim=true){
+    const n=parseInt(v,10);
+    if(this.prev===null){
+      this.ang=-n*DEG;
+      this.list.style.transition='none';
+      this.list.style.transform=`rotateX(${this.ang}deg)`;
+      this.prev=n; return;
+    }
+    if(n===this.prev&&anim)return;
+    let d=n-this.prev;
+    if(d>5)d-=10; else if(d<-5)d+=10;
+    this.ang-=d*DEG;
+    this.list.style.transition=anim?'transform .44s cubic-bezier(.14,1.4,.46,1)':'none';
+    this.list.style.transform=`rotateX(${this.ang}deg)`;
+    this.prev=n;
+  }
+}
+
+/* Build digital clock */
+const clockEl=document.getElementById('digital-clock');
+const drums=[];
+['zh','zm','zs'].forEach((zid,zi)=>{
+  if(zi>0){ const s=document.createElement('div');s.className='sep';s.textContent=':';clockEl.appendChild(s); }
+  const zone=document.createElement('div');zone.className='dzone';zone.id=zid;
+  const d1=new Drum(),d2=new Drum();
+  drums.push(d1,d2);
+  zone.appendChild(d1.wrap);zone.appendChild(d2.wrap);
+  clockEl.appendChild(zone);
+});
+
+/* ═══════════════════════════════════
+   RESULT DISPLAY
+═══════════════════════════════════ */
+const rdEl=document.getElementById('result-disp');
+const xlOv=document.getElementById('xl-overlay');
+let xlDismissTm=null;
+
+function showResult(txt,type='math'){
+  if(type==='translate'){
+    // Hide math result if showing
+    rdEl.className=''; rdEl.textContent='';
+    // Hide seconds, show translation overlay
+    clockEl.classList.add('hide-clock');
+    xlOv.textContent=txt;
+    xlOv.classList.remove('hiding');
+    xlOv.classList.add('show');
+    // Auto-dismiss after 18s
+    clearTimeout(xlDismissTm);
+    xlDismissTm=setTimeout(dismissTranslation,18000);
+  } else {
+    // Math: use the old result-disp above input
+    dismissTranslation();
+    rdEl.textContent=txt;
+    rdEl.className='show math-result';
+  }
+}
+function dismissTranslation(){
+  if(xlOv.classList.contains('show')){
+    xlOv.classList.remove('show');
+    xlOv.classList.add('hiding');
+    setTimeout(()=>{
+      xlOv.classList.remove('hiding');
+      clockEl.classList.remove('hide-clock');
+    },500);
+  }
+  clearTimeout(xlDismissTm);
+}
+function clearResult(){
+  rdEl.className='';
+  rdEl.textContent='';
+  dismissTranslation();
+}
+
+// Double-tap / dblclick on translation overlay to dismiss
+let xlTapTime=0;
+xlOv.addEventListener('touchend',()=>{
+  const now=Date.now();
+  if(now-xlTapTime<320){dismissTranslation();xlTapTime=0;}
+  else xlTapTime=now;
+},{passive:true});
+xlOv.addEventListener('dblclick',()=>dismissTranslation());
+
+/* ═══════════════════════════════════
+   MATH
+═══════════════════════════════════ */
+const mathParser=math.parser();
+try{ mathParser.evaluate('sigma(v,s,e,expr)=sum(expr,v,s,e)'); }catch(_){}
+
+function preprocessMath(str){
+  let s=str.trim();
+  s=s.replace(/[０-９＊＋－]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).replace(/ー/g,'-');
+  s=s.replace(/・/g,'*');
+  s=s.replace(/²/g,'^2').replace(/³/g,'^3');
+  s=s.replace(/√\s*\(([^)]+)\)/g,'sqrt($1)').replace(/√(\w+)/g,'sqrt($1)');
+  s=s.replace(/π/g,'pi');
+  s=s.replace(/Σ\((.+)=(.+),(.+),(.+)\)/g,'sigma($1,$2,$3,$4)');
+  s=s.replace(/(\d)([a-zA-Z(])/g,'$1*$2');
+  s=s.replace(/\)([\d(a-zA-Z])/g,')*$1');
+  return s;
+}
+
+function factorial(n){ if(n<0||n>170)return NaN;let r=1;for(let i=2;i<=n;i++)r*=i;return r; }
+const NUM_FMT=v=>parseFloat(v.toPrecision(12)).toLocaleString('ja',{maximumFractionDigits:12});
+function tryMath(raw){
+  let s=raw.trim();
+  if(/^[Cc]$/.test(s))return '__CLEAR__';
+  // √ shorthand
+  s=s.replace(/ルート\s*/g,'√').replace(/sqrt\s*/gi,'√');
+  const sqm=s.match(/^√\(?([\d.]+)\)?$/);
+  if(sqm)return `√${sqm[1]} = ${NUM_FMT(Math.sqrt(parseFloat(sqm[1])))}`;
+  const fam=s.match(/^(\d+)!$/);
+  if(fam)return `${fam[1]}! = ${NUM_FMT(factorial(parseInt(fam[1])))}`;
+  // General safe expression
+  const safe=s.replace(/[^0-9+\-*\/().%\s]/g,'');
+  if(safe&&/[0-9]/.test(safe)&&/[+\-*\/]/.test(safe)){
+    try{const r=Function('"use strict";return('+safe+')')();if(typeof r==='number'&&isFinite(r))return`= ${NUM_FMT(r)}`;}catch(_){}
+  }
+  // mathjs extended
+  const pm=preprocessMath(raw);
+  if(!/^[y=]/.test(pm)){
+    try{
+      const r=mathParser.evaluate(pm);
+      if(r!==undefined&&typeof r!=='function'&&typeof r!=='object'){
+        return`= ${math.format(r,{precision:10})}`;
+      }
+    }catch(_){}
+  }
+  return null;
+}
+
+/* ═══════════════════════════════════
+   TRANSLATION
+═══════════════════════════════════ */
+let xlTm=null;
+async function translate(txt){
+  clearTimeout(xlTm);
+  xlTm=setTimeout(async()=>{
+    const isJP=/[\u3040-\u30FF\u4E00-\u9FFF]/.test(txt);
+    const tl=isJP?'en':'ja';
+    try{
+      const res=await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${tl}&dt=t&q=${encodeURIComponent(txt)}`);
+      const data=await res.json();
+      const out=data[0].map(x=>x[0]).join('');
+      if(out&&out!==txt)showResult(out,'translate');
+    }catch(_){
+      // fallback mymemory
+      try{
+        const res=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(txt)}&langpair=${isJP?'ja|en':'en|ja'}`);
+        const data=await res.json();
+        const out=data.responseData?.translatedText;
+        if(out)showResult(out,'translate');
+      }catch(_){}
+    }
+  },500);
+}
+
+/* ═══════════════════════════════════
+   GRAPH ENGINE  (slides over analog clock)
+═══════════════════════════════════ */
+const graphPanel=document.getElementById('graph-panel');
+const graphCanvas=document.getElementById('graph-canvas');
+const graphCtx=graphCanvas.getContext('2d');
+const graphScaleInd=document.getElementById('graph-scale-ind');
+let gScale=60, gPoints=[], gGradient=false, gGrid=false, gGridAlpha=0;
+let gAnimId=null, gGridAnimId=null;
+let graphShown=false;
+let scaleIndTm=null;
+
+function getGraphSize(){
+  const w=document.getElementById('clock-graph-wrap');
+  return w.offsetWidth;
+}
+
+function buildGradient(w){
+  const g=graphCtx.createLinearGradient(0,0,w,0);
+  g.addColorStop(0,'#ff2d55');
+  g.addColorStop(0.4,'#7b61ff');
+  g.addColorStop(1,'#00e5ff');
+  return g;
+}
+
+function renderGraphStatic(){
+  const dpr=window.devicePixelRatio||1;
+  const sz=getGraphSize();
+  graphCanvas.width=sz*dpr;
+  graphCanvas.height=sz*dpr;
+  const w=graphCanvas.width,h=graphCanvas.height;
+  const gc=graphCtx;
+  gc.clearRect(0,0,w,h);
+
+  // Subtle glass tint
+  gc.fillStyle='rgba(2,8,40,0.55)';
+  gc.fillRect(0,0,w,h);
+
+  // Grid
+  if(gGridAlpha>0){
+    const sc=gScale*dpr;
+    gc.strokeStyle=`rgba(255,255,255,${0.1*gGridAlpha})`;
+    gc.lineWidth=dpr;
+    for(let i=1;(w/2)+i*sc<w;i++){
+      gc.beginPath();gc.moveTo(w/2+i*sc,0);gc.lineTo(w/2+i*sc,h);gc.stroke();
+      gc.beginPath();gc.moveTo(w/2-i*sc,0);gc.lineTo(w/2-i*sc,h);gc.stroke();
+    }
+    for(let i=1;(h/2)+i*sc<h;i++){
+      gc.beginPath();gc.moveTo(0,h/2+i*sc);gc.lineTo(w,h/2+i*sc);gc.stroke();
+      gc.beginPath();gc.moveTo(0,h/2-i*sc);gc.lineTo(w,h/2-i*sc);gc.stroke();
+    }
+  }
+
+  // Axes
+  gc.strokeStyle='rgba(255,255,255,0.35)';
+  gc.lineWidth=1.5*dpr;
+  gc.beginPath();gc.moveTo(w/2,0);gc.lineTo(w/2,h);gc.stroke();
+  gc.beginPath();gc.moveTo(0,h/2);gc.lineTo(w,h/2);gc.stroke();
+
+  // Curve
+  if(gPoints.length>0){
+    gc.lineWidth=2.5*dpr; gc.lineCap='round'; gc.lineJoin='round';
+    gc.strokeStyle=gGradient?buildGradient(w):'#7c4dff';
+    gc.beginPath();
+    let first=true;
+    for(const p of gPoints){
+      if(Math.abs(p.py)>h*2){first=true;continue;}
+      if(first){gc.moveTo(p.px,p.py);first=false;}
+      else gc.lineTo(p.px,p.py);
+    }
+    gc.stroke();
+  }
+}
+
+function computeGraphPoints(formulaStr){
+  const dpr=window.devicePixelRatio||1;
+  const sz=getGraphSize();
+  const w=sz*dpr, h=sz*dpr;
+  const sc=gScale*dpr;
+  const expr=formulaStr.includes('=')?formulaStr.split('=')[1]:formulaStr;
+  if(!expr.trim())return [];
+  try{
+    const node=math.parse(expr);
+    const code=node.compile();
+    const pts=[];
+    for(let px=0;px<=w;px+=2){
+      const x=(px-w/2)/sc;
+      const y=code.evaluate({x});
+      if(Number.isFinite(y))pts.push({px,py:h/2-y*sc});
+    }
+    return pts;
+  }catch(_){return [];}
+}
+
+function animateGraphDraw(formulaStr){
+  cancelAnimationFrame(gAnimId);
+  const dpr=window.devicePixelRatio||1;
+  const sz=getGraphSize();
+  const w=sz*dpr,h=sz*dpr;
+  const sc=gScale*dpr;
+  const target=computeGraphPoints(formulaStr);
+  if(!target.length){gPoints=[];renderGraphStatic();return;}
+  const from=gPoints.length===target.length?gPoints:target.map(p=>({...p,py:h/2}));
+  const t0=performance.now();
+  const dur=400;
+  function frame(now){
+    const prog=Math.min((now-t0)/dur,1);
+    const ease=1-Math.pow(1-prog,3);
+    graphCanvas.width=w; graphCanvas.height=h;
+    const animated=target.map((p,i)=>({px:p.px,py:from[i].py+(p.py-from[i].py)*ease}));
+    gPoints=animated;
+    renderGraphStatic();
+    if(prog<1){gAnimId=requestAnimationFrame(frame);}
+    else gPoints=target;
+  }
+  gAnimId=requestAnimationFrame(frame);
+}
+
+function showGraph(formulaStr){
+  graphShown=true;
+  graphPanel.classList.add('visible');
+  document.getElementById('analog-clock').style.opacity='0';
+  animateGraphDraw(formulaStr);
+  hConfirm();
+}
+
+function hideGraph(){
+  graphShown=false;
+  cancelAnimationFrame(gAnimId);
+  graphPanel.classList.remove('visible');
+  document.getElementById('analog-clock').style.opacity='1';
+  gPoints=[];
+  hLight();
+}
+
+// Graph tap → toggle grid
+graphPanel.addEventListener('click',e=>{
+  gGrid=!gGrid;
+  cancelAnimationFrame(gGridAnimId);
+  const t0=performance.now();
+  const from=gGridAlpha, to=gGrid?1:0;
+  function animGrid(now){
+    const p=Math.min((now-t0)/400,1);
+    gGridAlpha=from+(to-from)*p;
+    renderGraphStatic();
+    if(p<1)gGridAnimId=requestAnimationFrame(animGrid);
+  }
+  gGridAnimId=requestAnimationFrame(animGrid);
+  hLight();
+});
+
+// Double-tap on graph → toggle gradient
+let gDblTm=0;
+graphPanel.addEventListener('touchend',e=>{
+  const now=Date.now();
+  if(now-gDblTm<320){gGradient=!gGradient;renderGraphStatic();hConfirm();}
+  gDblTm=now;
+});
+
+// Pinch to zoom graph
+let pinchDist0=null, pinchScale0=gScale;
+function getDist(e){ const a=e.touches[0],b=e.touches[1];return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY); }
+graphPanel.addEventListener('touchstart',e=>{
+  if(e.touches.length===2){e.preventDefault();pinchDist0=getDist(e);pinchScale0=gScale;}
+},{passive:false});
+graphPanel.addEventListener('touchmove',e=>{
+  if(e.touches.length===2&&pinchDist0){
+    e.preventDefault();
+    gScale=Math.max(10,Math.min(800,pinchScale0*(getDist(e)/pinchDist0)));
+    showScaleIndicator();
+    if(lastGraphFormula)animateGraphDraw(lastGraphFormula);
+  }
+},{passive:false});
+graphPanel.addEventListener('touchend',()=>{if(event.touches.length<2)pinchDist0=null;});
+graphPanel.addEventListener('wheel',e=>{
+  e.preventDefault();
+  gScale=Math.max(10,Math.min(800,gScale*(e.deltaY<0?1.1:0.9)));
+  showScaleIndicator();
+  if(lastGraphFormula)animateGraphDraw(lastGraphFormula);
+},{passive:false});
+
+function showScaleIndicator(){
+  graphScaleInd.textContent=`Scale: ${(gScale/60).toFixed(1)}×`;
+  graphScaleInd.classList.add('show');
+  clearTimeout(scaleIndTm);
+  scaleIndTm=setTimeout(()=>graphScaleInd.classList.remove('show'),1600);
+}
+
+/* ═══════════════════════════════════
+   INPUT HANDLER
+═══════════════════════════════════ */
+const minp=document.getElementById('mode-inp');
+let lastGraphFormula='';
+let xlThrottle=null;
+let inpDebounce=null;
+
+function isGraphInput(s){
+  const lower=s.toLowerCase().trim();
+  return lower.startsWith('y=')||lower.startsWith('x=');
+}
+
+function isTranslationInput(s){
+  const jp=/[\u3040-\u30FF\u4E00-\u9FFF]/.test(s);
+  const en=(s.match(/[a-zA-Z]/g)||[]).length>=3;
+  const hasOp=/[+\-*\/!√^Σ]/.test(s)||/sigma|sqrt/i.test(s);
+  return !hasOp&&(jp||(en&&(s.match(/[a-zA-Z]/g)||[]).length>=(s.length*0.6)));
+}
+
+function handleInput(){
+  const raw=minp.value.trim();
+
+  if(!raw){
+    clearResult();
+    if(graphShown)hideGraph();
+    return;
+  }
+
+  // Graph: y= or Y=
+  if(isGraphInput(raw)){
+    const pm=preprocessMath(raw);
+    lastGraphFormula=pm;
+    if(!graphShown)showGraph(pm);
+    else animateGraphDraw(pm);
+    clearResult();
+    return;
+  }
+
+  // If graph was showing and input no longer y=, hide it
+  if(graphShown)hideGraph();
+
+  // Math
+  const hasMath=/[+\-*\/!√^]/.test(raw)||/sqrt|ルート|sigma|Σ/i.test(raw)||/^\d+!$/.test(raw)||/^[Cc]$/.test(raw);
+  if(hasMath){
+    const r=tryMath(raw);
+    if(r==='__CLEAR__'){minp.value='';clearResult();return;}
+    if(r){showResult(r,'math');hSel();return;}
+  }
+  // Also try mathjs preprocessed
+  const pm2=preprocessMath(raw);
+  try{
+    const r=mathParser.evaluate(pm2);
+    if(r!==undefined&&typeof r!=='function'&&typeof r!=='object'){
+      showResult(`= ${math.format(r,{precision:10})}`,'math');
+      hSel(); return;
+    }
+  }catch(_){}
+
+  // Translation
+  const jp=/[\u3040-\u30FF\u4E00-\u9FFF]/.test(raw);
+  const enLen=(raw.match(/[a-zA-Z]/g)||[]).length;
+  if(jp||(enLen>=3)){
+    clearTimeout(xlThrottle);
+    xlThrottle=setTimeout(()=>translate(raw),500);
+  } else {
+    // Not translation text anymore — dismiss if showing
+    dismissTranslation();
+  }
+}
+
+minp.addEventListener('input',()=>{
+  clearTimeout(inpDebounce);
+  inpDebounce=setTimeout(handleInput,200);
+});
+minp.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){clearTimeout(inpDebounce);handleInput();}
+  if(e.key==='Escape'){minp.value='';clearResult();if(graphShown)hideGraph();minp.blur();}
+});
+minp.addEventListener('touchstart',e=>e.stopPropagation(),{passive:true});
+minp.addEventListener('mousedown', e=>e.stopPropagation());
+
+// Symbol flyout
+const symFlyout=document.getElementById('sym-flyout');
+document.getElementById('sym-toggle-btn').addEventListener('click',e=>{
+  e.stopPropagation();
+  symFlyout.classList.toggle('on');
+});
+symFlyout.addEventListener('click',e=>{
+  if(!e.target.classList.contains('sym-btn'))return;
+  const s=e.target.dataset.s;
+  const pos=minp.selectionStart||minp.value.length;
+  const insert=s==='Σ'?'Σ(i=1,10,i)':s;
+  minp.value=minp.value.slice(0,pos)+insert+minp.value.slice(pos);
+  minp.focus();
+  minp.dispatchEvent(new Event('input',{bubbles:true}));
+  symFlyout.classList.remove('on');
+});
+document.getElementById('main-body').addEventListener('click',()=>symFlyout.classList.remove('on'),{passive:true});
+
+/* ═══════════════════════════════════
+   BACKGROUND  (time-of-day)
+═══════════════════════════════════ */
+const BG_SEQ=[1,2,3,4,5,4,3,2,1]; const BG_STEP=72;
+const bgA=document.getElementById('bg-a');
+const bgB=document.getElementById('bg-b');
+const bgBlur=document.getElementById('bg-blur');
+let actBg=bgA,inaBg=bgB,curBgI=-1,bgBusy=false;
+
+function calcBgI(){
+  const jst=getJST();const mins=jst.getHours()*60+jst.getMinutes();
+  return Math.floor(mins/BG_STEP)%BG_SEQ.length;
+}
+function loadBg(idx,cb){
+  const img=new Image();img.onload=()=>cb(true,idx);img.onerror=()=>cb(false,idx);
+  img.src=`${BG_SEQ[idx]}.jpg`;
+}
+function initBg(){
+  const i=calcBgI();
+  loadBg(i,(ok,idx)=>{
+    if(ok){
+      actBg.style.backgroundImage=`url('${BG_SEQ[idx]}.jpg')`;
+      actBg.style.backgroundSize='cover';
+      actBg.style.backgroundPosition='center';
+    }
+    curBgI=idx;
+  });
+}
+async function switchBg(idx){
+  if(bgBusy)return;bgBusy=true;
+  loadBg(idx,async(ok)=>{
+    if(!ok){curBgI=idx;bgBusy=false;return;}
+    inaBg.style.transition='none';inaBg.style.opacity='0';
+    inaBg.style.backgroundImage=`url('${BG_SEQ[idx]}.jpg')`;
+    inaBg.style.backgroundSize='cover';
+    inaBg.style.backgroundPosition='center';
+    bgBlur.classList.add('on');await sleep(250);
+    inaBg.style.transition='opacity .5s ease';inaBg.style.opacity='1';
+    actBg.style.transition='opacity .5s ease';actBg.style.opacity='0';
+    await sleep(550);
+    bgBlur.classList.remove('on');[actBg,inaBg]=[inaBg,actBg];curBgI=idx;bgBusy=false;
+  });
+}
+function checkBg(){const i=calcBgI();if(i!==curBgI)switchBg(i);}
+initBg();setInterval(checkBg,30000);
+
+/* ═══════════════════════════════════
+   RENDER
+═══════════════════════════════════ */
+function renderDisplay(h,m,s){
+  const str=`${String(h).padStart(2,'0')}${String(m).padStart(2,'0')}${String(s).padStart(2,'0')}`;
+  drums.forEach((d,i)=>d.set(str[i]));
+}
+
+/* ═══════════════════════════════════
+   SYSTEM CLOCK
+═══════════════════════════════════ */
+function updateClock(){
+  const jst=getJST();
+  const hr=jst.getHours(),mn=jst.getMinutes(),sc=jst.getSeconds();
+  document.getElementById('hour-hand').style.transform  =`rotate(${hr%12*30+mn/2}deg)`;
+  document.getElementById('minute-hand').style.transform=`rotate(${mn*6+sc/10}deg)`;
+  document.getElementById('second-hand').style.transform=`rotate(${sc*6}deg)`;
+  if(!timerActive||peekActive)renderDisplay(hr,mn,sc);
+}
+
+/* ═══════════════════════════════════
+   ALARM SOUND
+═══════════════════════════════════ */
+let alarmFiles=[],selectedAlarmIdx=-1,alarmAudio=null;
+function _playAudio(url){
+  if(alarmAudio){alarmAudio.pause();alarmAudio.currentTime=0;}
+  alarmAudio=new Audio(url);alarmAudio.loop=false;alarmAudio.play().catch(()=>{});
+}
+function playAlarm(){if(selectedAlarmIdx>=0&&alarmFiles[selectedAlarmIdx])_playAudio(alarmFiles[selectedAlarmIdx].url);}
+function stopAlarm(){if(alarmAudio){alarmAudio.pause();alarmAudio.currentTime=0;}}
+function previewAlarm(idx){if(alarmFiles[idx])_playAudio(alarmFiles[idx].url);}
+
+const alarmOv=document.getElementById('alarm-ov');
+const alarmList=document.getElementById('alarm-list');
+const alarmCloseBtn=document.getElementById('alarm-close-btn');
+
+function renderAlarmList(){
+  if(!alarmFiles.length){alarmList.innerHTML='<div class="alarm-empty">.m4r ファイルを追加してください</div>';return;}
+  alarmList.innerHTML='';
+  alarmFiles.forEach((af,idx)=>{
+    const item=document.createElement('div');
+    item.className='alarm-item'+(idx===selectedAlarmIdx?' selected':'');
+    item.innerHTML=`<div class="alarm-dot"></div><div class="alarm-name">${af.name}</div><div class="alarm-preview">▶</div>`;
+    item.addEventListener('click',e=>{
+      if(e.target.classList.contains('alarm-preview'))return;
+      selectedAlarmIdx=idx;hConfirm();renderAlarmList();
+    });
+    item.querySelector('.alarm-preview').addEventListener('click',e=>{e.stopPropagation();hLight();previewAlarm(idx);});
+    alarmList.appendChild(item);
+  });
+}
+function openAlarmPicker(){hLight();renderAlarmList();alarmOv.classList.add('on');}
+function closeAlarmPicker(){stopAlarm();alarmOv.classList.remove('on');hLight();}
+alarmCloseBtn.addEventListener('click',closeAlarmPicker);
+alarmOv.addEventListener('click',e=>{if(e.target===alarmOv)closeAlarmPicker();});
+document.getElementById('alarm-add-btn').addEventListener('click',()=>document.getElementById('alarm-file-inp').click());
+document.getElementById('alarm-file-inp').addEventListener('change',e=>{
+  Array.from(e.target.files).forEach(f=>{
+    alarmFiles.push({name:f.name.replace(/\.[^.]+$/,''),url:URL.createObjectURL(f)});
+    if(selectedAlarmIdx<0)selectedAlarmIdx=0;
+  });
+  e.target.value='';renderAlarmList();hConfirm();
+});
+
+/* ═══════════════════════════════════
+   TIMER END SOUND (platform-specific)
+   macOS → macOS-timer.mp3, others → time.mp3
+═══════════════════════════════════ */
+const _isMacOS=/Macintosh|Mac OS X/.test(navigator.userAgent)&&!/iPhone|iPad|iPod/.test(navigator.userAgent);
+const _timerSoundFile=_isMacOS?'macOS-timer.mp3':'time.mp3';
+let _timerEndAudio=null;
+function playTimerEndSound(){
+  if(_timerEndAudio){_timerEndAudio.pause();_timerEndAudio.currentTime=0;}
+  _timerEndAudio=new Audio(_timerSoundFile);
+  _timerEndAudio.loop=false;
+  _timerEndAudio.play().catch(()=>{});
+}
+function stopTimerEndSound(){
+  if(_timerEndAudio){_timerEndAudio.pause();_timerEndAudio.currentTime=0;}
+}
+
+/* ═══════════════════════════════════
+   TIMER STATE
+═══════════════════════════════════ */
+let timerActive=false,peekActive=false;
+let timerSecs=0,timerIv=null,peekTm=null;
+let knobGraceEnd=0;
+const END_MSGS=['タイマー終了'];
+let endOvTm=null;
+
+function tH(){return Math.floor(timerSecs/3600);}
+function tM(){return Math.floor((timerSecs%3600)/60);}
+function tS(){return timerSecs%60;}
+function renderTimer(){renderDisplay(tH(),tM(),tS());}
+
+function showEndAnim(){
+  if(Date.now()<knobGraceEnd)return;
+  hConfirm();playTimerEndSound();
+  const ov=document.getElementById('end-ov');
+  const txt=document.getElementById('end-txt');
+  txt.textContent=END_MSGS[0];
+  ov.classList.add('on');
+  function dismiss(e){
+    e.stopPropagation();hConfirm();stopTimerEndSound();
+    ov.classList.remove('on');ov.removeEventListener('click',dismiss);clearTimeout(endOvTm);
+  }
+  ov.addEventListener('click',dismiss);
+  clearTimeout(endOvTm);
+  endOvTm=setTimeout(()=>{stopTimerEndSound();ov.classList.remove('on');ov.removeEventListener('click',dismiss);},5000);
+}
+
+const TIMER_MAX=3540; // 59 minutes in seconds
+
+function startTimer(totalSecs){
+  timerSecs=Math.max(1,Math.min(TIMER_MAX,Math.round(totalSecs)));
+  timerActive=true;
+  renderTimer();syncKnob();
+  clearInterval(timerIv);
+  timerIv=setInterval(()=>{
+    if(!timerActive||peekActive)return;
+    if(timerSecs>0){
+      timerSecs--;renderTimer();syncKnob();
+    } else {
+      stopTimer();showEndAnim();
+    }
+  },1000);
+}
+function stopTimer(){
+  timerActive=false;peekActive=false;
+  clearInterval(timerIv);clearTimeout(peekTm);
+  timerSecs=0;syncKnob();
+  updateClock();
+}
+
+/* ═══════════════════════════════════
+   SVG KNOB — timer dial on analog clock
+   SVG elements have correct hit-testing even after transform.
+   The knob sits on a circle r=96 inside a 200×200 viewBox.
+   0 min = 12-o'clock (top), 59 min = just before 12.
+═══════════════════════════════════ */
+const timerArc=document.getElementById('timer-arc');
+const knobEl=document.getElementById('timer-knob-circle');
+const timerSvg=document.getElementById('timer-svg');
+const ARC_R=96, ARC_CX=100, ARC_CY=100;
+const ARC_CIRC=2*Math.PI*ARC_R; // full circumference
+
+function syncKnob(){
+  if(knobDragging)return; // smooth position handled by onKnobMove
+  const mins=tM(), secs=tS();
+  const frac=(mins*60+secs)/3600; // fraction of 60 min
+  const deg=frac*360;
+  const rad=deg*Math.PI/180;
+  // Position knob on the circle
+  knobEl.setAttribute('cx', ARC_CX + ARC_R * Math.sin(rad));
+  knobEl.setAttribute('cy', ARC_CY - ARC_R * Math.cos(rad));
+  // Arc length
+  const arcLen=frac*ARC_CIRC;
+  timerArc.setAttribute('stroke-dasharray', arcLen+' '+ARC_CIRC);
+}
+
+let knobDragging=false;
+
+function svgAngleFromEvent(e){
+  const rect=timerSvg.getBoundingClientRect();
+  const pt=e.touches?e.touches[0]:e;
+  // Map screen coords to viewBox coords (200×200)
+  const sx=(pt.clientX-rect.left)/rect.width*200;
+  const sy=(pt.clientY-rect.top)/rect.height*200;
+  // Angle from center, 0=top, clockwise
+  return ((Math.atan2(sx-ARC_CX, ARC_CY-sy)*180/Math.PI)+360)%360;
+}
+
+function knobFromAngle(ang){
+  let mins=Math.round(ang/6);
+  if(mins>=60)mins=0;
+  return mins;
+}
+
+let knobLastDragMins=-1;
+
+function onKnobMove(e){
+  if(!knobDragging)return;
+  if(e.cancelable)e.preventDefault();
+  const ang=svgAngleFromEvent(e);
+
+  // Smooth: position knob at exact pointer angle (not snapped)
+  const rad=ang*Math.PI/180;
+  knobEl.setAttribute('cx', ARC_CX + ARC_R * Math.sin(rad));
+  knobEl.setAttribute('cy', ARC_CY - ARC_R * Math.cos(rad));
+  // Also update arc to match visual position
+  const frac=ang/360;
+  timerArc.setAttribute('stroke-dasharray', (frac*ARC_CIRC)+' '+ARC_CIRC);
+
+  // Snap timer value to whole minutes
+  const mins=knobFromAngle(ang);
+  if(mins===knobLastDragMins)return;
+  knobLastDragMins=mins;
+
+  if(mins===0){
+    if(timerActive)stopTimer();
+    hSel();
+    return;
+  }
+  const totalSecs=mins*60;
+  if(!timerActive){
+    startTimer(totalSecs);
+  } else {
+    timerSecs=totalSecs;
+    renderTimer();
+  }
+  hSel();
+}
+
+function onKnobDown(e){
+  knobDragging=true;
+  knobGraceEnd=Date.now()+2000;
+  knobEl.setAttribute('r','12');
+  if(e.cancelable)e.preventDefault();
+  e.stopPropagation();
+}
+function onKnobUp(){
+  if(!knobDragging)return;
+  knobDragging=false;
+  knobLastDragMins=-1;
+  knobEl.setAttribute('r','10');
+  // Snap knob to exact minute position on release
+  syncKnob();
+}
+
+knobEl.addEventListener('mousedown',onKnobDown);
+knobEl.addEventListener('touchstart',onKnobDown,{passive:false});
+document.addEventListener('mousemove',onKnobMove);
+document.addEventListener('touchmove',onKnobMove,{passive:false});
+document.addEventListener('mouseup',onKnobUp);
+document.addEventListener('touchend',onKnobUp);
+document.addEventListener('touchcancel',onKnobUp);
+
+/* ═══════════════════════════════════
+   WHEEL on digital clock (59 min max)
+═══════════════════════════════════ */
+let wThrottle=false;
+clockEl.addEventListener('wheel',e=>{
+  e.preventDefault();
+  if(wThrottle)return;wThrottle=true;setTimeout(()=>wThrottle=false,70);
+  const dir=e.deltaY<0?1:-1;
+  const rect=clockEl.getBoundingClientRect();
+  const rx=e.clientX-rect.left;const w3=rect.width/3;
+  // Left 1/3 = minutes, Middle 1/3 = minutes, Right 1/3 = seconds
+  const delta=dir*(rx>=2*w3?1:60);
+  timerSecs=Math.max(0,Math.min(TIMER_MAX,timerSecs+delta));
+  if(timerSecs>0&&!timerActive)startTimer(timerSecs);
+  else if(timerActive){renderTimer();syncKnob();}
+  else{syncKnob();updateClock();}
+  hSel();
+},{passive:false});
+
+/* ═══════════════════════════════════
+   SWIPE on digital display (59 min max)
+═══════════════════════════════════ */
+const dispEl=document.getElementById('digital-display');
+let swipeY0=null,swipeDone=false;
+
+function handleSwipe(dy){
+  swipeDone=true;setTimeout(()=>swipeDone=false,300);
+  const up=dy<0;
+  if(up){
+    if(!timerActive)startTimer(60);
+    else if(peekActive){peekActive=false;clearTimeout(peekTm);renderTimer();}
+    else{timerSecs=Math.min(TIMER_MAX,timerSecs+60);renderTimer();syncKnob();}
+  } else {
+    if(timerActive){
+      if(peekActive){peekActive=false;clearTimeout(peekTm);renderTimer();}
+      else{timerSecs=Math.max(0,timerSecs-60);if(timerSecs<=0)stopTimer();else{renderTimer();syncKnob();}}
+    }
+  }
+  hLight();
+}
+dispEl.addEventListener('touchstart',e=>{swipeY0=e.touches[0].clientY;},{passive:true});
+dispEl.addEventListener('touchend',e=>{
+  if(swipeY0===null)return;
+  const dy=e.changedTouches[0].clientY-swipeY0;swipeY0=null;
+  if(Math.abs(dy)>=26){handleSwipe(dy);e.preventDefault();}
+},{passive:false});
+dispEl.addEventListener('mousedown',e=>{swipeY0=e.clientY;swipeDone=false;});
+dispEl.addEventListener('mouseup',e=>{
+  if(swipeY0===null)return;
+  const dy=e.clientY-swipeY0;swipeY0=null;
+  if(Math.abs(dy)>=18)handleSwipe(dy);
+});
+
+/* ═══════════════════════════════════
+   DOUBLE-TAP → Alarm Picker
+═══════════════════════════════════ */
+let dtTime=0,dtZone=null;
+function fireDT(zone){
+  if(alarmOv.classList.contains('on'))return;
+  const now=Date.now();
+  if(now-dtTime<320&&dtZone===zone){openAlarmPicker();dtTime=0;dtZone=null;}
+  else{dtTime=now;dtZone=zone;}
+}
+document.getElementById('analog-clock').addEventListener('touchend',e=>{
+  fireDT('analog');
+},{passive:true});
+dispEl.addEventListener('touchend',e=>{
+  if(Math.abs((e.changedTouches[0]?.clientY||0)-(swipeY0||e.changedTouches[0]?.clientY||0))>=26)return;
+  fireDT('digital');
+},{passive:true});
+// Desktop dblclick
+document.getElementById('analog-clock').addEventListener('dblclick',e=>{
+  if('ontouchstart' in window)return;
+  openAlarmPicker();
+});
+dispEl.addEventListener('dblclick',e=>{
+  if('ontouchstart' in window)return;openAlarmPicker();
+});
+
+/* ═══════════════════════════════════
+   BODY CLICK → peek toggle
+═══════════════════════════════════ */
+document.getElementById('main-body').addEventListener('click',e=>{
+  if(swipeDone){swipeDone=false;return;}
+  if(knobDragging||e.target===minp)return;
+  if(alarmOv.classList.contains('on'))return;
+  hLight();
+  if(!timerActive)return;
+  if(!peekActive){
+    peekActive=true;updateClock();
+    clearTimeout(peekTm);peekTm=setTimeout(()=>{peekActive=false;},10000);
+  } else {
+    peekActive=false;clearTimeout(peekTm);renderTimer();
+  }
+},{passive:true});
+
+document.getElementById('analog-clock').addEventListener('click',e=>{
+  if(!alarmOv.classList.contains('on')&&!graphShown)hConfirm();
+},{passive:true});
+
+/* Resize: redraw graph */
+window.addEventListener('resize',()=>{
+  if(graphShown&&lastGraphFormula)animateGraphDraw(lastGraphFormula);
+});
+
+/* ═══════════════════════════════════
+   INIT
+═══════════════════════════════════ */
+setInterval(updateClock,1000);
+updateClock();
+syncKnob();
+
+})();
+</script>
+</body>
+</html>
