@@ -782,7 +782,7 @@ overflow:hidden;
 
 <!-- ══════════ DELETE SLIDER OVERLAY ══════════ -->
 <div id="del-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0);transition:background .4s;">
-  <div id="del-content" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:30dvh;opacity:0;transition:opacity .4s;">
+  <div id="del-content" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:20dvh;opacity:0;transition:opacity .4s;">
     <div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:20px;text-shadow:0 2px 10px #000b">⚠️ 全てのセーブデータが削除されます</div>
     <div id="del-slider-wrap" style="position:relative;width:310px;height:64px;">
       <div style="
@@ -806,7 +806,7 @@ overflow:hidden;
         <svg width="32" height="32" viewBox="0 0 32 32"><polyline points="12,8 20,16 12,24" fill="none" stroke="#ff3b30" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
-    <button id="btn-cancel-delete" style="margin-top:60px;width:52px;height:52px;background:rgba(255,255,255,.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:50%;font-size:24px;font-weight:300;cursor:pointer;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;box-shadow:1.1px 1px 0 rgba(255,255,255,.6),-1px -.8px 0 rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+    <button id="btn-cancel-delete" style="margin-top:auto;margin-bottom:calc(env(safe-area-inset-bottom,0px) + 50px);width:52px;height:52px;background:rgba(255,255,255,.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:50%;font-size:24px;font-weight:300;cursor:pointer;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;box-shadow:1.1px 1px 0 rgba(255,255,255,.6),-1px -.8px 0 rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
   </div>
 </div>
 
@@ -2173,7 +2173,9 @@ function springBack(states,onSettle){
   },550);
 }
 
+let _shakeListenerActive=false;
 async function startShakeListener(){
+  if(_shakeListenerActive)return; // Prevent duplicate listeners
   // iOS 13+ needs permission
   if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
     try{
@@ -2181,6 +2183,7 @@ async function startShakeListener(){
       if(perm!=='granted')return;
     }catch(e){return;}
   }
+  _shakeListenerActive=true;
   localStorage.setItem(SHAKE_KEY,'1');
   let lx=0,ly=0,lz=0,lastT=0;
   let peakForce=0,peakAx=0,peakAy=0;
@@ -2196,25 +2199,23 @@ async function startShakeListener(){
     const force=dx+dy+dz;
     lx=a.x;ly=a.y;lz=a.z;
 
-    if(force>15){
+    if(force>10){
       if(force>peakForce){peakForce=force;peakAx=a.x;peakAy=a.y;}
       clearTimeout(shakeTimeout);
       shakeTimeout=setTimeout(()=>{
         const homeEl=document.getElementById('home');
         const isHome=homeEl&&!homeEl.classList.contains('hidden');
+        console.log('[SHAKE] peak:',peakForce.toFixed(1),'isHome:',isHome);
         if(isHome){
-          // Home: medium shake → icon grid, heavy shake → physics drop
-          if(peakForce>55){onHeavyShake(peakAx,peakAy);}
-          else if(peakForce>25){
-            // Switch to icon grid on medium shake
+          if(peakForce>50){onHeavyShake(peakAx,peakAy);}
+          else if(peakForce>18){
             haptic.confirm();
             localStorage.setItem('inglish_layout','icon');
             showIconGrid();
           }
         }else{
-          // Card screen
-          if(peakForce>50){onHeavyShake(peakAx,peakAy);}
-          else if(peakForce>12){onLightShake();}
+          if(peakForce>45){onHeavyShake(peakAx,peakAy);}
+          else if(peakForce>10){onLightShake();}
         }
         peakForce=0;peakAx=0;peakAy=0;
       },200);
