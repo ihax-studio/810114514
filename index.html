@@ -771,35 +771,47 @@ overflow:hidden;
 
 <!-- ══════════ MEMO OVERLAY ══════════ -->
 <div id="memo-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(245,245,247,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.05,.64,1)">
-  <div style="display:flex;flex-direction:column;height:100%;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px env(safe-area-inset-bottom,0px)">
-    <div style="display:flex;align-items:center;margin-bottom:10px">
-      <button id="memo-back" style="font-size:14px;color:var(--b);background:none;border:none;cursor:pointer;font-family:inherit;padding:8px">← 戻る</button>
+  <div style="display:flex;flex-direction:column;height:100%;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 8px)">
+    <div style="display:flex;align-items:center;margin-bottom:8px">
+      <button id="memo-back" style="font-size:15px;color:var(--b);background:none;border:none;cursor:pointer;font-family:inherit;padding:8px 12px">← 戻る</button>
       <div style="flex:1;text-align:center;font-size:16px;font-weight:700">📝 メモ</div>
-      <button id="memo-translate" style="font-size:12px;color:var(--b);background:rgba(0,122,255,.1);border:1px solid rgba(0,122,255,.15);border-radius:55px;padding:6px 12px;cursor:pointer;font-family:inherit">翻訳</button>
+      <button id="memo-translate" style="font-size:12px;color:var(--b);background:rgba(0,122,255,.08);border:1px solid rgba(0,122,255,.12);border-radius:55px;padding:6px 14px;cursor:pointer;font-family:inherit">翻訳</button>
     </div>
-    <div id="memo-lock-banner" style="display:none;background:rgba(0,122,255,.08);border:1px solid rgba(0,122,255,.15);border-radius:12px;padding:12px;margin-bottom:10px;text-align:center">
-      <div style="font-size:13px;font-weight:600;color:var(--b)">🔒 メモはロックして使用できます</div>
-      <div style="font-size:11px;color:var(--sub);margin-top:4px">iOS/macOS/visionOSでFace ID・Touch IDと連携</div>
-      <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
-        <button id="memo-lock-later" style="padding:8px 16px;font-size:12px;background:rgba(0,0,0,.06);border:none;border-radius:55px;cursor:pointer;font-family:inherit;color:var(--sub)">今は使わない</button>
-        <button id="memo-lock-enable" style="padding:8px 16px;font-size:12px;background:var(--b);color:#fff;border:none;border-radius:55px;cursor:pointer;font-family:inherit;font-weight:600">使う</button>
+    <!-- Lock banner (first time) -->
+    <div id="memo-lock-banner" style="display:none;background:rgba(0,122,255,.06);border:1px solid rgba(0,122,255,.12);border-radius:14px;padding:14px;margin-bottom:10px;text-align:center">
+      <div style="font-size:28px;margin-bottom:6px">🔒</div>
+      <div style="font-size:14px;font-weight:600;color:#000;margin-bottom:4px">メモはロックして使用できます</div>
+      <div style="font-size:11px;color:rgba(0,0,0,.45);line-height:1.5;margin-bottom:12px">Face ID・Touch ID・Optic IDと連携すると<br>メモを安全にロックできます</div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button id="memo-lock-later" style="padding:10px 20px;font-size:13px;background:rgba(0,0,0,.05);border:none;border-radius:55px;cursor:pointer;font-family:inherit;color:var(--sub)">今は使わない</button>
+        <button id="memo-lock-enable" style="padding:10px 20px;font-size:13px;background:var(--b);color:#fff;border:none;border-radius:55px;cursor:pointer;font-family:inherit;font-weight:600">使う</button>
       </div>
     </div>
-    <textarea id="memo-text" style="flex:1;border:none;outline:none;background:transparent;font-family:inherit;font-size:15px;color:var(--tx);resize:none;padding:8px;line-height:1.8;-webkit-user-select:text;user-select:text" placeholder="ここにメモを書く..."></textarea>
-    <div id="memo-translation" style="display:none;background:rgba(255,255,255,.8);border-radius:12px;padding:10px;margin-top:8px;max-height:25dvh;overflow-y:auto">
+    <!-- Memo content (blurred when locked) -->
+    <div id="memo-content-area" style="flex:1;display:flex;flex-direction:column;min-height:0;position:relative">
+      <textarea id="memo-text" style="flex:1;border:none;outline:none;background:rgba(255,255,255,.5);border-radius:14px;font-family:inherit;font-size:15px;color:var(--tx);resize:none;padding:14px;line-height:1.8;-webkit-user-select:text;user-select:text;transition:filter .5s ease" placeholder="ここにメモを書く..."></textarea>
+      <!-- Lock overlay (shown when locked) -->
+      <div id="memo-lock-overlay" style="display:none;position:absolute;inset:0;background:rgba(255,255,255,.4);backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);border-radius:14px;display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;transition:backdrop-filter .5s ease,-webkit-backdrop-filter .5s ease">
+        <div style="font-size:40px">🔒</div>
+        <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,.6)">タップでロック解除</div>
+      </div>
+    </div>
+    <!-- Translation result -->
+    <div id="memo-translation" style="display:none;background:rgba(255,255,255,.7);border-radius:14px;padding:12px;margin-top:8px;max-height:20dvh;overflow-y:auto">
       <div style="font-size:10px;font-weight:700;color:var(--sub);margin-bottom:4px">翻訳結果</div>
       <div id="memo-tr-result" style="font-size:13px;color:var(--tx);line-height:1.6"></div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 4px;flex-shrink:0">
-      <button id="memo-lock-btn" style="font-size:20px;background:none;border:none;cursor:pointer;padding:4px">🔒</button>
-      <button id="memo-delete-btn" style="font-size:20px;background:none;border:none;cursor:pointer;padding:4px">🗑️</button>
+    <!-- Bottom bar -->
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 4px 0;flex-shrink:0">
+      <button id="memo-lock-btn" style="font-size:22px;background:none;border:none;cursor:pointer;padding:6px">🔓</button>
+      <button id="memo-delete-btn" style="font-size:22px;background:none;border:none;cursor:pointer;padding:6px">🗑️</button>
     </div>
   </div>
 </div>
 
 <!-- ══════════ IFRAME APP OVERLAY ══════════ -->
 <div id="iframe-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:#fff;transition:transform .4s ease">
-  <button id="iframe-back" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:10;width:36px;height:36px;border-radius:55px;background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--b);box-shadow:0 2px 8px rgba(0,0,0,.1)">←</button>
+  <button id="iframe-back" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:10;width:42px;height:42px;border-radius:55px;background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--b);box-shadow:0 2px 8px rgba(0,0,0,.1)">←</button>
   <iframe id="iframe-content" style="position:absolute;inset:0;width:100%;height:100%;border:none" sandbox="allow-scripts allow-same-origin"></iframe>
 </div>
 
@@ -865,7 +877,7 @@ overflow:hidden;
 
 <!-- ══════════ DELETE SLIDER OVERLAY ══════════ -->
 <div id="del-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0);transition:background .4s;">
-  <div id="del-content" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:20dvh;opacity:0;transition:opacity .4s;">
+  <div id="del-content" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:15dvh;opacity:0;transition:opacity .4s;">
     <div id="del-slider-wrap" style="position:relative;width:310px;height:64px;">
       <div style="
         position:absolute;inset:0;border-radius:36px;
@@ -1919,78 +1931,112 @@ function restoreHomeFromGrid(){
 /* ═══ MEMO ═══ */
 const MEMO_KEY='inglish_memo';
 const MEMO_LOCK_KEY='inglish_memo_locked';
+let memoLocked=localStorage.getItem(MEMO_LOCK_KEY)==='1';
+
+function updateMemoLockUI(){
+  const ta=document.getElementById('memo-text');
+  const lockOv=document.getElementById('memo-lock-overlay');
+  const lockBtn=document.getElementById('memo-lock-btn');
+  if(memoLocked){
+    ta.style.filter='blur(12px)';ta.style.pointerEvents='none';
+    lockOv.style.display='flex';
+    requestAnimationFrame(()=>{lockOv.style.backdropFilter='blur(12px)';lockOv.style.webkitBackdropFilter='blur(12px)';});
+    lockBtn.textContent='🔒';
+  }else{
+    ta.style.filter='';ta.style.pointerEvents='';
+    lockOv.style.backdropFilter='blur(0)';lockOv.style.webkitBackdropFilter='blur(0)';
+    setTimeout(()=>{lockOv.style.display='none';},500);
+    lockBtn.textContent='🔓';
+  }
+}
 
 function openMemo(){
   const ov=document.getElementById('memo-overlay');
   ov.style.display='flex';
   requestAnimationFrame(()=>{ov.style.transform='translateY(0)';});
-  // Load saved memo
-  const saved=localStorage.getItem(MEMO_KEY)||'';
-  document.getElementById('memo-text').value=saved;
+  document.getElementById('memo-text').value=localStorage.getItem(MEMO_KEY)||'';
   document.getElementById('memo-translation').style.display='none';
-  // Show lock banner on first open if not dismissed
   if(!localStorage.getItem('inglish_memo_lock_dismissed')){
     document.getElementById('memo-lock-banner').style.display='block';
   }
+  updateMemoLockUI();
 }
 function closeMemo(){
+  if(!memoLocked)localStorage.setItem(MEMO_KEY,document.getElementById('memo-text').value);
   const ov=document.getElementById('memo-overlay');
-  // Save before closing
-  localStorage.setItem(MEMO_KEY,document.getElementById('memo-text').value);
   ov.style.transform='translateY(100%)';
   setTimeout(()=>{ov.style.display='none';},400);
 }
 document.getElementById('memo-back').addEventListener('click',()=>{haptic();closeMemo();});
-// Auto-save on input
 document.getElementById('memo-text').addEventListener('input',()=>{
-  localStorage.setItem(MEMO_KEY,document.getElementById('memo-text').value);
+  if(!memoLocked)localStorage.setItem(MEMO_KEY,document.getElementById('memo-text').value);
 });
-// Lock banner buttons
 document.getElementById('memo-lock-later').addEventListener('click',()=>{
-  haptic();
-  localStorage.setItem('inglish_memo_lock_dismissed','1');
+  haptic();localStorage.setItem('inglish_memo_lock_dismissed','1');
   document.getElementById('memo-lock-banner').style.display='none';
 });
 document.getElementById('memo-lock-enable').addEventListener('click',()=>{
   haptic.confirm();
-  localStorage.setItem(MEMO_LOCK_KEY,'1');
   localStorage.setItem('inglish_memo_lock_dismissed','1');
   document.getElementById('memo-lock-banner').style.display='none';
 });
-// Lock button toggle
-document.getElementById('memo-lock-btn').addEventListener('click',()=>{
+// Lock/unlock toggle with WebAuthn (Face ID/Touch ID)
+document.getElementById('memo-lock-btn').addEventListener('click',async()=>{
   haptic();
-  const locked=localStorage.getItem(MEMO_LOCK_KEY)==='1';
-  localStorage.setItem(MEMO_LOCK_KEY,locked?'0':'1');
-  document.getElementById('memo-lock-btn').textContent=locked?'🔓':'🔒';
+  if(!memoLocked){
+    // Lock: just blur
+    memoLocked=true;localStorage.setItem(MEMO_LOCK_KEY,'1');
+    updateMemoLockUI();
+    haptic.confirm();
+  }else{
+    // Unlock: require biometric
+    await unlockMemoWithBiometric();
+  }
 });
-// Delete memo
+// Tap lock overlay to unlock
+document.getElementById('memo-lock-overlay').addEventListener('click',async()=>{
+  haptic();await unlockMemoWithBiometric();
+});
+async function unlockMemoWithBiometric(){
+  try{
+    const challenge=new Uint8Array(32);crypto.getRandomValues(challenge);
+    const userId=new Uint8Array(16);crypto.getRandomValues(userId);
+    await navigator.credentials.create({publicKey:{
+      challenge,rp:{name:'iN glish Memo'},
+      user:{id:userId,name:'user@inglish',displayName:'User'},
+      pubKeyCredParams:[{type:'public-key',alg:-7}],
+      authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},
+      timeout:60000
+    }});
+    haptic.confirm();
+    memoLocked=false;localStorage.setItem(MEMO_LOCK_KEY,'0');
+    updateMemoLockUI();
+  }catch(e){
+    haptic.error();console.log('Auth failed:',e);
+  }
+}
+// Delete
 document.getElementById('memo-delete-btn').addEventListener('click',()=>{
   haptic();
   if(confirm('全て削除しますか？😔')){
     localStorage.removeItem(MEMO_KEY);
-    document.getElementById('memo-text').value='';
-    haptic.confirm();
+    document.getElementById('memo-text').value='';haptic.confirm();
   }
 });
-// Translate button
+// Translate
 document.getElementById('memo-translate').addEventListener('click',async()=>{
   haptic();
   const text=document.getElementById('memo-text').value.trim();
   if(!text)return;
   const isJa=/[\u3041-\u3093\u30A1-\u30F6\u4E00-\u9FFF]/.test(text);
-  const sl=isJa?'ja':'en';
-  const tl=isJa?'en':'ja';
+  const sl=isJa?'ja':'en';const tl=isJa?'en':'ja';
   const trDiv=document.getElementById('memo-translation');
   const trResult=document.getElementById('memo-tr-result');
-  trDiv.style.display='block';
-  trResult.textContent='翻訳中...';
+  trDiv.style.display='block';trResult.textContent='翻訳中...';
   try{
     const url='https://translate.googleapis.com/translate_a/single?client=gtx&sl='+sl+'&tl='+tl+'&dt=t&q='+encodeURIComponent(text);
-    const res=await fetch(url);
-    const data=await res.json();
-    const translated=data[0].map(s=>s[0]).join('');
-    trResult.textContent=translated;
+    const res=await fetch(url);const data=await res.json();
+    trResult.textContent=data[0].map(s=>s[0]).join('');
   }catch(e){trResult.textContent='翻訳エラー';}
 });
 
@@ -3041,11 +3087,11 @@ function showIconGrid(){
   const bigMode=localStorage.getItem('inglish_bigicon')==='1';
   const iconSize=bigMode?66:56;
   const fontSize=bigMode?28:24;
-  const gap=bigMode?'18px 6px':'20px 8px';
+  const gap=bigMode?'22px 6px':'24px 8px';
   
   const grid=document.createElement('div');
   grid.id='icon-grid';
-  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:'+gap+';padding:12px 10px;justify-items:center;';
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:'+gap+';padding:24px 10px 16px;justify-items:center;';
   
   const cards=[...document.querySelectorAll('.hcard')];
   const allIcons=[];
