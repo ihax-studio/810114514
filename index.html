@@ -2118,6 +2118,14 @@ function hideLockScreen(){
     knob.addEventListener('click',e=>{e.stopPropagation();doUnlock();});
   }
 
+  // Enter key to unlock
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){
+      const ls=document.getElementById('lockscreen');
+      if(ls&&ls.style.display!=='none'&&ls.offsetParent!==null)doUnlock();
+    }
+  });
+
   knob.addEventListener('touchstart',e=>{dragging=true;startX=e.touches[0].clientX-knobLeft;knob.style.transition='none';},{passive:true});
   document.addEventListener('touchmove',e=>{
     if(!dragging)return;
