@@ -2081,6 +2081,23 @@ document.getElementById('memo-translate').addEventListener('click',async()=>{
   }catch(e){trResult.textContent='翻訳エラー';}
 });
 
+/* ═══ KEYBOARD SHORTCUTS (PC) ═══ */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    // Close any open overlay, or go home
+    const iframe=document.getElementById('iframe-overlay');
+    if(iframe&&iframe.style.visibility==='visible'){
+      document.getElementById('iframe-back').click();return;
+    }
+    const settings=document.getElementById('settings-overlay');
+    if(settings&&settings.style.display!=='none'&&settings.style.display!==''){
+      closeSettings();return;
+    }
+    const home=document.getElementById('home');
+    if(home&&home.classList.contains('hidden')){goHome();return;}
+  }
+});
+
 /* ═══ CRASH RECOVERY ═══ */
 // Save app state periodically for crash recovery
 setInterval(()=>{
@@ -2182,10 +2199,14 @@ function closeSettings(){
   }
   setTimeout(()=>{
     document.getElementById('settings-overlay').style.display='none';
-    // Reset card styles
-    card.style.position='';card.style.margin='';card.style.maxWidth='';
-    card.style.maxHeight='';card.style.borderRadius='';card.style.bottom='';
-    card.style.opacity='';card.style.width='';card.style.transition='';
+    if(_isWideScreen){
+      // Reset iPad/Mac specific styles
+      card.style.position='';card.style.margin='';card.style.maxWidth='';
+      card.style.maxHeight='';card.style.borderRadius='';card.style.bottom='';
+      card.style.opacity='';card.style.width='';
+    }
+    // Always reset transition but keep transform for iPhone reopen
+    card.style.transition='transform .4s cubic-bezier(.34,1.05,.64,1)';
     if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
     else restoreHomeFromGrid();
   },400);
@@ -2209,7 +2230,7 @@ function updateHeavyVisibility(){
 }
 
 document.getElementById('settings-close').addEventListener('click',()=>{haptic();closeSettings();});
-document.getElementById('settings-overlay').addEventListener('click',e=>{if(e.target.id==='settings-overlay')closeSettings();});
+document.getElementById('settings-overlay').addEventListener('click',e=>{if(e.target.id==='settings-overlay'){haptic();closeSettings();}});
 // Layout
 document.getElementById('s-layout-icon').addEventListener('click',()=>{
   haptic.confirm();localStorage.setItem('inglish_layout','icon');
