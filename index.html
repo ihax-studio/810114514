@@ -416,6 +416,7 @@ overflow-y:auto;padding:0 18px 20px;
 transform:translateY(30px) scale(.95);opacity:0;
 transition:transform .3s cubic-bezier(.34,1.05,.64,1),opacity .2s;
 -webkit-overflow-scrolling:touch;scrollbar-width:none;
+margin-bottom:4px;
 }
 #tr-card::-webkit-scrollbar{display:none}
 #tr-overlay.on #tr-card{transform:translateY(0) scale(1);opacity:1}
@@ -512,6 +513,31 @@ padding:2px 6px;
 display:inline-block;width:6px;height:6px;border-radius:50%;
 background:var(–r);margin-left:4px;vertical-align:middle;
 }
+/* ═══ STAR FAVORITES ═══ */
+.star-btn{
+position:absolute;top:12px;right:14px;
+font-size:22px;cursor:pointer;z-index:5;
+-webkit-user-select:none;user-select:none;
+transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+filter:drop-shadow(0 1px 2px rgba(0,0,0,.1));
+}
+.star-btn.pop{animation:starPop .3s ease}
+@keyframes starPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
+.star-tr{
+font-size:18px;cursor:pointer;flex-shrink:0;
+-webkit-user-select:none;user-select:none;
+transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+margin-left:auto;padding:4px;
+}
+.star-tr.pop{animation:starPop .3s ease}
+.star-input-btn{
+width:40px;height:40px;border-radius:50%;
+display:flex;align-items:center;justify-content:center;
+font-size:20px;cursor:pointer;flex-shrink:0;
+background:rgba(255,200,0,.1);border:1.5px solid rgba(255,200,0,.3);
+transition:transform .12s;-webkit-user-select:none;user-select:none;
+}
+.star-input-btn:active{transform:scale(.84)}
 </style>
 
 </head>
@@ -618,6 +644,7 @@ background:var(–r);margin-left:4px;vertical-align:middle;
 
 <div id="tr-bar">
   <div class="ti-wrap">
+    <div class="star-input-btn" id="btn-star-list">⭐</div>
     <textarea id="ti" placeholder="Type to here..." rows="1"></textarea>
     <div id="flag-row">
       <div id="flag-active"></div>
@@ -1267,7 +1294,8 @@ CFG.forEach((c,i)=>{
 </div>
 <div class="ca"><div class="fw" id="fw${i}">
   <div class="fc" id="fc${i}">
-    <div class="ff">
+    <div class="ff" style="position:relative">
+      <div class="star-btn" id="star${i}" data-deck="${i}">☆</div>
       <div class="fmeta"><span class="lv ${c.lv}" id="lv${i}">${c.lvT}</span><span class="fcat" id="ca${i}"></span></div>
       <div class="fword" id="wd${i}"></div>
       <div class="fpron" id="pr${i}"></div>
@@ -1405,6 +1433,9 @@ function render(i){
   // Update shuffle button text
   const sfBtn=document.getElementById('sfb'+i);
   if(sfBtn)sfBtn.textContent=d.shuffled?'📋':'🔀';
+
+  // Update star
+  updateCardStar(i);
 }
 
 /* ═══ CONTROLS ═══ */
@@ -1795,9 +1826,27 @@ trCard.innerHTML='<div class="tr-handle"></div><div style="text-align:center;pad
 const gResult=await googleTranslate(text,sl,tl);
 const local=localLookup(text);
 let html='';
-if(gResult){html+=`<div class="tr-item"><div class="tr-dir">${dirLabel}</div><div class="tr-txt">${gResult}</div><div class="tr-badge">Google Translate</div></div>`;}
+const inputText=text.trim();
+if(gResult){
+  const starState=isStarred(inputText)?'★':'☆';
+  html+=`<div class="tr-item" style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1"><div class="tr-dir">${dirLabel}</div><div class="tr-txt">${gResult}</div><div class="tr-badge">Google Translate</div></div><span class="star-tr" data-word="${inputText.replace(/"/g,'&quot;')}" data-meaning="${gResult.replace(/"/g,'&quot;')}">${starState}</span></div>`;
+}
 else{html+='<div style="color:var(--sub);text-align:center;font-size:12px;padding:10px">\u7FFB\u8A33\u7D50\u679C\u304C\u3042\u308A\u307E\u305B\u3093\u3067\u3057\u305F</div>';}
-if(local){html+='<div class="tr-bonus-hdr">\uD83D\uDCD6 \u53CE\u9332\u5358\u8A9E\u304B\u3089</div>';html+=local.map(l=>`<div class="tr-item"><div class="tr-local">${l}</div></div>`).join('');}
+if(local){
+  html+='<div class="tr-bonus-hdr">\uD83D\uDCD6 \u53CE\u9332\u5358\u8A9E\u304B\u3089</div>';
+  html+=local.map(l=>{
+    // Extract the word from the local result for forgot/star
+    const m=l.match(/<b>([^<]+)<\/b>/);
+    const w=m?m[1]:'';
+    const wEsc=w.replace(/"/g,'&quot;');
+    const mText=l.replace(/<[^>]+>/g,'').trim();
+    const isForgotten=isForgot(w,0);
+    const forgotBtn=w?`<button class="tr-forgot-btn" data-word="${wEsc}" data-meaning="${mText}" style="font-size:9px;padding:2px 8px;border:1px solid rgba(255,59,48,.2);background:rgba(255,59,48,.08);color:#c0001a;border-radius:8px;cursor:pointer;font-family:inherit;margin-left:6px">${isForgotten?'✓追加済み':'😰忘れた'}</button>`:'';
+    const starState2=isStarred(w)?'★':'☆';
+    const starBtn=w?`<span class="star-tr" data-word="${wEsc}" data-meaning="${mText}" style="font-size:16px">${starState2}</span>`:'';
+    return `<div class="tr-item"><div class="tr-local" style="display:flex;align-items:center;gap:4px"><div style="flex:1">${l}</div>${starBtn}${forgotBtn}</div></div>`;
+  }).join('');
+}
 trCard.innerHTML='<div class="tr-handle"></div>'+html;haptic.confirm();
 }
 
@@ -1926,8 +1975,88 @@ function updateHomeBadges(){
 }
 updateHomeBadges();
 
+/* ═══ STAR FAVORITES CACHE ═══ */
+const STAR_KEY='inglish_star_cache';
+function loadStars(){try{return JSON.parse(localStorage.getItem(STAR_KEY))||{};}catch(_){return {};}}
+function saveStars(s){try{localStorage.setItem(STAR_KEY,JSON.stringify(s));}catch(_){}}
+let starCache=loadStars();
+function isStarred(word){return !!starCache[word];}
+function toggleStar(word,meaning){
+  if(starCache[word]){delete starCache[word];}
+  else{starCache[word]={m:meaning,t:Date.now()};}
+  saveStars(starCache);
+}
+// Update star icon on current card
+function updateCardStar(i){
+  const d=DK[i];if(d.idx>=d.deck.length)return;
+  const w=d.deck[d.idx];
+  const el=document.getElementById('star'+i);
+  if(el)el.textContent=isStarred(w.e||w.w)?'★':'☆';
+}
+
+/* ═══ STAR FAVORITES LIST ═══ */
+function buildStarList(){
+  starCache=loadStars();
+  const items=Object.entries(starCache).sort((a,b)=>b[1].t-a[1].t);
+  if(!items.length)return '<div style="color:var(--sub);text-align:center;font-size:13px;padding:40px 20px">⭐ お気に入りはまだありません<br><br><span style="font-size:11px">単語カードの☆をタップして追加</span></div>';
+  let html=`<div class="sh">⭐ お気に入り ${items.length}語</div>`;
+  items.forEach(([word,data])=>{
+    const enText=word.replace(/"/g,'&quot;');
+    html+=`<div class="li ans-row" data-en="${enText}" style="position:relative"><div class="lw">${word}</div><div class="lm">${data.m||''}</div><div style="display:flex;justify-content:flex-end;margin-top:4px"><button class="ch star-remove-btn" data-word="${enText}" style="font-size:9px;padding:3px 8px;color:var(--r)">★ 削除</button></div></div>`;
+  });
+  return html;
+}
+
 /* ═══ TAP-TO-SPEAK DELEGATION ═══ */
 document.addEventListener('click',e=>{
+  // Handle .star-btn (card star toggle)
+  const star=e.target.closest('.star-btn');
+  if(star){
+    e.stopPropagation();
+    const i=parseInt(star.dataset.deck,10);
+    const d=DK[i];if(d.idx>=d.deck.length)return;
+    const w=d.deck[d.idx];
+    toggleStar(w.e||w.w, w.j||w.m||'');
+    haptic.confirm();
+    star.textContent=isStarred(w.e||w.w)?'★':'☆';
+    star.classList.remove('pop');void star.offsetWidth;star.classList.add('pop');
+    return;
+  }
+  // Handle .star-tr (translation result star toggle)
+  const starTr=e.target.closest('.star-tr');
+  if(starTr){
+    e.stopPropagation();
+    const word=starTr.dataset.word;
+    const meaning=starTr.dataset.meaning||'';
+    toggleStar(word,meaning);
+    haptic.confirm();
+    starTr.textContent=isStarred(word)?'★':'☆';
+    starTr.classList.remove('pop');void starTr.offsetWidth;starTr.classList.add('pop');
+    return;
+  }
+  // Handle .star-remove-btn (remove from star list)
+  const starRm=e.target.closest('.star-remove-btn');
+  if(starRm){
+    e.stopPropagation();
+    const word=starRm.dataset.word;
+    if(starCache[word]){delete starCache[word];saveStars(starCache);}
+    haptic.confirm();
+    const li=starRm.closest('.li');
+    if(li){li.style.transition='opacity .25s,transform .25s';li.style.opacity='0';li.style.transform='translateX(60px)';setTimeout(()=>li.remove(),260);}
+    return;
+  }
+  // Handle .tr-forgot-btn (add to forgot from translation local result)
+  const trForgot=e.target.closest('.tr-forgot-btn');
+  if(trForgot){
+    e.stopPropagation();
+    const word=trForgot.dataset.word;
+    const meaning=trForgot.dataset.meaning||'';
+    markForgot(word,meaning,0);
+    haptic.error();
+    trForgot.textContent='✓追加済み';trForgot.style.color='var(--sub)';trForgot.style.pointerEvents='none';
+    updateHomeBadges();
+    return;
+  }
   // Handle .forgot-clear-btn (覚えた button in forgot list)
   const clr=e.target.closest('.forgot-clear-btn');
   if(clr){
@@ -1936,10 +2065,8 @@ document.addEventListener('click',e=>{
     const deckIdx=parseInt(clr.dataset.deck,10);
     unmarkForgot(word,deckIdx);
     haptic.confirm();
-    // Animate out
     const li=clr.closest('.li');
     if(li){li.style.transition='opacity .25s,transform .25s';li.style.opacity='0';li.style.transform='translateX(60px)';setTimeout(()=>li.remove(),260);}
-    // Update badge
     updateHomeBadges();
     return;
   }
@@ -1984,8 +2111,8 @@ document.addEventListener('click',e=>{
 
   function doDeleteAll(){
     haptic.error();haptic.error();haptic.error();
-    try{localStorage.removeItem(CACHE_KEY);}catch(_){}
-    fCache={};
+    try{localStorage.removeItem(CACHE_KEY);localStorage.removeItem(STAR_KEY);}catch(_){}
+    fCache={};starCache={};
     // Scale 1→1.2 zoom out effect then reload
     ov.style.background='rgba(0,0,0,1)';
     content.style.opacity='0';
@@ -2099,6 +2226,18 @@ window.openS=function(type,arg){
 };
 
 /* ═══ INIT ═══ */
+// Star list button
+document.getElementById('btn-star-list').addEventListener('click',()=>{
+  haptic.confirm();
+  document.getElementById('home').classList.add('hidden');
+  setTimeout(()=>document.getElementById('app').classList.add('vis'),30);
+  document.getElementById('app-dots').style.display='none';
+  document.getElementById('sw-wrap').style.display='none';
+  document.getElementById('list-wrap').style.display='flex';
+  document.getElementById('app-ttl').textContent='⭐ お気に入り';
+  document.getElementById('list-cnt').innerHTML=buildStarList();
+  document.getElementById('list-wrap').scrollTop=0;
+});
 // body animation handles splash — no separate element needed
 </script>
 
