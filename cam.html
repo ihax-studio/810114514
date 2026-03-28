@@ -13,251 +13,259 @@ window.hap.confirm=()=>{try{window.H.confirm();}catch(e){}};
 window.hap.error=()=>{try{window.H.error();}catch(e){}};
 </script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;touch-action:none}
 body{background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;overflow:hidden;height:100dvh;display:flex;flex-direction:column;-webkit-user-select:none;user-select:none}
-#viewfinder{flex:1;position:relative;overflow:hidden;background:#111}
-#viewfinder video{width:100%;height:100%;object-fit:cover}
-#controls{display:flex;align-items:center;justify-content:center;padding:20px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+20px);background:#000;gap:40px;flex-shrink:0}
-#shutter{width:72px;height:72px;border-radius:50%;background:#fff;border:4px solid rgba(255,255,255,.3);cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center}
+#vf{flex:1;position:relative;overflow:hidden;background:#111}
+video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .15s;z-index:5}
+#flash.on{opacity:.6;transition:opacity 0s}
+#ctrls{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+20px);background:#000;flex-shrink:0}
+.ctrl-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:opacity .3s,transform .15s}
+.ctrl-btn:active{transform:scale(.88)}
+.ctrl-btn.dim{opacity:.3;pointer-events:none}
+#shutter{width:72px;height:72px;border-radius:50%;background:transparent;border:4px solid rgba(255,255,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s}
 #shutter:active{transform:scale(.88)}
-#shutter .inner{width:60px;height:60px;border-radius:50%;background:#fff;transition:transform .15s}
-#switch-btn{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:opacity .3s}
-#switch-btn.disabled{opacity:.3;pointer-events:none}
-#thumb-btn{width:40px;height:40px;border-radius:8px;overflow:hidden;border:2px solid rgba(255,255,255,.4);cursor:pointer;background:#222}
-#thumb-btn img{width:100%;height:100%;object-fit:cover}
-/* Preview overlay */
-#preview{display:none;position:fixed;inset:0;z-index:100;background:#000;flex-direction:column}
-#preview.show{display:flex}
-#preview-img{flex:1;object-fit:contain;background:#000}
-#preview-bar{display:flex;align-items:center;justify-content:space-between;padding:16px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+16px);background:#000}
-#preview-bar button{background:none;border:none;color:#fff;font-size:15px;font-family:inherit;cursor:pointer;padding:10px 16px;border-radius:55px}
-#preview-bar .save-btn{background:rgba(0,122,255,.9);font-weight:600}
-/* Loupe */
-#loupe{display:none;position:absolute;width:120px;height:120px;border-radius:50%;border:2px solid rgba(255,255,255,.6);overflow:hidden;pointer-events:none;z-index:50;box-shadow:0 4px 20px rgba(0,0,0,.5)}
-#loupe canvas{width:100%;height:100%}
+#shutter .inn{width:58px;height:58px;border-radius:50%;background:#fff}
+/* Top bar */
+#top{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:flex-end;padding:calc(env(safe-area-inset-top,0px)+8px) 16px 8px;gap:10px}
+.top-btn{width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:none;color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:background .2s}
+.top-btn.active{background:rgba(255,204,0,.7);color:#000}
+/* Preview */
+#pv{position:fixed;inset:0;z-index:100;background:#000;display:none;flex-direction:column}
+#pv.show{display:flex}
+#pv-top{display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px)+8px) 16px 8px;background:rgba(0,0,0,.8);z-index:2}
+#pv-wrap{flex:1;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
+#pv-img{max-width:100%;max-height:100%;transition:filter .3s}
+#pv-bottom{display:flex;align-items:center;justify-content:center;padding:16px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+16px);background:rgba(0,0,0,.8);gap:12px}
+#pv-bottom button{background:none;border:none;color:#fff;font-size:14px;font-family:inherit;cursor:pointer;padding:10px 20px;border-radius:55px}
+#pv-bottom .save{background:rgba(0,122,255,.9);font-weight:600}
 /* Save dialog */
-#save-dlg{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);align-items:center;justify-content:center}
-#save-dlg.show{display:flex}
-#save-card{width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .3s ease,opacity .3s ease}
-#save-dlg.show #save-card{transform:scale(1);opacity:1}
+#sdlg{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);align-items:center;justify-content:center;transition:background .3s}
+#sdlg.show{display:flex}
+#scard{width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .3s ease,opacity .3s ease}
+#sdlg.show #scard{transform:scale(1);opacity:1}
+/* Camera select */
+#cam-sel{display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.5);align-items:flex-end;justify-content:center;padding-bottom:calc(env(safe-area-inset-bottom,0px)+20px)}
+#cam-sel.show{display:flex}
+#cam-list{width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:translateY(20px);opacity:0;transition:transform .3s ease,opacity .3s ease}
+#cam-sel.show #cam-list{transform:translateY(0);opacity:1}
+.cam-opt{padding:14px;font-size:16px;color:#007aff;border:none;background:none;width:100%;cursor:pointer;font-family:inherit;border-bottom:1px solid rgba(0,0,0,.1)}
+.cam-opt:last-child{border:none}
+.cam-opt.cancel{color:rgba(0,0,0,.4)}
 </style>
 </head>
 <body>
-<div id="viewfinder">
+
+<div id="vf">
   <video id="cam" autoplay playsinline muted></video>
-  <div id="loupe"><canvas id="loupe-canvas" width="240" height="240"></canvas></div>
-</div>
-<div id="controls">
-  <div id="thumb-btn" onclick="showLastPhoto()"><img id="thumb-img" src="" style="display:none"></div>
-  <div id="shutter" onclick="capture()"><div class="inner"></div></div>
-  <button id="switch-btn" onclick="switchCam()">↔︎</button>
-</div>
-
-<div id="preview">
-  <div style="display:flex;align-items:center;padding:12px;padding-top:calc(env(safe-area-inset-top,0px)+12px)">
-    <button onclick="closePreview()" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;font-family:inherit;padding:8px">← 戻る</button>
-  </div>
-  <img id="preview-img">
-  <div id="preview-bar">
-    <button onclick="closePreview()">キャンセル</button>
-    <button class="save-btn" onclick="savePhoto()">写真を保存</button>
+  <div id="flash"></div>
+  <div id="top">
+    <button class="top-btn" id="wb-btn" onclick="toggleWB()">☀︎</button>
   </div>
 </div>
 
-<div id="save-dlg">
-  <div id="save-card">
+<div id="ctrls">
+  <button class="ctrl-btn" id="split-btn" onclick="splitCapture()" title="2分割撮影">⬜⬛</button>
+  <div id="shutter" onclick="capture()"><div class="inn"></div></div>
+  <button class="ctrl-btn" id="sw-btn" onclick="openCamSelect()">↔︎</button>
+</div>
+
+<div id="pv">
+  <div id="pv-top">
+    <button onclick="closePV()" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;font-family:inherit;padding:8px">← 戻る</button>
+    <button class="top-btn" id="pv-wb" onclick="togglePVFilter()">☀︎</button>
+  </div>
+  <div id="pv-wrap">
+    <img id="pv-img">
+  </div>
+  <div id="pv-bottom">
+    <button onclick="closePV()">キャンセル</button>
+    <button class="save" onclick="savePV()">写真を保存</button>
+  </div>
+</div>
+
+<div id="sdlg">
+  <div id="scard">
     <div style="padding:22px 20px 10px">
       <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">まとめて保存</div>
-      <div id="save-count" style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5"></div>
+      <div id="sc-txt" style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5"></div>
     </div>
     <div style="border-top:1px solid rgba(0,0,0,.1);display:flex">
-      <button onclick="dismissSave()" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;border-right:1px solid rgba(0,0,0,.1);cursor:pointer;font-family:inherit">あとで</button>
-      <button onclick="saveAll()" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">保存</button>
+      <button onclick="dismissS()" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;border-right:1px solid rgba(0,0,0,.1);cursor:pointer;font-family:inherit">あとで</button>
+      <button onclick="saveAllS()" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">保存</button>
     </div>
   </div>
+</div>
+
+<div id="cam-sel">
+  <div id="cam-list"></div>
 </div>
 
 <script>
-const CACHE_KEY='cam_photos';
-let photos=JSON.parse(localStorage.getItem(CACHE_KEY)||'[]');
-let stream=null,facingMode='environment',devices=[];
-let previewIdx=-1,loupeActive=false,loupeTimer=null;
+const CK='cam_photos';
+let photos=[];try{photos=JSON.parse(localStorage.getItem(CK)||'[]');}catch(e){}
+let stream=null,curDeviceId=null,devices=[];
+let pvFilterOn=false,wbOn=false;
 
 const cam=document.getElementById('cam');
 
-async function startCam(){
-  if(stream){stream.getTracks().forEach(t=>t.stop());}
+async function startCam(deviceId){
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  const constraints={video:deviceId?{deviceId:{exact:deviceId}}:{facingMode:'environment',width:{ideal:1920}},audio:false};
   try{
-    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode,width:{ideal:1920},height:{ideal:1080}},audio:false});
+    stream=await navigator.mediaDevices.getUserMedia(constraints);
     cam.srcObject=stream;
-    // Enumerate devices for switch button
+    curDeviceId=stream.getVideoTracks()[0]?.getSettings()?.deviceId||null;
     const all=await navigator.mediaDevices.enumerateDevices();
     devices=all.filter(d=>d.kind==='videoinput');
-    document.getElementById('switch-btn').classList.toggle('disabled',devices.length<2);
-  }catch(e){console.log('Camera error:',e);}
+    document.getElementById('sw-btn').classList.toggle('dim',devices.length<2);
+  }catch(e){console.log('Cam err:',e);}
 }
 
-async function switchCam(){
-  hap.confirm();
-  facingMode=facingMode==='environment'?'user':'environment';
-  await startCam();
+// Camera select sheet
+function openCamSelect(){
+  hap();
+  if(devices.length<2)return;
+  const list=document.getElementById('cam-list');
+  list.innerHTML='';
+  devices.forEach((d,i)=>{
+    const b=document.createElement('button');
+    b.className='cam-opt';
+    b.textContent=d.label||`カメラ ${i+1}`;
+    b.onclick=()=>{hap.confirm();document.getElementById('cam-sel').classList.remove('show');startCam(d.deviceId);};
+    list.appendChild(b);
+  });
+  const cancel=document.createElement('button');
+  cancel.className='cam-opt cancel';cancel.textContent='キャンセル';
+  cancel.onclick=()=>{hap();document.getElementById('cam-sel').classList.remove('show');};
+  list.appendChild(cancel);
+  document.getElementById('cam-sel').classList.add('show');
+}
+
+function doFlash(){
+  const f=document.getElementById('flash');
+  f.classList.add('on');
+  setTimeout(()=>f.classList.remove('on'),300);
+}
+
+function captureFrame(){
+  const c=document.createElement('canvas');
+  c.width=cam.videoWidth;c.height=cam.videoHeight;
+  const ctx=c.getContext('2d');
+  ctx.drawImage(cam,0,0);
+  if(wbOn){ctx.globalCompositeOperation='overlay';ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(0,0,c.width,c.height);}
+  return c.toDataURL('image/jpeg',.85);
 }
 
 function capture(){
-  hap.confirm();
-  // Flash effect
-  const vf=document.getElementById('viewfinder');
-  vf.style.transition='none';vf.style.opacity='0';
-  requestAnimationFrame(()=>{vf.style.transition='opacity .3s';vf.style.opacity='1';});
-  
-  const canvas=document.createElement('canvas');
-  canvas.width=cam.videoWidth;canvas.height=cam.videoHeight;
-  canvas.getContext('2d').drawImage(cam,0,0);
-  const dataUrl=canvas.toDataURL('image/jpeg',0.85);
-  
-  if(photos.length>=5)photos.shift(); // Max 5
-  photos.push(dataUrl);
-  try{localStorage.setItem(CACHE_KEY,JSON.stringify(photos));}catch(e){photos.shift();try{localStorage.setItem(CACHE_KEY,JSON.stringify(photos));}catch(e2){}}
-  
-  updateThumb();
-  
-  // Show save dialog at 3 photos
+  hap.confirm();doFlash();
+  const d=captureFrame();
+  if(photos.length>=5)photos.shift();
+  photos.push(d);
+  try{localStorage.setItem(CK,JSON.stringify(photos));}catch(e){photos.shift();try{localStorage.setItem(CK,JSON.stringify(photos));}catch(e2){}}
   if(photos.length===3){
-    document.getElementById('save-count').textContent=`${photos.length}枚の写真を撮影しました。まとめて保存しますか？`;
-    document.getElementById('save-dlg').classList.add('show');
+    document.getElementById('sc-txt').textContent=photos.length+'枚の写真を撮影しました。まとめて保存しますか？';
+    document.getElementById('sdlg').classList.add('show');
   }
 }
 
-function updateThumb(){
-  const img=document.getElementById('thumb-img');
-  if(photos.length>0){img.src=photos[photos.length-1];img.style.display='block';}
-  else{img.style.display='none';}
-}
-
-function showLastPhoto(){
-  hap();
-  if(!photos.length)return;
-  previewIdx=photos.length-1;
-  document.getElementById('preview-img').src=photos[previewIdx];
-  document.getElementById('preview').classList.add('show');
-}
-
-function closePreview(){
-  hap();
-  document.getElementById('preview').classList.remove('show');
-}
-
-function savePhoto(){
+// Split capture (2 photos, top + bottom)
+async function splitCapture(){
   hap.confirm();
-  if(previewIdx<0||!photos[previewIdx])return;
-  const a=document.createElement('a');
-  a.href=photos[previewIdx];
-  a.download=`photo_${Date.now()}.jpg`;
-  a.click();
-  closePreview();
+  doFlash();
+  const d1=captureFrame();
+  await new Promise(r=>setTimeout(r,500));
+  doFlash();
+  const d2=captureFrame();
+  // Combine
+  const img1=new Image(),img2=new Image();
+  img1.src=d1;img2.src=d2;
+  await Promise.all([new Promise(r=>{img1.onload=r;}),new Promise(r=>{img2.onload=r;})]);
+  const c=document.createElement('canvas');
+  c.width=Math.max(img1.width,img2.width);
+  c.height=img1.height+img2.height;
+  const ctx=c.getContext('2d');
+  ctx.drawImage(img1,0,0,c.width,c.height/2);
+  ctx.drawImage(img2,0,c.height/2,c.width,c.height/2);
+  const combined=c.toDataURL('image/jpeg',.85);
+  if(photos.length>=5)photos.shift();
+  photos.push(combined);
+  try{localStorage.setItem(CK,JSON.stringify(photos));}catch(e){}
+  // Show preview
+  showPV(photos.length-1);
 }
 
-function dismissSave(){
-  hap();
-  document.getElementById('save-dlg').classList.remove('show');
+// White balance toggle
+function toggleWB(){
+  hap();wbOn=!wbOn;
+  document.getElementById('wb-btn').classList.toggle('active',wbOn);
+  cam.style.filter=wbOn?'contrast(1.15) brightness(1.08)':'';
 }
 
-function saveAll(){
+// Preview
+let pvIdx=-1;
+function showPV(idx){
+  pvIdx=idx;pvFilterOn=false;
+  document.getElementById('pv-img').src=photos[idx];
+  document.getElementById('pv-img').style.filter='';
+  document.getElementById('pv-img').style.transform='scale(1)';
+  pvScale=1;
+  document.getElementById('pv').classList.add('show');
+}
+function closePV(){hap();document.getElementById('pv').classList.remove('show');}
+function savePV(){
   hap.confirm();
-  photos.forEach((p,i)=>{
-    setTimeout(()=>{
-      const a=document.createElement('a');a.href=p;a.download=`photo_${Date.now()}_${i+1}.jpg`;a.click();
-    },i*200);
-  });
-  document.getElementById('save-dlg').classList.remove('show');
+  if(pvIdx<0||!photos[pvIdx])return;
+  const a=document.createElement('a');a.href=photos[pvIdx];a.download='photo_'+Date.now()+'.jpg';a.click();
+}
+function togglePVFilter(){
+  hap();pvFilterOn=!pvFilterOn;
+  document.getElementById('pv-wb').classList.toggle('active',pvFilterOn);
+  document.getElementById('pv-img').style.filter=pvFilterOn?'contrast(1.2) brightness(1.1)':'';
 }
 
 // Pinch zoom on preview
-let pinchDist0=null,curScale=1;
-const pImg=document.getElementById('preview-img');
-pImg.addEventListener('touchstart',e=>{
+let pvScale=1,pvPinchDist=null;
+const pvImg=document.getElementById('pv-img');
+pvImg.addEventListener('touchstart',e=>{
   if(e.touches.length===2){
-    pinchDist0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    e.preventDefault();
+    pvPinchDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
   }
-},{passive:true});
-pImg.addEventListener('touchmove',e=>{
-  if(e.touches.length===2&&pinchDist0){
+},{passive:false});
+pvImg.addEventListener('touchmove',e=>{
+  if(e.touches.length===2&&pvPinchDist){
+    e.preventDefault();
     const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-    curScale=Math.max(1,Math.min(5,curScale*(d/pinchDist0)));
-    pinchDist0=d;
-    pImg.style.transform=`scale(${curScale})`;
+    pvScale=Math.max(1,Math.min(5,pvScale*(d/pvPinchDist)));
+    pvPinchDist=d;
+    pvImg.style.transform='scale('+pvScale+')';
   }
-},{passive:true});
-pImg.addEventListener('touchend',e=>{if(e.touches.length<2)pinchDist0=null;},{passive:true});
-// Double tap to reset zoom
-let tapTime=0;
-pImg.addEventListener('click',()=>{
-  const now=Date.now();
-  if(now-tapTime<300){curScale=1;pImg.style.transform='scale(1)';hap();}
-  tapTime=now;
+},{passive:false});
+pvImg.addEventListener('touchend',e=>{if(e.touches.length<2)pvPinchDist=null;},{passive:true});
+// Double tap reset
+let pvTapT=0;
+pvImg.addEventListener('click',()=>{
+  const n=Date.now();
+  if(n-pvTapT<300){pvScale=1;pvImg.style.transform='scale(1)';hap();}
+  pvTapT=n;
 });
 
-// Long press loupe on viewfinder
-const vf=document.getElementById('viewfinder');
-const loupe=document.getElementById('loupe');
-const loupeCanvas=document.getElementById('loupe-canvas');
-const loupeCtx=loupeCanvas.getContext('2d');
-
-vf.addEventListener('touchstart',e=>{
-  if(e.target===cam||e.target===vf){
-    const t=e.touches[0];
-    loupeTimer=setTimeout(()=>{
-      hap.confirm();
-      loupeActive=true;
-      updateLoupe(t.clientX,t.clientY);
-      loupe.style.display='block';
-    },500);
-  }
-},{passive:true});
-
-vf.addEventListener('touchmove',e=>{
-  if(loupeActive&&e.touches[0]){
-    updateLoupe(e.touches[0].clientX,e.touches[0].clientY);
-  }else{
-    clearTimeout(loupeTimer);
-  }
-},{passive:true});
-
-vf.addEventListener('touchend',()=>{
-  clearTimeout(loupeTimer);
-  if(loupeActive){
-    loupeActive=false;
-    loupe.style.display='none';
-    // Capture zoomed area
-    hap.confirm();
-  }
-},{passive:true});
-
-function updateLoupe(cx,cy){
-  const rect=vf.getBoundingClientRect();
-  // Position loupe above finger
-  loupe.style.left=(cx-rect.left-60)+'px';
-  loupe.style.top=(cy-rect.top-140)+'px';
-  // Draw zoomed portion of video
-  const vw=cam.videoWidth,vh=cam.videoHeight;
-  const rx=(cx-rect.left)/rect.width,ry=(cy-rect.top)/rect.height;
-  const srcX=rx*vw-vw*0.05,srcY=ry*vh-vh*0.05;
-  const srcW=vw*0.1,srcH=vh*0.1;
-  loupeCtx.drawImage(cam,srcX,srcY,srcW,srcH,0,0,240,240);
+// Save dialog
+function dismissS(){hap();document.getElementById('sdlg').classList.remove('show');}
+function saveAllS(){
+  hap.confirm();
+  photos.forEach((p,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=p;a.download='photo_'+Date.now()+'_'+(i+1)+'.jpg';a.click();},i*200));
+  document.getElementById('sdlg').classList.remove('show');
 }
 
-// Double tap on viewfinder outside loupe = haptic
-let vfTapTime=0;
-vf.addEventListener('click',()=>{
-  if(!loupeActive){
-    const now=Date.now();
-    if(now-vfTapTime<300){hap();}
-    vfTapTime=now;
-  }
-});
+// "写真を表示" button - replace split button with photo viewer when photos exist
+function updateUI(){
+  const sb=document.getElementById('split-btn');
+  sb.textContent='⬜⬛';sb.title='2分割撮影';
+}
 
-updateThumb();
-startCam();
+startCam();updateUI();
 </script>
 </body>
 </html>
