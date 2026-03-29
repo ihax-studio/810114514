@@ -997,7 +997,7 @@ overflow:hidden;
         <button id="wp-pick-color" style="flex:1;padding:13px;border-radius:14px;border:none;background:rgba(0,0,0,.06);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--tx);display:flex;align-items:center;justify-content:center;gap:6px">🌈 色を選択</button>
       </div>
       <input type="file" id="wp-file-input" accept="image/*" style="display:none">
-      <input type="color" id="wp-color-input" value="#007aff" style="position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;border:none;padding:0">
+      <input type="color" id="wp-color-input" value="#007aff" style="position:fixed;left:-9999px;top:-9999px;width:48px;height:48px;opacity:0.01;border:none;padding:0;pointer-events:auto">
       <!-- Current wallpaper info -->
       <div id="wp-current-info" style="text-align:center;padding:8px;font-size:12px;color:var(--sub)"></div>
       <!-- Reset button -->
@@ -1046,7 +1046,7 @@ overflow:hidden;
       <span>:</span>
       <span id="lc-m1" style="display:inline-block"></span><span id="lc-m2" style="display:inline-block"></span>
     </div>
-    <input type="color" id="lock-color-input" value="#ffffff" style="position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;border:none;padding:0">
+    <input type="color" id="lock-color-input" value="#ffffff" style="position:fixed;left:-9999px;top:-9999px;width:48px;height:48px;opacity:0.01;border:none;padding:0;pointer-events:auto">
     <div id="lock-date" style="font-size:16px;font-weight:300;opacity:.5;margin-top:4px;text-align:center"></div>
     <div style="flex:1"></div>
     <div style="position:relative;width:280px;height:60px;margin-bottom:calc(env(safe-area-inset-bottom,0px) + 50px)" onclick="event.stopPropagation()">
@@ -2444,7 +2444,15 @@ document.getElementById('wp-pick-color').addEventListener('click',()=>{
   const curKey=_wpTarget==='lock'?WP_LOCK_KEY:WP_HOME_KEY;
   const cur=loadWP(curKey);
   if(cur&&cur.startsWith('#'))ci.value=cur;
-  ci.click();
+  // iOS requires element to be in viewport and focused for picker to open
+  ci.style.position='fixed';ci.style.left='50%';ci.style.top='50%';
+  ci.style.opacity='0.01';ci.style.zIndex='99999';
+  ci.focus();
+  setTimeout(()=>{ci.click();},50);
+  // Hide again after picker closes
+  const hide=()=>{ci.style.position='fixed';ci.style.left='-9999px';ci.style.top='-9999px';ci.style.zIndex='';};
+  ci.addEventListener('change',hide,{once:true});
+  ci.addEventListener('blur',()=>{setTimeout(hide,300);},{once:true});
 });
 function _applyColorPick(e){
   const color=e.target.value;
@@ -4543,7 +4551,17 @@ document.addEventListener('click',e=>{
 });
 // Custom color fallback button
 document.getElementById('clock-color-custom-btn').addEventListener('click',()=>{
-  haptic();document.getElementById('clock-color-custom').click();
+  haptic();
+  const ci=document.getElementById('clock-color-custom');
+  const cur=localStorage.getItem(CLOCK_COLOR_KEY);
+  if(cur)ci.value=cur;
+  ci.style.position='fixed';ci.style.left='50%';ci.style.top='50%';
+  ci.style.opacity='0.01';ci.style.zIndex='99999';
+  ci.focus();
+  setTimeout(()=>{ci.click();},50);
+  const hide=()=>{ci.style.position='fixed';ci.style.left='-9999px';ci.style.top='-9999px';ci.style.zIndex='';};
+  ci.addEventListener('change',hide,{once:true});
+  ci.addEventListener('blur',()=>{setTimeout(hide,300);},{once:true});
 });
 document.getElementById('clock-color-custom').addEventListener('input',e=>{
   setClockColor(e.target.value);
@@ -4569,7 +4587,7 @@ if('serviceWorker' in navigator){
       <div id="clock-color-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:0 4px"></div>
       <div style="text-align:center;margin-top:14px">
         <button id="clock-color-custom-btn" style="padding:10px 20px;border-radius:55px;border:none;background:rgba(0,0,0,.06);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--tx)">カスタムカラー</button>
-        <input type="color" id="clock-color-custom" value="#000000" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
+        <input type="color" id="clock-color-custom" value="#000000" style="position:fixed;left:-9999px;top:-9999px;width:48px;height:48px;opacity:0.01;border:none;padding:0;pointer-events:auto">
       </div>
     </div>
   </div>
