@@ -597,6 +597,45 @@ transition:transform .3s ease;
 pointer-events:auto;
 }
 .float-btn:active{transform:scale(1.8)}
+
+/* ═══ QUIZ CHOICES ═══ */
+.quiz-choices{
+display:flex;flex-direction:column;gap:6px;
+padding:6px 14px 8px;max-width:420px;margin:0 auto;width:100%;
+}
+.quiz-choice{
+background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+border:1.5px solid rgba(255,255,255,.8);border-radius:14px;
+padding:12px 16px;font-size:14px;font-weight:600;color:var(--tx);
+cursor:pointer;transition:transform .12s,background .12s,border-color .15s;
+text-align:left;font-family:inherit;
+box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 1px 4px rgba(0,0,0,.06);
+display:flex;align-items:center;gap:10px;
+}
+.quiz-choice:active{transform:scale(.96);background:rgba(255,255,255,.95)}
+.quiz-choice .qc-num{
+width:24px;height:24px;border-radius:50%;
+background:rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;
+font-size:11px;font-weight:800;color:var(--sub);flex-shrink:0;
+}
+.quiz-choice.correct{background:rgba(52,199,89,.18)!important;border-color:rgba(52,199,89,.5)!important;color:#1a7a35}
+.quiz-choice.correct .qc-num{background:rgba(52,199,89,.25);color:#1a7a35}
+.quiz-choice.wrong{background:rgba(255,59,48,.12)!important;border-color:rgba(255,59,48,.4)!important;color:#c0001a}
+.quiz-choice.wrong .qc-num{background:rgba(255,59,48,.2);color:#c0001a}
+.quiz-choice.disabled{pointer-events:none;opacity:.6}
+/* Timer bar */
+.quiz-timer-wrap{
+height:3px;background:rgba(0,0,0,.06);border-radius:2px;margin:0 14px 2px;max-width:420px;margin-left:auto;margin-right:auto;width:calc(100% - 28px);overflow:hidden;
+}
+.quiz-timer-bar{
+height:100%;background:linear-gradient(90deg,var(--b),var(--p));border-radius:2px;
+transition:width .1s linear;width:100%;
+}
+/* Shrink card in quiz mode to fit choices */
+.quiz-active .fc{min-height:160px!important}
+.quiz-active .ca{padding:2px 14px 4px}
+.quiz-active .fh{display:none}
+.quiz-choices+.acts{display:none!important}
 .float-btn.pop{animation:starPop .3s ease}
 
 /* ═══ SHAKE TOOLTIP ═══ */
@@ -826,6 +865,7 @@ overflow:hidden;
       <!-- Sidebar (iPad/Mac only, JS toggles visibility) -->
       <div id="settings-sidebar" style="display:none;width:220px;border-right:1px solid rgba(0,0,0,.08);padding:8px;overflow-y:auto;flex-shrink:0">
         <div class="s-nav-item s-nav-active" data-section="home">ホーム画面</div>
+        <div class="s-nav-item" data-section="quiz">クイズモード</div>
         <div class="s-nav-item" data-section="sound">サウンドと触覚</div>
         <div class="s-nav-item" data-section="gesture">ジェスチャ</div>
         <div class="s-nav-item" data-section="wallpaper">壁紙</div>
@@ -850,6 +890,22 @@ overflow:hidden;
           <div class="s-group">
             <div class="s-row"><div class="s-label">触覚</div><div class="s-toggle on" id="s-haptic"><div class="s-knob"></div></div></div>
             <div class="s-row"><div class="s-label">はっきりとした触覚</div><div class="s-toggle" id="s-haptic-strong"><div class="s-knob"></div></div></div>
+          </div>
+        </div>
+        <!-- Quiz Mode -->
+        <div class="s-section" id="ss-quiz">
+          <div class="s-sec">クイズモード</div>
+          <div class="s-group">
+            <div class="s-row s-quiz-opt" id="s-quiz-tap"><div class="s-label">カード（タップ）</div><div class="s-check s-on" id="sc-quiz-tap">✓</div></div>
+            <div class="s-row s-quiz-opt" id="s-quiz-5"><div class="s-label">5択</div><div class="s-check" id="sc-quiz-5">✓</div></div>
+            <div class="s-row s-quiz-opt" id="s-quiz-3"><div class="s-label">3択</div><div class="s-check" id="sc-quiz-3">✓</div></div>
+          </div>
+          <div class="s-sec" style="margin-top:14px">タイムリミット</div>
+          <div class="s-group">
+            <div class="s-row s-timer-opt" id="s-timer-0"><div class="s-label">なし</div><div class="s-check" id="sc-timer-0">✓</div></div>
+            <div class="s-row s-timer-opt" id="s-timer-5"><div class="s-label">5秒</div><div class="s-check" id="sc-timer-5">✓</div></div>
+            <div class="s-row s-timer-opt" id="s-timer-10"><div class="s-label">10秒（デフォルト）</div><div class="s-check s-on" id="sc-timer-10">✓</div></div>
+            <div class="s-row s-timer-opt" id="s-timer-15"><div class="s-label">15秒</div><div class="s-check" id="sc-timer-15">✓</div></div>
           </div>
         </div>
         <!-- Gesture -->
@@ -880,7 +936,8 @@ overflow:hidden;
               <div id="wp-lock-preview" style="width:130px;height:230px;border-radius:18px;background:#fff;overflow:hidden;position:relative;border:1px solid rgba(0,0,0,.1);box-shadow:0 4px 16px rgba(0,0,0,.12)">
                 <div id="wp-lock-bg" style="position:absolute;inset:0;background:#fff;background-size:cover;background-position:center"></div>
                 <div style="position:relative;z-index:1;padding-top:36px;text-align:center">
-                  <div style="font-size:32px;font-weight:200;color:#000;letter-spacing:-1px">10:09</div>
+                  <div id="wp-lock-clock-preview" style="font-size:32px;font-weight:200;color:#000;letter-spacing:-1px;cursor:pointer" onclick="document.getElementById('wp-clock-color-input').click()">10:09</div>
+                  <input type="color" id="wp-clock-color-input" value="#000000" style="position:absolute;opacity:0;pointer-events:none">
                 </div>
               </div>
               <button id="wp-lock-customize" style="margin-top:10px;padding:7px 18px;border-radius:55px;border:none;background:rgba(0,0,0,.06);color:var(--tx);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">カスタマイズ</button>
@@ -923,7 +980,8 @@ overflow:hidden;
     <div style="overflow-y:auto;padding:0 20px 20px;-webkit-overflow-scrolling:touch">
       <!-- Time preview for lock screen -->
       <div id="wp-time-preview" style="display:none;text-align:center;padding:10px 0 16px">
-        <div style="font-size:56px;font-weight:200;color:#000;letter-spacing:-2px">10:09</div>
+        <div id="wp-dialog-clock-text" style="font-size:56px;font-weight:200;color:#000;letter-spacing:-2px;cursor:pointer" onclick="document.getElementById('wp-clock-color-input2').click()">10:09</div>
+        <input type="color" id="wp-clock-color-input2" value="#000000" style="position:absolute;opacity:0;pointer-events:none">
         <div style="margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px">
           <span style="font-size:12px;color:var(--sub)">細い</span>
           <input type="range" id="wp-lock-weight" min="100" max="700" step="100" value="200" style="width:150px;accent-color:#007aff">
@@ -1879,6 +1937,27 @@ function render(i){
     const w=d.deck[d.idx];
     gStar.textContent=isStarred(w.e||w.w)?'★':'☆';
   }
+
+  // Quiz mode rendering
+  if(typeof getQuizMode==='function'){
+    const mode=getQuizMode();
+    if(mode!=='tap'&&d.idx<d.deck.length){
+      const panel=document.getElementById('fw'+i)?.closest('.sw-panel');
+      if(panel)panel.classList.add('quiz-active');
+      const hint=document.querySelector('#fw'+i+' .fh');
+      if(hint)hint.textContent='下の選択肢から正解を選んでください';
+      document.getElementById('ac'+i).style.display='none';
+      if(typeof renderQuiz==='function')renderQuiz(i);
+    }else{
+      const choicesEl=document.getElementById('qc-'+i);
+      if(choicesEl)choicesEl.style.display='none';
+      const timerWrap=document.getElementById('qt-wrap-'+i);
+      if(timerWrap)timerWrap.style.display='none';
+      if(typeof stopQuizTimer==='function')stopQuizTimer();
+      const panel=document.getElementById('fw'+i)?.closest('.sw-panel');
+      if(panel)panel.classList.remove('quiz-active');
+    }
+  }
 }
 
 /* ═══ CONTROLS ═══ */
@@ -2294,6 +2373,13 @@ function openWPDialog(target){
     document.getElementById('wp-lock-weight').value=w;
     timePrev.querySelector('div').style.fontWeight=w;
   }
+  // Sync clock color inputs
+  if(target==='lock'){
+    const cc=localStorage.getItem('inglish_clock_color')||'#000000';
+    const ci1=document.getElementById('wp-clock-color-input');if(ci1)ci1.value=cc;
+    const ci2=document.getElementById('wp-clock-color-input2');if(ci2)ci2.value=cc;
+    const dp=document.getElementById('wp-dialog-clock-text');if(dp)dp.style.color=cc;
+  }
   const cur=loadWP(target==='lock'?WP_LOCK_KEY:WP_HOME_KEY);
   document.getElementById('wp-current-info').textContent=cur?(cur.startsWith('#')?'カラー: '+cur:'写真が設定されています'):'デフォルト';
   dlg.style.display='block';
@@ -2504,6 +2590,9 @@ function openSettings(){
   const notifRow=document.getElementById('s-notif').closest('.s-row');
   if(notifRow){notifRow.style.opacity=_isPWA?'1':'.2';notifRow.style.pointerEvents=_isPWA?'':'none';}
   document.getElementById('s-notif').classList.toggle('on',localStorage.getItem('inglish_notif')==='1');
+  // Sync quiz mode & timer checks
+  if(typeof syncQuizChecks==='function')syncQuizChecks();
+  if(typeof syncTimerChecks==='function')syncTimerChecks();
 }
 
 function showSettingsSection(sec){
@@ -2990,8 +3079,8 @@ CFG.forEach((_,i)=>{
       if(d.prev){Bk(i);haptic.confirm();}
       return;
     }
-    // Horizontal swipe only on flipped card
-    if(!d.flipped)return;
+    // Horizontal swipe only on flipped card (and only in tap mode)
+    if(!d.flipped||getQuizMode()!=='tap')return;
     if(adx>55&&adx>ady){dx>0?An(i,'g'):An(i,'f');}
   },{passive:true});
   /* Tap card: front→flip to back, back→flip to front (unless tapping a button) */
@@ -4044,6 +4133,227 @@ document.getElementById('g-star').addEventListener('click',()=>{
 const floatBar=document.getElementById('float-bar');
 
 // body animation handles splash — no separate element needed
+
+/* ═══ QUIZ MODE (5択/3択) ═══ */
+const QUIZ_MODE_KEY='inglish_quiz_mode'; // 'tap','5','3'
+const QUIZ_TIMER_KEY='inglish_quiz_timer'; // '0','5','10','15'
+function getQuizMode(){return localStorage.getItem(QUIZ_MODE_KEY)||'tap';}
+function getQuizTimer(){return parseInt(localStorage.getItem(QUIZ_TIMER_KEY)||'10',10);}
+
+// Quiz settings UI
+document.querySelectorAll('.s-quiz-opt').forEach(row=>{
+  row.addEventListener('click',()=>{
+    haptic();
+    const mode=row.id.replace('s-quiz-','');
+    localStorage.setItem(QUIZ_MODE_KEY,mode);
+    syncQuizChecks();
+  });
+});
+document.querySelectorAll('.s-timer-opt').forEach(row=>{
+  row.addEventListener('click',()=>{
+    haptic();
+    const val=row.id.replace('s-timer-','');
+    localStorage.setItem(QUIZ_TIMER_KEY,val);
+    syncTimerChecks();
+  });
+});
+function syncQuizChecks(){
+  const m=getQuizMode();
+  ['tap','5','3'].forEach(v=>{
+    const el=document.getElementById('sc-quiz-'+v);
+    if(el)el.classList.toggle('s-on',m===v);
+  });
+}
+function syncTimerChecks(){
+  const t=localStorage.getItem(QUIZ_TIMER_KEY)||'10';
+  ['0','5','10','15'].forEach(v=>{
+    const el=document.getElementById('sc-timer-'+v);
+    if(el)el.classList.toggle('s-on',t===v);
+  });
+}
+
+// Quiz timer state
+let _quizTimerIv=null;
+let _quizTimerStart=0;
+let _quizTimerDur=0;
+function startQuizTimer(panelIdx){
+  stopQuizTimer();
+  const dur=getQuizTimer();
+  if(dur<=0)return;
+  _quizTimerDur=dur*1000;
+  _quizTimerStart=Date.now();
+  const barWrap=document.getElementById('qt-wrap-'+panelIdx);
+  const bar=document.getElementById('qt-bar-'+panelIdx);
+  if(barWrap)barWrap.style.display='';
+  if(bar)bar.style.width='100%';
+  _quizTimerIv=setInterval(()=>{
+    const elapsed=Date.now()-_quizTimerStart;
+    const pct=Math.max(0,1-elapsed/_quizTimerDur)*100;
+    if(bar)bar.style.width=pct+'%';
+    if(elapsed>=_quizTimerDur){
+      stopQuizTimer();
+      // Time up — treat as forgot
+      quizTimeUp(panelIdx);
+    }
+  },50);
+}
+function stopQuizTimer(){
+  if(_quizTimerIv){clearInterval(_quizTimerIv);_quizTimerIv=null;}
+}
+function quizTimeUp(i){
+  const d=DK[i];
+  if(d.idx>=d.deck.length)return;
+  haptic.error();
+  // Show correct answer
+  const choicesEl=document.getElementById('qc-'+i);
+  if(choicesEl){
+    const w=d.deck[d.idx];
+    const correct=w.j||w.m||'';
+    choicesEl.querySelectorAll('.quiz-choice').forEach(btn=>{
+      btn.classList.add('disabled');
+      if(btn.dataset.answer===correct)btn.classList.add('correct');
+    });
+  }
+  // Mark as forgot after delay
+  setTimeout(()=>{
+    An(i,'f');
+    renderQuiz(i);
+  },800);
+}
+
+// Generate wrong answers from same deck
+function generateChoices(deck,idx,count){
+  const w=deck[idx];
+  const correctAns=w.j||w.m||'';
+  const pool=deck.filter((_,j)=>j!==idx).map(x=>x.j||x.m||'').filter(x=>x&&x!==correctAns);
+  // Shuffle pool
+  for(let i=pool.length-1;i>0;i--){const j=0|Math.random()*(i+1);[pool[i],pool[j]]=[pool[j],pool[i]];}
+  const wrongs=pool.slice(0,count-1);
+  // If not enough wrong answers, pad with generic
+  while(wrongs.length<count-1)wrongs.push('---');
+  const choices=[correctAns,...wrongs];
+  // Shuffle choices
+  for(let i=choices.length-1;i>0;i--){const j=0|Math.random()*(i+1);[choices[i],choices[j]]=[choices[j],choices[i]];}
+  return {choices,correct:correctAns};
+}
+
+// Render quiz choices below card
+function renderQuiz(i){
+  const mode=getQuizMode();
+  const choicesEl=document.getElementById('qc-'+i);
+  const timerWrap=document.getElementById('qt-wrap-'+i);
+  if(mode==='tap'){
+    if(choicesEl)choicesEl.style.display='none';
+    if(timerWrap)timerWrap.style.display='none';
+    stopQuizTimer();
+    return;
+  }
+  const d=DK[i];
+  if(d.idx>=d.deck.length){
+    if(choicesEl)choicesEl.style.display='none';
+    if(timerWrap)timerWrap.style.display='none';
+    stopQuizTimer();
+    return;
+  }
+  const numChoices=mode==='3'?3:5;
+  const {choices,correct}=generateChoices(d.deck,d.idx,numChoices);
+  if(choicesEl){
+    choicesEl.style.display='flex';
+    choicesEl.innerHTML=choices.map((c,j)=>
+      `<button class="quiz-choice" data-answer="${c.replace(/"/g,'&quot;')}" data-correct="${correct.replace(/"/g,'&quot;')}" data-panel="${i}">
+        <span class="qc-num">${j+1}</span><span>${c}</span>
+      </button>`
+    ).join('');
+  }
+  startQuizTimer(i);
+}
+
+// Handle quiz choice click (delegated)
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.quiz-choice');
+  if(!btn||btn.classList.contains('disabled'))return;
+  haptic();
+  stopQuizTimer();
+  const i=parseInt(btn.dataset.panel,10);
+  const answer=btn.dataset.answer;
+  const correct=btn.dataset.correct;
+  const choicesEl=document.getElementById('qc-'+i);
+  const isCorrect=answer===correct;
+  // Mark all disabled
+  choicesEl.querySelectorAll('.quiz-choice').forEach(b=>{
+    b.classList.add('disabled');
+    if(b.dataset.answer===correct)b.classList.add('correct');
+  });
+  if(!isCorrect){
+    btn.classList.add('wrong');
+    haptic.error();
+  }else{
+    haptic.confirm();
+  }
+  setTimeout(()=>{
+    if(isCorrect)An(i,'g');
+    else An(i,'f');
+    renderQuiz(i);
+  },600);
+});
+
+// Quiz render logic is added at end of render() function directly
+
+// Inject quiz choice containers + timer bars into each panel
+CFG.forEach((_,i)=>{
+  const fw=document.getElementById('fw'+i);
+  if(!fw)return;
+  const parent=fw.parentElement; // .ca
+  // Timer bar
+  const tw=document.createElement('div');
+  tw.className='quiz-timer-wrap';tw.id='qt-wrap-'+i;tw.style.display='none';
+  tw.innerHTML='<div class="quiz-timer-bar" id="qt-bar-'+i+'"></div>';
+  parent.parentElement.insertBefore(tw,parent.nextSibling);
+  // Choices container
+  const qc=document.createElement('div');
+  qc.className='quiz-choices';qc.id='qc-'+i;qc.style.display='none';
+  tw.after(qc);
+});
+
+// In quiz mode, card tap should NOT flip — only show front + choices
+const _origFl=window.Fl;
+window.Fl=function(i){
+  const mode=getQuizMode();
+  if(mode!=='tap')return; // Don't flip in quiz mode
+  _origFl(i);
+};
+
+// Quiz/timer sync is done inside openSettings via mutation below
+
+/* ═══ CLOCK COLOR PICKER ═══ */
+const CLOCK_COLOR_KEY='inglish_clock_color';
+function applyClockColor(){
+  const color=localStorage.getItem(CLOCK_COLOR_KEY)||'#000';
+  document.getElementById('lock-clock').style.color=color;
+  const ld=document.getElementById('lock-date');if(ld)ld.style.color=color;
+  const lbl=document.getElementById('lock-slide-label');if(lbl)lbl.style.color=color;
+  const knobSvg=document.querySelector('#lock-knob svg polyline');
+  if(knobSvg)knobSvg.setAttribute('stroke',color);
+  // Update previews
+  const prev1=document.getElementById('wp-lock-clock-preview');
+  if(prev1)prev1.style.color=color;
+  const prev2=document.getElementById('wp-dialog-clock-text');
+  if(prev2)prev2.style.color=color;
+}
+// Color input handler (preview in settings)
+document.getElementById('wp-clock-color-input').addEventListener('input',e=>{
+  const color=e.target.value;
+  localStorage.setItem(CLOCK_COLOR_KEY,color);
+  applyClockColor();
+});
+document.getElementById('wp-clock-color-input2').addEventListener('input',e=>{
+  const color=e.target.value;
+  localStorage.setItem(CLOCK_COLOR_KEY,color);
+  applyClockColor();
+});
+// Clock color sync on dialog open is handled inside openWPDialog
+// Apply on startup
+applyClockColor();
 
 /* ═══ SERVICE WORKER REGISTRATION ═══ */
 if('serviceWorker' in navigator){
