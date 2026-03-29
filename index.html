@@ -4485,13 +4485,6 @@ window.Fl=function(i){
 
 /* ═══ CLOCK COLOR PICKER (iOS-friendly palette) ═══ */
 const CLOCK_COLOR_KEY='inglish_clock_color';
-const CLOCK_COLORS=[
-  '#000000','#FFFFFF','#8E8E93','#FF3B30','#FF9500','#FFCC00',
-  '#34C759','#00C7BE','#30B0C7','#007AFF','#5856D6','#AF52DE',
-  '#FF2D55','#A2845E','#1C1C1E','#F2F2F7','#636366','#C0001A',
-  '#D4A017','#8B6914','#0A7A3E','#005F73','#003FA0','#3634A3',
-  '#2A2880','#7A4A00','#48484A','#AEAEB2','#D1D1D6','#E5E5EA',
-];
 function applyClockColor(){
   const color=localStorage.getItem(CLOCK_COLOR_KEY)||'#000';
   document.getElementById('lock-clock').style.color=color;
@@ -4504,53 +4497,8 @@ function applyClockColor(){
   const prev2=document.getElementById('wp-dialog-clock-text');
   if(prev2)prev2.style.color=color;
 }
+// 10:09タップ → OS標準カラーピッカーを直接開く
 window.openClockColorPicker=function(){
-  haptic();
-  const ov=document.getElementById('clock-color-overlay');
-  const card=document.getElementById('clock-color-card');
-  const grid=document.getElementById('clock-color-grid');
-  const preview=document.getElementById('clock-color-preview');
-  const cur=localStorage.getItem(CLOCK_COLOR_KEY)||'#000000';
-  preview.style.color=cur;
-  grid.innerHTML=CLOCK_COLORS.map(c=>{
-    const sel=c.toLowerCase()===cur.toLowerCase();
-    return `<div data-color="${c}" style="width:100%;aspect-ratio:1;border-radius:50%;background:${c};cursor:pointer;border:${sel?'3px solid #007AFF':'2px solid rgba(0,0,0,.1)'};box-shadow:${sel?'0 0 0 2px #fff,0 0 0 4px #007AFF':'0 1px 3px rgba(0,0,0,.1)'};transition:transform .12s,border .15s" class="cc-swatch"></div>`;
-  }).join('');
-  ov.style.display='block';
-  requestAnimationFrame(()=>{ov.style.background='rgba(0,0,0,.4)';card.style.transform='translateY(0)';});
-}
-window.closeClockColorPicker=function(){
-  haptic();
-  const ov=document.getElementById('clock-color-overlay');
-  const card=document.getElementById('clock-color-card');
-  card.style.transform='translateY(100%)';
-  ov.style.background='rgba(0,0,0,0)';
-  setTimeout(()=>{ov.style.display='none';},400);
-}
-function setClockColor(color){
-  localStorage.setItem(CLOCK_COLOR_KEY,color);
-  applyClockColor();
-  const preview=document.getElementById('clock-color-preview');
-  if(preview)preview.style.color=color;
-  // Update swatch selection
-  document.querySelectorAll('.cc-swatch').forEach(s=>{
-    const sc=s.dataset.color;
-    const sel=sc.toLowerCase()===color.toLowerCase();
-    s.style.border=sel?'3px solid #007AFF':'2px solid rgba(0,0,0,.1)';
-    s.style.boxShadow=sel?'0 0 0 2px #fff,0 0 0 4px #007AFF':'0 1px 3px rgba(0,0,0,.1)';
-  });
-}
-// Swatch click
-document.addEventListener('click',e=>{
-  const sw=e.target.closest('.cc-swatch');
-  if(!sw)return;
-  haptic();
-  sw.style.transform='scale(.85)';
-  setTimeout(()=>{sw.style.transform='';},150);
-  setClockColor(sw.dataset.color);
-});
-// Custom color fallback button
-document.getElementById('clock-color-custom-btn').addEventListener('click',()=>{
   haptic();
   const ci=document.getElementById('clock-color-custom');
   const cur=localStorage.getItem(CLOCK_COLOR_KEY);
@@ -4562,9 +4510,12 @@ document.getElementById('clock-color-custom-btn').addEventListener('click',()=>{
   const hide=()=>{ci.style.position='fixed';ci.style.left='-9999px';ci.style.top='-9999px';ci.style.zIndex='';};
   ci.addEventListener('change',hide,{once:true});
   ci.addEventListener('blur',()=>{setTimeout(hide,300);},{once:true});
-});
+}
+window.closeClockColorPicker=function(){}
 document.getElementById('clock-color-custom').addEventListener('input',e=>{
-  setClockColor(e.target.value);
+  const color=e.target.value;
+  localStorage.setItem(CLOCK_COLOR_KEY,color);
+  applyClockColor();
 });
 // Apply on startup
 applyClockColor();
@@ -4575,22 +4526,7 @@ if('serviceWorker' in navigator){
 }
 </script>
 
-<!-- ══════════ CLOCK COLOR PALETTE ══════════ -->
-<div id="clock-color-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0);transition:background .3s" onclick="closeClockColorPicker()">
-  <div id="clock-color-card" style="position:absolute;bottom:0;left:0;right:0;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.05,.64,1)" onclick="event.stopPropagation()">
-    <div style="display:flex;align-items:center;padding:16px 20px 10px">
-      <div style="flex:1;font-size:17px;font-weight:700;color:#000">時計の色</div>
-      <button onclick="closeClockColorPicker()" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.06);border:none;font-size:18px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#000;line-height:1">✕</button>
-    </div>
-    <div style="padding:0 20px 20px">
-      <div id="clock-color-preview" style="text-align:center;font-size:48px;font-weight:200;letter-spacing:-2px;color:#000;padding:10px 0 16px">10:09</div>
-      <div id="clock-color-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:0 4px"></div>
-      <div style="text-align:center;margin-top:14px">
-        <button id="clock-color-custom-btn" style="padding:10px 20px;border-radius:55px;border:none;background:rgba(0,0,0,.06);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--tx)">カスタムカラー</button>
-        <input type="color" id="clock-color-custom" value="#000000" style="position:fixed;left:-9999px;top:-9999px;width:48px;height:48px;opacity:0.01;border:none;padding:0;pointer-events:auto">
-      </div>
-    </div>
-  </div>
-</div>
+<!-- ══════════ CLOCK COLOR INPUT (OS standard picker) ══════════ -->
+<input type="color" id="clock-color-custom" value="#000000" style="position:fixed;left:-9999px;top:-9999px;width:48px;height:48px;opacity:0.01;border:none;padding:0;pointer-events:auto">
 </body>
 </html>
