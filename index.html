@@ -642,6 +642,18 @@ transition:width .1s linear;width:100%;
 .quiz-active .ca{padding:2px 14px 4px}
 .quiz-active .fh{display:none}
 .quiz-choices+.acts{display:none!important}
+/* Quiz result indicator between shuffle & star */
+#quiz-result-indicator{
+font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;
+}
+#quiz-result-indicator.pop-in{
+animation:qrPop .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes qrPop{
+0%{transform:scale(.5);opacity:0}
+60%{transform:scale(1.1);opacity:1}
+100%{transform:scale(1);opacity:1}
+}
 .float-btn.pop{animation:starPop .3s ease}
 
 /* ═══ SHAKE TOOLTIP ═══ */
@@ -1111,6 +1123,7 @@ overflow:hidden;
   <!-- FLOAT BAR (fixed, global for card mode) -->
   <div class="float-bar" id="float-bar" style="display:none">
     <button class="float-btn" id="g-sfb" title="シャッフル">🔀</button>
+    <div id="quiz-result-indicator" style="display:none;height:52px;border-radius:55px;padding:0 16px;font-size:16px;font-weight:800;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;align-items:center;justify-content:center;pointer-events:none;white-space:nowrap;background:rgba(255,255,255,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 4px 16px rgba(0,0,0,.10)"></div>
     <button class="float-btn" id="g-star" title="お気に入り">☆</button>
   </div>
   <div class="lswrap" id="list-wrap" style="display:none">
@@ -4326,6 +4339,7 @@ function quizTimeUp(i){
   const d=DK[i];
   if(d.idx>=d.deck.length)return;
   haptic.error();
+  showQuizResultIndicator('f');
   // Show correct answer
   const choicesEl=document.getElementById('qc-'+i);
   if(choicesEl){
@@ -4385,6 +4399,7 @@ function renderQuiz(i){
   }
   const numChoices=mode==='3'?3:5;
   const {choices,correct}=generateChoices(d.deck,d.idx,numChoices);
+  hideQuizResultIndicator();
   if(choicesEl){
     choicesEl.style.display='flex';
     choicesEl.classList.remove('slide-out');
@@ -4422,13 +4437,15 @@ document.addEventListener('click',e=>{
   }else{
     haptic.confirm();
   }
+  // Show result indicator (✓/✗) between shuffle & star
+  showQuizResultIndicator(isCorrect?'g':'f');
   // Auto-speak the word
   if(isAutoSpeak()){
     const d=DK[i];
     if(d.idx<d.deck.length)speakEn(d.deck[d.idx].e||d.deck[d.idx].w||'');
   }
   const result=isCorrect?'g':'f';
-  // Set up pending advance — double-tap card to skip delay
+  // Set up pending advance — tap card to skip delay
   _pendingAdvance={panel:i,result,timer:null};
   const doAdvance=()=>{
     if(!_pendingAdvance)return;
@@ -4450,24 +4467,39 @@ document.addEventListener('click',e=>{
   }
 });
 
-// Pending advance state for double-tap skip
+// Pending advance state for tap skip
 let _pendingAdvance=null;
 
-// Double-tap on card area to skip delay and advance immediately
+// Show ✓ △ ✗ indicator between shuffle & star
+function showQuizResultIndicator(type){
+  const el=document.getElementById('quiz-result-indicator');
+  if(!el)return;
+  const map={g:{text:'✓ 覚えた',color:'var(--g)'},h:{text:'△ 難しい',color:'var(--y)'},f:{text:'✗ 忘れた',color:'var(--r)'}};
+  const cfg=map[type]||map.f;
+  el.textContent=cfg.text;
+  el.style.color=cfg.color;
+  el.style.display='flex';
+  el.classList.remove('pop-in');
+  void el.offsetWidth;
+  el.classList.add('pop-in');
+}
+function hideQuizResultIndicator(){
+  const el=document.getElementById('quiz-result-indicator');
+  if(el){el.style.display='none';el.classList.remove('pop-in');}
+}
+
+// Single tap on card area to skip delay and advance
 (()=>{
-  let lastTap=0;
   document.addEventListener('touchend',e=>{
     if(!_pendingAdvance)return;
-    if(!e.target.closest('.ca,.quiz-choices,.fw'))return;
-    const now=Date.now();
-    if(now-lastTap<400){
-      // Double-tap detected
-      haptic();
-      const pa=_pendingAdvance;
-      _pendingAdvance=null;
-      slideOutChoicesThen(()=>{An(pa.panel,pa.result);renderQuiz(pa.panel);});
-    }
-    lastTap=now;
+    // Ignore taps on quiz choice buttons themselves
+    if(e.target.closest('.quiz-choice,button'))return;
+    if(!e.target.closest('.ca,.quiz-choices,.fw,.fc'))return;
+    haptic();
+    const pa=_pendingAdvance;
+    _pendingAdvance=null;
+    hideQuizResultIndicator();
+    slideOutChoicesThen(()=>{An(pa.panel,pa.result);renderQuiz(pa.panel);});
   },{passive:true});
 })();
 
