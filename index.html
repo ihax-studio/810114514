@@ -3901,8 +3901,20 @@ document.addEventListener('click',e=>{
 
   function doDeleteAll(){
     haptic.error();haptic.error();haptic.error();
-    try{localStorage.removeItem(CACHE_KEY);localStorage.removeItem(STAR_KEY);localStorage.removeItem(STAR_TOOLTIP_KEY);}catch(_){}
+    // Clear ALL inglish_ keys + known keys
+    try{
+      const keysToRemove=[];
+      for(let i=0;i<localStorage.length;i++){
+        const k=localStorage.key(i);
+        if(k&&(k.startsWith('inglish_')||k===CACHE_KEY||k===STAR_KEY||k===STAR_TOOLTIP_KEY))keysToRemove.push(k);
+      }
+      keysToRemove.forEach(k=>localStorage.removeItem(k));
+    }catch(_){}
     fCache={};starCache={};
+    // Clear Service Worker caches
+    if('caches' in window){
+      caches.keys().then(names=>{names.forEach(n=>caches.delete(n));}).catch(()=>{});
+    }
     // Scale 1→1.2 zoom out effect then reload
     ov.style.background='rgba(0,0,0,1)';
     content.style.opacity='0';
