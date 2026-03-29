@@ -602,7 +602,13 @@ pointer-events:auto;
 .quiz-choices{
 display:flex;flex-direction:column;gap:6px;
 padding:6px 14px 8px;max-width:420px;margin:0 auto;width:100%;
+transform:translateY(0);opacity:1;
+transition:transform .5s cubic-bezier(.34,1.05,.64,1),opacity .3s;
 }
+.quiz-choices.slide-in{animation:qcSlideIn .4s cubic-bezier(.34,1.05,.64,1) both}
+.quiz-choices.slide-out{animation:qcSlideOut .5s ease both}
+@keyframes qcSlideIn{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes qcSlideOut{from{transform:translateY(0);opacity:1}to{transform:translateY(40px);opacity:0}}
 .quiz-choice{
 background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
 border:1.5px solid rgba(255,255,255,.8);border-radius:14px;
@@ -4205,13 +4211,20 @@ function syncTimerChecks(){
 
 // Delayed advance helper: 1.5s or wait for speech to end (whichever is longer)
 let _delayedAdvanceTimers=[];
+function slideOutChoicesThen(fn){
+  const els=document.querySelectorAll('.quiz-choices[style*="flex"]');
+  if(els.length){
+    els.forEach(el=>{el.classList.remove('slide-in');el.classList.add('slide-out');});
+    setTimeout(fn,500);
+  }else{fn();}
+}
 function delayedAdvance(fn){
   // Clear any previous timers
   _delayedAdvanceTimers.forEach(t=>clearTimeout(t));
   _delayedAdvanceTimers=[];
   const minDelay=1500;
   const start=Date.now();
-  const wrappedFn=()=>{if(_pendingAdvance)fn();};
+  const wrappedFn=()=>{if(_pendingAdvance)slideOutChoicesThen(fn);};
   if(isAutoSpeak()&&window.speechSynthesis&&speechSynthesis.speaking){
     const check=setInterval(()=>{
       if(!speechSynthesis.speaking){
@@ -4331,7 +4344,7 @@ function quizTimeUp(i){
     const nextBtn=document.createElement('button');
     nextBtn.className='ab af';nextBtn.style.cssText='margin:10px auto;display:flex';
     nextBtn.innerHTML='<span>→</span>次へ';
-    nextBtn.onclick=()=>{An(i,'f');renderQuiz(i);};
+    nextBtn.onclick=()=>{slideOutChoicesThen(()=>{An(i,'f');renderQuiz(i);});};
     if(choicesEl)choicesEl.appendChild(nextBtn);
   }
 }
@@ -4374,6 +4387,10 @@ function renderQuiz(i){
   const {choices,correct}=generateChoices(d.deck,d.idx,numChoices);
   if(choicesEl){
     choicesEl.style.display='flex';
+    choicesEl.classList.remove('slide-out');
+    choicesEl.classList.remove('slide-in');
+    void choicesEl.offsetWidth;
+    choicesEl.classList.add('slide-in');
     choicesEl.innerHTML=choices.map((c,j)=>
       `<button class="quiz-choice" data-answer="${c.replace(/"/g,'&quot;')}" data-correct="${correct.replace(/"/g,'&quot;')}" data-panel="${i}">
         <span class="qc-num">${j+1}</span><span>${c}</span>
@@ -4428,7 +4445,7 @@ document.addEventListener('click',e=>{
     const nextBtn=document.createElement('button');
     nextBtn.className='ab ag';nextBtn.style.cssText='margin:10px auto;display:flex';
     nextBtn.innerHTML='<span>→</span>次へ';
-    nextBtn.onclick=()=>{An(i,result);renderQuiz(i);};
+    nextBtn.onclick=()=>{slideOutChoicesThen(()=>{An(i,result);renderQuiz(i);});};
     choicesEl.appendChild(nextBtn);
   }
 });
@@ -4448,8 +4465,7 @@ let _pendingAdvance=null;
       haptic();
       const pa=_pendingAdvance;
       _pendingAdvance=null;
-      An(pa.panel,pa.result);
-      renderQuiz(pa.panel);
+      slideOutChoicesThen(()=>{An(pa.panel,pa.result);renderQuiz(pa.panel);});
     }
     lastTap=now;
   },{passive:true});
