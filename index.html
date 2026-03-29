@@ -4183,6 +4183,27 @@ function syncTimerChecks(){
   });
 }
 
+// Delayed advance helper: 1.5s or wait for speech to end (whichever is longer)
+function delayedAdvance(fn){
+  const minDelay=1500;
+  const start=Date.now();
+  if(isAutoSpeak()&&window.speechSynthesis&&speechSynthesis.speaking){
+    // Wait for speech end, then ensure at least 1.5s total
+    const check=setInterval(()=>{
+      if(!speechSynthesis.speaking){
+        clearInterval(check);
+        const elapsed=Date.now()-start;
+        const remaining=Math.max(0,minDelay-elapsed);
+        setTimeout(fn,remaining);
+      }
+    },100);
+    // Safety timeout: max 8s
+    setTimeout(()=>{clearInterval(check);fn();},8000);
+  }else{
+    setTimeout(fn,minDelay);
+  }
+}
+
 // Auto-next & auto-speak settings
 const AUTO_NEXT_KEY='inglish_auto_next';
 const AUTO_SPEAK_KEY='inglish_auto_speak';
@@ -4258,7 +4279,7 @@ function startCardAnswerTimer(panelIdx){
         haptic.error();
         if(isAutoSpeak())speakEn(d.deck[d.idx].e||d.deck[d.idx].w||'');
         if(isAutoNext()){
-          setTimeout(()=>{An(panelIdx,'f');},2000);
+          delayedAdvance(()=>{An(panelIdx,'f');});
         }
         // If not autoNext, user still sees buttons to respond manually
       }
@@ -4282,7 +4303,7 @@ function quizTimeUp(i){
   // Auto-speak
   if(isAutoSpeak()&&d.idx<d.deck.length)speakEn(d.deck[d.idx].e||d.deck[d.idx].w||'');
   if(isAutoNext()){
-    setTimeout(()=>{An(i,'f');renderQuiz(i);},2000);
+    delayedAdvance(()=>{An(i,'f');renderQuiz(i);});
   }else{
     const nextBtn=document.createElement('button');
     nextBtn.className='ab af';nextBtn.style.cssText='margin:10px auto;display:flex';
@@ -4367,11 +4388,11 @@ document.addEventListener('click',e=>{
     if(d.idx<d.deck.length)speakEn(d.deck[d.idx].e||d.deck[d.idx].w||'');
   }
   if(isAutoNext()){
-    setTimeout(()=>{
+    delayedAdvance(()=>{
       if(isCorrect)An(i,'g');
       else An(i,'f');
       renderQuiz(i);
-    },2000);
+    });
   }else{
     // Manual: mark answer but don't advance — show "次へ" button
     const result=isCorrect?'g':'f';
