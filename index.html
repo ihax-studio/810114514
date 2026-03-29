@@ -642,18 +642,32 @@ transition:width .1s linear;width:100%;
 .quiz-active .ca{padding:2px 14px 4px}
 .quiz-active .fh{display:none}
 .quiz-choices+.acts{display:none!important}
-/* Quiz result indicator between shuffle & star */
+/* Quiz result buttons between shuffle & star */
 #quiz-result-indicator{
 font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;
 }
-#quiz-result-indicator.pop-in{
-animation:qrPop .4s cubic-bezier(.34,1.56,.64,1) both;
+.qr-btn{
+height:44px;border-radius:55px;padding:0 14px;
+font-size:13px;font-weight:800;
+font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;
+border:none;cursor:pointer;
+display:flex;align-items:center;justify-content:center;gap:4px;
+white-space:nowrap;
+backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 4px 16px rgba(0,0,0,.10);
+transform:scale(.8);opacity:0;
+animation:qrBtnIn .8s ease both;
+transition:transform .12s;
 }
-@keyframes qrPop{
-0%{transform:scale(.5);opacity:0}
-60%{transform:scale(1.1);opacity:1}
+.qr-btn:active{transform:scale(.88)!important}
+.qr-btn:nth-child(2){animation-delay:.1s}
+@keyframes qrBtnIn{
+0%{transform:scale(.8);opacity:0}
 100%{transform:scale(1);opacity:1}
 }
+.qr-btn-g{background:rgba(52,199,89,.15);color:#1a7a35;border:1px solid rgba(52,199,89,.3)}
+.qr-btn-h{background:rgba(255,149,0,.15);color:#7a4a00;border:1px solid rgba(255,149,0,.3)}
+.qr-btn-f{background:rgba(255,59,48,.15);color:#c0001a;border:1px solid rgba(255,59,48,.3)}
 .float-btn.pop{animation:starPop .3s ease}
 
 /* ═══ SHAKE TOOLTIP ═══ */
@@ -1123,7 +1137,7 @@ overflow:hidden;
   <!-- FLOAT BAR (fixed, global for card mode) -->
   <div class="float-bar" id="float-bar" style="display:none">
     <button class="float-btn" id="g-sfb" title="シャッフル">🔀</button>
-    <div id="quiz-result-indicator" style="display:none;height:52px;border-radius:55px;padding:0 16px;font-size:16px;font-weight:800;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;align-items:center;justify-content:center;pointer-events:none;white-space:nowrap;background:rgba(255,255,255,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 4px 16px rgba(0,0,0,.10)"></div>
+    <div id="quiz-result-indicator" style="display:none;gap:6px;align-items:center;justify-content:center;pointer-events:auto"></div>
     <button class="float-btn" id="g-star" title="お気に入り">☆</button>
   </div>
   <div class="lswrap" id="list-wrap" style="display:none">
@@ -4450,8 +4464,10 @@ document.addEventListener('click',e=>{
   const doAdvance=()=>{
     if(!_pendingAdvance)return;
     clearTimeout(_pendingAdvance.timer);
+    const finalResult=_pendingAdvance.result;
     _pendingAdvance=null;
-    An(i,result);
+    hideQuizResultIndicator();
+    An(i,finalResult);
     renderQuiz(i);
   };
   if(isAutoNext()){
@@ -4470,23 +4486,43 @@ document.addEventListener('click',e=>{
 // Pending advance state for tap skip
 let _pendingAdvance=null;
 
-// Show ✓ △ ✗ indicator between shuffle & star
+// Show result action buttons between shuffle & star
+// correct → 覚えた / 難しい, wrong → 忘れた / 難しい
 function showQuizResultIndicator(type){
   const el=document.getElementById('quiz-result-indicator');
   if(!el)return;
-  const map={g:{text:'✓ 覚えた',color:'var(--g)'},h:{text:'△ 難しい',color:'var(--y)'},f:{text:'✗ 忘れた',color:'var(--r)'}};
-  const cfg=map[type]||map.f;
-  el.textContent=cfg.text;
-  el.style.color=cfg.color;
   el.style.display='flex';
-  el.classList.remove('pop-in');
-  void el.offsetWidth;
-  el.classList.add('pop-in');
+  if(type==='g'){
+    // Correct: 覚えた + 難しい
+    el.innerHTML=
+      '<button class="qr-btn qr-btn-g" data-qr="g">✓ 覚えた</button>'+
+      '<button class="qr-btn qr-btn-h" data-qr="h">△ 難しい</button>';
+  }else{
+    // Wrong/timeout: 忘れた + 難しい
+    el.innerHTML=
+      '<button class="qr-btn qr-btn-f" data-qr="f">✗ 忘れた</button>'+
+      '<button class="qr-btn qr-btn-h" data-qr="h">△ 難しい</button>';
+  }
 }
 function hideQuizResultIndicator(){
   const el=document.getElementById('quiz-result-indicator');
-  if(el){el.style.display='none';el.classList.remove('pop-in');}
+  if(el){el.style.display='none';el.innerHTML='';}
 }
+
+// Handle result button click — override the pending result and advance
+document.addEventListener('click',e=>{
+  const qr=e.target.closest('.qr-btn');
+  if(!qr||!_pendingAdvance)return;
+  haptic();
+  const newResult=qr.dataset.qr;
+  const pa=_pendingAdvance;
+  _pendingAdvance=null;
+  // Cancel any pending delayed advance
+  _delayedAdvanceTimers.forEach(t=>clearTimeout(t));
+  _delayedAdvanceTimers=[];
+  hideQuizResultIndicator();
+  slideOutChoicesThen(()=>{An(pa.panel,newResult);renderQuiz(pa.panel);});
+});
 
 // Single tap on card area to skip delay and advance
 (()=>{
