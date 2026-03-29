@@ -1965,11 +1965,15 @@ window.Fl=i=>{
   document.getElementById('fc'+i).classList.toggle('fl',d.flipped);
   haptic();
   document.getElementById('ac'+i).style.display=d.flipped?'flex':'none';
+  // Start answer timer when card is flipped to back (tap mode)
+  if(d.flipped&&typeof startCardAnswerTimer==='function')startCardAnswerTimer(i);
+  if(!d.flipped&&typeof stopQuizTimer==='function')stopQuizTimer();
 };
 
 // Answer
 window.An=(i,t)=>{
   const d=DK[i];if(d.idx>=d.deck.length)return;
+  if(typeof stopQuizTimer==='function')stopQuizTimer();
   if(t==='g')hRemember(); else if(t==='f')hForgot(); else hHard();
   d.prev={deck:[...d.deck],idx:d.idx,st:{...d.st},hist:[...d.hist]};
   const w=d.deck[d.idx];
@@ -4195,6 +4199,34 @@ function startQuizTimer(panelIdx){
 }
 function stopQuizTimer(){
   if(_quizTimerIv){clearInterval(_quizTimerIv);_quizTimerIv=null;}
+  // Hide all timer bars
+  document.querySelectorAll('.quiz-timer-wrap').forEach(el=>{el.style.display='none';});
+}
+// Card tap mode: 5-second answer timer after flip
+function startCardAnswerTimer(panelIdx){
+  stopQuizTimer();
+  const dur=getQuizTimer();
+  if(dur<=0)return;
+  _quizTimerDur=dur*1000;
+  _quizTimerStart=Date.now();
+  const barWrap=document.getElementById('qt-wrap-'+panelIdx);
+  const bar=document.getElementById('qt-bar-'+panelIdx);
+  if(barWrap)barWrap.style.display='';
+  if(bar)bar.style.width='100%';
+  _quizTimerIv=setInterval(()=>{
+    const elapsed=Date.now()-_quizTimerStart;
+    const pct=Math.max(0,1-elapsed/_quizTimerDur)*100;
+    if(bar)bar.style.width=pct+'%';
+    if(elapsed>=_quizTimerDur){
+      stopQuizTimer();
+      // Time up on card mode — auto mark as forgot and go next
+      const d=DK[panelIdx];
+      if(d.idx<d.deck.length){
+        haptic.error();
+        An(panelIdx,'f');
+      }
+    }
+  },50);
 }
 function quizTimeUp(i){
   const d=DK[i];
