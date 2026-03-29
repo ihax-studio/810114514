@@ -4504,7 +4504,7 @@ function applyClockColor(){
   const prev2=document.getElementById('wp-dialog-clock-text');
   if(prev2)prev2.style.color=color;
 }
-function openClockColorPicker(){
+window.openClockColorPicker=function(){
   haptic();
   const ov=document.getElementById('clock-color-overlay');
   const card=document.getElementById('clock-color-card');
@@ -4519,7 +4519,7 @@ function openClockColorPicker(){
   ov.style.display='block';
   requestAnimationFrame(()=>{ov.style.background='rgba(0,0,0,.4)';card.style.transform='translateY(0)';});
 }
-function closeClockColorPicker(){
+window.closeClockColorPicker=function(){
   haptic();
   const ov=document.getElementById('clock-color-overlay');
   const card=document.getElementById('clock-color-card');
