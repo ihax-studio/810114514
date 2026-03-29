@@ -536,7 +536,7 @@ padding:2px 6px;
 
 /* ═══ CORRECT ANSWER FIREWORK ═══ */
 .firework-container{position:fixed;inset:0;pointer-events:none;z-index:9999}
-.firework-dot{position:absolute;width:8px;height:8px;border-radius:50%;animation:fwBurst .7s ease-out forwards}
+.firework-dot{position:absolute;width:12px;height:12px;border-radius:50%;animation:fwBurst .9s ease-out forwards}
 @keyframes fwBurst{
   0%{transform:translate(0,0) scale(1);opacity:1}
   100%{opacity:0}
@@ -640,10 +640,25 @@ width:24px;height:24px;border-radius:50%;
 background:rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;
 font-size:11px;font-weight:800;color:var(--sub);flex-shrink:0;
 }
-.quiz-choice.correct{background:rgba(52,199,89,.18)!important;border-color:rgba(52,199,89,.5)!important;color:#1a7a35}
+.quiz-choice.correct{background:rgba(52,199,89,.18)!important;border-color:rgba(52,199,89,.5)!important;color:#1a7a35;animation:qcCorrectPop .5s cubic-bezier(.34,1.56,.64,1) both!important}
 .quiz-choice.correct .qc-num{background:rgba(52,199,89,.25);color:#1a7a35}
-.quiz-choice.wrong{background:rgba(255,59,48,.12)!important;border-color:rgba(255,59,48,.4)!important;color:#c0001a}
+@keyframes qcCorrectPop{
+0%{transform:scale(1)}
+30%{transform:scale(1.12)}
+60%{transform:scale(.97)}
+100%{transform:scale(1.04)}
+}
+.quiz-choice.wrong{background:rgba(255,59,48,.12)!important;border-color:rgba(255,59,48,.4)!important;color:#c0001a;animation:qcWrongShake .45s ease both!important}
 .quiz-choice.wrong .qc-num{background:rgba(255,59,48,.2);color:#c0001a}
+@keyframes qcWrongShake{
+0%,100%{transform:translateX(0)}
+15%{transform:translateX(-8px)}
+30%{transform:translateX(7px)}
+45%{transform:translateX(-6px)}
+60%{transform:translateX(5px)}
+75%{transform:translateX(-3px)}
+90%{transform:translateX(2px)}
+}
 .quiz-choice.disabled{pointer-events:none;opacity:.6}
 /* Timer bar */
 .quiz-timer-wrap{
@@ -4638,7 +4653,7 @@ function spawnFirework(el){
   container.className='firework-container';
   document.body.appendChild(container);
   const colors=['#FF3B30','#FF9500','#FFCC00','#34C759','#007AFF','#5856D6','#AF52DE','#FF2D55'];
-  const numDots=16;
+  const numDots=24;
   for(let k=0;k<numDots;k++){
     const dot=document.createElement('div');
     dot.className='firework-dot';
@@ -4646,7 +4661,7 @@ function spawnFirework(el){
     dot.style.top=cy+'px';
     dot.style.background=colors[k%colors.length];
     const angle=(k/numDots)*Math.PI*2;
-    const dist=40+Math.random()*60;
+    const dist=70+Math.random()*90;
     const tx=Math.cos(angle)*dist;
     const ty=Math.sin(angle)*dist;
     dot.style.animation='none';
@@ -4658,12 +4673,12 @@ function spawnFirework(el){
     // Use custom keyframes per dot
     dot.animate([
       {transform:'translate(0,0) scale(1)',opacity:1},
-      {transform:`translate(${tx}px,${ty}px) scale(0.3)`,opacity:0}
-    ],{duration:700,easing:'ease-out',fill:'forwards'});
+      {transform:`translate(${tx}px,${ty}px) scale(0)`,opacity:0}
+    ],{duration:900,easing:'cubic-bezier(.2,.8,.3,1)',fill:'forwards'});
     dot.style.animation='';
     container.appendChild(dot);
   }
-  setTimeout(()=>container.remove(),800);
+  setTimeout(()=>container.remove(),1000);
 }
 /* ═══ SERVICE WORKER REGISTRATION ═══ */
 if('serviceWorker' in navigator){
