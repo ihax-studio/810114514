@@ -4184,23 +4184,26 @@ function syncTimerChecks(){
 }
 
 // Delayed advance helper: 1.5s or wait for speech to end (whichever is longer)
+let _delayedAdvanceTimers=[];
 function delayedAdvance(fn){
+  // Clear any previous timers
+  _delayedAdvanceTimers.forEach(t=>clearTimeout(t));
+  _delayedAdvanceTimers=[];
   const minDelay=1500;
   const start=Date.now();
+  const wrappedFn=()=>{if(_pendingAdvance)fn();};
   if(isAutoSpeak()&&window.speechSynthesis&&speechSynthesis.speaking){
-    // Wait for speech end, then ensure at least 1.5s total
     const check=setInterval(()=>{
       if(!speechSynthesis.speaking){
         clearInterval(check);
         const elapsed=Date.now()-start;
         const remaining=Math.max(0,minDelay-elapsed);
-        setTimeout(fn,remaining);
+        _delayedAdvanceTimers.push(setTimeout(wrappedFn,remaining));
       }
     },100);
-    // Safety timeout: max 8s
-    setTimeout(()=>{clearInterval(check);fn();},8000);
+    _delayedAdvanceTimers.push(setTimeout(()=>{clearInterval(check);wrappedFn();},8000));
   }else{
-    setTimeout(fn,minDelay);
+    _delayedAdvanceTimers.push(setTimeout(wrappedFn,minDelay));
   }
 }
 
@@ -4387,15 +4390,21 @@ document.addEventListener('click',e=>{
     const d=DK[i];
     if(d.idx<d.deck.length)speakEn(d.deck[d.idx].e||d.deck[d.idx].w||'');
   }
+  const result=isCorrect?'g':'f';
+  // Set up pending advance — double-tap card to skip delay
+  _pendingAdvance={panel:i,result,timer:null};
+  const doAdvance=()=>{
+    if(!_pendingAdvance)return;
+    clearTimeout(_pendingAdvance.timer);
+    _pendingAdvance=null;
+    An(i,result);
+    renderQuiz(i);
+  };
   if(isAutoNext()){
-    delayedAdvance(()=>{
-      if(isCorrect)An(i,'g');
-      else An(i,'f');
-      renderQuiz(i);
-    });
+    _pendingAdvance.timer=null;
+    delayedAdvance(doAdvance);
   }else{
-    // Manual: mark answer but don't advance — show "次へ" button
-    const result=isCorrect?'g':'f';
+    // Manual: show "次へ" button
     const nextBtn=document.createElement('button');
     nextBtn.className='ab ag';nextBtn.style.cssText='margin:10px auto;display:flex';
     nextBtn.innerHTML='<span>→</span>次へ';
@@ -4403,6 +4412,28 @@ document.addEventListener('click',e=>{
     choicesEl.appendChild(nextBtn);
   }
 });
+
+// Pending advance state for double-tap skip
+let _pendingAdvance=null;
+
+// Double-tap on card area to skip delay and advance immediately
+(()=>{
+  let lastTap=0;
+  document.addEventListener('touchend',e=>{
+    if(!_pendingAdvance)return;
+    if(!e.target.closest('.ca,.quiz-choices,.fw'))return;
+    const now=Date.now();
+    if(now-lastTap<400){
+      // Double-tap detected
+      haptic();
+      const pa=_pendingAdvance;
+      _pendingAdvance=null;
+      An(pa.panel,pa.result);
+      renderQuiz(pa.panel);
+    }
+    lastTap=now;
+  },{passive:true});
+})();
 
 // Quiz render logic is added at end of render() function directly
 
