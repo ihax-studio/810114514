@@ -936,8 +936,7 @@ overflow:hidden;
               <div id="wp-lock-preview" style="width:130px;height:230px;border-radius:18px;background:#fff;overflow:hidden;position:relative;border:1px solid rgba(0,0,0,.1);box-shadow:0 4px 16px rgba(0,0,0,.12)">
                 <div id="wp-lock-bg" style="position:absolute;inset:0;background:#fff;background-size:cover;background-position:center"></div>
                 <div style="position:relative;z-index:1;padding-top:36px;text-align:center">
-                  <div id="wp-lock-clock-preview" style="font-size:32px;font-weight:200;color:#000;letter-spacing:-1px;cursor:pointer" onclick="document.getElementById('wp-clock-color-input').click()">10:09</div>
-                  <input type="color" id="wp-clock-color-input" value="#000000" style="position:absolute;opacity:0;pointer-events:none">
+                  <div id="wp-lock-clock-preview" style="font-size:32px;font-weight:200;color:#000;letter-spacing:-1px;cursor:pointer" onclick="openClockColorPicker()">10:09</div>
                 </div>
               </div>
               <button id="wp-lock-customize" style="margin-top:10px;padding:7px 18px;border-radius:55px;border:none;background:rgba(0,0,0,.06);color:var(--tx);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">カスタマイズ</button>
@@ -980,8 +979,7 @@ overflow:hidden;
     <div style="overflow-y:auto;padding:0 20px 20px;-webkit-overflow-scrolling:touch">
       <!-- Time preview for lock screen -->
       <div id="wp-time-preview" style="display:none;text-align:center;padding:10px 0 16px">
-        <div id="wp-dialog-clock-text" style="font-size:56px;font-weight:200;color:#000;letter-spacing:-2px;cursor:pointer" onclick="document.getElementById('wp-clock-color-input2').click()">10:09</div>
-        <input type="color" id="wp-clock-color-input2" value="#000000" style="position:absolute;opacity:0;pointer-events:none">
+        <div id="wp-dialog-clock-text" style="font-size:56px;font-weight:200;color:#000;letter-spacing:-2px;cursor:pointer" onclick="openClockColorPicker()">10:09</div>
         <div style="margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px">
           <span style="font-size:12px;color:var(--sub)">細い</span>
           <input type="range" id="wp-lock-weight" min="100" max="700" step="100" value="200" style="width:150px;accent-color:#007aff">
@@ -2373,11 +2371,9 @@ function openWPDialog(target){
     document.getElementById('wp-lock-weight').value=w;
     timePrev.querySelector('div').style.fontWeight=w;
   }
-  // Sync clock color inputs
+  // Sync clock color preview
   if(target==='lock'){
     const cc=localStorage.getItem('inglish_clock_color')||'#000000';
-    const ci1=document.getElementById('wp-clock-color-input');if(ci1)ci1.value=cc;
-    const ci2=document.getElementById('wp-clock-color-input2');if(ci2)ci2.value=cc;
     const dp=document.getElementById('wp-dialog-clock-text');if(dp)dp.style.color=cc;
   }
   const cur=loadWP(target==='lock'?WP_LOCK_KEY:WP_HOME_KEY);
@@ -4325,8 +4321,15 @@ window.Fl=function(i){
 
 // Quiz/timer sync is done inside openSettings via mutation below
 
-/* ═══ CLOCK COLOR PICKER ═══ */
+/* ═══ CLOCK COLOR PICKER (iOS-friendly palette) ═══ */
 const CLOCK_COLOR_KEY='inglish_clock_color';
+const CLOCK_COLORS=[
+  '#000000','#FFFFFF','#8E8E93','#FF3B30','#FF9500','#FFCC00',
+  '#34C759','#00C7BE','#30B0C7','#007AFF','#5856D6','#AF52DE',
+  '#FF2D55','#A2845E','#1C1C1E','#F2F2F7','#636366','#C0001A',
+  '#D4A017','#8B6914','#0A7A3E','#005F73','#003FA0','#3634A3',
+  '#2A2880','#7A4A00','#48484A','#AEAEB2','#D1D1D6','#E5E5EA',
+];
 function applyClockColor(){
   const color=localStorage.getItem(CLOCK_COLOR_KEY)||'#000';
   document.getElementById('lock-clock').style.color=color;
@@ -4334,24 +4337,63 @@ function applyClockColor(){
   const lbl=document.getElementById('lock-slide-label');if(lbl)lbl.style.color=color;
   const knobSvg=document.querySelector('#lock-knob svg polyline');
   if(knobSvg)knobSvg.setAttribute('stroke',color);
-  // Update previews
   const prev1=document.getElementById('wp-lock-clock-preview');
   if(prev1)prev1.style.color=color;
   const prev2=document.getElementById('wp-dialog-clock-text');
   if(prev2)prev2.style.color=color;
 }
-// Color input handler (preview in settings)
-document.getElementById('wp-clock-color-input').addEventListener('input',e=>{
-  const color=e.target.value;
+function openClockColorPicker(){
+  haptic();
+  const ov=document.getElementById('clock-color-overlay');
+  const card=document.getElementById('clock-color-card');
+  const grid=document.getElementById('clock-color-grid');
+  const preview=document.getElementById('clock-color-preview');
+  const cur=localStorage.getItem(CLOCK_COLOR_KEY)||'#000000';
+  preview.style.color=cur;
+  grid.innerHTML=CLOCK_COLORS.map(c=>{
+    const sel=c.toLowerCase()===cur.toLowerCase();
+    return `<div data-color="${c}" style="width:100%;aspect-ratio:1;border-radius:50%;background:${c};cursor:pointer;border:${sel?'3px solid #007AFF':'2px solid rgba(0,0,0,.1)'};box-shadow:${sel?'0 0 0 2px #fff,0 0 0 4px #007AFF':'0 1px 3px rgba(0,0,0,.1)'};transition:transform .12s,border .15s" class="cc-swatch"></div>`;
+  }).join('');
+  ov.style.display='block';
+  requestAnimationFrame(()=>{ov.style.background='rgba(0,0,0,.4)';card.style.transform='translateY(0)';});
+}
+function closeClockColorPicker(){
+  haptic();
+  const ov=document.getElementById('clock-color-overlay');
+  const card=document.getElementById('clock-color-card');
+  card.style.transform='translateY(100%)';
+  ov.style.background='rgba(0,0,0,0)';
+  setTimeout(()=>{ov.style.display='none';},400);
+}
+function setClockColor(color){
   localStorage.setItem(CLOCK_COLOR_KEY,color);
   applyClockColor();
+  const preview=document.getElementById('clock-color-preview');
+  if(preview)preview.style.color=color;
+  // Update swatch selection
+  document.querySelectorAll('.cc-swatch').forEach(s=>{
+    const sc=s.dataset.color;
+    const sel=sc.toLowerCase()===color.toLowerCase();
+    s.style.border=sel?'3px solid #007AFF':'2px solid rgba(0,0,0,.1)';
+    s.style.boxShadow=sel?'0 0 0 2px #fff,0 0 0 4px #007AFF':'0 1px 3px rgba(0,0,0,.1)';
+  });
+}
+// Swatch click
+document.addEventListener('click',e=>{
+  const sw=e.target.closest('.cc-swatch');
+  if(!sw)return;
+  haptic();
+  sw.style.transform='scale(.85)';
+  setTimeout(()=>{sw.style.transform='';},150);
+  setClockColor(sw.dataset.color);
 });
-document.getElementById('wp-clock-color-input2').addEventListener('input',e=>{
-  const color=e.target.value;
-  localStorage.setItem(CLOCK_COLOR_KEY,color);
-  applyClockColor();
+// Custom color fallback button
+document.getElementById('clock-color-custom-btn').addEventListener('click',()=>{
+  haptic();document.getElementById('clock-color-custom').click();
 });
-// Clock color sync on dialog open is handled inside openWPDialog
+document.getElementById('clock-color-custom').addEventListener('input',e=>{
+  setClockColor(e.target.value);
+});
 // Apply on startup
 applyClockColor();
 
@@ -4361,5 +4403,22 @@ if('serviceWorker' in navigator){
 }
 </script>
 
+<!-- ══════════ CLOCK COLOR PALETTE ══════════ -->
+<div id="clock-color-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0);transition:background .3s" onclick="closeClockColorPicker()">
+  <div id="clock-color-card" style="position:absolute;bottom:0;left:0;right:0;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.05,.64,1)" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;padding:16px 20px 10px">
+      <div style="flex:1;font-size:17px;font-weight:700;color:#000">時計の色</div>
+      <button onclick="closeClockColorPicker()" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.06);border:none;font-size:18px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#000;line-height:1">✕</button>
+    </div>
+    <div style="padding:0 20px 20px">
+      <div id="clock-color-preview" style="text-align:center;font-size:48px;font-weight:200;letter-spacing:-2px;color:#000;padding:10px 0 16px">10:09</div>
+      <div id="clock-color-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:0 4px"></div>
+      <div style="text-align:center;margin-top:14px">
+        <button id="clock-color-custom-btn" style="padding:10px 20px;border-radius:55px;border:none;background:rgba(0,0,0,.06);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--tx)">カスタムカラー</button>
+        <input type="color" id="clock-color-custom" value="#000000" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0">
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
