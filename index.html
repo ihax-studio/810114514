@@ -907,6 +907,11 @@ overflow:hidden;
             <div class="s-row s-timer-opt" id="s-timer-10"><div class="s-label">10秒（デフォルト）</div><div class="s-check s-on" id="sc-timer-10">✓</div></div>
             <div class="s-row s-timer-opt" id="s-timer-15"><div class="s-label">15秒</div><div class="s-check" id="sc-timer-15">✓</div></div>
           </div>
+          <div class="s-sec" style="margin-top:14px">オプション</div>
+          <div class="s-group">
+            <div class="s-row"><div class="s-label">自動で次の問題に進む</div><div class="s-toggle on" id="s-auto-next"><div class="s-knob"></div></div></div>
+            <div class="s-row"><div class="s-label">答え表示時に読み上げ</div><div class="s-toggle" id="s-auto-speak"><div class="s-knob"></div></div></div>
+          </div>
         </div>
         <!-- Gesture -->
         <div class="s-section" id="ss-gesture">
@@ -1966,7 +1971,12 @@ window.Fl=i=>{
   haptic();
   document.getElementById('ac'+i).style.display=d.flipped?'flex':'none';
   // Start answer timer when card is flipped to back (tap mode)
-  if(d.flipped&&typeof startCardAnswerTimer==='function')startCardAnswerTimer(i);
+  if(d.flipped){
+    if(typeof startCardAnswerTimer==='function')startCardAnswerTimer(i);
+    if(typeof isAutoSpeak==='function'&&isAutoSpeak()){
+      const w=d.deck[d.idx];if(w)speakEn(w.e||w.w||'');
+    }
+  }
   if(!d.flipped&&typeof stopQuizTimer==='function')stopQuizTimer();
 };
 
@@ -2593,6 +2603,7 @@ function openSettings(){
   // Sync quiz mode & timer checks
   if(typeof syncQuizChecks==='function')syncQuizChecks();
   if(typeof syncTimerChecks==='function')syncTimerChecks();
+  if(typeof syncQuizToggles==='function')syncQuizToggles();
 }
 
 function showSettingsSection(sec){
@@ -4172,6 +4183,28 @@ function syncTimerChecks(){
   });
 }
 
+// Auto-next & auto-speak settings
+const AUTO_NEXT_KEY='inglish_auto_next';
+const AUTO_SPEAK_KEY='inglish_auto_speak';
+function isAutoNext(){return localStorage.getItem(AUTO_NEXT_KEY)!=='0';}
+function isAutoSpeak(){return localStorage.getItem(AUTO_SPEAK_KEY)==='1';}
+document.getElementById('s-auto-next').addEventListener('click',function(){
+  haptic();
+  const on=!this.classList.contains('on');
+  this.classList.toggle('on',on);
+  localStorage.setItem(AUTO_NEXT_KEY,on?'1':'0');
+});
+document.getElementById('s-auto-speak').addEventListener('click',function(){
+  haptic();
+  const on=!this.classList.contains('on');
+  this.classList.toggle('on',on);
+  localStorage.setItem(AUTO_SPEAK_KEY,on?'1':'0');
+});
+function syncQuizToggles(){
+  document.getElementById('s-auto-next').classList.toggle('on',isAutoNext());
+  document.getElementById('s-auto-speak').classList.toggle('on',isAutoSpeak());
+}
+
 // Quiz timer state
 let _quizTimerIv=null;
 let _quizTimerStart=0;
@@ -4219,11 +4252,15 @@ function startCardAnswerTimer(panelIdx){
     if(bar)bar.style.width=pct+'%';
     if(elapsed>=_quizTimerDur){
       stopQuizTimer();
-      // Time up on card mode — auto mark as forgot and go next
+      // Time up on card mode
       const d=DK[panelIdx];
       if(d.idx<d.deck.length){
         haptic.error();
-        An(panelIdx,'f');
+        if(isAutoSpeak())speakEn(d.deck[d.idx].e||d.deck[d.idx].w||'');
+        if(isAutoNext()){
+          setTimeout(()=>{An(panelIdx,'f');},2000);
+        }
+        // If not autoNext, user still sees buttons to respond manually
       }
     }
   },50);
@@ -4242,11 +4279,17 @@ function quizTimeUp(i){
       if(btn.dataset.answer===correct)btn.classList.add('correct');
     });
   }
-  // Mark as forgot after delay
-  setTimeout(()=>{
-    An(i,'f');
-    renderQuiz(i);
-  },800);
+  // Auto-speak
+  if(isAutoSpeak()&&d.idx<d.deck.length)speakEn(d.deck[d.idx].e||d.deck[d.idx].w||'');
+  if(isAutoNext()){
+    setTimeout(()=>{An(i,'f');renderQuiz(i);},2000);
+  }else{
+    const nextBtn=document.createElement('button');
+    nextBtn.className='ab af';nextBtn.style.cssText='margin:10px auto;display:flex';
+    nextBtn.innerHTML='<span>→</span>次へ';
+    nextBtn.onclick=()=>{An(i,'f');renderQuiz(i);};
+    if(choicesEl)choicesEl.appendChild(nextBtn);
+  }
 }
 
 // Generate wrong answers from same deck
@@ -4318,11 +4361,26 @@ document.addEventListener('click',e=>{
   }else{
     haptic.confirm();
   }
-  setTimeout(()=>{
-    if(isCorrect)An(i,'g');
-    else An(i,'f');
-    renderQuiz(i);
-  },600);
+  // Auto-speak the word
+  if(isAutoSpeak()){
+    const d=DK[i];
+    if(d.idx<d.deck.length)speakEn(d.deck[d.idx].e||d.deck[d.idx].w||'');
+  }
+  if(isAutoNext()){
+    setTimeout(()=>{
+      if(isCorrect)An(i,'g');
+      else An(i,'f');
+      renderQuiz(i);
+    },2000);
+  }else{
+    // Manual: mark answer but don't advance — show "次へ" button
+    const result=isCorrect?'g':'f';
+    const nextBtn=document.createElement('button');
+    nextBtn.className='ab ag';nextBtn.style.cssText='margin:10px auto;display:flex';
+    nextBtn.innerHTML='<span>→</span>次へ';
+    nextBtn.onclick=()=>{An(i,result);renderQuiz(i);};
+    choicesEl.appendChild(nextBtn);
+  }
 });
 
 // Quiz render logic is added at end of render() function directly
