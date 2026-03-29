@@ -532,6 +532,14 @@ padding:2px 6px;
 .ans-ja:active{background:rgba(0,0,0,.06)}
 .ans-row{cursor:pointer;transition:background .1s}
 .ans-row:active{background:rgba(0,122,255,.08)!important}
+
+/* ═══ CORRECT ANSWER FIREWORK ═══ */
+.firework-container{position:fixed;inset:0;pointer-events:none;z-index:9999}
+.firework-dot{position:absolute;width:8px;height:8px;border-radius:50%;animation:fwBurst .7s ease-out forwards}
+@keyframes fwBurst{
+  0%{transform:translate(0,0) scale(1);opacity:1}
+  100%{opacity:0}
+}
 /* ═══ FORGOT CACHE BADGE ═══ */
 .forgot-dot{
 display:inline-block;width:6px;height:6px;border-radius:50%;
@@ -3273,6 +3281,11 @@ function ensureLists(){
 
 window.openS=function(type,arg){
   haptic.confirm();
+  // Clear any leftover quiz state
+  if(typeof stopQuizTimer==='function')stopQuizTimer();
+  if(typeof _pendingAdvance!=='undefined')_pendingAdvance=null;
+  if(typeof hideQuizResultIndicator==='function')hideQuizResultIndicator();
+  if(typeof _delayedAdvanceTimers!=='undefined'){_delayedAdvanceTimers.forEach(t=>clearTimeout(t));_delayedAdvanceTimers=[];}
   document.getElementById('home').classList.add('hidden');
   setTimeout(()=>document.getElementById('app').classList.add('vis'),30);
   const isCard=type==='card';
@@ -3299,6 +3312,12 @@ window.openS=function(type,arg){
 window.goHome=function(){
   haptic();
   sendStudyNotif();
+  // Clear quiz state to prevent crash on re-entry
+  stopQuizTimer();
+  _pendingAdvance=null;
+  hideQuizResultIndicator();
+  _delayedAdvanceTimers.forEach(t=>clearTimeout(t));
+  _delayedAdvanceTimers=[];
   document.getElementById('app').classList.remove('vis');
   document.getElementById('float-bar').style.display='none';
   setTimeout(()=>{
@@ -4249,7 +4268,7 @@ function delayedAdvance(fn){
   // Clear any previous timers
   _delayedAdvanceTimers.forEach(t=>clearTimeout(t));
   _delayedAdvanceTimers=[];
-  const minDelay=1500;
+  const minDelay=2000;
   const start=Date.now();
   const wrappedFn=()=>{if(_pendingAdvance)slideOutChoicesThen(fn);};
   if(isAutoSpeak()&&window.speechSynthesis&&speechSynthesis.speaking){
@@ -4364,17 +4383,16 @@ function quizTimeUp(i){
       if(btn.dataset.answer===correct)btn.classList.add('correct');
     });
   }
-  // Auto-speak
-  if(isAutoSpeak()&&d.idx<d.deck.length)speakEn(d.deck[d.idx].e||d.deck[d.idx].w||'');
-  if(isAutoNext()){
-    delayedAdvance(()=>{An(i,'f');renderQuiz(i);});
-  }else{
-    const nextBtn=document.createElement('button');
-    nextBtn.className='ab af';nextBtn.style.cssText='margin:10px auto;display:flex';
-    nextBtn.innerHTML='<span>→</span>次へ';
-    nextBtn.onclick=()=>{slideOutChoicesThen(()=>{An(i,'f');renderQuiz(i);});};
-    if(choicesEl)choicesEl.appendChild(nextBtn);
-  }
+  // Always speak + haptic on time up
+  if(d.idx<d.deck.length){haptic.confirm();speakEn(d.deck[d.idx].e||d.deck[d.idx].w||'');}
+  // Set up pending advance — tap anywhere to advance after 2s
+  _pendingAdvance={panel:i,result:'f',timer:null};
+  delayedAdvance(()=>{
+    if(!_pendingAdvance)return;
+    _pendingAdvance=null;
+    hideQuizResultIndicator();
+    An(i,'f');renderQuiz(i);
+  });
 }
 
 // Generate wrong answers from same deck
@@ -4398,6 +4416,7 @@ function renderQuiz(i){
   const mode=getQuizMode();
   const choicesEl=document.getElementById('qc-'+i);
   const timerWrap=document.getElementById('qt-wrap-'+i);
+  if(!choicesEl)return; // Panel not ready yet
   if(mode==='tap'){
     if(choicesEl)choicesEl.style.display='none';
     if(timerWrap)timerWrap.style.display='none';
@@ -4433,7 +4452,6 @@ function renderQuiz(i){
 document.addEventListener('click',e=>{
   const btn=e.target.closest('.quiz-choice');
   if(!btn||btn.classList.contains('disabled'))return;
-  haptic();
   stopQuizTimer();
   const i=parseInt(btn.dataset.panel,10);
   const answer=btn.dataset.answer;
@@ -4449,17 +4467,21 @@ document.addEventListener('click',e=>{
     btn.classList.add('wrong');
     haptic.error();
   }else{
-    haptic.confirm();
+    // Correct: ultraBurst haptic + firework
+    const delay=30;
+    for(let k=0;k<5;k++){setTimeout(()=>haptic.error(),k*delay);}
+    spawnFirework(btn);
   }
   // Show result indicator (✓/✗) between shuffle & star
   showQuizResultIndicator(isCorrect?'g':'f');
-  // Auto-speak the word
-  if(isAutoSpeak()){
-    const d=DK[i];
-    if(d.idx<d.deck.length)speakEn(d.deck[d.idx].e||d.deck[d.idx].w||'');
+  // Speak the word (Alex TTS) with haptic.confirm()
+  const d=DK[i];
+  if(d.idx<d.deck.length){
+    haptic.confirm();
+    speakEn(d.deck[d.idx].e||d.deck[d.idx].w||'');
   }
   const result=isCorrect?'g':'f';
-  // Set up pending advance — tap card to skip delay
+  // Set up pending advance — tap anywhere to advance after 2s
   _pendingAdvance={panel:i,result,timer:null};
   const doAdvance=()=>{
     if(!_pendingAdvance)return;
@@ -4470,17 +4492,8 @@ document.addEventListener('click',e=>{
     An(i,finalResult);
     renderQuiz(i);
   };
-  if(isAutoNext()){
-    _pendingAdvance.timer=null;
-    delayedAdvance(doAdvance);
-  }else{
-    // Manual: show "次へ" button
-    const nextBtn=document.createElement('button');
-    nextBtn.className='ab ag';nextBtn.style.cssText='margin:10px auto;display:flex';
-    nextBtn.innerHTML='<span>→</span>次へ';
-    nextBtn.onclick=()=>{slideOutChoicesThen(()=>{An(i,result);renderQuiz(i);});};
-    choicesEl.appendChild(nextBtn);
-  }
+  // Always use delayed advance (no manual 次へ button)
+  delayedAdvance(doAdvance);
 });
 
 // Pending advance state for tap skip
@@ -4524,17 +4537,20 @@ document.addEventListener('click',e=>{
   slideOutChoicesThen(()=>{An(pa.panel,newResult);renderQuiz(pa.panel);});
 });
 
-// Single tap on card area to skip delay and advance
+// Tap ANYWHERE (card, background, choices area) to skip delay and advance
 (()=>{
   document.addEventListener('touchend',e=>{
     if(!_pendingAdvance)return;
-    // Ignore taps on quiz choice buttons themselves
-    if(e.target.closest('.quiz-choice,button'))return;
-    if(!e.target.closest('.ca,.quiz-choices,.fw,.fc'))return;
+    // Ignore taps on settings, overlays, input bar, star list
+    if(e.target.closest('#settings-overlay,#tr-bar,#tr-overlay,#hsheet,#star-list-overlay,#flag-scrim'))return;
+    // Ignore taps on quiz choice buttons (already handled)
+    if(e.target.closest('.quiz-choice'))return;
     haptic();
     const pa=_pendingAdvance;
     _pendingAdvance=null;
     hideQuizResultIndicator();
+    _delayedAdvanceTimers.forEach(t=>clearTimeout(t));
+    _delayedAdvanceTimers=[];
     slideOutChoicesThen(()=>{An(pa.panel,pa.result);renderQuiz(pa.panel);});
   },{passive:true});
 })();
@@ -4604,6 +4620,43 @@ document.getElementById('clock-color-custom').addEventListener('input',e=>{
 // Apply on startup
 applyClockColor();
 
+
+/* ═══ FIREWORK BURST ON CORRECT ═══ */
+function spawnFirework(el){
+  const rect=el.getBoundingClientRect();
+  const cx=rect.left+rect.width/2;
+  const cy=rect.top+rect.height/2;
+  const container=document.createElement('div');
+  container.className='firework-container';
+  document.body.appendChild(container);
+  const colors=['#FF3B30','#FF9500','#FFCC00','#34C759','#007AFF','#5856D6','#AF52DE','#FF2D55'];
+  const numDots=16;
+  for(let k=0;k<numDots;k++){
+    const dot=document.createElement('div');
+    dot.className='firework-dot';
+    dot.style.left=cx+'px';
+    dot.style.top=cy+'px';
+    dot.style.background=colors[k%colors.length];
+    const angle=(k/numDots)*Math.PI*2;
+    const dist=40+Math.random()*60;
+    const tx=Math.cos(angle)*dist;
+    const ty=Math.sin(angle)*dist;
+    dot.style.animation='none';
+    void dot.offsetWidth;
+    dot.style.setProperty('--tx',tx+'px');
+    dot.style.setProperty('--ty',ty+'px');
+    dot.style.animation='fwBurst .7s ease-out forwards';
+    dot.style.transform='translate(0,0) scale(1)';
+    // Use custom keyframes per dot
+    dot.animate([
+      {transform:'translate(0,0) scale(1)',opacity:1},
+      {transform:`translate(${tx}px,${ty}px) scale(0.3)`,opacity:0}
+    ],{duration:700,easing:'ease-out',fill:'forwards'});
+    dot.style.animation='';
+    container.appendChild(dot);
+  }
+  setTimeout(()=>container.remove(),800);
+}
 /* ═══ SERVICE WORKER REGISTRATION ═══ */
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
