@@ -268,13 +268,14 @@ padding:12px 20px;border:none;border-radius:14px;
 font-family:inherit;font-size:12px;font-weight:800;
 cursor:pointer;transition:transform .15s;
 display:flex;align-items:center;gap:5px;
-box-shadow:0 2px 8px rgba(0,0,0,.10);
+box-shadow:.8px .8px 0 rgba(255,255,255,.9),-.7px .7px 0 rgba(255,255,255,.9),0 4px 16px rgba(0,0,0,.08);
+backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
 min-height:44px;
 }
 .ab:active{transform:scale(.88)}
-.ab.af{background:rgba(255,59,48,.12);color:#c0001a;border:1px solid rgba(255,59,48,.2)}
-.ab.ah{background:rgba(255,149,0,.12);color:#7a4a00;border:1px solid rgba(255,149,0,.2)}
-.ab.ag{background:rgba(52,199,89,.12);color:#1a7a35;border:1px solid rgba(52,199,89,.2)}
+.ab.af{background:rgba(255,59,48,.1);color:#c0001a;border:1px solid rgba(255,255,255,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.ab.ah{background:rgba(255,149,0,.1);color:#7a4a00;border:1px solid rgba(255,255,255,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.ab.ag{background:rgba(52,199,89,.1);color:#1a7a35;border:1px solid rgba(255,255,255,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
 .ab span{font-size:22px;line-height:1}
 
 /* ════ LIST WRAP ════ */
@@ -599,7 +600,7 @@ background:rgba(255,255,255,.55);backdrop-filter:blur(20px) saturate(150%);-webk
 border:1px solid rgba(255,255,255,.6);
 font-size:22px;cursor:pointer;
 display:flex;align-items:center;justify-content:center;
-box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 4px 16px rgba(0,0,0,.10);
+box-shadow:.8px .8px 0 rgba(255,255,255,.9),-.7px .7px 0 rgba(255,255,255,.9),0 4px 16px rgba(0,0,0,.08);
 transition:transform .3s ease;
 -webkit-user-select:none;user-select:none;
 pointer-events:auto;
@@ -613,19 +614,26 @@ padding:6px 14px 8px;max-width:420px;margin:0 auto;width:100%;
 transform:translateY(0);opacity:1;
 transition:transform .5s cubic-bezier(.34,1.05,.64,1),opacity .3s;
 }
-.quiz-choices.slide-in{animation:qcSlideIn .4s cubic-bezier(.34,1.05,.64,1) both}
-.quiz-choices.slide-out{animation:qcSlideOut .5s ease both}
-@keyframes qcSlideIn{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
-@keyframes qcSlideOut{from{transform:translateY(0);opacity:1}to{transform:translateY(40px);opacity:0}}
+.quiz-choices.slide-in{animation:qcScaleUp .4s ease both}
+.quiz-choices.slide-out{animation:qcScaleDown .35s ease both}
+@keyframes qcScaleUp{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes qcScaleDown{from{transform:scale(1);opacity:1}to{transform:scale(.85);opacity:0}}
 .quiz-choice{
 background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
 border:1.5px solid rgba(255,255,255,.8);border-radius:14px;
 padding:12px 16px;font-size:14px;font-weight:600;color:var(--tx);
 cursor:pointer;transition:transform .12s,background .12s,border-color .15s;
 text-align:left;font-family:inherit;
-box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 1px 4px rgba(0,0,0,.06);
+box-shadow:.8px .8px 0 rgba(255,255,255,.9),-.7px .7px 0 rgba(255,255,255,.9),0 2px 8px rgba(0,0,0,.06);
 display:flex;align-items:center;gap:10px;
 }
+.quiz-choice{animation:qcItemIn .3s ease both}
+.quiz-choice:nth-child(1){animation-delay:0s}
+.quiz-choice:nth-child(2){animation-delay:.04s}
+.quiz-choice:nth-child(3){animation-delay:.08s}
+.quiz-choice:nth-child(4){animation-delay:.12s}
+.quiz-choice:nth-child(5){animation-delay:.16s}
+@keyframes qcItemIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
 .quiz-choice:active{transform:scale(.96);background:rgba(255,255,255,.95)}
 .quiz-choice .qc-num{
 width:24px;height:24px;border-radius:50%;
@@ -662,7 +670,7 @@ border:none;cursor:pointer;
 display:flex;align-items:center;justify-content:center;gap:4px;
 white-space:nowrap;
 backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 4px 16px rgba(0,0,0,.10);
+box-shadow:.8px .8px 0 rgba(255,255,255,.9),-.7px .7px 0 rgba(255,255,255,.9),0 4px 16px rgba(0,0,0,.08);
 transform:scale(.8);opacity:0;
 animation:qrBtnIn .8s ease both;
 transition:transform .12s;
