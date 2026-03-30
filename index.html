@@ -46,7 +46,7 @@ html,body{
   font-family:"SF Pro Display","SF Pro Text",-apple-system,"Noto Sans JP",sans-serif;color:var(--tx);
   overscroll-behavior:none;
   -webkit-overflow-scrolling:auto;
-  transition:background .8s cubic-bezier(.77,0,.18,1);
+  transition:background .5s ease;
 }
 /* Body reveal: scale .8→1 in 1s */
 body{animation:bReveal 1s cubic-bezier(.77,0,.18,1) both;transform-origin:center center}
@@ -64,14 +64,14 @@ background-size:cover;background-position:center;background-repeat:no-repeat;bac
 filter:blur(20px);-webkit-filter:blur(20px);
 transform:scale(1.05);
 pointer-events:none;
-transition:background .8s cubic-bezier(.77,0,.18,1),filter .8s cubic-bezier(.77,0,.18,1),opacity .8s cubic-bezier(.77,0,.18,1);
+transition:background .5s ease,filter .8s cubic-bezier(.77,0,.18,1),opacity .8s cubic-bezier(.77,0,.18,1);
 }
 /* ════ HOME ════ */
 #home{
 position:fixed;inset:0;z-index:100;
 display:flex;flex-direction:column;
 padding-top:var(--sat);
-transition:opacity .8s,transform .8s cubic-bezier(.4,0,.2,1);
+transition:opacity .5s ease,transform .5s ease;
 }
 #home.hidden{opacity:0;transform:scale(.96);pointer-events:none}
 .hm-hdr{padding:22px 20px 8px}
@@ -97,7 +97,7 @@ display:flex;align-items:center;gap:13px;padding:12px 14px;
 background:var(--gls);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);
 border-bottom:1px solid var(--ln);
 cursor:pointer;user-select:none;-webkit-user-select:none;
-transition:background .8s;
+transition:background .5s ease;
 }
 .hcard:last-child{border-bottom:none}
 .hcard:active{background:rgba(255,255,255,.95)}
@@ -125,7 +125,7 @@ flex-shrink:0;
 position:fixed;inset:0;z-index:50;
 display:flex;flex-direction:column;
 transform:translateY(105%) scale(.7);
-transition:transform .8s cubic-bezier(.34,1.05,.64,1);
+transition:transform .5s ease;
 background:linear-gradient(150deg,#eef2f8 0%,#f8f2fc 50%,#edf7f2 100%);
 }
 #app.vis{transform:translateY(0) scale(1)}
@@ -154,7 +154,7 @@ padding:6px 0 4px;flex-shrink:0;
 
 /* ════ SWIPE PANELS ════ */
 .sw-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
-.sw-track{display:flex;height:100%;transition:transform .8s cubic-bezier(.4,0,.2,1);will-change:transform}
+.sw-track{display:flex;height:100%;transition:transform .5s ease;will-change:transform}
 .sw-panel{flex-shrink:0;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;padding-bottom:calc(var(--ib) + 70px)}
 
 /* ════ PROGRESS ROW ════ */
@@ -322,7 +322,7 @@ z-index:520;
 display:flex;justify-content:center;
 padding:8px 14px calc(16px + var(--sab));
 background:linear-gradient(to top,rgba(240,243,250,.98) 70%,rgba(240,243,250,0) 100%);
-transition:background .8s cubic-bezier(.77,0,.18,1),padding .8s cubic-bezier(.77,0,.18,1);
+transition:background .5s ease,padding .8s cubic-bezier(.77,0,.18,1);
 }
 .ti-wrap{
 display:flex;
@@ -417,22 +417,22 @@ overflow-y:auto;
 -webkit-overflow-scrolling:touch;
 scrollbar-width:none;
 z-index:510;
-transform:scale(.9) translateY(8px);
+transform:translateY(16px);
 opacity:0;
-transition:transform .8s cubic-bezier(.34,1.05,.64,1),opacity .8s;
+transition:transform .5s ease,opacity .5s ease;
 }
 #flag-picker::-webkit-scrollbar{display:none}
 #flag-picker.open{
 display:flex;
 opacity:1;
-transform:scale(1) translateY(0);
+transform:translateY(0);
 }
 .fp-item{
 display:flex;align-items:center;gap:10px;
 padding:9px 12px;
 border-radius:12px;
 cursor:pointer;
-transition:background .8s;
+transition:background .5s ease;
 user-select:none;-webkit-user-select:none;
 }
 .fp-item:active{background:rgba(0,0,0,.08)}
@@ -491,7 +491,7 @@ font-size:12.5px;color:var(--b);
 background:rgba(0,122,255,.07);border-radius:10px;
 padding:9px 12px;margin-bottom:10px;line-height:1.7;
 border:1px solid rgba(0,122,255,.15);
-cursor:pointer;-webkit-user-select:none;user-select:none;transition:background .8s;
+cursor:pointer;-webkit-user-select:none;user-select:none;transition:background .5s ease;
 }
 .tr-local:active{background:rgba(0,122,255,.18)}
 .tr-dir{font-size:9px;font-weight:800;letter-spacing:.08em;color:var(--sub);text-transform:uppercase;margin-bottom:4px}
@@ -544,7 +544,7 @@ border-radius:2px;padding:0 1px;
 .fword .hl-word{background:none;padding:0}
 /* ═══ TAPPABLE ANSWER ═══ */
 .ans-tap{
-cursor:pointer;transition:background .8s;border-radius:6px;padding:1px 3px;
+cursor:pointer;transition:background .5s ease;border-radius:6px;padding:1px 3px;
 -webkit-user-select:none;user-select:none;
 }
 .ans-tap:active{background:rgba(0,122,255,.12)}
@@ -754,9 +754,9 @@ border:6px solid transparent;border-top-color:rgba(255,255,255,.92);
 .s-label{flex:1;font-size:15px;color:#000}
 .s-check{width:22px;text-align:center;font-size:15px;font-weight:700;color:transparent}
 .s-check.s-on{color:#007aff}
-.s-toggle{width:51px;height:31px;border-radius:16px;background:#e0e0e0;position:relative;cursor:pointer;transition:background .8s;flex-shrink:0}
+.s-toggle{width:51px;height:31px;border-radius:16px;background:#e0e0e0;position:relative;cursor:pointer;transition:background .3s;flex-shrink:0}
 .s-toggle.on{background:#34c759}
-.s-knob{width:27px;height:27px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .8s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.s-knob{width:27px;height:27px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .3s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .s-toggle.on .s-knob{transform:translateX(20px)}
 
 /* ═══ ICON WOBBLE ═══ */
@@ -796,32 +796,29 @@ transition:transform .8s;-webkit-user-select:none;user-select:none;
 position:relative;
 }
 .star-input-btn:active{transform:scale(.84)}
-/* Star tooltip bubble */
+/* Star tooltip bubble → slide-down notification inside input bar */
 .star-tooltip{
-position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-35%);
-background:rgba(255,255,255,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-border:1px solid rgba(255,200,0,.4);border-radius:14px;
-padding:10px 16px;white-space:nowrap;
-font-size:12px;font-weight:600;color:var(--tx);
-box-shadow:0 4px 20px rgba(0,0,0,.12);
+position:absolute;bottom:0;left:0;right:0;
+height:100%;
+display:flex;align-items:center;justify-content:center;gap:6px;
+background:rgba(255,200,0,.15);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+border:1.5px solid rgba(255,200,0,.4);border-radius:55px;
+font-size:13px;font-weight:600;color:var(--tx);
 pointer-events:none;
-animation:starTooltipIn .5s cubic-bezier(.77,0,.18,1) forwards,starTooltipOut .5s cubic-bezier(.77,0,.18,1) 1.1s forwards;
+animation:starNotifIn .4s cubic-bezier(.34,1.05,.64,1) forwards,starNotifOut .4s ease 1.4s forwards;
+z-index:20;
 }
-.star-tooltip::after{
-content:'';position:absolute;top:100%;left:40%;transform:translateX(-50%);
-border:6px solid transparent;border-top-color:rgba(255,255,255,.95);
-}
-@keyframes starTooltipIn{from{opacity:0;transform:translateX(-35%) scale(.8) translateY(4px)}to{opacity:1;transform:translateX(-35%) scale(1) translateY(0)}}
-@keyframes starTooltipOut{from{opacity:1;transform:translateX(-35%) scale(1)}to{opacity:0;transform:translateX(-35%) scale(.8) translateY(4px)}}
+@keyframes starNotifIn{from{opacity:0;transform:translateY(-8px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes starNotifOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(8px) scale(.95)}}
 /* Star list overlay */
 #star-list-overlay{
 position:fixed;inset:0;z-index:600;
 background:rgba(0,0,0,.80);
 opacity:0;pointer-events:none;
-transition:opacity .8s cubic-bezier(.77,0,.18,1);
+transition:opacity .5s ease;
 display:flex;flex-direction:column;
 }
-#star-list-overlay.on{opacity:1;pointer-events:auto;transition:opacity .8s cubic-bezier(.77,0,.18,1)}
+#star-list-overlay.on{opacity:1;pointer-events:auto;transition:opacity .5s ease}
 #star-list-card{
 flex:1;margin:calc(var(--sat) + 120px) 0 0;
 background:rgba(255,255,255,.80);
@@ -830,7 +827,7 @@ border-radius:22px 22px 0 0;
 box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 -4px 30px rgba(0,0,0,.15);
 display:flex;flex-direction:column;
 transform:translateY(100%) scale(.7);
-transition:transform .8s cubic-bezier(.77,0,.18,1);
+transition:transform .5s ease;
 overflow:hidden;
 }
 #star-list-overlay.on #star-list-card{transform:translateY(0) scale(1)}
@@ -910,7 +907,7 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ LIST SWITCH DIALOG ══════════ -->
-<div id="list-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background .8s cubic-bezier(.77,0,.18,1);align-items:center;justify-content:center">
+<div id="list-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background .5s ease;align-items:center;justify-content:center">
   <div id="list-dialog-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .8s cubic-bezier(.77,0,.18,1),opacity .8s cubic-bezier(.77,0,.18,1)">
     <div style="padding:22px 20px 10px">
       <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">リスト表示</div>
@@ -931,7 +928,7 @@ overflow:hidden;
 </div>
 
 <!-- Icon mode dialog -->
-<div id="icon-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background .8s cubic-bezier(.77,0,.18,1);align-items:center;justify-content:center">
+<div id="icon-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background .5s ease;align-items:center;justify-content:center">
   <div id="icon-dialog-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .8s cubic-bezier(.77,0,.18,1),opacity .8s cubic-bezier(.77,0,.18,1)">
     <div style="padding:22px 20px 10px">
       <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">アイコン表示</div>
@@ -945,7 +942,7 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ SETTINGS OVERLAY ══════════ -->
-<div id="settings-overlay" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,0);transition:background .8s cubic-bezier(.77,0,.18,1)">
+<div id="settings-overlay" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,0);transition:background .5s ease">
   <div id="settings-card" style="position:absolute;bottom:0;left:0;right:0;max-height:85dvh;background:rgba(245,245,247,.95);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .8s cubic-bezier(.34,1.05,.64,1)">
     <div style="display:flex;align-items:center;padding:16px 20px 12px">
       <div style="flex:1;font-size:17px;font-weight:700;color:#000">設定</div>
@@ -1066,7 +1063,7 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ WALLPAPER CUSTOMIZE DIALOG ══════════ -->
-<div id="wp-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background .8s cubic-bezier(.77,0,.18,1)">
+<div id="wp-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background .5s ease">
   <div id="wp-dialog-card" style="position:absolute;bottom:0;left:0;right:0;max-height:70dvh;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .8s cubic-bezier(.34,1.05,.64,1)">
     <div style="display:flex;align-items:center;padding:16px 20px 10px">
       <div id="wp-dialog-title" style="flex:1;font-size:17px;font-weight:700;color:#000">壁紙をカスタマイズ</div>
@@ -1100,7 +1097,7 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ DELETE SLIDER OVERLAY ══════════ -->
-<div id="del-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0);transition:background .8s;">
+<div id="del-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0);transition:background .5s ease;">
   <div id="del-content" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:15dvh;opacity:0;transition:opacity .8s;">
     <div id="del-slider-wrap" style="position:relative;width:310px;height:64px;">
       <div style="
@@ -1152,7 +1149,7 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ LOCK CONFIRM DIALOG ══════════ -->
-<div id="lock-confirm-dlg" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0);transition:background .8s cubic-bezier(.77,0,.18,1);align-items:center;justify-content:center">
+<div id="lock-confirm-dlg" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0);transition:background .5s ease;align-items:center;justify-content:center">
   <div id="lock-confirm-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .8s cubic-bezier(.77,0,.18,1),opacity .8s cubic-bezier(.77,0,.18,1)">
     <div style="padding:22px 20px 10px">
       <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">パスコードが必要</div>
@@ -1166,7 +1163,7 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ NO-FORGOT DIALOG ══════════ -->
-<div id="no-forgot-dlg" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0);transition:background .8s cubic-bezier(.77,0,.18,1);align-items:center;justify-content:center">
+<div id="no-forgot-dlg" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0);transition:background .5s ease;align-items:center;justify-content:center">
   <div id="no-forgot-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.8);opacity:0;transition:transform .8s cubic-bezier(.34,1.05,.64,1),opacity .8s cubic-bezier(.77,0,.18,1)">
     <div style="padding:22px 20px 10px">
       <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">忘れた単語がありません</div>
@@ -3583,7 +3580,7 @@ function closeFlagPicker(){
   if(!flagOpen)return;flagOpen=false;
   flagScrim.classList.remove('on');
   flagPicker.classList.remove('open');
-  setTimeout(()=>{if(!flagOpen)flagPicker.style.display='none';},200);
+  setTimeout(()=>{if(!flagOpen)flagPicker.style.display='none';},500);
 }
 flagActive.addEventListener('click',()=>{flagOpen?closeFlagPicker():openFlagPicker();});
 flagScrim.addEventListener('click',closeFlagPicker);
@@ -4230,12 +4227,13 @@ function showStarTooltip(){
   if(starTooltipShown)return;
   starTooltipShown=true;
   try{localStorage.setItem(STAR_TOOLTIP_KEY,'1');}catch(_){}
-  const btn=document.getElementById('btn-star-list');
+  const wrap=document.querySelector('.ti-wrap');
+  if(!wrap)return;
   const tip=document.createElement('div');
   tip.className='star-tooltip';
-  tip.textContent='ここから★追加した単語を見れます';
-  btn.appendChild(tip);
-  setTimeout(()=>{if(tip.parentNode)tip.remove();},1800);
+  tip.textContent='⭐ お気に入りに追加しました';
+  wrap.appendChild(tip);
+  setTimeout(()=>{if(tip.parentNode)tip.remove();},2000);
 }
 
 // Star list overlay
