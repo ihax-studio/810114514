@@ -753,6 +753,7 @@ border:6px solid transparent;border-top-color:rgba(255,255,255,.92);
 .s-toggle.on .s-knob{transform:translateX(20px)}
 
 /* ═══ ICON WOBBLE ═══ */
+@keyframes gridReveal{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
 #icon-grid.wobbling .ig-cell{animation:iconWobble .15s ease-in-out infinite alternate}
 #icon-grid.wobbling .ig-cell:nth-child(odd){animation-delay:.07s}
 @keyframes iconWobble{from{transform:rotate(-1.5deg)}to{transform:rotate(1.5deg)}}
@@ -914,7 +915,7 @@ overflow:hidden;
 
 <!-- ══════════ MEMO OVERLAY ══════════ -->
 <!-- ══════════ IFRAME APP OVERLAY ══════════ -->
-<div id="iframe-overlay" style="position:fixed;inset:0;z-index:900;background:#fff;transform:translateX(100%) scale(1.8);transition:transform .5s ease;visibility:hidden">
+<div id="iframe-overlay" style="position:fixed;inset:0;z-index:900;background:#fff;transform:translateX(100%) scale(1.5);opacity:0;transition:transform .5s ease,opacity .5s ease;visibility:hidden">
   <button id="iframe-back" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:10;width:42px;height:42px;border-radius:55px;background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--b);box-shadow:0 2px 8px rgba(0,0,0,.1)">←</button>
   <iframe id="iframe-content" style="position:absolute;inset:0;width:100%;height:100%;border:none" sandbox="allow-scripts allow-same-origin allow-downloads allow-modals" allow="camera;microphone"></iframe>
 </div>
@@ -935,7 +936,7 @@ overflow:hidden;
 
 <!-- ══════════ SETTINGS OVERLAY ══════════ -->
 <div id="settings-overlay" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,0);transition:background .5s ease">
-  <div id="settings-card" style="position:absolute;bottom:0;left:0;right:0;max-height:85dvh;background:rgba(245,245,247,.95);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .8s cubic-bezier(.34,1.05,.64,1)">
+  <div id="settings-card" style="position:absolute;bottom:0;left:0;right:0;max-height:85dvh;background:rgba(245,245,247,.95);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%) scale(.8);transition:transform .8s cubic-bezier(.34,1.05,.64,1)">
     <div style="display:flex;align-items:center;padding:16px 20px 12px">
       <div style="flex:1;font-size:17px;font-weight:700;color:#000">設定</div>
       <button id="settings-close" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.06);border:none;font-size:18px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'SF Pro Display',system-ui,sans-serif;color:#000;line-height:1">✕</button>
@@ -2624,9 +2625,10 @@ function openIframe(url,title){
   const ov=document.getElementById('iframe-overlay');
   document.getElementById('iframe-content').src=url;
   ov.style.visibility='visible';
-  ov.style.transform='translateX(100%) scale(1.8)';
-  ov.style.transition='transform .5s ease';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{ov.style.transform='translateX(0) scale(1)';}));
+  ov.style.transform='translateX(100%) scale(1.5)';
+  ov.style.opacity='0';
+  ov.style.transition='transform .5s ease,opacity .5s ease';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ov.style.transform='translateX(0) scale(1)';ov.style.opacity='1';}));
 }
 document.getElementById('iframe-back').addEventListener('click',()=>{
   haptic();
@@ -2639,7 +2641,8 @@ document.getElementById('iframe-back').addEventListener('click',()=>{
 });
 function closeIframeNow(){
   const ov=document.getElementById('iframe-overlay');
-  ov.style.transform='translateX(100%) scale(1.8)';
+  ov.style.transform='translateX(100%) scale(1.5)';
+  ov.style.opacity='0';
   setTimeout(()=>{
     document.getElementById('iframe-content').src='';
     ov.style.visibility='hidden';
@@ -2653,7 +2656,7 @@ function openSettings(){
   ov.style.display='flex';
   requestAnimationFrame(()=>{
     ov.style.background='rgba(0,0,0,.4)';
-    document.getElementById('settings-card').style.transform='translateY(0)';
+    document.getElementById('settings-card').style.transform='translateY(0) scale(1)';
   });
   // Show sidebar on iPad/Mac
   const sidebar=document.getElementById('settings-sidebar');
@@ -2742,7 +2745,7 @@ function closeSettings(){
   if(_isWideScreen){
     card.style.transform='scale(0.9)';card.style.opacity='0';
   }else{
-    card.style.transform='translateY(100%)';
+    card.style.transform='translateY(100%) scale(.8)';
   }
   setTimeout(()=>{
     sov.style.display='none';
@@ -3902,7 +3905,7 @@ function showIconGrid(){
   const grid=document.createElement('div');
   grid.id='icon-grid';
   const iconPadH=_isWideScreen?'20px':'10px';
-  grid.style.cssText='display:grid;grid-template-columns:repeat('+GRID_COLS+',1fr);gap:'+gap+';padding:24px '+iconPadH+' 16px;justify-items:center;';
+  grid.style.cssText='display:grid;grid-template-columns:repeat('+GRID_COLS+',1fr);gap:'+gap+';padding:24px '+iconPadH+' 16px;justify-items:center;animation:gridReveal .5s ease both;';
   
   const cards=[...document.querySelectorAll('.hcard')];
   const allIcons=[];
