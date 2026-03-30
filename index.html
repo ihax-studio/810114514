@@ -124,11 +124,11 @@ flex-shrink:0;
 #app{
 position:fixed;inset:0;z-index:50;
 display:flex;flex-direction:column;
-transform:translateY(105%) scale(.7);
+transform:translateX(100%) scale(.7);
 transition:transform .5s ease;
 background:linear-gradient(150deg,#eef2f8 0%,#f8f2fc 50%,#edf7f2 100%);
 }
-#app.vis{transform:translateY(0) scale(1)}
+#app.vis{transform:translateX(0) scale(1)}
 .app-hdr{
 display:flex;align-items:center;gap:10px;
 padding:calc(var(--sat) + 14px) 16px 8px;
@@ -356,7 +356,7 @@ padding:0;
 }
 #tr-bar.collapsed .ti-wrap{
   max-width:80px;padding:8px 0;gap:0;
-  transform:scale(.8);
+  transform:scale(.7);
   cursor:pointer;justify-content:center;align-items:center;
 }
 #ti,#flag-row,.star-input-btn{
@@ -796,20 +796,19 @@ transition:transform .8s;-webkit-user-select:none;user-select:none;
 position:relative;
 }
 .star-input-btn:active{transform:scale(.84)}
-/* Star tooltip bubble → slide-down notification inside input bar */
-.star-tooltip{
-position:absolute;bottom:0;left:0;right:0;
-height:100%;
+/* Star tooltip bubble → slide-up notification in score row */
+.star-notif-banner{
+position:absolute;top:0;left:0;right:0;bottom:0;
 display:flex;align-items:center;justify-content:center;gap:6px;
-background:rgba(255,200,0,.15);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-border:1.5px solid rgba(255,200,0,.4);border-radius:55px;
-font-size:13px;font-weight:600;color:var(--tx);
+background:rgba(255,200,0,.18);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+border-radius:55px;
+font-size:12px;font-weight:700;color:var(--tx);
 pointer-events:none;
-animation:starNotifIn .4s cubic-bezier(.34,1.05,.64,1) forwards,starNotifOut .4s ease 1.4s forwards;
+animation:starBannerIn .5s ease forwards,starBannerOut .4s ease 1.4s forwards;
 z-index:20;
 }
-@keyframes starNotifIn{from{opacity:0;transform:translateY(-8px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes starNotifOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(8px) scale(.95)}}
+@keyframes starBannerIn{from{opacity:0;transform:translateY(6px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes starBannerOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-6px) scale(.95)}}
 /* Star list overlay */
 #star-list-overlay{
 position:fixed;inset:0;z-index:600;
@@ -3473,7 +3472,7 @@ function expandSearchBar(){
 function scheduleSearchCollapse(){
   clearTimeout(_searchCollapseTimer);
   if(alwaysSearchOn()||isOnHomeScreen())return;
-  _searchCollapseTimer=setTimeout(collapseSearchBar,5000);
+  _searchCollapseTimer=setTimeout(collapseSearchBar,3700);
 }
 // Tap pill → expand & focus
 _searchPill.addEventListener('click',function(e){
@@ -4227,13 +4226,15 @@ function showStarTooltip(){
   if(starTooltipShown)return;
   starTooltipShown=true;
   try{localStorage.setItem(STAR_TOOLTIP_KEY,'1');}catch(_){}
-  const wrap=document.querySelector('.ti-wrap');
-  if(!wrap)return;
+  // Find the first visible score row chip to overlay on
+  const sr=document.querySelector('.sr');
+  if(!sr)return;
+  sr.style.position='relative';
   const tip=document.createElement('div');
-  tip.className='star-tooltip';
+  tip.className='star-notif-banner';
   tip.textContent='⭐ お気に入りに追加しました';
-  wrap.appendChild(tip);
-  setTimeout(()=>{if(tip.parentNode)tip.remove();},2000);
+  sr.appendChild(tip);
+  setTimeout(()=>{if(tip.parentNode)tip.remove();},2200);
 }
 
 // Star list overlay
