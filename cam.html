@@ -25,7 +25,7 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 #sh{width:72px;height:72px;border-radius:50%;background:transparent;border:4px solid rgba(255,255,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s}
 #sh:active{transform:scale(.88)}
 #sh .inn{width:58px;height:58px;border-radius:50%;background:#fff}
-#top{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:flex-end;padding:calc(env(safe-area-inset-top,0px)+8px) 16px 8px;gap:10px}
+#top{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:flex-end;padding:calc(env(safe-area-inset-top,0px)+28px) 16px 8px;gap:10px}
 .tb{width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:none;color:#fff;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:background .2s}
 .tb.on{background:rgba(255,204,0,.7);color:#000}
 /* Preview */
@@ -134,7 +134,9 @@ function flash(){
 function grab(){
   const c=document.createElement('canvas');c.width=cam.videoWidth;c.height=cam.videoHeight;
   const ctx=c.getContext('2d');ctx.drawImage(cam,0,0);
-  if(wbOn){ctx.globalCompositeOperation='overlay';ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(0,0,c.width,c.height);}
+  // Default slight lux
+  ctx.globalCompositeOperation='overlay';ctx.fillStyle='rgba(255,255,255,.04)';ctx.fillRect(0,0,c.width,c.height);
+  if(wbOn){ctx.fillStyle='rgba(255,255,255,.10)';ctx.fillRect(0,0,c.width,c.height);}
   return c.toDataURL('image/jpeg',.85);
 }
 
@@ -167,7 +169,7 @@ window.splitCapture=async()=>{
   showPV(photos.length-1);
 };
 
-window.toggleWB=()=>{hap();wbOn=!wbOn;document.getElementById('wb').classList.toggle('on',wbOn);cam.style.filter=wbOn?'contrast(1.15) brightness(1.08)':'';};
+window.toggleWB=()=>{hap();wbOn=!wbOn;document.getElementById('wb').classList.toggle('on',wbOn);cam.style.filter=wbOn?'contrast(1.22) brightness(1.12)':'contrast(1.06) brightness(1.03)';};
 
 // Camera select - slide up/down
 window.openCS=()=>{
@@ -202,7 +204,7 @@ function showPV(idx){pvIdx=idx;pvFilt=false;pvSc=1;
 }
 window.closePV=()=>{hap();document.getElementById('pv').classList.remove('show');};
 window.savePV=()=>{hap.confirm();if(pvIdx<0||!photos[pvIdx])return;const a=document.createElement('a');a.href=photos[pvIdx];a.download='photo_'+Date.now()+'.jpg';a.click();};
-window.togglePVF=()=>{hap();pvFilt=!pvFilt;document.getElementById('pvw2').classList.toggle('on',pvFilt);document.getElementById('pvi').style.filter=pvFilt?'contrast(1.2) brightness(1.1)':'';};
+window.togglePVF=()=>{hap();pvFilt=!pvFilt;document.getElementById('pvw2').classList.toggle('on',pvFilt);document.getElementById('pvi').style.filter=pvFilt?'contrast(1.22) brightness(1.12)':'contrast(1.06) brightness(1.03)';};
 
 // Pinch zoom preview
 let pd=null;const pi=document.getElementById('pvi');
@@ -216,6 +218,8 @@ window.dS=()=>{hap();document.getElementById('sd').classList.remove('show');};
 window.sAll=()=>{hap.confirm();photos.forEach((p,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=p;a.download='photo_'+Date.now()+'_'+(i+1)+'.jpg';a.click();},i*200));document.getElementById('sd').classList.remove('show');};
 
 startCam();
+// Default slight lux boost
+cam.style.filter='contrast(1.06) brightness(1.03)';
 </script>
 </body>
 </html>

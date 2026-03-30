@@ -914,7 +914,7 @@ overflow:hidden;
 
 <!-- ══════════ MEMO OVERLAY ══════════ -->
 <!-- ══════════ IFRAME APP OVERLAY ══════════ -->
-<div id="iframe-overlay" style="position:fixed;inset:0;z-index:900;background:#fff;transform:translateX(100%);transition:transform .7s ease;visibility:hidden">
+<div id="iframe-overlay" style="position:fixed;inset:0;z-index:900;background:#fff;transform:translateX(100%);transition:transform 1s ease;visibility:hidden">
   <button id="iframe-back" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:10;width:42px;height:42px;border-radius:55px;background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--b);box-shadow:0 2px 8px rgba(0,0,0,.1)">←</button>
   <iframe id="iframe-content" style="position:absolute;inset:0;width:100%;height:100%;border:none" sandbox="allow-scripts allow-same-origin allow-downloads allow-modals" allow="camera;microphone"></iframe>
 </div>
@@ -2625,7 +2625,7 @@ function openIframe(url,title){
   document.getElementById('iframe-content').src=url;
   ov.style.visibility='visible';
   ov.style.transform='translateX(100%) scale(0.8)';
-  ov.style.transition='transform .7s ease';
+  ov.style.transition='transform 1s ease';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ov.style.transform='translateX(0) scale(1)';}));
 }
 document.getElementById('iframe-back').addEventListener('click',()=>{
@@ -2637,7 +2637,7 @@ document.getElementById('iframe-back').addEventListener('click',()=>{
     ov.style.visibility='hidden';
     // Restore icon grid if in icon mode
     if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
-  },700);
+  },1000);
 });
 
 function openSettings(){
