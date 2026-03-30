@@ -381,7 +381,6 @@ padding:0;
 display:flex;
 align-items:center;
 flex-shrink:0;
-position:relative;
 }
 /* The single visible flag (active language) */
 #flag-active{
@@ -392,34 +391,28 @@ font-size:22px;
 cursor:pointer;
 background:rgba(0,122,255,.1);
 border:1.5px solid rgba(0,122,255,.3);
-transition:transform .8s;
+transition:transform .3s;
 user-select:none;-webkit-user-select:none;
 flex-shrink:0;
 }
 #flag-active:active{transform:scale(.84)}
-/* Expanded picker - overlays above input bar */
+/* Expanded picker — horizontal scroll INSIDE .ti-wrap */
 #flag-picker{
-position:absolute;
-bottom:calc(100% + 10px);
-right:0;
+position:absolute;inset:0;
 background:var(--gls3);
 backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);
-border:1px solid rgba(255,255,255,.9);
-border-radius:18px;
-padding:10px;
-box-shadow:var(--shl);
+border-radius:55px;
 display:none;
-flex-direction:column;
-gap:4px;
-min-width:170px;
-max-height:55dvh;
-overflow-y:auto;
+align-items:center;
+gap:2px;
+padding:0 12px;
+overflow-x:auto;overflow-y:hidden;
 -webkit-overflow-scrolling:touch;
 scrollbar-width:none;
-z-index:510;
-transform:translateY(16px);
+z-index:20;
+transform:translateY(100%);
 opacity:0;
-transition:transform .5s ease,opacity .5s ease;
+transition:transform .4s ease,opacity .3s ease;
 }
 #flag-picker::-webkit-scrollbar{display:none}
 #flag-picker.open{
@@ -428,17 +421,17 @@ opacity:1;
 transform:translateY(0);
 }
 .fp-item{
-display:flex;align-items:center;gap:10px;
-padding:9px 12px;
-border-radius:12px;
+display:flex;align-items:center;justify-content:center;
+width:40px;height:40px;min-width:40px;
+border-radius:50%;
 cursor:pointer;
-transition:background .5s ease;
+transition:background .2s,transform .2s;
 user-select:none;-webkit-user-select:none;
 }
-.fp-item:active{background:rgba(0,0,0,.08)}
-.fp-item.sel{background:rgba(0,122,255,.1)}
+.fp-item:active{transform:scale(.85)}
+.fp-item.sel{background:rgba(0,122,255,.15)}
 .fp-flag{font-size:24px;line-height:1}
-.fp-name{font-size:13px;font-weight:600;color:var(--tx)}
+.fp-name{display:none}
 #flag-scrim{
 position:fixed;inset:0;z-index:505;
 display:none;
@@ -1209,8 +1202,8 @@ overflow:hidden;
     <textarea id="ti" placeholder="Type to here..." rows="1"></textarea>
     <div id="flag-row">
       <div id="flag-active"></div>
-      <div id="flag-picker"></div>
     </div>
+    <div id="flag-picker"></div>
   </div>
 </div>
 <div id="flag-scrim"></div>
@@ -3572,14 +3565,28 @@ function openFlagPicker(){
   if(flagOpen)return;flagOpen=true;
   flagScrim.classList.add('on');
   flagPicker.style.display='flex';
-  requestAnimationFrame(()=>flagPicker.classList.add('open'));
+  flagPicker.style.transform='translateY(100%)';
+  flagPicker.style.opacity='0';
+  requestAnimationFrame(()=>{
+    flagPicker.classList.add('open');
+    flagPicker.style.transform='';
+    flagPicker.style.opacity='';
+  });
   haptic.error();
 }
 function closeFlagPicker(){
   if(!flagOpen)return;flagOpen=false;
   flagScrim.classList.remove('on');
-  flagPicker.classList.remove('open');
-  setTimeout(()=>{if(!flagOpen)flagPicker.style.display='none';},500);
+  flagPicker.style.transform='translateY(100%)';
+  flagPicker.style.opacity='0';
+  setTimeout(()=>{
+    if(!flagOpen){
+      flagPicker.classList.remove('open');
+      flagPicker.style.display='none';
+      flagPicker.style.transform='';
+      flagPicker.style.opacity='';
+    }
+  },400);
 }
 flagActive.addEventListener('click',()=>{flagOpen?closeFlagPicker():openFlagPicker();});
 flagScrim.addEventListener('click',closeFlagPicker);
