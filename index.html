@@ -2630,6 +2630,14 @@ function openIframe(url,title){
 }
 document.getElementById('iframe-back').addEventListener('click',()=>{
   haptic();
+  // Ask iframe if it wants to handle close (e.g. unsaved photos)
+  try{
+    const iw=document.getElementById('iframe-content').contentWindow;
+    if(iw&&typeof iw.beforeClose==='function'&&!iw.beforeClose())return;
+  }catch(e){}
+  closeIframeNow();
+});
+function closeIframeNow(){
   const ov=document.getElementById('iframe-overlay');
   ov.style.transform='translateX(100%)';
   setTimeout(()=>{
@@ -2638,7 +2646,7 @@ document.getElementById('iframe-back').addEventListener('click',()=>{
     // Restore icon grid if in icon mode
     if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
   },1000);
-});
+}
 
 function openSettings(){
   const ov=document.getElementById('settings-overlay');

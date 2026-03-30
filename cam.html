@@ -95,6 +95,19 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   <div style="font-size:16px;text-align:center;padding:0 40px;opacity:.7">カメラへのアクセスが<br>拒否されました</div>
   <button onclick="goBack()" style="margin-top:12px;padding:12px 28px;border-radius:55px;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:14px;cursor:pointer;font-family:inherit">ホームに戻る</button>
 </div>
+<!-- Close confirmation dialog -->
+<div id="cd" style="position:fixed;inset:0;z-index:250;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;visibility:hidden;pointer-events:none;transition:background .3s">
+  <div id="cc" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .3s ease,opacity .3s ease">
+    <div style="padding:22px 20px 10px">
+      <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">撮影した写真を保存</div>
+      <div id="cd-txt" style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5"></div>
+    </div>
+    <div style="border-top:1px solid rgba(0,0,0,.1);display:flex">
+      <button onclick="cdSkip()" style="flex:1;padding:14px;font-size:16px;color:rgba(0,0,0,.4);background:none;border:none;border-right:1px solid rgba(0,0,0,.1);cursor:pointer;font-family:inherit">しない</button>
+      <button onclick="cdSave()" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">保存</button>
+    </div>
+  </div>
+</div>
 <script>
 const CK='cam_photos';
 let photos=[];try{photos=JSON.parse(localStorage.getItem(CK)||'[]');}catch(e){}
@@ -216,6 +229,33 @@ let tt=0;pi.addEventListener('click',()=>{const n=Date.now();if(n-tt<300){pvSc=1
 // Save dialog
 window.dS=()=>{hap();document.getElementById('sd').classList.remove('show');};
 window.sAll=()=>{hap.confirm();photos.forEach((p,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=p;a.download='photo_'+Date.now()+'_'+(i+1)+'.jpg';a.click();},i*200));document.getElementById('sd').classList.remove('show');};
+
+// Close confirmation — called by parent before closing iframe
+let _closeBypass=false;
+window.beforeClose=function(){
+  if(_closeBypass||photos.length===0)return true;
+  // Show save dialog
+  document.getElementById('cd-txt').textContent=photos.length+'枚の写真があります';
+  const cd=document.getElementById('cd');
+  cd.style.visibility='visible';cd.style.pointerEvents='auto';
+  cd.style.background='rgba(0,0,0,.5)';
+  const cc=document.getElementById('cc');
+  cc.style.transform='scale(1)';cc.style.opacity='1';
+  return false;
+};
+window.cdSave=function(){
+  hap.confirm();
+  photos.forEach((p,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=p;a.download='photo_'+Date.now()+'_'+(i+1)+'.jpg';a.click();},i*200));
+  _closeBypass=true;
+  setTimeout(()=>{
+    try{window.parent.closeIframeNow();}catch(e){try{window.parent.document.getElementById('iframe-back').click();}catch(e2){}}
+  },photos.length*200+100);
+};
+window.cdSkip=function(){
+  hap();
+  _closeBypass=true;
+  try{window.parent.closeIframeNow();}catch(e){try{window.parent.document.getElementById('iframe-back').click();}catch(e2){}}
+};
 
 startCam();
 // Default slight lux boost
