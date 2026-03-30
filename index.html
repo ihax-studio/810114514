@@ -319,9 +319,10 @@ Layout: [  textarea  ][🌐 flag btn]
 position:fixed;
 bottom:0;left:0;right:0;
 z-index:520;
-/* Raised higher up from bottom */
+display:flex;justify-content:center;
 padding:8px 14px calc(16px + var(--sab));
 background:linear-gradient(to top,rgba(240,243,250,.98) 70%,rgba(240,243,250,0) 100%);
+transition:background .5s cubic-bezier(.77,0,.18,1),padding .5s cubic-bezier(.77,0,.18,1);
 }
 .ti-wrap{
 display:flex;
@@ -348,36 +349,32 @@ overflow-y:auto;
 padding:0;
 }
 #ti::placeholder{color:rgba(142,142,147,.8)}
-/* ═══ COLLAPSED SEARCH BUTTON (non-home) ═══ */
+/* ═══ COLLAPSED SEARCH (iOS-style, center pill) ═══ */
+.ti-wrap{
+  transition:max-width .5s cubic-bezier(.77,0,.18,1),padding .5s cubic-bezier(.77,0,.18,1),gap .5s cubic-bezier(.77,0,.18,1),border-radius .5s cubic-bezier(.77,0,.18,1);
+  max-width:600px;width:100%;position:relative;overflow:hidden;
+}
 #tr-bar.collapsed .ti-wrap{
-  padding:0;gap:0;overflow:hidden;
-  width:64px;height:40px;
-  border-radius:20px;margin-left:auto;
-  transition:width .5s cubic-bezier(.77,0,.18,1),height .5s cubic-bezier(.77,0,.18,1),padding .5s cubic-bezier(.77,0,.18,1),gap .5s cubic-bezier(.77,0,.18,1),border-radius .5s cubic-bezier(.77,0,.18,1);
+  max-width:80px;padding:8px 0;gap:0;border-radius:20px;
+  cursor:pointer;justify-content:center;align-items:center;
 }
-#tr-bar:not(.collapsed) .ti-wrap{
-  transition:width .5s cubic-bezier(.77,0,.18,1),height .5s cubic-bezier(.77,0,.18,1),padding .5s cubic-bezier(.77,0,.18,1),gap .5s cubic-bezier(.77,0,.18,1),border-radius .5s cubic-bezier(.77,0,.18,1);
-  width:auto;
+#ti,#flag-row,.star-input-btn{
+  transition:opacity .35s cubic-bezier(.77,0,.18,1),max-width .5s cubic-bezier(.77,0,.18,1),flex .5s cubic-bezier(.77,0,.18,1);
 }
-#tr-bar.collapsed #ti,
+#tr-bar.collapsed #ti{opacity:0;max-width:0;flex:0 0 0;overflow:hidden;padding:0;min-height:0;pointer-events:none}
 #tr-bar.collapsed #flag-row,
-#tr-bar.collapsed .star-input-btn{
-  opacity:0;pointer-events:none;width:0;min-height:0;max-height:0;overflow:hidden;
-  transition:opacity .3s cubic-bezier(.77,0,.18,1);
-}
-#tr-bar:not(.collapsed) #ti,
-#tr-bar:not(.collapsed) #flag-row,
-#tr-bar:not(.collapsed) .star-input-btn{
-  transition:opacity .3s cubic-bezier(.77,0,.18,1) .15s;
-}
+#tr-bar.collapsed .star-input-btn{opacity:0;max-width:0;overflow:hidden;pointer-events:none;padding:0;margin:0;border:0;flex:0 0 0}
 #search-pill{
-  display:none;position:absolute;inset:0;
-  align-items:center;justify-content:center;
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
   font-size:13px;font-weight:600;color:var(--b);
   cursor:pointer;white-space:nowrap;
   -webkit-user-select:none;user-select:none;
+  opacity:0;pointer-events:none;
+  transition:opacity .35s cubic-bezier(.77,0,.18,1);
 }
-#tr-bar.collapsed #search-pill{display:flex}
+#tr-bar.collapsed #search-pill{opacity:1;pointer-events:auto}
+#tr-bar.collapsed{background:transparent}
 /* Flag system — single active flag shown, tap to expand picker inline */
 #flag-row{
 display:flex;
@@ -948,7 +945,7 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ SETTINGS OVERLAY ══════════ -->
-<div id="settings-overlay" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">
+<div id="settings-overlay" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,0);transition:background .5s cubic-bezier(.77,0,.18,1)">
   <div id="settings-card" style="position:absolute;bottom:0;left:0;right:0;max-height:85dvh;background:rgba(245,245,247,.95);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.05,.64,1)">
     <div style="display:flex;align-items:center;padding:16px 20px 12px">
       <div style="flex:1;font-size:17px;font-weight:700;color:#000">設定</div>
@@ -2657,7 +2654,10 @@ document.getElementById('iframe-back').addEventListener('click',()=>{
 function openSettings(){
   const ov=document.getElementById('settings-overlay');
   ov.style.display='flex';
-  requestAnimationFrame(()=>{document.getElementById('settings-card').style.transform='translateY(0)';});
+  requestAnimationFrame(()=>{
+    ov.style.background='rgba(0,0,0,.4)';
+    document.getElementById('settings-card').style.transform='translateY(0)';
+  });
   // Show sidebar on iPad/Mac
   const sidebar=document.getElementById('settings-sidebar');
   if(_isWideScreen&&sidebar){
@@ -2740,13 +2740,15 @@ document.getElementById('settings-sidebar')?.addEventListener('click',e=>{
 });
 function closeSettings(){
   const card=document.getElementById('settings-card');
+  const sov=document.getElementById('settings-overlay');
+  sov.style.background='rgba(0,0,0,0)';
   if(_isWideScreen){
     card.style.transform='scale(0.9)';card.style.opacity='0';
   }else{
     card.style.transform='translateY(100%)';
   }
   setTimeout(()=>{
-    document.getElementById('settings-overlay').style.display='none';
+    sov.style.display='none';
     if(_isWideScreen){
       // Reset iPad/Mac specific styles
       card.style.position='';card.style.margin='';card.style.maxWidth='';
