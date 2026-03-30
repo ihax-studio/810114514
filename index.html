@@ -46,9 +46,9 @@ html,body{
   font-family:"SF Pro Display","SF Pro Text",-apple-system,"Noto Sans JP",sans-serif;color:var(--tx);
   overscroll-behavior:none;
   -webkit-overflow-scrolling:auto;
-  transition:background 1s cubic-bezier(.77,0,.18,1);
+  transition:background .8s cubic-bezier(.77,0,.18,1);
 }
-/* Body reveal: scale .8→1 in 0.8s */
+/* Body reveal: scale .8→1 in 1s */
 body{animation:bReveal 1s cubic-bezier(.77,0,.18,1) both;transform-origin:center center}
 @keyframes bReveal{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
 
@@ -64,14 +64,14 @@ background-size:cover;background-position:center;background-repeat:no-repeat;bac
 filter:blur(20px);-webkit-filter:blur(20px);
 transform:scale(1.05);
 pointer-events:none;
-transition:background 1s cubic-bezier(.77,0,.18,1),filter 1s cubic-bezier(.77,0,.18,1),opacity 1s cubic-bezier(.77,0,.18,1);
+transition:background .8s cubic-bezier(.77,0,.18,1),filter .8s cubic-bezier(.77,0,.18,1),opacity .8s cubic-bezier(.77,0,.18,1);
 }
 /* ════ HOME ════ */
 #home{
 position:fixed;inset:0;z-index:100;
 display:flex;flex-direction:column;
 padding-top:var(--sat);
-transition:opacity 1s,transform 1s cubic-bezier(.4,0,.2,1);
+transition:opacity .8s,transform .8s cubic-bezier(.4,0,.2,1);
 }
 #home.hidden{opacity:0;transform:scale(.96);pointer-events:none}
 .hm-hdr{padding:22px 20px 8px}
@@ -97,7 +97,7 @@ display:flex;align-items:center;gap:13px;padding:12px 14px;
 background:var(--gls);backdrop-filter:var(--blr);-webkit-backdrop-filter:var(--blr);
 border-bottom:1px solid var(--ln);
 cursor:pointer;user-select:none;-webkit-user-select:none;
-transition:background 1s;
+transition:background .8s;
 }
 .hcard:last-child{border-bottom:none}
 .hcard:active{background:rgba(255,255,255,.95)}
@@ -125,7 +125,7 @@ flex-shrink:0;
 position:fixed;inset:0;z-index:50;
 display:flex;flex-direction:column;
 transform:translateY(105%) scale(.7);
-transition:transform 1s cubic-bezier(.34,1.05,.64,1);
+transition:transform .8s cubic-bezier(.34,1.05,.64,1);
 background:linear-gradient(150deg,#eef2f8 0%,#f8f2fc 50%,#edf7f2 100%);
 }
 #app.vis{transform:translateY(0) scale(1)}
@@ -141,7 +141,7 @@ background:transparent;
 border:none;
 color:var(--b);font-size:13px;cursor:pointer;
 display:flex;align-items:center;justify-content:center;gap:3px;
-transition:transform 1s;flex-shrink:0;
+transition:transform .8s;flex-shrink:0;
 }
 .app-back:active{transform:scale(.88)}
 .app-ttl{flex:1;text-align:center;font-size:16px;font-weight:700;color:var(--tx)}
@@ -149,18 +149,18 @@ transition:transform 1s;flex-shrink:0;
 display:flex;gap:5px;align-items:center;justify-content:center;
 padding:6px 0 4px;flex-shrink:0;
 }
-.dot{width:5px;height:5px;border-radius:50%;background:rgba(0,0,0,.15);transition:all 1s}
+.dot{width:5px;height:5px;border-radius:50%;background:rgba(0,0,0,.15);transition:all .8s}
 .dot.on{background:var(--b);width:16px;border-radius:3px}
 
 /* ════ SWIPE PANELS ════ */
 .sw-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
-.sw-track{display:flex;height:100%;transition:transform 1s cubic-bezier(.4,0,.2,1);will-change:transform}
+.sw-track{display:flex;height:100%;transition:transform .8s cubic-bezier(.4,0,.2,1);will-change:transform}
 .sw-panel{flex-shrink:0;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;padding-bottom:calc(var(--ib) + 70px)}
 
 /* ════ PROGRESS ROW ════ */
 .pr-row{display:flex;align-items:center;gap:8px;padding:5px 14px 2px;flex-shrink:0}
 .prb{flex:1;height:2px;background:rgba(0,0,0,.08);border-radius:1px;overflow:hidden}
-.prf{height:100%;background:linear-gradient(90deg,var(--b),var(--p));border-radius:1px;transition:width 1s}
+.prf{height:100%;background:linear-gradient(90deg,var(--b),var(--p));border-radius:1px;transition:width .8s}
 .prt{font-size:10px;font-weight:600;color:var(--sub);min-width:38px;text-align:right}
 
 /* ════ SCORE ROW ════ */
@@ -172,7 +172,7 @@ border-radius:55px;padding:8px 12px;
 display:flex;align-items:center;gap:5px;
 font-size:12px;font-weight:700;
 border:1px solid rgba(255,255,255,.85);
-cursor:pointer;transition:transform 1s,background 1s;
+cursor:pointer;transition:transform .8s,background .8s;
 font-family:inherit;color:var(--tx);
 box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 1px 4px rgba(0,0,0,.08);
 min-height:36px;
@@ -196,7 +196,7 @@ user-select:none;-webkit-user-select:none;
 .fc{
 width:100%;min-height:255px;
 position:relative;transform-style:preserve-3d;
-transition:transform 1s cubic-bezier(.4,0,.2,1);
+transition:transform .8s cubic-bezier(.4,0,.2,1);
 }
 .fc.fl{transform:rotateY(180deg)}
 .ff{
@@ -266,7 +266,7 @@ justify-content:center;
 .ab{
 padding:12px 20px;border:none;border-radius:14px;
 font-family:inherit;font-size:12px;font-weight:800;
-cursor:pointer;transition:transform 1s;
+cursor:pointer;transition:transform .8s;
 display:flex;align-items:center;gap:5px;
 box-shadow:.8px .8px 0 rgba(255,255,255,.9),-.7px .7px 0 rgba(255,255,255,.9),0 4px 16px rgba(0,0,0,.08);
 backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
@@ -322,7 +322,7 @@ z-index:520;
 display:flex;justify-content:center;
 padding:8px 14px calc(16px + var(--sab));
 background:linear-gradient(to top,rgba(240,243,250,.98) 70%,rgba(240,243,250,0) 100%);
-transition:background 1s cubic-bezier(.77,0,.18,1),padding 1s cubic-bezier(.77,0,.18,1);
+transition:background .8s cubic-bezier(.77,0,.18,1),padding .8s cubic-bezier(.77,0,.18,1);
 }
 .ti-wrap{
 display:flex;
@@ -351,7 +351,7 @@ padding:0;
 #ti::placeholder{color:rgba(142,142,147,.8)}
 /* ═══ COLLAPSED SEARCH (iOS-style, center pill) ═══ */
 .ti-wrap{
-  transition:max-width 1s cubic-bezier(.77,0,.18,1),padding 1s cubic-bezier(.77,0,.18,1),gap 1s cubic-bezier(.77,0,.18,1),transform 1s cubic-bezier(.77,0,.18,1);
+  transition:max-width .8s cubic-bezier(.77,0,.18,1),padding .8s cubic-bezier(.77,0,.18,1),gap .8s cubic-bezier(.77,0,.18,1),transform .8s cubic-bezier(.77,0,.18,1);
   max-width:600px;width:100%;position:relative;overflow:hidden;
 }
 #tr-bar.collapsed .ti-wrap{
@@ -360,7 +360,7 @@ padding:0;
   cursor:pointer;justify-content:center;align-items:center;
 }
 #ti,#flag-row,.star-input-btn{
-  transition:opacity 1s cubic-bezier(.77,0,.18,1),max-width 1s cubic-bezier(.77,0,.18,1),flex 1s cubic-bezier(.77,0,.18,1);
+  transition:opacity .8s cubic-bezier(.77,0,.18,1),max-width .8s cubic-bezier(.77,0,.18,1),flex .8s cubic-bezier(.77,0,.18,1);
 }
 #tr-bar.collapsed #ti{opacity:0;max-width:0;flex:0 0 0;overflow:hidden;padding:0;min-height:0;pointer-events:none}
 #tr-bar.collapsed #flag-row,
@@ -372,7 +372,7 @@ padding:0;
   cursor:pointer;white-space:nowrap;
   -webkit-user-select:none;user-select:none;
   opacity:0;pointer-events:none;
-  transition:opacity 1s cubic-bezier(.77,0,.18,1);
+  transition:opacity .8s cubic-bezier(.77,0,.18,1);
 }
 #tr-bar.collapsed #search-pill{opacity:1;pointer-events:auto}
 #tr-bar.collapsed{background:transparent}
@@ -392,7 +392,7 @@ font-size:22px;
 cursor:pointer;
 background:rgba(0,122,255,.1);
 border:1.5px solid rgba(0,122,255,.3);
-transition:transform 1s;
+transition:transform .8s;
 user-select:none;-webkit-user-select:none;
 flex-shrink:0;
 }
@@ -419,7 +419,7 @@ scrollbar-width:none;
 z-index:510;
 transform:scale(.9) translateY(8px);
 opacity:0;
-transition:transform 1s cubic-bezier(.34,1.05,.64,1),opacity 1s;
+transition:transform .8s cubic-bezier(.34,1.05,.64,1),opacity .8s;
 }
 #flag-picker::-webkit-scrollbar{display:none}
 #flag-picker.open{
@@ -432,7 +432,7 @@ display:flex;align-items:center;gap:10px;
 padding:9px 12px;
 border-radius:12px;
 cursor:pointer;
-transition:background 1s;
+transition:background .8s;
 user-select:none;-webkit-user-select:none;
 }
 .fp-item:active{background:rgba(0,0,0,.08)}
@@ -454,7 +454,7 @@ backdrop-filter:blur(8px) saturate(130%);
 display:flex;align-items:flex-end;justify-content:center;
 padding:0 14px calc(var(--ib) + 14px);
 opacity:0;pointer-events:none;
-transition:opacity 1s;
+transition:opacity .8s;
 }
 #tr-overlay.on{opacity:1;pointer-events:auto}
 #tr-card{
@@ -467,7 +467,7 @@ border-radius:22px;
 box-shadow:0 8px 40px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06);
 overflow-y:auto;padding:0 18px 20px;
 transform:translateY(30px) scale(.95);opacity:0;
-transition:transform 1s cubic-bezier(.34,1.05,.64,1),opacity 1s;
+transition:transform .8s cubic-bezier(.34,1.05,.64,1),opacity .8s;
 -webkit-overflow-scrolling:touch;scrollbar-width:none;
 margin-bottom:4px;
 }
@@ -491,11 +491,11 @@ font-size:12.5px;color:var(--b);
 background:rgba(0,122,255,.07);border-radius:10px;
 padding:9px 12px;margin-bottom:10px;line-height:1.7;
 border:1px solid rgba(0,122,255,.15);
-cursor:pointer;-webkit-user-select:none;user-select:none;transition:background 1s;
+cursor:pointer;-webkit-user-select:none;user-select:none;transition:background .8s;
 }
 .tr-local:active{background:rgba(0,122,255,.18)}
 .tr-dir{font-size:9px;font-weight:800;letter-spacing:.08em;color:var(--sub);text-transform:uppercase;margin-bottom:4px}
-.tr-txt{font-size:clamp(16px,4.5vw,28px);font-weight:300;color:var(--tx);line-height:1.5;word-break:break-word;cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:10px;padding:4px 6px;margin:-4px -6px;transition:background 1s}
+.tr-txt{font-size:clamp(16px,4.5vw,28px);font-weight:300;color:var(--tx);line-height:1.5;word-break:break-word;cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:10px;padding:4px 6px;margin:-4px -6px;transition:background .8s}
 .tr-txt:active{background:rgba(0,122,255,.10)}
 .tr-badge{
 display:inline-block;margin-top:5px;
@@ -506,7 +506,7 @@ background:rgba(0,0,0,.05);border-radius:8px;padding:2px 8px;
 /* ════ HISTORY SHEET ════ */
 #hs-scrim{
 position:fixed;inset:0;background:rgba(0,0,0,.10);z-index:395;
-opacity:0;pointer-events:none;transition:opacity 1s;
+opacity:0;pointer-events:none;transition:opacity .8s;
 }
 #hs-scrim.on{opacity:1;pointer-events:auto}
 #hsheet{
@@ -517,7 +517,7 @@ border:1px solid rgba(255,255,255,.8);
 border-radius:22px;
 padding-bottom:10px;
 transform:translateY(120%) scale(.7);opacity:0;
-transition:transform 1s cubic-bezier(.34,1.05,.64,1),opacity 1s cubic-bezier(.77,0,.18,1);
+transition:transform .8s cubic-bezier(.34,1.05,.64,1),opacity .8s cubic-bezier(.77,0,.18,1);
 max-height:55dvh;display:flex;flex-direction:column;
 box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 4px 30px rgba(0,0,0,.12);
 pointer-events:none;
@@ -544,7 +544,7 @@ border-radius:2px;padding:0 1px;
 .fword .hl-word{background:none;padding:0}
 /* ═══ TAPPABLE ANSWER ═══ */
 .ans-tap{
-cursor:pointer;transition:background 1s;border-radius:6px;padding:1px 3px;
+cursor:pointer;transition:background .8s;border-radius:6px;padding:1px 3px;
 -webkit-user-select:none;user-select:none;
 }
 .ans-tap:active{background:rgba(0,122,255,.12)}
@@ -559,12 +559,12 @@ font-size:16px;font-weight:700;color:var(--tx);display:inline-block;
 padding:2px 6px;
 }
 .ans-ja:active{background:rgba(0,0,0,.06)}
-.ans-row{cursor:pointer;transition:background 1s}
+.ans-row{cursor:pointer;transition:background .8s}
 .ans-row:active{background:rgba(0,122,255,.08)!important}
 
 /* ═══ CORRECT ANSWER FIREWORK ═══ */
 .firework-container{position:fixed;inset:0;pointer-events:none;z-index:9999}
-.firework-dot{position:absolute;width:12px;height:12px;border-radius:50%;animation:fwBurst .9s ease-out forwards}
+.firework-dot{position:absolute;width:12px;height:12px;border-radius:50%;animation:fwBurst .8s ease-out forwards}
 @keyframes fwBurst{
   0%{transform:translate(0,0) scale(1);opacity:1}
   100%{opacity:0}
@@ -575,7 +575,7 @@ display:inline-block;width:6px;height:6px;border-radius:50%;
 background:var(--r);margin-left:4px;vertical-align:middle;
 }
 /* ═══ STAR FAVORITES ═══ */
-.star-deck-btn{transition:transform 1s cubic-bezier(.34,1.56,.64,1)!important}
+.star-deck-btn{transition:transform .8s cubic-bezier(.34,1.56,.64,1)!important}
 .star-deck-btn.pop{animation:starPop .3s cubic-bezier(.77,0,.18,1)}
 @keyframes starPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
 
@@ -629,7 +629,7 @@ border:1px solid rgba(255,255,255,.6);
 font-size:22px;cursor:pointer;
 display:flex;align-items:center;justify-content:center;
 box-shadow:.8px .8px 0 rgba(255,255,255,.9),-.7px .7px 0 rgba(255,255,255,.9),0 4px 16px rgba(0,0,0,.08);
-transition:transform 1s cubic-bezier(.77,0,.18,1);
+transition:transform .8s cubic-bezier(.77,0,.18,1);
 -webkit-user-select:none;user-select:none;
 pointer-events:auto;
 }
@@ -640,7 +640,7 @@ pointer-events:auto;
 display:flex;flex-direction:column;gap:6px;
 padding:6px 14px 8px;max-width:420px;margin:0 auto;width:100%;
 transform:translateY(0);opacity:1;
-transition:transform 1s cubic-bezier(.34,1.05,.64,1),opacity 1s;
+transition:transform .8s cubic-bezier(.34,1.05,.64,1),opacity .8s;
 }
 .quiz-choices.slide-in{animation:qcScaleUp .4s cubic-bezier(.77,0,.18,1) both}
 .quiz-choices.slide-out{animation:qcScaleDown .35s cubic-bezier(.77,0,.18,1) both}
@@ -650,7 +650,7 @@ transition:transform 1s cubic-bezier(.34,1.05,.64,1),opacity 1s;
 background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
 border:1.5px solid rgba(255,255,255,.8);border-radius:14px;
 padding:12px 16px;font-size:14px;font-weight:600;color:var(--tx);
-cursor:pointer;transition:transform 1s,background 1s,border-color 1s;
+cursor:pointer;transition:transform .8s,background .8s,border-color .8s;
 text-align:left;font-family:inherit;
 box-shadow:.8px .8px 0 rgba(255,255,255,.9),-.7px .7px 0 rgba(255,255,255,.9),0 2px 8px rgba(0,0,0,.06);
 display:flex;align-items:center;gap:10px;
@@ -694,7 +694,7 @@ height:3px;background:rgba(0,0,0,.06);border-radius:2px;margin:0 14px 2px;max-wi
 }
 .quiz-timer-bar{
 height:100%;background:linear-gradient(90deg,var(--b),var(--p));border-radius:2px;
-transition:width 1s linear;width:100%;
+transition:width .8s linear;width:100%;
 }
 /* Shrink card in quiz mode to fit choices */
 .quiz-active .fc{min-height:160px!important}
@@ -716,7 +716,7 @@ backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
 box-shadow:.8px .8px 0 rgba(255,255,255,.9),-.7px .7px 0 rgba(255,255,255,.9),0 4px 16px rgba(0,0,0,.08);
 transform:scale(.8);opacity:0;
 animation:qrBtnIn .8s cubic-bezier(.77,0,.18,1) both;
-transition:transform 1s;
+transition:transform .8s;
 }
 .qr-btn:active{transform:scale(.88)!important}
 .qr-btn:nth-child(2){animation-delay:.1s}
@@ -747,16 +747,16 @@ border:6px solid transparent;border-top-color:rgba(255,255,255,.92);
 /* ═══ SETTINGS ═══ */
 .s-sec{font-size:12px;font-weight:600;color:rgba(0,0,0,.4);padding:12px 4px 4px;text-transform:uppercase;letter-spacing:.05em}
 .s-group{background:rgba(255,255,255,.8);border-radius:12px;overflow:hidden;margin-bottom:2px}
-.s-nav-item{padding:10px 14px;border-radius:10px;font-size:14px;color:#000;cursor:pointer;margin-bottom:2px;transition:background 1s}
+.s-nav-item{padding:10px 14px;border-radius:10px;font-size:14px;color:#000;cursor:pointer;margin-bottom:2px;transition:background .8s}
 .s-nav-item:active,.s-nav-item.s-nav-active{background:rgba(0,122,255,.12);color:var(--b);font-weight:600}
 .s-row{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid rgba(0,0,0,.06)}
 .s-row:last-child{border-bottom:none}
 .s-label{flex:1;font-size:15px;color:#000}
 .s-check{width:22px;text-align:center;font-size:15px;font-weight:700;color:transparent}
 .s-check.s-on{color:#007aff}
-.s-toggle{width:51px;height:31px;border-radius:16px;background:#e0e0e0;position:relative;cursor:pointer;transition:background 1s;flex-shrink:0}
+.s-toggle{width:51px;height:31px;border-radius:16px;background:#e0e0e0;position:relative;cursor:pointer;transition:background .8s;flex-shrink:0}
 .s-toggle.on{background:#34c759}
-.s-knob{width:27px;height:27px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform 1s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.s-knob{width:27px;height:27px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .8s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .s-toggle.on .s-knob{transform:translateX(20px)}
 
 /* ═══ ICON WOBBLE ═══ */
@@ -783,7 +783,7 @@ justify-content:center;
 .star-tr{
 font-size:18px;cursor:pointer;flex-shrink:0;
 -webkit-user-select:none;user-select:none;
-transition:transform 1s cubic-bezier(.34,1.56,.64,1);
+transition:transform .8s cubic-bezier(.34,1.56,.64,1);
 margin-left:auto;padding:4px;
 }
 .star-tr.pop{animation:starPop .3s cubic-bezier(.77,0,.18,1)}
@@ -792,7 +792,7 @@ width:40px;height:40px;border-radius:50%;
 display:flex;align-items:center;justify-content:center;
 font-size:20px;cursor:pointer;flex-shrink:0;
 background:rgba(255,200,0,.1);border:1.5px solid rgba(255,200,0,.3);
-transition:transform 1s;-webkit-user-select:none;user-select:none;
+transition:transform .8s;-webkit-user-select:none;user-select:none;
 position:relative;
 }
 .star-input-btn:active{transform:scale(.84)}
@@ -818,10 +818,10 @@ border:6px solid transparent;border-top-color:rgba(255,255,255,.95);
 position:fixed;inset:0;z-index:600;
 background:rgba(0,0,0,.80);
 opacity:0;pointer-events:none;
-transition:opacity 1s cubic-bezier(.77,0,.18,1);
+transition:opacity .8s cubic-bezier(.77,0,.18,1);
 display:flex;flex-direction:column;
 }
-#star-list-overlay.on{opacity:1;pointer-events:auto;transition:opacity 1s cubic-bezier(.77,0,.18,1)}
+#star-list-overlay.on{opacity:1;pointer-events:auto;transition:opacity .8s cubic-bezier(.77,0,.18,1)}
 #star-list-card{
 flex:1;margin:calc(var(--sat) + 120px) 0 0;
 background:rgba(255,255,255,.80);
@@ -830,7 +830,7 @@ border-radius:22px 22px 0 0;
 box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 -4px 30px rgba(0,0,0,.15);
 display:flex;flex-direction:column;
 transform:translateY(100%) scale(.7);
-transition:transform 1s cubic-bezier(.77,0,.18,1);
+transition:transform .8s cubic-bezier(.77,0,.18,1);
 overflow:hidden;
 }
 #star-list-overlay.on #star-list-card{transform:translateY(0) scale(1)}
@@ -894,7 +894,7 @@ overflow:hidden;
         background:rgba(255,255,255,.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
         color:#c0001a;border:1px solid rgba(255,255,255,.7);
         border-radius:55px;padding:14px 28px;font-size:13px;font-weight:700;
-        cursor:pointer;font-family:inherit;transition:transform 1s;
+        cursor:pointer;font-family:inherit;transition:transform .8s;
         display:inline-flex;align-items:center;gap:8px;
         box-shadow:1.1px 1px 0 rgba(255,255,255,.9),-1px -.8px 0 rgba(255,255,255,.7),0 2px 8px rgba(0,0,0,.08);
       ">⚠️ セーブデータを全て削除</button>
@@ -910,8 +910,8 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ LIST SWITCH DIALOG ══════════ -->
-<div id="list-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background 1s cubic-bezier(.77,0,.18,1);align-items:center;justify-content:center">
-  <div id="list-dialog-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform 1s cubic-bezier(.77,0,.18,1),opacity 1s cubic-bezier(.77,0,.18,1)">
+<div id="list-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background .8s cubic-bezier(.77,0,.18,1);align-items:center;justify-content:center">
+  <div id="list-dialog-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .8s cubic-bezier(.77,0,.18,1),opacity .8s cubic-bezier(.77,0,.18,1)">
     <div style="padding:22px 20px 10px">
       <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">リスト表示</div>
       <div style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5">アイコン表示と設定を表示するにはホーム画面でシェイクします</div>
@@ -925,14 +925,14 @@ overflow:hidden;
 
 <!-- ══════════ MEMO OVERLAY ══════════ -->
 <!-- ══════════ IFRAME APP OVERLAY ══════════ -->
-<div id="iframe-overlay" style="position:fixed;inset:0;z-index:900;background:#fff;transform:translateX(100%);transition:transform 1s cubic-bezier(.77,0,.18,1);visibility:hidden">
+<div id="iframe-overlay" style="position:fixed;inset:0;z-index:900;background:#fff;transform:translateX(100%);transition:transform .8s cubic-bezier(.77,0,.18,1);visibility:hidden">
   <button id="iframe-back" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:10;width:42px;height:42px;border-radius:55px;background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--b);box-shadow:0 2px 8px rgba(0,0,0,.1)">←</button>
   <iframe id="iframe-content" style="position:absolute;inset:0;width:100%;height:100%;border:none" sandbox="allow-scripts allow-same-origin allow-downloads allow-modals" allow="camera;microphone"></iframe>
 </div>
 
 <!-- Icon mode dialog -->
-<div id="icon-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background 1s cubic-bezier(.77,0,.18,1);align-items:center;justify-content:center">
-  <div id="icon-dialog-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform 1s cubic-bezier(.77,0,.18,1),opacity 1s cubic-bezier(.77,0,.18,1)">
+<div id="icon-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background .8s cubic-bezier(.77,0,.18,1);align-items:center;justify-content:center">
+  <div id="icon-dialog-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .8s cubic-bezier(.77,0,.18,1),opacity .8s cubic-bezier(.77,0,.18,1)">
     <div style="padding:22px 20px 10px">
       <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">アイコン表示</div>
       <div style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5">リスト表示に戻すには設定から変更します😰</div>
@@ -945,8 +945,8 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ SETTINGS OVERLAY ══════════ -->
-<div id="settings-overlay" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,0);transition:background 1s cubic-bezier(.77,0,.18,1)">
-  <div id="settings-card" style="position:absolute;bottom:0;left:0;right:0;max-height:85dvh;background:rgba(245,245,247,.95);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%);transition:transform 1s cubic-bezier(.34,1.05,.64,1)">
+<div id="settings-overlay" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,0);transition:background .8s cubic-bezier(.77,0,.18,1)">
+  <div id="settings-card" style="position:absolute;bottom:0;left:0;right:0;max-height:85dvh;background:rgba(245,245,247,.95);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .8s cubic-bezier(.34,1.05,.64,1)">
     <div style="display:flex;align-items:center;padding:16px 20px 12px">
       <div style="flex:1;font-size:17px;font-weight:700;color:#000">設定</div>
       <button id="settings-close" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.06);border:none;font-size:18px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'SF Pro Display',system-ui,sans-serif;color:#000;line-height:1">✕</button>
@@ -1066,8 +1066,8 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ WALLPAPER CUSTOMIZE DIALOG ══════════ -->
-<div id="wp-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background 1s cubic-bezier(.77,0,.18,1)">
-  <div id="wp-dialog-card" style="position:absolute;bottom:0;left:0;right:0;max-height:70dvh;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%);transition:transform 1s cubic-bezier(.34,1.05,.64,1)">
+<div id="wp-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background .8s cubic-bezier(.77,0,.18,1)">
+  <div id="wp-dialog-card" style="position:absolute;bottom:0;left:0;right:0;max-height:70dvh;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .8s cubic-bezier(.34,1.05,.64,1)">
     <div style="display:flex;align-items:center;padding:16px 20px 10px">
       <div id="wp-dialog-title" style="flex:1;font-size:17px;font-weight:700;color:#000">壁紙をカスタマイズ</div>
       <button id="wp-dialog-close" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.06);border:none;font-size:18px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#000;line-height:1">✕</button>
@@ -1100,8 +1100,8 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ DELETE SLIDER OVERLAY ══════════ -->
-<div id="del-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0);transition:background 1s;">
-  <div id="del-content" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:15dvh;opacity:0;transition:opacity 1s;">
+<div id="del-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0);transition:background .8s;">
+  <div id="del-content" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:15dvh;opacity:0;transition:opacity .8s;">
     <div id="del-slider-wrap" style="position:relative;width:310px;height:64px;">
       <div style="
         position:absolute;inset:0;border-radius:36px;
@@ -1109,7 +1109,7 @@ overflow:hidden;
         box-shadow:inset 1px -1px 11px rgb(255 255 255/12%),inset 1px -1px 55px rgb(255 255 255/11%),1px -1px 1px rgb(243 243 243/62%),-1px 1px 1px rgb(225 225 225/62%),0 2px 18px #0000000d;
         display:flex;align-items:center;overflow:visible;
       ">
-        <div id="del-inner" style="position:absolute;top:0;left:-5px;height:64px;border-radius:36px;z-index:1;transition:width 1s;pointer-events:none;width:72px;"></div>
+        <div id="del-inner" style="position:absolute;top:0;left:-5px;height:64px;border-radius:36px;z-index:1;transition:width .8s;pointer-events:none;width:72px;"></div>
         <div id="del-label" style="position:absolute;left:88px;top:0;height:64px;line-height:64px;color:#fff;font-size:19px;font-weight:500;letter-spacing:1px;z-index:2;opacity:.83;user-select:none;pointer-events:none;text-shadow:0 2px 10px #000b;">スライドで全て削除</div>
       </div>
       <div id="del-knob" style="
@@ -1119,7 +1119,7 @@ overflow:hidden;
         backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
         border:none;outline:none;cursor:pointer;user-select:none;
         box-shadow:1px -1px 1px rgb(255 255 255/62%),-1px 1px 1px rgb(255 255 255/62%),0 2px 18px #00000015;
-        will-change:left;transition:left 1s cubic-bezier(.62,0,.4,1);
+        will-change:left;transition:left .8s cubic-bezier(.62,0,.4,1);
       ">
         <svg width="32" height="32" viewBox="0 0 32 32"><polyline points="12,8 20,16 12,24" fill="none" stroke="#ff3b30" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
@@ -1130,7 +1130,7 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ LOCK SCREEN (PWA only) ══════════ -->
-<div id="lockscreen" style="display:none;position:fixed;inset:0;z-index:10000;background:#fff;color:#000;font-weight:300;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;-webkit-user-select:none;user-select:none;transform:scale(1);opacity:1;transition:transform 1s cubic-bezier(.77,0,.18,1),opacity 1s cubic-bezier(.77,0,.18,1),background 1s cubic-bezier(.77,0,.18,1)" onclick="haptic()">
+<div id="lockscreen" style="display:none;position:fixed;inset:0;z-index:10000;background:#fff;color:#000;font-weight:300;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;-webkit-user-select:none;user-select:none;transform:scale(1);opacity:1;transition:transform .8s cubic-bezier(.77,0,.18,1),opacity .8s cubic-bezier(.77,0,.18,1),background .8s cubic-bezier(.77,0,.18,1)" onclick="haptic()">
   <div style="display:flex;flex-direction:column;align-items:center;width:100%;height:100%;padding-top:calc(env(safe-area-inset-top,0px) + 60px)">
     <div id="lock-clock" style="font-size:76px;font-weight:200;letter-spacing:-2px;display:flex;overflow:hidden;justify-content:center;cursor:pointer" onclick="event.stopPropagation();document.getElementById('lock-color-input').click();">
       <span id="lc-h1" style="display:inline-block"></span><span id="lc-h2" style="display:inline-block"></span>
@@ -1144,7 +1144,7 @@ overflow:hidden;
       <div style="position:absolute;inset:0;border-radius:55px;background:rgba(0,0,0,.08);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04)">
         <div id="lock-slide-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(0,0,0,.35);font-size:15px;font-weight:400;letter-spacing:.5px;user-select:none;pointer-events:none">スライドでロック解除</div>
       </div>
-      <div id="lock-knob" style="position:absolute;top:4px;left:4px;width:52px;height:52px;background:rgba(0,0,0,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:10;cursor:pointer;user-select:none;will-change:left;transition:left 1s cubic-bezier(.62,0,.4,1);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(0,0,0,.1)">
+      <div id="lock-knob" style="position:absolute;top:4px;left:4px;width:52px;height:52px;background:rgba(0,0,0,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:10;cursor:pointer;user-select:none;will-change:left;transition:left .8s cubic-bezier(.62,0,.4,1);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(0,0,0,.1)">
         <svg width="24" height="24" viewBox="0 0 32 32"><polyline points="12,8 20,16 12,24" fill="none" stroke="#000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
@@ -1152,8 +1152,8 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ LOCK CONFIRM DIALOG ══════════ -->
-<div id="lock-confirm-dlg" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0);transition:background 1s cubic-bezier(.77,0,.18,1);align-items:center;justify-content:center">
-  <div id="lock-confirm-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform 1s cubic-bezier(.77,0,.18,1),opacity 1s cubic-bezier(.77,0,.18,1)">
+<div id="lock-confirm-dlg" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0);transition:background .8s cubic-bezier(.77,0,.18,1);align-items:center;justify-content:center">
+  <div id="lock-confirm-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .8s cubic-bezier(.77,0,.18,1),opacity .8s cubic-bezier(.77,0,.18,1)">
     <div style="padding:22px 20px 10px">
       <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">パスコードが必要</div>
       <div style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5">Face ID/Optic IDまたはTouch IDを<br>設定している必要があります😰</div>
@@ -1166,8 +1166,8 @@ overflow:hidden;
 </div>
 
 <!-- ══════════ NO-FORGOT DIALOG ══════════ -->
-<div id="no-forgot-dlg" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0);transition:background 1s cubic-bezier(.77,0,.18,1);align-items:center;justify-content:center">
-  <div id="no-forgot-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.8);opacity:0;transition:transform 1s cubic-bezier(.34,1.05,.64,1),opacity 1s cubic-bezier(.77,0,.18,1)">
+<div id="no-forgot-dlg" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0);transition:background .8s cubic-bezier(.77,0,.18,1);align-items:center;justify-content:center">
+  <div id="no-forgot-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.8);opacity:0;transition:transform .8s cubic-bezier(.34,1.05,.64,1),opacity .8s cubic-bezier(.77,0,.18,1)">
     <div style="padding:22px 20px 10px">
       <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">忘れた単語がありません</div>
       <div style="font-size:13px;color:rgba(0,0,0,.5);line-height:1.5">クイズで 😰忘れた / 🤔難しい を<br>押してください</div>
@@ -2278,7 +2278,7 @@ function showLockScreen(){
 }
 function hideLockScreen(){
   const ls=document.getElementById('lockscreen');
-  ls.style.transition='transform 1s cubic-bezier(.77,0,.18,1),opacity 1s cubic-bezier(.77,0,.18,1)';
+  ls.style.transition='transform .8s cubic-bezier(.77,0,.18,1),opacity .8s cubic-bezier(.77,0,.18,1)';
   ls.style.transform='scale(1.8)';ls.style.opacity='0';
   setTimeout(()=>{ls.style.display='none';ls.style.transform='';ls.style.opacity='';ls.style.transition='';},800);
   if(window._lockIv){clearInterval(window._lockIv);window._lockIv=null;}
@@ -2293,7 +2293,7 @@ function hideLockScreen(){
   async function doUnlock(){
     knob.style.left=maxLeft+'px';haptic.confirm();
     const ls=document.getElementById('lockscreen');
-    ls.style.transition='filter 1s cubic-bezier(.77,0,.18,1)';ls.style.filter='blur(12px)';
+    ls.style.transition='filter .8s cubic-bezier(.77,0,.18,1)';ls.style.filter='blur(12px)';
     setTimeout(async()=>{
       try{
         const c=new Uint8Array(32);crypto.getRandomValues(c);
@@ -2327,7 +2327,7 @@ function hideLockScreen(){
   },{passive:true});
   document.addEventListener('touchend',()=>{
     if(!dragging)return;dragging=false;
-    knob.style.transition='left 1s cubic-bezier(.62,0,.4,1)';
+    knob.style.transition='left .8s cubic-bezier(.62,0,.4,1)';
     if(!_touchMoved){haptic.confirm();doUnlock();}
     else if(knobLeft>maxLeft*0.75){doUnlock();}
     else{knob.style.left='4px';knobLeft=4;const lb=document.getElementById('lock-slide-label');if(lb)lb.style.opacity='1';}
@@ -2636,7 +2636,7 @@ function openIframe(url,title){
   document.getElementById('iframe-content').src=url;
   ov.style.visibility='visible';
   ov.style.transform='translateX(100%) scale(0.8)';
-  ov.style.transition='transform 1s cubic-bezier(.77,0,.18,1)';
+  ov.style.transition='transform .8s cubic-bezier(.77,0,.18,1)';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ov.style.transform='translateX(0) scale(1)';}));
 }
 document.getElementById('iframe-back').addEventListener('click',()=>{
@@ -2667,7 +2667,7 @@ function openSettings(){
     card.style.position='relative';card.style.margin='auto';
     card.style.maxWidth='800px';card.style.width='90%';card.style.maxHeight='80dvh';
     card.style.borderRadius='22px';card.style.bottom='auto';
-    card.style.transition='transform 1s cubic-bezier(.77,0,.18,1), opacity 1s cubic-bezier(.77,0,.18,1), width 1s cubic-bezier(.77,0,.18,1), max-width 1s cubic-bezier(.77,0,.18,1)';
+    card.style.transition='transform .8s cubic-bezier(.77,0,.18,1), opacity .8s cubic-bezier(.77,0,.18,1), width .8s cubic-bezier(.77,0,.18,1), max-width .8s cubic-bezier(.77,0,.18,1)';
     card.style.transform='scale(0.9)';card.style.opacity='0';
     requestAnimationFrame(()=>{card.style.transform='scale(1)';card.style.opacity='1';});
     // Show only first section on iPad
@@ -2713,7 +2713,7 @@ function openSettings(){
 
 function showSettingsSection(sec){
   const content=document.querySelector('#settings-body > div:last-child');
-  if(content){content.style.transition='opacity 1s cubic-bezier(.77,0,.18,1)';content.style.opacity='0';}
+  if(content){content.style.transition='opacity .8s cubic-bezier(.77,0,.18,1)';content.style.opacity='0';}
   setTimeout(()=>{
     document.querySelectorAll('.s-section').forEach(s=>{s.style.display='none';});
     const target=document.getElementById('ss-'+sec);
@@ -2756,7 +2756,7 @@ function closeSettings(){
       card.style.opacity='';card.style.width='';
     }
     // Always reset transition but keep transform for iPhone reopen
-    card.style.transition='transform 1s cubic-bezier(.34,1.05,.64,1)';
+    card.style.transition='transform .8s cubic-bezier(.34,1.05,.64,1)';
     if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
     else restoreHomeFromGrid();
   },400);
@@ -2771,7 +2771,7 @@ function updateHeavyVisibility(){
   const shakeMode=localStorage.getItem('inglish_shake_mode')||'none';
   // Hide heavy option that matches current shake selection (when shake != none)
   document.querySelectorAll('.s-heavy-opt').forEach(row=>{
-    row.style.display='';row.style.transition='opacity 1s';row.style.opacity='1';
+    row.style.display='';row.style.transition='opacity .9s';row.style.opacity='1';
   });
   if(shakeMode!=='none'){
     const hideEl=document.getElementById('s-heavy-'+shakeMode);
@@ -2828,13 +2828,13 @@ document.getElementById('icon-dialog-ok').addEventListener('click',()=>{
   localStorage.setItem('inglish_layout','icon');
   hideDialog('icon-dialog','icon-dialog-card',()=>{
     const scroll=document.querySelector('.hm-scroll');
-    scroll.style.transition='transform 1s cubic-bezier(.77,0,.18,1), opacity 1s cubic-bezier(.77,0,.18,1)';
+    scroll.style.transition='transform .8s cubic-bezier(.77,0,.18,1), opacity .8s cubic-bezier(.77,0,.18,1)';
     scroll.style.transform='translateX(100%)';scroll.style.opacity='0';
     setTimeout(()=>{
       scroll.style.transition='none';scroll.style.transform='translateX(-100%)';
       showIconGrid();
       requestAnimationFrame(()=>{
-        scroll.style.transition='transform 1s cubic-bezier(.77,0,.18,1), opacity 1s cubic-bezier(.77,0,.18,1)';
+        scroll.style.transition='transform .8s cubic-bezier(.77,0,.18,1), opacity .8s cubic-bezier(.77,0,.18,1)';
         scroll.style.transform='';scroll.style.opacity='1';
       });
       setTimeout(()=>{scroll.style.transition='';},500);
@@ -3057,7 +3057,7 @@ function runPhysics(els,shakeX,shakeY,onSettle){
 function springBack(states,onSettle){
   physicsRunning=false;
   states.forEach(s=>{
-    s.el.style.transition='transform 1s cubic-bezier(.34,1.56,.64,1)';
+    s.el.style.transition='transform .8s cubic-bezier(.34,1.56,.64,1)';
     s.el.style.transform='';
   });
   setTimeout(()=>{
@@ -3250,7 +3250,7 @@ function jPanel(idx,anim=true){
   const tr=document.getElementById('sw-track');
   const ttl=document.getElementById('app-ttl');
   const oldP=curP;
-  tr.style.transition=anim?'transform 1s cubic-bezier(.77,0,.18,1)':'none';
+  tr.style.transition=anim?'transform .8s cubic-bezier(.77,0,.18,1)':'none';
   curP=idx;tr.style.transform=`translateX(${-idx*100}%)`;
   document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===idx));
   // Title slide animation
@@ -3259,7 +3259,7 @@ function jPanel(idx,anim=true){
     ttl.style.transition='none';
     ttl.style.transform=`translateX(${dir*40}px)`;ttl.style.opacity='0';
     requestAnimationFrame(()=>{
-      ttl.style.transition='transform 1s cubic-bezier(.77,0,.18,1),opacity 1s cubic-bezier(.77,0,.18,1)';
+      ttl.style.transition='transform .8s cubic-bezier(.77,0,.18,1),opacity .8s cubic-bezier(.77,0,.18,1)';
       ttl.style.transform='translateX(0)';ttl.style.opacity='1';
     });
   }
@@ -3435,7 +3435,7 @@ document.getElementById('ti').addEventListener('input',()=>{
       closeTrOverlay();clearTimeout(trTimer);
       srDiv.style.display='block';
       srDiv.innerHTML=matches.map(a=>
-        `<div data-act="${a.action}" style="padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.06);transition:transform 1s,opacity 1s"><span style="font-size:18px">${a.icon}</span><span style="font-size:13px;color:#000">${a.name}</span></div>`
+        `<div data-act="${a.action}" style="padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.06);transition:transform .8s,opacity .9s"><span style="font-size:18px">${a.icon}</span><span style="font-size:13px;color:#000">${a.name}</span></div>`
       ).join('');
       srDiv.querySelectorAll('[data-act]').forEach(el=>{
         el.addEventListener('click',()=>{
@@ -3500,15 +3500,15 @@ _tiEl.addEventListener('focus',function(){
 _tiEl.addEventListener('input',function(){
   clearTimeout(_searchCollapseTimer);
 });
-// Patch openS: when leaving home, schedule collapse
+// Patch openS: when leaving home, collapse immediately
 const _origOpenS2=window.openS;
 window.openS=function(type,arg){
   _origOpenS2(type,arg);
-  if(!alwaysSearchOn())scheduleSearchCollapse();
+  if(!alwaysSearchOn())collapseSearchBar();
 };
 // Watch for any hcard/iframe navigations that use onclick with openIframe
 document.querySelectorAll('[onclick*="openIframe"]').forEach(el=>{
-  el.addEventListener('click',()=>{if(!alwaysSearchOn())scheduleSearchCollapse();});
+  el.addEventListener('click',()=>{if(!alwaysSearchOn())collapseSearchBar();});
 });
 // Patch goHome: always expand when returning home
 const _origGoHome=window.goHome;
@@ -3925,15 +3925,15 @@ function showIconGrid(){
     const short=d.name.length>5?d.name.slice(0,4)+'\u2026':d.name;
     const labelHtml=bigMode?'':'<div style="font-size:8px;font-weight:600;color:var(--tx);text-align:center;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+short+'</div>';
     const iconContent=d.icon==='__clock__'?'<svg class="live-clock-svg" viewBox="0 0 40 40" width="'+(fontSize+4)+'" height="'+(fontSize+4)+'"><circle cx="20" cy="20" r="18" fill="none" stroke="rgba(0,0,0,.3)" stroke-width="1.5"/><line class="clk-h" x1="20" y1="20" x2="20" y2="10" stroke="#333" stroke-width="2.5" stroke-linecap="round"/><line class="clk-m" x1="20" y1="20" x2="20" y2="7" stroke="#333" stroke-width="1.5" stroke-linecap="round"/><line class="clk-s" x1="20" y1="20" x2="20" y2="6" stroke="#ff3b30" stroke-width=".8" stroke-linecap="round"/><circle cx="20" cy="20" r="1.5" fill="#333"/></svg>':d.icon;
-    cell.innerHTML='<div class="ig-icon" style="width:'+iconSize+'px;height:'+iconSize+'px;border-radius:14px;background:rgba(255,255,255,.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.85),-1px -.8px 0 rgba(255,255,255,.6),0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:'+fontSize+'px;transition:transform 1s">'+iconContent+'</div>'+labelHtml;
+    cell.innerHTML='<div class="ig-icon" style="width:'+iconSize+'px;height:'+iconSize+'px;border-radius:14px;background:rgba(255,255,255,.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.85),-1px -.8px 0 rgba(255,255,255,.6),0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:'+fontSize+'px;transition:transform .9s">'+iconContent+'</div>'+labelHtml;
     cell.addEventListener('click',()=>{
       if(wobbleMode)return;
       haptic();
       const allCells=grid.querySelectorAll('.ig-cell');
       const thisIcon=cell.querySelector('.ig-icon');
-      thisIcon.style.transition='transform 1s cubic-bezier(.77,0,.18,1), opacity 1s cubic-bezier(.77,0,.18,1)';
+      thisIcon.style.transition='transform .8s cubic-bezier(.77,0,.18,1), opacity .8s cubic-bezier(.77,0,.18,1)';
       thisIcon.style.transform='scale(5)';thisIcon.style.opacity='0';
-      allCells.forEach(c2=>{if(c2===cell)return;c2.style.transition='transform 1s cubic-bezier(.77,0,.18,1), opacity 1s cubic-bezier(.77,0,.18,1)';c2.style.transform='scale(0.8)';c2.style.opacity='0.3';});
+      allCells.forEach(c2=>{if(c2===cell)return;c2.style.transition='transform .8s cubic-bezier(.77,0,.18,1), opacity .8s cubic-bezier(.77,0,.18,1)';c2.style.transform='scale(0.8)';c2.style.opacity='0.3';});
       setTimeout(()=>{
         allCells.forEach(c2=>{c2.style.transition='';c2.style.transform='';c2.style.opacity='';});
         if(d.onclick==='__openSettings__'){openSettings();}
@@ -4048,7 +4048,7 @@ document.addEventListener('click',e=>{
     unmarkForgot(word,deckIdx);
     haptic.confirm();
     const li=clr.closest('.li');
-    if(li){li.style.transition='opacity 1s,transform 1s';li.style.opacity='0';li.style.transform='translateX(60px)';setTimeout(()=>li.remove(),260);}
+    if(li){li.style.transition='opacity .8s,transform .9s';li.style.opacity='0';li.style.transform='translateX(60px)';setTimeout(()=>li.remove(),260);}
     updateHomeBadges();
     return;
   }
@@ -4086,8 +4086,8 @@ document.addEventListener('click',e=>{
 
   function setPos(x){knob.style.left=x+'px';inner.style.width=(72+x)+'px';label.style.opacity=1-x/maxOff;}
   function resetSlider(){
-    knob.style.transition='left 1s cubic-bezier(.62,0,.4,1)';
-    inner.style.transition='width 1s';
+    knob.style.transition='left .8s cubic-bezier(.62,0,.4,1)';
+    inner.style.transition='width .9s';
     knob.style.left='4px';inner.style.width='72px';label.style.opacity=1;
   }
 
@@ -4110,7 +4110,7 @@ document.addEventListener('click',e=>{
     // Scale 1→1.2 zoom out effect then reload
     ov.style.background='rgba(0,0,0,1)';
     content.style.opacity='0';
-    document.body.style.transition='transform 1s cubic-bezier(.77,0,.18,1), opacity 1s cubic-bezier(.77,0,.18,1)';
+    document.body.style.transition='transform .8s cubic-bezier(.77,0,.18,1), opacity .8s cubic-bezier(.77,0,.18,1)';
     document.body.style.transform='scale(1.2)';
     document.body.style.opacity='0';
     setTimeout(()=>{window.location.reload();},550);
@@ -4151,8 +4151,8 @@ document.addEventListener('click',e=>{
   },{passive:true});
   wrap.addEventListener('touchend',e=>{
     if(!dragging)return;dragging=false;
-    knob.style.transition='left 1s cubic-bezier(.62,0,.4,1)';
-    inner.style.transition='width 1s';
+    knob.style.transition='left .8s cubic-bezier(.62,0,.4,1)';
+    inner.style.transition='width .9s';
     if(kx>=maxOff*.9){doDeleteAll();}
     else{for(let i=0;i<9;i++)setTimeout(()=>haptic.error(),i*45);resetSlider();}
   },{passive:true});
@@ -4169,8 +4169,8 @@ document.addEventListener('click',e=>{
   });
   window.addEventListener('mouseup',e=>{
     if(!dragging)return;dragging=false;
-    knob.style.transition='left 1s cubic-bezier(.62,0,.4,1)';
-    inner.style.transition='width 1s';
+    knob.style.transition='left .8s cubic-bezier(.62,0,.4,1)';
+    inner.style.transition='width .9s';
     if(kx>=maxOff*.9){doDeleteAll();}
     else{resetSlider();}
   });
@@ -4305,7 +4305,7 @@ slOverlay.addEventListener('click',e=>{if(e.target===slOverlay)closeStarList();}
     lc.addEventListener('touchend',e=>{
       if(!target)return;
       const dx=e.changedTouches[0].clientX-sx;
-      target.style.transition='transform 1s cubic-bezier(.77,0,.18,1)';
+      target.style.transition='transform .8s cubic-bezier(.77,0,.18,1)';
       if(dx<-60){
         // Show delete button
         target.style.transform='translateX(-70px)';
