@@ -2,571 +2,492 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>数学III・C</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Math Visualizer</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
-html,body{width:100%;height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif}
-#cv{display:block;width:100%;background:#fafafa}
-/* tab bar */
-.tabs{display:flex;background:rgba(249,249,249,.94);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:.5px solid #c6c6c8;padding-bottom:env(safe-area-inset-bottom,0)}
-.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0 4px;font:500 10px/1 -apple-system,sans-serif;background:none;border:none;color:#8e8e93;cursor:pointer;transition:color .15s}
-.tabs button.on{color:var(--tc,#007aff)}
-.tabs button span.ico{font-size:20px;line-height:1}
-/* controls */
-.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 14px;background:#fff;border-bottom:.5px solid #c6c6c8}
-.bar select,.bar input[type=number]{background:#e5e5ea;border:none;border-radius:10px;color:#1c1c1e;padding:6px 10px;font:14px -apple-system,sans-serif;text-align:center}
-.bar select{padding-right:24px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238e8e93'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
-.bar input[type=number]{width:56px}
-.bar input[type=range]{height:22px;-webkit-appearance:none;appearance:none;background:transparent;flex:1 1 80px;max-width:160px}
-.bar input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:#d1d1d6}
-.bar input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 .5px 4px rgba(0,0,0,.2);margin-top:-9px}
-.pill{padding:5px 12px;font:500 13px -apple-system,sans-serif;border-radius:20px;border:1.5px solid #c6c6c8;background:none;color:#8e8e93;cursor:pointer;transition:all .2s}
-.pill.on{background:var(--c,#007aff)18;border-color:var(--c,#007aff);color:var(--c,#007aff)}
-.vals{font:500 12px -apple-system,sans-serif}
-/* Apple Pencil floating label */
-#pencil-label{position:fixed;pointer-events:none;opacity:0;transform:scale(.8);transition:opacity .15s,transform .2s cubic-bezier(.4,.0,.2,1);background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-radius:14px;padding:8px 14px;box-shadow:0 2px 16px rgba(0,0,0,.12);z-index:999;font:600 15px/1.3 -apple-system,"SF Pro Display",sans-serif;color:#1c1c1e;white-space:nowrap}
-#pencil-label.show{opacity:1;transform:scale(1)}
-#pencil-label .deg{font-size:22px;font-weight:700;letter-spacing:-.5px}
-#pencil-label .pres{font-size:13px;color:#8e8e93;font-weight:500;margin-top:2px}
+    :root {
+        --bg: #121212;
+        --surface: #1e1e1e;
+        --primary: #0a84ff;
+        --text: #ffffff;
+        --text-dim: #8e8e93;
+        --border: #333333;
+    }
+    body {
+        margin: 0; padding: 0;
+        background-color: var(--bg); color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        overflow: hidden; touch-action: none; /* スクロール防止 */
+    }
+    #canvas-container {
+        position: absolute; top: 0; left: 0; right: 0; bottom: 140px;
+    }
+    canvas {
+        width: 100%; height: 100%; display: block;
+    }
+    /* コントロールパネル */
+    #controls {
+        position: absolute; bottom: 70px; left: 0; right: 0; height: 70px;
+        background-color: var(--surface); border-top: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        padding: 0 15px; overflow-x: auto; white-space: nowrap;
+    }
+    select, input[type="range"], button {
+        background: #2c2c2e; color: var(--text); border: none;
+        padding: 8px 12px; border-radius: 8px; font-size: 14px; outline: none;
+    }
+    input[type="range"] { padding: 0; width: 120px; }
+    .control-label { font-size: 14px; color: var(--text-dim); margin-right: 5px; }
+    
+    /* タブバー */
+    #tabbar {
+        position: absolute; bottom: 0; left: 0; right: 0; height: 70px;
+        background-color: var(--surface); border-top: 1px solid var(--border);
+        display: flex; justify-content: space-around; align-items: center;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    .tab {
+        flex: 1; display: flex; flex-direction: column; align-items: center;
+        color: var(--text-dim); font-size: 11px; padding: 10px 0; cursor: pointer;
+    }
+    .tab.active { color: var(--primary); }
+    .tab-icon { font-size: 24px; margin-bottom: 4px; }
+    
+    /* 情報表示用オーバーレイ */
+    #info-overlay {
+        position: absolute; top: 20px; left: 20px; pointer-events: none;
+        background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;
+        font-family: monospace; font-size: 14px;
+    }
 </style>
 </head>
 <body>
-<div id="app"></div>
-<div id="pencil-label"><div class="deg">0°</div><div class="pres">pressure: 0</div></div>
 
-<script>
-/* 外部依存を排除し、標準のVibration APIを利用した安全なハプティック関数 */
-const hap = () => {
-  try {
-    if (navigator.vibrate) navigator.vibrate(10);
-  } catch(e) {}
-};
+<div id="canvas-container">
+    <canvas id="mathCanvas"></canvas>
+    <div id="info-overlay"></div>
+</div>
 
-const TAU=2*Math.PI,PI=Math.PI;
-const tr4=v=>Math.trunc(v*10000)/10000;
-const fmt=v=>{if(!isFinite(v))return'—';const t=tr4(v);if(t===0)return'0';return t.toFixed(4).replace(/0+$/,'').replace(/\.$/,'')};
+<div id="controls">
+    </div>
 
-/* ── Colors ── */
-const SYS={pink:'#ff2d55',teal:'#5ac8fa',orange:'#ff9500',green:'#34c759',
-  purple:'#af52de',blue:'#007aff',red:'#ff3b30',
-  bg:'#f2f2f7',graphBg:'#fafafa',grid:'#e8e8ed',axis:'#c7c7cc',
-  label:'#1c1c1e',label2:'#636366',label3:'#8e8e93'};
+<nav id="tabbar">
+    <div class="tab active" data-tab="trig"><div class="tab-icon">∿</div>三角関数</div>
+    <div class="tab" data-tab="diff"><div class="tab-icon">∂</div>微分</div>
+    <div class="tab" data-tab="int"><div class="tab-icon">∫</div>積分</div>
+    <div class="tab" data-tab="complex"><div class="tab-icon">ℂ</div>複素数</div>
+    <div class="tab" data-tab="curve"><div class="tab-icon">∞</div>曲線</div>
+</nav>
 
-/* ── Gradient helper ── */
-function lerpC(c1,c2,t){
-  const p=(s,o)=>parseInt(s.slice(o,o+2),16),m=(a,b)=>Math.round(a+(b-a)*t);
-  return`rgb(${m(p(c1,1),p(c2,1))},${m(p(c1,3),p(c2,3))},${m(p(c1,5),p(c2,5))})`;
-}
-
-/* ── Canvas helpers ── */
-function setupCvs(c){
-  const x=c.getContext('2d'),d=window.devicePixelRatio||1;
-  const r=c.getBoundingClientRect(),W=r.width,H=r.height;
-  c.width=W*d;c.height=H*d;x.scale(d,d);
-  x.fillStyle=SYS.graphBg;x.fillRect(0,0,W,H);
-  return{x,W,H};
-}
-
-function makeG(ox,oy,w,h,x0,x1,y0,y1){
-  return{
-    mx:v=>ox+(v-x0)/(x1-x0)*w-w/2,
-    my:v=>oy-(v-y0)/(y1-y0)*h+h/2,
-    ix:s=>(s-ox+w/2)/w*(x1-x0)+x0,
-    ox,oy,w,h,x0,x1,y0,y1
-  };
-}
-
-function drawGrid(x,g,xs,ys){
-  x.fillStyle='#fafafa';x.fillRect(g.ox-g.w/2-1,g.oy-g.h/2-1,g.w+2,g.h+2);
-  x.strokeStyle=SYS.grid;x.lineWidth=.5;
-  if(ys)for(let v=Math.ceil(g.y0/ys)*ys;v<=g.y1;v+=ys){const y=g.my(v);x.beginPath();x.moveTo(g.ox-g.w/2,y);x.lineTo(g.ox+g.w/2,y);x.stroke()}
-  if(xs)for(let v=Math.ceil(g.x0/xs)*xs;v<=g.x1;v+=xs){const xx=g.mx(v);x.beginPath();x.moveTo(xx,g.oy-g.h/2);x.lineTo(xx,g.oy+g.h/2);x.stroke()}
-  x.strokeStyle=SYS.axis;x.lineWidth=1;
-  const y0=g.my(0),x0_=g.mx(0);
-  if(y0>=g.oy-g.h/2&&y0<=g.oy+g.h/2){x.beginPath();x.moveTo(g.ox-g.w/2,y0);x.lineTo(g.ox+g.w/2,y0);x.stroke()}
-  if(x0_>=g.ox-g.w/2&&x0_<=g.ox+g.w/2){x.beginPath();x.moveTo(x0_,g.oy-g.h/2);x.lineTo(x0_,g.oy+g.h/2);x.stroke()}
-}
-
-function gradCurve(x,fn,c1,c2,g,skip){
-  const top=g.oy-g.h/2-5,bot=g.oy+g.h/2+5;
-  const steps=Math.max(400,Math.floor(g.w*1.5)),dx=(g.x1-g.x0)/steps;
-  let pX=null,pY=null;x.lineWidth=2.5;x.lineCap='round';
-  for(let i=0;i<=steps;i++){
-    const a=g.x0+i*dx;
-    if(skip&&skip(a)){pX=null;continue}
-    let v;try{v=fn(a)}catch(e){pX=null;continue}
-    if(!isFinite(v)){pX=null;continue}
-    const sx=g.mx(a),sy=g.my(v);
-    if(sy<top||sy>bot){pX=null;continue}
-    if(pX!==null){x.strokeStyle=lerpC(c1,c2,i/steps);x.beginPath();x.moveTo(pX,pY);x.lineTo(sx,sy);x.stroke()}
-    pX=sx;pY=sy;
-  }
-}
-
-function gradSeg(x,x1,y1,x2,y2,c1,c2,N){
-  x.lineCap='round';x.lineWidth=3;
-  for(let i=0;i<N;i++){const a=i/N,b=(i+1)/N;x.strokeStyle=lerpC(c1,c2,a);
-    x.beginPath();x.moveTo(x1+(x2-x1)*a,y1+(y2-y1)*a);x.lineTo(x1+(x2-x1)*b,y1+(y2-y1)*b);x.stroke()}
-}
-
-/* ── Special angles ── */
-const SPEC=[
-  [0,'0','1','0'],[30,'1/2','√3/2','1/√3'],[45,'√2/2','√2/2','1'],[60,'√3/2','1/2','√3'],
-  [90,'1','0','—'],[120,'√3/2','−1/2','−√3'],[135,'√2/2','−√2/2','−1'],[150,'1/2','−√3/2','−1/√3'],
-  [180,'0','−1','0'],[210,'−1/2','−√3/2','1/√3'],[225,'−√2/2','−√2/2','1'],[240,'−√3/2','−1/2','√3'],
-  [270,'−1','0','—'],[300,'−√3/2','1/2','−√3'],[315,'−√2/2','√2/2','−1'],[330,'−1/2','√3/2','−1/√3']
-];
-const fSp=d=>{const n=((d%360)+360)%360;return SPEC.find(a=>a[0]===n)};
-
-/* ── Functions for 微分/積分 ── */
-const FUNCS=[
-  {name:'sin x',f:Math.sin,df:Math.cos,x0:-PI,x1:PI,y0:-1.5,y1:1.5,da:0,db:PI},
-  {name:'cos x',f:Math.cos,df:a=>-Math.sin(a),x0:-PI,x1:PI,y0:-1.5,y1:1.5,da:0,db:PI},
-  {name:'tan x',f:Math.tan,df:a=>1/Math.cos(a)**2,x0:-PI*.9,x1:PI*.9,y0:-4,y1:4,skip:a=>Math.abs(Math.cos(a))<.04,da:0,db:1},
-  {name:'x²',f:a=>a*a,df:a=>2*a,x0:-3,x1:3,y0:-2,y1:9,da:0,db:2},
-  {name:'x³',f:a=>a**3,df:a=>3*a*a,x0:-2,x1:2,y0:-8,y1:8,da:-1,db:1},
-  {name:'eˣ',f:Math.exp,df:Math.exp,x0:-2,x1:3,y0:-1,y1:8,da:0,db:1},
-  {name:'ln x',f:Math.log,df:a=>1/a,x0:.05,x1:5,y0:-3,y1:3,da:1,db:Math.E},
-];
-
-/* ── Curves ── */
-const CURVES=[
-  {name:'サイクロイド',fx:t=>t-Math.sin(t),fy:t=>1-Math.cos(t),t0:0,t1:4*PI,xc:2*PI,yc:1,xr:2*PI+1,yr:2.5},
-  {name:'アステロイド',fx:t=>Math.cos(t)**3,fy:t=>Math.sin(t)**3,t0:0,t1:TAU,xc:0,yc:0,xr:1.3,yr:1.3},
-  {name:'カージオイド',fx:t=>(1+Math.cos(t))*Math.cos(t),fy:t=>(1+Math.cos(t))*Math.sin(t),t0:0,t1:TAU,xc:.5,yc:0,xr:2.5,yr:2.2},
-  {name:'リサージュ(3:2)',fx:t=>Math.sin(3*t),fy:t=>Math.sin(2*t),t0:0,t1:TAU,xc:0,yc:0,xr:1.3,yr:1.3},
-  {name:'バラ曲線',fx:t=>Math.cos(3*t)*Math.cos(t),fy:t=>Math.cos(3*t)*Math.sin(t),t0:0,t1:PI,xc:0,yc:0,xr:1.3,yr:1.3},
-];
-
-/* ══════════════════════════════════════
-   STATE
-   ══════════════════════════════════════ */
-const S={
-  tab:'trig',
-  ang:45,sh:{s:true,c:true,t:true},
-  fi:0,pt:1,showD:true,showT:true,
-  ia:0,ib:PI,in_:10,showR:true,
-  cre:1,cim:1,cpow:2,cshowP:true,crange:4,
-  ci:0,ctp:.5,
-  drag:false,dragTarget:null,
-  pencil:{active:false,x:0,y:0,pressure:0,angle:0}
-};
-
-let cvs,ctx;
-
-/* ── Apple Pencil floating label ── */
-const pencilEl=document.getElementById('pencil-label');
-function showPencilLabel(x,y,deg,pressure){
-  pencilEl.querySelector('.deg').textContent=Math.round(deg)+'°';
-  pencilEl.querySelector('.pres').textContent='pressure: '+pressure.toFixed(3);
-  pencilEl.style.left=(x+20)+'px';
-  pencilEl.style.top=(y-60)+'px';
-  pencilEl.classList.add('show');
-}
-function hidePencilLabel(){pencilEl.classList.remove('show')}
-
-/* ══════════════════════════════════════
-   RENDER
-   ══════════════════════════════════════ */
-function render(){
-  if(!cvs)return;
-  const{x,W,H}=setupCvs(cvs);
-
-  if(S.tab==='trig') drawTrig(x,W,H);
-  else if(S.tab==='deriv') drawDeriv(x,W,H);
-  else if(S.tab==='integ') drawInteg(x,W,H);
-  else if(S.tab==='complex') drawComplex(x,W,H);
-  else if(S.tab==='curve') drawCurve(x,W,H);
-
-  updateControls();
-}
-
-/* ── Trig ── */
-function drawTrig(x,W,H){
-  const wide=W>550;
-  const R=wide?Math.min(W*.16,H*.32):Math.min(W*.26,H*.16);
-  const cx=wide?W*.22:W*.5,cy=wide?H*.45:H*.27;
-  const rad=S.ang*PI/180,sV=Math.sin(rad),cV=Math.cos(rad);
-  const isA=Math.abs(cV)<.05,tV=isA?null:Math.tan(rad);
-
-  // unit circle
-  x.strokeStyle=SYS.grid;x.lineWidth=.5;
-  x.beginPath();x.moveTo(cx-R*1.4,cy);x.lineTo(cx+R*1.6,cy);x.moveTo(cx,cy-R*1.4);x.lineTo(cx,cy+R*1.4);x.stroke();
-  x.strokeStyle=SYS.axis;x.lineWidth=1.5;x.beginPath();x.arc(cx,cy,R,0,TAU);x.stroke();
-  x.fillStyle=SYS.blue+'15';x.beginPath();x.moveTo(cx,cy);x.arc(cx,cy,R*.22,0,-rad,rad>0);x.closePath();x.fill();
-  x.strokeStyle=SYS.blue;x.lineWidth=1.5;x.beginPath();x.arc(cx,cy,R*.22,0,-rad,rad>0);x.stroke();
-  const px=cx+R*cV,py=cy-R*sV;
-  x.strokeStyle=SYS.label3;x.lineWidth=1.5;x.beginPath();x.moveTo(cx,cy);x.lineTo(px,py);x.stroke();
-  if(S.sh.c)gradSeg(x,cx,cy,px,cy,'#5ac8fa','#32ade6',20);
-  if(S.sh.s)gradSeg(x,px,cy,px,py,'#ff2d55','#ff6b8a',20);
-  if(S.sh.t&&tV!==null){
-    const tlx=cx+R,cl=Math.max(cy-R*3.5,Math.min(cy+R*3.5,cy-R*tV));
-    x.strokeStyle=SYS.orange+'22';x.lineWidth=1;x.beginPath();x.moveTo(tlx,cy-R*2.5);x.lineTo(tlx,cy+R*2.5);x.stroke();
-    gradSeg(x,tlx,cy,tlx,cl,'#ffcc00','#ff9500',20);
-    x.strokeStyle=SYS.orange+'44';x.setLineDash([4,4]);x.lineWidth=1;x.beginPath();x.moveTo(cx,cy);x.lineTo(tlx,cl);x.stroke();x.setLineDash([]);
-    x.fillStyle=SYS.orange;x.beginPath();x.arc(tlx,cl,4,0,TAU);x.fill();
-  }
-  x.fillStyle=SYS.label;x.beginPath();x.arc(px,py,5,0,TAU);x.fill();
-  x.strokeStyle=SYS.graphBg;x.lineWidth=2;x.stroke();
-
-  // graph
-  const gox=wide?W*.73:W*.5,goy=wide?H*.5:H*.72,gw=wide?W*.42:W*.86,gh=wide?H*.8:H*.42;
-  const g=makeG(gox,goy,gw,gh,-PI,PI,-3,3);
-  drawGrid(x,g,PI/2,1);
-  x.setLineDash([2,4]);x.strokeStyle=SYS.axis+'88';x.lineWidth=.5;
-  [1,-1].forEach(v=>{const y=g.my(v);x.beginPath();x.moveTo(gox-gw/2,y);x.lineTo(gox+gw/2,y);x.stroke()});
-  x.setLineDash([]);
-  if(S.sh.t){x.setLineDash([4,6]);x.strokeStyle=SYS.orange+'33';x.lineWidth=1;
-    [PI/2,-PI/2].forEach(a=>{const xx=g.mx(a);x.beginPath();x.moveTo(xx,goy-gh/2);x.lineTo(xx,goy+gh/2);x.stroke()});x.setLineDash([])}
-  if(S.sh.s)gradCurve(x,Math.sin,'#ff2d55','#ff6b8a',g,null);
-  if(S.sh.c)gradCurve(x,Math.cos,'#5ac8fa','#32ade6',g,null);
-  if(S.sh.t)gradCurve(x,Math.tan,'#ffcc00','#ff9500',g,a=>Math.abs(Math.cos(a))<.04);
-  const mapped=((rad%TAU+TAU)%TAU);const mRad=mapped>PI?mapped-TAU:mapped;
-  const cX=g.mx(mRad);
-  x.strokeStyle=SYS.label+'11';x.lineWidth=1;x.beginPath();x.moveTo(cX,goy-gh/2);x.lineTo(cX,goy+gh/2);x.stroke();
-  if(S.sh.s){x.fillStyle=SYS.pink;x.beginPath();x.arc(cX,g.my(sV),4,0,TAU);x.fill()}
-  if(S.sh.c){x.fillStyle=SYS.teal;x.beginPath();x.arc(cX,g.my(cV),4,0,TAU);x.fill()}
-  if(S.sh.t&&tV!==null){const sy=g.my(tV);if(sy>=goy-gh/2&&sy<=goy+gh/2){x.fillStyle=SYS.orange;x.beginPath();x.arc(cX,sy,4,0,TAU);x.fill()}}
-
-  // store layout for interaction
-  S._trig={cx,cy,R,g};
-}
-
-/* ── Deriv ── */
-function drawDeriv(x,W,H){
-  const fn=FUNCS[S.fi];
-  const g=makeG(W*.5,H*.5,W*.88,H*.82,fn.x0,fn.x1,fn.y0,fn.y1);
-  const xs=fn.x1-fn.x0>8?2:fn.x1-fn.x0>3?1:.5,ys=fn.y1-fn.y0>8?2:1;
-  drawGrid(x,g,xs,ys);
-  gradCurve(x,fn.f,'#ff2d55','#ff6b8a',g,fn.skip);
-  if(S.showD)gradCurve(x,fn.df,'#5ac8fa','#32ade6',g,fn.skip);
-  if(S.showT){
-    const fv=fn.f(S.pt),dv=fn.df(S.pt);
-    if(isFinite(fv)&&isFinite(dv)){
-      const tanFn=a=>fv+dv*(a-S.pt);
-      x.strokeStyle=SYS.orange+'66';x.lineWidth=1.5;x.setLineDash([6,4]);
-      x.beginPath();x.moveTo(g.mx(fn.x0),g.my(tanFn(fn.x0)));x.lineTo(g.mx(fn.x1),g.my(tanFn(fn.x1)));x.stroke();x.setLineDash([]);
-      const sx=g.mx(S.pt),sy=g.my(fv);
-      if(sy>=g.oy-g.h/2&&sy<=g.oy+g.h/2){
-        x.fillStyle=SYS.label;x.beginPath();x.arc(sx,sy,6,0,TAU);x.fill();
-        x.fillStyle=SYS.graphBg;x.beginPath();x.arc(sx,sy,3,0,TAU);x.fill();
-      }
+<script type="module">
+    try {
+        import { haptic } from 'ios-haptics';
+        window.triggerHaptic = haptic;
+    } catch (e) {
+        // モジュールが解決できない環境向けのフォールバック
+        window.triggerHaptic = () => {
+            if(navigator.vibrate) navigator.vibrate(10);
+        };
     }
-  }
-  x.font='12px -apple-system,sans-serif';x.fillStyle=SYS.pink;x.textAlign='left';
-  x.fillText('f(x) = '+fn.name,g.ox-g.w/2+10,g.oy-g.h/2+18);
-  if(S.showD){x.fillStyle=SYS.teal;x.fillText("f'(x)",g.ox-g.w/2+10,g.oy-g.h/2+34)}
-  S._deriv={g};
-}
-
-/* ── Integ ── */
-function drawInteg(x,W,H){
-  const fn=FUNCS[S.fi];
-  const g=makeG(W*.5,H*.52,W*.88,H*.78,fn.x0,fn.x1,fn.y0,fn.y1);
-  const xs=fn.x1-fn.x0>8?2:1,ys=fn.y1-fn.y0>8?2:1;
-  drawGrid(x,g,xs,ys);
-  const lo=Math.max(fn.x0,Math.min(S.ia,S.ib)),hi=Math.min(fn.x1,Math.max(S.ia,S.ib));
-  if(hi>lo){
-    const y0=g.my(0),steps=200,dx=(hi-lo)/steps;
-    x.fillStyle=SYS.green+'20';x.beginPath();x.moveTo(g.mx(lo),y0);
-    for(let i=0;i<=steps;i++){const xv=lo+i*dx;let fv;try{fv=fn.f(xv)}catch(e){fv=0}if(!isFinite(fv))fv=0;x.lineTo(g.mx(xv),g.my(fv))}
-    x.lineTo(g.mx(hi),y0);x.closePath();x.fill();
-    if(S.showR&&S.in_>0){
-      const dx2=(hi-lo)/S.in_;
-      for(let i=0;i<S.in_;i++){const xi=lo+i*dx2;let fv;try{fv=fn.f(xi+dx2/2)}catch(e){continue}
-        if(!isFinite(fv))continue;
-        const lx=g.mx(xi),rx=g.mx(xi+dx2),ty=g.my(fv),by=g.my(0),col=fv>=0?SYS.green:SYS.red;
-        x.fillStyle=col+'22';x.fillRect(Math.min(lx,rx),Math.min(ty,by),Math.abs(rx-lx),Math.abs(ty-by));
-        x.strokeStyle=col+'55';x.lineWidth=.5;x.strokeRect(Math.min(lx,rx),Math.min(ty,by),Math.abs(rx-lx),Math.abs(ty-by))}
-    }
-  }
-  gradCurve(x,fn.f,'#ff2d55','#ff6b8a',g,fn.skip);
-  [['a',S.ia,SYS.blue],['b',S.ib,SYS.purple]].forEach(([l,v,c])=>{
-    if(v>=fn.x0&&v<=fn.x1){const sx=g.mx(v);x.strokeStyle=c;x.lineWidth=2;x.beginPath();x.moveTo(sx,g.oy-g.h/2);x.lineTo(sx,g.oy+g.h/2);x.stroke();
-      x.fillStyle=c;x.beginPath();x.arc(sx,g.oy-g.h/2+12,7,0,TAU);x.fill();
-      x.fillStyle='#fff';x.font='bold 9px -apple-system,sans-serif';x.textAlign='center';x.fillText(l,sx,g.oy-g.h/2+15)}
-  });
-  S._integ={g};
-}
-
-/* ── Complex ── */
-function drawComplex(x,W,H){
-  const range=S.crange;const ox=W*.5,oy=H*.5,sc=Math.min(W,H)*.42/range;
-  const gs=range>20?5:range>8?2:1;
-  x.strokeStyle=SYS.grid;x.lineWidth=.5;
-  for(let i=Math.ceil(-range/gs)*gs;i<=range;i+=gs){
-    x.beginPath();x.moveTo(ox+i*sc,0);x.lineTo(ox+i*sc,H);x.stroke();
-    x.beginPath();x.moveTo(0,oy-i*sc);x.lineTo(W,oy-i*sc);x.stroke();}
-  x.strokeStyle=SYS.axis;x.lineWidth=1;
-  x.beginPath();x.moveTo(0,oy);x.lineTo(W,oy);x.stroke();
-  x.beginPath();x.moveTo(ox,0);x.lineTo(ox,H);x.stroke();
-  x.strokeStyle=SYS.axis+'66';x.lineWidth=1;x.beginPath();x.arc(ox,oy,sc,0,TAU);x.stroke();
-  const r_=Math.sqrt(S.cre**2+S.cim**2),th=Math.atan2(S.cim,S.cre);
-  if(r_>.05){x.strokeStyle=SYS.blue+'22';x.lineWidth=1;x.beginPath();x.arc(ox,oy,r_*sc,0,TAU);x.stroke();
-    const aR=Math.min(30,r_*sc*.35);x.fillStyle=SYS.blue+'12';x.beginPath();x.moveTo(ox,oy);x.arc(ox,oy,aR,0,-th,th>0);x.closePath();x.fill();
-    x.strokeStyle=SYS.blue;x.lineWidth=1.5;x.beginPath();x.arc(ox,oy,aR,0,-th,th>0);x.stroke()}
-  const zx=ox+S.cre*sc,zy=oy-S.cim*sc;
-  gradSeg(x,ox,oy,zx,zy,'#af52de','#da7cff',20);
-  x.fillStyle=SYS.purple;x.beginPath();x.arc(zx,zy,6,0,TAU);x.fill();
-  x.fillStyle=SYS.graphBg;x.beginPath();x.arc(zx,zy,3,0,TAU);x.fill();
-  x.font='bold 12px -apple-system,sans-serif';x.fillStyle=SYS.purple;x.textAlign='left';x.fillText('z',zx+10,zy-10);
-  if(S.cshowP){
-    const rn=Math.pow(r_,S.cpow),tn_=th*S.cpow,zr=rn*Math.cos(tn_),zi=rn*Math.sin(tn_);
-    if(isFinite(zr)&&isFinite(zi)){
-      const znx=ox+zr*sc,zny=oy-zi*sc;
-      gradSeg(x,ox,oy,znx,zny,'#ffcc00','#ff9500',20);
-      x.fillStyle=SYS.orange;x.beginPath();x.arc(znx,zny,5,0,TAU);x.fill();
-      x.font='bold 12px -apple-system,sans-serif';x.fillStyle=SYS.orange;
-      const sup=String(S.cpow).split('').map(c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[+c]||c).join('');
-      x.fillText('z'+sup,znx+10,zny-10);
-    }
-  }
-  S._complex={ox,oy,sc,range};
-}
-
-/* ── Curve ── */
-function drawCurve(x,W,H){
-  const cv=CURVES[S.ci];
-  const g=makeG(W*.5,H*.5,W*.88,H*.82,cv.xc-cv.xr,cv.xc+cv.xr,cv.yc-cv.yr,cv.yc+cv.yr);
-  drawGrid(x,g,cv.xr>5?2:cv.xr>1.5?1:.5,cv.yr>5?2:cv.yr>1.5?1:.5);
-  const steps=1000,dt=(cv.t1-cv.t0)/steps;
-  let pX=null,pY=null;x.lineWidth=2.5;x.lineCap='round';
-  for(let i=0;i<=steps;i++){const t=cv.t0+i*dt,vx=cv.fx(t),vy=cv.fy(t);
-    if(!isFinite(vx)||!isFinite(vy)){pX=null;continue}
-    const sx=g.mx(vx),sy=g.my(vy);
-    if(pX!==null){x.strokeStyle=lerpC('#af52de','#da7cff',i/steps);x.beginPath();x.moveTo(pX,pY);x.lineTo(sx,sy);x.stroke()}
-    pX=sx;pY=sy;}
-  const tVal=cv.t0+(cv.t1-cv.t0)*S.ctp,ptx=cv.fx(tVal),pty=cv.fy(tVal);
-  if(isFinite(ptx)&&isFinite(pty)){const sx=g.mx(ptx),sy=g.my(pty);
-    x.fillStyle=SYS.label;x.beginPath();x.arc(sx,sy,6,0,TAU);x.fill();
-    x.fillStyle=SYS.graphBg;x.beginPath();x.arc(sx,sy,3,0,TAU);x.fill()}
-}
-
-/* ══════════════════════════════════════
-   CONTROLS (vanilla DOM)
-   ══════════════════════════════════════ */
-function updateControls(){
-  const bar=document.getElementById('ctrl');if(!bar)return;
-  // vals
-  const vals=document.getElementById('vals');if(!vals)return;
-  if(S.tab==='trig'){
-    const rad=S.ang*PI/180,sp=fSp(S.ang),sV=Math.sin(rad),cV=Math.cos(rad),isA=Math.abs(cV)<.05;
-    let tanT=isA?'tan→'+(Math.sin(rad)>0==Math.cos(rad)>=0?'+∞':'−∞'):`tan=${fmt(Math.tan(rad))}`;
-    if(sp&&sp[3]==='—')tanT='tan=±∞';else if(sp)tanT=`tan=${sp[3]}(${fmt(Math.tan(rad))})`;
-    vals.innerHTML=`<span style="color:${SYS.pink}">sin=${sp?sp[1]+'('+fmt(sV)+')':fmt(sV)}</span> `+
-      `<span style="color:${SYS.teal}">cos=${sp?sp[2]+'('+fmt(cV)+')':fmt(cV)}</span> `+
-      `<span style="color:${SYS.orange}">${tanT}</span>`;
-  }else if(S.tab==='deriv'){
-    const fn=FUNCS[S.fi],fv=fn.f(S.pt),dv=fn.df(S.pt);
-    vals.innerHTML=`<span style="color:${SYS.pink}">f(${fmt(S.pt)})=${fmt(fv)}</span> `+
-      `<span style="color:${SYS.teal}">f'(${fmt(S.pt)})=${fmt(dv)}</span>`;
-  }else if(S.tab==='integ'){
-    const fn=FUNCS[S.fi],lo=Math.min(S.ia,S.ib),hi=Math.max(S.ia,S.ib);
-    let area=0;const h=(hi-lo)/2000;for(let i=0;i<2000;i++){const v=fn.f(lo+(i+.5)*h);if(isFinite(v))area+=v*h}
-    if(S.ia>S.ib)area=-area;
-    vals.innerHTML=`<span style="color:${SYS.green};font-weight:600;font-size:14px">∫f(x)dx ≈ ${fmt(area)}</span>`;
-  }else if(S.tab==='complex'){
-    const r_=Math.sqrt(S.cre**2+S.cim**2),th=Math.atan2(S.cim,S.cre);
-    vals.innerHTML=`<span style="color:${SYS.purple}">z=${fmt(S.cre)}${S.cim>=0?'+':'−'}${fmt(Math.abs(S.cim))}i</span> `+
-      `<span style="color:${SYS.blue}">|z|=${fmt(r_)} arg=${fmt(th)}rad</span>`;
-  }else if(S.tab==='curve'){
-    const cv=CURVES[S.ci],tVal=cv.t0+(cv.t1-cv.t0)*S.ctp;
-    vals.innerHTML=`<span style="color:${SYS.purple}">t=${fmt(tVal)} (${isFinite(cv.fx(tVal))?fmt(cv.fx(tVal)):'—'},${isFinite(cv.fy(tVal))?fmt(cv.fy(tVal)):'—'})</span>`;
-  }
-}
-
-/* ══════════════════════════════════════
-   BUILD UI
-   ══════════════════════════════════════ */
-function buildApp(){
-  const app=document.getElementById('app');
-  app.innerHTML=`
-    <div id="ctrl" class="bar"></div>
-    <div id="vals" class="bar vals"></div>
-    <canvas id="cv"></canvas>
-    <div class="tabs" id="tabs"></div>`;
-  cvs=document.getElementById('cv');
-  resize();
-  buildTabs();
-  buildControls();
-  render();
-}
-
-function resize(){
-  if(!cvs)return;
-  const app=document.getElementById('app');
-  const ctrl=document.getElementById('ctrl');
-  const vals=document.getElementById('vals');
-  const tabs=document.getElementById('tabs');
-  const h=window.innerHeight-(ctrl?ctrl.offsetHeight:0)-(vals?vals.offsetHeight:0)-(tabs?tabs.offsetHeight:0);
-  cvs.style.height=Math.max(100,h)+'px';
-  render();
-}
-
-const TABDEF=[
-  {id:'trig',label:'三角関数',ico:'∿',color:SYS.pink},
-  {id:'deriv',label:'微分',ico:'∂',color:SYS.teal},
-  {id:'integ',label:'積分',ico:'∫',color:SYS.green},
-  {id:'complex',label:'複素数',ico:'ℂ',color:SYS.purple},
-  {id:'curve',label:'曲線',ico:'∞',color:SYS.orange},
-];
-
-function buildTabs(){
-  const el=document.getElementById('tabs');
-  el.innerHTML=TABDEF.map(t=>`<button data-tab="${t.id}" style="--tc:${t.color}" class="${S.tab===t.id?'on':''}"><span class="ico">${t.ico}</span><span>${t.label}</span></button>`).join('');
-  el.querySelectorAll('button').forEach(b=>b.onclick=()=>{hap();S.tab=b.dataset.tab;buildTabs();buildControls();render()});
-}
-
-function buildControls(){
-  const el=document.getElementById('ctrl');
-  if(S.tab==='trig'){
-    el.innerHTML=`<span style="color:#636366;font-weight:500">θ=</span>
-      <input type="number" id="angN" value="${S.ang}" style="width:56px">
-      <span style="color:#8e8e93;font-size:12px">°</span>
-      <input type="range" id="angR" min="0" max="360" value="${((S.ang%360)+360)%360}">
-      <button class="pill ${S.sh.s?'on':''}" style="--c:${SYS.pink}" data-k="s">sin</button>
-      <button class="pill ${S.sh.c?'on':''}" style="--c:${SYS.teal}" data-k="c">cos</button>
-      <button class="pill ${S.sh.t?'on':''}" style="--c:${SYS.orange}" data-k="t">tan</button>`;
-    el.querySelector('#angN').oninput=e=>{S.ang=parseInt(e.target.value)||0;hap();render()};
-    el.querySelector('#angR').oninput=e=>{S.ang=+e.target.value;el.querySelector('#angN').value=S.ang;hap();render()};
-    el.querySelectorAll('.pill').forEach(b=>b.onclick=()=>{hap();S.sh[b.dataset.k]=!S.sh[b.dataset.k];b.classList.toggle('on');render()});
-  }else if(S.tab==='deriv'){
-    el.innerHTML=`<select id="fsel">${FUNCS.map((f,i)=>`<option value="${i}"${i===S.fi?' selected':''}>${f.name}</option>`).join('')}</select>
-      <button class="pill ${S.showD?'on':''}" style="--c:${SYS.teal}" id="togD">f'(x)</button>
-      <button class="pill ${S.showT?'on':''}" style="--c:${SYS.orange}" id="togT">接線</button>`;
-    el.querySelector('#fsel').onchange=e=>{S.fi=+e.target.value;S.pt=1;hap();render()};
-    el.querySelector('#togD').onclick=()=>{hap();S.showD=!S.showD;buildControls();render()};
-    el.querySelector('#togT').onclick=()=>{hap();S.showT=!S.showT;buildControls();render()};
-  }else if(S.tab==='integ'){
-    el.innerHTML=`<select id="fsel">${FUNCS.map((f,i)=>`<option value="${i}"${i===S.fi?' selected':''}>${f.name}</option>`).join('')}</select>
-      <button class="pill ${S.showR?'on':''}" style="--c:${SYS.green}" id="togR">区分求積</button>
-      <span style="color:#636366;font-weight:600">a=</span><input type="number" id="iaI" value="${tr4(S.ia)}" step="0.1" style="width:52px;border-left:3px solid ${SYS.blue}">
-      <span style="color:#636366;font-weight:600">b=</span><input type="number" id="ibI" value="${tr4(S.ib)}" step="0.1" style="width:52px;border-left:3px solid ${SYS.purple}">
-      <span style="color:#8e8e93">n=</span><input type="range" id="nR" min="1" max="100" value="${S.in_}" style="width:70px"><span style="color:#8e8e93;font-size:11px">${S.in_}</span>`;
-    el.querySelector('#fsel').onchange=e=>{S.fi=+e.target.value;const fn=FUNCS[S.fi];S.ia=fn.da;S.ib=fn.db;hap();buildControls();render()};
-    el.querySelector('#togR').onclick=()=>{hap();S.showR=!S.showR;buildControls();render()};
-    el.querySelector('#iaI').oninput=e=>{const v=parseFloat(e.target.value);if(isFinite(v))S.ia=v;render()};
-    el.querySelector('#ibI').oninput=e=>{const v=parseFloat(e.target.value);if(isFinite(v))S.ib=v;render()};
-    el.querySelector('#nR').oninput=e=>{S.in_=+e.target.value;hap();buildControls();render()};
-  }else if(S.tab==='complex'){
-    el.innerHTML=`<span style="color:#636366">z=</span><input type="number" id="creI" value="${S.cre}" step="0.1" style="width:50px">
-      <span style="color:#636366">+i</span><input type="number" id="cimI" value="${S.cim}" step="0.1" style="width:50px">
-      <span style="color:#8e8e93">n=</span><input type="number" id="cpI" value="${S.cpow}" min="1" max="12" style="width:40px">
-      <button class="pill ${S.cshowP?'on':''}" style="--c:${SYS.orange}" id="togP">zⁿ</button>`;
-    el.querySelector('#creI').oninput=e=>{const v=parseFloat(e.target.value);if(isFinite(v))S.cre=v;render()};
-    el.querySelector('#cimI').oninput=e=>{const v=parseFloat(e.target.value);if(isFinite(v))S.cim=v;render()};
-    el.querySelector('#cpI').oninput=e=>{const v=parseInt(e.target.value);if(v>=1&&v<=12)S.cpow=v;render()};
-    el.querySelector('#togP').onclick=()=>{hap();S.cshowP=!S.cshowP;buildControls();render()};
-  }else if(S.tab==='curve'){
-    el.innerHTML=`<select id="csel">${CURVES.map((c,i)=>`<option value="${i}"${i===S.ci?' selected':''}>${c.name}</option>`).join('')}</select>
-      <span style="color:#8e8e93">t=</span><input type="range" id="tpR" min="0" max="1" step="0.002" value="${S.ctp}" style="flex:1;max-width:200px">`;
-    el.querySelector('#csel').onchange=e=>{S.ci=+e.target.value;S.ctp=.5;hap();render()};
-    el.querySelector('#tpR').oninput=e=>{S.ctp=+e.target.value;hap();render()};
-  }
-}
-
-/* ══════════════════════════════════════
-   POINTER / APPLE PENCIL
-   ══════════════════════════════════════ */
-function onPointerDown(e){
-  if(e.pointerType==='pen'){
-    S.pencil.active=true;
-    handlePencil(e);
-    return;
-  }
-  S.drag=true;
-  handleDrag(e);
-}
-
-function onPointerMove(e){
-  if(e.pointerType==='pen'&&S.pencil.active){
-    e.preventDefault();
-    handlePencil(e);
-    return;
-  }
-  if(S.drag){e.preventDefault();handleDrag(e)}
-}
-
-function onPointerUp(e){
-  if(e.pointerType==='pen'){S.pencil.active=false;hidePencilLabel();return}
-  S.drag=false;S.dragTarget=null;
-}
-
-function handlePencil(e){
-  const r=cvs.getBoundingClientRect();
-  const mx=e.clientX-r.left,my=e.clientY-r.top;
-  const pressure=e.pressure||0;
-
-  let deg=0;
-  if(S.tab==='trig'&&S._trig){
-    const{cx,cy}=S._trig;
-    let a=Math.atan2(-(my-cy),mx-cx);if(a<0)a+=TAU;
-    deg=a*180/PI;
-    S.ang=Math.round(deg);
-    render();
-  }else if(S.tab==='complex'&&S._complex){
-    const{ox,oy,sc}=S._complex;
-    S.cre=tr4((mx-ox)/sc);S.cim=tr4(-(my-oy)/sc);
-    deg=Math.atan2(S.cim,S.cre)*180/PI;if(deg<0)deg+=360;
-    render();
-  }else{
-    deg=Math.atan2(-(my-r.height/2),mx-r.width/2)*180/PI;if(deg<0)deg+=360;
-  }
-
-  showPencilLabel(e.clientX,e.clientY,deg,pressure);
-}
-
-function handleDrag(e){
-  const r=cvs.getBoundingClientRect();
-  const mx=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
-  const my=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
-
-  if(S.tab==='trig'&&S._trig){
-    const{cx,cy,R}=S._trig;
-    if(Math.hypot(mx-cx,my-cy)<R*2){
-      let a=Math.atan2(-(my-cy),mx-cx);if(a<0)a+=TAU;
-      S.ang=Math.round(a*180/PI);
-      const angN=document.getElementById('angN');if(angN)angN.value=S.ang;
-      const angR=document.getElementById('angR');if(angR)angR.value=((S.ang%360)+360)%360;
-      render();
-    }
-  }else if(S.tab==='deriv'&&S._deriv){
-    const fn=FUNCS[S.fi],v=S._deriv.g.ix(mx);
-    S.pt=Math.max(fn.x0+.01,Math.min(fn.x1-.01,v));
-    render();
-  }else if(S.tab==='integ'&&S._integ){
-    const fn=FUNCS[S.fi],v=S._integ.g.ix(mx);
-    const da=Math.abs(S._integ.g.mx(S.ia)-mx),db=Math.abs(S._integ.g.mx(S.ib)-mx);
-    if(!S.dragTarget)S.dragTarget=da<db?'a':'b';
-    const clamped=Math.max(fn.x0,Math.min(fn.x1,v));
-    if(S.dragTarget==='a'){S.ia=tr4(clamped);const el=document.getElementById('iaI');if(el)el.value=tr4(S.ia)}
-    else{S.ib=tr4(clamped);const el=document.getElementById('ibI');if(el)el.value=tr4(S.ib)}
-    render();
-  }else if(S.tab==='complex'&&S._complex){
-    const{ox,oy,sc}=S._complex;
-    S.cre=tr4((mx-ox)/sc);S.cim=tr4(-(my-oy)/sc);
-    S.crange=Math.min(50,Math.max(3,Math.sqrt(S.cre**2+S.cim**2)*1.8));
-    render();
-  }
-}
-
-/* ══════════════════════════════════════
-   INIT
-   ══════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded',()=>{
-  buildApp();
-  window.addEventListener('resize',()=>{resize()});
-  document.getElementById('cv').addEventListener('pointerdown',onPointerDown);
-  window.addEventListener('pointermove',onPointerMove);
-  window.addEventListener('pointerup',onPointerUp);
-  document.getElementById('cv').addEventListener('touchstart',e=>{if(e.touches.length===1){S.drag=true;handleDrag(e)}},{passive:true});
-  window.addEventListener('touchmove',e=>{if(S.drag){e.preventDefault();handleDrag(e)}},{passive:false});
-  window.addEventListener('touchend',()=>{S.drag=false;S.dragTarget=null});
-});
 </script>
 
+<script>
+    // --- 初期設定とHapticラッパー ---
+    const haptic = () => {
+        if (typeof window.triggerHaptic === 'function') window.triggerHaptic();
+    };
+
+    const canvas = document.getElementById('mathCanvas');
+    const ctx = canvas.getContext('2d');
+    const controls = document.getElementById('controls');
+    const info = document.getElementById('info-overlay');
+    
+    let width, height, cx, cy, scale;
+    function resize() {
+        width = canvas.clientWidth; height = canvas.clientHeight;
+        canvas.width = width * window.devicePixelRatio;
+        canvas.height = height * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        cx = width / 2; cy = height / 2; scale = Math.min(width, height) / 8; // グラフの縮尺
+        draw();
+    }
+    window.addEventListener('resize', resize);
+
+    // --- 状態管理 ---
+    const state = {
+        tab: 'trig',
+        trig: { type: 'sin', angle: Math.PI / 4 },
+        diff: { fn: 'sin', x: 1 },
+        int: { fn: 'sin', a: -2, b: 2, n: 20 },
+        complex: { z: { x: 1.5, y: 1.5 }, n: 3 },
+        curve: { type: 'cycloid', t: Math.PI }
+    };
+
+    // --- 数学関数定義 ---
+    const funcs = {
+        'sin': { f: Math.sin, df: Math.cos, name: 'sin(x)', defA: -3, defB: 3 },
+        'cos': { f: Math.cos, df: x => -Math.sin(x), name: 'cos(x)', defA: -3, defB: 3 },
+        'tan': { f: Math.tan, df: x => 1 / (Math.cos(x)**2), name: 'tan(x)', defA: -1, defB: 1 },
+        'x2':  { f: x => x*x, df: x => 2*x, name: 'x²', defA: -2, defB: 2 },
+        'x3':  { f: x => x*x*x, df: x => 3*x*x, name: 'x³', defA: -1.5, defB: 1.5 },
+        'ex':  { f: Math.exp, df: Math.exp, name: 'eˣ', defA: -2, defB: 2 },
+        'ln':  { f: x => Math.log(x), df: x => 1/x, name: 'ln(x)', defA: 0.5, defB: 3 }
+    };
+
+    const curves = {
+        'cycloid':   (t) => ({ x: t - Math.sin(t), y: 1 - Math.cos(t) }),
+        'astroid':   (t) => ({ x: 2 * Math.pow(Math.cos(t), 3), y: 2 * Math.pow(Math.sin(t), 3) }),
+        'cardioid':  (t) => ({ x: 2 * (1 - Math.cos(t)) * Math.cos(t), y: 2 * (1 - Math.cos(t)) * Math.sin(t) }),
+        'lissajous': (t) => ({ x: 3 * Math.sin(3 * t + Math.PI / 2), y: 3 * Math.sin(2 * t) }),
+        'rose':      (t) => ({ x: 3 * Math.cos(4 * t) * Math.cos(t), y: 3 * Math.cos(4 * t) * Math.sin(t) })
+    };
+
+    // --- 座標変換 ---
+    const sx = (x) => cx + x * scale;
+    const sy = (y) => cy - y * scale;
+    const mx = (sx) => (sx - cx) / scale;
+    const my = (sy) => -(sy - cy) / scale;
+
+    // --- 描画ロジック ---
+    function drawGrid() {
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, cy); ctx.lineTo(width, cy);
+        ctx.moveTo(cx, 0); ctx.lineTo(cx, height);
+        ctx.stroke();
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, width, height);
+        drawGrid();
+        info.innerHTML = '';
+
+        if (state.tab === 'trig') drawTrig();
+        if (state.tab === 'diff') drawDiff();
+        if (state.tab === 'int')  drawInt();
+        if (state.tab === 'complex') drawComplex();
+        if (state.tab === 'curve') drawCurve();
+    }
+
+    function drawTrig() {
+        // 左に単位円、右にグラフ
+        const shiftX = -2; // 単位円の中心を左にずらす
+        const r = 2; // 表示上の半径
+        const a = state.trig.angle;
+        
+        // 単位円
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(sx(shiftX), sy(0), r * scale, 0, Math.PI * 2); ctx.stroke();
+        
+        // 動径
+        const px = shiftX + r * Math.cos(a);
+        const py = r * Math.sin(a);
+        ctx.beginPath(); ctx.moveTo(sx(shiftX), sy(0)); ctx.lineTo(sx(px), sy(py));
+        ctx.strokeStyle = 'var(--primary)'; ctx.stroke();
+        
+        // グラフ描画
+        ctx.beginPath();
+        for (let x = 0; x <= Math.PI * 2; x += 0.05) {
+            let y = 0;
+            if (state.trig.type === 'sin') y = Math.sin(x);
+            if (state.trig.type === 'cos') y = Math.cos(x);
+            if (state.trig.type === 'tan') y = Math.tan(x);
+            
+            const gX = 0.5 + x; // グラフの開始X位置
+            if (Math.abs(y) > 5) { ctx.stroke(); ctx.beginPath(); continue; } // tanの漸近線対策
+            
+            if (x === 0) ctx.moveTo(sx(gX), sy(y * r));
+            else ctx.lineTo(sx(gX), sy(y * r));
+        }
+        ctx.strokeStyle = '#ff9f0a'; ctx.stroke();
+
+        // グラフ上の現在点
+        let curY = state.trig.type === 'sin' ? Math.sin(a) : (state.trig.type === 'cos' ? Math.cos(a) : Math.tan(a));
+        ctx.fillStyle = '#ff9f0a';
+        ctx.beginPath(); ctx.arc(sx(0.5 + a), sy(curY * r), 5, 0, Math.PI * 2); ctx.fill();
+
+        info.innerHTML = `θ = ${(a / Math.PI).toFixed(2)}π<br>${state.trig.type}(θ) = ${curY.toFixed(2)}`;
+    }
+
+    function drawDiff() {
+        const fn = funcs[state.diff.fn];
+        const x0 = state.diff.x;
+        const y0 = fn.f(x0);
+        const m = fn.df(x0);
+
+        // f(x)
+        ctx.beginPath();
+        for(let x = -5; x <= 5; x += 0.05) {
+            let y = fn.f(x);
+            if(x === -5) ctx.moveTo(sx(x), sy(y));
+            else ctx.lineTo(sx(x), sy(y));
+        }
+        ctx.strokeStyle = '#0a84ff'; ctx.lineWidth = 2; ctx.stroke();
+
+        // f'(x)
+        ctx.beginPath();
+        for(let x = -5; x <= 5; x += 0.05) {
+            let y = fn.df(x);
+            if(x === -5) ctx.moveTo(sx(x), sy(y));
+            else ctx.lineTo(sx(x), sy(y));
+        }
+        ctx.strokeStyle = '#ff453a'; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]);
+
+        // 接線
+        ctx.beginPath();
+        ctx.moveTo(sx(-5), sy(m * (-5 - x0) + y0));
+        ctx.lineTo(sx(5), sy(m * (5 - x0) + y0));
+        ctx.strokeStyle = '#32d74b'; ctx.lineWidth = 2; ctx.stroke();
+
+        // 接点
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(sx(x0), sy(y0), 6, 0, Math.PI * 2); ctx.fill();
+        
+        info.innerHTML = `f(x) = ${fn.name}<br>x = ${x0.toFixed(2)}<br>f(x) = ${y0.toFixed(2)}<br>f'(x) = ${m.toFixed(2)}`;
+    }
+
+    function drawInt() {
+        const fn = funcs[state.int.fn];
+        let { a, b, n } = state.int;
+        if (a > b) { let tmp = a; a = b; b = tmp; }
+
+        // f(x)
+        ctx.beginPath();
+        for(let x = -5; x <= 5; x += 0.05) {
+            if (state.int.fn === 'ln' && x <= 0) continue;
+            let y = fn.f(x);
+            if(x === -5) ctx.moveTo(sx(x), sy(y));
+            else ctx.lineTo(sx(x), sy(y));
+        }
+        ctx.strokeStyle = '#0a84ff'; ctx.lineWidth = 2; ctx.stroke();
+
+        // リーマン和（面積塗りつぶし）
+        const dx = (b - a) / n;
+        ctx.fillStyle = 'rgba(10, 132, 255, 0.3)';
+        ctx.strokeStyle = 'rgba(10, 132, 255, 0.8)'; ctx.lineWidth = 1;
+        
+        let area = 0;
+        for(let i = 0; i < n; i++) {
+            let x = a + i * dx;
+            let y = fn.f(x);
+            area += y * dx;
+            
+            let rectX = sx(x);
+            let rectY = sy(Math.max(0, y));
+            let rectW = dx * scale;
+            let rectH = Math.abs(y) * scale;
+            
+            if(y < 0) rectY = sy(0);
+            
+            ctx.fillRect(rectX, rectY, rectW, rectH);
+            ctx.strokeRect(rectX, rectY, rectW, rectH);
+        }
+
+        // 境界線a, b
+        ctx.strokeStyle = '#ff9f0a'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(sx(a), 0); ctx.lineTo(sx(a), height); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx(b), 0); ctx.lineTo(sx(b), height); ctx.stroke();
+
+        info.innerHTML = `∫ f(x)dx [${a.toFixed(1)} -> ${b.toFixed(1)}]<br>n = ${n}<br>Area ≈ ${area.toFixed(3)}`;
+    }
+
+    function drawComplex() {
+        const { x, y } = state.complex.z;
+        const n = state.complex.n;
+        const r = Math.sqrt(x*x + y*y);
+        const theta = Math.atan2(y, x);
+
+        // Z
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(sx(x), sy(y), 8, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(sx(x), sy(y)); ctx.stroke();
+
+        // ド・モアブル z^k
+        ctx.strokeStyle = '#ff9f0a'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(cx, cy);
+        
+        for(let k = 1; k <= n; k++) {
+            let zk_r = Math.pow(r, k);
+            let zk_t = theta * k;
+            let zx = zk_r * Math.cos(zk_t);
+            let zy = zk_r * Math.sin(zk_t);
+            
+            ctx.lineTo(sx(zx), sy(zy));
+            ctx.fillStyle = '#ff9f0a';
+            ctx.beginPath(); ctx.arc(sx(zx), sy(zy), 5, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(sx(zx), sy(zy)); ctx.stroke();
+        }
+
+        info.innerHTML = `z = ${x.toFixed(2)} + ${y.toFixed(2)}i<br>|z| = ${r.toFixed(2)}<br>arg = ${(theta/Math.PI).toFixed(2)}π<br>n = ${n}`;
+    }
+
+    function drawCurve() {
+        const maxT = 4 * Math.PI;
+        const fn = curves[state.curve.type];
+        
+        // 全体の軌跡を薄く描画
+        ctx.beginPath();
+        for(let t = 0; t <= maxT; t += 0.05) {
+            let p = fn(t);
+            if(t === 0) ctx.moveTo(sx(p.x), sy(p.y));
+            else ctx.lineTo(sx(p.x), sy(p.y));
+        }
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)'; ctx.lineWidth = 2; ctx.stroke();
+
+        // tまでの軌跡を太く描画
+        ctx.beginPath();
+        for(let t = 0; t <= state.curve.t; t += 0.05) {
+            let p = fn(t);
+            if(t === 0) ctx.moveTo(sx(p.x), sy(p.y));
+            else ctx.lineTo(sx(p.x), sy(p.y));
+        }
+        ctx.strokeStyle = '#bf5af2'; ctx.lineWidth = 3; ctx.stroke();
+
+        // 現在点
+        const curP = fn(state.curve.t);
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(sx(curP.x), sy(curP.y), 6, 0, Math.PI*2); ctx.fill();
+
+        info.innerHTML = `Curve: ${state.curve.type}<br>t = ${(state.curve.t / Math.PI).toFixed(2)}π`;
+    }
+
+    // --- UI コントロール構築 ---
+    function buildControls() {
+        controls.innerHTML = '';
+        if (state.tab === 'trig') {
+            controls.innerHTML = `
+                <select id="trigType">
+                    <option value="sin" ${state.trig.type==='sin'?'selected':''}>sin(θ)</option>
+                    <option value="cos" ${state.trig.type==='cos'?'selected':''}>cos(θ)</option>
+                    <option value="tan" ${state.trig.type==='tan'?'selected':''}>tan(θ)</option>
+                </select>
+                <span class="control-label">※ドラッグで角度変更</span>
+            `;
+            document.getElementById('trigType').addEventListener('change', (e) => { haptic(); state.trig.type = e.target.value; draw(); });
+        }
+        else if (state.tab === 'diff') {
+            let opts = Object.keys(funcs).map(k => `<option value="${k}" ${state.diff.fn===k?'selected':''}>${funcs[k].name}</option>`).join('');
+            controls.innerHTML = `<select id="diffFn">${opts}</select><span class="control-label">※ドラッグで接線移動</span>`;
+            document.getElementById('diffFn').addEventListener('change', (e) => { haptic(); state.diff.fn = e.target.value; draw(); });
+        }
+        else if (state.tab === 'int') {
+            let opts = Object.keys(funcs).map(k => `<option value="${k}" ${state.int.fn===k?'selected':''}>${funcs[k].name}</option>`).join('');
+            controls.innerHTML = `
+                <select id="intFn">${opts}</select>
+                <span class="control-label">n=</span>
+                <input type="range" id="intN" min="1" max="100" value="${state.int.n}">
+                <span class="control-label">※a, bの線をドラッグ</span>
+            `;
+            document.getElementById('intFn').addEventListener('change', (e) => { 
+                haptic(); 
+                state.int.fn = e.target.value;
+                // 関数切り替え時にa/bリセット
+                state.int.a = funcs[state.int.fn].defA;
+                state.int.b = funcs[state.int.fn].defB;
+                draw(); 
+            });
+            document.getElementById('intN').addEventListener('input', (e) => { haptic(); state.int.n = parseInt(e.target.value); draw(); });
+        }
+        else if (state.tab === 'complex') {
+            controls.innerHTML = `
+                <span class="control-label">n=</span>
+                <input type="range" id="compN" min="1" max="10" value="${state.complex.n}">
+                <span class="control-label">※zをドラッグ</span>
+            `;
+            document.getElementById('compN').addEventListener('input', (e) => { haptic(); state.complex.n = parseInt(e.target.value); draw(); });
+        }
+        else if (state.tab === 'curve') {
+            controls.innerHTML = `
+                <select id="curveType">
+                    <option value="cycloid" ${state.curve.type==='cycloid'?'selected':''}>サイクロイド</option>
+                    <option value="astroid" ${state.curve.type==='astroid'?'selected':''}>アステロイド</option>
+                    <option value="cardioid" ${state.curve.type==='cardioid'?'selected':''}>カージオイド</option>
+                    <option value="lissajous" ${state.curve.type==='lissajous'?'selected':''}>リサージュ</option>
+                    <option value="rose" ${state.curve.type==='rose'?'selected':''}>バラ曲線</option>
+                </select>
+                <span class="control-label">t=</span>
+                <input type="range" id="curveT" min="0" max="${4*Math.PI}" step="0.1" value="${state.curve.t}">
+            `;
+            document.getElementById('curveType').addEventListener('change', (e) => { haptic(); state.curve.type = e.target.value; draw(); });
+            document.getElementById('curveT').addEventListener('input', (e) => { haptic(); state.curve.t = parseFloat(e.target.value); draw(); });
+        }
+    }
+
+    // --- タブ切り替え ---
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            haptic();
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            state.tab = tab.dataset.tab;
+            buildControls();
+            draw();
+        });
+    });
+
+    // --- インタラクション (ドラッグ) ---
+    let isDragging = false;
+    let dragTarget = null; // 'angle', 'x', 'a', 'b', 'z'
+
+    function getPos(e) {
+        if(e.touches) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        return { x: e.clientX, y: e.clientY };
+    }
+
+    function handleStart(e) {
+        const { x, y } = getPos(e);
+        const mathX = mx(x);
+        const mathY = my(y);
+        isDragging = true;
+        haptic(); // タップ/ドラッグ開始時にHaptic
+
+        if (state.tab === 'trig') dragTarget = 'angle';
+        else if (state.tab === 'diff') dragTarget = 'x';
+        else if (state.tab === 'int') {
+            if (Math.abs(mathX - state.int.a) < Math.abs(mathX - state.int.b)) dragTarget = 'a';
+            else dragTarget = 'b';
+        }
+        else if (state.tab === 'complex') dragTarget = 'z';
+        handleMove(e);
+    }
+
+    function handleMove(e) {
+        if (!isDragging) return;
+        e.preventDefault(); // スクロール防止
+        const { x, y } = getPos(e);
+        const mathX = mx(x);
+        const mathY = my(y);
+
+        if (state.tab === 'trig' && dragTarget === 'angle') {
+            const shiftX = -2;
+            state.trig.angle = Math.atan2(mathY, mathX - shiftX);
+            if(state.trig.angle < 0) state.trig.angle += Math.PI * 2;
+        }
+        else if (state.tab === 'diff' && dragTarget === 'x') state.diff.x = mathX;
+        else if (state.tab === 'int') {
+            if (dragTarget === 'a') state.int.a = mathX;
+            if (dragTarget === 'b') state.int.b = mathX;
+        }
+        else if (state.tab === 'complex' && dragTarget === 'z') {
+            state.complex.z.x = mathX;
+            state.complex.z.y = mathY;
+        }
+        draw();
+    }
+
+    function handleEnd() { isDragging = false; dragTarget = null; }
+
+    canvas.addEventListener('mousedown', handleStart);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleEnd);
+    
+    canvas.addEventListener('touchstart', handleStart, {passive: false});
+    window.addEventListener('touchmove', handleMove, {passive: false});
+    window.addEventListener('touchend', handleEnd);
+
+    // --- 初期化 ---
+    setTimeout(() => {
+        resize();
+        buildControls();
+    }, 100);
+
+</script>
 </body>
 </html>
