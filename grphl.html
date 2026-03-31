@@ -1,416 +1,615 @@
-<!DOCTYPE html>
+import { useState, useRef, useEffect, useCallback } from “react”;
 
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Trigonometric Graphs</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body {
-    background: #0a0a10;
-    overflow-x: hidden;
-    min-height: 100dvh;
-    touch-action: manipulation;
-    font-family: 'Courier New', monospace;
-  }
-  .title {
-    text-align: center;
-    padding: 14px 0 2px;
-    font-size: 18px;
-    letter-spacing: 5px;
-    color: #d080d0;
-    font-family: 'Times New Roman', serif;
-    font-style: italic;
-  }
-  canvas { display: block; width: 100%; }
-  .controls {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    padding: 8px 16px;
-    flex-wrap: wrap;
-  }
-  .ctrl-btn {
-    font-family: 'Courier New', monospace;
-    font-size: 13px;
-    padding: 7px 16px;
-    border-radius: 20px;
-    border: 1.5px solid #333;
-    background: rgba(255,255,255,0.04);
-    color: #aaa;
-    cursor: pointer;
-    transition: all 0.2s;
-    user-select: none;
-  }
-  .ctrl-btn.active { border-color: #777; color: #fff; background: rgba(255,255,255,0.08); }
-  .ctrl-btn:active { transform: scale(0.95); }
-  .speed-row {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    padding: 2px 16px 8px;
-  }
-  .speed-btn {
-    font-family: 'Courier New', monospace;
-    font-size: 11px;
-    padding: 4px 10px;
-    border-radius: 14px;
-    border: 1px solid #252525;
-    background: transparent;
-    color: #555;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .speed-btn.active { border-color: #555; color: #bbb; }
-  .speed-btn:active { transform: scale(0.95); }
-  .angle-info {
-    text-align: center;
-    font-size: 13px;
-    color: #666;
-    padding: 0 0 8px;
-    font-family: 'Courier New', monospace;
-  }
-  .angle-info span { color: #bbb; }
-</style>
-</head>
-<body>
+const TAU = 2 * Math.PI;
+const PI = Math.PI;
+const SPECIAL_ANGLES = [
+{ deg: 0, rad: 0, sin: “0”, cos: “1”, tan: “0” },
+{ deg: 30, rad: PI / 6, sin: “1/2”, cos: “√3/2”, tan: “1/√3” },
+{ deg: 45, rad: PI / 4, sin: “√2/2”, cos: “√2/2”, tan: “1” },
+{ deg: 60, rad: PI / 3, sin: “√3/2”, cos: “1/2”, tan: “√3” },
+{ deg: 90, rad: PI / 2, sin: “1”, cos: “0”, tan: “undefined” },
+{ deg: 120, rad: (2 * PI) / 3, sin: “√3/2”, cos: “−1/2”, tan: “−√3” },
+{ deg: 135, rad: (3 * PI) / 4, sin: “√2/2”, cos: “−√2/2”, tan: “−1” },
+{ deg: 150, rad: (5 * PI) / 6, sin: “1/2”, cos: “−√3/2”, tan: “−1/√3” },
+{ deg: 180, rad: PI, sin: “0”, cos: “−1”, tan: “0” },
+{ deg: 210, rad: (7 * PI) / 6, sin: “−1/2”, cos: “−√3/2”, tan: “1/√3” },
+{ deg: 225, rad: (5 * PI) / 4, sin: “−√2/2”, cos: “−√2/2”, tan: “1” },
+{ deg: 240, rad: (4 * PI) / 3, sin: “−√3/2”, cos: “−1/2”, tan: “√3” },
+{ deg: 270, rad: (3 * PI) / 2, sin: “−1”, cos: “0”, tan: “undefined” },
+{ deg: 300, rad: (5 * PI) / 3, sin: “−√3/2”, cos: “1/2”, tan: “−√3” },
+{ deg: 315, rad: (7 * PI) / 4, sin: “−√2/2”, cos: “√2/2”, tan: “−1” },
+{ deg: 330, rad: (11 * PI) / 6, sin: “−1/2”, cos: “√3/2”, tan: “−1/√3” },
+{ deg: 360, rad: TAU, sin: “0”, cos: “1”, tan: “0” },
+];
 
-<div class="title">Trigonometric Graphs</div>
-<div class="angle-info">θ = <span id="degVal">0°</span> = <span id="radVal">0</span> rad</div>
-
-<div class="controls">
-  <button class="ctrl-btn active" id="playBtn">▶ Play</button>
-  <button class="ctrl-btn" id="resetBtn">↺ Reset</button>
-</div>
-<div class="speed-row">
-  <button class="speed-btn" data-speed="0.3">0.3×</button>
-  <button class="speed-btn active" data-speed="0.7">0.7×</button>
-  <button class="speed-btn" data-speed="1.2">1.2×</button>
-  <button class="speed-btn" data-speed="2.5">2.5×</button>
-</div>
-
-<canvas id="c"></canvas>
-
-<script type="module">
-import { haptic } from 'https://esm.sh/ios-haptics'
-
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
-const dpr = window.devicePixelRatio || 2;
-const PI = Math.PI, TAU = PI * 2;
-
-let angle = 0, playing = true, speed = 0.7, dragging = false, lastTime = 0;
-
-const SIN = { main: '#4aeabc', dim: 'rgba(74,234,188,0.18)' };
-const COS = { main: '#8b7aff', dim: 'rgba(139,122,255,0.18)' };
-const TAN = { main: '#ff6e9c', dim: 'rgba(255,110,156,0.18)' };
-const AXIS_C = '#2a2a3c';
-const GRID_C = '#161620';
-
-let W, rowH;
-
-function resize() {
-  W = Math.min(window.innerWidth, 560);
-  rowH = W * 0.54;
-  canvas.style.width = W + 'px';
-  canvas.style.height = (rowH * 3) + 'px';
-  canvas.width = W * dpr;
-  canvas.height = rowH * 3 * dpr;
+function findSpecial(deg) {
+const norm = ((deg % 360) + 360) % 360;
+return SPECIAL_ANGLES.find((a) => a.deg === norm);
 }
 
-function s(v) { return v * dpr; } // scale helper
+function formatVal(name, numVal, specialStr) {
+if (specialStr === “undefined”) return `${name} = undefined (±∞)`;
+if (specialStr) return `${name} = ${specialStr} (${numVal.toFixed(4)})`;
+return `${name} = ${numVal.toFixed(4)}`;
+}
 
-function drawRow(idx, label, fn, col) {
-  ctx.save();
-  ctx.translate(0, idx * rowH * s(1));
-  const rW = s(W), rH = s(rowH);
+function isNearAsymptote(rad) {
+const c = Math.cos(rad);
+return Math.abs(c) < 0.05;
+}
 
-  // Layout
-  const cx = rW * 0.185, cy = rH * 0.52;
-  const R = Math.min(rW * 0.155, rH * 0.36);
-  const gL = rW * 0.40, gR = rW - s(10), gW = gR - gL;
-  const gCY = cy, gAmp = R * 0.88;
-  const isTan = label === 'tan';
-  const tanScale = isTan ? 0.45 : 1;
+const COL = {
+bg: “#0a0a0f”,
+grid: “#1a1a2e”,
+gridLight: “#12121f”,
+axis: “#333350”,
+circle: “#4a4a6a”,
+sin: “#ff6b6b”,
+cos: “#4ecdc4”,
+tan: “#ffd93d”,
+tanLine: “#ffd93d44”,
+radius: “#8888aa”,
+text: “#c8c8d8”,
+textDim: “#666680”,
+dot: “#ffffff”,
+asymptote: “#ffd93d33”,
+angleFill: “#4ecdc422”,
+angleArc: “#4ecdc4”,
+};
 
-  // --- Background grid ---
-  ctx.strokeStyle = GRID_C;
-  ctx.lineWidth = s(1);
-  for (let i = 0; i <= 4; i++) {
-    const x = gL + (i / 4) * gW;
-    ctx.beginPath(); ctx.moveTo(x, gCY - gAmp * 1.4); ctx.lineTo(x, gCY + gAmp * 1.4); ctx.stroke();
-  }
-  for (let v = -1; v <= 1; v++) {
-    const y = gCY - v * gAmp;
-    ctx.beginPath(); ctx.moveTo(gL, y); ctx.lineTo(gR, y); ctx.stroke();
-  }
+export default function TrigViz() {
+const canvasRef = useRef(null);
+const [angle, setAngle] = useState(45);
+const [dragging, setDragging] = useState(false);
+const [showSin, setShowSin] = useState(true);
+const [showCos, setShowCos] = useState(true);
+const [showTan, setShowTan] = useState(true);
+const animRef = useRef(null);
+const containerRef = useRef(null);
 
-  // --- Axes ---
-  ctx.strokeStyle = AXIS_C;
-  ctx.lineWidth = s(1.2);
-  ctx.beginPath(); ctx.moveTo(gL, gCY); ctx.lineTo(gR, gCY); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(gL, gCY - gAmp * 1.4); ctx.lineTo(gL, gCY + gAmp * 1.4); ctx.stroke();
-  // Circle axes
-  ctx.beginPath(); ctx.moveTo(cx - R * 1.25, cy); ctx.lineTo(cx + R * 1.25, cy); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx, cy - R * 1.25); ctx.lineTo(cx, cy + R * 1.25); ctx.stroke();
+const rad = (angle * PI) / 180;
+const sinVal = Math.sin(rad);
+const cosVal = Math.cos(rad);
+const tanVal = isNearAsymptote(rad) ? null : Math.tan(rad);
+const special = findSpecial(angle);
 
-  // --- Axis labels ---
-  ctx.font = `${s(9)}px Courier New`;
-  ctx.fillStyle = '#444';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-  ctx.fillText('0', gL, gCY + gAmp * 1.4 + s(3));
-  ctx.fillText('π', gL + gW * 0.5, gCY + gAmp * 1.4 + s(3));
-  ctx.fillText('2π', gR, gCY + gAmp * 1.4 + s(3));
-  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-  ctx.fillText('1', gL - s(5), gCY - gAmp);
-  ctx.fillText('-1', gL - s(5), gCY + gAmp);
-  if (isTan) {
-    ctx.fillText('2', gL - s(5), gCY - gAmp * 2 * tanScale);
-    ctx.fillText('-2', gL - s(5), gCY + gAmp * 2 * tanScale);
-  }
+const draw = useCallback(() => {
+const canvas = canvasRef.current;
+if (!canvas) return;
+const ctx = canvas.getContext(“2d”);
+const dpr = window.devicePixelRatio || 1;
+const rect = canvas.getBoundingClientRect();
+const W = rect.width;
+const H = rect.height;
+canvas.width = W * dpr;
+canvas.height = H * dpr;
+ctx.scale(dpr, dpr);
 
-  // --- Label ---
-  ctx.font = `bold ${s(15)}px Courier New`;
-  ctx.fillStyle = col.main;
-  ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-  ctx.fillText(label + 'θ', s(8), s(8));
+```
+ctx.fillStyle = COL.bg;
+ctx.fillRect(0, 0, W, H);
 
-  // --- Unit circle ---
-  ctx.strokeStyle = col.main;
-  ctx.lineWidth = s(1.6);
-  ctx.globalAlpha = 0.35;
-  ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke();
-  ctx.globalAlpha = 1;
+const isWide = W > 600;
+const unitR = isWide ? Math.min(W * 0.18, H * 0.35) : Math.min(W * 0.3, H * 0.18);
+const ucx = isWide ? W * 0.22 : W * 0.5;
+const ucy = isWide ? H * 0.45 : H * 0.28;
 
-  // --- Current angle ---
-  const cosA = Math.cos(angle), sinA = Math.sin(angle);
-  const pX = cx + R * cosA, pY = cy - R * sinA;
+const gx = isWide ? W * 0.52 : W * 0.06;
+const gy = isWide ? H * 0.1 : H * 0.52;
+const gw = isWide ? W * 0.44 : W * 0.88;
+const gh = isWide ? H * 0.8 : H * 0.42;
 
-  // Angle arc
-  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-  ctx.lineWidth = s(1);
+// ── UNIT CIRCLE ──
+// grid
+ctx.strokeStyle = COL.axis;
+ctx.lineWidth = 0.5;
+ctx.beginPath();
+ctx.moveTo(ucx - unitR * 1.4, ucy);
+ctx.lineTo(ucx + unitR * 1.6, ucy);
+ctx.moveTo(ucx, ucy - unitR * 1.4);
+ctx.lineTo(ucx, ucy + unitR * 1.4);
+ctx.stroke();
+
+// circle
+ctx.strokeStyle = COL.circle;
+ctx.lineWidth = 1.5;
+ctx.beginPath();
+ctx.arc(ucx, ucy, unitR, 0, TAU);
+ctx.stroke();
+
+// angle arc
+const arcR = unitR * 0.2;
+ctx.fillStyle = COL.angleFill;
+ctx.beginPath();
+ctx.moveTo(ucx, ucy);
+ctx.arc(ucx, ucy, arcR, 0, -rad, rad > 0);
+ctx.closePath();
+ctx.fill();
+ctx.strokeStyle = COL.angleArc;
+ctx.lineWidth = 1.5;
+ctx.beginPath();
+ctx.arc(ucx, ucy, arcR, 0, -rad, rad > 0);
+ctx.stroke();
+
+const px = ucx + unitR * cosVal;
+const py = ucy - unitR * sinVal;
+
+// radius line
+ctx.strokeStyle = COL.radius;
+ctx.lineWidth = 1.5;
+ctx.beginPath();
+ctx.moveTo(ucx, ucy);
+ctx.lineTo(px, py);
+ctx.stroke();
+
+// cos projection (horizontal)
+if (showCos) {
+  ctx.strokeStyle = COL.cos;
+  ctx.lineWidth = 2.5;
   ctx.beginPath();
-  ctx.arc(cx, cy, R * 0.2, 0, -angle, angle > 0);
+  ctx.moveTo(ucx, ucy);
+  ctx.lineTo(px, ucy);
+  ctx.stroke();
+  // vertical dashed from point to x-axis
+  ctx.setLineDash([3, 3]);
+  ctx.strokeStyle = COL.cos + "66";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(px, py);
+  ctx.lineTo(px, ucy);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// sin projection (vertical)
+if (showSin) {
+  ctx.strokeStyle = COL.sin;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(px, ucy);
+  ctx.lineTo(px, py);
+  ctx.stroke();
+}
+
+// tan on unit circle: tangent line at x=1
+if (showTan && tanVal !== null) {
+  const tanLineX = ucx + unitR; // x = 1 on unit circle
+  const tanLineY = ucy - unitR * tanVal;
+  const clampedTanY = Math.max(ucy - unitR * 3.5, Math.min(ucy + unitR * 3.5, tanLineY));
+
+  // vertical tangent line at x=1 (faint)
+  ctx.strokeStyle = COL.tanLine;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(tanLineX, ucy - unitR * 2.5);
+  ctx.lineTo(tanLineX, ucy + unitR * 2.5);
   ctx.stroke();
 
-  // Radius (dashed)
-  ctx.strokeStyle = '#555';
-  ctx.lineWidth = s(1);
-  ctx.setLineDash([s(3), s(3)]);
-  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(pX, pY); ctx.stroke();
+  // tan segment on tangent line
+  ctx.strokeStyle = COL.tan;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(tanLineX, ucy);
+  ctx.lineTo(tanLineX, clampedTanY);
+  ctx.stroke();
+
+  // extension line from origin through circle point to tangent line
+  ctx.strokeStyle = COL.tan + "55";
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(ucx, ucy);
+  ctx.lineTo(tanLineX, clampedTanY);
+  ctx.stroke();
   ctx.setLineDash([]);
 
-  // Function-specific line on circle
-  ctx.strokeStyle = col.main;
-  ctx.lineWidth = s(2.5);
-  ctx.shadowColor = col.main;
-  ctx.shadowBlur = s(6);
-  if (label === 'sin') {
-    ctx.beginPath(); ctx.moveTo(pX, cy); ctx.lineTo(pX, pY); ctx.stroke();
-  } else if (label === 'cos') {
-    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(pX, cy); ctx.stroke();
-  } else if (label === 'tan' && Math.abs(cosA) > 0.03) {
-    const tanV = sinA / cosA;
-    const tY = cy - R * Math.max(-3.5, Math.min(3.5, tanV));
-    ctx.beginPath(); ctx.moveTo(cx + R, cy); ctx.lineTo(cx + R, tY); ctx.stroke();
-    // Dashed extended
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = col.dim;
-    ctx.lineWidth = s(1);
-    ctx.setLineDash([s(3), s(3)]);
-    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + R, tY); ctx.stroke();
-    ctx.setLineDash([]);
-  }
-  ctx.shadowBlur = 0;
-
-  // --- Point on circle ---
-  ctx.beginPath(); ctx.arc(pX, pY, s(5), 0, TAU);
-  ctx.fillStyle = col.main;
-  ctx.shadowColor = col.main; ctx.shadowBlur = s(12);
-  ctx.fill(); ctx.shadowBlur = 0;
-
-  // --- Graph: faint full curve ---
-  const steps = 500;
-  ctx.strokeStyle = col.dim;
-  ctx.lineWidth = s(1.5);
+  // tan endpoint dot
+  ctx.fillStyle = COL.tan;
   ctx.beginPath();
-  let first = true;
+  ctx.arc(tanLineX, clampedTanY, 4, 0, TAU);
+  ctx.fill();
+}
+
+// point on circle
+ctx.fillStyle = COL.dot;
+ctx.beginPath();
+ctx.arc(px, py, 5, 0, TAU);
+ctx.fill();
+ctx.strokeStyle = COL.bg;
+ctx.lineWidth = 1.5;
+ctx.stroke();
+
+// labels on unit circle
+ctx.font = `11px "SF Mono", "Menlo", monospace`;
+ctx.fillStyle = COL.textDim;
+ctx.textAlign = "center";
+ctx.fillText("1", ucx + unitR + 10, ucy + 14);
+ctx.fillText("−1", ucx - unitR - 10, ucy + 14);
+ctx.fillText("1", ucx + 8, ucy - unitR - 6);
+ctx.fillText("−1", ucx + 8, ucy + unitR + 14);
+
+// ── GRAPH ──
+const graphXRange = TAU; // 0 to 2π
+const tanYMax = 3;
+const sinYMax = 1;
+
+function gXtoScreen(x) {
+  return gx + (x / graphXRange) * gw;
+}
+function gYtoScreen(y, max) {
+  return gy + gh / 2 - (y / max) * (gh / 2);
+}
+
+// graph background
+ctx.fillStyle = "#06060b";
+ctx.fillRect(gx - 2, gy - 2, gw + 4, gh + 4);
+
+// grid lines for tan scale
+ctx.strokeStyle = COL.gridLight;
+ctx.lineWidth = 0.5;
+for (let i = -3; i <= 3; i++) {
+  const yy = gYtoScreen(i, tanYMax);
+  ctx.beginPath();
+  ctx.moveTo(gx, yy);
+  ctx.lineTo(gx + gw, yy);
+  ctx.stroke();
+}
+
+// vertical grid at π/2 intervals
+for (let i = 0; i <= 4; i++) {
+  const xx = gXtoScreen((i * PI) / 2);
+  ctx.beginPath();
+  ctx.moveTo(xx, gy);
+  ctx.lineTo(xx, gy + gh);
+  ctx.stroke();
+}
+
+// asymptotes at π/2 and 3π/2
+if (showTan) {
+  ctx.setLineDash([4, 6]);
+  ctx.strokeStyle = COL.asymptote;
+  ctx.lineWidth = 1.5;
+  for (const a of [PI / 2, (3 * PI) / 2]) {
+    const xx = gXtoScreen(a);
+    ctx.beginPath();
+    ctx.moveTo(xx, gy);
+    ctx.lineTo(xx, gy + gh);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+}
+
+// axes
+ctx.strokeStyle = COL.axis;
+ctx.lineWidth = 1;
+const y0 = gYtoScreen(0, tanYMax);
+ctx.beginPath();
+ctx.moveTo(gx, y0);
+ctx.lineTo(gx + gw, y0);
+ctx.stroke();
+
+// Y-axis labels
+ctx.font = `10px "SF Mono", "Menlo", monospace`;
+ctx.fillStyle = COL.textDim;
+ctx.textAlign = "right";
+for (let i = -3; i <= 3; i++) {
+  if (i === 0) continue;
+  const yy = gYtoScreen(i, tanYMax);
+  ctx.fillText(String(i), gx - 4, yy + 3);
+}
+
+// X-axis labels
+ctx.textAlign = "center";
+const xLabels = [
+  [0, "0"],
+  [PI / 2, "π/2"],
+  [PI, "π"],
+  [(3 * PI) / 2, "3π/2"],
+  [TAU, "2π"],
+];
+for (const [xv, label] of xLabels) {
+  ctx.fillText(label, gXtoScreen(xv), gy + gh + 14);
+}
+
+// draw curves
+const steps = Math.floor(gw * 2);
+const dx = graphXRange / steps;
+
+function drawCurve(fn, color, yMax, skipFn) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  let drawing = false;
+  ctx.beginPath();
   for (let i = 0; i <= steps; i++) {
-    const a = (i / steps) * TAU;
-    let v = fn(a);
-    if (isTan && Math.abs(v) > 4) { first = true; continue; }
-    const x = gL + (i / steps) * gW;
-    const y = gCY - Math.max(-3.5, Math.min(3.5, v)) * gAmp * tanScale;
-    if (first) { ctx.moveTo(x, y); first = false; } else ctx.lineTo(x, y);
+    const a = i * dx;
+    if (skipFn && skipFn(a)) {
+      drawing = false;
+      continue;
+    }
+    const v = fn(a);
+    const sx = gXtoScreen(a);
+    const sy = gYtoScreen(v, yMax);
+    if (sy < gy - 5 || sy > gy + gh + 5) {
+      drawing = false;
+      continue;
+    }
+    if (!drawing) {
+      ctx.moveTo(sx, sy);
+      drawing = true;
+    } else {
+      ctx.lineTo(sx, sy);
+    }
   }
   ctx.stroke();
+}
 
-  // --- Graph: bright curve up to angle ---
-  const norm = ((angle % TAU) + TAU) % TAU;
-  const activeSteps = Math.ceil((norm / TAU) * steps);
-  ctx.strokeStyle = col.main;
-  ctx.lineWidth = s(2.8);
-  ctx.shadowColor = col.main; ctx.shadowBlur = s(5);
+// sin (scaled to tan's Y axis so it stays within ±1 range visually)
+if (showSin) {
+  drawCurve(Math.sin, COL.sin, tanYMax, null);
+}
+if (showCos) {
+  drawCurve(Math.cos, COL.cos, tanYMax, null);
+}
+if (showTan) {
+  drawCurve(
+    Math.tan,
+    COL.tan,
+    tanYMax,
+    (a) => Math.abs(Math.cos(a)) < 0.04
+  );
+}
+
+// ±1 reference lines
+ctx.setLineDash([2, 4]);
+ctx.strokeStyle = COL.axis + "66";
+ctx.lineWidth = 0.5;
+for (const v of [1, -1]) {
+  const yy = gYtoScreen(v, tanYMax);
   ctx.beginPath();
-  first = true;
-  for (let i = 0; i <= activeSteps; i++) {
-    const a = (i / steps) * TAU;
-    let v = fn(a);
-    if (isTan && Math.abs(v) > 4) { first = true; continue; }
-    const x = gL + (i / steps) * gW;
-    const y = gCY - Math.max(-3.5, Math.min(3.5, v)) * gAmp * tanScale;
-    if (first) { ctx.moveTo(x, y); first = false; } else ctx.lineTo(x, y);
-  }
+  ctx.moveTo(gx, yy);
+  ctx.lineTo(gx + gw, yy);
   ctx.stroke();
-  ctx.shadowBlur = 0;
-
-  // --- Dashed connection: circle point → graph point ---
-  const curV = fn(angle);
-  const gX = gL + (norm / TAU) * gW;
-  const clampedV = Math.max(-3.5, Math.min(3.5, curV));
-  const gY = gCY - clampedV * gAmp * tanScale;
-
-  if (!isTan || Math.abs(curV) < 4) {
-    ctx.strokeStyle = col.main;
-    ctx.globalAlpha = 0.25;
-    ctx.lineWidth = s(1);
-    ctx.setLineDash([s(4), s(4)]);
-    ctx.beginPath(); ctx.moveTo(pX, pY); ctx.lineTo(gX, gY); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.globalAlpha = 1;
-
-    // Graph point
-    ctx.beginPath(); ctx.arc(gX, gY, s(4.5), 0, TAU);
-    ctx.fillStyle = col.main;
-    ctx.shadowColor = col.main; ctx.shadowBlur = s(10);
-    ctx.fill(); ctx.shadowBlur = 0;
-  }
-
-  ctx.restore();
 }
+ctx.setLineDash([]);
 
-function updateAngleInfo() {
-  const norm = ((angle % TAU) + TAU) % TAU;
-  const deg = (norm * 180 / PI);
-  document.getElementById('degVal').textContent = deg.toFixed(1) + '°';
+// current angle indicator on graph
+const normRad = ((rad % TAU) + TAU) % TAU;
+const curX = gXtoScreen(normRad);
+ctx.strokeStyle = "#ffffff22";
+ctx.lineWidth = 1;
+ctx.beginPath();
+ctx.moveTo(curX, gy);
+ctx.lineTo(curX, gy + gh);
+ctx.stroke();
 
-  const frac = norm / PI;
-  const nice = [
-    [0,'0'],[1/6,'π/6'],[1/4,'π/4'],[1/3,'π/3'],[1/2,'π/2'],
-    [2/3,'2π/3'],[3/4,'3π/4'],[5/6,'5π/6'],[1,'π'],
-    [7/6,'7π/6'],[5/4,'5π/4'],[4/3,'4π/3'],[3/2,'3π/2'],
-    [5/3,'5π/3'],[7/4,'7π/4'],[11/6,'11π/6'],[2,'2π']
-  ];
-  let radStr = norm.toFixed(2);
-  for (const [k, v] of nice) {
-    if (Math.abs(frac - k) < 0.015) { radStr = v; break; }
+// dots on curves at current angle
+if (showSin) {
+  const sy = gYtoScreen(sinVal, tanYMax);
+  if (sy >= gy && sy <= gy + gh) {
+    ctx.fillStyle = COL.sin;
+    ctx.beginPath();
+    ctx.arc(curX, sy, 4, 0, TAU);
+    ctx.fill();
   }
-  document.getElementById('radVal').textContent = radStr;
 }
-
-function frame(ts) {
-  if (!lastTime) lastTime = ts;
-  const dt = Math.min((ts - lastTime) / 1000, 0.1);
-  lastTime = ts;
-  if (playing && !dragging) angle += speed * dt;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawRow(0, 'sin', Math.sin, SIN);
-  drawRow(1, 'cos', Math.cos, COS);
-  drawRow(2, 'tan', Math.tan, TAN);
-
-  // Separators
-  ctx.strokeStyle = '#1a1a28';
-  ctx.lineWidth = s(1);
-  for (let i = 1; i < 3; i++) {
-    const y = i * rowH * dpr;
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(s(W), y); ctx.stroke();
+if (showCos) {
+  const sy = gYtoScreen(cosVal, tanYMax);
+  if (sy >= gy && sy <= gy + gh) {
+    ctx.fillStyle = COL.cos;
+    ctx.beginPath();
+    ctx.arc(curX, sy, 4, 0, TAU);
+    ctx.fill();
   }
-
-  updateAngleInfo();
-  requestAnimationFrame(frame);
 }
-
-// --- Touch/Mouse ---
-function angleFromEvent(e) {
-  const rect = canvas.getBoundingClientRect();
-  const ex = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-  const ey = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-  const row = Math.floor(ey / rowH);
-  if (row < 0 || row > 2) return null;
-  const ry = ey - row * rowH;
-
-  // Check circle area
-  const cx = W * 0.185, cy = rowH * 0.52;
-  const R = Math.min(W * 0.155, rowH * 0.36);
-  const dx = ex - cx, dy = -(ry - cy);
-  if (Math.sqrt(dx*dx + dy*dy) < R * 2.5) {
-    let a = Math.atan2(dy, dx);
-    if (a < 0) a += TAU;
-    return a;
+if (showTan && tanVal !== null) {
+  const sy = gYtoScreen(tanVal, tanYMax);
+  if (sy >= gy && sy <= gy + gh) {
+    ctx.fillStyle = COL.tan;
+    ctx.beginPath();
+    ctx.arc(curX, sy, 4, 0, TAU);
+    ctx.fill();
   }
-
-  // Check graph area
-  const gL = W * 0.40, gR = W - 10;
-  if (ex >= gL - 20 && ex <= gR + 10) {
-    return Math.max(0, Math.min(TAU, ((ex - gL) / (gR - gL)) * TAU));
-  }
-  return null;
 }
+```
 
-canvas.addEventListener('touchstart', e => {
-  e.preventDefault();
-  const a = angleFromEvent(e);
-  if (a !== null) { dragging = true; angle = a; try{haptic()}catch(e){} }
-}, { passive: false });
+}, [angle, showSin, showCos, showTan, sinVal, cosVal, tanVal, rad]);
 
-canvas.addEventListener('touchmove', e => {
-  if (!dragging) return;
-  e.preventDefault();
-  const a = angleFromEvent(e);
-  if (a !== null) angle = a;
-}, { passive: false });
+useEffect(() => {
+draw();
+const handleResize = () => draw();
+window.addEventListener(“resize”, handleResize);
+return () => window.removeEventListener(“resize”, handleResize);
+}, [draw]);
 
-window.addEventListener('touchend', () => { if(dragging){dragging=false;try{haptic()}catch(e){}} });
+// drag on unit circle
+const handlePointerDown = (e) => {
+const canvas = canvasRef.current;
+if (!canvas) return;
+const rect = canvas.getBoundingClientRect();
+const W = rect.width;
+const H = rect.height;
+const isWide = W > 600;
+const unitR = isWide ? Math.min(W * 0.18, H * 0.35) : Math.min(W * 0.3, H * 0.18);
+const ucx = isWide ? W * 0.22 : W * 0.5;
+const ucy = isWide ? H * 0.45 : H * 0.28;
+const mx = e.clientX - rect.left;
+const my = e.clientY - rect.top;
+const dist = Math.sqrt((mx - ucx) ** 2 + (my - ucy) ** 2);
+if (dist < unitR * 1.8) {
+setDragging(true);
+updateAngleFromMouse(e);
+}
+};
 
-canvas.addEventListener('mousedown', e => {
-  const a = angleFromEvent(e);
-  if (a !== null) { dragging = true; angle = a; }
+const updateAngleFromMouse = (e) => {
+const canvas = canvasRef.current;
+if (!canvas) return;
+const rect = canvas.getBoundingClientRect();
+const W = rect.width;
+const H = rect.height;
+const isWide = W > 600;
+const ucx = isWide ? W * 0.22 : W * 0.5;
+const ucy = isWide ? H * 0.45 : H * 0.28;
+const mx = e.clientX - rect.left;
+const my = e.clientY - rect.top;
+let a = Math.atan2(-(my - ucy), mx - ucx);
+if (a < 0) a += TAU;
+setAngle(Math.round((a * 180) / PI));
+};
+
+const handlePointerMove = (e) => {
+if (dragging) updateAngleFromMouse(e);
+};
+
+const handlePointerUp = () => setDragging(false);
+
+useEffect(() => {
+window.addEventListener(“pointermove”, handlePointerMove);
+window.addEventListener(“pointerup”, handlePointerUp);
+return () => {
+window.removeEventListener(“pointermove”, handlePointerMove);
+window.removeEventListener(“pointerup”, handlePointerUp);
+};
 });
-canvas.addEventListener('mousemove', e => {
-  if (!dragging) return;
-  const a = angleFromEvent(e);
-  if (a !== null) angle = a;
-});
-window.addEventListener('mouseup', () => { dragging = false; });
 
-// Controls
-const playBtn = document.getElementById('playBtn');
-playBtn.addEventListener('click', () => {
-  playing = !playing;
-  playBtn.textContent = playing ? '▶ Play' : '❚❚ Pause';
-  playBtn.classList.toggle('active', playing);
-  try{haptic()}catch(e){}
-});
+const nearAsym = isNearAsymptote(rad);
 
-document.getElementById('resetBtn').addEventListener('click', () => {
-  angle = 0; try{haptic()}catch(e){}
-});
+const tanDisplay = () => {
+if (special && special.tan === “undefined”) return “tan = undefined (±∞)”;
+if (nearAsym) {
+const s = Math.sin(rad);
+const c = Math.cos(rad);
+return c >= 0
+? `tan → ${s > 0 ? "+∞" : "−∞"}`
+: `tan → ${s > 0 ? "−∞" : "+∞"}`;
+}
+if (special) return formatVal(“tan”, Math.tan(rad), special.tan);
+return `tan = ${Math.tan(rad).toFixed(4)}`;
+};
 
-document.querySelectorAll('.speed-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    speed = parseFloat(btn.dataset.speed);
-    try{haptic()}catch(e){}
-  });
-});
+return (
+<div
+ref={containerRef}
+style={{
+width: “100%”,
+height: “100vh”,
+background: COL.bg,
+display: “flex”,
+flexDirection: “column”,
+fontFamily: ‘“SF Mono”, “Menlo”, “Fira Code”, monospace’,
+color: COL.text,
+overflow: “hidden”,
+userSelect: “none”,
+}}
+>
+{/* Header controls */}
+<div
+style={{
+padding: “12px 16px”,
+display: “flex”,
+flexWrap: “wrap”,
+gap: “8px”,
+alignItems: “center”,
+borderBottom: `1px solid ${COL.grid}`,
+flexShrink: 0,
+}}
+>
+<span style={{ fontSize: 13, color: COL.textDim, marginRight: 4 }}>θ =</span>
+<input
+type=“number”
+value={angle}
+onChange={(e) => {
+const v = parseInt(e.target.value, 10);
+if (!isNaN(v)) setAngle(v);
+}}
+style={{
+width: 60,
+background: “#12121f”,
+border: `1px solid ${COL.axis}`,
+borderRadius: 6,
+color: COL.text,
+padding: “4px 8px”,
+fontSize: 13,
+fontFamily: “inherit”,
+textAlign: “center”,
+}}
+/>
+<span style={{ fontSize: 12, color: COL.textDim }}>°</span>
 
-window.addEventListener('resize', resize);
-resize();
-requestAnimationFrame(frame);
-</script>
+```
+    <input
+      type="range"
+      min={0}
+      max={360}
+      value={((angle % 360) + 360) % 360}
+      onChange={(e) => setAngle(parseInt(e.target.value, 10))}
+      style={{ flex: "1 1 120px", maxWidth: 200, accentColor: COL.angleArc }}
+    />
 
-</body>
-</html>
+    <div style={{ display: "flex", gap: 6, marginLeft: "auto" }}>
+      {[
+        ["sin", showSin, setShowSin, COL.sin],
+        ["cos", showCos, setShowCos, COL.cos],
+        ["tan", showTan, setShowTan, COL.tan],
+      ].map(([label, on, set, col]) => (
+        <button
+          key={label}
+          onClick={() => set(!on)}
+          style={{
+            padding: "4px 10px",
+            fontSize: 12,
+            fontFamily: "inherit",
+            background: on ? col + "22" : "transparent",
+            border: `1px solid ${on ? col : COL.axis}`,
+            borderRadius: 6,
+            color: on ? col : COL.textDim,
+            cursor: "pointer",
+            transition: "all 0.15s",
+          }}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  </div>
+
+  {/* Values display */}
+  <div
+    style={{
+      padding: "8px 16px",
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "12px",
+      fontSize: 12,
+      borderBottom: `1px solid ${COL.grid}`,
+      flexShrink: 0,
+    }}
+  >
+    <span style={{ color: COL.sin }}>
+      {special ? formatVal("sin", sinVal, special.sin) : `sin = ${sinVal.toFixed(4)}`}
+    </span>
+    <span style={{ color: COL.cos }}>
+      {special ? formatVal("cos", cosVal, special.cos) : `cos = ${cosVal.toFixed(4)}`}
+    </span>
+    <span style={{ color: COL.tan }}>{tanDisplay()}</span>
+    <span style={{ color: COL.textDim, marginLeft: "auto" }}>
+      {((rad % TAU + TAU) % TAU).toFixed(4)} rad
+    </span>
+  </div>
+
+  {/* Canvas */}
+  <canvas
+    ref={canvasRef}
+    onPointerDown={handlePointerDown}
+    style={{
+      flex: 1,
+      width: "100%",
+      cursor: dragging ? "grabbing" : "grab",
+      touchAction: "none",
+    }}
+  />
+</div>
+```
+
+);
+}p
