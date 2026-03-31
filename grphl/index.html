@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>数学III・C</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body,#root{width:100%;height:100%;overflow:hidden;background:#f2f2f7;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif}
+input[type=range]{height:22px;-webkit-appearance:none;appearance:none;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:#d1d1d6}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2);margin-top:-9px}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button{opacity:1}
+select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238e8e93'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:26px!important}
+::-webkit-scrollbar{display:none}
+</style>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.9/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-type="module">
+const {useState,useRef,useEffect,useCallback}=React;
+
+let _h=()=>{};
+(async()=>{try{const m=await import('https://esm.sh/ios-haptics');if(m&&m.haptic)_h=m.haptic}catch(e){}})();
+const hap=()=>{try{_h()}catch(e){}};
+
+const TAU=2*Math.PI,PI=Math.PI;
+const tr4=v=>Math.trunc(v*10000)/10000;
+const fmt=v=>{if(!isFinite(v))return"—";const t=tr4(v);if(t===0)return"0";return t.toFixed(4).replace(/0+$/,'').replace(/\.$/,'')};
+
+/* ── iOS System Colors ── */
+const SYS={
+  red:"#ff3b30",orange:"#ff9500",yellow:"#ffcc00",green:"#34c759",
+  teal:"#5ac8fa",blue:"#007aff",purple:"#af52de",pink:"#ff2d55",
+  bg:"#f2f2f7",card:"#ffffff",cardBorder:"rgba(0,0,0,.06)",
+  label:"#1c1c1e",label2:"#636366",label3:"#8e8e93",label4:"#aeaeb2",
+  separator:"#c6c6c8",fill:"#e5e5ea",
+  graphBg:"#fafafa",graphGrid:"#e8e8ed",graphAxis:"#c7c7cc",
+};
+
+/* ── Gradients ── */
+const G1=[[0,"#ff2d55"],[.5,"#ff375f"],[1,"#ff6b8a"]]; // sin
+const G2=[[0,"#5ac8fa"],[.5,"#32ade6"],[1,"#5ac8fa"]]; // cos
+const G3=[[0,"#ff9500"],[.5,"#ffcc00"],[1,"#ff9500"]]; // tan
+const G4=[[0,"#af52de"],[.5,"#bf5af2"],[1,"#af52de"]]; // complex/curve
+const G5=[[0,"#34c759"],[.5,"#30d158"],[1,"#34c759"]]; // integral
+
+function lerp(g,t){
+  t=Math.max(0,Math.min(1,t));
+  for(let i=0;i<g.length-1;i++){
+    const[t0,c0]=g[i],[t1,c1]=g[i+1];
+    if(t>=t0&&t<=t1){
+      const f=(t-t0)/(t1-t0),p=(s,o)=>parseInt(s.slice(o,o+2),16),m=(a,b)=>Math.round(a+(b-a)*f);
+      return`rgb(${m(p(c0,1),p(c1,1))},${m(p(c0,3),p(c1,3))},${m(p(c0,5),p(c1,5))})`;
+    }
+  }
+  return g[g.length-1][1];
+}
+
+/* ── Canvas helpers ── */
+function setupCanvas(cvs){
+  const x=cvs.getContext("2d"),d=window.devicePixelRatio||1;
+  const r=cvs.getBoundingClientRect(),W=r.width,H=r.height;
+  cvs.width=W*d;cvs.height=H*d;x.scale(d,d);
+  x.fillStyle=SYS.graphBg;x.fillRect(0,0,W,H);
+  return{x,W,H};
+}
+
+function makeGraph(ox,oy,w,h,xMin,xMax,yMin,yMax){
+  const mapX=v=>ox+(v-xMin)/(xMax-xMin)*w-w/2;
+  const mapY=v=>oy-(v-yMin)/(yMax-yMin)*h+h/2;
+  const invX=sx=>(sx-ox+w/2)/w*(xMax-xMin)+xMin;
+  return{mapX,mapY,invX,ox,oy,w,h,xMin,xMax,yMin,yMax};
+}
+
+function drawGrid(x,g,xStep,yStep){
+  const{mapX,mapY,w,h,ox,oy,xMin,xMax,yMin,yMax}=g;
+  x.strokeStyle=SYS.graphGrid;x.lineWidth=.5;
+  if(yStep)for(let v=Math.ceil(yMin/yStep)*yStep;v<=yMax;v+=yStep){const yy=mapY(v);x.beginPath();x.moveTo(ox-w/2,yy);x.lineTo(ox+w/2,yy);x.stroke()}
+  if(xStep)for(let v=Math.ceil(xMin/xStep)*xStep;v<=xMax;v+=xStep){const xx=mapX(v);x.beginPath();x.moveTo(xx,oy-h/2);x.lineTo(xx,oy+h/2);x.stroke()}
+  x.strokeStyle=SYS.graphAxis;x.lineWidth=1;
+  const y0=mapY(0),x0=mapX(0);
+  if(y0>=oy-h/2&&y0<=oy+h/2){x.beginPath();x.moveTo(ox-w/2,y0);x.lineTo(ox+w/2,y0);x.stroke()}
+  if(x0>=ox-w/2&&x0<=ox+w/2){x.beginPath();x.moveTo(x0,oy-h/2);x.lineTo(x0,oy+h/2);x.stroke()}
+}
+
+function gradCurve(x,fn,grad,g,skip){
+  const{mapX,mapY,xMin,xMax}=g;
+  const top=g.oy-g.h/2-5,bot=g.oy+g.h/2+5;
+  const steps=Math.max(400,Math.floor(g.w*1.5)),dx=(xMax-xMin)/steps;
+  let pX=null,pY=null;
+  x.lineWidth=2.5;x.lineCap="round";
+  for(let i=0;i<=steps;i++){
+    const a=xMin+i*dx;
+    if(skip&&skip(a)){pX=null;continue}
+    let v;try{v=fn(a)}catch(e){pX=null;continue}
+    if(!isFinite(v)){pX=null;continue}
+    const sx=mapX(a),sy=mapY(v);
+    if(sy<top||sy>bot){pX=null;continue}
+    if(pX!==null){x.strokeStyle=lerp(grad,i/steps);x.beginPath();x.moveTo(pX,pY);x.lineTo(sx,sy);x.stroke()}
+    pX=sx;pY=sy;
+  }
+}
+
+function gradSeg(x,x1,y1,x2,y2,grad,N){
+  x.lineCap="round";x.lineWidth=3;
+  for(let i=0;i<N;i++){const a=i/N,b=(i+1)/N;x.strokeStyle=lerp(grad,a);x.beginPath();x.moveTo(x1+(x2-x1)*a,y1+(y2-y1)*a);x.lineTo(x1+(x2-x1)*b,y1+(y2-y1)*b);x.stroke()}
+}
+
+/* ── Shared UI ── */
+const rowS={padding:"8px 14px",display:"flex",flexWrap:"wrap",gap:8,alignItems:"center"};
+const cardRow={...rowS,background:SYS.card,borderBottom:`0.5px solid ${SYS.separator}`};
+const numS={width:54,background:SYS.fill,border:"none",borderRadius:10,color:SYS.label,
+  padding:"6px 8px",fontSize:14,fontFamily:"inherit",textAlign:"center"};
+const selS={background:SYS.fill,border:"none",borderRadius:10,color:SYS.label,
+  padding:"6px 12px",fontSize:13,fontFamily:"inherit"};
+const cvsS=d=>({flex:1,width:"100%",cursor:d?"grabbing":"grab",touchAction:"none",
+  borderRadius:0});
+
+function tBtn(l,on,fn_,color){
+  return <button onClick={()=>{hap();fn_()}} style={{padding:"5px 12px",fontSize:13,fontWeight:500,
+    fontFamily:"inherit",background:on?color+"18":"transparent",
+    border:`1.5px solid ${on?color:SYS.separator}`,borderRadius:20,color:on?color:SYS.label3,
+    cursor:"pointer",transition:"all .2s",WebkitTapHighlightColor:"transparent"}}>{l}</button>;
+}
+function superNum(n){return String(n).split('').map(c=>"⁰¹²³⁴⁵⁶⁷⁸⁹"[+c]||c).join('')}
+const getXY=e=>{const t=e.touches?e.touches[0]:e;return[t.clientX,t.clientY]};
+
+/* ══════════════════════════════════════════════
+   TAB 1: 三角関数
+   ══════════════════════════════════════════════ */
+const SPEC=[
+  {d:0,s:"0",c:"1",t:"0"},{d:30,s:"1/2",c:"√3/2",t:"1/√3"},
+  {d:45,s:"√2/2",c:"√2/2",t:"1"},{d:60,s:"√3/2",c:"1/2",t:"√3"},
+  {d:90,s:"1",c:"0",t:"—"},{d:120,s:"√3/2",c:"−1/2",t:"−√3"},
+  {d:135,s:"√2/2",c:"−√2/2",t:"−1"},{d:150,s:"1/2",c:"−√3/2",t:"−1/√3"},
+  {d:180,s:"0",c:"−1",t:"0"},{d:210,s:"−1/2",c:"−√3/2",t:"1/√3"},
+  {d:225,s:"−√2/2",c:"−√2/2",t:"1"},{d:240,s:"−√3/2",c:"−1/2",t:"√3"},
+  {d:270,s:"−1",c:"0",t:"—"},{d:300,s:"−√3/2",c:"1/2",t:"−√3"},
+  {d:315,s:"−√2/2",c:"√2/2",t:"−1"},{d:330,s:"−1/2",c:"√3/2",t:"−1/√3"},
+];
+const fSp=d=>{const n=((d%360)+360)%360;return SPEC.find(a=>a.d===n)};
+
+function TrigTab(){
+  const cvs=useRef(null);
+  const[ang,setAng]=useState(45);
+  const[drag,setDrag]=useState(false);
+  const[sh,setSh]=useState({s:true,c:true,t:true});
+  const rad=ang*PI/180,sV=Math.sin(rad),cV=Math.cos(rad);
+  const isA=Math.abs(cV)<.05,tV=isA?null:Math.tan(rad);
+  const sp=fSp(ang);
+
+  const draw=useCallback(()=>{
+    if(!cvs.current)return;
+    const{x,W,H}=setupCanvas(cvs.current);
+    const wide=W>550;
+    const R=wide?Math.min(W*.16,H*.32):Math.min(W*.26,H*.16);
+    const cx=wide?W*.22:W*.5,cy=wide?H*.45:H*.27;
+    // unit circle
+    x.strokeStyle=SYS.graphGrid;x.lineWidth=.5;
+    x.beginPath();x.moveTo(cx-R*1.4,cy);x.lineTo(cx+R*1.6,cy);x.moveTo(cx,cy-R*1.4);x.lineTo(cx,cy+R*1.4);x.stroke();
+    x.strokeStyle=SYS.graphAxis;x.lineWidth=1.5;x.beginPath();x.arc(cx,cy,R,0,TAU);x.stroke();
+    x.fillStyle=SYS.blue+"15";x.beginPath();x.moveTo(cx,cy);x.arc(cx,cy,R*.22,0,-rad,rad>0);x.closePath();x.fill();
+    x.strokeStyle=SYS.blue;x.lineWidth=1.5;x.beginPath();x.arc(cx,cy,R*.22,0,-rad,rad>0);x.stroke();
+    const px=cx+R*cV,py=cy-R*sV;
+    x.strokeStyle=SYS.label4;x.lineWidth=1.5;x.beginPath();x.moveTo(cx,cy);x.lineTo(px,py);x.stroke();
+    if(sh.c)gradSeg(x,cx,cy,px,cy,G2,20);
+    if(sh.s)gradSeg(x,px,cy,px,py,G1,20);
+    if(sh.t&&tV!==null){
+      const tlx=cx+R,cl=Math.max(cy-R*3.5,Math.min(cy+R*3.5,cy-R*tV));
+      x.strokeStyle=SYS.orange+"22";x.lineWidth=1;x.beginPath();x.moveTo(tlx,cy-R*2.5);x.lineTo(tlx,cy+R*2.5);x.stroke();
+      gradSeg(x,tlx,cy,tlx,cl,G3,20);
+      x.strokeStyle=SYS.orange+"44";x.setLineDash([4,4]);x.lineWidth=1;x.beginPath();x.moveTo(cx,cy);x.lineTo(tlx,cl);x.stroke();x.setLineDash([]);
+      x.fillStyle=SYS.orange;x.beginPath();x.arc(tlx,cl,4,0,TAU);x.fill();
+    }
+    x.fillStyle=SYS.label;x.beginPath();x.arc(px,py,5,0,TAU);x.fill();
+    x.strokeStyle=SYS.graphBg;x.lineWidth=2;x.stroke();
+    x.font='10px -apple-system,sans-serif';x.fillStyle=SYS.label3;x.textAlign="center";
+    x.fillText("1",cx+R+10,cy+13);x.fillText("−1",cx-R-12,cy+13);x.fillText("1",cx+8,cy-R-5);x.fillText("−1",cx+8,cy+R+13);
+
+    // graph
+    const gox=wide?W*.73:W*.5,goy=wide?H*.5:H*.72;
+    const gw=wide?W*.42:W*.86,gh_=wide?H*.8:H*.42;
+    const g=makeGraph(gox,goy,gw,gh_,-PI,PI,-3,3);
+    drawGrid(x,g,PI/2,1);
+    x.setLineDash([2,4]);x.strokeStyle=SYS.graphAxis+"88";x.lineWidth=.5;
+    for(const v of[1,-1]){const yy=g.mapY(v);x.beginPath();x.moveTo(gox-gw/2,yy);x.lineTo(gox+gw/2,yy);x.stroke()}x.setLineDash([]);
+    if(sh.t){x.setLineDash([4,6]);x.strokeStyle=SYS.orange+"33";x.lineWidth=1;
+      for(const a of[PI/2,-PI/2]){const xx=g.mapX(a);x.beginPath();x.moveTo(xx,goy-gh_/2);x.lineTo(xx,goy+gh_/2);x.stroke()}x.setLineDash([])}
+    x.font='9px -apple-system,sans-serif';x.fillStyle=SYS.label3;x.textAlign="center";
+    for(const[v,l]of[[-PI,"−π"],[-PI/2,"−π/2"],[PI/2,"π/2"],[PI,"π"]])x.fillText(l,g.mapX(v),goy+gh_/2+12);
+    x.textAlign="right";for(const v of[-3,-2,-1,1,2,3])x.fillText(String(v),gox-gw/2-3,g.mapY(v)+3);
+    if(sh.s)gradCurve(x,Math.sin,G1,g,null);
+    if(sh.c)gradCurve(x,Math.cos,G2,g,null);
+    if(sh.t)gradCurve(x,Math.tan,G3,g,a=>Math.abs(Math.cos(a))<.04);
+    const mapped=((rad%TAU+TAU)%TAU);const mRad=mapped>PI?mapped-TAU:mapped;
+    const cX=g.mapX(mRad);
+    x.strokeStyle=SYS.label+"11";x.lineWidth=1;x.beginPath();x.moveTo(cX,goy-gh_/2);x.lineTo(cX,goy+gh_/2);x.stroke();
+    if(sh.s){x.fillStyle=lerp(G1,.5);x.beginPath();x.arc(cX,g.mapY(sV),4,0,TAU);x.fill()}
+    if(sh.c){x.fillStyle=lerp(G2,.5);x.beginPath();x.arc(cX,g.mapY(cV),4,0,TAU);x.fill()}
+    if(sh.t&&tV!==null){const sy=g.mapY(tV);if(sy>=goy-gh_/2&&sy<=goy+gh_/2){x.fillStyle=lerp(G3,.5);x.beginPath();x.arc(cX,sy,4,0,TAU);x.fill()}}
+  },[ang,sh,sV,cV,tV,rad]);
+
+  useEffect(()=>{draw();const h=()=>draw();window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h)},[draw]);
+  const updA=useCallback(e=>{const c=cvs.current;if(!c)return;const r=c.getBoundingClientRect(),W=r.width,H=r.height;
+    const wide=W>550,cx_=wide?W*.22:W*.5,cy_=wide?H*.45:H*.27;const[mx,my]=getXY(e);
+    let a=Math.atan2(-(my-r.top-cy_),mx-r.left-cx_);if(a<0)a+=TAU;setAng(Math.round(a*180/PI))},[]);
+  const onD=useCallback(e=>{const c=cvs.current;if(!c)return;const r=c.getBoundingClientRect(),W=r.width,H=r.height;
+    const wide=W>550,R_=wide?Math.min(W*.16,H*.32):Math.min(W*.26,H*.16);
+    const cx_=wide?W*.22:W*.5,cy_=wide?H*.45:H*.27;const[mx,my]=getXY(e);
+    if(Math.hypot(mx-r.left-cx_,my-r.top-cy_)<R_*2){hap();setDrag(true);updA(e)}},[updA]);
+  useEffect(()=>{const mv=e=>{if(!drag)return;e.preventDefault();updA(e)},up=()=>setDrag(false);
+    window.addEventListener("pointermove",mv);window.addEventListener("pointerup",up);
+    window.addEventListener("touchmove",mv,{passive:false});window.addEventListener("touchend",up);
+    return()=>{window.removeEventListener("pointermove",mv);window.removeEventListener("pointerup",up);
+      window.removeEventListener("touchmove",mv);window.removeEventListener("touchend",up)}},[drag,updA]);
+
+  const tanT=(()=>{if(sp&&sp.t==="—")return"tan = ±∞";if(isA){const s=Math.sin(rad),c=Math.cos(rad);return"tan → "+(c>=0?(s>0?"+∞":"−∞"):(s>0?"−∞":"+∞"))}
+    if(sp)return`tan = ${sp.t} (${fmt(Math.tan(rad))})`;return`tan = ${fmt(Math.tan(rad))}`})();
+
+  return <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
+    <div style={cardRow}>
+      <span style={{color:SYS.label2,fontSize:14,fontWeight:500}}>θ =</span>
+      <input type="number" value={ang} onChange={e=>{const v=parseInt(e.target.value,10);if(!isNaN(v)){setAng(v);hap()}}} style={numS}/>
+      <span style={{color:SYS.label3,fontSize:12}}>°</span>
+      <input type="range" min={0} max={360} value={((ang%360)+360)%360} onChange={e=>setAng(parseInt(e.target.value,10))} onInput={hap} style={{flex:"1 1 80px",maxWidth:160}}/>
+      <div style={{display:"flex",gap:5,marginLeft:"auto"}}>
+        {tBtn("sin",sh.s,()=>setSh(p=>({...p,s:!p.s})),SYS.pink)}
+        {tBtn("cos",sh.c,()=>setSh(p=>({...p,c:!p.c})),SYS.teal)}
+        {tBtn("tan",sh.t,()=>setSh(p=>({...p,t:!p.t})),SYS.orange)}
+      </div>
+    </div>
+    <div style={{...cardRow,fontSize:12,fontWeight:500,gap:12}}>
+      <span style={{color:SYS.pink}}>sin = {sp?`${sp.s} (${fmt(sV)})`:fmt(sV)}</span>
+      <span style={{color:SYS.teal}}>cos = {sp?`${sp.c} (${fmt(cV)})`:fmt(cV)}</span>
+      <span style={{color:SYS.orange}}>{tanT}</span>
+    </div>
+    <canvas ref={cvs} onPointerDown={onD} onTouchStart={onD} style={cvsS(drag)}/>
+  </div>;
+}
+
+/* ══════════════════════════════════════════════
+   TAB 2: 微分
+   ══════════════════════════════════════════════ */
+const FUNCS=[
+  {name:"sin x",f:Math.sin,df:Math.cos,xMin:-PI,xMax:PI,yMin:-1.5,yMax:1.5,defA:0,defB:PI},
+  {name:"cos x",f:Math.cos,df:a=>-Math.sin(a),xMin:-PI,xMax:PI,yMin:-1.5,yMax:1.5,defA:0,defB:PI},
+  {name:"tan x",f:Math.tan,df:a=>1/(Math.cos(a)**2),xMin:-PI*.9,xMax:PI*.9,yMin:-4,yMax:4,skip:a=>Math.abs(Math.cos(a))<.04,defA:0,defB:1},
+  {name:"x²",f:a=>a*a,df:a=>2*a,xMin:-3,xMax:3,yMin:-2,yMax:9,defA:0,defB:2},
+  {name:"x³",f:a=>a**3,df:a=>3*a*a,xMin:-2,xMax:2,yMin:-8,yMax:8,defA:-1,defB:1},
+  {name:"eˣ",f:Math.exp,df:Math.exp,xMin:-2,xMax:3,yMin:-1,yMax:8,defA:0,defB:1},
+  {name:"ln x",f:Math.log,df:a=>1/a,xMin:0.05,xMax:5,yMin:-3,yMax:3,defA:1,defB:Math.E},
+];
+
+function DerivTab(){
+  const cvs=useRef(null);
+  const[fi,setFi]=useState(0);
+  const[pt,setPt]=useState(1);
+  const[showD,setShowD]=useState(true);
+  const[showT,setShowT]=useState(true);
+  const fn=FUNCS[fi];
+
+  const draw=useCallback(()=>{
+    if(!cvs.current)return;
+    const{x,W,H}=setupCanvas(cvs.current);
+    const g=makeGraph(W*.5,H*.5,W*.88,H*.82,fn.xMin,fn.xMax,fn.yMin,fn.yMax);
+    const xStep=fn.xMax-fn.xMin>8?2:fn.xMax-fn.xMin>3?1:.5;
+    const yStep=fn.yMax-fn.yMin>8?2:1;
+    drawGrid(x,g,xStep,yStep);
+    x.font='9px -apple-system,sans-serif';x.fillStyle=SYS.label3;x.textAlign="center";
+    for(let v=Math.ceil(fn.xMin/xStep)*xStep;v<=fn.xMax;v+=xStep){if(Math.abs(v)<.01)continue;x.fillText(fmt(v),g.mapX(v),g.oy+g.h/2+12)}
+    x.textAlign="right";
+    for(let v=Math.ceil(fn.yMin/yStep)*yStep;v<=fn.yMax;v+=yStep){if(Math.abs(v)<.01)continue;x.fillText(String(Math.round(v)),g.ox-g.w/2-3,g.mapY(v)+3)}
+    gradCurve(x,fn.f,G1,g,fn.skip);
+    if(showD)gradCurve(x,fn.df,G2,g,fn.skip);
+    if(showT){
+      const fv=fn.f(pt),dv=fn.df(pt);
+      if(isFinite(fv)&&isFinite(dv)){
+        const tanFn=a=>fv+dv*(a-pt);
+        x.strokeStyle=SYS.orange+"66";x.lineWidth=1.5;x.setLineDash([6,4]);
+        x.beginPath();x.moveTo(g.mapX(fn.xMin),g.mapY(tanFn(fn.xMin)));x.lineTo(g.mapX(fn.xMax),g.mapY(tanFn(fn.xMax)));x.stroke();x.setLineDash([]);
+        const sx=g.mapX(pt),sy=g.mapY(fv);
+        if(sy>=g.oy-g.h/2&&sy<=g.oy+g.h/2){
+          x.fillStyle=SYS.label;x.beginPath();x.arc(sx,sy,6,0,TAU);x.fill();
+          x.fillStyle=SYS.graphBg;x.beginPath();x.arc(sx,sy,3,0,TAU);x.fill();
+        }
+      }
+    }
+    x.font='12px -apple-system,sans-serif';x.fillStyle=SYS.pink;x.textAlign="left";
+    x.fillText("f(x) = "+fn.name,g.ox-g.w/2+10,g.oy-g.h/2+18);
+    if(showD){x.fillStyle=SYS.teal;x.fillText("f'(x)",g.ox-g.w/2+10,g.oy-g.h/2+34)}
+  },[fi,pt,showD,showT]);
+
+  useEffect(()=>{draw();const h=()=>draw();window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h)},[draw]);
+  const updPt=useCallback(e=>{const c=cvs.current;if(!c)return;const r=c.getBoundingClientRect(),W=r.width;
+    const fn_=FUNCS[fi];const g=makeGraph(W*.5,0,W*.88,0,fn_.xMin,fn_.xMax,0,0);
+    const mx=(e.touches?e.touches[0]:e).clientX-r.left;
+    setPt(Math.max(fn_.xMin+.01,Math.min(fn_.xMax-.01,g.invX(mx))))},[fi]);
+  const[dr,setDr]=useState(false);
+  const onD=useCallback(e=>{hap();setDr(true);updPt(e)},[updPt]);
+  useEffect(()=>{const mv=e=>{if(!dr)return;e.preventDefault();updPt(e)},up=()=>setDr(false);
+    window.addEventListener("pointermove",mv);window.addEventListener("pointerup",up);
+    window.addEventListener("touchmove",mv,{passive:false});window.addEventListener("touchend",up);
+    return()=>{window.removeEventListener("pointermove",mv);window.removeEventListener("pointerup",up);
+      window.removeEventListener("touchmove",mv);window.removeEventListener("touchend",up)}},[dr,updPt]);
+  const fv=fn.f(pt),dv=fn.df(pt);
+
+  return <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
+    <div style={cardRow}>
+      <select value={fi} onChange={e=>{setFi(+e.target.value);setPt(1);hap()}} style={selS}>
+        {FUNCS.map((f,i)=><option key={i} value={i}>{f.name}</option>)}
+      </select>
+      {tBtn("f'(x)",showD,()=>setShowD(!showD),SYS.teal)}
+      {tBtn("接線",showT,()=>setShowT(!showT),SYS.orange)}
+    </div>
+    <div style={{...cardRow,fontSize:12,fontWeight:500,gap:10}}>
+      <span style={{color:SYS.pink}}>f({fmt(pt)}) = {fmt(fv)}</span>
+      <span style={{color:SYS.teal}}>f'({fmt(pt)}) = {fmt(dv)}</span>
+      <span style={{color:SYS.orange}}>接線: y = {fmt(dv)}(x−{fmt(pt)})+{fmt(fv)}</span>
+    </div>
+    <canvas ref={cvs} onPointerDown={onD} onTouchStart={onD} style={cvsS(dr)}/>
+  </div>;
+}
+
+/* ══════════════════════════════════════════════
+   TAB 3: 積分
+   ══════════════════════════════════════════════ */
+function IntegTab(){
+  const cvs=useRef(null);
+  const[fi,setFi]=useState(0);
+  const[a,setA]=useState(0);
+  const[b,setB]=useState(PI);
+  const[n,setN]=useState(10);
+  const[showR,setShowR]=useState(true);
+  const fn=FUNCS[fi];
+
+  // reset bounds on function change
+  useEffect(()=>{setA(fn.defA);setB(fn.defB)},[fi]);
+
+  // midpoint rule integration
+  const integrate=(f,lo,hi,nn=2000)=>{
+    if(lo>=hi)return 0;
+    const h=(hi-lo)/nn;let s=0;
+    for(let i=0;i<nn;i++){const v=f(lo+(i+.5)*h);if(isFinite(v))s+=v*h}
+    return s;
+  };
+  const lo=Math.min(a,b),hi=Math.max(a,b);
+  const rawArea=integrate(fn.f,lo,hi);
+  const area=a>b?-rawArea:rawArea;
+
+  const draw=useCallback(()=>{
+    if(!cvs.current)return;
+    const{x,W,H}=setupCanvas(cvs.current);
+    const g=makeGraph(W*.5,H*.52,W*.88,H*.78,fn.xMin,fn.xMax,fn.yMin,fn.yMax);
+    const xStep=fn.xMax-fn.xMin>8?2:fn.xMax-fn.xMin>3?1:.5;
+    const yStep=fn.yMax-fn.yMin>8?2:1;
+    drawGrid(x,g,xStep,yStep);
+
+    // axis labels
+    x.font='9px -apple-system,sans-serif';x.fillStyle=SYS.label3;
+    x.textAlign="center";
+    for(let v=Math.ceil(fn.xMin/xStep)*xStep;v<=fn.xMax;v+=xStep){if(Math.abs(v)<.01)continue;x.fillText(fmt(v),g.mapX(v),g.oy+g.h/2+12)}
+    x.textAlign="right";
+    for(let v=Math.ceil(fn.yMin/yStep)*yStep;v<=fn.yMax;v+=yStep){if(Math.abs(v)<.01)continue;x.fillText(String(Math.round(v)),g.ox-g.w/2-3,g.mapY(v)+3)}
+
+    const clo=Math.max(fn.xMin,lo),chi=Math.min(fn.xMax,hi);
+
+    // filled area under curve
+    if(clo<chi){
+      const y0=g.mapY(0);
+      const steps=200;
+      const dx=(chi-clo)/steps;
+      x.fillStyle=SYS.green+"20";
+      x.beginPath();
+      x.moveTo(g.mapX(clo),y0);
+      for(let i=0;i<=steps;i++){
+        const xv=clo+i*dx;
+        let fv;try{fv=fn.f(xv)}catch(e){fv=0}
+        if(!isFinite(fv))fv=0;
+        x.lineTo(g.mapX(xv),g.mapY(fv));
+      }
+      x.lineTo(g.mapX(chi),y0);
+      x.closePath();x.fill();
+    }
+
+    // Riemann rectangles
+    if(showR&&n>0&&clo<chi){
+      const dx=(chi-clo)/n;
+      for(let i=0;i<n;i++){
+        const xi=clo+i*dx;
+        let fv;try{fv=fn.f(xi+dx/2)}catch(e){continue}
+        if(!isFinite(fv))continue;
+        const lx=g.mapX(xi),rx=g.mapX(xi+dx);
+        const ty=g.mapY(fv),by=g.mapY(0);
+        const col=fv>=0?SYS.green:SYS.red;
+        x.fillStyle=col+"22";
+        x.fillRect(Math.min(lx,rx),Math.min(ty,by),Math.abs(rx-lx),Math.abs(ty-by));
+        x.strokeStyle=col+"55";x.lineWidth=.5;
+        x.strokeRect(Math.min(lx,rx),Math.min(ty,by),Math.abs(rx-lx),Math.abs(ty-by));
+      }
+    }
+
+    // curve
+    gradCurve(x,fn.f,G1,g,fn.skip);
+
+    // bound markers
+    x.lineWidth=2;
+    for(const[v,label,col]of[[a,"a",SYS.blue],[b,"b",SYS.purple]]){
+      if(v>=fn.xMin&&v<=fn.xMax){
+        const sx=g.mapX(v);
+        x.strokeStyle=col;x.beginPath();x.moveTo(sx,g.oy-g.h/2);x.lineTo(sx,g.oy+g.h/2);x.stroke();
+        // draggable handle
+        x.fillStyle=col;x.beginPath();x.arc(sx,g.oy-g.h/2+12,7,0,TAU);x.fill();
+        x.fillStyle="#fff";x.font='bold 9px -apple-system,sans-serif';x.textAlign="center";
+        x.fillText(label,sx,g.oy-g.h/2+15);
+      }
+    }
+
+    x.font='12px -apple-system,sans-serif';x.fillStyle=SYS.pink;x.textAlign="left";
+    x.fillText("f(x) = "+fn.name,g.ox-g.w/2+10,g.oy-g.h/2+18);
+  },[fi,a,b,n,showR]);
+
+  useEffect(()=>{draw();const h=()=>draw();window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h)},[draw]);
+
+  // drag bounds a or b
+  const dragTarget=useRef(null);
+  const[dr,setDr]=useState(false);
+  const updBound=useCallback(e=>{
+    const c=cvs.current;if(!c)return;const r=c.getBoundingClientRect(),W=r.width;
+    const fn_=FUNCS[fi];const g=makeGraph(W*.5,0,W*.88,0,fn_.xMin,fn_.xMax,0,0);
+    const mx=(e.touches?e.touches[0]:e).clientX-r.left;
+    const v=Math.max(fn_.xMin,Math.min(fn_.xMax,g.invX(mx)));
+    if(dragTarget.current==="a")setA(tr4(v));
+    else if(dragTarget.current==="b")setB(tr4(v));
+  },[fi]);
+
+  const onD=useCallback(e=>{
+    const c=cvs.current;if(!c)return;const r=c.getBoundingClientRect(),W=r.width;
+    const fn_=FUNCS[fi];const g=makeGraph(W*.5,0,W*.88,0,fn_.xMin,fn_.xMax,0,0);
+    const mx=(e.touches?e.touches[0]:e).clientX-r.left;
+    const xv=g.invX(mx);
+    const distA=Math.abs(g.mapX(a)-mx),distB=Math.abs(g.mapX(b)-mx);
+    dragTarget.current=distA<distB?"a":"b";
+    hap();setDr(true);updBound(e);
+  },[fi,a,b,updBound]);
+
+  useEffect(()=>{const mv=e=>{if(!dr)return;e.preventDefault();updBound(e)},up=()=>{setDr(false);dragTarget.current=null};
+    window.addEventListener("pointermove",mv);window.addEventListener("pointerup",up);
+    window.addEventListener("touchmove",mv,{passive:false});window.addEventListener("touchend",up);
+    return()=>{window.removeEventListener("pointermove",mv);window.removeEventListener("pointerup",up);
+      window.removeEventListener("touchmove",mv);window.removeEventListener("touchend",up)}},[dr,updBound]);
+
+  return <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
+    <div style={cardRow}>
+      <select value={fi} onChange={e=>{setFi(+e.target.value);hap()}} style={selS}>
+        {FUNCS.map((f,i)=><option key={i} value={i}>{f.name}</option>)}
+      </select>
+      {tBtn("区分求積",showR,()=>setShowR(!showR),SYS.green)}
+    </div>
+    <div style={{...cardRow,gap:8,fontSize:12}}>
+      <span style={{color:SYS.blue,fontWeight:600}}>a = </span>
+      <input type="number" value={tr4(a)} step={0.1} onChange={e=>{const v=parseFloat(e.target.value);if(isFinite(v))setA(v)}} style={{...numS,width:56,borderLeft:`3px solid ${SYS.blue}`}}/>
+      <span style={{color:SYS.purple,fontWeight:600}}>b = </span>
+      <input type="number" value={tr4(b)} step={0.1} onChange={e=>{const v=parseFloat(e.target.value);if(isFinite(v))setB(v)}} style={{...numS,width:56,borderLeft:`3px solid ${SYS.purple}`}}/>
+      <span style={{color:SYS.label3}}>n =</span>
+      <input type="range" min={1} max={100} value={n} onChange={e=>setN(+e.target.value)} onInput={hap} style={{width:70}}/>
+      <span style={{color:SYS.label3,fontSize:11}}>{n}</span>
+    </div>
+    <div style={{...cardRow,fontSize:13,fontWeight:600}}>
+      <span style={{color:SYS.green}}>∫ f(x)dx ≈ {fmt(area)}</span>
+      <span style={{color:SYS.label3,fontWeight:400,fontSize:11,marginLeft:8}}>
+        (中点法 n={showR?n:2000})
+      </span>
+    </div>
+    <canvas ref={cvs} onPointerDown={onD} onTouchStart={onD} style={cvsS(dr)}/>
+  </div>;
+}
+
+/* ══════════════════════════════════════════════
+   TAB 4: 複素数平面
+   ══════════════════════════════════════════════ */
+function ComplexTab(){
+  const cvs=useRef(null);
+  const[re,setRe]=useState(1);
+  const[im,setIm]=useState(1);
+  const[pow,setPow]=useState(2);
+  const[showPow,setShowPow]=useState(true);
+  const rangeRef=useRef(4);
+
+  const r_=Math.sqrt(re*re+im*im);
+  const theta=Math.atan2(im,re);
+  const rn=Math.pow(r_,pow),tn=theta*pow;
+  const zn_re=rn*Math.cos(tn),zn_im=rn*Math.sin(tn);
+
+  const[dr,setDr]=useState(false);
+  useEffect(()=>{if(!dr){rangeRef.current=Math.min(50,Math.max(3,r_*1.8,showPow?rn*1.3:0))}},[re,im,r_,rn,dr,showPow]);
+
+  const draw=useCallback(()=>{
+    if(!cvs.current)return;
+    const{x,W,H}=setupCanvas(cvs.current);
+    const range=rangeRef.current;
+    const ox=W*.5,oy=H*.5,sc=Math.min(W,H)*.42/range;
+    const gridStep=range>20?5:range>8?2:1;
+    x.strokeStyle=SYS.graphGrid;x.lineWidth=.5;
+    for(let i=Math.ceil(-range/gridStep)*gridStep;i<=range;i+=gridStep){
+      x.beginPath();x.moveTo(ox+i*sc,0);x.lineTo(ox+i*sc,H);x.stroke();
+      x.beginPath();x.moveTo(0,oy-i*sc);x.lineTo(W,oy-i*sc);x.stroke();
+    }
+    x.strokeStyle=SYS.graphAxis;x.lineWidth=1;
+    x.beginPath();x.moveTo(0,oy);x.lineTo(W,oy);x.stroke();
+    x.beginPath();x.moveTo(ox,0);x.lineTo(ox,H);x.stroke();
+    x.font='10px -apple-system,sans-serif';x.fillStyle=SYS.label3;
+    x.textAlign="center";
+    for(let i=Math.ceil(-range/gridStep)*gridStep;i<=range;i+=gridStep){if(i===0)continue;x.fillText(String(i),ox+i*sc,oy+14)}
+    x.textAlign="right";
+    for(let i=Math.ceil(-range/gridStep)*gridStep;i<=range;i+=gridStep){if(i===0)continue;x.fillText(String(i)+"i",ox-6,oy-i*sc+4)}
+    x.fillText("Re",W-8,oy+14);x.textAlign="left";x.fillText("Im",ox+6,14);
+
+    const toS=(a,b)=>[ox+a*sc,oy-b*sc];
+    // unit circle
+    x.strokeStyle=SYS.graphAxis+"66";x.lineWidth=1;x.beginPath();x.arc(ox,oy,sc,0,TAU);x.stroke();
+    if(r_>.05){
+      x.strokeStyle=SYS.blue+"22";x.lineWidth=1;x.beginPath();x.arc(ox,oy,r_*sc,0,TAU);x.stroke();
+      const aR=Math.min(30,r_*sc*.35);
+      x.fillStyle=SYS.blue+"12";x.beginPath();x.moveTo(ox,oy);x.arc(ox,oy,aR,0,-theta,theta>0);x.closePath();x.fill();
+      x.strokeStyle=SYS.blue;x.lineWidth=1.5;x.beginPath();x.arc(ox,oy,aR,0,-theta,theta>0);x.stroke();
+    }
+    const[zx,zy]=toS(re,im);
+    gradSeg(x,ox,oy,zx,zy,G4,20);
+    x.fillStyle=SYS.purple;x.beginPath();x.arc(zx,zy,6,0,TAU);x.fill();
+    x.fillStyle=SYS.graphBg;x.beginPath();x.arc(zx,zy,3,0,TAU);x.fill();
+    x.font='bold 12px -apple-system,sans-serif';x.fillStyle=SYS.purple;x.textAlign="left";
+    x.fillText("z",zx+10,zy-10);
+    if(showPow&&isFinite(zn_re)&&isFinite(zn_im)){
+      const[znx,zny]=toS(zn_re,zn_im);
+      if(rn>.05){const aR2=Math.min(22,rn*sc*.25);x.strokeStyle=SYS.orange+"55";x.lineWidth=1;x.beginPath();x.arc(ox,oy,aR2,0,-tn,tn>0);x.stroke()}
+      gradSeg(x,ox,oy,znx,zny,G3,20);
+      x.fillStyle=SYS.orange;x.beginPath();x.arc(znx,zny,5,0,TAU);x.fill();
+      x.font='bold 12px -apple-system,sans-serif';x.fillStyle=SYS.orange;x.textAlign="left";
+      x.fillText("z"+superNum(pow),znx+10,zny-10);
+    }
+  },[re,im,pow,showPow,r_,theta,rn,tn,zn_re,zn_im]);
+
+  useEffect(()=>{draw();const h=()=>draw();window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h)},[draw]);
+  const updZ=useCallback(e=>{const c=cvs.current;if(!c)return;const rect=c.getBoundingClientRect();
+    const W=rect.width,H=rect.height,ox=W*.5,oy=H*.5,range=rangeRef.current,sc=Math.min(W,H)*.42/range;
+    const mx=(e.touches?e.touches[0]:e).clientX-rect.left,my=(e.touches?e.touches[0]:e).clientY-rect.top;
+    setRe(tr4((mx-ox)/sc));setIm(tr4(-(my-oy)/sc))},[]);
+  const onD=useCallback(e=>{hap();setDr(true);updZ(e)},[updZ]);
+  useEffect(()=>{const mv=e=>{if(!dr)return;e.preventDefault();updZ(e)},up=()=>setDr(false);
+    window.addEventListener("pointermove",mv);window.addEventListener("pointerup",up);
+    window.addEventListener("touchmove",mv,{passive:false});window.addEventListener("touchend",up);
+    return()=>{window.removeEventListener("pointermove",mv);window.removeEventListener("pointerup",up);
+      window.removeEventListener("touchmove",mv);window.removeEventListener("touchend",up)}},[dr,updZ]);
+
+  return <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
+    <div style={cardRow}>
+      <span style={{color:SYS.label2,fontSize:13,fontWeight:500}}>z =</span>
+      <input type="number" value={re} step={0.1} onChange={e=>{const v=parseFloat(e.target.value);if(isFinite(v))setRe(v)}} style={{...numS,width:52}}/>
+      <span style={{color:SYS.label2,fontSize:13}}>+ i</span>
+      <input type="number" value={im} step={0.1} onChange={e=>{const v=parseFloat(e.target.value);if(isFinite(v))setIm(v)}} style={{...numS,width:52}}/>
+      <span style={{color:SYS.label3,fontSize:12}}>n=</span>
+      <input type="number" value={pow} min={1} max={12} onChange={e=>{const v=parseInt(e.target.value,10);if(v>=1&&v<=12)setPow(v)}} style={{...numS,width:40}}/>
+      {tBtn("zⁿ",showPow,()=>setShowPow(!showPow),SYS.orange)}
+    </div>
+    <div style={{...cardRow,fontSize:12,fontWeight:500,gap:10,flexWrap:"wrap"}}>
+      <span style={{color:SYS.purple}}>z = {fmt(re)} {im>=0?"+":"−"} {fmt(Math.abs(im))}i</span>
+      <span style={{color:SYS.blue}}>|z| = {fmt(r_)}</span>
+      <span style={{color:SYS.blue}}>arg = {fmt(theta)} rad ({Math.round(theta*180/PI)}°)</span>
+      {showPow&&<span style={{color:SYS.orange}}>z{superNum(pow)} = {fmt(zn_re)} {zn_im>=0?"+":"−"} {fmt(Math.abs(zn_im))}i</span>}
+    </div>
+    <canvas ref={cvs} onPointerDown={onD} onTouchStart={onD} style={cvsS(dr)}/>
+  </div>;
+}
+
+/* ══════════════════════════════════════════════
+   TAB 5: 曲線
+   ══════════════════════════════════════════════ */
+const CURVES=[
+  {name:"サイクロイド",fx:t=>t-Math.sin(t),fy:t=>1-Math.cos(t),tMin:0,tMax:4*PI,xC:2*PI,yC:1,xR:2*PI+1,yR:2.5},
+  {name:"アステロイド",fx:t=>Math.cos(t)**3,fy:t=>Math.sin(t)**3,tMin:0,tMax:TAU,xC:0,yC:0,xR:1.3,yR:1.3},
+  {name:"カージオイド",fx:t=>(1+Math.cos(t))*Math.cos(t),fy:t=>(1+Math.cos(t))*Math.sin(t),tMin:0,tMax:TAU,xC:.5,yC:0,xR:2.5,yR:2.2},
+  {name:"リサージュ(3:2)",fx:t=>Math.sin(3*t),fy:t=>Math.sin(2*t),tMin:0,tMax:TAU,xC:0,yC:0,xR:1.3,yR:1.3},
+  {name:"インボリュート",fx:t=>Math.cos(t)+t*Math.sin(t),fy:t=>Math.sin(t)-t*Math.cos(t),tMin:0,tMax:3*PI,xC:0,yC:0,xR:12,yR:12},
+  {name:"バラ曲線(r=cos3θ)",fx:t=>Math.cos(3*t)*Math.cos(t),fy:t=>Math.cos(3*t)*Math.sin(t),tMin:0,tMax:PI,xC:0,yC:0,xR:1.3,yR:1.3},
+  {name:"レムニスケート",fx:t=>{const c=Math.cos(2*t);return c>=0?Math.sqrt(c)*Math.cos(t):NaN},fy:t=>{const c=Math.cos(2*t);return c>=0?Math.sqrt(c)*Math.sin(t):NaN},tMin:0,tMax:TAU,xC:0,yC:0,xR:1.3,yR:.9},
+];
+
+function CurveTab(){
+  const cvs=useRef(null);
+  const[ci,setCi]=useState(0);
+  const[tp,setTp]=useState(0.5);
+  const cv=CURVES[ci];
+
+  const draw=useCallback(()=>{
+    if(!cvs.current)return;
+    const{x,W,H}=setupCanvas(cvs.current);
+    const g=makeGraph(W*.5,H*.5,W*.88,H*.82,cv.xC-cv.xR,cv.xC+cv.xR,cv.yC-cv.yR,cv.yC+cv.yR);
+    drawGrid(x,g,cv.xR>5?2:cv.xR>1.5?1:.5,cv.yR>5?2:cv.yR>1.5?1:.5);
+    const steps=1000,dt=(cv.tMax-cv.tMin)/steps;
+    let pX=null,pY=null;
+    x.lineWidth=2.5;x.lineCap="round";
+    for(let i=0;i<=steps;i++){
+      const t=cv.tMin+i*dt,vx=cv.fx(t),vy=cv.fy(t);
+      if(!isFinite(vx)||!isFinite(vy)){pX=null;continue}
+      const sx=g.mapX(vx),sy=g.mapY(vy);
+      if(sx<g.ox-g.w/2-10||sx>g.ox+g.w/2+10||sy<g.oy-g.h/2-10||sy>g.oy+g.h/2+10){pX=null;continue}
+      if(pX!==null){x.strokeStyle=lerp(G4,i/steps);x.beginPath();x.moveTo(pX,pY);x.lineTo(sx,sy);x.stroke()}
+      pX=sx;pY=sy;
+    }
+    const tVal=cv.tMin+(cv.tMax-cv.tMin)*tp;
+    const ptx=cv.fx(tVal),pty=cv.fy(tVal);
+    if(isFinite(ptx)&&isFinite(pty)){
+      const spx=g.mapX(ptx),spy=g.mapY(pty);
+      const dt2=.001,dx_=(cv.fx(tVal+dt2)-cv.fx(tVal-dt2))/(2*dt2),dy_=(cv.fy(tVal+dt2)-cv.fy(tVal-dt2))/(2*dt2);
+      const vlen=Math.sqrt(dx_*dx_+dy_*dy_);
+      if(isFinite(vlen)&&vlen>.001){
+        const arrLen=35,svx=dx_/vlen*arrLen,svy=-dy_/vlen*arrLen;
+        x.strokeStyle=SYS.orange;x.lineWidth=2;
+        x.beginPath();x.moveTo(spx,spy);x.lineTo(spx+svx,spy+svy);x.stroke();
+        const ang_=Math.atan2(svy,svx);
+        x.beginPath();x.moveTo(spx+svx,spy+svy);
+        x.lineTo(spx+svx-8*Math.cos(ang_-.4),spy+svy-8*Math.sin(ang_-.4));
+        x.moveTo(spx+svx,spy+svy);
+        x.lineTo(spx+svx-8*Math.cos(ang_+.4),spy+svy-8*Math.sin(ang_+.4));x.stroke();
+      }
+      x.fillStyle=SYS.label;x.beginPath();x.arc(spx,spy,6,0,TAU);x.fill();
+      x.fillStyle=SYS.graphBg;x.beginPath();x.arc(spx,spy,3,0,TAU);x.fill();
+    }
+    x.font='12px -apple-system,sans-serif';x.fillStyle=SYS.purple;x.textAlign="left";
+    x.fillText(cv.name,g.ox-g.w/2+10,g.oy-g.h/2+18);
+  },[ci,tp]);
+
+  useEffect(()=>{draw();const h=()=>draw();window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h)},[draw]);
+  const tVal=cv.tMin+(cv.tMax-cv.tMin)*tp,ptx=cv.fx(tVal),pty=cv.fy(tVal);
+
+  return <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
+    <div style={cardRow}>
+      <select value={ci} onChange={e=>{setCi(+e.target.value);setTp(.5);hap()}} style={selS}>
+        {CURVES.map((c,i)=><option key={i} value={i}>{c.name}</option>)}
+      </select>
+    </div>
+    <div style={{...cardRow,gap:8,fontSize:12}}>
+      <span style={{color:SYS.label3}}>t =</span>
+      <input type="range" min={0} max={1} step={0.002} value={tp} onChange={e=>setTp(+e.target.value)} onInput={hap} style={{flex:"1 1 120px",maxWidth:200}}/>
+      <span style={{color:SYS.purple,fontWeight:500}}>{fmt(tVal)}</span>
+      <span style={{color:SYS.label2}}>({isFinite(ptx)?fmt(ptx):"—"}, {isFinite(pty)?fmt(pty):"—"})</span>
+    </div>
+    <canvas ref={cvs} style={{...cvsS(false),cursor:"default"}}/>
+  </div>;
+}
+
+/* ══════════════════════════════════════════════
+   App
+   ══════════════════════════════════════════════ */
+const TABS=[
+  {id:"trig",label:"三角関数",comp:TrigTab,color:SYS.pink,icon:"∿"},
+  {id:"deriv",label:"微分",comp:DerivTab,color:SYS.teal,icon:"∂"},
+  {id:"integ",label:"積分",comp:IntegTab,color:SYS.green,icon:"∫"},
+  {id:"complex",label:"複素数",comp:ComplexTab,color:SYS.purple,icon:"ℂ"},
+  {id:"curve",label:"曲線",comp:CurveTab,color:SYS.orange,icon:"∞"},
+];
+
+function App(){
+  const[tab,setTab]=useState("trig");
+  const T=TABS.find(t=>t.id===tab);
+  return <div style={{width:"100%",height:"100vh",background:SYS.bg,display:"flex",flexDirection:"column",
+    fontFamily:'-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif',color:SYS.label,
+    overflow:"hidden",userSelect:"none",WebkitUserSelect:"none"}}>
+    <div style={{flex:1,overflow:"hidden",background:SYS.card}}><T.comp/></div>
+    {/* iOS-style bottom tab bar */}
+    <div style={{display:"flex",background:"rgba(249,249,249,.94)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",
+      borderTop:`0.5px solid ${SYS.separator}`,flexShrink:0,paddingBottom:"env(safe-area-inset-bottom,0px)"}}>
+      {TABS.map(t=>{
+        const active=tab===t.id;
+        return <button key={t.id} onClick={()=>{hap();setTab(t.id)}} style={{
+          flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,
+          padding:"6px 0 4px",fontSize:10,fontFamily:"inherit",fontWeight:500,
+          background:"transparent",border:"none",
+          color:active?t.color:SYS.label3,cursor:"pointer",
+          transition:"color .15s",WebkitTapHighlightColor:"transparent",
+        }}>
+          <span style={{fontSize:20,lineHeight:1}}>{t.icon}</span>
+          <span>{t.label}</span>
+        </button>
+      })}
+    </div>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
