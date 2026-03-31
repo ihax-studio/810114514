@@ -18,7 +18,7 @@ body{background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',syste
 #vf{flex:1;position:relative;overflow:hidden;background:#111}
 video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:5}
-#ctrls{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+20px);background:#000;flex-shrink:0}
+#ctrls{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+20px);background:#000;flex-shrink:0;position:relative}
 .cb{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:opacity .3s,transform .15s}
 .cb:active{transform:scale(.88)}
 .cb.dim{opacity:.3;pointer-events:none}
@@ -39,7 +39,7 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 /* Gallery */
 #gal{position:fixed;inset:0;z-index:100;background:#000;display:none;flex-direction:column}
 #gal.show{display:flex}
-#gal-hdr{display:flex;align-items:center;padding:calc(env(safe-area-inset-top,0px)+8px) 12px 8px;background:rgba(0,0,0,.8);z-index:2;gap:4px;flex-shrink:0}
+#gal-hdr{display:flex;align-items:center;padding:calc(env(safe-area-inset-top,0px)+8px) 12px 8px 60px;background:rgba(0,0,0,.8);z-index:2;gap:4px;flex-shrink:0}
 #gal-hdr button{background:none;border:none;color:#fff;font-size:14px;cursor:pointer;font-family:inherit;padding:8px 10px;border-radius:10px}
 #gal-hdr button:active{background:rgba(255,255,255,.1)}
 #gal-hdr .del{color:#ff3b30}
@@ -81,6 +81,7 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 #cd.show #cc{transform:scale(1);opacity:1}
 #err{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
 #err.show{display:flex}
+#sec-note{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:9px;color:rgba(255,255,255,.35);padding:0 20px;pointer-events:none;line-height:1.4}
 </style>
 </head>
 <body>
@@ -97,6 +98,7 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   <button class="cb" id="sp" onclick="splitCapture()">⬜⬛</button>
   <div id="sh" onclick="capture()"><div class="inn"></div></div>
   <button class="cb" id="sw" onclick="openCS()">↔︎</button>
+  <div id="sec-note"></div>
 </div>
 <div id="gal">
   <div id="gal-hdr">
@@ -270,6 +272,18 @@ let _cb=false;
 window.beforeClose=function(){if(_cb||!photos.length)return true;document.getElementById('cd-txt').textContent=photos.length+'枚の写真があります';document.getElementById('cd').classList.add('show');return false;};
 window.cdSave=function(){hap.confirm();photos.forEach((p,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=p;a.download='photo_'+Date.now()+'_'+(i+1)+'.jpg';a.click();},i*200));_cb=true;setTimeout(()=>{try{window.parent.closeIframeNow();}catch(e){goBack();}},photos.length*200+100);};
 window.cdSkip=function(){hap();_cb=true;try{window.parent.closeIframeNow();}catch(e){goBack();}};
+
+// Device detection + security note
+(()=>{
+  const ua=navigator.userAgent;
+  let dev='コンピュータ';
+  if(/iPod/.test(ua))dev='iPod';
+  else if(/iPhone/.test(ua))dev='iPhone';
+  else if(/iPad/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))dev='iPad';
+  else if(/Macintosh/.test(ua))dev='Mac';
+  else if(/Vision/.test(ua))dev='Vision Pro';
+  document.getElementById('sec-note').textContent='セキュリティ保護のためあなたの'+dev+'内にしか保存されないため保存し忘れても復元できません\u{1F630}';
+})();
 
 startCam();
 cam.style.filter='contrast(1.06) brightness(1.03)';
