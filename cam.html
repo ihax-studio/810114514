@@ -39,7 +39,7 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 /* Gallery */
 #gal{position:fixed;inset:0;z-index:100;background:#000;display:none;flex-direction:column}
 #gal.show{display:flex}
-#gal-hdr{display:flex;align-items:center;padding:calc(env(safe-area-inset-top,0px)+8px) 12px 8px 60px;background:rgba(0,0,0,.8);z-index:2;gap:4px;flex-shrink:0}
+#gal-hdr{display:flex;align-items:center;padding:calc(env(safe-area-inset-top,0px)+8px) 12px 8px 72px;background:rgba(0,0,0,.8);z-index:2;gap:4px;flex-shrink:0;position:relative}
 #gal-hdr button{background:none;border:none;color:#fff;font-size:14px;cursor:pointer;font-family:inherit;padding:8px 10px;border-radius:10px}
 #gal-hdr button:active{background:rgba(255,255,255,.1)}
 #gal-hdr .del{color:#ff3b30}
@@ -47,7 +47,7 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 #gal-title{flex:1;text-align:center;font-size:13px;font-weight:600;color:rgba(255,255,255,.6)}
 #gal-track{flex:1;display:flex;overflow:hidden;position:relative}
 #gal-slider{display:flex;height:100%;transition:transform .3s ease}
-.gal-slide{flex-shrink:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.gal-slide{flex-shrink:0;width:100vw;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .gal-slide img{max-width:100%;max-height:100%;object-fit:contain;transition:filter .2s}
 #gal-dots{display:flex;justify-content:center;gap:5px;padding:8px;flex-shrink:0}
 .gd{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3);transition:all .2s}
@@ -66,9 +66,9 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 #sl-bri{background:linear-gradient(90deg,#000,#fff)}
 #sl-bp{background:linear-gradient(90deg,#000,#333)}
 /* Camera select */
-#cs{position:fixed;inset:0;z-index:150;display:flex;align-items:flex-end;justify-content:center;padding-bottom:calc(env(safe-area-inset-bottom,0px)+20px);background:rgba(0,0,0,0);visibility:hidden;pointer-events:none;transition:background .5s ease}
+#cs{position:fixed;inset:0;z-index:150;display:flex;align-items:flex-end;justify-content:center;padding-bottom:calc(env(safe-area-inset-bottom,0px)+20px);background:rgba(0,0,0,0);visibility:hidden;pointer-events:none;transition:background .3s ease}
 #cs.show{visibility:visible;pointer-events:auto;background:rgba(0,0,0,.5)}
-#cl{width:300px;background:rgba(30,30,32,.95);backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);border-radius:20px;overflow:hidden;text-align:center;translate:0 140px;scale:.85;opacity:0;transition:translate .5s cubic-bezier(.34,1.05,.64,1),scale .5s ease,opacity .4s ease}
+#cl{width:300px;background:rgba(30,30,32,.95);backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);border-radius:20px;overflow:hidden;text-align:center;translate:0 140px;scale:.85;opacity:0;transition:translate .3s cubic-bezier(.34,1.05,.64,1),scale .3s ease,opacity .25s ease}
 #cs.show #cl{translate:0 0;scale:1;opacity:1}
 .co{padding:16px;font-size:17px;color:#007aff;border:none;background:none;width:100%;cursor:pointer;font-family:inherit;border-bottom:1px solid rgba(255,255,255,.08);transition:background .15s}
 .co:active{background:rgba(255,255,255,.08)}
@@ -81,7 +81,7 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 #cd.show #cc{transform:scale(1);opacity:1}
 #err{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
 #err.show{display:flex}
-#sec-note{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:9px;color:rgba(255,255,255,.35);padding:0 20px;pointer-events:none;line-height:1.4}
+#sec-note{position:absolute;top:-28px;left:0;right:0;text-align:center;font-size:10px;color:rgba(255,255,255,.5);padding:0 20px;pointer-events:none;line-height:1.4}
 </style>
 </head>
 <body>
@@ -102,7 +102,7 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 </div>
 <div id="gal">
   <div id="gal-hdr">
-    <button onclick="closeGallery()">← 戻る</button>
+    <button onclick="closeGallery()" style="position:absolute;left:12px">閉じる</button>
     <div id="gal-title"></div>
     <button class="edit" onclick="toggleEditor()">編集</button>
     <button class="del" onclick="deletePhoto()">削除</button>
@@ -228,13 +228,13 @@ window.closeGallery=function(){document.getElementById('gal').classList.remove('
 function buildGal(){
   const s=document.getElementById('gal-slider');s.innerHTML='';
   photos.forEach(p=>{const d=document.createElement('div');d.className='gal-slide';const img=document.createElement('img');img.src=p;img.draggable=false;d.appendChild(img);s.appendChild(d);});
-  s.style.width=photos.length*100+'%';
+  s.style.width=(photos.length*100)+'vw';
   galPos(false);buildDots();galTitle();
 }
 function galPos(anim){
   const s=document.getElementById('gal-slider');
   s.style.transition=anim?'transform .3s ease':'none';
-  s.style.transform='translateX(-'+(gIdx*(100/photos.length))+'%)';
+  s.style.transform='translateX(-'+(gIdx*100)+'vw)';
 }
 function buildDots(){
   const d=document.getElementById('gal-dots');d.innerHTML='';
@@ -249,7 +249,7 @@ function goSlide(i){gIdx=Math.max(0,Math.min(photos.length-1,i));galPos(true);bu
 (()=>{
   const tr=document.getElementById('gal-track');let sx=0,dx=0,sw=false;
   tr.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;dx=0;sw=true;},{passive:true});
-  tr.addEventListener('touchmove',e=>{if(!sw)return;dx=e.touches[0].clientX-sx;const s=document.getElementById('gal-slider');const b=gIdx*(100/photos.length);const p=b-(dx/tr.offsetWidth)*(100/photos.length);s.style.transition='none';s.style.transform='translateX(-'+p+'%)';},{passive:true});
+  tr.addEventListener('touchmove',e=>{if(!sw)return;dx=e.touches[0].clientX-sx;const s=document.getElementById('gal-slider');const base=gIdx*100;const off=(dx/window.innerWidth)*100;s.style.transition='none';s.style.transform='translateX(-'+(base-off)+'vw)';},{passive:true});
   tr.addEventListener('touchend',()=>{if(!sw)return;sw=false;if(Math.abs(dx)>50){if(dx<0&&gIdx<photos.length-1)goSlide(gIdx+1);else if(dx>0&&gIdx>0)goSlide(gIdx-1);else galPos(true);}else galPos(true);hap();},{passive:true});
 })();
 
