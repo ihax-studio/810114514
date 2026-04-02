@@ -1,231 +1,384 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>haptic icon test</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;
--webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-html{overscroll-behavior:none;position:fixed;inset:0;touch-action:pan-y}
-body{overscroll-behavior:none;position:fixed;inset:0;overflow:hidden;touch-action:pan-y}
-:root{
-  --sat:env(safe-area-inset-top,0px);
-  --sab:env(safe-area-inset-bottom,0px);
-  --b:#007aff;--g:#34c759;--y:#ff9500;--r:#ff3b30;--p:#5856d6;
-  --tx:#1c1c1e;--sub:#8e8e93;--ln:rgba(0,0,0,.08);
-  --gls:rgba(255,255,255,.66);
-  --gls2:rgba(255,255,255,.81);
-  --gls3:rgba(255,255,255,.85);
-  --bdr:rgba(255,255,255,.85);
-  --blr:blur(28px) saturate(180%);
-  --sh:0 4px 20px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.07);
-  --shl:0 12px 40px rgba(0,0,0,.15),0 2px 8px rgba(0,0,0,.08);
-}
-html,body{
-  height:100dvh;overflow:hidden;
-  background:linear-gradient(150deg,#eef2f8 0%,#f8f2fc 50%,#edf7f2 100%);
-  font-family:"SF Pro Display","SF Pro Text",-apple-system,"Noto Sans JP",sans-serif;color:var(--tx);
-  overscroll-behavior:none;
-  -webkit-overflow-scrolling:auto;
-}
-
-/* ═══ ICON WOBBLE ═══ — 810114514そのまま */
-@keyframes gridReveal{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
-#icon-grid.wobbling .ig-cell{animation:iconWobble .15s ease-in-out infinite alternate}
-#icon-grid.wobbling .ig-cell:nth-child(odd){animation-delay:.07s}
-@keyframes iconWobble{from{transform:rotate(-1.5deg)}to{transform:rotate(1.5deg)}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>iOS電源オフスライダ（カーテンoverlay型）</title>
+  <style>
+    *{-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+    html, body {
+      margin: 0; padding: 0;
+      height: 100vh; width: 100vw;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      overflow: hidden;
+      overscroll-behavior:none;
+      position:fixed;inset:0;
+    }
+    .slider-wrapper {
+      position: relative;
+      width: 310px;
+      height: 64px;
+      z-index: 2;
+      transform: scale(1);
+      will-change: transform;
+      transition: opacity 0.5s cubic-bezier(.62,0,.4,1);
+    }
+    .slider-wrapper.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .slider-track {
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      box-shadow:
+        inset 1px -1px 11px rgb(255 255 255 / 12%),
+        inset 1px -1px 55px rgb(255 255 255 / 11%),
+        1px -1px 1px rgb(243 243 243 / 62%),
+        -1px 1px 1px rgb(225 225 225 / 62%),
+        0 2px 18px #0000000d;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 64px;
+      background: rgb(60 60 60 / 0%);
+      border-radius: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      overflow: visible;
+    }
+    .slider-inner-track {
+      position: absolute;
+      top: 0; left: -5px;
+      height: 64px;
+      border-radius: 36px;
+      z-index: 1;
+      transform: scale(0.9);
+      transition: width 0.13s;
+      pointer-events: none;
+    }
+    .slider-label {
+      position: absolute;
+      left: 88px;
+      top: 0;
+      height: 64px;
+      line-height: 64px;
+      color: #fff;
+      font-size: 19px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      z-index: 2;
+      opacity: 0.83;
+      transition: opacity 0.2s;
+      user-select: none;
+      pointer-events: none;
+      text-shadow: 0 2px 10px #000b;
+    }
+    .slider-knob {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 56px;
+      height: 56px;
+      background: #ffffff8c;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 33px;
+      font-weight: bold;
+      z-index: 10;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      border: none;
+      outline: none;
+      box-shadow:
+        1px -1px 1px rgb(255 255 255 / 62%),
+        -1px 1px 1px rgb(255 255 255 / 62%),
+        0 2px 18px #00000015;
+      will-change: box-shadow, left, background;
+      cursor: pointer;
+      user-select: none;
+      transition:
+        background 0.5s cubic-bezier(.62,0,.4,1),
+        box-shadow 0.5s cubic-bezier(.62,0,.4,1),
+        left 0.5s cubic-bezier(.62,0,.4,1);
+    }
+    .slider-knob:active {
+      background: #ebebeb5c;
+      box-shadow:
+        1px 1px 1px rgb(255 255 255 / 62%),
+        -1px -1px 1px rgb(255 255 255 / 62%);
+    }
+    .slider-arrow-polyline {
+      transition:
+        stroke 0.3s cubic-bezier(.62,0,.4,1),
+        stroke-width 0.3s cubic-bezier(.62,0,.4,1),
+        filter 0.3s cubic-bezier(.62,0,.4,1);
+    }
+    .slider-knob.active .slider-arrow-polyline {
+      stroke: #1552be;
+      stroke-width: 3.2;
+      filter: drop-shadow(0 0 7px #2579F7);
+    }
+    .slider-knob:not(.active) .slider-arrow-polyline {
+      stroke: #2579F7;
+      stroke-width: 2.6;
+      filter: none;
+    }
+    .black-overlay {
+      pointer-events: none;
+      position: fixed;
+      left: 0; top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      opacity: 0;
+      z-index: 1;
+      transition: opacity 0.5s cubic-bezier(.62,0,.4,1);
+      will-change: opacity;
+    }
+    .black-overlay.active {
+      opacity: 0.70 !important;
+      pointer-events: all;
+    }
+  </style>
 </head>
 <body>
+  <div class="slider-wrapper" id="sliderWrapper">
+    <div class="slider-track">
+      <div class="slider-inner-track" id="sliderInner"></div>
+      <div class="slider-label" id="sliderLabel">スライドで全て削除</div>
+    </div>
+    <div class="slider-knob" id="sliderKnob">
+      <svg id="knobSVG" width="32" height="32" viewBox="0 0 32 32">
+        <polyline 
+          class="slider-arrow-polyline"
+          points="12,8 20,16 12,24" 
+          fill="none" 
+          stroke="#2579F7" 
+          stroke-width="2.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </div>
+  </div>
+  <div class="black-overlay" id="blackOverlay"></div>
+  <audio id="audioGrab" src="./VolumeModule_Sliders_Grab.wav" preload="auto"></audio>
+  <audio id="audioRelease" src="./VolumeModule_Sliders_Release.wav" preload="auto"></audio>
+  <script type="module">
+    /* ═══ BLOCK iOS EDGE SWIPE — 810114514そのまま ═══ */
+    document.addEventListener('touchstart',function(e){
+      const x=e.touches[0].pageX;
+      if(x<15||x>window.innerWidth-15)e.preventDefault();
+    },{passive:false,capture:true});
+    document.addEventListener('contextmenu',function(e){e.preventDefault();});
 
-<div class="hm-scroll" style="width:100%;height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:var(--sat)"></div>
+    /* ═══ HAPTIC — 810114514と完全同一パターン ═══ */
+    let _h=null;
+    (()=>{import('https://esm.sh/ios-haptics').then(m=>{_h=m.haptic;}).catch(()=>{});})();
+    const _hapticOrig  = ()=>{try{_h&&_h();}catch(_){}};
+    const _hapticConfirmOrig= ()=>{try{_h&&_h.confirm&&_h.confirm();}catch(_){}};
+    const haptic  = ()=>{
+      _hapticOrig();
+    };
+    haptic.confirm= ()=>{
+      _hapticConfirmOrig();
+    };
+    haptic.error  = ()=>{try{_h&&_h.error&&_h.error();}catch(_){}};
+    haptic.selection = ()=>{try{_h&&_h.selection&&_h.selection();}catch(_){}};
+    haptic.impact = ()=>{try{_h&&_h.impact&&_h.impact();}catch(_){}};
 
-<script type="module">
-/* ═══ BLOCK iOS EDGE SWIPE (safe, no scroll impact) ═══ */
-document.addEventListener('touchstart',function(e){
-  const x=e.touches[0].pageX;
-  if(x<15||x>window.innerWidth-15)e.preventDefault();
-},{passive:false,capture:true});
+    /* ═══ DOM ═══ */
+    const wrapper = document.getElementById('sliderWrapper');
+    const knob = document.getElementById('sliderKnob');
+    const svg = document.getElementById('knobSVG');
+    const inner = document.getElementById('sliderInner');
+    const label = document.getElementById('sliderLabel');
+    const overlay = document.getElementById('blackOverlay');
+    const audioGrab = document.getElementById("audioGrab");
+    const audioRelease = document.getElementById("audioRelease");
 
-/* ═══ BLOCK CONTEXT MENU ON MAC (except inputs/textareas) ═══ */
-document.addEventListener('contextmenu',function(e){
-  const tag=e.target.tagName;
-  if(tag==='INPUT'||tag==='TEXTAREA'||e.target.isContentEditable)return;
-  e.preventDefault();
-});
+    /* ═══ STATE ═══ */
+    let isDragging = false;
+    let startX = 0;
+    let knobX = 0;
+    let lastX = 0;
+    let knobWidth = 56;
+    let wrapperWidth = 340;
+    let maxOffset = 340 - 56 - 4;
+    let lockedOnce = false;
+    const ua = navigator.userAgent;
+    const isiPhone = /iPhone/i.test(ua);
+    let lockStart = isiPhone ? true : false;
 
-/* ═══ DEVICE DETECTION ═══ */
-const _isIPad=navigator.userAgent.includes('iPad')||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-const _isMac=navigator.platform.startsWith('Mac')&&navigator.maxTouchPoints===0;
-const _isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(_isIPad);
-const _isWideScreen=_isIPad||_isMac||window.innerWidth>=768;
-const GRID_COLS=_isWideScreen?6:4;
+    function updateSizes() {
+      knobWidth = knob.offsetWidth;
+      wrapperWidth = wrapper.offsetWidth;
+      maxOffset = wrapperWidth - knobWidth - 4;
+    }
+    window.addEventListener("resize", updateSizes);
+    updateSizes();
 
-/* ═══ HAPTIC ═══ */
-let _h=null;
-(()=>{import('https://esm.sh/ios-haptics').then(m=>{_h=m.haptic;}).catch(()=>{});})();
-const _hapticOrig  = ()=>{try{_h&&_h();}catch(_){}};
-const _hapticConfirmOrig= ()=>{try{_h&&_h.confirm&&_h.confirm();}catch(_){}};
-const haptic  = ()=>{
-  if(localStorage.getItem('inglish_haptic')==='0')return;
-  _hapticOrig();
-  if(localStorage.getItem('inglish_haptic_strong')==='1'){for(let i=0;i<5;i++)setTimeout(()=>{try{_h&&_h.error&&_h.error();}catch(_){}},i*30);}
-};
-haptic.confirm= ()=>{
-  if(localStorage.getItem('inglish_haptic')==='0')return;
-  _hapticConfirmOrig();
-  if(localStorage.getItem('inglish_haptic_strong')==='1'){for(let i=0;i<5;i++)setTimeout(()=>{try{_h&&_h.error&&_h.error();}catch(_){}},i*30);}
-};
-haptic.error  = ()=>{try{_h&&_h.error&&_h.error();}catch(_){}};
+    function setKnobPos(x) {
+      knob.style.left = `${x}px`;
+      inner.style.width = `${72 + x}px`;
+      label.style.opacity = `${1 - x / maxOffset}`;
+    }
 
-/* ═══ ICON LONG-PRESS WOBBLE + DRAG REORDER ═══ */
-const ICON_ORDER_KEY='inglish_icon_order';
-let wobbleMode=false;
+    function playAudio(audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    }
 
-function getIconOrder(){
-  try{return JSON.parse(localStorage.getItem(ICON_ORDER_KEY));}catch(e){return null;}
-}
-function saveIconOrder(order){
-  localStorage.setItem(ICON_ORDER_KEY,JSON.stringify(order));
-}
+    function knobActive(val) {
+      if(val) knob.classList.add("active");
+      else knob.classList.remove("active");
+    }
 
-function enableWobble(grid){
-  if(wobbleMode)return;
-  wobbleMode=true;
-  haptic.confirm();
-  grid.classList.add('wobbling');
-  const stopWobble=()=>{
-    wobbleMode=false;
-    grid.classList.remove('wobbling');
-    document.removeEventListener('click',stopWobble);
-  };
-  setTimeout(()=>document.addEventListener('click',stopWobble),100);
-}
-
-// Long press detection on icon grid
-document.addEventListener('touchstart',e=>{
-  const cell=e.target.closest('.ig-cell');
-  if(!cell)return;
-  const grid=cell.closest('#icon-grid');
-  if(!grid)return;
-  let timer=setTimeout(()=>{
-    enableWobble(grid);
-    startDrag(cell,grid,e.touches[0]);
-  },500);
-  const cancel=()=>{clearTimeout(timer);cell.removeEventListener('touchend',cancel);cell.removeEventListener('touchmove',moveCheck);};
-  const moveCheck=(ev)=>{
-    const dx=Math.abs(ev.touches[0].clientX-e.touches[0].clientX);
-    const dy=Math.abs(ev.touches[0].clientY-e.touches[0].clientY);
-    if(dx>8||dy>8)cancel();
-  };
-  cell.addEventListener('touchend',cancel,{once:true});
-  cell.addEventListener('touchmove',moveCheck,{passive:true});
-},{passive:true});
-
-function startDrag(cell,grid,touch){
-  if(!wobbleMode)return;
-  const cells=[...grid.querySelectorAll('.ig-cell')];
-  const idx=cells.indexOf(cell);
-  const rect=cell.getBoundingClientRect();
-  const ox=touch.clientX-rect.left,oy=touch.clientY-rect.top;
-  cell.style.zIndex='100';cell.style.position='relative';
-  
-  const onMove=(ev)=>{
-    const t=ev.touches[0];
-    cell.style.transform=`translate(${t.clientX-rect.left-ox}px,${t.clientY-rect.top-oy}px) scale(1.1)`;
-    cells.forEach((c,i)=>{
-      if(c===cell)return;
-      const r=c.getBoundingClientRect();
-      if(t.clientX>r.left&&t.clientX<r.right&&t.clientY>r.top&&t.clientY<r.bottom){
-        if(i<idx)grid.insertBefore(cell,c);
-        else grid.insertBefore(cell,c.nextSibling);
+    function unlockForiPhone() {
+      if (lockStart && isiPhone) {
         haptic();
+        lockStart = false;
+        knob.classList.remove("ios-shadow");
       }
-    });
-  };
-  const onEnd=()=>{
-    cell.style.transform='';cell.style.zIndex='';cell.style.position='';
-    document.removeEventListener('touchmove',onMove);
-    document.removeEventListener('touchend',onEnd);
-    const newCells=[...grid.querySelectorAll('.ig-cell')];
-    const order=newCells.map(c=>c.dataset.name||'');
-    saveIconOrder(order);
-  };
-  document.addEventListener('touchmove',onMove,{passive:true});
-  document.addEventListener('touchend',onEnd,{once:true});
-}
+    }
 
-/* ═══ ICON MODE INIT ═══ */
-function showIconGrid(){
-  const scroll=document.querySelector('.hm-scroll');
-  let oldGrid=document.getElementById('icon-grid');
-  if(oldGrid)oldGrid.remove();
-  
-  const bigMode=localStorage.getItem('inglish_bigicon')==='1';
-  const iconSize=bigMode?66:56;
-  const fontSize=bigMode?28:24;
-  const gap=bigMode?'22px 6px':'24px 8px';
-  
-  const grid=document.createElement('div');
-  grid.id='icon-grid';
-  const iconPadH=_isWideScreen?'20px':'10px';
-  grid.style.cssText='display:grid;grid-template-columns:repeat('+GRID_COLS+',1fr);gap:'+gap+';padding:24px '+iconPadH+' 16px;justify-items:center;animation:gridReveal .5s ease both;';
-  
-  const allIcons=[
-    {icon:'📚',name:'英語',onclick:''},
-    {icon:'⚗️',name:'化学',onclick:''},
-    {icon:'🧮',name:'数学',onclick:''},
-    {icon:'\u2699\uFE0F',name:'\u8A2D\u5B9A',onclick:'__openSettings__'},
-    {icon:'\uD83E\uDDEE',name:'\u6570\u5B66',onclick:'__iframe_math__'},
-    {icon:'\uD83E\uDD96',name:'Neosaurs',onclick:'__iframe_neo__'},
-    {icon:'\uD83D\uDCDD',name:'\u30E1\u30E2',onclick:'__openMemo__'},
-    {icon:'\uD83D\uDCF7',name:'\u30AB\u30E1\u30E9',onclick:'__iframe_cam__'},
-  ];
-  
-  const savedOrder=getIconOrder();
-  if(savedOrder&&savedOrder.length===allIcons.length){
-    const ordered=[];
-    savedOrder.forEach(nm=>{
-      const found=allIcons.find(ic=>ic.name===nm);
-      if(found)ordered.push(found);
+    /* ═══ DRAG START ═══ */
+    function knobDragStart(clientX) {
+      updateSizes();
+      const nowLeft = parseFloat(knob.style.left) || 0;
+      if (nowLeft > 10) return;
+      isDragging = true;
+      startX = clientX;
+      knobX = 0;
+      lastX = 0;
+      knob.style.transition = "none";
+      inner.style.transition = "none";
+      overlay.classList.add("active");
+      knobActive(true);
+      playAudio(audioGrab);
+      haptic.selection();
+      requestAnimationFrame(updateKnob);
+    }
+
+    /* ═══ EVENT LISTENERS (重複なし、svgはstopPropagation) ═══ */
+    svg.addEventListener("touchstart", e => {
+      e.stopPropagation();
+      if (isiPhone && lockStart) { unlockForiPhone(); return; }
+      if (e.touches && e.touches.length > 0) knobDragStart(e.touches[0].clientX);
+    }, {passive:false});
+    svg.addEventListener("mousedown", e => {
+      e.stopPropagation();
+      if (isiPhone && lockStart) { unlockForiPhone(); return; }
+      knobDragStart(e.clientX);
+      document.body.style.userSelect = "none";
     });
-    if(ordered.length===allIcons.length)allIcons.splice(0,allIcons.length,...ordered);
-  }
-  
-  allIcons.forEach((d,idx)=>{
-    const cell=document.createElement('div');
-    cell.className='ig-cell';
-    cell.dataset.icon=d.icon;
-    cell.dataset.name=d.name;
-    cell.style.cssText='display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;-webkit-user-select:none';
-    const short=d.name.length>5?d.name.slice(0,4)+'\u2026':d.name;
-    const labelHtml=bigMode?'':'<div style="font-size:8px;font-weight:600;color:var(--tx);text-align:center;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+short+'</div>';
-    cell.innerHTML='<div class="ig-icon" style="width:'+iconSize+'px;height:'+iconSize+'px;border-radius:14px;background:rgba(255,255,255,.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.85),-1px -.8px 0 rgba(255,255,255,.6),0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:'+fontSize+'px;transition:transform .9s">'+d.icon+'</div>'+labelHtml;
-    cell.addEventListener('click',()=>{
-      if(wobbleMode)return;
+
+    knob.addEventListener("touchstart", e => {
+      if (isiPhone && lockStart) { unlockForiPhone(); return; }
+      if (e.touches && e.touches.length > 0) knobDragStart(e.touches[0].clientX);
+    }, {passive:true});
+    knob.addEventListener("mousedown", e => {
+      if (isiPhone && lockStart) { unlockForiPhone(); return; }
+      knobDragStart(e.clientX);
+      document.body.style.userSelect = "none";
+    });
+
+    /* ═══ ANIMATION LOOP ═══ */
+    function updateKnob() {
+      if (!isDragging) return;
+      setKnobPos(knobX);
+      requestAnimationFrame(updateKnob);
+    }
+
+    /* ═══ MOVE ═══ */
+    wrapper.addEventListener("touchmove", e => {
+      if (!isDragging || (isiPhone && lockStart)) return;
+      const clientX = e.touches[0].clientX;
+      let dx = clientX - startX;
+      if (dx < 0) dx = 0;
+      knobX = Math.max(0, Math.min(dx, maxOffset));
+      if (Math.abs(knobX - lastX) > 2) {
+        haptic.selection();
+        lastX = knobX;
+      }
+    }, {passive:true});
+
+    window.addEventListener("mousemove", e => {
+      if (!isDragging || (isiPhone && lockStart)) return;
+      let dx = e.clientX - startX;
+      if (dx < 0) dx = 0;
+      knobX = Math.max(0, Math.min(dx, maxOffset));
+    });
+
+    /* ═══ COMPLETE ═══ */
+    function onSlideComplete() {
+      if (!lockedOnce) {
+        lockedOnce = true;
+        overlay.classList.add("active");
+        haptic.confirm();
+        const delay = 220;
+        [1, 2, 4, 5, 6].forEach(i => {
+          setTimeout(() => haptic.confirm(), i * delay);
+        });
+        wrapper.classList.add("fade-out");
+        setTimeout(() => {
+          window.location.href = "story-dock.html";
+        }, 1900);
+      }
+    }
+
+    /* ═══ FAIL ═══ */
+    function onSlideFail() {
+      haptic.error();
+      for (let i = 1; i < 9; i++) {
+        setTimeout(() => haptic.error(), i * 45);
+      }
+      knob.style.transition = "left 0.5s cubic-bezier(.62,0,.4,1)";
+      knob.style.left = "4px";
+      knobX = 0;
+      inner.style.transition = "width 0.13s";
+      inner.style.width = "72px";
+      label.style.transition = "opacity 0.2s";
+      label.style.opacity = 1;
+      overlay.classList.remove("active");
+    }
+
+    /* ═══ END DRAG ═══ */
+    function endDrag() {
+      if (!isDragging || (isiPhone && lockStart)) return;
+      isDragging = false;
+      knobActive(false);
+      playAudio(audioRelease);
+
+      // 指離した瞬間 — 810114514のアイコンclick→haptic()と同じ仕組み
       haptic();
-      const allCells=grid.querySelectorAll('.ig-cell');
-      const thisIcon=cell.querySelector('.ig-icon');
-      thisIcon.style.transition='transform .8s cubic-bezier(.77,0,.18,1), opacity .8s cubic-bezier(.77,0,.18,1)';
-      thisIcon.style.transform='scale(5)';thisIcon.style.opacity='0';
-      allCells.forEach(c2=>{if(c2===cell)return;c2.style.transition='transform .8s cubic-bezier(.77,0,.18,1), opacity .8s cubic-bezier(.77,0,.18,1)';c2.style.transform='scale(0.8)';c2.style.opacity='0.3';});
-      setTimeout(()=>{
-        allCells.forEach(c2=>{c2.style.transition='';c2.style.transform='';c2.style.opacity='';});
-      },450);
-    });
-    const ib=cell.querySelector('.ig-icon');
-    ib.addEventListener('touchstart',function(){if(!wobbleMode)this.style.transform='scale(0.85)';},{passive:true});
-    ib.addEventListener('touchend',function(){if(!wobbleMode)this.style.transform='';},{passive:true});
-    grid.appendChild(cell);
-  });
-  scroll.prepend(grid);
-}
 
-showIconGrid();
-</script>
+      if (knobX >= maxOffset * 0.9) onSlideComplete();
+      else onSlideFail();
+
+      document.body.style.userSelect = "";
+    }
+
+    wrapper.addEventListener("touchend", endDrag);
+    window.addEventListener("mouseup", endDrag);
+    wrapper.addEventListener('touchcancel', endDrag);
+    window.addEventListener("mouseleave", endDrag);
+
+    if (isiPhone && lockStart) {
+      knob.classList.add("ios-shadow");
+    }
+  </script>
 </body>
 </html>
