@@ -202,9 +202,17 @@
   <audio id="audioRelease" src="./VolumeModule_Sliders_Release.wav" preload="auto"></audio>
 
   <script type="module">
-    import { haptic } from "https://esm.sh/ios-haptics";
+    /* ═══ HAPTIC — 810114514と完全同一パターン ═══ */
+    let _h = null;
+    (()=>{import('https://esm.sh/ios-haptics').then(m=>{_h=m.haptic; dbg('_h loaded: '+Object.keys(_h).join(','));}).catch(e=>{dbg('haptic load fail: '+e);});})();
 
-    // ─── Debug ───
+    const haptic = () => { try { _h && _h(); } catch(_){} };
+    haptic.confirm = () => { try { _h && _h.confirm && _h.confirm(); } catch(_){} };
+    haptic.error   = () => { try { _h && _h.error && _h.error(); } catch(_){} };
+    haptic.impact  = () => { try { _h && _h.impact && _h.impact(); } catch(_){} };
+    haptic.selection = () => { try { _h && _h.selection && _h.selection(); } catch(_){} };
+
+    /* ═══ DEBUG ═══ */
     const debugEl = document.getElementById('debugLog');
     const debugBtn = document.getElementById('debugToggle');
     let debugVisible = false;
@@ -223,7 +231,7 @@
       debugEl.scrollTop = debugEl.scrollHeight;
     }
 
-    // ─── DOM ───
+    /* ═══ DOM ═══ */
     const wrapper = document.getElementById('sliderWrapper');
     const knob    = document.getElementById('sliderKnob');
     const svg     = document.getElementById('knobSVG');
@@ -233,30 +241,20 @@
     const audioGrab    = document.getElementById("audioGrab");
     const audioRelease = document.getElementById("audioRelease");
 
-    // ─── State ───
+    /* ═══ STATE ═══ */
     let isDragging = false;
     let startX = 0, knobX = 0, lastX = 0;
     let knobWidth = 56, wrapperWidth = 310;
-    let maxOffset = 310 - 56 - 4;  // = 250
+    let maxOffset = 310 - 56 - 4;
     let lockedOnce = false;
 
     const ua = navigator.userAgent;
     const isiPhone = /iPhone/i.test(ua);
     let lockStart = isiPhone;
-    const canHaptic = ('ontouchstart' in window || navigator.maxTouchPoints > 0)
-      && /(iPhone|iPad|iPod|iOS|AppleWebKit)/i.test(ua);
 
-    dbg(`init: iPhone=${isiPhone} lock=${lockStart} haptic=${canHaptic}`);
-    dbg(`haptic obj keys: ${Object.keys(haptic).join(', ')}`);
+    dbg(`init: iPhone=${isiPhone} lock=${lockStart}`);
 
-    // ─── Haptic (直接呼び、ラッパーなし) ───
-    function H(fn, tag) {
-      if (!canHaptic) return;
-      try { fn(); dbg(`H ✓ ${tag}`); }
-      catch (e) { dbg(`H ✗ ${tag}: ${e.message}`); }
-    }
-
-    // ─── Sizing ───
+    /* ═══ SIZING ═══ */
     function updateSizes() {
       knobWidth = knob.offsetWidth;
       wrapperWidth = wrapper.offsetWidth;
@@ -264,9 +262,8 @@
     }
     window.addEventListener("resize", updateSizes);
     updateSizes();
-    dbg(`maxOffset=${maxOffset}`);
 
-    // ─── Helpers ───
+    /* ═══ HELPERS ═══ */
     function setKnobPos(x) {
       knob.style.left = `${x}px`;
       inner.style.width = `${72 + x}px`;
@@ -275,20 +272,20 @@
     function playAudio(a) { a.pause(); a.currentTime = 0; a.play().catch(() => {}); }
     function knobActive(v) { v ? knob.classList.add("active") : knob.classList.remove("active"); }
 
-    // ─── iPhone lock解除 ───
+    /* ═══ IPHONE LOCK解除 ═══ */
     function unlockForiPhone() {
       if (!lockStart || !isiPhone) return;
       dbg('unlock');
-      H(() => haptic(), 'unlock');
+      haptic();
       lockStart = false;
       knob.classList.remove("ios-shadow");
     }
 
-    // ─── Drag Start ───
+    /* ═══ DRAG START ═══ */
     function knobDragStart(clientX) {
       updateSizes();
       const nowLeft = parseFloat(knob.style.left) || 0;
-      if (nowLeft > 10) { dbg('dragStart blocked'); return; }
+      if (nowLeft > 10) return;
       isDragging = true;
       startX = clientX;
       knobX = 0;
@@ -298,30 +295,18 @@
       overlay.classList.add("active");
       knobActive(true);
       playAudio(audioGrab);
-      H(() => haptic.selection(), 'grab-selection');
-      dbg(`dragStart x=${clientX}`);
+      haptic.selection();
+      dbg('dragStart');
       requestAnimationFrame(updateKnob);
     }
 
-    // ─── Events: knob (touchstart/mousedown) ───
-    knob.addEventListener("touchstart", e => {
-      if (isiPhone && lockStart) { unlockForiPhone(); return; }
-      if (e.touches?.length > 0) knobDragStart(e.touches[0].clientX);
-    }, { passive: true });
-
-    knob.addEventListener("mousedown", e => {
-      if (isiPhone && lockStart) { unlockForiPhone(); return; }
-      knobDragStart(e.clientX);
-      document.body.style.userSelect = "none";
-    });
-
-    // ─── Events: svg (stopPropagation で knob と二重発火防止) ───
+    /* ═══ EVENTS ═══ */
+    // svg (内側) → stopPropagation で knob との二重発火を防止
     svg.addEventListener("touchstart", e => {
       e.stopPropagation();
       if (isiPhone && lockStart) { unlockForiPhone(); return; }
       if (e.touches?.length > 0) knobDragStart(e.touches[0].clientX);
     }, { passive: false });
-
     svg.addEventListener("mousedown", e => {
       e.stopPropagation();
       if (isiPhone && lockStart) { unlockForiPhone(); return; }
@@ -329,25 +314,35 @@
       document.body.style.userSelect = "none";
     });
 
-    // ─── Animation loop ───
+    // knob (外側)
+    knob.addEventListener("touchstart", e => {
+      if (isiPhone && lockStart) { unlockForiPhone(); return; }
+      if (e.touches?.length > 0) knobDragStart(e.touches[0].clientX);
+    }, { passive: true });
+    knob.addEventListener("mousedown", e => {
+      if (isiPhone && lockStart) { unlockForiPhone(); return; }
+      knobDragStart(e.clientX);
+      document.body.style.userSelect = "none";
+    });
+
+    /* ═══ ANIMATION LOOP ═══ */
     function updateKnob() {
       if (!isDragging) return;
       setKnobPos(knobX);
       requestAnimationFrame(updateKnob);
     }
 
-    // ─── Move ───
+    /* ═══ MOVE ═══ */
     wrapper.addEventListener("touchmove", e => {
       if (!isDragging) return;
       let dx = e.touches[0].clientX - startX;
       if (dx < 0) dx = 0;
       knobX = Math.max(0, Math.min(dx, maxOffset));
       if (Math.abs(knobX - lastX) > 2) {
-        H(() => haptic.selection(), 'mv');
+        haptic.selection();
         lastX = knobX;
       }
     }, { passive: true });
-
     window.addEventListener("mousemove", e => {
       if (!isDragging) return;
       let dx = e.clientX - startX;
@@ -355,38 +350,36 @@
       knobX = Math.max(0, Math.min(dx, maxOffset));
     });
 
-    // ─── Slide Complete ───
+    /* ═══ COMPLETE ═══ */
     function onSlideComplete() {
       if (lockedOnce) return;
       lockedOnce = true;
-      const pct = (knobX / maxOffset * 100).toFixed(1);
-      dbg(`★ COMPLETE ${pct}% (knobX=${knobX.toFixed(1)} max=${maxOffset})`);
+      dbg('★ COMPLETE');
 
       overlay.classList.add("active");
       wrapper.classList.add("fade-out");
 
-      // 即座にconfirm 1発目
-      H(() => haptic.confirm(), 'done-0');
-      // 220ms間隔で追加バースト
+      // 810114514と同じconfirmバースト
+      haptic.confirm();
+      const delay = 220;
       [1, 2, 4, 5, 6].forEach(i => {
-        setTimeout(() => H(() => haptic.confirm(), `done-${i}`), i * 220);
+        setTimeout(() => haptic.confirm(), i * delay);
       });
-      // 遷移は全触覚完了後
+
       setTimeout(() => {
-        dbg('navigate → story-dock.html');
+        dbg('→ navigate');
         window.location.href = "story-dock.html";
       }, 1900);
     }
 
-    // ─── Slide Fail (途中で離した) ───
+    /* ═══ FAIL (途中で指離した) ═══ */
     function onSlideFail() {
-      const pct = (knobX / maxOffset * 100).toFixed(1);
-      dbg(`✗ FAIL ${pct}% (need 90%)`);
+      dbg('✗ FAIL');
 
       // error連打
-      H(() => haptic.error(), 'fail-0');
+      haptic.error();
       for (let i = 1; i < 9; i++) {
-        setTimeout(() => H(() => haptic.error(), `fail-${i}`), i * 45);
+        setTimeout(() => haptic.error(), i * 45);
       }
 
       knob.style.transition = "left 0.5s cubic-bezier(.62,0,.4,1)";
@@ -399,16 +392,16 @@
       overlay.classList.remove("active");
     }
 
-    // ─── End Drag ───
+    /* ═══ END DRAG ═══ */
     function endDrag() {
       if (!isDragging) return;
       isDragging = false;
       knobActive(false);
       playAudio(audioRelease);
-      dbg(`endDrag: knobX=${knobX.toFixed(1)} threshold=${(maxOffset*0.9).toFixed(1)}`);
+      dbg(`endDrag knobX=${knobX.toFixed(1)} thr=${(maxOffset*0.9).toFixed(1)}`);
 
-      // 指離した瞬間にimpact触覚
-      H(() => haptic.impact(), 'release-impact');
+      // 指離した瞬間 — 810114514のアイコンドラッグと同じ
+      haptic();
 
       if (knobX >= maxOffset * 0.9) {
         onSlideComplete();
@@ -426,7 +419,7 @@
     if (isiPhone && lockStart) {
       knob.classList.add("ios-shadow");
     }
-    dbg('ready ✓');
+    dbg('ready');
   </script>
 </body>
 </html>
