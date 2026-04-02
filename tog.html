@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>iOS電源オフスライダ（カーテンoverlay型）</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      height: 100vh; width: 100vw;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      overflow: hidden;
+    }
+    #debugLog {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      max-height: 30vh;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.85);
+      color: #0f0;
+      font-size: 11px;
+      font-family: monospace;
+      padding: 6px 8px;
+      z-index: 9999;
+      pointer-events: auto;
+      white-space: pre-wrap;
+      display: none;
+    }
+    #debugToggle {
+      position: fixed;
+      bottom: 4px; right: 4px;
+      z-index: 10000;
+      background: #333;
+      color: #0f0;
+      border: none;
+      border-radius: 4px;
+      font-size: 10px;
+      padding: 4px 8px;
+      opacity: 0.6;
+    }
+    .slider-wrapper {
+      position: relative;
+      width: 310px;
+      height: 64px;
+      z-index: 2;
+      transform: scale(1);
+      will-change: transform;
+      transition: opacity 0.5s cubic-bezier(.62,0,.4,1);
+    }
+    .slider-wrapper.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .slider-track {
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      box-shadow:
+        inset 1px -1px 11px rgb(255 255 255 / 12%),
+        inset 1px -1px 55px rgb(255 255 255 / 11%),
+        1px -1px 1px rgb(243 243 243 / 62%),
+        -1px 1px 1px rgb(225 225 225 / 62%),
+        0 2px 18px #0000000d;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 64px;
+      background: rgb(60 60 60 / 0%);
+      border-radius: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      overflow: visible;
+    }
+    .slider-inner-track {
+      position: absolute;
+      top: 0; left: -5px;
+      height: 64px;
+      border-radius: 36px;
+      z-index: 1;
+      transform: scale(0.9);
+      transition: width 0.13s;
+      pointer-events: none;
+    }
+    .slider-label {
+      position: absolute;
+      left: 88px;
+      top: 0;
+      height: 64px;
+      line-height: 64px;
+      color: #fff;
+      font-size: 19px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      z-index: 2;
+      opacity: 0.83;
+      transition: opacity 0.2s;
+      user-select: none;
+      pointer-events: none;
+      text-shadow: 0 2px 10px #000b;
+    }
+    .slider-knob {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 56px;
+      height: 56px;
+      background: #ffffff8c;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 33px;
+      font-weight: bold;
+      z-index: 10;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      border: none;
+      outline: none;
+      box-shadow:
+        1px -1px 1px rgb(255 255 255 / 62%),
+        -1px 1px 1px rgb(255 255 255 / 62%),
+        0 2px 18px #00000015;
+      will-change: box-shadow, left, background;
+      cursor: pointer;
+      user-select: none;
+      transition:
+        background 0.5s cubic-bezier(.62,0,.4,1),
+        box-shadow 0.5s cubic-bezier(.62,0,.4,1),
+        left 0.5s cubic-bezier(.62,0,.4,1);
+    }
+    .slider-knob:active {
+      background: #ebebeb5c;
+      box-shadow:
+        1px 1px 1px rgb(255 255 255 / 62%),
+        -1px -1px 1px rgb(255 255 255 / 62%);
+    }
+    .slider-arrow-polyline {
+      transition:
+        stroke 0.3s cubic-bezier(.62,0,.4,1),
+        stroke-width 0.3s cubic-bezier(.62,0,.4,1),
+        filter 0.3s cubic-bezier(.62,0,.4,1);
+    }
+    .slider-knob.active .slider-arrow-polyline {
+      stroke: #1552be;
+      stroke-width: 3.2;
+      filter: drop-shadow(0 0 7px #2579F7);
+    }
+    .slider-knob:not(.active) .slider-arrow-polyline {
+      stroke: #2579F7;
+      stroke-width: 2.6;
+      filter: none;
+    }
+    .black-overlay {
+      pointer-events: none;
+      position: fixed;
+      left: 0; top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      opacity: 0;
+      z-index: 1;
+      transition: opacity 0.5s cubic-bezier(.62,0,.4,1);
+      will-change: opacity;
+    }
+    .black-overlay.active {
+      opacity: 0.70 !important;
+      pointer-events: all;
+    }
+  </style>
+</head>
+<body>
+  <div class="slider-wrapper" id="sliderWrapper">
+    <div class="slider-track">
+      <div class="slider-inner-track" id="sliderInner"></div>
+      <div class="slider-label" id="sliderLabel">スライドで全て削除</div>
+    </div>
+    <div class="slider-knob" id="sliderKnob">
+      <svg id="knobSVG" width="32" height="32" viewBox="0 0 32 32">
+        <polyline 
+          class="slider-arrow-polyline"
+          points="12,8 20,16 12,24" 
+          fill="none" 
+          stroke="#2579F7" 
+          stroke-width="2.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </div>
+  </div>
+  <div class="black-overlay" id="blackOverlay"></div>
+  <div id="debugLog"></div>
+  <button id="debugToggle">DBG</button>
+  <audio id="audioGrab" src="./VolumeModule_Sliders_Grab.wav" preload="auto"></audio>
+  <audio id="audioRelease" src="./VolumeModule_Sliders_Release.wav" preload="auto"></audio>
+
+  <script type="module">
+    import { haptic } from "https://esm.sh/ios-haptics";
+
+    // ─── Debug ───
+    const debugEl = document.getElementById('debugLog');
+    const debugBtn = document.getElementById('debugToggle');
+    let debugVisible = false;
+    debugBtn.onclick = () => {
+      debugVisible = !debugVisible;
+      debugEl.style.display = debugVisible ? 'block' : 'none';
+    };
+    function dbg(msg) {
+      const t = new Date().toLocaleTimeString('ja-JP', {
+        hour12: false, hour: '2-digit', minute: '2-digit',
+        second: '2-digit', fractionalSecondDigits: 3
+      });
+      const line = `[${t}] ${msg}`;
+      console.log(line);
+      debugEl.textContent += line + '\n';
+      debugEl.scrollTop = debugEl.scrollHeight;
+    }
+
+    // ─── DOM ───
+    const wrapper = document.getElementById('sliderWrapper');
+    const knob    = document.getElementById('sliderKnob');
+    const svg     = document.getElementById('knobSVG');
+    const inner   = document.getElementById('sliderInner');
+    const label   = document.getElementById('sliderLabel');
+    const overlay = document.getElementById('blackOverlay');
+    const audioGrab    = document.getElementById("audioGrab");
+    const audioRelease = document.getElementById("audioRelease");
+
+    // ─── State ───
+    let isDragging = false;
+    let startX = 0, knobX = 0, lastX = 0;
+    let knobWidth = 56, wrapperWidth = 310;
+    let maxOffset = 310 - 56 - 4;  // = 250
+    let lockedOnce = false;
+
+    const ua = navigator.userAgent;
+    const isiPhone = /iPhone/i.test(ua);
+    let lockStart = isiPhone;
+    const canHaptic = ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+      && /(iPhone|iPad|iPod|iOS|AppleWebKit)/i.test(ua);
+
+    dbg(`init: iPhone=${isiPhone} lock=${lockStart} haptic=${canHaptic}`);
+    dbg(`haptic obj keys: ${Object.keys(haptic).join(', ')}`);
+
+    // ─── Haptic (直接呼び、ラッパーなし) ───
+    function H(fn, tag) {
+      if (!canHaptic) return;
+      try { fn(); dbg(`H ✓ ${tag}`); }
+      catch (e) { dbg(`H ✗ ${tag}: ${e.message}`); }
+    }
+
+    // ─── Sizing ───
+    function updateSizes() {
+      knobWidth = knob.offsetWidth;
+      wrapperWidth = wrapper.offsetWidth;
+      maxOffset = wrapperWidth - knobWidth - 4;
+    }
+    window.addEventListener("resize", updateSizes);
+    updateSizes();
+    dbg(`maxOffset=${maxOffset}`);
+
+    // ─── Helpers ───
+    function setKnobPos(x) {
+      knob.style.left = `${x}px`;
+      inner.style.width = `${72 + x}px`;
+      label.style.opacity = `${0.83 * (1 - x / maxOffset)}`;
+    }
+    function playAudio(a) { a.pause(); a.currentTime = 0; a.play().catch(() => {}); }
+    function knobActive(v) { v ? knob.classList.add("active") : knob.classList.remove("active"); }
+
+    // ─── iPhone lock解除 ───
+    function unlockForiPhone() {
+      if (!lockStart || !isiPhone) return;
+      dbg('unlock');
+      H(() => haptic(), 'unlock');
+      lockStart = false;
+      knob.classList.remove("ios-shadow");
+    }
+
+    // ─── Drag Start ───
+    function knobDragStart(clientX) {
+      updateSizes();
+      const nowLeft = parseFloat(knob.style.left) || 0;
+      if (nowLeft > 10) { dbg('dragStart blocked'); return; }
+      isDragging = true;
+      startX = clientX;
+      knobX = 0;
+      lastX = 0;
+      knob.style.transition = "none";
+      inner.style.transition = "none";
+      overlay.classList.add("active");
+      knobActive(true);
+      playAudio(audioGrab);
+      H(() => haptic.selection(), 'grab-selection');
+      dbg(`dragStart x=${clientX}`);
+      requestAnimationFrame(updateKnob);
+    }
+
+    // ─── Events: knob (touchstart/mousedown) ───
+    knob.addEventListener("touchstart", e => {
+      if (isiPhone && lockStart) { unlockForiPhone(); return; }
+      if (e.touches?.length > 0) knobDragStart(e.touches[0].clientX);
+    }, { passive: true });
+
+    knob.addEventListener("mousedown", e => {
+      if (isiPhone && lockStart) { unlockForiPhone(); return; }
+      knobDragStart(e.clientX);
+      document.body.style.userSelect = "none";
+    });
+
+    // ─── Events: svg (stopPropagation で knob と二重発火防止) ───
+    svg.addEventListener("touchstart", e => {
+      e.stopPropagation();
+      if (isiPhone && lockStart) { unlockForiPhone(); return; }
+      if (e.touches?.length > 0) knobDragStart(e.touches[0].clientX);
+    }, { passive: false });
+
+    svg.addEventListener("mousedown", e => {
+      e.stopPropagation();
+      if (isiPhone && lockStart) { unlockForiPhone(); return; }
+      knobDragStart(e.clientX);
+      document.body.style.userSelect = "none";
+    });
+
+    // ─── Animation loop ───
+    function updateKnob() {
+      if (!isDragging) return;
+      setKnobPos(knobX);
+      requestAnimationFrame(updateKnob);
+    }
+
+    // ─── Move ───
+    wrapper.addEventListener("touchmove", e => {
+      if (!isDragging) return;
+      let dx = e.touches[0].clientX - startX;
+      if (dx < 0) dx = 0;
+      knobX = Math.max(0, Math.min(dx, maxOffset));
+      if (Math.abs(knobX - lastX) > 2) {
+        H(() => haptic.selection(), 'mv');
+        lastX = knobX;
+      }
+    }, { passive: true });
+
+    window.addEventListener("mousemove", e => {
+      if (!isDragging) return;
+      let dx = e.clientX - startX;
+      if (dx < 0) dx = 0;
+      knobX = Math.max(0, Math.min(dx, maxOffset));
+    });
+
+    // ─── Slide Complete ───
+    function onSlideComplete() {
+      if (lockedOnce) return;
+      lockedOnce = true;
+      const pct = (knobX / maxOffset * 100).toFixed(1);
+      dbg(`★ COMPLETE ${pct}% (knobX=${knobX.toFixed(1)} max=${maxOffset})`);
+
+      overlay.classList.add("active");
+      wrapper.classList.add("fade-out");
+
+      // 即座にconfirm 1発目
+      H(() => haptic.confirm(), 'done-0');
+      // 220ms間隔で追加バースト
+      [1, 2, 4, 5, 6].forEach(i => {
+        setTimeout(() => H(() => haptic.confirm(), `done-${i}`), i * 220);
+      });
+      // 遷移は全触覚完了後
+      setTimeout(() => {
+        dbg('navigate → story-dock.html');
+        window.location.href = "story-dock.html";
+      }, 1900);
+    }
+
+    // ─── Slide Fail (途中で離した) ───
+    function onSlideFail() {
+      const pct = (knobX / maxOffset * 100).toFixed(1);
+      dbg(`✗ FAIL ${pct}% (need 90%)`);
+
+      // error連打
+      H(() => haptic.error(), 'fail-0');
+      for (let i = 1; i < 9; i++) {
+        setTimeout(() => H(() => haptic.error(), `fail-${i}`), i * 45);
+      }
+
+      knob.style.transition = "left 0.5s cubic-bezier(.62,0,.4,1)";
+      knob.style.left = "4px";
+      knobX = 0;
+      inner.style.transition = "width 0.13s";
+      inner.style.width = "72px";
+      label.style.transition = "opacity 0.2s";
+      label.style.opacity = 0.83;
+      overlay.classList.remove("active");
+    }
+
+    // ─── End Drag ───
+    function endDrag() {
+      if (!isDragging) return;
+      isDragging = false;
+      knobActive(false);
+      playAudio(audioRelease);
+      dbg(`endDrag: knobX=${knobX.toFixed(1)} threshold=${(maxOffset*0.9).toFixed(1)}`);
+
+      // 指離した瞬間にimpact触覚
+      H(() => haptic.impact(), 'release-impact');
+
+      if (knobX >= maxOffset * 0.9) {
+        onSlideComplete();
+      } else {
+        onSlideFail();
+      }
+      document.body.style.userSelect = "";
+    }
+
+    wrapper.addEventListener("touchend", endDrag);
+    window.addEventListener("mouseup", endDrag);
+    wrapper.addEventListener("touchcancel", endDrag);
+    window.addEventListener("mouseleave", endDrag);
+
+    if (isiPhone && lockStart) {
+      knob.classList.add("ios-shadow");
+    }
+    dbg('ready ✓');
+  </script>
+</body>
+</html>
