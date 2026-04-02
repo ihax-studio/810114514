@@ -31,8 +31,8 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .tb.on{background:rgba(255,204,0,.7);color:#000}
 #photo-count{background:rgba(255,255,255,.2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:#fff;opacity:0;transition:opacity .3s;pointer-events:none}
 #photo-count.show{opacity:1}
-#pvb-float{position:absolute;bottom:16px;left:50%;z-index:8;transform:translateX(-50%) scale(0);opacity:0;transition:transform .4s cubic-bezier(.34,1.05,.64,1),opacity .3s ease;pointer-events:none}
-#pvb-float.show{transform:translateX(-50%) scale(1);opacity:1;pointer-events:auto}
+#pvb-float{position:absolute;bottom:16px;left:50%;z-index:8;transform:translateX(-50%) translateY(80px);opacity:0;transition:transform .5s cubic-bezier(.34,1.05,.64,1),opacity .4s ease;pointer-events:none}
+#pvb-float.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
 #pvb-float button{background:rgba(255,255,255,.25);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.4);border-radius:55px;padding:10px 20px;color:#fff;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2);display:flex;align-items:center;gap:6px}
 #pvb-float button:active{transform:scale(.9)}
 .pvb-thumb{width:28px;height:28px;border-radius:6px;object-fit:cover;border:1px solid rgba(255,255,255,.5)}
@@ -205,13 +205,22 @@ function showBubble(){
   const el=document.getElementById('pvb-float'),th=document.getElementById('pvb-thumb');
   th.src=photos[photos.length-1];
   if(photos.length>=MAX){
+    // 12枚到達: 大きいプレビュー + スライドアップ
+    th.style.width='48px';th.style.height='48px';th.style.borderRadius='10px';
     el.style.transition='transform .5s cubic-bezier(.34,1.05,.64,1),opacity .4s ease';
-    el.style.transform='translateX(-50%) scale(1.8)';el.style.opacity='0';el.style.pointerEvents='auto';
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.transform='translateX(-50%) scale(1)';el.style.opacity='1';}));
+    el.style.transform='translateX(-50%) translateY(80px)';el.style.opacity='0';el.style.pointerEvents='auto';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.transform='translateX(-50%) translateY(0)';el.style.opacity='1';}));
   }else{
-    el.style.transition='';el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
+    th.style.width='28px';th.style.height='28px';th.style.borderRadius='6px';
+    el.style.transition='';el.classList.remove('show');
+    el.style.transform='translateX(-50%) translateY(80px)';el.style.opacity='0';
+    void el.offsetWidth;el.classList.add('show');
   }
-  clearTimeout(_bt);_bt=setTimeout(()=>{el.classList.remove('show');el.style.transform='';el.style.opacity='';el.style.pointerEvents='';},3500);
+  clearTimeout(_bt);_bt=setTimeout(()=>{
+    el.classList.remove('show');
+    el.style.transform='translateX(-50%) translateY(80px)';el.style.opacity='0';el.style.pointerEvents='';
+    th.style.width='';th.style.height='';th.style.borderRadius='';
+  },3500);
 }
 
 /* ═══ SUN ═══ */
@@ -318,17 +327,8 @@ window.beforeClose=function(){if(_cb||!photos.length)return true;document.getEle
 window.cdSave=function(){hap.confirm();photos.forEach((p,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=p;a.download='photo_'+Date.now()+'_'+(i+1)+'.jpg';a.click();},i*200));_cb=true;setTimeout(()=>{try{window.parent.closeIframeNow();}catch(e){goBack();}},photos.length*200+100);};
 window.cdSkip=function(){hap();_cb=true;try{window.parent.closeIframeNow();}catch(e){goBack();}};
 
-// Device detection + security note
-(()=>{
-  const ua=navigator.userAgent;
-  let dev='コンピュータ';
-  if(/iPod/.test(ua))dev='iPod';
-  else if(/iPhone/.test(ua))dev='iPhone';
-  else if(/iPad/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))dev='iPad';
-  else if(/Macintosh/.test(ua))dev='Mac';
-  else if(/Vision/.test(ua))dev='Vision Pro';
-  document.getElementById('sec-note').textContent='セキュリティ保護のためあなたの'+dev+'内にしか保存されないため保存し忘れても復元できません\u{1F630}';
-})();
+// Security note
+document.getElementById('sec-note').textContent='写真は保存し忘れても復元できません\u{1F630}';
 
 startCam();
 cam.style.filter='contrast(1.06) brightness(1.03)';
