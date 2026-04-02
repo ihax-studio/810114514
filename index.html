@@ -3837,7 +3837,6 @@ window.openS=function(type,arg){
 };
 window.goHome=function(){
   haptic();
-  sendStudyNotif();
   // Clear quiz state to prevent crash on re-entry
   stopQuizTimer();
   _pendingAdvance=null;
