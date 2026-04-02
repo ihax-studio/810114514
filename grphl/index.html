@@ -14,10 +14,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f2f2f7;
 /* tab bar */
 .tabs{display:flex;background:rgba(249,249,249,.94);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
   border-top:.5px solid #c6c6c8;padding-bottom:env(safe-area-inset-bottom,0)}
-.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0 4px;
-  font:500 10px/1 -apple-system,sans-serif;background:none;border:none;color:#8e8e93;cursor:pointer;transition:color .15s}
+.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 0 8px;
+  font:500 10px/1 -apple-system,sans-serif;background:none;border:none;color:#8e8e93;cursor:pointer;transition:color .15s;
+  min-height:52px}
 .tabs button.on{color:var(--tc,#007aff)}
-.tabs button span.ico{font-size:20px;line-height:1}
+.tabs button span.ico{font-size:22px;line-height:1}
 /* controls */
 .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 14px;background:#fff;border-bottom:.5px solid #c6c6c8}
 .bar select,.bar input[type=number]{background:#e5e5ea;border:none;border-radius:10px;color:#1c1c1e;
@@ -30,8 +31,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#f2f2f7;
 .bar input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:#d1d1d6}
 .bar input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;
   background:#fff;box-shadow:0 .5px 4px rgba(0,0,0,.2);margin-top:-9px}
-.pill{padding:5px 12px;font:500 13px -apple-system,sans-serif;border-radius:20px;border:1.5px solid #c6c6c8;
-  background:none;color:#8e8e93;cursor:pointer;transition:all .2s}
+.pill{padding:7px 14px;font:500 13px -apple-system,sans-serif;border-radius:20px;border:1.5px solid #c6c6c8;
+  background:none;color:#8e8e93;cursor:pointer;transition:all .2s;min-height:36px}
 .pill.on{background:var(--c,#007aff)18;border-color:var(--c,#007aff);color:var(--c,#007aff)}
 .vals{font:500 12px -apple-system,sans-serif}
 /* Apple Pencil floating label */
@@ -55,7 +56,11 @@ window._hap=haptic||function(){};
 </script>
 <script>
 window._hap=window._hap||function(){};
-const hap=()=>{try{window._hap()}catch(e){}};
+let _hapReady=false;
+const hap=()=>{
+  if(!_hapReady&&window._hap&&window._hap.toString&&!window._hap.toString().includes('function(){}'))_hapReady=true;
+  try{window._hap()}catch(e){}
+};
 
 const TAU=2*Math.PI,PI=Math.PI;
 const tr4=v=>Math.trunc(v*10000)/10000;

@@ -64,7 +64,7 @@ background-size:cover;background-position:center;background-repeat:no-repeat;bac
 filter:blur(20px);-webkit-filter:blur(20px);
 transform:scale(1.05);
 pointer-events:none;
-transition:background .5s ease,filter .8s cubic-bezier(.77,0,.18,1),opacity .8s cubic-bezier(.77,0,.18,1);
+transition:background .5s ease,filter .55s cubic-bezier(.77,0,.18,1),opacity .55s cubic-bezier(.77,0,.18,1);
 }
 /* ════ HOME ════ */
 #home{
@@ -596,6 +596,13 @@ background:var(--r);margin-left:4px;vertical-align:middle;
 75%{transform:translateX(-3px)}
 100%{transform:translateX(0)}
 }
+/* ═══ GOROAWASE MNEMONIC ═══ */
+.goro-box{margin:8px 0 4px;padding:8px 12px;border-radius:12px;
+  background:linear-gradient(135deg,rgba(255,149,0,.10),rgba(255,59,48,.08));
+  border:1px solid rgba(255,149,0,.18);font-size:13px;line-height:1.5;color:#1c1c1e}
+.goro-box .goro-label{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--y);margin-bottom:3px}
+.goro-box .goro-text{font-weight:600}
+
 /* Card text slide-up on shuffle */
 .card-slide-up .fword,.card-slide-up .fmean,.card-slide-up .fpron,.card-slide-up .fmeta{
 animation:txtSlideUp .35s cubic-bezier(.77,0,.18,1) both;
@@ -936,7 +943,7 @@ overflow:hidden;
 
 <!-- ══════════ SETTINGS OVERLAY ══════════ -->
 <div id="settings-overlay" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,0);transition:background .5s ease">
-  <div id="settings-card" style="position:absolute;bottom:0;left:0;right:0;max-height:85dvh;background:rgba(245,245,247,.95);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;translate:0 100%;scale:.8;transition:translate .8s cubic-bezier(.34,1.05,.64,1),scale .8s ease">
+  <div id="settings-card" style="position:absolute;bottom:0;left:0;right:0;max-height:85dvh;background:rgba(245,245,247,.95);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;translate:0 100%;scale:.8;transition:translate .55s cubic-bezier(.34,1.05,.64,1),scale .55s ease">
     <div style="display:flex;align-items:center;padding:16px 20px 12px">
       <div style="flex:1;font-size:17px;font-weight:700;color:#000">設定</div>
       <button id="settings-close" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.06);border:none;font-size:18px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'SF Pro Display',system-ui,sans-serif;color:#000;line-height:1">✕</button>
@@ -962,6 +969,8 @@ overflow:hidden;
             <div class="s-row"><div class="s-label">大きいアイコン</div><div class="s-toggle" id="s-bigicon"><div class="s-knob"></div></div></div>
             <div class="s-row"><div class="s-label">ロック画面</div><div class="s-toggle" id="s-lockscreen"><div class="s-knob"></div></div></div>
             <div class="s-row"><div class="s-label">通知</div><div class="s-toggle" id="s-notif"><div class="s-knob"></div></div></div>
+            <div class="s-row"><div class="s-label" style="font-size:12px;color:var(--sub);line-height:1.4">忘れた単語を通知で復習<br>(閉じると即3語 → 10分後5語)</div></div>
+            <div class="s-row"><div class="s-label">覚えたで忘れたから自動削除</div><div class="s-toggle" id="s-auto-clear"><div class="s-knob"></div></div></div>
             <div class="s-row"><div class="s-label">常に検索を表示</div><div class="s-toggle" id="s-always-search"><div class="s-knob"></div></div></div>
           </div>
         </div>
@@ -1057,7 +1066,7 @@ overflow:hidden;
 
 <!-- ══════════ WALLPAPER CUSTOMIZE DIALOG ══════════ -->
 <div id="wp-dialog" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0);transition:background .5s ease">
-  <div id="wp-dialog-card" style="position:absolute;bottom:0;left:0;right:0;max-height:70dvh;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .8s cubic-bezier(.34,1.05,.64,1)">
+  <div id="wp-dialog-card" style="position:absolute;bottom:0;left:0;right:0;max-height:70dvh;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:22px 22px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .55s cubic-bezier(.34,1.05,.64,1)">
     <div style="display:flex;align-items:center;padding:16px 20px 10px">
       <div id="wp-dialog-title" style="flex:1;font-size:17px;font-weight:700;color:#000">壁紙をカスタマイズ</div>
       <button id="wp-dialog-close" style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.06);border:none;font-size:18px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#000;line-height:1">✕</button>
@@ -1164,6 +1173,21 @@ overflow:hidden;
     </div>
     <div style="border-top:1px solid rgba(0,0,0,.1)">
       <button id="no-forgot-ok" style="width:100%;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:600">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ NOTIF REVIEW DIALOG ══════════ -->
+<div id="notif-review-dlg" style="display:none;position:fixed;inset:0;z-index:10002;background:rgba(0,0,0,0);transition:background .5s ease;align-items:center;justify-content:center">
+  <div id="notif-review-card" style="width:300px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.8);opacity:0;transition:transform .55s cubic-bezier(.34,1.05,.64,1),opacity .55s cubic-bezier(.77,0,.18,1)">
+    <div style="padding:22px 20px 10px">
+      <div style="font-size:36px;margin-bottom:8px">🔄</div>
+      <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">忘れた単語を復習しますか？</div>
+      <div id="notif-review-preview" style="font-size:12px;color:rgba(0,0,0,.45);line-height:1.6;margin-top:8px"></div>
+    </div>
+    <div style="border-top:1px solid rgba(0,0,0,.1);display:flex">
+      <button id="notif-review-cancel" style="flex:1;padding:14px;font-size:16px;color:#8e8e93;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:500;border-right:1px solid rgba(0,0,0,.1)">あとで</button>
+      <button id="notif-review-go" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700">復習する</button>
     </div>
   </div>
 </div>
@@ -1857,6 +1881,350 @@ const LIST_TITLES={
   p:'言い換え表現', r:'長文読解 重要表現', c:'混同注意ペア', a:'頻出テーマ'
 };
 
+/* ═══ 語呂合わせ辞書 (GOROAWASE) ═══ */
+const GORO={
+// ── Pre-1 単語 ──
+'abandon':'あ、晩、ドン！→夜にドン！と捨てられた',
+'absorb':'アブ(虻)がSorb(吸う)→虻が血を吸収する',
+'abuse':'アビューズ→あ、ビュー(美)ズタボロに虐待',
+'accelerate':'アクセル踏んでレート上げる→加速する',
+'accumulate':'「あ来む、レート！」→どんどん蓄積する',
+'acknowledge':'あ、苦労じゃ→苦労を認める',
+'acquire':'あ、クワイヤー(聖歌隊)入って技術を習得する',
+'adapt':'あ、ダプト→あ、脱ぷ！と環境に適応する',
+'adequate':'あ、出来ゅーと→あ、十分にできた！',
+'adopt':'あ、どっぷり養子にする',
+'advocate':'アドボ(煮物)食いと→煮物を提唱する',
+'affect':'あ、触れた！→影響する',
+'aggressive':'ア・グレッシブ→あ、グレた！攻撃的な',
+'alter':'オルター→「俺たー」変えるぞ',
+'ample':'あんぷる→アンプル十分な量ある',
+'analyze':'穴、ライズ→穴が広がるのを分析する',
+'ancestor':'「あん、セスター！」→先祖のおばあちゃん',
+'anxiety':'案、ザイエティ→案がなくて不安',
+'appetite':'アパタイト→あ、パッと胃と！食欲',
+'archaeologist':'あー、気をロジストが考古学者',
+'arrogant':'有ろう、ガント→「ある！」とガンと傲慢な',
+'assess':'アセス→汗ス！評価されて汗かく',
+'associate':'あ、ソシエイト→ああ、社会と関連付ける',
+'awkward':'おーくわーど→「おー食わぁど」気まずい食事',
+'ban':'バン！→バンッと禁止',
+'barely':'ベアリー→熊(bear)でもかろうじて',
+'bargain':'バーゲン→バーゲンでお得品をゲット',
+'beneficial':'便利フィシャル→便利で有益な',
+'betray':'ビートレイ→ビートで殴って裏切る',
+'biased':'バイアスド→野獣「バイアス、ド偏ってんだよなぁ」',
+'blame':'ブレーム→ブレイムだ！と非難する',
+'boost':'ブースト→ブーストかけて高める',
+'breed':'ブリード→ブリーダーが育てる',
+'burden':'バーデン→馬伝(馬が荷物を運ぶ)→負担',
+'capable':'ケイパブル→K(計)パワフル→有能な',
+'capture':'キャプチャー→野獣がキャプチャー(捕獲)',
+'cargo':'カーゴ→車GO！貨物運搬',
+'casual':'カジュアル→「河豚ある？」くらい気軽',
+'cattle':'キャトル→勝とる！牛で勝負',
+'cease':'シース→「しーっス！」止まれ',
+'chronic':'クロニック→苦労ニック→慢性的に苦労',
+'circulation':'サーキュレーション→サーキット周回→循環',
+'claim':'クレーム→主張する',
+'classify':'クラシファイ→「暮らし、ファイ！」分類する',
+'collapse':'コラプス→「コラ！」パスっと崩壊',
+'combat':'コンバット→「こん、バット！」で戦う',
+'commit':'コミット→コミットメント→専念する',
+'companion':'コンパニオン→仲間',
+'compel':'コンペル→「コンペでる！」強制参加',
+'compensate':'コンペンセート→コンペで負けた分を補償する',
+'complex':'コンプレックス→複雑な心',
+'comply':'コンプライ→「混、プライ！」従う',
+'compromise':'コンプロマイズ→混ぷろまいず→妥協する',
+'conceal':'コンシール→コンシーラーで隠す',
+'concern':'コンサーン→「困サーン」心配',
+'conduct':'コンダクト→指揮者がコンダクトする',
+'confess':'コンフェス→「こんフェス」で告白する',
+'confine':'コンファイン→監禁（ファインじゃない）',
+'conflict':'コンフリクト→こんフリック→紛争で弾く',
+'conform':'コンフォーム→「皆でフォーム揃えて」従う',
+'congress':'コングレス→コンと来る→議会にやって来る',
+'conscience':'コンシエンス→「こんしぇんす！」良心',
+'consequence':'コンシークエンス→「困！シークエンス」結果が困る',
+'conserve':'コンサーヴ→缶詰にして保存する',
+'considerable':'コンシダラブル→「コンシダー(考える)あぶる」かなりの',
+'consistent':'コンシステント→コンシス→一貫した',
+'constitute':'コンスティテュート→構成する',
+'consume':'コンシューム→消費者(コンシューマー)',
+'contaminate':'コンタミネート→コンタミ→汚染する',
+'contemplate':'コンテンプレート→野獣「コンテン(満足)にプレート眺めて」熟考',
+'contradict':'コントラディクト→コントラ(反)→矛盾する',
+'controversy':'コントロバーシー→コントロール不能な論争',
+'convince':'コンビンス→「コンビニっす」と説得する',
+'cooperate':'コーオペレイト→「こー、お！ペレ(選手)と！」協力する',
+'cope':'コープ→生協(コープ)で対処する',
+'correspond':'コレスポンド→これスポンと→対応する',
+'costly':'コストリー→コスト高い→高価な',
+'council':'カウンシル→「カウンターしる！」議会',
+'counterpart':'カウンターパート→カウンターの向かいの人→対応する人',
+'creature':'クリーチャー→クリーチャー(生き物)',
+'critical':'クリティカル→クリティカルヒット！→重要な',
+'crucial':'クルーシャル→「くるーっしゃる！」→重要な',
+'crush':'クラッシュ→粉砕する',
+'cultivate':'カルティベイト→カルチャー(文化)を育てる→耕す',
+'cunning':'カンニング→ずる賢い',
+'currency':'カレンシー→カレン(可憐)な通貨',
+'custody':'カスタディ→「カスが棚に」拘留',
+'dawn':'ドーン→ドーン！と夜明け',
+'debris':'デブリ→宇宙デブリ→残骸',
+'decade':'ディケイド→10年間',
+'decline':'ディクライン→「で、クライン(泣く)」断られて泣く',
+'dedicate':'デディケイト→出で、ケイト→ケイトに捧げる',
+'defeat':'ディフィート→「で、フィート(足)」→足をすくわれて敗北',
+'deficiency':'デフィシエンシー→「出費しぇんしー」不足',
+'deliberately':'デリバレートリー→デリバリー→配達は故意に遅い',
+'demonstrate':'デモンストレート→デモで示す',
+'dense':'デンス→電子(デンシ)が密な→密度の高い',
+'depict':'デピクト→でピクチャー→描写する',
+'deprive':'ディプライブ→「出、プライブ」→奪う',
+'derive':'デライブ→「出ライブ」→由来する',
+'desperate':'デスパレート→野獣「デスパレート(必死)だよなぁ」',
+'despite':'ディスパイト→「ディスっぱい（酸っぱい）と」にもかかわらず',
+'detect':'ディテクト→探偵(ディテクティブ)が発見する',
+'determine':'ディターミン→「出たーミン！」決定する',
+'device':'デバイス→装置',
+'devote':'ディボート→「出、ボート」→ボートに人生を捧げる',
+'diabetes':'ダイアビーティーズ→「大暴TEAs(お茶)」→糖尿病',
+'diminish':'ディミニッシュ→dim(暗い)+ish→暗くなって減少',
+'disaster':'ディザスター→「ディスアスター(星が悪い)」→災害',
+'discipline':'ディシプリン→ディスプリン→規律のプリン',
+'disclose':'ディスクローズ→ディスってクローズ→いや、明らかにする',
+'discourage':'ディスカレッジ→「ディスってカレッジ(大学)」落胆させる',
+'discrimination':'ディスクリミネーション→dis(否定)+クリミナル→差別',
+'disguise':'ディスガイズ→「ディスってるガイズ(奴ら)」は変装してる',
+'dismiss':'ディスミス→「ディス、ミス！」→ミスを解雇',
+'disorder':'ディスオーダー→dis(無)+order(秩序)→無秩序',
+'dispute':'ディスピュート→「ディスってピュート」論争',
+'disrupt':'ディスラプト→dis(壊す)+rupt→混乱させる',
+'distinguish':'ディスティングイッシュ→「出すティング(刺す)、いっしゅ」区別して刺す',
+'distract':'ディストラクト→dis(離す)+tract(引く)→気をそらす',
+'diverse':'ダイバース→ダイバーが色々→多様な',
+'divorce':'ディボース→離婚',
+'dominate':'ドミネート→ドミノのように支配する',
+'donate':'ドネート→ドーナツを寄付する',
+'dose':'ドーズ→「どーぞ」用量をどうぞ',
+'drought':'ドラウト→ドラウトで「ドラ(のび太)うっと」干ばつ',
+'durable':'デュラブル→デュラ(耐久)+able→耐久性のある',
+'dwelling':'ドゥエリング→「ドエリング(住居)」→住居',
+'ecosystem':'エコシステム→エコな生態系',
+'efficient':'エフィシェント→「え、フィシェント」効率的な',
+'elaborate':'エラボレート→「えらぼーれと」精巧に選ぶ',
+'eliminate':'エリミネート→「えり、見ねーと！」除去する',
+'embrace':'エンブレイス→「円、ブレイス」→抱擁する',
+'emission':'エミッション→排出',
+'emphasize':'エンファサイズ→「えん！ファサイズ」強調する',
+'encounter':'エンカウンター→RPGでエンカウント！→遭遇する',
+'endeavor':'エンデバー→スペースシャトル エンデバー→努力',
+'enforce':'エンフォース→「円フォース(力)」→施行する',
+'enormous':'エノーマス→「えのーまっす！」→巨大な',
+'ensure':'エンシュア→「エンシュア(飲料)で」確保する',
+'epidemic':'エピデミック→エピ(上)+デミック(人々)→流行病',
+'essential':'エッセンシャル→エッセンス(本質)→不可欠な',
+'evaluate':'エバリュエイト→「え、バリュー(価値)eat」→評価する',
+'eventually':'イベンチュアリー→イベント→最終的にイベントが来る',
+'evidence':'エビデンス→証拠',
+'evolve':'エボルブ→「え、ボルブ(回る)」→進化する',
+'exaggerate':'エグザジェレイト→「エグい！ザ・ジェレイト」→誇張する',
+'exceed':'エクシード→X(超える)+seed→超える',
+'excessive':'エクセッシブ→EXCEL使いすぎ→過度の',
+'exclude':'エクスクルード→「X(元)クルー」除外する',
+'executive':'エグゼクティブ→幹部',
+'exhaust':'エグゾースト→排気(エグゾースト)→疲れ果てさせる',
+'expand':'エクスパンド→エキスパンドする→拡大する',
+'exploit':'エクスプロイト→「エクスプローラーいと」→利用する',
+'expose':'エクスポーズ→「エクスポーズ(さらす)」',
+'extinct':'エクスティンクト→「エクスティンクション」→絶滅した',
+'extract':'エクストラクト→extra(外へ)+tract(引く)→抽出する',
+'facilitate':'ファシリテイト→ファシリテーター→促進する',
+'famine':'ファミン→ファミ(family)飢える→飢饉',
+'fatal':'フェイタル→fate(運命)→致命的な',
+'fertile':'ファータイル→野獣「ファータイル(肥沃)だよなぁ…この土地」',
+'fierce':'フィアス→「ひぃ、あーす！」猛烈な',
+'flexible':'フレキシブル→フレキシブルに柔軟',
+'flourish':'フラリッシュ→「ふらりしゅ」→花のように繁栄する',
+'fossil':'フォッスル→化石',
+'fragile':'フラジャイル→「ふら、ジャイル」→壊れやすい',
+'frustrate':'フラストレイト→フラストレーション→欲求不満にする',
+'fundamental':'ファンダメンタル→ファンダ(基礎)+メンタル→根本的な',
+'generous':'ジェネラス→「ジェネ(遺伝)ラス」→遺伝的に寛大な',
+'genuine':'ジェニュイン→「じぇ、入院？」本物の入院',
+'glacier':'グレイシャー→グレイ(灰色)+シャー→灰色の氷河',
+'gratify':'グラティファイ→グラッと来て満足させる',
+'guarantee':'ギャランティー→保証する',
+'habitat':'ハビタット→「はびたっと！」生息地',
+'harsh':'ハーシュ→「はーっしゅ！」と厳しく叱る',
+'hesitant':'ヘジタント→「へ？じたんと」ためらう',
+'hostile':'ホスタイル→「ホストいる？」敵対的な態度',
+'humidity':'ヒューミディティ→「ひゅー、蒸してー」湿気',
+'hypothesis':'ハイポセシス→「はいポーズ、しーっす」仮説',
+'ignorance':'イグノランス→ignore(無視)+ance→無知',
+'illustrate':'イラストレイト→イラストで図説する',
+'immune':'イミューン→「いみゅーん」免疫の',
+'impose':'インポーズ→in(中に)+pose(置く)→課する',
+'impulse':'インパルス→衝動→芸人インパルス',
+'incident':'インシデント→in(中で)+sident(座る)→事件発生',
+'incredible':'インクレディブル→信じられない→Mr.インクレディブル',
+'indicate':'インディケイト→「インディ(Indiana)計と」→示す',
+'inevitable':'イネビタブル→「いねービタブル」→避けられない',
+'inferior':'インフィリアー→「いんフィリア」→劣っている',
+'inflation':'インフレーション→インフレ→物価上昇',
+'infrastructure':'インフラストラクチャー→インフラ',
+'inhabit':'インハビット→in(中に)+habit(住む)→住む',
+'inherit':'インヘリット→in(中に)+herit(相続)→相続する',
+'inject':'インジェクト→in(中に)+ject(投げる)→注射する',
+'innovative':'イノベーティブ→イノベーション→革新的な',
+'inspire':'インスパイア→in(中に)+spire(息を吹く)→鼓舞する',
+'integrate':'インテグレート→integral→統合する',
+'intelligence':'インテリジェンス→インテリ→知性',
+'interact':'インタラクト→inter(間)+act(行動)→相互作用する',
+'interfere':'インターフィア→「インター出ぃあー」→干渉する',
+'interrupt':'インタラプト→「インターラプッと」→遮る',
+'investigate':'インベスティゲイト→「投資(invest)ゲート」→調査する',
+'isolate':'アイソレート→「あいそーれいと」→孤立させる',
+'labor':'レイバー→「例場ー」→労働',
+'launch':'ランチ→ロケットランチ(発射)',
+'legislation':'レジスレーション→レジ+ration→法律',
+'legitimate':'レジティメイト→レジ＋チメイト→正当な',
+'maintain':'メインテイン→メンテナンス→維持する',
+'mammal':'マンマル→ママル→ママの乳→哺乳動物',
+'mandatory':'マンダトリー→「まんだとりー」→義務的な',
+'manufacture':'マニュファクチャー→manu(手)+fact(作る)→製造する',
+'marine':'マリーン→海のマリン',
+'massive':'マッシブ→マッシブ(大量の)→巨大な',
+'medieval':'メディーバル→メディ(中間)+eval(時代)→中世の',
+'migrate':'マイグレート→「舞、グレート！」→移住する',
+'moderate':'モデレート→モデレーター→穏やかな',
+'modify':'モディファイ→モッド(mod)+ify→修正する',
+'monopoly':'モノポリー→ボードゲーム モノポリー→独占',
+'mortal':'モータル→mort(死)+al→死を免れない',
+'negotiate':'ネゴシエイト→ネゴ(交渉)する',
+'notorious':'ノトーリアス→野獣「ノトーリアス…悪名高いっすね」',
+'numerous':'ニューメラス→number(数)+ous→多数の',
+'obesity':'オビーシティ→「おビーシティ」→帯(おび)がきつい→肥満',
+'obstacle':'オブスタクル→「おっ！ブスタグル」→障害物',
+'occupy':'オキュパイ→「お、急パイ！」→占める',
+'offspring':'オフスプリング→off(離れる)+spring(飛ぶ)→子孫',
+'oppose':'オポーズ→opposite(反対)→反対する',
+'organ':'オーガン→オルガン→器官',
+'outbreak':'アウトブレイク→out(外に)+break→勃発',
+'overcome':'オーバーカム→over(超えて)+come→乗り越える',
+'overlook':'オーバールック→over(超えて)+look→見落とす',
+'paradox':'パラドックス→逆説',
+'particle':'パーティクル→パーティ+クル→粒子がパーティに来る',
+'peculiar':'ピキュリアー→「ピキュリアーっ！」奇妙な！',
+'penetrate':'ペネトレイト→pen(ペン)が入る→貫通する',
+'perceive':'パシーブ→「パッと見ーぶ」→知覚する',
+'phenomenon':'フェノメノン→「不能メノン」→現象',
+'pledge':'プレッジ→プレッジ(誓い)',
+'pollution':'ポリューション→ポリュートする→汚染',
+'potential':'ポテンシャル→ポテンシャル(潜在力)',
+'poverty':'ポバティ→「ポバッティ」→貧困',
+'precede':'プリシード→pre(前)+cede(進む)→先行する',
+'prejudice':'プレジュディス→pre(前)+judge→先入観→偏見',
+'preserve':'プリザーブ→「プリ(前から)ザーブ(serve保つ)」→保存する',
+'prevail':'プリベイル→pre(前に)+vail(力)→勝る',
+'primitive':'プリミティブ→原始的な',
+'privilege':'プリビレッジ→「プリ、ビレッジ(村)」→村の特権',
+'proceed':'プロシード→pro(前へ)+ceed(進む)→進む',
+'productive':'プロダクティブ→product(製品)→生産的な',
+'profound':'プロファウンド→pro(深く)+found→深い',
+'prohibit':'プロヒビット→pro(前に)+hibit(持つ)→禁止する',
+'prominent':'プロミネント→pro(前に)+minent(突き出す)→著名な',
+'proportion':'プロポーション→割合',
+'prospect':'プロスペクト→pro(前を)+spect(見る)→見込み',
+'province':'プロビンス→「プロ、ビンス！」→州',
+'provoke':'プロボーク→「プロ、暴苦」→挑発する',
+'pursue':'パスー→野獣「パスーっと追いかけるぞ」→追求する',
+'radiation':'レイディエイション→放射線',
+'rebel':'レベル→「レベル上がって反逆」→反乱を起こす',
+'recession':'リセッション→リセッション(不況)',
+'recruit':'リクルート→リクルートスーツ→採用する',
+'refugee':'レフュジー→refuge(避難所)+ee→難民',
+'regulate':'レギュレイト→レギュレーション→規制する',
+'reinforce':'リインフォース→re(再)+in+force(力)→強化する',
+'reluctant':'リラクタント→リラックスしたくない→気が進まない',
+'remarkable':'リマーカブル→re+mark+able→注目すべき',
+'reproduce':'リプロデュース→re+produce→複製する',
+'reputation':'レピュテーション→「レッピュテーション」→評判',
+'resolve':'リゾルブ→re(再)+solve(解く)→解決する',
+'restore':'リストア→re(再)+store→回復する',
+'restrict':'リストリクト→「リスト、リクト」→制限する',
+'reveal':'リビール→re(再)+veal(ベール外す)→明らかにする',
+'revenue':'レベニュー→「レベ入ー(revenue)」→収益',
+'revolution':'レボリューション→革命',
+'ritual':'リチュアル→ritual→儀式',
+'sacrifice':'サクリファイス→「桜ファイス(顔)」→桜散る→犠牲にする',
+'satellite':'サテライト→「さて、ライト！」→衛星',
+'scatter':'スキャター→「すかったー」→散らばる',
+'scheme':'スキーム→スキーム(計画)',
+'scrutiny':'スクルーティニー→スクルー(screw)で細かく→精査',
+'secure':'セキュア→セキュリティ→安全な',
+'segment':'セグメント→seg(切る)+ment→区分',
+'sensation':'センセーション→センセーショナル→感覚',
+'settlement':'セトルメント→settle(定住)+ment→定住地',
+'severe':'シビア→シビアな→厳しい',
+'shrink':'シュリンク→シュリンクラップ→縮む',
+'significant':'シグニフィカント→sign(しるし)+ificant→重要な',
+'skeptical':'スケプティカル→「すけっぷてぃかる！」→懐疑的な',
+'sophisticated':'ソフィスティケイテッド→ソフィー(知恵)+icated→洗練された',
+'specific':'スペシフィック→specific→具体的な',
+'stable':'ステイブル→stay(留まる)+ble→安定した',
+'stereotype':'ステレオタイプ→固定観念',
+'stimulate':'スティミュレイト→「スティック、舞、レイト」→刺激する',
+'strategy':'ストラテジー→戦略',
+'submit':'サブミット→sub(下に)+mit(送る)→提出する',
+'substance':'サブスタンス→sub(下の)+stance(立つもの)→物質',
+'substitute':'サブスティテュート→sub(代わりの)→代用品',
+'sufficient':'サフィシェント→suffice(足りる)+ent→十分な',
+'supplement':'サプリメント→サプリ→補う',
+'suppress':'サプレス→sub(下に)+press(押す)→抑制する',
+'surrender':'サレンダー→野獣「されんだぁ！」→降伏する',
+'survive':'サバイブ→サバイバル→生き残る',
+'suspect':'サスペクト→サスペンス→疑う',
+'sustain':'サステイン→サステナブル→維持する',
+'symptom':'シンプトム→sin(一緒)+ptom(落ちる)→症状',
+'tackle':'タックル→タックルして取り組む',
+'temporary':'テンポラリー→tempo(時間)+rary→一時的な',
+'territory':'テリトリー→テリトリー(縄張り)',
+'theology':'セオロジー→theo(神)+logy→神学',
+'threat':'スレット→「すれっと」→脅威',
+'thrive':'スライブ→「スラ(すら)イブ(生きる)」→繁栄する',
+'tolerate':'トレレイト→「取れ、レイト！」→我慢して取れ',
+'toxic':'トキシック→毒(トキ)+sick→有毒な',
+'tragedy':'トラジェディ→「寅(とら)、ジェディ」→悲劇',
+'transform':'トランスフォーム→トランスフォーマー→変換する',
+'transparent':'トランスペアレント→trans(通して)+parent(見える)→透明な',
+'tremendous':'トレメンダス→「とれ、メンダス(すごい)」→ものすごい',
+'triumph':'トライアンフ→try(挑戦)+umph→勝利する',
+'undermine':'アンダーマイン→under(下から)+mine(掘る)→弱体化させる',
+'unemployment':'アンエンプロイメント→un+employ+ment→失業',
+'urge':'アージ→「あー、じ(痔)」→促す',
+'utilize':'ユーティライズ→utility(有用性)→利用する',
+'vaccine':'ワクチン→vaccine',
+'vague':'ベイグ→「米具(べいぐ)？」→曖昧な',
+'valid':'バリッド→valid(有効)→バリバリ有効',
+'vast':'バスト→「バスト(bust)が」広大な',
+'venue':'ベニュー→「便入ー」→会場',
+'vessel':'ベッセル→vessel→船・容器',
+'victim':'ビクティム→「ビクッ！ティム」→被害者',
+'vigorous':'ビゴラス→「ビゴー！ラス」→精力的な',
+'violate':'バイオレイト→violence(暴力)→違反する',
+'virtue':'バーチュー→virtual(仮想)→美徳',
+'visible':'ビジブル→vision(視覚)+ble→目に見える',
+'vital':'バイタル→バイタルサイン→不可欠な',
+'vulnerable':'バルネラブル→「バルネラ(傷)+ブル」→脆弱な',
+'welfare':'ウェルフェア→well(良い)+fare(暮らし)→福祉',
+'wilderness':'ウィルダネス→wild(野生)+ness→荒野',
+'withdraw':'ウィズドロー→with(共に)+draw(引く)→引き出す・撤退する',
+'yield':'イールド→「いーるど」→生み出す',
+};
+
 /* ═══ BUILD 6 PANELS ═══ */
 function shuf(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=0|Math.random()*(i+1);[b[i],b[j]]=[b[j],b[i]];}return b;}
 
@@ -1884,6 +2252,7 @@ CFG.forEach((c,i)=>{
     </div>
     <div class="ff fb">
       <div class="fmean" id="me${i}"></div>
+      <div class="goro-box" id="go${i}" style="display:none"><div class="goro-label">🧠 語呂合わせ</div><div class="goro-text" id="gt${i}"></div></div>
       <div class="ffull" id="fu${i}"></div>
       <div class="fex"   id="ex${i}"></div>
       <div class="ftags" id="ta${i}"></div>
@@ -1976,6 +2345,10 @@ function render(i){
   const wordText = w.e||w.w||'';
   const meanText = w.j||w.m||'';
   document.getElementById('me'+i).innerHTML = `<span class="ans-tap ans-en" data-en="${wordText.replace(/"/g,'&quot;')}">🔊 ${wordText}</span><br><span class="ans-tap ans-ja" data-en="${wordText.replace(/"/g,'&quot;')}">${meanText}</span>`;
+  // Goroawase mnemonic
+  const goKey=wordText.toLowerCase().trim();
+  const goEl=document.getElementById('go'+i),gtEl=document.getElementById('gt'+i);
+  if(GORO[goKey]){goEl.style.display='';gtEl.textContent=GORO[goKey];}else{goEl.style.display='none';}
   document.getElementById('fu'+i).textContent = (isV&&w.f)||'';
 
   // Underline the target word in example sentences
@@ -2074,8 +2447,17 @@ window.An=(i,t)=>{
   if(d.hist.length>80)d.hist.pop();
   d.st[t]++;
   // Cache forgot/hard words
-  if(t==='f'||t==='h') markForgot(w.e||w.w,w.j||w.m,i);
-  else if(t==='g') unmarkForgot(w.e||w.w,i);
+  if(t==='f'||t==='h') markForgot(w.e||w.w,w.j||w.m,w._origDeck!=null?w._origDeck:i);
+  else if(t==='g'){
+    if(w._origDeck!=null){
+      // card-forgot mode: only auto-clear if setting is ON
+      if(localStorage.getItem('inglish_auto_clear')==='1'){
+        unmarkForgot(w.e||w.w,w._origDeck);
+      }
+    }else{
+      unmarkForgot(w.e||w.w,i);
+    }
+  }
   document.getElementById('sg'+i).textContent=d.st.g;
   document.getElementById('sh'+i).textContent=d.st.h;
   document.getElementById('sf'+i).textContent=d.st.f;
@@ -2350,22 +2732,70 @@ async function requestNotifPermission(){
   if(Notification.permission==='denied')return false;
   return (await Notification.requestPermission())==='granted';
 }
-const _notifMsgs=[
-  '昨日覚えた単語、まだ覚えてる？確認しよう',
-  '1日5分で差がつく。今日もサクッとやろう',
-  '忘却曲線は待ってくれない。今が復習のベストタイミング',
-  'あと10語で次のレベル。あと少しだけ',
-  '3日サボると記憶は半分に。今日やれば定着する',
-  '英検まであと何日？毎日の積み重ねが合格の鍵',
-  '朝の5分は夜の30分に匹敵する。今やろう',
-  'さっきの間違い、もう一回だけ確認しない？',
-];
-function sendStudyNotif(){
+let _notifTimer10=null;
+function getForgotWords(){
+  const c=loadCache();
+  const items=[];
+  Object.keys(c).forEach(dk=>{
+    Object.keys(c[dk]).forEach(w=>{items.push({word:w,meaning:c[dk][w].m||''});});
+  });
+  return items;
+}
+function pickRandom(arr,n){
+  const s=[...arr];for(let i=s.length-1;i>0;i--){const j=0|Math.random()*(i+1);[s[i],s[j]]=[s[j],s[i]];}
+  return s.slice(0,n);
+}
+function buildNotifBody(words){
+  return words.map(w=>{
+    const g=GORO[w.word.toLowerCase()];
+    return g?`📌 ${w.word}：${w.meaning}\n　🧠 ${g}`:`📌 ${w.word}：${w.meaning}`;
+  }).join('\n');
+}
+function sendForgotNotif(count,title){
   if(!_notifEnabled||!_isPWA)return;
   if(Notification.permission!=='granted')return;
-  const msg=_notifMsgs[Math.floor(Math.random()*_notifMsgs.length)];
-  try{new Notification('iN glish',{body:msg,icon:'icon-192.png'});}catch(e){}
+  const all=getForgotWords();
+  if(!all.length)return;
+  const picked=pickRandom(all,count);
+  const body=buildNotifBody(picked);
+  try{
+    const n=new Notification(title||'🔄 忘れた単語を復習しよう',{
+      body:body,icon:'icon-192.png',tag:'inglish-forgot-'+count,
+      requireInteraction:true
+    });
+    n.onclick=()=>{n.close();window.focus();showNotifReviewDialog();};
+  }catch(e){}
 }
+function showNotifReviewDialog(){
+  const dlg=document.getElementById('notif-review-dlg');
+  const card=document.getElementById('notif-review-card');
+  const preview=document.getElementById('notif-review-preview');
+  const all=getForgotWords();
+  if(!all.length){openS('card-forgot',0);return;}
+  const sample=pickRandom(all,3);
+  preview.innerHTML=sample.map(w=>`<b>${w.word}</b> ${w.meaning}`).join('<br>')+'<br>…ほか '+all.length+'語';
+  dlg.style.display='flex';
+  requestAnimationFrame(()=>{
+    dlg.style.background='rgba(0,0,0,.4)';
+    card.style.transform='scale(1)';card.style.opacity='1';
+  });
+}
+document.getElementById('notif-review-cancel').addEventListener('click',()=>{
+  haptic();
+  const dlg=document.getElementById('notif-review-dlg');
+  const card=document.getElementById('notif-review-card');
+  dlg.style.background='rgba(0,0,0,0)';
+  card.style.transform='scale(1.8)';card.style.opacity='0';
+  setTimeout(()=>{dlg.style.display='none';},400);
+});
+document.getElementById('notif-review-go').addEventListener('click',()=>{
+  haptic.confirm();
+  const dlg=document.getElementById('notif-review-dlg');
+  const card=document.getElementById('notif-review-card');
+  dlg.style.background='rgba(0,0,0,0)';
+  card.style.transform='scale(.8)';card.style.opacity='0';
+  setTimeout(()=>{dlg.style.display='none';openS('card-forgot',0);},300);
+});
 document.getElementById('s-notif').addEventListener('click',async function(){
   haptic();
   if(!_isPWA)return;
@@ -2374,6 +2804,13 @@ document.getElementById('s-notif').addEventListener('click',async function(){
     if(ok){this.classList.add('on');localStorage.setItem('inglish_notif','1');_notifEnabled=true;haptic.confirm();}
     else{haptic.error();}
   }else{this.classList.remove('on');localStorage.setItem('inglish_notif','0');_notifEnabled=false;}
+});
+// Auto-clear forgot on 覚えた toggle
+document.getElementById('s-auto-clear').addEventListener('click',function(){
+  haptic();
+  const on=!this.classList.contains('on');
+  this.classList.toggle('on',on);
+  localStorage.setItem('inglish_auto_clear',on?'1':'0');
 });
 
 /* ═══ WALLPAPER SYSTEM ═══ */
@@ -2614,8 +3051,27 @@ setInterval(()=>{
 // On visibility change (app comes back from background)
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
-    // Re-init shake if needed
     if(!_shakeActive)initShake();
+    // Clear pending 10min timer
+    if(_notifTimer10){clearTimeout(_notifTimer10);_notifTimer10=null;}
+    // Check if opened from notification (URL hash or focus)
+    if(localStorage.getItem('_inglish_notif_review')==='1'){
+      localStorage.removeItem('_inglish_notif_review');
+      setTimeout(()=>showNotifReviewDialog(),500);
+    }
+  }else{
+    // App going to background → send forgot word notifications
+    if(_notifEnabled&&_isPWA&&Notification.permission==='granted'){
+      const all=getForgotWords();
+      if(all.length>0){
+        sendForgotNotif(Math.min(3,all.length),'📝 さっき間違えた単語、覚えてる？');
+        if(all.length>3){
+          _notifTimer10=setTimeout(()=>{
+            sendForgotNotif(Math.min(5,all.length),'⏰ 10分経ったよ！まだ覚えきれてない？');
+          },10*60*1000);
+        }
+      }
+    }
   }
 });
 
@@ -2669,7 +3125,7 @@ function openSettings(){
     card.style.position='relative';card.style.margin='auto';
     card.style.maxWidth='800px';card.style.width='90%';card.style.maxHeight='80dvh';
     card.style.borderRadius='22px';card.style.bottom='auto';
-    card.style.transition='transform .8s cubic-bezier(.77,0,.18,1), opacity .8s cubic-bezier(.77,0,.18,1), width .8s cubic-bezier(.77,0,.18,1), max-width .8s cubic-bezier(.77,0,.18,1)';
+    card.style.transition='transform .55s cubic-bezier(.77,0,.18,1), opacity .55s cubic-bezier(.77,0,.18,1), width .55s cubic-bezier(.77,0,.18,1), max-width .55s cubic-bezier(.77,0,.18,1)';
     card.style.transform='scale(0.9)';card.style.opacity='0';
     requestAnimationFrame(()=>{card.style.transform='scale(1)';card.style.opacity='1';});
     // Show only first section on iPad
@@ -2707,6 +3163,7 @@ function openSettings(){
   if(notifRow){notifRow.style.opacity=_isPWA?'1':'.2';notifRow.style.pointerEvents=_isPWA?'':'none';}
   document.getElementById('s-notif').classList.toggle('on',localStorage.getItem('inglish_notif')==='1');
   document.getElementById('s-always-search').classList.toggle('on',localStorage.getItem('inglish_always_search')==='1');
+  document.getElementById('s-auto-clear').classList.toggle('on',localStorage.getItem('inglish_auto_clear')==='1');
   // Sync quiz mode & timer checks
   if(typeof syncQuizChecks==='function')syncQuizChecks();
   if(typeof syncTimerChecks==='function')syncTimerChecks();
@@ -2758,7 +3215,7 @@ function closeSettings(){
       card.style.opacity='';card.style.width='';
     }
     // Always reset transition but keep transform for iPhone reopen
-    card.style.transition='translate .8s cubic-bezier(.34,1.05,.64,1),scale .8s ease';
+    card.style.transition='translate .55s cubic-bezier(.34,1.05,.64,1),scale .55s ease';
     if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
     else restoreHomeFromGrid();
   },400);
@@ -4208,7 +4665,7 @@ window.openS=function(type,arg){
     Object.keys(fCache).forEach(deckIdx=>{
       const deck=fCache[deckIdx];
       Object.keys(deck).forEach(word=>{
-        items.push({e:word,j:deck[word].m||'',w:word,m:deck[word].m||'',p:'',l:1,c:'復習',pr:'',f:'忘れた/難しいマーク',t:[],id:[]});
+        items.push({e:word,j:deck[word].m||'',w:word,m:deck[word].m||'',p:'',l:1,c:'復習',pr:'',f:'忘れた/難しいマーク',t:[],id:[],_origDeck:parseInt(deckIdx,10)});
       });
     });
     if(!items.length){
