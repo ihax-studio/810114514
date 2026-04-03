@@ -41,7 +41,7 @@ body{overscroll-behavior:none;position:fixed;inset:0;overflow:hidden;touch-actio
   --ab:74px;
 }
 html,body{
-  height:100dvh;overflow:hidden;
+  overflow:hidden;
   background:linear-gradient(150deg,#eef2f8 0%,#f8f2fc 50%,#edf7f2 100%);
   font-family:"SF Pro Display","SF Pro Text",-apple-system,"Noto Sans JP",sans-serif;color:var(--tx);
   overscroll-behavior:none;
@@ -358,8 +358,7 @@ resize:none;
 min-height:28px;max-height:88px;
 line-height:1.5;
 overflow-y:auto;
-/* vertically centre single line */
-padding:0;
+padding:0;margin-top:-2px;
 }
 #ti::placeholder{color:rgba(142,142,147,.8)}
 /* ═══ COLLAPSED SEARCH (iOS-style, center pill) ═══ */
@@ -3109,11 +3108,17 @@ function openIframe(url,title){
   ov.style.opacity='0';
   ov.style.transition='translate .5s cubic-bezier(.34,1.05,.64,1),scale .5s ease,opacity .5s ease';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ov.style.translate='0 0';ov.style.scale='1';ov.style.opacity='1';}));
-  // Search: show then collapse after 2s (unless always-show)
+  // Search: show then fully hide after 2s (unless always-show)
   expandSearchBar();
+  document.getElementById('tr-bar').style.opacity='';
+  document.getElementById('tr-bar').style.pointerEvents='';
   if(!alwaysSearchOn()){
     clearTimeout(_iframeSearchT);
-    _iframeSearchT=setTimeout(()=>{document.getElementById('tr-bar').classList.add('collapsed');},2000);
+    _iframeSearchT=setTimeout(()=>{
+      const tb=document.getElementById('tr-bar');
+      tb.classList.add('collapsed');
+      tb.style.opacity='0';tb.style.pointerEvents='none';
+    },2000);
   }
 }
 document.getElementById('iframe-back').addEventListener('click',()=>{
@@ -3138,8 +3143,11 @@ function closeIframeNow(){
     ov.style.background='#fff';
     if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
   },500);
-  // Show search bar after 0.5s
-  setTimeout(()=>{expandSearchBar();},500);
+  // Restore search bar with 0.5s delay
+  const tb=document.getElementById('tr-bar');
+  tb.style.transition='opacity .5s';
+  tb.style.opacity='1';tb.style.pointerEvents='';
+  setTimeout(()=>{expandSearchBar();tb.style.transition='';},500);
 }
 
 function openSettings(){
