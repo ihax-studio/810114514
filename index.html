@@ -3449,51 +3449,53 @@ document.addEventListener('touchstart',e=>{
 
 function startDrag(cell,grid,touch){
   if(!wobbleMode)return;
-  const cells=[...grid.querySelectorAll('.ig-cell')];
-  let idx=cells.indexOf(cell);
-  const rect=cell.getBoundingClientRect();
-  const ox=touch.clientX-rect.left,oy=touch.clientY-rect.top;
-  // Lift dragged cell
-  cell.style.zIndex='100';cell.style.position='relative';
-  cell.style.transition='transform 0s';
-  // Add transition to other cells for smooth swap
-  cells.forEach(c=>{if(c!==cell)c.style.transition='transform .3s cubic-bezier(.34,1.05,.64,1)';});
+  cell.style.zIndex='100';
+  cell.style.transition='none';
+  // Other cells get smooth transition for swap
+  grid.querySelectorAll('.ig-cell').forEach(c=>{
+    if(c!==cell)c.style.transition='transform .3s cubic-bezier(.34,1.05,.64,1)';
+  });
+  let cx=touch.clientX,cy=touch.clientY;
+  let dx=0,dy=0;
   let _swapLock=false;
   
   const onMove=(ev)=>{
     const t=ev.touches[0];
-    cell.style.transform=`translate(${t.clientX-rect.left-ox}px,${t.clientY-rect.top-oy}px) scale(1.1)`;
+    dx=t.clientX-cx;dy=t.clientY-cy;
+    cell.style.transform=`translate(${dx}px,${dy}px) scale(1.1)`;
     if(_swapLock)return;
-    // Find swap target
-    const currentCells=[...grid.querySelectorAll('.ig-cell')];
-    currentCells.forEach((c,i)=>{
-      if(c===cell)return;
+    // Find swap target by center distance
+    const cells=[...grid.querySelectorAll('.ig-cell')];
+    for(const c of cells){
+      if(c===cell)continue;
       const r=c.getBoundingClientRect();
-      const cx=r.left+r.width/2,cy=r.top+r.height/2;
-      const dist=Math.hypot(t.clientX-cx,t.clientY-cy);
-      if(dist<r.width*.6){
+      const mx=r.left+r.width/2,my=r.top+r.height/2;
+      if(Math.hypot(t.clientX-mx,t.clientY-my)<r.width*.55){
         _swapLock=true;
-        const curIdx=currentCells.indexOf(cell);
-        if(i<curIdx)grid.insertBefore(cell,c);
+        const ci=cells.indexOf(cell),ti=cells.indexOf(c);
+        if(ti<ci)grid.insertBefore(cell,c);
         else grid.insertBefore(cell,c.nextSibling);
+        // Reset origin to new position
+        const nr=cell.getBoundingClientRect();
+        cx=t.clientX-dx+(nr.left+nr.width/2-(cell.getBoundingClientRect().left+cell.getBoundingClientRect().width/2));
+        cx=t.clientX;cy=t.clientY;dx=0;dy=0;
+        cell.style.transform='scale(1.1)';
         haptic();
-        setTimeout(()=>{_swapLock=false;},200);
+        setTimeout(()=>{_swapLock=false;},250);
+        break;
       }
-    });
+    }
   };
   const onEnd=()=>{
-    // Smooth return
-    cell.style.transition='transform .3s cubic-bezier(.34,1.05,.64,1)';
+    cell.style.transition='transform .25s cubic-bezier(.34,1.05,.64,1)';
     cell.style.transform='';
     setTimeout(()=>{
-      cell.style.zIndex='';cell.style.position='';cell.style.transition='';
-      cells.forEach(c=>c.style.transition='');
-    },300);
+      cell.style.zIndex='';cell.style.transition='';
+      grid.querySelectorAll('.ig-cell').forEach(c=>c.style.transition='');
+    },250);
     document.removeEventListener('touchmove',onMove);
     document.removeEventListener('touchend',onEnd);
-    // Save new order
-    const newCells=[...grid.querySelectorAll('.ig-cell')];
-    const order=newCells.map(c=>c.dataset.name||'');
+    const order=[...grid.querySelectorAll('.ig-cell')].map(c=>c.dataset.name||'');
     saveIconOrder(order);
   };
   document.addEventListener('touchmove',onMove,{passive:true});
