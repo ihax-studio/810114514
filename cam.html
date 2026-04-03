@@ -253,13 +253,13 @@ function checkOverflow(){
   return false;
 }
 window.capture=()=>{
-  hap.confirm();flash();
+  hideBubble();hap.confirm();flash();
   photos.push(grab());
   updateCount();
   if(!checkOverflow())showBubble('撮影した写真を表示',false);
 };
 window.splitCapture=async()=>{
-  hap.confirm();flash();const d1=grab();
+  hideBubble();hap.confirm();flash();const d1=grab();
   await new Promise(r=>setTimeout(r,500));flash();const d2=grab();
   const i1=new Image(),i2=new Image();i1.src=d1;i2.src=d2;
   await Promise.all([new Promise(r=>{i1.onload=r;}),new Promise(r=>{i2.onload=r;})]);
@@ -270,16 +270,15 @@ window.splitCapture=async()=>{
   if(!checkOverflow())showBubble('撮影した写真を表示',false);
 };
 
-/* ═══ BUBBLE (slide-up) ═══ */
-let _bt=null,_bubbleVideoUrl=null;
+/* ═══ BUBBLE (slide-up, stays until next action) ═══ */
+let _bubbleVideoUrl=null;
 function showBubble(label,isVideo){
   const el=document.getElementById('pvb-float');
   const th=document.getElementById('pvb-thumb');
   const lb=document.getElementById('pvb-label');
   lb.textContent=label;
-  // Reset onclick for photos (video sets custom handler)
   if(!isVideo){
-    el.querySelector('button').onclick=function(){openGallery();};
+    el.querySelector('button').onclick=function(){hap.confirm();openGallery();};
     if(photos.length){th.src=photos[photos.length-1];th.style.display='';}
     th.classList.toggle('lg',photos.length>=MAX);
   }else{
@@ -288,8 +287,8 @@ function showBubble(label,isVideo){
   el.classList.remove('show');
   void el.offsetHeight;
   el.classList.add('show');
-  clearTimeout(_bt);_bt=setTimeout(()=>el.classList.remove('show'),4000);
 }
+function hideBubble(){document.getElementById('pvb-float').classList.remove('show');}
 
 /* ═══ SHUTTER: TAP=PHOTO, LONG PRESS=RECORD ═══ */
 let _recording=false,_recorder=null,_recChunks=[],_recTimer=null,_recStart=0,_recMax=30;
@@ -312,7 +311,7 @@ sh.addEventListener('touchcancel',()=>{if(_shLong){clearTimeout(_shLong);_shLong
 function startRec(){
   if(_recording)return;
   _recording=true;_recChunks=[];
-  hap.confirm();
+  hideBubble();hap.confirm();
   sh.classList.add('rec');
   document.getElementById('rec-bar').classList.add('show');
   _recStart=Date.now();
@@ -497,7 +496,7 @@ spBtn.addEventListener('touchend',e=>{
 spBtn.addEventListener('touchcancel',()=>{if(_spT){clearTimeout(_spT);_spT=null;}});
 
 async function dualCapture(oppDevId){
-  hap.confirm();flash();
+  hideBubble();hap.confirm();flash();
   const img1=grab();photos.push(img1);updateCount();
   // Switch to opposite camera, take photo, switch back
   const origDev=curDev;
