@@ -103,6 +103,14 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transiti
 .dlg-btn.dim{color:rgba(0,0,0,.4)}
 #err{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
 #err.show{display:flex}
+/* Lux slider */
+#lux-bar{position:absolute;top:calc(env(safe-area-inset-top,0px)+80px);left:50%;transform:translateX(-50%) scale(.85);width:88vw;max-width:400px;height:48px;background:rgba(255,255,255,.12);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.2);border-radius:55px;z-index:11;opacity:0;pointer-events:none;transition:opacity .35s cubic-bezier(.77,0,.18,1),transform .4s cubic-bezier(.34,1.05,.64,1);overflow:hidden;display:flex;align-items:center}
+#lux-bar.show{opacity:1;pointer-events:auto;transform:translateX(-50%) scale(1)}
+#lux-list{display:flex;gap:0;overflow-x:scroll;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:100%;height:100%;align-items:center;padding:0 calc(50% - 22px)}
+#lux-list::-webkit-scrollbar{display:none}
+.lux-item{flex-shrink:0;width:44px;height:100%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:rgba(255,255,255,.5);scroll-snap-align:center;cursor:pointer;transition:color .3s,transform .3s cubic-bezier(.34,1.05,.64,1)}
+.lux-item.on{color:#ffc63e;transform:scale(1.15)}
+#lux-dot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:3px;height:3px;border-radius:50%;background:#ffc63e;pointer-events:none;opacity:.7}
 #sec-note{position:absolute;top:-28px;left:0;right:0;text-align:center;font-size:10px;color:rgba(255,255,255,.5);padding:0 20px;pointer-events:none;line-height:1.4}
 </style>
 </head>
@@ -115,6 +123,10 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transiti
     <button class="tb" id="wb" onclick="toggleWB()">☀︎</button>
   </div>
   <div id="rec-bar"><div id="rec-dot"></div><div id="rec-time">00:00</div><div id="rec-hint">指を離して停止</div></div>
+  <div id="lux-bar">
+    <div id="lux-list"></div>
+    <div id="lux-dot"></div>
+  </div>
   <div id="pvb-float"><button onclick="openGallery()"><img class="pvb-thumb" id="pvb-thumb" src=""><span id="pvb-label">撮影した写真を表示</span></button></div>
 </div>
 <div id="ctrls">
@@ -174,7 +186,7 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transiti
   <button onclick="goBack()" style="margin-top:12px;padding:12px 28px;border-radius:55px;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:14px;cursor:pointer;font-family:inherit">ホームに戻る</button>
 </div>
 <script>
-let photos=[],stream=null,curDev=null,devs=[],wbOn=false;
+let photos=[],stream=null,curDev=null,devs=[];
 const MAX=24,cam=document.getElementById('cam');
 
 let _switching=false;
@@ -222,7 +234,6 @@ function grab(){
   const c=document.createElement('canvas');c.width=cam.videoWidth;c.height=cam.videoHeight;
   const ctx=c.getContext('2d');ctx.drawImage(cam,0,0);
   ctx.globalCompositeOperation='overlay';ctx.fillStyle='rgba(255,255,255,.04)';ctx.fillRect(0,0,c.width,c.height);
-  if(wbOn){ctx.fillStyle='rgba(255,255,255,.10)';ctx.fillRect(0,0,c.width,c.height);}
   return c.toDataURL('image/jpeg',.97);
 }
 function updateCount(){
@@ -367,8 +378,45 @@ function updateRecTime(){
   document.getElementById('rec-time').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
 }
 
-/* ═══ SUN ═══ */
-window.toggleWB=()=>{hap();wbOn=!wbOn;document.getElementById('wb').classList.toggle('on',wbOn);cam.style.filter=wbOn?'contrast(1.18) brightness(1.28) saturate(1.12)':'contrast(1.06) brightness(1.18) saturate(1.04)';};
+/* ═══ LUX SLIDER ═══ */
+const LUX_VALS=[0.3,0.5,0.7,1,1.3,1.7,2];
+let luxIdx=3,luxOpen=false; // default=1
+(()=>{
+  const list=document.getElementById('lux-list');
+  LUX_VALS.forEach((v,i)=>{
+    const d=document.createElement('div');d.className='lux-item'+(i===luxIdx?' on':'');
+    d.textContent=v;d.dataset.idx=i;list.appendChild(d);
+  });
+  // Scroll snap to detect selection
+  list.addEventListener('scroll',()=>{
+    const cw=44,sl=list.scrollLeft,ci=Math.round(sl/cw);
+    if(ci>=0&&ci<LUX_VALS.length&&ci!==luxIdx){
+      luxIdx=ci;applyLux();hap();
+      list.querySelectorAll('.lux-item').forEach((el,i)=>el.classList.toggle('on',i===luxIdx));
+    }
+  },{passive:true});
+  // Tap to select
+  list.addEventListener('click',e=>{
+    const item=e.target.closest('.lux-item');if(!item)return;
+    const i=+item.dataset.idx;luxIdx=i;applyLux();hap.confirm();
+    list.querySelectorAll('.lux-item').forEach((el,j)=>el.classList.toggle('on',j===luxIdx));
+    list.scrollTo({left:i*44,behavior:'smooth'});
+  });
+  // Initial scroll
+  requestAnimationFrame(()=>list.scrollLeft=luxIdx*44);
+})();
+function applyLux(){
+  const v=LUX_VALS[luxIdx];
+  const b=100*Math.pow(1.3,v-0.3);
+  const c=100+(v-0.3)*20;
+  cam.style.filter='brightness('+b+'%) contrast('+c+'%) saturate(1.04)';
+  document.getElementById('wb').classList.toggle('on',luxIdx!==3);
+}
+window.toggleWB=()=>{
+  hap();luxOpen=!luxOpen;
+  document.getElementById('lux-bar').classList.toggle('show',luxOpen);
+  if(!luxOpen&&luxIdx===3)document.getElementById('wb').classList.remove('on');
+};
 
 /* ═══ CAMERA SELECT ═══ */
 const CAM_ORDER=[
@@ -623,7 +671,7 @@ document.getElementById('sec-note').textContent='写真は保存し忘れても�
 })();
 
 startCam();
-cam.style.filter='contrast(1.06) brightness(1.18) saturate(1.04)';
+applyLux();
 </script>
 </body>
 </html>
