@@ -380,29 +380,36 @@ function updateRecTime(){
 
 /* ═══ LUX SLIDER ═══ */
 const LUX_VALS=[0.3,0.5,0.7,1,1.3,1.7,2];
-let luxIdx=3,luxOpen=false; // default=1
+let luxIdx=3,luxOpen=false,_luxCloseT=null;
+function luxAutoClose(){
+  clearTimeout(_luxCloseT);
+  _luxCloseT=setTimeout(()=>{
+    if(luxOpen){luxOpen=false;document.getElementById('lux-bar').classList.remove('show');}
+  },500);
+}
 (()=>{
   const list=document.getElementById('lux-list');
   LUX_VALS.forEach((v,i)=>{
     const d=document.createElement('div');d.className='lux-item'+(i===luxIdx?' on':'');
     d.textContent=v;d.dataset.idx=i;list.appendChild(d);
   });
-  // Scroll snap to detect selection
+  let _scrollT=null;
   list.addEventListener('scroll',()=>{
+    clearTimeout(_scrollT);clearTimeout(_luxCloseT);
     const cw=44,sl=list.scrollLeft,ci=Math.round(sl/cw);
     if(ci>=0&&ci<LUX_VALS.length&&ci!==luxIdx){
       luxIdx=ci;applyLux();hap();
       list.querySelectorAll('.lux-item').forEach((el,i)=>el.classList.toggle('on',i===luxIdx));
     }
+    _scrollT=setTimeout(luxAutoClose,150); // Wait for scroll to settle then start close timer
   },{passive:true});
-  // Tap to select
   list.addEventListener('click',e=>{
     const item=e.target.closest('.lux-item');if(!item)return;
     const i=+item.dataset.idx;luxIdx=i;applyLux();hap.confirm();
     list.querySelectorAll('.lux-item').forEach((el,j)=>el.classList.toggle('on',j===luxIdx));
     list.scrollTo({left:i*44,behavior:'smooth'});
+    luxAutoClose();
   });
-  // Initial scroll
   requestAnimationFrame(()=>list.scrollLeft=luxIdx*44);
 })();
 function applyLux(){
@@ -413,9 +420,9 @@ function applyLux(){
   document.getElementById('wb').classList.toggle('on',luxIdx!==3);
 }
 window.toggleWB=()=>{
-  hap();luxOpen=!luxOpen;
+  hap();clearTimeout(_luxCloseT);
+  luxOpen=!luxOpen;
   document.getElementById('lux-bar').classList.toggle('show',luxOpen);
-  if(!luxOpen&&luxIdx===3)document.getElementById('wb').classList.remove('on');
 };
 
 /* ═══ CAMERA SELECT ═══ */
