@@ -282,6 +282,7 @@ function showBubble(label,isVideo){
 
 /* ═══ SHUTTER: TAP=PHOTO, LONG PRESS=RECORD ═══ */
 let _recording=false,_recorder=null,_recChunks=[],_recTimer=null,_recStart=0,_recMax=30;
+let _recCanvas=null,_recCtx=null,_recRaf=null;
 let _shDown=0,_shLong=null;
 const sh=document.getElementById('sh');
 
@@ -298,7 +299,7 @@ sh.addEventListener('touchend',e=>{
 sh.addEventListener('touchcancel',()=>{if(_shLong){clearTimeout(_shLong);_shLong=null;}});
 
 function startRec(){
-  if(!stream||_recording)return;
+  if(_recording)return;
   _recording=true;_recChunks=[];
   hap.confirm();
   sh.classList.add('rec');
@@ -309,10 +310,31 @@ function startRec(){
     updateRecTime();
     if((Date.now()-_recStart)/1000>=_recMax)stopRec();
   },200);
+  // Canvas capture: draws video element (including CSS transforms/transitions)
+  _recCanvas=document.createElement('canvas');
+  _recCanvas.width=cam.videoWidth||1280;
+  _recCanvas.height=cam.videoHeight||720;
+  _recCtx=_recCanvas.getContext('2d');
+  function drawFrame(){
+    if(!_recording)return;
+    // Update canvas size if video resolution changes (lens switch)
+    if(cam.videoWidth&&cam.videoHeight&&(_recCanvas.width!==cam.videoWidth||_recCanvas.height!==cam.videoHeight)){
+      _recCanvas.width=cam.videoWidth;_recCanvas.height=cam.videoHeight;
+    }
+    try{_recCtx.drawImage(cam,0,0,_recCanvas.width,_recCanvas.height);}catch(_){}
+    _recRaf=requestAnimationFrame(drawFrame);
+  }
+  drawFrame();
   try{
+    const canvasStream=_recCanvas.captureStream(30);
+    // Add audio if available
+    if(stream){
+      const audioTracks=stream.getAudioTracks();
+      audioTracks.forEach(t=>canvasStream.addTrack(t));
+    }
     const mimeTypes=['video/mp4','video/webm;codecs=h264','video/webm'];
     let mime=mimeTypes.find(m=>MediaRecorder.isTypeSupported(m))||'';
-    _recorder=new MediaRecorder(stream,mime?{mimeType:mime}:{});
+    _recorder=new MediaRecorder(canvasStream,mime?{mimeType:mime}:{});
     _recorder.ondataavailable=e=>{if(e.data.size>0)_recChunks.push(e.data);};
     _recorder.onstop=()=>{
       const blob=new Blob(_recChunks,{type:_recorder.mimeType||'video/webm'});
@@ -320,7 +342,6 @@ function startRec(){
       _bubbleVideoUrl=URL.createObjectURL(blob);
       const ext=(_recorder?.mimeType||'').includes('mp4')?'mp4':'webm';
       hap.confirm();
-      // Show save bubble
       const btn=document.getElementById('pvb-float').querySelector('button');
       btn.onclick=function(){
         const a=document.createElement('a');a.href=_bubbleVideoUrl;
@@ -329,7 +350,7 @@ function startRec(){
       showBubble('録画したものを保存',true);
     };
     _recorder.start(100);
-  }catch(e){_recording=false;sh.classList.remove('rec');document.getElementById('rec-bar').classList.remove('show');clearInterval(_recTimer);}
+  }catch(e){_recording=false;sh.classList.remove('rec');document.getElementById('rec-bar').classList.remove('show');clearInterval(_recTimer);if(_recRaf)cancelAnimationFrame(_recRaf);}
 }
 function stopRec(){
   if(!_recording)return;
@@ -337,6 +358,7 @@ function stopRec(){
   sh.classList.remove('rec');
   document.getElementById('rec-bar').classList.remove('show');
   clearInterval(_recTimer);
+  if(_recRaf)cancelAnimationFrame(_recRaf);
   hap.error();
   if(_recorder&&_recorder.state!=='inactive')_recorder.stop();
 }
