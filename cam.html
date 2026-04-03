@@ -13,6 +13,7 @@ window.hap.confirm=()=>{try{window.H.confirm();}catch(e){}};
 window.hap.error=()=>{try{window.H.error();}catch(e){}};
 </script>
 <style>
+:root{--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;margin:0;padding:0;touch-action:none}
 html,body{position:fixed;inset:0;overflow:hidden}
 body{background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;display:flex;flex-direction:column;-webkit-user-select:none;user-select:none;animation:camReveal .5s cubic-bezier(.34,1.05,.64,1) both}
@@ -20,7 +21,7 @@ body{background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',syste
 #vf{flex:1;position:relative;overflow:hidden;background:#111}
 video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.34,1.05,.64,1)}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:5;transition:opacity .3s cubic-bezier(.77,0,.18,1)}
-#ctrls{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+12px);background:#000;flex-shrink:0;position:relative}
+#ctrls{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;padding-bottom:calc(var(--sab) + 16px);background:#000;flex-shrink:0;position:relative}
 .cb{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:opacity .3s cubic-bezier(.77,0,.18,1),transform .2s cubic-bezier(.34,1.05,.64,1)}
 .cb:active{transform:scale(.88)}
 .cb.dim{opacity:.3;pointer-events:none}
@@ -30,13 +31,13 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transiti
 #sh.rec .inn{width:28px;height:28px;border-radius:8px;background:#ff3b30}
 #sh.rec{border-color:#ff3b30}
 /* Recording UI */
-#rec-bar{position:absolute;top:0;left:0;right:0;z-index:12;display:flex;align-items:center;justify-content:center;gap:8px;padding:calc(env(safe-area-inset-top,0px)+12px) 16px 8px;background:linear-gradient(180deg,rgba(0,0,0,.6),transparent);opacity:0;pointer-events:none;transition:opacity .3s cubic-bezier(.77,0,.18,1)}
+#rec-bar{position:absolute;top:0;left:0;right:0;z-index:12;display:flex;align-items:center;justify-content:center;gap:8px;padding:calc(var(--sat) + 12px) 16px 8px;background:linear-gradient(180deg,rgba(0,0,0,.6),transparent);opacity:0;pointer-events:none;transition:opacity .3s cubic-bezier(.77,0,.18,1)}
 #rec-bar.show{opacity:1;pointer-events:auto}
 #rec-dot{width:10px;height:10px;border-radius:50%;background:#ff3b30;animation:recPulse 1s ease infinite}
 @keyframes recPulse{0%,100%{opacity:1}50%{opacity:.3}}
 #rec-time{font-size:15px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:.5px}
 #rec-hint{font-size:11px;color:rgba(255,255,255,.5);margin-left:8px}
-#top{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px)+12px) 16px 8px}
+#top{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:calc(var(--sat) + 40px) 16px 8px}
 .tb{width:50px;height:50px;border-radius:50%;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:none;color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:background .3s cubic-bezier(.77,0,.18,1),transform .2s cubic-bezier(.34,1.05,.64,1)}
 .tb:active{transform:scale(.85)}
 .tb.on{background:rgba(255,204,0,.7);color:#000}
@@ -105,7 +106,7 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transiti
 #err{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
 #err.show{display:flex}
 /* Lux slider */
-#lux-bar{position:absolute;top:calc(env(safe-area-inset-top,0px)+68px);left:50%;transform:translateX(-50%) scale(.85);width:88vw;max-width:400px;height:48px;background:rgba(255,255,255,.12);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.2);border-radius:55px;z-index:11;opacity:0;pointer-events:none;transition:opacity .2s cubic-bezier(.77,0,.18,1),transform .25s cubic-bezier(.77,0,.18,1)}
+#lux-bar{position:absolute;top:calc(var(--sat) + 96px);left:50%;transform:translateX(-50%) scale(.85);width:88vw;max-width:400px;height:48px;background:rgba(255,255,255,.12);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.2);border-radius:55px;z-index:11;opacity:0;pointer-events:none;transition:opacity .2s cubic-bezier(.77,0,.18,1),transform .25s cubic-bezier(.77,0,.18,1)}
 #lux-bar.show{opacity:1;pointer-events:auto;transform:translateX(-50%) scale(1);transition:opacity .35s cubic-bezier(.77,0,.18,1),transform .4s cubic-bezier(.34,1.05,.64,1)}
 #lux-list{display:flex;gap:0;overflow-x:scroll;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:100%;height:100%;align-items:center;padding:0 calc(50% - 22px)}
 #lux-list::-webkit-scrollbar{display:none}
@@ -678,6 +679,30 @@ document.getElementById('sec-note').textContent='写真は保存し忘れても�
 
 startCam();
 applyLux();
+
+// Fix safe area in iframe (env() returns 0 inside iframe)
+(()=>{
+  const r=document.documentElement;
+  let sat=parseInt(getComputedStyle(r).getPropertyValue('--sat'))||0;
+  let sab=parseInt(getComputedStyle(r).getPropertyValue('--sab'))||0;
+  if(!sat&&!sab){
+    // Try parent
+    try{
+      const ps=getComputedStyle(window.parent.document.documentElement);
+      sat=parseInt(ps.getPropertyValue('--sat'))||parseInt(ps.getPropertyValue('padding-top'))||0;
+      sab=parseInt(ps.getPropertyValue('--sab'))||0;
+    }catch(_){}
+    // Fallback: detect notch device
+    if(!sat){
+      const isIphone=(/iPhone/.test(navigator.userAgent))&&window.screen.height>800;
+      const isIPad=navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1;
+      if(isIphone){sat=59;sab=34;}
+      else if(isIPad){sat=24;sab=20;}
+    }
+    r.style.setProperty('--sat',sat+'px');
+    r.style.setProperty('--sab',sab+'px');
+  }
+})();
 </script>
 </body>
 </html>
