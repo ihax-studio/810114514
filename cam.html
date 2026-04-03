@@ -24,7 +24,15 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .cb.dim{opacity:.3;pointer-events:none}
 #sh{width:72px;height:72px;border-radius:50%;background:transparent;border:4px solid rgba(255,255,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s}
 #sh:active{transform:scale(.88)}
-#sh .inn{width:58px;height:58px;border-radius:50%;background:#fff}
+#sh .inn{width:58px;height:58px;border-radius:50%;background:#fff;transition:border-radius .3s,width .3s,height .3s,background .3s}
+#sh.rec .inn{width:28px;height:28px;border-radius:8px;background:#ff3b30}
+#sh.rec{border-color:#ff3b30}
+/* Recording UI */
+#rec-bar{position:absolute;top:0;left:0;right:0;z-index:12;display:none;align-items:center;justify-content:center;gap:8px;padding:calc(env(safe-area-inset-top,0px)+12px) 16px 8px;background:linear-gradient(180deg,rgba(0,0,0,.6),transparent)}
+#rec-bar.show{display:flex}
+#rec-dot{width:10px;height:10px;border-radius:50%;background:#ff3b30;animation:recPulse 1s ease infinite}
+@keyframes recPulse{0%,100%{opacity:1}50%{opacity:.3}}
+#rec-time{font-size:15px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:.5px}
 #top{position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px)+28px) 16px 8px}
 .tb{width:50px;height:50px;border-radius:50%;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:none;color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:background .2s,transform .15s}
 .tb:active{transform:scale(.85)}
@@ -92,11 +100,12 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
     <div id="photo-count"></div>
     <button class="tb" id="wb" onclick="toggleWB()">☀︎</button>
   </div>
+  <div id="rec-bar"><div id="rec-dot"></div><div id="rec-time">00:00</div></div>
   <div id="pvb-float"><button onclick="openGallery()"><img class="pvb-thumb" id="pvb-thumb" src="">撮影した写真を表示</button></div>
 </div>
 <div id="ctrls">
   <button class="cb" id="sp" onclick="splitCapture()">⬜⬛</button>
-  <div id="sh" onclick="capture()"><div class="inn"></div></div>
+  <div id="sh"><div class="inn"></div></div>
   <button class="cb" id="sw" onclick="openCS()">↔︎</button>
   <div id="sec-note"></div>
 </div>
@@ -157,8 +166,10 @@ const MAX=12,cam=document.getElementById('cam');
 async function startCam(devId){
   if(stream)stream.getTracks().forEach(t=>t.stop());
   try{
-    const c=devId?{video:{deviceId:{exact:devId}},audio:false}:{video:{facingMode:'environment',width:{ideal:1920}},audio:false};
-    stream=await navigator.mediaDevices.getUserMedia(c);
+    const vc=devId?{deviceId:{exact:devId}}:{facingMode:'environment',width:{ideal:1920}};
+    // Try with audio for video recording
+    try{stream=await navigator.mediaDevices.getUserMedia({video:vc,audio:true});}
+    catch(_){stream=await navigator.mediaDevices.getUserMedia({video:vc,audio:false});}
     cam.srcObject=stream;
     curDev=stream.getVideoTracks()[0]?.getSettings()?.deviceId||null;
     devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
@@ -205,22 +216,83 @@ function showBubble(){
   const el=document.getElementById('pvb-float'),th=document.getElementById('pvb-thumb');
   th.src=photos[photos.length-1];
   if(photos.length>=MAX){
-    // 12枚到達: 大きいプレビュー + スライドアップ
     th.style.width='48px';th.style.height='48px';th.style.borderRadius='10px';
-    el.style.transition='transform .5s cubic-bezier(.34,1.05,.64,1),opacity .4s ease';
-    el.style.transform='translateX(-50%) translateY(80px)';el.style.opacity='0';el.style.pointerEvents='auto';
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.transform='translateX(-50%) translateY(0)';el.style.opacity='1';}));
   }else{
-    th.style.width='28px';th.style.height='28px';th.style.borderRadius='6px';
-    el.style.transition='';el.classList.remove('show');
-    el.style.transform='translateX(-50%) translateY(80px)';el.style.opacity='0';
-    void el.offsetWidth;el.classList.add('show');
+    th.style.width='';th.style.height='';th.style.borderRadius='';
   }
+  // Reset to hidden, then animate in
+  el.classList.remove('show');
+  el.removeAttribute('style');
+  void el.offsetWidth;
+  el.classList.add('show');
   clearTimeout(_bt);_bt=setTimeout(()=>{
     el.classList.remove('show');
-    el.style.transform='translateX(-50%) translateY(80px)';el.style.opacity='0';el.style.pointerEvents='';
     th.style.width='';th.style.height='';th.style.borderRadius='';
   },3500);
+}
+
+/* ═══ SHUTTER: TAP=PHOTO, LONG PRESS=RECORD ═══ */
+let _recording=false,_recorder=null,_recChunks=[],_recTimer=null,_recStart=0,_recMax=30;
+let _shDown=0,_shLong=null;
+const sh=document.getElementById('sh');
+
+sh.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  _shDown=Date.now();
+  _shLong=setTimeout(()=>{_shLong=null;startRec();},400);
+},{passive:false});
+sh.addEventListener('touchend',e=>{
+  e.preventDefault();
+  if(_shLong){clearTimeout(_shLong);_shLong=null;capture();}
+  else if(_recording){stopRec();}
+});
+sh.addEventListener('touchcancel',()=>{if(_shLong){clearTimeout(_shLong);_shLong=null;}});
+
+function startRec(){
+  if(!stream||_recording)return;
+  _recording=true;_recChunks=[];
+  hap.confirm();
+  sh.classList.add('rec');
+  document.getElementById('rec-bar').classList.add('show');
+  _recStart=Date.now();
+  updateRecTime();
+  _recTimer=setInterval(()=>{
+    const elapsed=(Date.now()-_recStart)/1000;
+    updateRecTime();
+    if(elapsed>=_recMax)stopRec();
+  },200);
+  try{
+    const mimeTypes=['video/mp4','video/webm;codecs=h264','video/webm'];
+    let mime=mimeTypes.find(m=>MediaRecorder.isTypeSupported(m))||'';
+    _recorder=new MediaRecorder(stream,mime?{mimeType:mime}:{});
+    _recorder.ondataavailable=e=>{if(e.data.size>0)_recChunks.push(e.data);};
+    _recorder.onstop=()=>{
+      const blob=new Blob(_recChunks,{type:_recorder.mimeType||'video/webm'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;
+      const ext=(_recorder.mimeType||'').includes('mp4')?'mp4':'webm';
+      a.download='video_'+Date.now()+'.'+ext;a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),3000);
+      hap.confirm();
+    };
+    _recorder.start(100);
+  }catch(e){_recording=false;sh.classList.remove('rec');document.getElementById('rec-bar').classList.remove('show');clearInterval(_recTimer);}
+}
+function stopRec(){
+  if(!_recording)return;
+  _recording=false;
+  sh.classList.remove('rec');
+  document.getElementById('rec-bar').classList.remove('show');
+  clearInterval(_recTimer);
+  hap.error();
+  if(_recorder&&_recorder.state!=='inactive')_recorder.stop();
+  _recorder=null;
+}
+function updateRecTime(){
+  const s=Math.floor((Date.now()-_recStart)/1000);
+  const mm=String(Math.floor(s/60)).padStart(2,'0');
+  const ss=String(s%60).padStart(2,'0');
+  document.getElementById('rec-time').textContent=mm+':'+ss;
 }
 
 /* ═══ SUN ═══ */
