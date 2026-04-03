@@ -186,37 +186,30 @@ let _switching=false;
 async function startCam(devId){
   if(_switching)return;
   _switching=true;
+  // Stop old stream
   if(stream){
     try{
       cam.style.transition='transform .3s cubic-bezier(.77,0,.18,1),opacity .2s';
       cam.style.transform='scale(.92)';cam.style.opacity='0';
       await new Promise(r=>setTimeout(r,250));
-      stream.getTracks().forEach(t=>{try{t.stop();}catch(_){}});
-      stream=null;cam.srcObject=null;
     }catch(_){}
+    try{stream.getTracks().forEach(t=>t.stop());}catch(_){}
+    stream=null;cam.srcObject=null;
   }
-  // Try multiple constraint combos until one works
-  const tries=devId?[
-    {video:{deviceId:{exact:devId},width:{ideal:4032},height:{ideal:3024}},audio:true},
-    {video:{deviceId:{exact:devId},width:{ideal:1920}},audio:false},
-    {video:{deviceId:{exact:devId}},audio:false},
-    {video:{deviceId:devId},audio:false}
-  ]:[
-    {video:{facingMode:'environment',width:{ideal:4032},height:{ideal:3024}},audio:true},
-    {video:{facingMode:'environment',width:{ideal:1920}},audio:false},
-    {video:{facingMode:'environment'},audio:false}
-  ];
-  let s=null;
-  for(const c of tries){
-    try{s=await navigator.mediaDevices.getUserMedia(c);break;}catch(_){}
+  // Get new stream - simple constraints only
+  try{
+    const c=devId?{video:{deviceId:{exact:devId}}}:{video:{facingMode:'environment'}};
+    stream=await navigator.mediaDevices.getUserMedia(c);
+  }catch(e){
+    // Fallback without exact
+    try{stream=await navigator.mediaDevices.getUserMedia(devId?{video:{deviceId:devId}}:{video:true});}
+    catch(_){stream=null;}
   }
-  if(!s){
+  if(!stream){
     _switching=false;
-    cam.style.transition='transform .3s,opacity .25s';
-    cam.style.transform='scale(1)';cam.style.opacity='1';
+    cam.style.transition='transform .3s,opacity .25s';cam.style.transform='scale(1)';cam.style.opacity='1';
     return;
   }
-  stream=s;
   cam.srcObject=stream;
   cam.style.transition='none';cam.style.transform='scale(.92)';cam.style.opacity='0';
   requestAnimationFrame(()=>{
