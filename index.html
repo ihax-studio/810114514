@@ -325,7 +325,7 @@ background:linear-gradient(to top,rgba(240,243,250,.98) 70%,rgba(240,243,250,0) 
 transition:background .5s ease,padding 1s cubic-bezier(.77,0,.18,1);
 }
 @media (display-mode:standalone){
-#tr-bar{padding-bottom:4px;z-index:99999}
+#tr-bar{padding-bottom:0;z-index:99999}
 }
 .ti-wrap{
 display:flex;
@@ -375,6 +375,9 @@ padding:0;
   cursor:pointer;white-space:nowrap;
   -webkit-user-select:none;user-select:none;
   opacity:0;pointer-events:none;
+  background:rgba(240,243,250,.5);
+  backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-radius:55px;
   transition:opacity 1s cubic-bezier(.77,0,.18,1);
 }
 #tr-bar.collapsed #search-pill{opacity:1;pointer-events:auto}
@@ -3089,6 +3092,7 @@ function openIframe(url,title){
   haptic.confirm();
   const ov=document.getElementById('iframe-overlay');
   document.getElementById('iframe-content').src=url;
+  document.getElementById('tr-bar').classList.add('collapsed');
   ov.style.visibility='visible';
   ov.style.translate='100% 0';
   ov.style.scale='1.5';
@@ -3114,6 +3118,8 @@ function closeIframeNow(){
     document.getElementById('iframe-content').src='';
     ov.style.visibility='hidden';
     if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
+    // Restore search bar state
+    if(alwaysSearchOn()||isOnHomeScreen())expandSearchBar();
   },500);
 }
 
