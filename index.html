@@ -328,7 +328,7 @@ transition:background .5s ease,padding 1s cubic-bezier(.77,0,.18,1);
 #tr-bar{
   position:fixed!important;
   bottom:0!important;left:0!important;right:0!important;
-  padding:6px 14px 0!important;
+  padding:6px 14px 6px!important;
   z-index:2147483647!important;
   background:transparent!important;
 }
@@ -390,7 +390,7 @@ padding:0;
   border-radius:55px;
   transition:opacity 1s cubic-bezier(.77,0,.18,1);
 }
-#tr-bar.collapsed #search-pill{opacity:1;pointer-events:auto}
+#tr-bar.collapsed #search-pill{opacity:.5;pointer-events:auto}
 #tr-bar.collapsed{background:transparent}
 /* Flag system — single active flag shown, tap to expand picker inline */
 #flag-row{
@@ -3102,8 +3102,6 @@ function openIframe(url,title){
   haptic.confirm();
   const ov=document.getElementById('iframe-overlay');
   document.getElementById('iframe-content').src=url;
-  document.getElementById('tr-bar').classList.add('collapsed');
-  // Camera gets black bg
   ov.style.background=url.includes('cam')?'#000':'#fff';
   ov.style.visibility='visible';
   ov.style.translate='100% 0';
@@ -3111,6 +3109,12 @@ function openIframe(url,title){
   ov.style.opacity='0';
   ov.style.transition='translate .5s cubic-bezier(.34,1.05,.64,1),scale .5s ease,opacity .5s ease';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ov.style.translate='0 0';ov.style.scale='1';ov.style.opacity='1';}));
+  // Search: show then collapse after 2s (unless always-show)
+  expandSearchBar();
+  if(!alwaysSearchOn()){
+    clearTimeout(_iframeSearchT);
+    _iframeSearchT=setTimeout(()=>{document.getElementById('tr-bar').classList.add('collapsed');},2000);
+  }
 }
 document.getElementById('iframe-back').addEventListener('click',()=>{
   haptic();
@@ -3121,8 +3125,10 @@ document.getElementById('iframe-back').addEventListener('click',()=>{
   }catch(e){}
   closeIframeNow();
 });
+let _iframeSearchT=null;
 function closeIframeNow(){
   const ov=document.getElementById('iframe-overlay');
+  clearTimeout(_iframeSearchT);
   ov.style.translate='100% 0';
   ov.style.scale='1.5';
   ov.style.opacity='0';
@@ -3131,8 +3137,9 @@ function closeIframeNow(){
     ov.style.visibility='hidden';
     ov.style.background='#fff';
     if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
-    if(alwaysSearchOn()||isOnHomeScreen())expandSearchBar();
   },500);
+  // Show search bar after 0.5s
+  setTimeout(()=>{expandSearchBar();},500);
 }
 
 function openSettings(){
@@ -4424,7 +4431,7 @@ function showIconGrid(){
     const short=d.name.length>5?d.name.slice(0,4)+'\u2026':d.name;
     const labelHtml=bigMode?'':'<div style="font-size:8px;font-weight:600;color:var(--tx);text-align:center;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+short+'</div>';
     const iconContent=d.icon==='__clock__'?'<svg class="live-clock-svg" viewBox="0 0 40 40" width="'+(fontSize+4)+'" height="'+(fontSize+4)+'"><circle cx="20" cy="20" r="18" fill="none" stroke="rgba(0,0,0,.3)" stroke-width="1.5"/><line class="clk-h" x1="20" y1="20" x2="20" y2="10" stroke="#333" stroke-width="2.5" stroke-linecap="round"/><line class="clk-m" x1="20" y1="20" x2="20" y2="7" stroke="#333" stroke-width="1.5" stroke-linecap="round"/><line class="clk-s" x1="20" y1="20" x2="20" y2="6" stroke="#ff3b30" stroke-width=".8" stroke-linecap="round"/><circle cx="20" cy="20" r="1.5" fill="#333"/></svg>':d.icon;
-    cell.innerHTML='<div class="ig-icon" style="width:'+iconSize+'px;height:'+iconSize+'px;border-radius:14px;background:rgba(255,255,255,.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.85),-1px -.8px 0 rgba(255,255,255,.6),0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:'+fontSize+'px;transition:transform .9s">'+iconContent+'</div>'+labelHtml;
+    cell.innerHTML='<div class="ig-icon" style="width:'+iconSize+'px;height:'+iconSize+'px;border-radius:17px;background:rgba(255,255,255,.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);box-shadow:1.1px 1px 0 rgba(255,255,255,.85),-1px -.8px 0 rgba(255,255,255,.6),0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:'+fontSize+'px;transition:transform .9s">'+iconContent+'</div>'+labelHtml;
     cell.addEventListener('click',()=>{
       if(wobbleMode)return;
       haptic();
