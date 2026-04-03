@@ -124,7 +124,7 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transiti
 <div id="ctrls">
   <button class="cb" id="sp" onclick="splitCapture()">⬜⬛</button>
   <div id="sh"><div class="inn"></div></div>
-  <button class="cb" id="sw" onclick="openCS()">↔︎</button>
+  <button class="cb" id="sw">↔︎</button>
   <div id="sec-note"></div>
 </div>
 <div id="gal">
@@ -179,7 +179,7 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transiti
 </div>
 <script>
 let photos=[],stream=null,curDev=null,devs=[],wbOn=false;
-const MAX=12,cam=document.getElementById('cam');
+const MAX=24,cam=document.getElementById('cam');
 
 async function startCam(devId){
   if(stream)stream.getTracks().forEach(t=>t.stop());
@@ -209,11 +209,20 @@ function updateCount(){
 }
 
 /* ═══ CAPTURE ═══ */
+function checkOverflow(){
+  if(photos.length>=MAX){
+    hap.error();
+    document.getElementById('cd-txt').textContent='全ての写真を保存しますか？（'+photos.length+'枚）';
+    showDlg('cd');
+    return true;
+  }
+  return false;
+}
 window.capture=()=>{
   hap.confirm();flash();
-  if(photos.length>=MAX)photos.shift();
   photos.push(grab());
-  updateCount();showBubble('撮影した写真を表示',false);
+  updateCount();
+  if(!checkOverflow())showBubble('撮影した写真を表示',false);
 };
 window.splitCapture=async()=>{
   hap.confirm();flash();const d1=grab();
@@ -222,9 +231,9 @@ window.splitCapture=async()=>{
   await Promise.all([new Promise(r=>{i1.onload=r;}),new Promise(r=>{i2.onload=r;})]);
   const c=document.createElement('canvas');c.width=Math.max(i1.width,i2.width);c.height=i1.height+i2.height;
   const ctx=c.getContext('2d');ctx.drawImage(i1,0,0,c.width,c.height/2);ctx.drawImage(i2,0,c.height/2,c.width,c.height/2);
-  if(photos.length>=MAX)photos.shift();
   photos.push(c.toDataURL('image/jpeg',.85));
-  updateCount();showBubble('撮影した写真を表示',false);
+  updateCount();
+  if(!checkOverflow())showBubble('撮影した写真を表示',false);
 };
 
 /* ═══ BUBBLE (slide-up) ═══ */
@@ -316,12 +325,55 @@ function updateRecTime(){
 /* ═══ SUN ═══ */
 window.toggleWB=()=>{hap();wbOn=!wbOn;document.getElementById('wb').classList.toggle('on',wbOn);cam.style.filter=wbOn?'contrast(1.22) brightness(1.18) saturate(1.1)':'contrast(1.08) brightness(1.10) saturate(1.02)';};
 
-/* ═══ CAMERA SELECT ═══ */
+/* ═══ CAMERA SELECT (tap=cycle, long-press=list) ═══ */
+const CAM_ORDER=[
+  ['背面超広角','back ultra wide','ultra wide back','back ultrawide'],
+  ['背面トリプル','back triple','triple'],
+  ['背面デュアル広角','back dual wide','dual wide back'],
+  ['背面デュアル','back dual','dual back'],
+  ['背面カメラ','back camera','rear camera','back','rear','environment'],
+  ['背面望遠','back telephoto','telephoto','tele'],
+  ['前面超広角','front ultra wide','ultra wide front','front ultrawide'],
+  ['前面カメラ','front camera','front','front facing','user']
+];
+function camPriority(label){
+  const l=(label||'').toLowerCase();
+  for(let i=0;i<CAM_ORDER.length;i++){
+    if(CAM_ORDER[i].some(k=>l.includes(k)))return i;
+  }
+  return CAM_ORDER.length;
+}
+function getSortedDevs(){return [...devs].sort((a,b)=>camPriority(a.label)-camPriority(b.label));}
+let _swLong=null;
+const swBtn=document.getElementById('sw');
+swBtn.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  _swLong=setTimeout(()=>{_swLong=null;openCS();},500);
+},{passive:false});
+swBtn.addEventListener('touchend',e=>{
+  e.preventDefault();
+  if(_swLong){clearTimeout(_swLong);_swLong=null;cycleCam();}
+});
+swBtn.addEventListener('touchcancel',()=>{if(_swLong){clearTimeout(_swLong);_swLong=null;}});
+
+function cycleCam(){
+  if(devs.length<2)return;
+  hap.confirm();
+  const sorted=getSortedDevs();
+  const curIdx=sorted.findIndex(d=>d.deviceId===curDev);
+  const next=sorted[(curIdx+1)%sorted.length];
+  startCam(next.deviceId);
+}
 window.openCS=()=>{
   hap();if(devs.length<2)return;
   const cl=document.getElementById('cl');cl.innerHTML='';
-  const sorted=sortCams(devs);
-  sorted.forEach((d,i)=>{const b=document.createElement('button');b.className='co';b.textContent=d.label||'カメラ '+(i+1);b.onclick=()=>{hap.confirm();closeCS();startCam(d.deviceId);};cl.appendChild(b);});
+  const sorted=getSortedDevs();
+  sorted.forEach((d,i)=>{
+    const b=document.createElement('button');b.className='co'+(d.deviceId===curDev?' x':'');
+    b.textContent=d.label||'カメラ '+(i+1);
+    b.onclick=()=>{hap.confirm();closeCS();startCam(d.deviceId);};
+    cl.appendChild(b);
+  });
   const x=document.createElement('button');x.className='co x';x.textContent='キャンセル';x.onclick=()=>{hap();closeCS();};cl.appendChild(x);
   document.getElementById('cs').classList.add('show');
 };
@@ -419,11 +471,23 @@ function getFilt(){const s=document.getElementById('sl-sat').value/100,b=documen
 function applyFilt(){const imgs=document.querySelectorAll('.gal-slide img');if(imgs[gIdx])imgs[gIdx].style.filter=editing?getFilt():'';}
 ['sl-sat','sl-bri','sl-bp'].forEach(id=>{document.getElementById(id).addEventListener('input',()=>{_dirty=true;applyFilt();});});
 
-/* ═══ CLOSE CONFIRM ═══ */
+/* ═══ CLOSE / OVERFLOW CONFIRM ═══ */
 let _cb=false;
-window.beforeClose=function(){if(_cb||!photos.length)return true;document.getElementById('cd-txt').textContent=photos.length+'枚の写真があります';showDlg('cd');return false;};
-window.cdSave=function(){hap.confirm();photos.forEach((p,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=p;a.download='photo_'+Date.now()+'_'+(i+1)+'.jpg';a.click();},i*200));_cb=true;setTimeout(()=>{try{window.parent.closeIframeNow();}catch(e){goBack();}},photos.length*200+100);};
-window.cdSkip=function(){hap();_cb=true;try{window.parent.closeIframeNow();}catch(e){goBack();}};
+window.beforeClose=function(){if(_cb||!photos.length)return true;_cb=true;document.getElementById('cd-txt').textContent=photos.length+'枚の写真があります';showDlg('cd');return false;};
+window.cdSave=function(){
+  hap.confirm();
+  const n=photos.length;
+  photos.forEach((p,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=p;a.download='photo_'+Date.now()+'_'+(i+1)+'.jpg';a.click();},i*120));
+  setTimeout(()=>{
+    photos=[];updateCount();hideDlg('cd');
+    if(_cb){try{window.parent.closeIframeNow();}catch(e){goBack();}}
+  },n*120+200);
+};
+window.cdSkip=function(){
+  hap();
+  if(_cb){_cb=false;photos=[];updateCount();hideDlg('cd');try{window.parent.closeIframeNow();}catch(e){goBack();}}
+  else{photos=[];updateCount();hideDlg('cd');}
+};
 
 // Security note
 document.getElementById('sec-note').textContent='写真は保存し忘れても復元できません\u{1F630}';
@@ -441,8 +505,9 @@ document.getElementById('sec-note').textContent='写真は保存し忘れても�
     ring.style.left=x+'px';ring.style.top=y+'px';
     ring.classList.remove('show','shrink');void ring.offsetHeight;
     ring.classList.add('show');
-    // Scale bounce: video 1→1.2→1
-    cam.style.transform='scale(1.05)';
+    // Scale bounce: video 1→1.2→1 (0.5s)
+    cam.style.transition='transform .25s cubic-bezier(.34,1.05,.64,1)';
+    cam.style.transform='scale(1.2)';
     setTimeout(()=>{cam.style.transform='scale(1)';},250);
     setTimeout(()=>{ring.classList.add('shrink');},500);
     setTimeout(()=>{ring.classList.remove('show','shrink');},900);
@@ -461,7 +526,7 @@ document.getElementById('sec-note').textContent='写真は保存し忘れても�
     if(!pinching||e.touches.length!==2)return;
     const d=dist(e.touches);
     const ratio=d/initDist;
-    const s=Math.max(.88,Math.min(1.3,ratio));
+    const s=Math.max(.88,Math.min(1.2,ratio));
     cam.style.transition='none';
     cam.style.transform='scale('+s+')';
   },{passive:true});
@@ -474,17 +539,6 @@ document.getElementById('sec-note').textContent='写真は保存し忘れても�
     }
   },{passive:true});
 })();
-
-/* ═══ CAMERA ORDER (iPhone priority) ═══ */
-const CAM_PRIORITY=['背面超広角','背面トリプル','背面デュアル広角','背面デュアル','背面カメラ','背面','back','rear','背面望遠','前面超広角','前面カメラ','前面','front'];
-function sortCams(list){
-  return [...list].sort((a,b)=>{
-    const al=(a.label||'').toLowerCase(),bl=(b.label||'').toLowerCase();
-    let ai=CAM_PRIORITY.length,bi=CAM_PRIORITY.length;
-    CAM_PRIORITY.forEach((p,i)=>{if(al.includes(p.toLowerCase())&&i<ai)ai=i;if(bl.includes(p.toLowerCase())&&i<bi)bi=i;});
-    return ai-bi;
-  });
-}
 
 startCam();
 cam.style.filter='contrast(1.08) brightness(1.10) saturate(1.02)';
