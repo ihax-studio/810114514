@@ -19,10 +19,6 @@ body{background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',syste
 #vf{flex:1;position:relative;overflow:hidden;background:#111}
 video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.34,1.05,.64,1)}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:5;transition:opacity .3s cubic-bezier(.77,0,.18,1)}
-/* Focus ring */
-#focus-ring{position:absolute;width:70px;height:70px;border:2px solid rgba(255,204,0,.9);border-radius:4px;pointer-events:none;z-index:6;opacity:0;transform:scale(1.4);transition:opacity .15s,transform .15s cubic-bezier(.34,1.05,.64,1)}
-#focus-ring.show{opacity:1;transform:scale(1)}
-#focus-ring.shrink{transform:scale(.9);opacity:0;transition:opacity .3s .3s,transform .3s .3s cubic-bezier(.77,0,.18,1)}
 #ctrls{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;padding-bottom:calc(env(safe-area-inset-bottom,0px)+20px);background:#000;flex-shrink:0;position:relative}
 .cb{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:opacity .3s cubic-bezier(.77,0,.18,1),transform .2s cubic-bezier(.34,1.05,.64,1)}
 .cb:active{transform:scale(.88)}
@@ -113,7 +109,6 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transiti
 <body>
 <div id="vf">
   <video id="cam" autoplay playsinline muted></video>
-  <div id="focus-ring"></div>
   <div id="flash"></div>
   <div id="top">
     <div id="photo-count"></div>
@@ -512,24 +507,6 @@ window.cdSkip=function(){
 
 // Security note
 document.getElementById('sec-note').textContent='写真は保存し忘れても復元できません\u{1F630}';
-
-/* ═══ TAP TO FOCUS ═══ */
-(()=>{
-  const vf=document.getElementById('vf');
-  const ring=document.getElementById('focus-ring');
-  vf.addEventListener('click',e=>{
-    if(e.target.closest('#pvb-float,#top,#rec-bar,.tb'))return;
-    if(_recording||_switching)return;
-    hap();
-    const r=vf.getBoundingClientRect();
-    const x=e.clientX-r.left-35, y=e.clientY-r.top-35;
-    ring.style.left=x+'px';ring.style.top=y+'px';
-    ring.classList.remove('show','shrink');void ring.offsetHeight;
-    ring.classList.add('show');
-    setTimeout(()=>{ring.classList.add('shrink');},500);
-    setTimeout(()=>{ring.classList.remove('show','shrink');},900);
-  });
-})();
 
 /* ═══ PINCH GESTURE → CAMERA SWITCH ═══ */
 (()=>{
