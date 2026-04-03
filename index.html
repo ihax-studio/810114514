@@ -3450,28 +3450,45 @@ document.addEventListener('touchstart',e=>{
 function startDrag(cell,grid,touch){
   if(!wobbleMode)return;
   const cells=[...grid.querySelectorAll('.ig-cell')];
-  const idx=cells.indexOf(cell);
+  let idx=cells.indexOf(cell);
   const rect=cell.getBoundingClientRect();
   const ox=touch.clientX-rect.left,oy=touch.clientY-rect.top;
+  // Lift dragged cell
   cell.style.zIndex='100';cell.style.position='relative';
+  cell.style.transition='transform 0s';
+  // Add transition to other cells for smooth swap
+  cells.forEach(c=>{if(c!==cell)c.style.transition='transform .3s cubic-bezier(.34,1.05,.64,1)';});
+  let _swapLock=false;
   
   const onMove=(ev)=>{
     const t=ev.touches[0];
     cell.style.transform=`translate(${t.clientX-rect.left-ox}px,${t.clientY-rect.top-oy}px) scale(1.1)`;
+    if(_swapLock)return;
     // Find swap target
-    cells.forEach((c,i)=>{
+    const currentCells=[...grid.querySelectorAll('.ig-cell')];
+    currentCells.forEach((c,i)=>{
       if(c===cell)return;
       const r=c.getBoundingClientRect();
-      if(t.clientX>r.left&&t.clientX<r.right&&t.clientY>r.top&&t.clientY<r.bottom){
-        // Swap in DOM
-        if(i<idx)grid.insertBefore(cell,c);
+      const cx=r.left+r.width/2,cy=r.top+r.height/2;
+      const dist=Math.hypot(t.clientX-cx,t.clientY-cy);
+      if(dist<r.width*.6){
+        _swapLock=true;
+        const curIdx=currentCells.indexOf(cell);
+        if(i<curIdx)grid.insertBefore(cell,c);
         else grid.insertBefore(cell,c.nextSibling);
         haptic();
+        setTimeout(()=>{_swapLock=false;},200);
       }
     });
   };
   const onEnd=()=>{
-    cell.style.transform='';cell.style.zIndex='';cell.style.position='';
+    // Smooth return
+    cell.style.transition='transform .3s cubic-bezier(.34,1.05,.64,1)';
+    cell.style.transform='';
+    setTimeout(()=>{
+      cell.style.zIndex='';cell.style.position='';cell.style.transition='';
+      cells.forEach(c=>c.style.transition='');
+    },300);
     document.removeEventListener('touchmove',onMove);
     document.removeEventListener('touchend',onEnd);
     // Save new order
