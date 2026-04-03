@@ -23,7 +23,9 @@ body {
   -webkit-tap-highlight-color: transparent;
   user-select: none; -webkit-user-select: none;
   touch-action: none;
+  animation: clockReveal .5s cubic-bezier(.34,1.05,.64,1) both;
 }
+@keyframes clockReveal{from{transform:scale(1.8);opacity:0}to{transform:scale(1);opacity:1}}
 
 /* ── Backgrounds ── */
 .bg-layer {
