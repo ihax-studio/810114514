@@ -186,7 +186,6 @@ let _switching=false;
 async function startCam(devId){
   if(_switching)return;
   _switching=true;
-  // Stop existing stream safely
   if(stream){
     try{
       cam.style.transition='transform .3s cubic-bezier(.77,0,.18,1),opacity .2s';
@@ -196,23 +195,37 @@ async function startCam(devId){
       stream=null;cam.srcObject=null;
     }catch(_){}
   }
-  try{
-    const vc=devId?{deviceId:{exact:devId},width:{ideal:4032},height:{ideal:3024}}:{facingMode:'environment',width:{ideal:4032},height:{ideal:3024}};
-    let s=null;
-    try{s=await navigator.mediaDevices.getUserMedia({video:vc,audio:true});}
-    catch(_){try{s=await navigator.mediaDevices.getUserMedia({video:vc,audio:false});}catch(_2){}}
-    if(!s){_switching=false;return;}
-    stream=s;
-    cam.srcObject=stream;
-    cam.style.transition='none';cam.style.transform='scale(.92)';cam.style.opacity='0';
-    requestAnimationFrame(()=>{
-      cam.style.transition='transform .3s cubic-bezier(.34,1.05,.64,1),opacity .25s';
-      cam.style.transform='scale(1)';cam.style.opacity='1';
-    });
-    curDev=stream.getVideoTracks()[0]?.getSettings()?.deviceId||null;
-    devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
-    document.getElementById('sw').classList.toggle('dim',devs.length<2);
-  }catch(e){document.getElementById('err').classList.add('show');}
+  // Try multiple constraint combos until one works
+  const tries=devId?[
+    {video:{deviceId:{exact:devId},width:{ideal:4032},height:{ideal:3024}},audio:true},
+    {video:{deviceId:{exact:devId},width:{ideal:1920}},audio:false},
+    {video:{deviceId:{exact:devId}},audio:false},
+    {video:{deviceId:devId},audio:false}
+  ]:[
+    {video:{facingMode:'environment',width:{ideal:4032},height:{ideal:3024}},audio:true},
+    {video:{facingMode:'environment',width:{ideal:1920}},audio:false},
+    {video:{facingMode:'environment'},audio:false}
+  ];
+  let s=null;
+  for(const c of tries){
+    try{s=await navigator.mediaDevices.getUserMedia(c);break;}catch(_){}
+  }
+  if(!s){
+    _switching=false;
+    cam.style.transition='transform .3s,opacity .25s';
+    cam.style.transform='scale(1)';cam.style.opacity='1';
+    return;
+  }
+  stream=s;
+  cam.srcObject=stream;
+  cam.style.transition='none';cam.style.transform='scale(.92)';cam.style.opacity='0';
+  requestAnimationFrame(()=>{
+    cam.style.transition='transform .3s cubic-bezier(.34,1.05,.64,1),opacity .25s';
+    cam.style.transform='scale(1)';cam.style.opacity='1';
+  });
+  curDev=stream.getVideoTracks()[0]?.getSettings()?.deviceId||null;
+  try{devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');}catch(_){}
+  document.getElementById('sw').classList.toggle('dim',devs.length<2);
   setTimeout(()=>{_switching=false;},500);
 }
 function goBack(){try{window.parent.document.getElementById('iframe-back').click();}catch(e){}}
@@ -513,7 +526,7 @@ document.getElementById('sec-note').textContent='写真は保存し忘れても�
   const ring=document.getElementById('focus-ring');
   vf.addEventListener('click',e=>{
     if(e.target.closest('#pvb-float,#top,#rec-bar,.tb'))return;
-    if(_recording)return;
+    if(_recording||_switching)return;
     hap();
     const r=vf.getBoundingClientRect();
     const x=e.clientX-r.left-35, y=e.clientY-r.top-35;
