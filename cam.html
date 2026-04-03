@@ -14,8 +14,8 @@ window.hap.error=()=>{try{window.H.error();}catch(e){}};
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;touch-action:none}
-body{background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;overflow:hidden;height:100dvh;display:flex;flex-direction:column;-webkit-user-select:none;user-select:none;animation:camReveal .88s cubic-bezier(.34,1.05,.64,1) both}
-@keyframes camReveal{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+body{background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;overflow:hidden;height:100dvh;display:flex;flex-direction:column;-webkit-user-select:none;user-select:none;animation:camReveal .5s cubic-bezier(.34,1.05,.64,1) both}
+@keyframes camReveal{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
 #vf{flex:1;position:relative;overflow:hidden;background:#111}
 video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.34,1.05,.64,1)}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:5;transition:opacity .3s cubic-bezier(.77,0,.18,1)}
@@ -206,9 +206,9 @@ async function startCam(devId){
     return;
   }
   cam.srcObject=stream;
-  cam.style.transition='none';cam.style.transform='scale(.92)';cam.style.opacity='0';
+  cam.style.transition='none';cam.style.transform='scale(.8)';cam.style.opacity='0';
   requestAnimationFrame(()=>{
-    cam.style.transition='transform .3s cubic-bezier(.34,1.05,.64,1),opacity .25s';
+    cam.style.transition='transform .5s cubic-bezier(.34,1.05,.64,1),opacity .4s';
     cam.style.transform='scale(1)';cam.style.opacity='1';
   });
   curDev=stream.getVideoTracks()[0]?.getSettings()?.deviceId||null;
@@ -503,13 +503,30 @@ document.getElementById('sec-note').textContent='写真は保存し忘れても�
   const vf=document.getElementById('vf');
   let initDist=0,pinching=false,switched=false;
   function dist(t){return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);}
+  // Sorted + skip triple(1)/dual-wide(2)/dual(3) for pinch
+  function pinchList(){
+    const skip=new Set([1,2,3]);
+    return getSortedDevs().filter(d=>!skip.has(camPriority(d.label)));
+  }
   function cycleCam(dir){
-    if(_switching||devs.length<2)return;
-    let idx=devs.findIndex(d=>d.deviceId===curDev);
-    if(idx<0)idx=0;
+    if(_switching)return;
+    const list=pinchList();
+    if(list.length<2)return;
+    let idx=list.findIndex(d=>d.deviceId===curDev);
+    if(idx<0){
+      // Current cam not in pinch list (e.g. triple) → jump to nearest
+      const sorted=getSortedDevs();
+      const si=sorted.findIndex(d=>d.deviceId===curDev);
+      idx=dir>0?0:list.length-1;
+      // Find closest in pinch list
+      for(let i=0;i<list.length;i++){
+        const pi=sorted.findIndex(d=>d.deviceId===list[i].deviceId);
+        if(pi>=si){idx=dir>0?i:Math.max(0,i-1);break;}
+      }
+    }
     const next=idx+dir;
-    if(next<0||next>=devs.length)return;
-    startCam(devs[next].deviceId);
+    if(next<0||next>=list.length)return;
+    startCam(list[next].deviceId);
   }
   vf.addEventListener('touchstart',e=>{
     if(e.touches.length===2){pinching=true;switched=false;initDist=dist(e.touches);}
