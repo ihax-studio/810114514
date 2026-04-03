@@ -324,7 +324,7 @@ padding:8px 14px calc(16px + var(--sab));
 background:linear-gradient(to top,rgba(240,243,250,.98) 70%,rgba(240,243,250,0) 100%);
 transition:background .5s ease,padding 1s cubic-bezier(.77,0,.18,1);
 }
-@media (display-mode:standalone){#tr-bar{padding-bottom:calc(24px + var(--sab))}}
+@media (display-mode:standalone){#tr-bar{padding-bottom:calc(36px + var(--sab));z-index:9999}}
 .ti-wrap{
 display:flex;
 align-items:flex-end;  /* align items to bottom so send btn stays low */
@@ -953,6 +953,7 @@ overflow:hidden;
       <!-- Sidebar (iPad/Mac only, JS toggles visibility) -->
       <div id="settings-sidebar" style="display:none;width:220px;border-right:1px solid rgba(0,0,0,.08);padding:8px;overflow-y:auto;flex-shrink:0">
         <div class="s-nav-item s-nav-active" data-section="home">ホーム画面</div>
+        <div class="s-nav-item" data-section="display">表示設定</div>
         <div class="s-nav-item" data-section="quiz">クイズモード</div>
         <div class="s-nav-item" data-section="sound">サウンドと触覚</div>
         <div class="s-nav-item" data-section="gesture">ジェスチャ</div>
@@ -968,9 +969,15 @@ overflow:hidden;
             <div class="s-row" id="s-layout-icon"><div class="s-label">アイコン</div><div class="s-check" id="s-check-icon">✓</div></div>
             <div class="s-row" id="s-layout-list"><div class="s-label">リスト</div><div class="s-check s-on" id="s-check-list">✓</div></div>
             <div class="s-row"><div class="s-label">大きいアイコン</div><div class="s-toggle" id="s-bigicon"><div class="s-knob"></div></div></div>
-            <div class="s-row"><div class="s-label">ロック画面</div><div class="s-toggle" id="s-lockscreen"><div class="s-knob"></div></div></div>
             <div class="s-row"><div class="s-label">通知で復習</div><div class="s-toggle" id="s-notif"><div class="s-knob"></div></div></div>
             <div class="s-row"><div class="s-label">覚えたで忘れたから自動削除</div><div class="s-toggle" id="s-auto-clear"><div class="s-knob"></div></div></div>
+          </div>
+        </div>
+        <!-- Display -->
+        <div class="s-section" id="ss-display">
+          <div class="s-sec">表示設定</div>
+          <div class="s-group">
+            <div class="s-row"><div class="s-label">ロック画面</div><div class="s-toggle" id="s-lockscreen"><div class="s-knob"></div></div></div>
             <div class="s-row"><div class="s-label">常に検索を表示</div><div class="s-toggle" id="s-always-search"><div class="s-knob"></div></div></div>
           </div>
         </div>
