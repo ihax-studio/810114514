@@ -330,10 +330,12 @@ transition:background .5s ease,padding 1s cubic-bezier(.77,0,.18,1);
   bottom:0!important;left:0!important;right:0!important;
   padding:6px 14px 0!important;
   z-index:2147483647!important;
-  background:rgba(240,243,250,.5)!important;
-  backdrop-filter:blur(20px) saturate(180%)!important;-webkit-backdrop-filter:blur(20px) saturate(180%)!important;
+  background:transparent!important;
 }
-#tr-bar.collapsed{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+#tr-bar .ti-wrap{
+  background:rgba(255,255,255,.5)!important;
+  backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important;
+}
 }
 .ti-wrap{
 display:flex;
@@ -383,11 +385,9 @@ padding:0;
   cursor:pointer;white-space:nowrap;
   -webkit-user-select:none;user-select:none;
   opacity:0;pointer-events:none;
-  background:rgba(240,243,250,.5)!important;
-  backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
-  border:1px solid rgba(255,255,255,.6);
+  background:rgba(255,255,255,.5)!important;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
   border-radius:55px;
-  box-shadow:0 2px 12px rgba(0,0,0,.08);
   transition:opacity 1s cubic-bezier(.77,0,.18,1);
 }
 #tr-bar.collapsed #search-pill{opacity:1;pointer-events:auto}
@@ -456,10 +456,10 @@ display:none;
 
 /* ════ TRANSLATION OVERLAY (blur + centered card) ════ */
 #tr-overlay{
-position:fixed;inset:0;z-index:500;
+position:fixed;inset:0;z-index:950;
 background:rgba(0,0,0,.12);
-backdrop-filter:blur(8px) saturate(130%);
--webkit-backdrop-filter:blur(8px) saturate(130%);
+backdrop-filter:blur(8px);
+-webkit-backdrop-filter:blur(8px);
 display:flex;align-items:flex-end;justify-content:center;
 padding:0 14px calc(var(--ib) + 14px);
 opacity:0;pointer-events:none;
@@ -3103,6 +3103,8 @@ function openIframe(url,title){
   const ov=document.getElementById('iframe-overlay');
   document.getElementById('iframe-content').src=url;
   document.getElementById('tr-bar').classList.add('collapsed');
+  // Camera gets black bg
+  ov.style.background=url.includes('cam')?'#000':'#fff';
   ov.style.visibility='visible';
   ov.style.translate='100% 0';
   ov.style.scale='1.5';
@@ -3127,8 +3129,8 @@ function closeIframeNow(){
   setTimeout(()=>{
     document.getElementById('iframe-content').src='';
     ov.style.visibility='hidden';
+    ov.style.background='#fff';
     if(localStorage.getItem('inglish_layout')==='icon')showIconGrid();
-    // Restore search bar state
     if(alwaysSearchOn()||isOnHomeScreen())expandSearchBar();
   },500);
 }
