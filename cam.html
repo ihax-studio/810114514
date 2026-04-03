@@ -525,7 +525,8 @@ function getCyclableDevs(){
     if(list.length<2)return;
     const curIdx=list.findIndex(d=>d.deviceId===curDev);
     const ci=curIdx<0?0:curIdx;
-    const next=dir>0?(ci+1)%list.length:(ci-1+list.length)%list.length;
+    const next=ci+dir;
+    if(next<0||next>=list.length)return; // 端で停止
     startCam(list[next].deviceId);
   }
   vf.addEventListener('touchstart',e=>{
