@@ -14,7 +14,8 @@ window.hap.error=()=>{try{window.H.error();}catch(e){}};
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;touch-action:none}
-body{background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;overflow:hidden;height:100dvh;display:flex;flex-direction:column;-webkit-user-select:none;user-select:none}
+body{background:#000;color:#fff;font-family:'SF Pro Display','SF Pro Text',system-ui,sans-serif;overflow:hidden;height:100dvh;display:flex;flex-direction:column;-webkit-user-select:none;user-select:none;animation:camReveal .6s cubic-bezier(.34,1.05,.64,1) both}
+@keyframes camReveal{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
 #vf{flex:1;position:relative;overflow:hidden;background:#111}
 video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.34,1.05,.64,1)}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:5;transition:opacity .3s cubic-bezier(.77,0,.18,1)}
@@ -184,7 +185,7 @@ const MAX=24,cam=document.getElementById('cam');
 async function startCam(devId){
   if(stream)stream.getTracks().forEach(t=>t.stop());
   try{
-    const vc=devId?{deviceId:{exact:devId}}:{facingMode:'environment',width:{ideal:1920}};
+    const vc=devId?{deviceId:{exact:devId},width:{ideal:4032},height:{ideal:3024}}:{facingMode:'environment',width:{ideal:4032},height:{ideal:3024}};
     try{stream=await navigator.mediaDevices.getUserMedia({video:vc,audio:true});}
     catch(_){stream=await navigator.mediaDevices.getUserMedia({video:vc,audio:false});}
     cam.srcObject=stream;
@@ -200,7 +201,7 @@ function grab(){
   const ctx=c.getContext('2d');ctx.drawImage(cam,0,0);
   ctx.globalCompositeOperation='overlay';ctx.fillStyle='rgba(255,255,255,.04)';ctx.fillRect(0,0,c.width,c.height);
   if(wbOn){ctx.fillStyle='rgba(255,255,255,.10)';ctx.fillRect(0,0,c.width,c.height);}
-  return c.toDataURL('image/jpeg',.85);
+  return c.toDataURL('image/jpeg',.97);
 }
 function updateCount(){
   const el=document.getElementById('photo-count');
@@ -231,7 +232,7 @@ window.splitCapture=async()=>{
   await Promise.all([new Promise(r=>{i1.onload=r;}),new Promise(r=>{i2.onload=r;})]);
   const c=document.createElement('canvas');c.width=Math.max(i1.width,i2.width);c.height=i1.height+i2.height;
   const ctx=c.getContext('2d');ctx.drawImage(i1,0,0,c.width,c.height/2);ctx.drawImage(i2,0,c.height/2,c.width,c.height/2);
-  photos.push(c.toDataURL('image/jpeg',.85));
+  photos.push(c.toDataURL('image/jpeg',.97));
   updateCount();
   if(!checkOverflow())showBubble('撮影した写真を表示',false);
 };
@@ -323,7 +324,7 @@ function updateRecTime(){
 }
 
 /* ═══ SUN ═══ */
-window.toggleWB=()=>{hap();wbOn=!wbOn;document.getElementById('wb').classList.toggle('on',wbOn);cam.style.filter=wbOn?'contrast(1.22) brightness(1.18) saturate(1.1)':'contrast(1.08) brightness(1.10) saturate(1.02)';};
+window.toggleWB=()=>{hap();wbOn=!wbOn;document.getElementById('wb').classList.toggle('on',wbOn);cam.style.filter=wbOn?'contrast(1.18) brightness(1.28) saturate(1.12)':'contrast(1.06) brightness(1.18) saturate(1.04)';};
 
 /* ═══ CAMERA SELECT (tap=cycle, long-press=list) ═══ */
 const CAM_ORDER=[
@@ -414,7 +415,7 @@ window.saveAllPhotos=()=>{
     src.onload=()=>{
       const c=document.createElement('canvas');c.width=src.width;c.height=src.height;
       const ctx=c.getContext('2d');ctx.filter=getFilt();ctx.drawImage(src,0,0);
-      photos[gIdx]=c.toDataURL('image/jpeg',.9);
+      photos[gIdx]=c.toDataURL('image/jpeg',.97);
       _dirty=false;editing=false;
       document.getElementById('editor').classList.remove('show');resetSl();
       doSaveAll();
@@ -485,10 +486,6 @@ document.getElementById('sec-note').textContent='写真は保存し忘れても�
     ring.style.left=x+'px';ring.style.top=y+'px';
     ring.classList.remove('show','shrink');void ring.offsetHeight;
     ring.classList.add('show');
-    // Scale bounce: video 1→1.2→1 (0.5s)
-    cam.style.transition='transform .25s cubic-bezier(.34,1.05,.64,1)';
-    cam.style.transform='scale(1.2)';
-    setTimeout(()=>{cam.style.transform='scale(1)';},250);
     setTimeout(()=>{ring.classList.add('shrink');},500);
     setTimeout(()=>{ring.classList.remove('show','shrink');},900);
   });
@@ -533,7 +530,7 @@ document.getElementById('sec-note').textContent='写真は保存し忘れても�
 })();
 
 startCam();
-cam.style.filter='contrast(1.08) brightness(1.10) saturate(1.02)';
+cam.style.filter='contrast(1.06) brightness(1.18) saturate(1.04)';
 </script>
 </body>
 </html>
