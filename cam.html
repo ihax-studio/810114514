@@ -103,12 +103,23 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transiti
 .dlg-btn.dim{color:rgba(0,0,0,.4)}
 #err{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
 #err.show{display:flex}
+/* Split camera */
+#vf.split video{height:50%;position:relative;inset:auto;width:100%}
+#vf.split{display:flex;flex-direction:column}
+#vf.split #cam2{display:block}
+#cam2{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.split-label{position:absolute;left:12px;z-index:7;font-size:10px;font-weight:700;color:#fff;background:rgba(0,0,0,.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:10px;padding:3px 8px;pointer-events:none;opacity:0;transition:opacity .4s}
+#vf.split .split-label{opacity:1}
+#sl1{top:8px}#sl2{top:calc(50% + 8px)}
 #sec-note{position:absolute;top:-28px;left:0;right:0;text-align:center;font-size:10px;color:rgba(255,255,255,.5);padding:0 20px;pointer-events:none;line-height:1.4}
 </style>
 </head>
 <body>
 <div id="vf">
   <video id="cam" autoplay playsinline muted></video>
+  <video id="cam2" autoplay playsinline muted></video>
+  <div class="split-label" id="sl1"></div>
+  <div class="split-label" id="sl2"></div>
   <div id="flash"></div>
   <div id="top">
     <div id="photo-count"></div>
@@ -120,7 +131,7 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transiti
 <div id="ctrls">
   <button class="cb" id="sp" onclick="splitCapture()">⬜⬛</button>
   <div id="sh"><div class="inn"></div></div>
-  <button class="cb" id="sw" onclick="openCS()">↔︎</button>
+  <button class="cb" id="sw">↔︎</button>
   <div id="sec-note"></div>
 </div>
 <div id="gal">
@@ -208,7 +219,7 @@ async function startCam(devId){
   cam.srcObject=stream;
   cam.style.transition='none';cam.style.transform='scale(.8)';cam.style.opacity='0';
   requestAnimationFrame(()=>{
-    cam.style.transition='transform .5s cubic-bezier(.34,1.05,.64,1),opacity .4s';
+    cam.style.transition='transform .88s cubic-bezier(.34,1.05,.64,1),opacity .5s';
     cam.style.transform='scale(1)';cam.style.opacity='1';
   });
   curDev=stream.getVideoTracks()[0]?.getSettings()?.deviceId||null;
@@ -243,7 +254,8 @@ function checkOverflow(){
 }
 window.capture=()=>{
   hap.confirm();flash();
-  photos.push(grab());
+  const img=_splitMode?window._grabSplit():grab();
+  photos.push(img);
   updateCount();
   if(!checkOverflow())showBubble('撮影した写真を表示',false);
 };
@@ -385,6 +397,69 @@ window.openCS=()=>{
 };
 function closeCS(){document.getElementById('cs').classList.remove('show');}
 document.getElementById('cs').addEventListener('click',e=>{if(e.target.id==='cs')closeCS();});
+
+/* ═══ SPLIT CAMERA MODE ═══ */
+let _splitMode=false,_stream2=null;
+const cam2=document.getElementById('cam2');
+
+async function enterSplit(){
+  if(_switching||devs.length<2)return;
+  _switching=true;_splitMode=true;
+  hap.confirm();
+  const vf=document.getElementById('vf');
+  // Pick 2 different cameras
+  let idx1=devs.findIndex(d=>d.deviceId===curDev);
+  if(idx1<0)idx1=0;
+  let idx2=(idx1+1)%devs.length;
+  // Start second stream
+  try{
+    _stream2=await navigator.mediaDevices.getUserMedia({video:{deviceId:{exact:devs[idx2].deviceId}}});
+  }catch(_){try{_stream2=await navigator.mediaDevices.getUserMedia({video:{deviceId:devs[idx2].deviceId}});}catch(_2){_stream2=null;}}
+  if(!_stream2){_splitMode=false;_switching=false;return;}
+  cam2.srcObject=_stream2;
+  // Labels
+  document.getElementById('sl1').textContent=devs[idx1].label||'カメラ 1';
+  document.getElementById('sl2').textContent=devs[idx2].label||'カメラ 2';
+  // Animate split
+  vf.classList.add('split');
+  setTimeout(()=>{_switching=false;},500);
+}
+function exitSplit(){
+  hap();_splitMode=false;
+  const vf=document.getElementById('vf');
+  vf.classList.remove('split');
+  if(_stream2){_stream2.getTracks().forEach(t=>{try{t.stop();}catch(_){}});_stream2=null;}
+  cam2.srcObject=null;
+}
+
+/* ═══ ↔︎ BUTTON: tap=list/exitSplit, 0.2s hold=split ═══ */
+let _swT=null,_swDown=0;
+const swBtn=document.getElementById('sw');
+swBtn.addEventListener('touchstart',e=>{
+  e.preventDefault();_swDown=Date.now();
+  _swT=setTimeout(()=>{_swT=null;if(!_splitMode)enterSplit();},200);
+},{passive:false});
+swBtn.addEventListener('touchend',e=>{
+  e.preventDefault();
+  if(_swT){clearTimeout(_swT);_swT=null;
+    if(_splitMode)exitSplit(); else openCS();
+  }
+});
+swBtn.addEventListener('touchcancel',()=>{if(_swT){clearTimeout(_swT);_swT=null;}});
+
+/* Override grab for split mode */
+const _origGrab=grab;
+window._grabSplit=function(){
+  if(!_splitMode)return _origGrab();
+  const c=document.createElement('canvas');
+  const w=Math.max(cam.videoWidth||640,cam2.videoWidth||640);
+  const h1=cam.videoHeight||480,h2=cam2.videoHeight||480;
+  c.width=w;c.height=h1+h2;
+  const ctx=c.getContext('2d');
+  ctx.drawImage(cam,0,0,w,h1);
+  ctx.drawImage(cam2,0,h1,w,h2);
+  return c.toDataURL('image/jpeg',.97);
+};
 
 /* ═══ GALLERY (slide-up) ═══ */
 let gIdx=0,editing=false;
