@@ -1505,7 +1505,7 @@ overflow:hidden;
 <div class="p2p-dialog" id="p2p-dialog">
   <div class="p2p-card">
     <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:10px">Macに接続</div>
-    <input type="text" id="mac-code-input" placeholder="コード" value="" style="width:100%;padding:14px;border-radius:14px;border:1px solid rgba(0,0,0,.12);font-size:28px;font-weight:800;font-family:inherit;background:rgba(0,0,0,.03);outline:none;color:#000;text-align:center;letter-spacing:10px;margin-bottom:10px;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default" inputmode="numeric">
+    <input type="text" id="mac-code-input" placeholder="6桁コード" value="" style="width:100%;padding:14px;border-radius:14px;border:1px solid rgba(0,0,0,.12);font-size:28px;font-weight:800;font-family:inherit;background:rgba(0,0,0,.03);outline:none;color:#000;text-align:center;letter-spacing:10px;margin-bottom:10px;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default" inputmode="numeric">
     <button id="mac-connect-go-btn" onclick="window._doMacConnect&&window._doMacConnect()" style="width:100%;padding:14px;border-radius:14px;border:none;background:#007aff;color:#fff;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:10px;touch-action:manipulation">接続</button>
     <button id="mac-disconnect-btn" style="display:none;width:100%;padding:12px;border-radius:14px;border:none;background:#ff3b30;color:#fff;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:6px">接続解除</button>
     <div class="p2p-status" id="p2p-status" style="min-height:18px"></div>
@@ -5975,8 +5975,9 @@ if('serviceWorker' in navigator){
     try{
     var codeInput=document.getElementById('mac-code-input');
     var statusEl=document.getElementById('p2p-status');
-    var code=codeInput?codeInput.value.trim():'';
-    if(!code||code.length<4){
+    var rawCode=codeInput?codeInput.value.trim():'';
+    var code=rawCode.startsWith('ihax-')?rawCode:'ihax-'+rawCode;
+    if(!rawCode||rawCode.length<4){
       if(statusEl){statusEl.textContent='コードを入力してください';statusEl.style.color='#ff3b30';}
       try{new Audio(window._SND_ERROR).play();}catch(e){}
       try{haptic.error();}catch(e){}
