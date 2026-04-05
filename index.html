@@ -5914,8 +5914,7 @@ if('serviceWorker' in navigator){
   };
 
   window.openProofreadTool=function(){
-    var ov=document.getElementById('proofread-overlay');
-    if(ov)ov.classList.add('on');
+    window.openProofread('');
   };
   window.openCLIConnect=function(){
     var ov=document.getElementById('cli-connect-overlay');
