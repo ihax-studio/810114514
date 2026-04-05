@@ -1505,7 +1505,10 @@ overflow:hidden;
 <div class="p2p-dialog" id="p2p-dialog">
   <div class="p2p-card">
     <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:10px">Macに接続</div>
-    <input type="text" id="mac-code-input" placeholder="6桁コード" value="" style="width:100%;padding:14px;border-radius:14px;border:1px solid rgba(0,0,0,.12);font-size:28px;font-weight:800;font-family:inherit;background:rgba(0,0,0,.03);outline:none;color:#000;text-align:center;letter-spacing:10px;margin-bottom:10px;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default" inputmode="numeric">
+    <div id="mac-code-row" style="display:flex;align-items:center;gap:0;width:100%;border-radius:14px;border:1px solid rgba(0,0,0,.12);background:rgba(0,0,0,.03);margin-bottom:10px;overflow:hidden">
+      <div id="mac-code-prefix" style="padding:14px 2px 14px 14px;font-size:28px;font-weight:800;color:rgba(0,0,0,.3);letter-spacing:2px;flex-shrink:0;font-family:inherit">ihax-</div>
+      <input type="text" id="mac-code-input" placeholder="000000" value="" maxlength="6" style="flex:1;padding:14px 14px 14px 2px;border:none;font-size:28px;font-weight:800;font-family:inherit;background:transparent;outline:none;color:#000;letter-spacing:10px;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;min-width:0" inputmode="numeric">
+    </div>
     <button id="mac-connect-go-btn" onclick="window._doMacConnect&&window._doMacConnect()" style="width:100%;padding:14px;border-radius:14px;border:none;background:#007aff;color:#fff;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:10px;touch-action:manipulation">接続</button>
     <button id="mac-disconnect-btn" style="display:none;width:100%;padding:12px;border-radius:14px;border:none;background:#ff3b30;color:#fff;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:6px">接続解除</button>
     <div class="p2p-status" id="p2p-status" style="min-height:18px"></div>
@@ -6004,7 +6007,7 @@ if('serviceWorker' in navigator){
         try{addProofreadCard();}catch(e){}
         // Show disconnect button, hide input+connect
         var dcBtn=document.getElementById('mac-disconnect-btn');if(dcBtn)dcBtn.style.display='block';
-        var ci=document.getElementById('mac-code-input');if(ci)ci.style.display='none';
+        var ci=document.getElementById('mac-code-row');if(ci)ci.style.display='none';
         var gb=document.getElementById('mac-connect-go-btn');if(gb)gb.style.display='none';
         setTimeout(function(){var d=document.getElementById('p2p-dialog');if(d)d.classList.remove('on');},1200);
         conn.on('data',function(data){
@@ -6040,7 +6043,7 @@ if('serviceWorker' in navigator){
           window._macConnected=false;window._p2pConn=null;
           try{removeProofreadCard();}catch(e){}
           var dcBtn=document.getElementById('mac-disconnect-btn');if(dcBtn)dcBtn.style.display='none';
-          var ci=document.getElementById('mac-code-input');if(ci)ci.style.display='';
+          var ci=document.getElementById('mac-code-row');if(ci)ci.style.display='';
           var gb=document.getElementById('mac-connect-go-btn');if(gb)gb.style.display='';
         });
       });
@@ -6087,7 +6090,7 @@ if('serviceWorker' in navigator){
         window._macConnected=false;
         try{removeProofreadCard();}catch(e){}
         dcBtn.style.display='none';
-        var ci=document.getElementById('mac-code-input');if(ci)ci.style.display='';
+        var ci=document.getElementById('mac-code-row');if(ci)ci.style.display='';
         var gb=document.getElementById('mac-connect-go-btn');if(gb)gb.style.display='';
         var statusEl=document.getElementById('p2p-status');
         if(statusEl){statusEl.textContent='切断しました';statusEl.style.color='#8e8e93';}
