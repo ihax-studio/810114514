@@ -5692,11 +5692,12 @@ window._ICON_TEND='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAAD
 let _timerInterval=null;
 let _timerEndTime=0;
 let _timerSyncIv=null;
+let _timerTotalSec=0;
 function _ihaxTimerSync(remaining,source){
   const m=Math.floor(remaining/60),s=remaining%60;
   fetch('http://localhost:19876/inglish/timer-sync',{
     method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({remaining:remaining,minutes:m,seconds:s,source:source||'inglish'})
+    body:JSON.stringify({remaining:remaining,totalSeconds:_timerTotalSec||remaining,minutes:m,seconds:s,source:source||'inglish'})
   }).catch(()=>{});
 }
 function startSmartTimer(){
@@ -5715,12 +5716,13 @@ function startSmartTimer(){
   fg.style.strokeDashoffset='0';
   overlay.classList.add('on');
   haptic.confirm();
-  /* Start syncing timer to iHax every 5s */
+  /* Start syncing timer to iHax Dynamic Notch every 1s */
+  _timerTotalSec=totalSec;
   if(_timerSyncIv)clearInterval(_timerSyncIv);
   _timerSyncIv=setInterval(()=>{
     const r=Math.max(0,Math.ceil((_timerEndTime-Date.now())/1000));
     _ihaxTimerSync(r,'inglish');
-  },5000);
+  },1000);
   _ihaxTimerSync(totalSec,'inglish');
   if(_timerInterval)clearInterval(_timerInterval);
   _timerInterval=setInterval(()=>{
