@@ -4505,7 +4505,7 @@ if(isTimerKw){
       <div class="smart-word">\u30BF\u30A4\u30DE\u30FC\u3092\u8A2D\u5B9A</div>
       <div style="display:flex;align-items:center;gap:4px;margin-top:4px">
         <input type="number" class="timer-input" id="smart-timer-input" min="1" max="59" placeholder="\u5206" value="${prefill}" onclick="event.stopPropagation()"> \u5206
-        <button class="timer-confirm-btn" onclick="event.stopPropagation();startSmartTimer()">OK</button>
+        <button class="timer-confirm-btn" onclick="event.stopPropagation();window.startSmartTimer()">OK</button>
       </div>
     </div>
   </div>`;
@@ -4516,7 +4516,7 @@ if(isTimerKw){
 if(/\u6642\u8A08/.test(inputText)){
   const now=new Date();
   const dateStr=`${now.getFullYear()}\u5E74${now.getMonth()+1}\u6708${now.getDate()}\u65E5`;
-  html+=`<div class="smart-result" style="animation-delay:${delayIdx*60}ms;background:rgba(0,122,255,.06);border-color:rgba(0,122,255,.15)" onclick="event.stopPropagation();openSmartClock()">
+  html+=`<div class="smart-result" style="animation-delay:${delayIdx*60}ms;background:rgba(0,122,255,.06);border-color:rgba(0,122,255,.15)" onclick="event.stopPropagation();window.openSmartClock()">
     <img class="smart-icon" src="${window._ICON_CLOCK}">
     <div class="smart-info">
       <div class="smart-word">\u6642\u8A08\u3092\u958B\u304F</div>
@@ -4556,8 +4556,8 @@ if(local && local.data && local.data.length){
 
 /* ── Proofread option (5+ chars) ── */
 if(inputText.length>=5){
-  html+=`<div class="smart-result proofread-result" style="animation-delay:${delayIdx*60}ms" onclick="event.stopPropagation();openProofread('${inputText.replace(/'/g,"\\'")}')">
-    <img class="smart-icon" src="${window._ICON_INTEL}">
+  html+=`<div class="smart-result proofread-result" style="animation-delay:${delayIdx*60}ms" onclick="event.stopPropagation();window.openProofread('${inputText.replace(/'/g,"\\'")}')">
+    <img class="smart-icon" src="${window._ICON_PROOFREAD||window._ICON_INTEL}">
     <div class="smart-info">
       <div class="smart-word">\u9577\u6587\u3092\u6DFB\u524A</div>
       <div class="smart-meaning">\u30BF\u30C3\u30D7\u3057\u3066\u6DFB\u524A\u30C4\u30FC\u30EB\u3092\u958B\u304F</div>
@@ -4580,7 +4580,7 @@ const gResult=await googleTranslate(text,sl,tl);
 const slot=document.getElementById('tr-translate-slot');
 if(slot){
   if(gResult){
-    slot.innerHTML=`<div class="smart-result translate-result" style="animation:smartSlideUp .45s cubic-bezier(.34,1.05,.64,1) both" onclick="event.stopPropagation();speakEn('${gResult.replace(/'/g,"\\'")}')">
+    slot.innerHTML=`<div class="smart-result translate-result" style="animation:smartSlideUp .45s cubic-bezier(.34,1.05,.64,1) both" onclick="event.stopPropagation();window.speakEn('${gResult.replace(/'/g,"\\'")}')">
       <img class="smart-icon" src="${window._ICON_TRANS}">
       <div class="smart-info">
         <div class="smart-word">${gResult}</div>
@@ -6005,7 +6005,7 @@ if('serviceWorker' in navigator){
         if(statusEl){statusEl.textContent='\u2705 iHax に接続しました！';statusEl.style.color='#34c759';}
         try{new Audio(window._SND_CONNECT).play();}catch(e){}
         try{for(var i=0;i<5;i++){setTimeout(function(){haptic.error();},i*30);}}catch(e){}
-        try{addProofreadCard();}catch(e){}
+        try{window.addProofreadCard();}catch(e){console.error('addProofreadCard error',e);}
         // Show disconnect button, hide input+connect
         var dcBtn=document.getElementById('mac-disconnect-btn');if(dcBtn)dcBtn.style.display='block';
         var ci=document.getElementById('mac-code-row');if(ci)ci.style.display='none';
@@ -6042,7 +6042,7 @@ if('serviceWorker' in navigator){
         });
         conn.on('close',function(){
           window._macConnected=false;window._p2pConn=null;
-          try{removeProofreadCard();}catch(e){}
+          try{window.removeProofreadCard();}catch(e){}
           var dcBtn=document.getElementById('mac-disconnect-btn');if(dcBtn)dcBtn.style.display='none';
           var ci=document.getElementById('mac-code-row');if(ci)ci.style.display='';
           var gb=document.getElementById('mac-connect-go-btn');if(gb)gb.style.display='';
@@ -6089,7 +6089,7 @@ if('serviceWorker' in navigator){
         if(_p2pPeer){try{_p2pPeer.destroy();}catch(e){}_p2pPeer=null;}
         window._p2pConn=null;
         window._macConnected=false;
-        try{removeProofreadCard();}catch(e){}
+        try{window.removeProofreadCard();}catch(e){}
         dcBtn.style.display='none';
         var ci=document.getElementById('mac-code-row');if(ci)ci.style.display='';
         var gb=document.getElementById('mac-connect-go-btn');if(gb)gb.style.display='';
