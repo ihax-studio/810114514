@@ -823,7 +823,7 @@ function restartAll(){
     '<div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer-bar" style="width:100%"></div></div>'+
     '<div class="q-tag" id="q-tag"></div><div class="q-text" id="q-text"></div>'+
     '<div class="choices" id="choices"></div>'+
-    '<div class="fb" id="fb" style="display:none"><div class="fb-sentence" id="fb-sentence"></div><div class="fb-jp" id="fb-jp"></div><div class="fb-tip" id="fb-tip"></div></div></div>';
+    '<div class="fb" id="fb" style="display:none"><div class="fb-sentence" id="fb-sentence" onclick="speakEn(this.textContent)" style="cursor:pointer"></div><div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div><div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div></div></div>';
   render();
 }
 function goHome(){
@@ -1084,14 +1084,16 @@ function playAudio(){
 }
 
 function toggleSpeed(){
-  const was=S.speed;
-  S.speed=S.speed===1?1.3:1;
+  const prev=S.speed;
+  if(S.speed===1)S.speed=1.2;
+  else if(S.speed===1.2)S.speed=1.3;
+  else S.speed=1;
   save();
   const btn=document.getElementById('speed-btn');
-  btn.textContent=S.speed===1?'1x':'1.3x';
-  btn.classList.toggle('fast',S.speed===1.3);
+  btn.textContent=S.speed===1?'1x':S.speed+'x';
+  btn.classList.toggle('fast',S.speed!==1);
   if(_audio)_audio.playbackRate=S.speed;
-  playSnd(S.speed===1.3?'speedup':'speeddown');
+  playSnd(S.speed>prev?'speedup':'speeddown');
 }
 
 // ═══ SCREEN READER ═══
@@ -1130,15 +1132,15 @@ function resetAll(){
     '<div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer-bar" style="width:100%"></div></div>'+
     '<div class="q-tag" id="q-tag"></div><div class="q-text" id="q-text"></div>'+
     '<div class="choices" id="choices"></div>'+
-    '<div class="fb" id="fb" style="display:none"><div class="fb-sentence" id="fb-sentence"></div><div class="fb-jp" id="fb-jp"></div><div class="fb-tip" id="fb-tip"></div></div></div>';
+    '<div class="fb" id="fb" style="display:none"><div class="fb-sentence" id="fb-sentence" onclick="speakEn(this.textContent)" style="cursor:pointer"></div><div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div><div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div></div></div>';
   render();
 }
 
 // ═══ INIT ═══
 document.getElementById('btn-shuffle').style.opacity=S.shuffled?'1':'.4';
 const _spBtn=document.getElementById('speed-btn');
-_spBtn.textContent=S.speed===1.3?'1.3x':'1x';
-_spBtn.classList.toggle('fast',S.speed===1.3);
+_spBtn.textContent=S.speed===1?'1x':S.speed+'x';
+_spBtn.classList.toggle('fast',S.speed!==1);
 if(S.idx>=EK2Q.length)S.idx=0;
 
 </script>
