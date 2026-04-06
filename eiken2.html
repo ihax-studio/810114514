@@ -359,6 +359,27 @@ color:#1c1c1e;display:flex;flex-direction:column}
 </div>
 
 <script>
+// ═══ HAPTIC ═══
+let _h=null;
+(()=>{
+  // Try parent's haptic first (when inside iframe)
+  try{if(window.parent&&window.parent.haptic){_h={__parent:true};}}catch(_){}
+  if(!_h)import('https://esm.sh/ios-haptics').then(m=>{_h=m.haptic;}).catch(()=>{});
+})();
+const haptic=()=>{try{if(_h&&_h.__parent){window.parent.haptic();}else if(_h){_h();}}catch(_){}};
+haptic.confirm=()=>{try{if(_h&&_h.__parent){window.parent.haptic.confirm();}else if(_h&&_h.confirm){_h.confirm();}}catch(_){}};
+haptic.error=()=>{try{if(_h&&_h.__parent){window.parent.haptic.error();}else if(_h&&_h.error){_h.error();}}catch(_){}};
+const hapticWrong=()=>{const d=220;[0,1,2,4,5,6].forEach(i=>setTimeout(()=>haptic.error(),i*d));};
+// ═══ FORGOT CACHE SYNC ═══
+const FORGOT_KEY='inglish_forgot_cache';
+function syncForgot(q){
+  try{
+    const c=JSON.parse(localStorage.getItem(FORGOT_KEY)||'{}');
+    if(!c[5])c[5]={};
+    c[5][q.at]={m:q.jt,t:Date.now()};
+    localStorage.setItem(FORGOT_KEY,JSON.stringify(c));
+  }catch(_){}
+}
 // ═══ QUESTION DATA ═══
 const EK2Q=[
 {id:972,q:"Comics ( ) more than a third of all sales of commercial publications in Japan.",ch:["account for", "count in", "explain to", "occupy for"],a:1,at:"account for",af:"eiken2-audio/Q972.mp3",cs:"Comics account for more than a third of all sales of commercial publications in Japan.",jt:"漫画は日本の商業出版物の全売上の3分の1以上を占めている。",st:"account for = ～を説明する、～を占める"},
@@ -795,9 +816,11 @@ function timeUp(){
   S.answered=true;
   stopQTimer();
   playSnd('timeup');
+  hapticWrong();
   const q=getQ();
   S.wrong++;
   if(!S.wrongs.includes(q.id))S.wrongs.push(q.id);
+  syncForgot(q);
   document.querySelectorAll('#choices .ch').forEach(b=>{
     b.classList.add('disabled');
     if(parseInt(b.dataset.i,10)===q.a)b.classList.add('correct');
@@ -827,6 +850,7 @@ function timeUp(){
 function pauseQuiz(){
   if(_paused)return;
   _paused=true;
+  haptic.error();
 
   if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
   stopQTimer();
@@ -866,6 +890,12 @@ function restartAll(){
 }
 function goHome(){
   save();
+  // If inside iframe, close parent overlay
+  try{
+    if(window.parent&&window.parent!==window&&window.parent.closeIframeNow){
+      window.parent.closeIframeNow();return;
+    }
+  }catch(_){}
   if(window.opener||document.referrer){history.back();}
   else{window.location.href='index.html';}
 }
@@ -927,6 +957,7 @@ function openWrongList(){
   ov.querySelector('.qlist-body').addEventListener('click',e=>{
     const item=e.target.closest('.qlist-item');
     if(!item)return;
+    haptic();
     const qid=parseInt(item.dataset.wid,10);
     const order=getOrder();
     const idx=order.findIndex(oi=>EK2Q[oi].id===qid);
@@ -970,6 +1001,7 @@ function closeCorrectList(){
 
 // ═══ SEARCH BY QUESTION ID ═══
 function openSearch(){
+  haptic.error();
   stopQTimer();
   const ov=document.createElement('div');
   ov.className='search-overlay';ov.id='search-overlay';
@@ -1106,11 +1138,13 @@ function handleChoice(btn){
       // Wrong pick → mark wrong, keep going
       btn.classList.add('wrong');btn.classList.add('disabled');
       playSnd('wrong');
+      hapticWrong();
       _multiState.missed=true;
     }else{
       // Correct pick
       btn.classList.add('correct');btn.classList.add('disabled');
       playSnd('correct');
+      haptic.confirm();
     }
     // Check if all correct ones have been found
     const foundCorrects=_multiState.selected.filter(s=>_multiState.info.corrects.includes(s)).length;
@@ -1119,6 +1153,7 @@ function handleChoice(btn){
       document.querySelectorAll('#choices .ch').forEach(b=>b.classList.add('disabled'));
       if(_multiState.missed){
         S.wrong++;if(!S.wrongs.includes(q.id))S.wrongs.push(q.id);
+        syncForgot(q);
       }else{
         S.correct++;if(!S.corrects.includes(q.id))S.corrects.push(q.id);
       }
@@ -1140,11 +1175,14 @@ function handleChoice(btn){
     btn.classList.add('wrong');
     S.wrong++;
     if(!S.wrongs.includes(q.id))S.wrongs.push(q.id);
+    syncForgot(q);
     playSnd('wrong');
+    hapticWrong();
   }else{
     S.correct++;
     if(!S.corrects.includes(q.id))S.corrects.push(q.id);
     playSnd('correct');
+    haptic.confirm();
   }
   showFeedback(q);
 }
@@ -1284,6 +1322,7 @@ function showDone(){
   document.getElementById('hdr-count').textContent=EK2Q.length+' / '+EK2Q.length;
   document.getElementById('prog-bar').style.width='100%';
   playSnd('correct');
+  haptic.confirm();
   document.getElementById('main').innerHTML=
     '<div class="done"><div class="done-emoji">🎉</div>'+
     '<div class="done-title">全問完了！</div>'+
