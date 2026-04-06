@@ -607,11 +607,9 @@ const EK2Q=[
 
 // ═══ SOUND EFFECTS ═══
 const SND={
-  start:new Audio('start.mp3'),
   correct:new Audio('success.caf'),
   wrong:new Audio('retry.caf'),
   timeup:new Audio('failure.caf'),
-  click:new Audio('click.mp3'),
 };
 // Preload all
 Object.values(SND).forEach(a=>{a.load();});
@@ -657,7 +655,7 @@ function getQ(){return EK2Q[getOrder()[S.idx]];}
 // ═══ START ═══
 function startQuiz(){
   unlockAudio().then(()=>{
-    playSnd('start');
+
     const ss=document.getElementById('start-screen');
     ss.classList.add('out');
     setTimeout(()=>{
@@ -733,7 +731,7 @@ function timeUp(){
 function pauseQuiz(){
   if(_paused)return;
   _paused=true;
-  playSnd('click');
+
   if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
   stopQTimer();
   if(_audio){_audio.pause();}
@@ -751,7 +749,7 @@ function pauseQuiz(){
 }
 function resumeQuiz(){
   _paused=false;
-  playSnd('click');
+
   if(!S.answered)startQTimer();
   const ov=document.getElementById('pause-overlay');
   if(ov){ov.classList.add('out');setTimeout(()=>ov.remove(),250);}
@@ -764,7 +762,7 @@ function goHome(){
 
 // ═══ QUESTION LIST ═══
 function openQList(){
-  playSnd('click');
+
   const ov=document.createElement('div');
   ov.className='qlist-overlay';ov.id='qlist-overlay';
   const order=getOrder();
@@ -791,7 +789,7 @@ function openQList(){
     S.idx=qi;S.correct=0;S.wrong=0;save();
     closeQList();
     render();
-    playSnd('click');
+  
   });
 }
 function closeQList(){
@@ -809,7 +807,7 @@ function toggleShuffle(){
     S.order=a;
   }else{S.order=null;}
   S.idx=0;S.correct=0;S.wrong=0;save();render();
-  playSnd('click');
+
 }
 
 // ═══ RENDER ═══
