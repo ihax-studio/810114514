@@ -19,33 +19,64 @@ html{overscroll-behavior:none;width:100%;height:100%;overflow:hidden}
 body{overscroll-behavior:none;width:100%;height:100dvh;overflow:hidden;
 font-family:"SF Pro Display","SF Pro Text",-apple-system,"Noto Sans JP",sans-serif;
 background:linear-gradient(150deg,#eef2f8 0%,#f0edfc 50%,#edf7f2 100%);
-color:#1c1c1e;
-animation:appReveal .8s cubic-bezier(.77,0,.18,1) both}
-@keyframes appReveal{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+color:#1c1c1e;display:flex;flex-direction:column}
 :root{
   --sat:env(safe-area-inset-top,0px);
   --sab:env(safe-area-inset-bottom,0px);
 }
 
+/* ══ START SCREEN ══ */
+.start-screen{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(150deg,#eef2f8 0%,#f0edfc 50%,#edf7f2 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:calc(var(--sat) + 40px) 24px calc(var(--sab) + 40px);
+  animation:startIn .6s ease both;
+}
+.start-screen.out{animation:startOut .5s cubic-bezier(.77,0,.18,1) both;pointer-events:none}
+@keyframes startIn{from{opacity:0}to{opacity:1}}
+@keyframes startOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(1.1)}}
+.start-icon{font-size:72px;margin-bottom:20px;animation:startBounce 2s ease infinite}
+@keyframes startBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.start-title{font-size:28px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px}
+.start-sub{font-size:14px;color:#8e8e93;margin-bottom:36px;text-align:center;line-height:1.5}
+.start-btn{
+  width:180px;height:180px;border-radius:50%;
+  background:linear-gradient(135deg,#007aff,#5856d6);
+  border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:0 8px 32px rgba(0,122,255,.35),0 2px 8px rgba(0,0,0,.1);
+  transition:transform .15s ease;color:#fff;
+}
+.start-btn:active{transform:scale(.93)}
+.start-btn-icon{font-size:48px;margin-bottom:6px}
+.start-btn-text{font-size:20px;font-weight:700}
+.start-resume{
+  margin-top:20px;font-size:15px;color:#007aff;font-weight:600;
+  background:rgba(0,122,255,.08);border:none;cursor:pointer;padding:10px 24px;
+  border-radius:12px;transition:background .2s;
+}
+.start-resume:active{background:rgba(0,122,255,.16)}
+
 /* ══ HEADER ══ */
 .hdr{
-  display:flex;align-items:center;gap:10px;
-  padding:calc(var(--sat) + 14px) 18px 12px;
+  display:flex;align-items:center;gap:8px;
+  padding:calc(var(--sat) + 14px) 16px 12px;
   background:rgba(255,255,255,.72);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
   border-bottom:1px solid rgba(0,0,0,.05);
   position:relative;z-index:10;
 }
 .hdr-back{font-size:28px;background:none;border:none;color:#007aff;cursor:pointer;padding:0 4px;line-height:1;font-weight:300}
 .hdr-title{font-size:17px;font-weight:700;flex:1;letter-spacing:-.02em}
-.hdr-count{font-size:13px;color:#8e8e93;font-weight:500}
-.hdr-shuffle{font-size:20px;background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:8px;transition:background .2s}
-.hdr-shuffle:active{background:rgba(0,0,0,.06)}
+.hdr-btn{font-size:18px;background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:8px;transition:background .2s;min-width:34px;text-align:center}
+.hdr-btn:active{background:rgba(0,0,0,.06)}
+.hdr-count{font-size:13px;color:#007aff;font-weight:600;cursor:pointer;padding:4px 10px;border-radius:8px;background:rgba(0,122,255,.08);transition:background .2s}
+.hdr-count:active{background:rgba(0,122,255,.16)}
 
 /* ══ MAIN BODY ══ */
 .main{
   flex:1;overflow-y:auto;padding:20px 16px 20px;
   -webkit-overflow-scrolling:touch;
-  display:flex;flex-direction:column;
 }
 @media(min-width:768px){.main{max-width:680px;margin:0 auto;width:100%}}
 
@@ -58,11 +89,9 @@ animation:appReveal .8s cubic-bezier(.77,0,.18,1) both}
   animation:cardIn .45s cubic-bezier(.77,0,.18,1) both;
 }
 @keyframes cardIn{from{opacity:0;transform:scale(.9) translateY(24px)}to{opacity:1;transform:scale(1) translateY(0)}}
-
 .q-tag{
   display:inline-block;font-size:11px;font-weight:600;color:#5856d6;
   background:rgba(88,86,214,.1);padding:3px 10px;border-radius:8px;margin-bottom:14px;
-  letter-spacing:.02em;
 }
 .q-text{
   font-size:19px;font-weight:600;line-height:1.65;color:#1c1c1e;
@@ -131,7 +160,7 @@ animation:appReveal .8s cubic-bezier(.77,0,.18,1) both}
 @keyframes audioPulse{from{transform:scale(1)}to{transform:scale(1.08)}}
 
 /* ══ PROGRESS BAR ══ */
-.prog-wrap{height:3px;background:rgba(0,0,0,.05);margin:0 -22px;margin-top:-28px;margin-bottom:20px;border-radius:0}
+.prog-wrap{height:3px;background:rgba(0,0,0,.05);margin:0 -22px;margin-top:-28px;margin-bottom:20px}
 .prog-bar{height:100%;background:linear-gradient(90deg,#007aff,#5856d6);border-radius:0 2px 2px 0;transition:width .4s cubic-bezier(.77,0,.18,1)}
 
 /* ══ COMPLETE SCREEN ══ */
@@ -142,25 +171,107 @@ animation:appReveal .8s cubic-bezier(.77,0,.18,1) both}
 .done-sub{font-size:15px;color:#8e8e93;margin-bottom:28px;line-height:1.5}
 .done-btn{
   padding:14px 36px;border-radius:16px;background:#007aff;color:#fff;
-  border:none;font-size:16px;font-weight:700;cursor:pointer;
-  transition:transform .12s;
+  border:none;font-size:16px;font-weight:700;cursor:pointer;transition:transform .12s;
 }
 .done-btn:active{transform:scale(.95)}
 
-/* layout */
-body{display:flex;flex-direction:column}
+/* ══ PAUSE OVERLAY ══ */
+.pause-overlay{
+  position:fixed;inset:0;z-index:8888;
+  background:rgba(0,0,0,.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  animation:pauseIn .3s ease both;
+}
+.pause-overlay.out{animation:pauseOut .25s ease both;pointer-events:none}
+@keyframes pauseIn{from{opacity:0}to{opacity:1}}
+@keyframes pauseOut{from{opacity:1}to{opacity:0}}
+.pause-box{
+  background:rgba(255,255,255,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-radius:24px;padding:36px 32px;text-align:center;
+  box-shadow:0 12px 40px rgba(0,0,0,.2);
+  animation:pauseBoxIn .35s cubic-bezier(.34,1.56,.64,1) both;
+  min-width:260px;
+}
+@keyframes pauseBoxIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+.pause-icon{font-size:48px;margin-bottom:12px}
+.pause-title{font-size:22px;font-weight:800;margin-bottom:6px}
+.pause-sub{font-size:14px;color:#8e8e93;margin-bottom:24px;line-height:1.4}
+.pause-resume{
+  width:100%;padding:14px;border-radius:14px;background:#007aff;color:#fff;
+  border:none;font-size:17px;font-weight:700;cursor:pointer;margin-bottom:10px;
+  transition:transform .12s;
+}
+.pause-resume:active{transform:scale(.96)}
+.pause-home{
+  width:100%;padding:12px;border-radius:14px;background:rgba(0,0,0,.05);color:#1c1c1e;
+  border:none;font-size:15px;font-weight:600;cursor:pointer;
+  transition:transform .12s;
+}
+.pause-home:active{transform:scale(.96)}
+
+/* ══ QUESTION LIST OVERLAY ══ */
+.qlist-overlay{
+  position:fixed;inset:0;z-index:7777;
+  background:rgba(255,255,255,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  display:flex;flex-direction:column;
+  animation:qlistIn .3s ease both;
+}
+.qlist-overlay.out{animation:qlistOut .25s ease both;pointer-events:none}
+@keyframes qlistIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes qlistOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(30px)}}
+.qlist-hdr{
+  display:flex;align-items:center;gap:10px;
+  padding:calc(var(--sat) + 14px) 16px 12px;
+  border-bottom:1px solid rgba(0,0,0,.06);
+}
+.qlist-close{font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-weight:600;padding:4px 8px}
+.qlist-title{font-size:17px;font-weight:700;flex:1}
+.qlist-body{
+  flex:1;overflow-y:auto;padding:8px 12px calc(var(--sab) + 16px);
+  -webkit-overflow-scrolling:touch;
+}
+.qlist-item{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;border-radius:12px;cursor:pointer;
+  transition:background .15s;
+  border-bottom:1px solid rgba(0,0,0,.04);
+}
+.qlist-item:active{background:rgba(0,122,255,.08)}
+.qlist-item.current{background:rgba(0,122,255,.1)}
+.qlist-num{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;flex-shrink:0;
+  background:rgba(0,0,0,.04);color:#8e8e93;
+}
+.qlist-item.current .qlist-num{background:rgba(0,122,255,.15);color:#007aff}
+.qlist-q{font-size:14px;color:#1c1c1e;flex:1;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 </style>
 </head>
 <body>
 
-<div class="hdr">
-  <button class="hdr-back" onclick="history.back()">‹</button>
-  <div class="hdr-title">英検2級 穴埋め問題集</div>
-  <button class="hdr-shuffle" id="btn-shuffle" onclick="toggleShuffle()" title="シャッフル">🔀</button>
-  <div class="hdr-count" id="hdr-count">1 / 299</div>
+<!-- START SCREEN -->
+<div class="start-screen" id="start-screen">
+  <div class="start-icon">🔥</div>
+  <div class="start-title">英検2級 穴埋め問題集</div>
+  <div class="start-sub">299問 · 4択 · 音声付き<br>熟語・句動詞を完全マスター</div>
+  <button class="start-btn" id="start-btn" onclick="startQuiz()">
+    <div class="start-btn-icon">▶</div>
+    <div class="start-btn-text">START</div>
+  </button>
+  <div class="start-resume" id="start-resume" style="display:none"></div>
 </div>
 
-<div class="main" id="main">
+<!-- QUIZ UI (hidden until start) -->
+<div class="hdr" id="quiz-hdr" style="display:none">
+  <button class="hdr-back" onclick="pauseQuiz()">‹</button>
+  <div class="hdr-title">穴埋め問題集</div>
+  <button class="hdr-btn" id="btn-pause" onclick="pauseQuiz()" title="一時停止">⏸</button>
+  <button class="hdr-btn" id="btn-shuffle" onclick="toggleShuffle()" title="シャッフル">🔀</button>
+  <div class="hdr-count" id="hdr-count" onclick="openQList()">1 / 299</div>
+</div>
+
+<div class="main" id="main" style="display:none">
   <div class="card" id="card">
     <div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
     <div class="q-tag" id="q-tag"></div>
@@ -174,7 +285,7 @@ body{display:flex;flex-direction:column}
   </div>
 </div>
 
-<div class="ftr">
+<div class="ftr" id="quiz-ftr" style="display:none">
   <div class="score">
     <span class="sc-g" id="sc-g">0</span>
     <span class="sc-f" id="sc-f">0</span>
@@ -183,6 +294,7 @@ body{display:flex;flex-direction:column}
 </div>
 
 <script>
+// ═══ QUESTION DATA ═══
 const EK2Q=[
 {id:972,q:"Comics ( ) more than a third of all sales of commercial publications in Japan.",ch:["account for", "count in", "explain to", "occupy for"],a:1,at:"account for",af:"eiken2-audio/Q972.mp3",cs:"Comics account for more than a third of all sales of commercial publications in Japan.",jt:"漫画は日本の商業出版物の全売上の3分の1以上を占めている。",st:"account for = ～を説明する、～を占める"},
 {id:973,q:"They were asked to account ( ) the accident.",ch:["of", "in", "after", "for"],a:4,at:"for",af:"eiken2-audio/Q973.mp3",cs:"They were asked to account for the accident.",jt:"彼らはその事故の原因を説明するよう求められた。",st:"account for = ～を説明する、～を占める"},
@@ -485,10 +597,42 @@ const EK2Q=[
 {id:1272,q:"She was ( ) a dark suit at the meeting.",ch:["dressed", "dressed herself", "dressed in", "dressed up"],a:3,at:"dressed in",af:"eiken2-audio/Q1272.mp3",cs:"She was dressed in a dark suit at the meeting.",jt:"彼女は会議でダークスーツを着ていた。",st:""}
 ];
 
+// ═══ SOUND EFFECTS ═══
+const SND={
+  start:new Audio('start.mp3'),
+  correct:new Audio('collect.mp3'),
+  wrong:new Audio('wrong.mp3'),
+  click:new Audio('click.mp3'),
+};
+// Preload all
+Object.values(SND).forEach(a=>{a.load();});
+function playSnd(name){
+  const a=SND[name];
+  if(!a)return;
+  a.currentTime=0;
+  a.play().catch(()=>{});
+}
+
+// ═══ AUDIO CONTEXT UNLOCK (iOS) ═══
+let _audioUnlocked=false;
+function unlockAudio(){
+  if(_audioUnlocked)return Promise.resolve();
+  return new Promise(r=>{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const buf=ctx.createBuffer(1,1,22050);
+    const src=ctx.createBufferSource();
+    src.buffer=buf;src.connect(ctx.destination);src.start(0);
+    src.onended=()=>{ctx.close();_audioUnlocked=true;r();};
+    setTimeout(()=>{_audioUnlocked=true;r();},100);
+  });
+}
+
+// ═══ STATE ═══
 const SAVE_KEY='ek2q_state';
-let S={idx:0,correct:0,wrong:0,answered:false,shuffled:false,order:null};
+let S={idx:0,correct:0,wrong:0,answered:false,shuffled:false,order:null,started:false};
 let _audio=null;
 let _advTimer=null;
+let _paused=false;
 
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({idx:S.idx,correct:S.correct,wrong:S.wrong,shuffled:S.shuffled,order:S.order}));}catch(_){}}
 function load(){try{const s=localStorage.getItem(SAVE_KEY);if(s){const d=JSON.parse(s);S.idx=d.idx||0;S.correct=d.correct||0;S.wrong=d.wrong||0;S.shuffled=!!d.shuffled;S.order=d.order||null;}}catch(_){}}
@@ -499,26 +643,116 @@ function getOrder(){
 }
 function getQ(){return EK2Q[getOrder()[S.idx]];}
 
+// ═══ START ═══
+function startQuiz(){
+  unlockAudio().then(()=>{
+    playSnd('start');
+    const ss=document.getElementById('start-screen');
+    ss.classList.add('out');
+    setTimeout(()=>{
+      ss.style.display='none';
+      document.getElementById('quiz-hdr').style.display='flex';
+      document.getElementById('main').style.display='';
+      document.getElementById('quiz-ftr').style.display='flex';
+      S.started=true;
+      render();
+    },400);
+  });
+}
+
+// Show resume button on start screen if progress exists
+load();
+if(S.idx>0){
+  const rb=document.getElementById('start-resume');
+  rb.style.display='block';
+  rb.textContent='Q'+(S.idx+1)+'から再開 (✓'+S.correct+' ✗'+S.wrong+')';
+  rb.onclick=startQuiz;
+}
+
+// ═══ PAUSE ═══
+function pauseQuiz(){
+  if(_paused)return;
+  _paused=true;
+  playSnd('click');
+  if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
+  if(_audio){_audio.pause();}
+  const ov=document.createElement('div');
+  ov.className='pause-overlay';ov.id='pause-overlay';
+  ov.innerHTML=
+    '<div class="pause-box">'+
+    '<div class="pause-icon">⏸</div>'+
+    '<div class="pause-title">一時停止</div>'+
+    '<div class="pause-sub">Q'+(S.idx+1)+' / '+EK2Q.length+'<br>✓ '+S.correct+' ✗ '+S.wrong+'</div>'+
+    '<button class="pause-resume" onclick="resumeQuiz()">▶ 再開</button>'+
+    '<button class="pause-home" onclick="goHome()">ホームに戻る</button>'+
+    '</div>';
+  document.body.appendChild(ov);
+}
+function resumeQuiz(){
+  _paused=false;
+  playSnd('click');
+  const ov=document.getElementById('pause-overlay');
+  if(ov){ov.classList.add('out');setTimeout(()=>ov.remove(),250);}
+}
+function goHome(){
+  save();
+  if(window.opener||document.referrer){history.back();}
+  else{window.location.href='index.html';}
+}
+
+// ═══ QUESTION LIST ═══
+function openQList(){
+  playSnd('click');
+  const ov=document.createElement('div');
+  ov.className='qlist-overlay';ov.id='qlist-overlay';
+  const order=getOrder();
+  let items='';
+  for(let i=0;i<EK2Q.length;i++){
+    const q=EK2Q[order[i]];
+    const cur=i===S.idx?'current':'';
+    items+=`<div class="qlist-item ${cur}" data-qi="${i}"><span class="qlist-num">${i+1}</span><span class="qlist-q">${q.q}</span></div>`;
+  }
+  ov.innerHTML=
+    '<div class="qlist-hdr"><button class="qlist-close" onclick="closeQList()">閉じる</button><div class="qlist-title">問題一覧</div></div>'+
+    '<div class="qlist-body" id="qlist-body">'+items+'</div>';
+  document.body.appendChild(ov);
+  // Scroll to current
+  setTimeout(()=>{
+    const cur=ov.querySelector('.qlist-item.current');
+    if(cur)cur.scrollIntoView({block:'center'});
+  },50);
+  // Click to jump
+  ov.querySelector('.qlist-body').addEventListener('click',e=>{
+    const item=e.target.closest('.qlist-item');
+    if(!item)return;
+    const qi=parseInt(item.dataset.qi,10);
+    S.idx=qi;S.correct=0;S.wrong=0;save();
+    closeQList();
+    render();
+    playSnd('click');
+  });
+}
+function closeQList(){
+  const ov=document.getElementById('qlist-overlay');
+  if(ov){ov.classList.add('out');setTimeout(()=>ov.remove(),250);}
+}
+
+// ═══ SHUFFLE ═══
 function toggleShuffle(){
   S.shuffled=!S.shuffled;
   document.getElementById('btn-shuffle').style.opacity=S.shuffled?'1':'.4';
   if(S.shuffled){
-    // Fisher-Yates
     const a=Array.from({length:EK2Q.length},(_,i)=>i);
     for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]];}
     S.order=a;
   }else{S.order=null;}
   S.idx=0;S.correct=0;S.wrong=0;save();render();
-  hap();
+  playSnd('click');
 }
 
-function hap(){try{navigator.vibrate?.(12);}catch(_){}}
-function hapErr(){try{navigator.vibrate?.([30,20,30,20,30]);}catch(_){}}
-
+// ═══ RENDER ═══
 function render(){
-  if(S.idx>=EK2Q.length){
-    showDone();return;
-  }
+  if(S.idx>=EK2Q.length){showDone();return;}
   S.answered=false;
   if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
   const q=getQ();
@@ -526,62 +760,53 @@ function render(){
   document.getElementById('sc-g').textContent=S.correct;
   document.getElementById('sc-f').textContent=S.wrong;
   document.getElementById('prog-bar').style.width=(S.idx/EK2Q.length*100)+'%';
-  // Tag
-  const tag=document.getElementById('q-tag');
-  tag.textContent='Q'+(S.idx+1);
-  // Question with blank
+  document.getElementById('q-tag').textContent='Q'+(S.idx+1);
   document.getElementById('q-text').innerHTML=q.q.replace('( )','<span class="blank" id="blank">(      )</span>');
-  // Feedback hide
   document.getElementById('fb').style.display='none';
-  // Choices
   const chEl=document.getElementById('choices');
   chEl.innerHTML=q.ch.map((c,i)=>
     `<button class="ch" data-i="${i+1}"><span class="ch-num">${i+1}</span><span>${c}</span></button>`
   ).join('');
-  // Animate card
   const card=document.getElementById('card');
   card.style.animation='none';void card.offsetWidth;
   card.style.animation='cardIn .45s cubic-bezier(.77,0,.18,1) both';
-  // Scroll to top
   document.getElementById('main').scrollTop=0;
-  // Auto play audio
+  // Play question audio automatically
   playAudio();
 }
 
+// ═══ CHOICE HANDLER ═══
 function handleChoice(btn){
-  if(S.answered)return;
+  if(S.answered||_paused)return;
   S.answered=true;
   const q=getQ();
   const chosen=parseInt(btn.dataset.i,10);
   const ok=chosen===q.a;
-  // Disable all, mark correct
   document.querySelectorAll('#choices .ch').forEach(b=>{
     b.classList.add('disabled');
     if(parseInt(b.dataset.i,10)===q.a)b.classList.add('correct');
   });
   if(!ok){
     btn.classList.add('wrong');
-    S.wrong++;hapErr();
+    S.wrong++;
+    playSnd('wrong');
   }else{
-    S.correct++;hap();
-    // Extra burst
-    for(let k=0;k<3;k++)setTimeout(()=>hap(),k*40);
+    S.correct++;
+    playSnd('correct');
   }
   document.getElementById('sc-g').textContent=S.correct;
   document.getElementById('sc-f').textContent=S.wrong;
-  // Fill blank
   const blank=document.getElementById('blank');
   if(blank){blank.textContent=q.at;blank.classList.add('revealed');}
-  // Show feedback
   const fb=document.getElementById('fb');
   fb.style.display='block';
   document.getElementById('fb-sentence').textContent=q.cs;
   document.getElementById('fb-jp').textContent=q.jt;
   const tip=document.getElementById('fb-tip');
   if(q.st){tip.textContent=q.st;tip.style.display='block';}else{tip.style.display='none';}
-  // Play audio
+  // Play question audio after answer
   playAudio();
-  // Auto advance
+  save();
   _advTimer=setTimeout(advance,3500);
 }
 
@@ -598,11 +823,12 @@ document.addEventListener('click',e=>{
 });
 // Tap to skip
 document.addEventListener('touchend',e=>{
-  if(!S.answered)return;
-  if(e.target.closest('.ch,.hdr-back,.hdr-shuffle,.audio-btn,.done-btn'))return;
+  if(!S.answered||_paused)return;
+  if(e.target.closest('.ch,.hdr-back,.hdr-btn,.hdr-count,.audio-btn,.done-btn,.pause-overlay,.qlist-overlay'))return;
   advance();
 },{passive:true});
 
+// ═══ AUDIO PLAYBACK ═══
 function playAudio(){
   if(S.idx>=EK2Q.length)return;
   const q=getQ();
@@ -615,16 +841,16 @@ function playAudio(){
   _audio.play().catch(()=>btn.classList.remove('playing'));
 }
 
+// ═══ DONE ═══
 function showDone(){
   document.getElementById('hdr-count').textContent=EK2Q.length+' / '+EK2Q.length;
   document.getElementById('prog-bar').style.width='100%';
+  playSnd('correct');
   document.getElementById('main').innerHTML=
-    '<div class="done">'+
-    '<div class="done-emoji">🎉</div>'+
+    '<div class="done"><div class="done-emoji">🎉</div>'+
     '<div class="done-title">全問完了！</div>'+
     '<div class="done-sub">正解 '+S.correct+' / 不正解 '+S.wrong+'<br>正答率 '+Math.round(S.correct/(S.correct+S.wrong)*100)+'%</div>'+
-    '<button class="done-btn" onclick="resetAll()">もう一度チャレンジ</button>'+
-    '</div>';
+    '<button class="done-btn" onclick="resetAll()">もう一度</button></div>';
 }
 function resetAll(){
   S.idx=0;S.correct=0;S.wrong=0;save();
@@ -636,11 +862,10 @@ function resetAll(){
   render();
 }
 
-// Init
-load();
+// ═══ INIT ═══
 document.getElementById('btn-shuffle').style.opacity=S.shuffled?'1':'.4';
 if(S.idx>=EK2Q.length)S.idx=0;
-render();
+
 </script>
 </body>
 </html>
