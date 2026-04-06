@@ -4712,7 +4712,14 @@ document.addEventListener('click',function(e){
 
 /* ═══ BUILD FORGOT LIST (from cache) ═══ */
 let _forgotFilter='all';
-function buildForgotList(){
+const FORGOT_CATS=[
+  {k:'all',l:'全て'},
+  {k:'ek2',l:'2級穴埋め'},
+  {k:'pass',l:'出る単'},
+  {k:'pre1',l:'Pre1'},
+  {k:'g2',l:'2級'}
+];
+function _getForgotItems(){
   fCache=loadCache();
   const items=[];
   Object.keys(fCache).forEach(deckIdx=>{
@@ -4729,28 +4736,37 @@ function buildForgotList(){
     });
   });
   items.sort((a,b)=>b.t-a.t);
-  if(!items.length)return '<div style="color:var(--sub);text-align:center;font-size:13px;padding:40px 20px">まだ「忘れた」「難しい」にマークされた単語はありません<br><br><span style="font-size:11px">クイズで 😰忘れた or 🤔難しい を押すとここに表示されます</span></div>';
-  const filtered=_forgotFilter==='all'?items:items.filter(w=>w.cat===_forgotFilter);
-  const tabs=[{k:'all',l:'全て'},{k:'ek2',l:'2級穴埋め'},{k:'pass',l:'出る単'},{k:'pre1',l:'Pre1'},{k:'g2',l:'2級'}];
-  let html='<div style="display:flex;gap:8px;padding:12px 6px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">';
-  tabs.forEach(t=>{
+  return items;
+}
+function _renderForgotTabs(allItems){
+  let h='<div id="forgot-tabs" style="display:flex;gap:8px;padding:14px 8px 10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">';
+  FORGOT_CATS.forEach(t=>{
     const on=_forgotFilter===t.k;
-    const cnt=t.k==='all'?items.length:items.filter(w=>w.cat===t.k).length;
-    html+=`<button onclick="event.stopPropagation();haptic();_forgotFilter='${t.k}';document.getElementById('list-cnt').innerHTML=buildForgotList()" style="flex-shrink:0;padding:8px 18px;border-radius:55px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border:1px solid ${on?'#007aff':'rgba(0,0,0,.12)'};background:${on?'#007aff':'rgba(255,255,255,.7)'};color:${on?'#fff':'#333'};backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:${on?'0 2px 8px rgba(0,122,255,.3)':'0 1px 4px rgba(0,0,0,.06)'};transition:all .3s ease">${t.l} <span style="font-size:10px;opacity:.7">${cnt}</span></button>`;
+    const cnt=t.k==='all'?allItems.length:allItems.filter(w=>w.cat===t.k).length;
+    if(cnt===0&&t.k!=='all')return;
+    h+=`<div class="forgot-tab" data-cat="${t.k}" style="flex-shrink:0;padding:9px 20px;border-radius:55px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;border:1.5px solid ${on?'#007aff':'rgba(0,0,0,.12)'};background:${on?'#007aff':'rgba(255,255,255,.75)'};color:${on?'#fff':'#333'};backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:${on?'0 2px 10px rgba(0,122,255,.35)':'0 1px 4px rgba(0,0,0,.06)'};-webkit-user-select:none;user-select:none">${t.l} <span style="font-size:11px;opacity:.65">${cnt}</span></div>`;
   });
-  html+='</div>';
-  html+=`<div class="sh">要復習 ${filtered.length}語</div>`;
+  h+='</div>';
+  return h;
+}
+function _renderForgotItems(items){
+  const filtered=_forgotFilter==='all'?items:items.filter(w=>w.cat===_forgotFilter);
+  if(!filtered.length)return '<div style="color:var(--sub);text-align:center;font-size:13px;padding:30px 20px">このカテゴリにはまだ単語がありません</div>';
+  let h=`<div class="sh">要復習 ${filtered.length}語</div>`;
   filtered.forEach(w=>{
     const enText=(w.en||'').replace(/"/g,'&quot;');
-    const csText=(w.cs||'').replace(/"/g,'&quot;');
-    const speakText=w.cs||w.en||'';
-    const speakAttr=speakText.replace(/"/g,'&quot;');
+    const speakText=(w.cs||w.en||'').replace(/"/g,'&quot;');
     let extra='';
-    if(w.cs)extra+=`<div style="font-size:11px;color:#007aff;margin-top:4px;cursor:pointer" onclick="event.stopPropagation();_speakEn('${speakAttr}')">📖 ${w.cs}</div>`;
+    if(w.cs)extra+=`<div class="forgot-speak" data-speak="${speakText}" style="font-size:11px;color:#007aff;margin-top:4px;cursor:pointer">📖 ${w.cs}</div>`;
     if(w.st)extra+=`<div style="font-size:10px;color:var(--p);margin-top:2px">💡 ${w.st}</div>`;
-    html+=`<div class="li ans-row" data-en="${enText}" onclick="_speakEn('${speakAttr}');haptic()" style="cursor:pointer"><div class="lw">${w.en}</div><div class="lm">${w.ja||''}</div>${extra}<div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px"><span style="font-size:9px;color:var(--sub)">${w.deck}</span><button class="ch forgot-clear-btn" data-word="${enText}" data-deck="${w.deckIdx}" style="font-size:9px;padding:3px 10px;color:var(--g)" onclick="event.stopPropagation()">✓覚えた</button></div></div>`;
+    h+=`<div class="li ans-row forgot-item" data-en="${enText}" data-speak="${speakText}" style="cursor:pointer"><div class="lw">${w.en}</div><div class="lm">${w.ja||''}</div>${extra}<div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px"><span style="font-size:9px;color:var(--sub)">${w.deck}</span><button class="ch forgot-clear-btn" data-word="${enText}" data-deck="${w.deckIdx}" style="font-size:9px;padding:3px 10px;color:var(--g)">✓覚えた</button></div></div>`;
   });
-  return html;
+  return h;
+}
+function buildForgotList(){
+  const items=_getForgotItems();
+  if(!items.length)return '<div style="color:var(--sub);text-align:center;font-size:13px;padding:40px 20px">まだ「忘れた」「難しい」にマークされた単語はありません<br><br><span style="font-size:11px">クイズで 😰忘れた or 🤔難しい を押すとここに表示されます</span></div>';
+  return _renderForgotTabs(items)+'<div id="forgot-items">'+_renderForgotItems(items)+'</div>';
 }
 function _speakEn(text){
   try{
@@ -4763,6 +4779,38 @@ function _speakEn(text){
     window.speechSynthesis.speak(u);
   }catch(_){}
 }
+// ═══ FORGOT LIST EVENT DELEGATION ═══
+document.getElementById('list-cnt').addEventListener('click',e=>{
+  // Tab click
+  const tab=e.target.closest('.forgot-tab');
+  if(tab){
+    e.stopPropagation();
+    haptic();
+    _forgotFilter=tab.dataset.cat;
+    const items=_getForgotItems();
+    const tabsEl=document.getElementById('forgot-tabs');
+    if(tabsEl)tabsEl.outerHTML=_renderForgotTabs(items);
+    const itemsEl=document.getElementById('forgot-items');
+    if(itemsEl)itemsEl.innerHTML=_renderForgotItems(items);
+    return;
+  }
+  // Speak on item tap
+  const item=e.target.closest('.forgot-item');
+  if(item&&!e.target.closest('.forgot-clear-btn')){
+    haptic();
+    const txt=item.dataset.speak||item.dataset.en||'';
+    if(txt)_speakEn(txt);
+    return;
+  }
+  // Speak on sentence tap
+  const speak=e.target.closest('.forgot-speak');
+  if(speak){
+    e.stopPropagation();
+    haptic();
+    _speakEn(speak.dataset.speak||'');
+    return;
+  }
+});
 
 /* ═══ UPDATE BADGE COUNTS ON HOME ═══ */
 function updateHomeBadges(){
