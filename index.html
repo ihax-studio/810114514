@@ -108,15 +108,15 @@ transition:background .5s ease;
 .it{background:linear-gradient(145deg,#32ade6,#007aaa)}
 .ii{background:linear-gradient(145deg,#5856d6,#3634a3)}
 .id2{background:linear-gradient(145deg,#8e8e93,#636366)}
-.hcard-info{flex:1;min-width:0;pointer-events:none}
-.hcard-name{font-size:14px;font-weight:600;color:var(--tx);pointer-events:none}
-.hcard-desc{font-size:11px;color:var(--sub);margin-top:1px;pointer-events:none}
+.hcard-info{flex:1;min-width:0}
+.hcard-name{font-size:14px;font-weight:600;color:var(--tx)}
+.hcard-desc{font-size:11px;color:var(--sub);margin-top:1px}
 .badge{
 background:rgba(0,0,0,.07);border-radius:20px;
 padding:2px 9px;font-size:10px;font-weight:700;color:var(--sub);
-flex-shrink:0;pointer-events:none;
+flex-shrink:0;
 }
-.chev{color:rgba(0,0,0,.2);font-size:14px;margin-left:2px;pointer-events:none}
+.chev{color:rgba(0,0,0,.2);font-size:14px;margin-left:2px}
 
 /* ════ APP ════ */
 #app{
@@ -1118,8 +1118,8 @@ overflow:hidden;
 
 <!-- ══════════ MEMO OVERLAY ══════════ -->
 <!-- ══════════ IFRAME APP OVERLAY ══════════ -->
-<div id="iframe-overlay" style="position:fixed;inset:0;z-index:99999;background:#fff;translate:100% 0;scale:1.5;opacity:0;transition:translate .5s cubic-bezier(.34,1.05,.64,1),scale .5s ease,opacity .5s ease;visibility:hidden">
-  <button id="iframe-back" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:10;width:42px;height:42px;border-radius:55px;background:rgba(255,255,255,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--b);box-shadow:0 2px 8px rgba(0,0,0,.1)">←</button>
+<div id="iframe-overlay" style="position:fixed;inset:0;z-index:2147483646;background:#fff;translate:100% 0;scale:1.5;opacity:0;transition:translate .5s cubic-bezier(.34,1.05,.64,1),scale .5s ease,opacity .5s ease;visibility:hidden">
+  <button id="iframe-back" style="position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);left:16px;z-index:10;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.7);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--b);box-shadow:0 2px 10px rgba(0,0,0,.12)">←</button>
   <iframe id="iframe-content" style="position:absolute;inset:0;width:100%;height:100%;border:none" sandbox="allow-scripts allow-same-origin allow-downloads allow-modals" allow="camera;microphone"></iframe>
 </div>
 
@@ -4711,6 +4711,7 @@ document.addEventListener('click',function(e){
 });
 
 /* ═══ BUILD FORGOT LIST (from cache) ═══ */
+let _forgotFilter='all';
 function buildForgotList(){
   fCache=loadCache();
   const items=[];
@@ -4718,17 +4719,48 @@ function buildForgotList(){
     const deck=fCache[deckIdx];
     const deckLabel=CFG[deckIdx]?CFG[deckIdx].title:('Deck '+deckIdx);
     Object.keys(deck).forEach(word=>{
-      items.push({en:word,ja:deck[word].m,t:deck[word].t,deck:deckLabel,deckIdx:+deckIdx});
+      const d=deck[word];
+      let cat='other';
+      if(+deckIdx===5&&d.cs)cat='ek2';
+      else if(+deckIdx===0)cat='pre1';
+      else if(+deckIdx===1||+deckIdx===2)cat='pass';
+      else if(+deckIdx===4||(+deckIdx===5&&!d.cs))cat='g2';
+      items.push({en:word,ja:d.m,t:d.t,deck:deckLabel,deckIdx:+deckIdx,cs:d.cs||'',st:d.st||'',cat});
     });
   });
   items.sort((a,b)=>b.t-a.t);
   if(!items.length)return '<div style="color:var(--sub);text-align:center;font-size:13px;padding:40px 20px">まだ「忘れた」「難しい」にマークされた単語はありません<br><br><span style="font-size:11px">クイズで 😰忘れた or 🤔難しい を押すとここに表示されます</span></div>';
-  let html=`<div class="sh">要復習 ${items.length}語${window._macConnected?'<button onclick="window.generateMnemonic(window._getForgotWords())" style="float:right;font-size:9px;padding:3px 10px;border-radius:55px;border:1px solid rgba(88,86,214,.2);background:rgba(88,86,214,.08);color:#5856d6;cursor:pointer;font-family:inherit;font-weight:600">🧠 覚え方を生成</button>':''}</div>`;
-  items.forEach(w=>{
+  const filtered=_forgotFilter==='all'?items:items.filter(w=>w.cat===_forgotFilter);
+  const tabs=[{k:'all',l:'全て'},{k:'ek2',l:'2級穴埋め'},{k:'pass',l:'出る単'},{k:'pre1',l:'Pre1'},{k:'g2',l:'2級'}];
+  let html='<div style="display:flex;gap:6px;padding:8px 4px 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">';
+  tabs.forEach(t=>{
+    const on=_forgotFilter===t.k;
+    html+=`<button onclick="haptic();_forgotFilter='${t.k}';document.getElementById('list-cnt').innerHTML=buildForgotList()" style="flex-shrink:0;padding:5px 14px;border-radius:55px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid ${on?'#007aff':'rgba(0,0,0,.1)'};background:${on?'#007aff':'rgba(255,255,255,.6)'};color:${on?'#fff':'var(--sub)'};backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">${t.l}</button>`;
+  });
+  html+='</div>';
+  html+=`<div class="sh">要復習 ${filtered.length}語</div>`;
+  filtered.forEach(w=>{
     const enText=(w.en||'').replace(/"/g,'&quot;');
-    html+=`<div class="li ans-row" data-en="${enText}"><div class="lw">${w.en}</div><div class="lm">${w.ja||''}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px"><span style="font-size:9px;color:var(--sub)">${w.deck}</span><button class="ch forgot-clear-btn" data-word="${enText}" data-deck="${w.deckIdx}" style="font-size:9px;padding:3px 10px;color:var(--g)">✓覚えた</button></div></div>`;
+    const csText=(w.cs||'').replace(/"/g,'&quot;');
+    const speakText=w.cs||w.en||'';
+    const speakAttr=speakText.replace(/"/g,'&quot;');
+    let extra='';
+    if(w.cs)extra+=`<div style="font-size:11px;color:#007aff;margin-top:4px;cursor:pointer" onclick="event.stopPropagation();_speakEn('${speakAttr}')">📖 ${w.cs}</div>`;
+    if(w.st)extra+=`<div style="font-size:10px;color:var(--p);margin-top:2px">💡 ${w.st}</div>`;
+    html+=`<div class="li ans-row" data-en="${enText}" onclick="_speakEn('${speakAttr}');haptic()" style="cursor:pointer"><div class="lw">${w.en}</div><div class="lm">${w.ja||''}</div>${extra}<div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px"><span style="font-size:9px;color:var(--sub)">${w.deck}</span><button class="ch forgot-clear-btn" data-word="${enText}" data-deck="${w.deckIdx}" style="font-size:9px;padding:3px 10px;color:var(--g)" onclick="event.stopPropagation()">✓覚えた</button></div></div>`;
   });
   return html;
+}
+function _speakEn(text){
+  try{
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='en-US';u.rate=0.9;
+    const voices=window.speechSynthesis.getVoices();
+    const alex=voices.find(v=>v.name==='Alex')||voices.find(v=>v.lang.startsWith('en')&&v.localService);
+    if(alex)u.voice=alex;
+    window.speechSynthesis.speak(u);
+  }catch(_){}
 }
 
 /* ═══ UPDATE BADGE COUNTS ON HOME ═══ */
@@ -4747,6 +4779,14 @@ function updateHomeBadges(){
   if(bRetry)bRetry.textContent=fc?fc+'語':'0';
 }
 updateHomeBadges();
+
+// ═══ HCARD CLICK DELEGATION (fix list view tap) ═══
+document.querySelector('.hm-scroll').addEventListener('click',e=>{
+  const card=e.target.closest('.hcard');
+  if(!card)return;
+  const oc=card.getAttribute('onclick');
+  if(oc){e.stopPropagation();try{eval(oc);}catch(_){}}
+},{capture:true});
 
 // Home ★ button → open star list
 document.getElementById('home-star-btn').addEventListener('click',()=>{

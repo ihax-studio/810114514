@@ -951,7 +951,7 @@ function openWrongList(){
     items+=`<div class="qlist-item" data-wid="${qid}"><span class="qlist-num" style="background:rgba(255,59,48,.12);color:#ff3b30">${i+1}</span><span class="qlist-q">${q.q}<br><span style="font-size:12px;color:#34c759;font-weight:600">→ ${q.at}</span></span></div>`;
   });
   ov.innerHTML=
-    '<div class="qlist-hdr"><button class="qlist-close" onclick="haptic();closeWrongList()">閉じる</button><div class="qlist-title">間違えた問題 ('+S.wrongs.length+')</div></div>'+
+    '<div class="qlist-hdr"><div class="qlist-title">間違えた問題 ('+S.wrongs.length+')</div></div>'+
     '<div class="qlist-body">'+items+'</div>'+
     '<button onclick="haptic();closeWrongList()" style="position:fixed;bottom:calc(env(safe-area-inset-bottom,0px)+16px);left:16px;z-index:10;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.7);box-shadow:0 2px 10px rgba(0,0,0,.12);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#007aff">←</button>';
   document.body.appendChild(ov);
