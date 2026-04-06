@@ -4722,7 +4722,7 @@ function buildForgotList(){
       const d=deck[word];
       let cat='other';
       if(+deckIdx===5&&d.cs)cat='ek2';
-      else if(+deckIdx===0)cat='pre1';
+      else if(+deckIdx===0||+deckIdx===3)cat='pre1';
       else if(+deckIdx===1||+deckIdx===2)cat='pass';
       else if(+deckIdx===4||(+deckIdx===5&&!d.cs))cat='g2';
       items.push({en:word,ja:d.m,t:d.t,deck:deckLabel,deckIdx:+deckIdx,cs:d.cs||'',st:d.st||'',cat});
@@ -4732,10 +4732,11 @@ function buildForgotList(){
   if(!items.length)return '<div style="color:var(--sub);text-align:center;font-size:13px;padding:40px 20px">まだ「忘れた」「難しい」にマークされた単語はありません<br><br><span style="font-size:11px">クイズで 😰忘れた or 🤔難しい を押すとここに表示されます</span></div>';
   const filtered=_forgotFilter==='all'?items:items.filter(w=>w.cat===_forgotFilter);
   const tabs=[{k:'all',l:'全て'},{k:'ek2',l:'2級穴埋め'},{k:'pass',l:'出る単'},{k:'pre1',l:'Pre1'},{k:'g2',l:'2級'}];
-  let html='<div style="display:flex;gap:6px;padding:8px 4px 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">';
+  let html='<div style="display:flex;gap:8px;padding:12px 6px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">';
   tabs.forEach(t=>{
     const on=_forgotFilter===t.k;
-    html+=`<button onclick="haptic();_forgotFilter='${t.k}';document.getElementById('list-cnt').innerHTML=buildForgotList()" style="flex-shrink:0;padding:5px 14px;border-radius:55px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid ${on?'#007aff':'rgba(0,0,0,.1)'};background:${on?'#007aff':'rgba(255,255,255,.6)'};color:${on?'#fff':'var(--sub)'};backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">${t.l}</button>`;
+    const cnt=t.k==='all'?items.length:items.filter(w=>w.cat===t.k).length;
+    html+=`<button onclick="event.stopPropagation();haptic();_forgotFilter='${t.k}';document.getElementById('list-cnt').innerHTML=buildForgotList()" style="flex-shrink:0;padding:8px 18px;border-radius:55px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border:1px solid ${on?'#007aff':'rgba(0,0,0,.12)'};background:${on?'#007aff':'rgba(255,255,255,.7)'};color:${on?'#fff':'#333'};backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:${on?'0 2px 8px rgba(0,122,255,.3)':'0 1px 4px rgba(0,0,0,.06)'};transition:all .3s ease">${t.l} <span style="font-size:10px;opacity:.7">${cnt}</span></button>`;
   });
   html+='</div>';
   html+=`<div class="sh">要復習 ${filtered.length}語</div>`;
@@ -5021,12 +5022,12 @@ document.addEventListener('click',e=>{
 
   function doDeleteAll(){
     haptic.error();haptic.error();haptic.error();
-    // Clear ALL inglish_ keys + known keys
+    // Clear ALL inglish_ keys + known keys + eiken2
     try{
       const keysToRemove=[];
       for(let i=0;i<localStorage.length;i++){
         const k=localStorage.key(i);
-        if(k&&(k.startsWith('inglish_')||k===CACHE_KEY||k===STAR_KEY||k===STAR_TOOLTIP_KEY))keysToRemove.push(k);
+        if(k&&(k.startsWith('inglish_')||k===CACHE_KEY||k===STAR_KEY||k===STAR_TOOLTIP_KEY||k==='ek2q_state'))keysToRemove.push(k);
       }
       keysToRemove.forEach(k=>localStorage.removeItem(k));
     }catch(_){}
