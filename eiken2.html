@@ -629,6 +629,7 @@ const SND={
   correct:new Audio('success.caf'),
   wrong:new Audio('retry.caf'),
   timeup:new Audio('failure.caf'),
+  next:new Audio('next.caf'),
 };
 // Preload all
 Object.values(SND).forEach(a=>{a.load();});
@@ -910,8 +911,11 @@ function toggleShuffle(){
 }
 
 // ═══ RENDER ═══
+let _rendered=false;
 function render(){
   if(S.idx>=EK2Q.length){showDone();return;}
+  if(_rendered)playSnd('next');
+  _rendered=true;
   S.answered=false;
   if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
   const q=getQ();
