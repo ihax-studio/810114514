@@ -1,0 +1,12 @@
+{
+  "name": "英検2級 穴埋め問題集",
+  "short_name": "英検2級",
+  "start_url": "/eiken2.html",
+  "display": "standalone",
+  "background_color": "#eef2f8",
+  "theme_color": "#f0f4ff",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}
