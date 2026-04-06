@@ -3392,6 +3392,16 @@ document.getElementById('iframe-back').addEventListener('click',()=>{
   closeIframeNow();
 });
 let _iframeSearchT=null;
+// Auto-close iframe if it navigates back to index.html
+setInterval(()=>{
+  try{
+    const ifr=document.getElementById('iframe-content');
+    const ov=document.getElementById('iframe-overlay');
+    if(ov.style.visibility==='visible'&&ifr.contentWindow&&ifr.contentWindow.location.pathname.endsWith('index.html')){
+      closeIframeNow();
+    }
+  }catch(e){}
+},300);
 function closeIframeNow(){
   const ov=document.getElementById('iframe-overlay');
   clearTimeout(_iframeSearchT);
