@@ -376,7 +376,7 @@ function syncForgot(q){
   try{
     const c=JSON.parse(localStorage.getItem(FORGOT_KEY)||'{}');
     if(!c[5])c[5]={};
-    c[5][q.at]={m:q.jt,t:Date.now()};
+    c[5][q.at]={m:q.jt,t:Date.now(),cs:q.cs||'',st:q.st||''};
     localStorage.setItem(FORGOT_KEY,JSON.stringify(c));
   }catch(_){}
 }
@@ -863,9 +863,8 @@ function pauseQuiz(){
     '<div class="pause-icon">⏸</div>'+
     '<div class="pause-title">一時停止</div>'+
     '<div class="pause-sub">Q'+(S.idx+1)+' / '+EK2Q.length+'<br>✓ '+S.correct+' ✗ '+S.wrong+'</div>'+
-    '<button class="pause-resume" onclick="resumeQuiz()">▶ 再開</button>'+
-    '<button class="pause-home" onclick="restartAll()">最初からやり直す</button>'+
-    '<button class="pause-home" style="margin-top:8px" onclick="goHome()">ホームに戻る</button>'+
+    '<button class="pause-resume" onclick="haptic();resumeQuiz()">▶ 再開</button>'+
+    '<button class="pause-home" onclick="haptic();restartAll()">最初からやり直す</button>'+
     '</div>';
   document.body.appendChild(ov);
 }
@@ -903,7 +902,7 @@ function goHome(){
 
 // ═══ QUESTION LIST ═══
 function openQList(){
-
+  haptic();
   const ov=document.createElement('div');
   ov.className='qlist-overlay';ov.id='qlist-overlay';
   const order=getOrder();
@@ -941,6 +940,7 @@ function closeQList(){
 // ═══ WRONG LIST ═══
 function openWrongList(){
   if(!S.wrongs.length){return;}
+  haptic();
   stopQTimer();
   const ov=document.createElement('div');
   ov.className='qlist-overlay';ov.id='wrong-overlay';
@@ -951,8 +951,9 @@ function openWrongList(){
     items+=`<div class="qlist-item" data-wid="${qid}"><span class="qlist-num" style="background:rgba(255,59,48,.12);color:#ff3b30">${i+1}</span><span class="qlist-q">${q.q}<br><span style="font-size:12px;color:#34c759;font-weight:600">→ ${q.at}</span></span></div>`;
   });
   ov.innerHTML=
-    '<div class="qlist-hdr"><button class="qlist-close" onclick="closeWrongList()">閉じる</button><div class="qlist-title">間違えた問題 ('+S.wrongs.length+')</div></div>'+
-    '<div class="qlist-body">'+items+'</div>';
+    '<div class="qlist-hdr"><button class="qlist-close" onclick="haptic();closeWrongList()">閉じる</button><div class="qlist-title">間違えた問題 ('+S.wrongs.length+')</div></div>'+
+    '<div class="qlist-body">'+items+'</div>'+
+    '<button onclick="haptic();closeWrongList()" style="position:fixed;bottom:calc(env(safe-area-inset-bottom,0px)+16px);left:16px;z-index:10;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.7);box-shadow:0 2px 10px rgba(0,0,0,.12);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#007aff">←</button>';
   document.body.appendChild(ov);
   // Tap to jump to that question
   ov.querySelector('.qlist-body').addEventListener('click',e=>{
@@ -1051,6 +1052,7 @@ let _lastEnterTime=0;
 
 // ═══ SHUFFLE ═══
 function toggleShuffle(){
+  haptic();
   S.shuffled=!S.shuffled;
   document.getElementById('btn-shuffle').style.opacity=S.shuffled?'1':'.4';
   if(S.shuffled){
