@@ -1057,7 +1057,7 @@ overflow:hidden;
     <div class="hg-list">
       <div class="hcard" onclick="openS('card',4)"><div class="hi ig">🔤</div><div class="hcard-info"><div class="hcard-name">2級 単語</div><div class="hcard-desc">教科書索引 + 過去5年補足 699語</div></div><div class="badge">699</div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('card',5)"><div class="hi it">📌</div><div class="hcard-info"><div class="hcard-name">2級 熟語・句動詞</div><div class="hcard-desc">218フレーズ</div></div><div class="badge">218</div><div class="chev">›</div></div>
-      <div class="hcard" onclick="openIframe('eiken2.html','2級 穴埋め')"><div class="hi ir">🔥</div><div class="hcard-info"><div class="hcard-name">2級 穴埋め問題集</div><div class="hcard-desc">熟語・句動詞 299問 + 音声</div></div><div class="badge">299</div><div class="chev">›</div></div>
+      <div class="hcard" onclick="openIframe('eiken2.html','2級 穴埋め')"><div class="hi ir">💾</div><div class="hcard-info"><div class="hcard-name">2級 穴埋め問題集</div><div class="hcard-desc">熟語・句動詞 299問 + 音声</div></div><div class="badge">299</div><div class="chev">›</div></div>
     </div>
     <div class="hg-lbl">参考書</div>
     <div class="hg-list">
@@ -4173,7 +4173,7 @@ const SEARCH_APPS=[
   {name:'準1 イディオム',icon:'💡',action:"openS('list','id')"},
   {name:'2級 単語',icon:'🔤',action:"openS('card',3)"},
   {name:'2級 熟語・句動詞',icon:'📌',action:"openS('card',5)"},
-  {name:'2級 穴埋め問題集',icon:'🔥',action:"openIframe('eiken2.html','2級 穴埋め')"},
+  {name:'2級 穴埋め問題集',icon:'💾',action:"openIframe('eiken2.html','2級 穴埋め')"},
   {name:'全単語一覧',icon:'📚',action:"openS('list','all')"},
   {name:'忘れた・わからない',icon:'😰',action:"openS('list','forgot')"},
   {name:'入試で使える表現',icon:'📝',action:"openS('list','ex')"},
@@ -4779,7 +4779,7 @@ function showIconGrid(){
   const grid=document.createElement('div');
   grid.id='icon-grid';
   const iconPadH=_isWideScreen?'20px':'10px';
-  grid.style.cssText='display:grid;grid-template-columns:repeat('+GRID_COLS+',1fr);gap:'+gap+';padding:24px '+iconPadH+' 16px;justify-items:center;animation:gridReveal .5s ease both;';
+  grid.style.cssText='display:grid;grid-template-columns:repeat('+GRID_COLS+',1fr);gap:'+gap+';padding:calc(var(--sat) + 50px) '+iconPadH+' 16px;justify-items:center;animation:gridReveal .5s ease both;';
   
   const cards=[...document.querySelectorAll('.hcard')];
   const allIcons=[];
