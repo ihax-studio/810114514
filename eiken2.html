@@ -950,13 +950,15 @@ function render(){
   if(_rendered)playSnd('next');
   _rendered=true;
   S.answered=false;
+  _multiState=null;
   if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
   const q=getQ();
   document.getElementById('hdr-count').textContent=(S.idx+1)+' / '+EK2Q.length;
   document.getElementById('sc-g').textContent=S.correct;
   document.getElementById('sc-f').textContent=S.wrong;
   document.getElementById('prog-bar').style.width=(S.idx/EK2Q.length*100)+'%';
-  document.getElementById('q-tag').textContent='Q'+(S.idx+1);
+  const mn=isMulti(q);
+  document.getElementById('q-tag').textContent='Q'+(S.idx+1)+(mn?' · '+mn+'つ選べ':'');
   document.getElementById('q-text').innerHTML=q.q.replace('( )','<span class="blank" id="blank">(      )</span>');
   document.getElementById('fb').style.display='none';
   const chEl=document.getElementById('choices');
@@ -973,13 +975,79 @@ function render(){
   startQTimer();
 }
 
+// ═══ MULTI-SELECT (Xつ選べ) ═══
+let _multiState=null; // {need:3, wrongAnswers:[indices], selected:[]}
+function isMulti(q){
+  const m=q.q.match(/(\d)つ選べ/);
+  return m?parseInt(m[1],10):0;
+}
+function getMultiCorrects(q){
+  // For multi-select: all non-empty choices except the "wrong" one are correct
+  // The single answer field marks the odd-one-out approach won't work universally
+  // So: all choices with content are candidates; answer field = the first correct one
+  // For Q1107 specifically: choices 2,3,4 are correct (index 1,2,3), choice 1 is wrong
+  // General rule: non-empty choices that are valid uses
+  // Since data only has 1 answer, we treat answer as "one of the correct ones"
+  // and all other non-empty choices except 1 wrong one are also correct
+  const need=isMulti(q);
+  const nonEmpty=q.ch.map((_,i)=>i+1).filter(i=>q.ch[i-1]!=='');
+  // wrong ones = total non-empty - need
+  // answer is definitely correct, the remaining (nonEmpty.length - need) are wrong
+  const corrects=[q.a];
+  // We need to figure out which are correct. For now, assume the first (nonEmpty.length-need)
+  // that are NOT the answer are wrong, rest are correct
+  const others=nonEmpty.filter(i=>i!==q.a);
+  const wrongCount=nonEmpty.length-need;
+  const wrongs=others.slice(0,wrongCount);
+  const moreCorrects=others.filter(i=>!wrongs.includes(i));
+  return{corrects:[q.a,...moreCorrects],wrongs};
+}
+
 // ═══ CHOICE HANDLER ═══
 function handleChoice(btn){
   if(S.answered||_paused)return;
-  S.answered=true;
-  stopQTimer();
   const q=getQ();
   const chosen=parseInt(btn.dataset.i,10);
+  const multiNeed=isMulti(q);
+
+  // ── Multi-select mode ──
+  if(multiNeed>0){
+    if(!_multiState)_multiState={need:multiNeed,selected:[],info:getMultiCorrects(q)};
+    if(_multiState.selected.includes(chosen))return;
+    _multiState.selected.push(chosen);
+    const isRight=_multiState.info.corrects.includes(chosen);
+    if(!isRight){
+      // Wrong pick → game over, show all correct
+      btn.classList.add('wrong');
+      playSnd('wrong');
+      S.answered=true;stopQTimer();
+      S.wrong++;if(!S.wrongs.includes(q.id))S.wrongs.push(q.id);
+      // Reveal all correct
+      document.querySelectorAll('#choices .ch').forEach(b=>{
+        b.classList.add('disabled');
+        if(_multiState.info.corrects.includes(parseInt(b.dataset.i,10)))b.classList.add('correct');
+      });
+      _multiState=null;
+      showFeedback(q);
+      return;
+    }
+    // Correct pick
+    btn.classList.add('correct');btn.classList.add('disabled');
+    playSnd('correct');
+    if(_multiState.selected.filter(s=>_multiState.info.corrects.includes(s)).length>=multiNeed){
+      // All correct selected!
+      S.answered=true;stopQTimer();
+      S.correct++;if(!S.corrects.includes(q.id))S.corrects.push(q.id);
+      document.querySelectorAll('#choices .ch').forEach(b=>b.classList.add('disabled'));
+      _multiState=null;
+      showFeedback(q);
+    }
+    return;
+  }
+
+  // ── Normal single-select ──
+  S.answered=true;
+  stopQTimer();
   const ok=chosen===q.a;
   document.querySelectorAll('#choices .ch').forEach(b=>{
     b.classList.add('disabled');
@@ -995,6 +1063,10 @@ function handleChoice(btn){
     if(!S.corrects.includes(q.id))S.corrects.push(q.id);
     playSnd('correct');
   }
+  showFeedback(q);
+}
+
+function showFeedback(q){
   document.getElementById('sc-g').textContent=S.correct;
   document.getElementById('sc-f').textContent=S.wrong;
   const blank=document.getElementById('blank');
@@ -1011,10 +1083,8 @@ function handleChoice(btn){
     if(q.st.includes('混同')){tip.style.background='rgba(255,59,48,.08)';tip.style.color='#ff3b30';}
     else{tip.style.background='';tip.style.color='';}
   }else{tip.style.display='none';}
-  // Play question audio after answer
   playAudio();
   save();
-  // Show next button (no auto-advance)
   showNextBtn();
 }
 
