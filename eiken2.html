@@ -306,7 +306,7 @@ color:#1c1c1e;display:flex;flex-direction:column}
     <div class="fb" id="fb" style="display:none">
       <div class="fb-sentence" id="fb-sentence" onclick="speakEn(this.textContent)" style="cursor:pointer"></div>
       <div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div>
-      <div class="fb-tip" id="fb-tip" onclick="speakJp(this.textContent)"></div>
+      <div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div>
     </div>
   </div>
 </div>
@@ -666,6 +666,34 @@ let _paused=false;
 let _qTimer=null;
 const Q_TIME=30000; // 30 seconds to answer
 
+// 混同注意ペアの意味対比
+const KONFUSE={
+"give in":"屈する・譲る","give up":"あきらめる","give away":"譲り渡す・ばらす",
+"take on":"引き受ける","take up":"始める・占める","take off":"離陸する・脱ぐ","take in":"理解する・だます","take into consideration":"考慮に入れる",
+"carry on":"続ける","carry out":"実行する",
+"make out":"理解する・判読する","make up":"作り上げる・化粧する","make up for":"埋め合わせる","make do":"間に合わせる","make up one's mind":"決心する",
+"come up with":"思いつく","come across":"偶然出会う","come about":"起こる",
+"turn out":"判明する","turn up":"現れる","turn down":"断る・下げる",
+"hold back":"抑える","hold on":"待つ・しがみつく","hold out":"持ちこたえる",
+"put off":"延期する","put out":"消す","put up with":"我慢する",
+"look up to":"尊敬する","look down on":"見下す",
+"run out":"なくなる","run into":"偶然会う・衝突する","run short":"不足する",
+"keep up with":"遅れずについていく","catch up with":"追いつく","catch up on":"遅れを取り戻す",
+};
+function getKonfuseText(st){
+  if(!st||!st.includes('混同'))return'';
+  // Extract phrases from st like "take on / take in と混同注意"
+  const m=st.match(/(.+?)と混同/);
+  if(!m)return'';
+  const phrases=m[1].split(/\s*[/／]\s*/).map(s=>s.trim()).filter(Boolean);
+  const lines=[];
+  phrases.forEach(p=>{
+    const pl=p.toLowerCase();
+    if(KONFUSE[pl])lines.push(p+' = '+KONFUSE[pl]);
+  });
+  return lines.join('\n');
+}
+
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({idx:S.idx,correct:S.correct,wrong:S.wrong,shuffled:S.shuffled,order:S.order,wrongs:S.wrongs,corrects:S.corrects,speed:S.speed}));}catch(_){}}
 function load(){try{const s=localStorage.getItem(SAVE_KEY);if(s){const d=JSON.parse(s);S.idx=d.idx||0;S.correct=d.correct||0;S.wrong=d.wrong||0;S.shuffled=!!d.shuffled;S.order=d.order||null;S.wrongs=d.wrongs||[];S.corrects=d.corrects||[];S.speed=d.speed||1;}}catch(_){}}
 
@@ -746,7 +774,9 @@ function timeUp(){
   document.getElementById('fb-jp').textContent=q.jt;
   const tip=document.getElementById('fb-tip');
   if(q.st){
-    tip.textContent=q.st;tip.style.display='block';
+    const kf=getKonfuseText(q.st);
+    tip.innerHTML=q.st+(kf?'<br><span style="display:block;margin-top:6px;white-space:pre-line;font-size:13px;line-height:1.6">'+kf+'</span>':'');
+    tip.style.display='block';
     if(q.st.includes('混同')){tip.style.background='rgba(255,59,48,.08)';tip.style.color='#ff3b30';}
     else{tip.style.background='';tip.style.color='';}
   }else{tip.style.display='none';}
@@ -975,7 +1005,9 @@ function handleChoice(btn){
   document.getElementById('fb-jp').textContent=q.jt;
   const tip=document.getElementById('fb-tip');
   if(q.st){
-    tip.textContent=q.st;tip.style.display='block';
+    const kf=getKonfuseText(q.st);
+    tip.innerHTML=q.st+(kf?'<br><span style="display:block;margin-top:6px;white-space:pre-line;font-size:13px;line-height:1.6">'+kf+'</span>':'');
+    tip.style.display='block';
     if(q.st.includes('混同')){tip.style.background='rgba(255,59,48,.08)';tip.style.color='#ff3b30';}
     else{tip.style.background='';tip.style.color='';}
   }else{tip.style.display='none';}
