@@ -305,7 +305,7 @@ color:#1c1c1e;display:flex;flex-direction:column}
 <div class="ftr" id="quiz-ftr" style="display:none">
   <div class="score">
     <span class="sc-g" id="sc-g">0</span>
-    <span class="sc-f" id="sc-f">0</span>
+    <span class="sc-f" id="sc-f" onclick="openWrongList()" style="cursor:pointer">0</span>
   </div>
   <button class="audio-btn" id="audio-btn" onclick="playAudio()">🔊</button>
 </div>
@@ -645,15 +645,15 @@ function unlockAudio(){
 
 // ═══ STATE ═══
 const SAVE_KEY='ek2q_state';
-let S={idx:0,correct:0,wrong:0,answered:false,shuffled:false,order:null,started:false};
+let S={idx:0,correct:0,wrong:0,answered:false,shuffled:false,order:null,started:false,wrongs:[]};
 let _audio=null;
 let _advTimer=null;
 let _paused=false;
 let _qTimer=null;
 const Q_TIME=30000; // 30 seconds to answer
 
-function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({idx:S.idx,correct:S.correct,wrong:S.wrong,shuffled:S.shuffled,order:S.order}));}catch(_){}}
-function load(){try{const s=localStorage.getItem(SAVE_KEY);if(s){const d=JSON.parse(s);S.idx=d.idx||0;S.correct=d.correct||0;S.wrong=d.wrong||0;S.shuffled=!!d.shuffled;S.order=d.order||null;}}catch(_){}}
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({idx:S.idx,correct:S.correct,wrong:S.wrong,shuffled:S.shuffled,order:S.order,wrongs:S.wrongs}));}catch(_){}}
+function load(){try{const s=localStorage.getItem(SAVE_KEY);if(s){const d=JSON.parse(s);S.idx=d.idx||0;S.correct=d.correct||0;S.wrong=d.wrong||0;S.shuffled=!!d.shuffled;S.order=d.order||null;S.wrongs=d.wrongs||[];}}catch(_){}}
 
 function getOrder(){
   if(S.shuffled&&S.order&&S.order.length===EK2Q.length)return S.order;
@@ -717,6 +717,7 @@ function timeUp(){
   playSnd('timeup');
   const q=getQ();
   S.wrong++;
+  if(!S.wrongs.includes(q.id))S.wrongs.push(q.id);
   document.querySelectorAll('#choices .ch').forEach(b=>{
     b.classList.add('disabled');
     if(parseInt(b.dataset.i,10)===q.a)b.classList.add('correct');
@@ -768,7 +769,7 @@ function restartAll(){
   _paused=false;
   const ov=document.getElementById('pause-overlay');
   if(ov)ov.remove();
-  S.idx=0;S.correct=0;S.wrong=0;save();
+  S.idx=0;S.correct=0;S.wrong=0;S.wrongs=[];save();
   document.getElementById('main').innerHTML=
     '<div class="card" id="card"><div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>'+
     '<div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer-bar" style="width:100%"></div></div>'+
@@ -820,6 +821,37 @@ function closeQList(){
   if(ov){ov.classList.add('out');setTimeout(()=>ov.remove(),250);}
 }
 
+// ═══ WRONG LIST ═══
+function openWrongList(){
+  if(!S.wrongs.length){return;}
+  stopQTimer();
+  const ov=document.createElement('div');
+  ov.className='qlist-overlay';ov.id='wrong-overlay';
+  let items='';
+  S.wrongs.forEach((qid,i)=>{
+    const q=EK2Q.find(x=>x.id===qid);
+    if(!q)return;
+    items+=`<div class="qlist-item" data-wid="${qid}"><span class="qlist-num" style="background:rgba(255,59,48,.12);color:#ff3b30">${i+1}</span><span class="qlist-q">${q.q}<br><span style="font-size:12px;color:#34c759;font-weight:600">→ ${q.at}</span></span></div>`;
+  });
+  ov.innerHTML=
+    '<div class="qlist-hdr"><button class="qlist-close" onclick="closeWrongList()">閉じる</button><div class="qlist-title">間違えた問題 ('+S.wrongs.length+')</div></div>'+
+    '<div class="qlist-body">'+items+'</div>';
+  document.body.appendChild(ov);
+  // Tap to jump to that question
+  ov.querySelector('.qlist-body').addEventListener('click',e=>{
+    const item=e.target.closest('.qlist-item');
+    if(!item)return;
+    const qid=parseInt(item.dataset.wid,10);
+    const order=getOrder();
+    const idx=order.findIndex(oi=>EK2Q[oi].id===qid);
+    if(idx>=0){S.idx=idx;save();closeWrongList();render();}
+  });
+}
+function closeWrongList(){
+  const ov=document.getElementById('wrong-overlay');
+  if(ov){ov.classList.add('out');setTimeout(()=>ov.remove(),250);}
+}
+
 // ═══ SHUFFLE ═══
 function toggleShuffle(){
   S.shuffled=!S.shuffled;
@@ -829,7 +861,7 @@ function toggleShuffle(){
     for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]];}
     S.order=a;
   }else{S.order=null;}
-  S.idx=0;S.correct=0;S.wrong=0;save();render();
+  S.idx=0;S.correct=0;S.wrong=0;S.wrongs=[];save();render();
 
 }
 
@@ -875,6 +907,7 @@ function handleChoice(btn){
   if(!ok){
     btn.classList.add('wrong');
     S.wrong++;
+    if(!S.wrongs.includes(q.id))S.wrongs.push(q.id);
     playSnd('wrong');
   }else{
     S.correct++;
@@ -962,7 +995,7 @@ function showDone(){
     '<button class="done-btn" onclick="resetAll()">もう一度</button></div>';
 }
 function resetAll(){
-  S.idx=0;S.correct=0;S.wrong=0;save();
+  S.idx=0;S.correct=0;S.wrong=0;S.wrongs=[];save();
   document.getElementById('main').innerHTML=
     '<div class="card" id="card"><div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>'+
     '<div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer-bar" style="width:100%"></div></div>'+
