@@ -138,13 +138,15 @@ color:#1c1c1e;display:flex;flex-direction:column}
 .fb-sentence{font-size:16px;font-weight:600;color:#1c1c1e;line-height:1.55;margin-bottom:8px}
 .fb-jp{font-size:14px;color:#8e8e93;line-height:1.55;margin-bottom:8px}
 .fb-tip{font-size:13px;color:#5856d6;font-weight:500;line-height:1.45;padding:8px 12px;background:rgba(88,86,214,.06);border-radius:10px}
-.next-btn{
-  display:block;width:100%;margin-top:18px;padding:15px;border-radius:14px;
-  background:#007aff;color:#fff;border:none;font-size:17px;font-weight:700;
+.nav-btns{display:flex;gap:10px;margin-top:18px;animation:fbIn .3s ease both}
+.nav-btn{
+  flex:1;padding:15px;border-radius:14px;
+  border:none;font-size:16px;font-weight:700;
   cursor:pointer;transition:transform .12s;
-  animation:fbIn .3s ease both;
 }
-.next-btn:active{transform:scale(.96)}
+.nav-btn:active{transform:scale(.96)}
+.nav-next{background:#007aff;color:#fff}
+.nav-back{background:rgba(0,0,0,.06);color:#1c1c1e}
 
 /* ══ FOOTER ══ */
 .ftr{
@@ -900,6 +902,12 @@ function advance(){
   if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
   S.idx++;save();render();
 }
+function goBack(){
+  if(S.idx<=0)return;
+  stopQTimer();
+  if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
+  S.idx--;save();render();
+}
 
 // Click delegation
 document.addEventListener('click',e=>{
@@ -910,13 +918,23 @@ document.addEventListener('click',e=>{
 function showNextBtn(){
   const fb=document.getElementById('fb');
   if(!fb)return;
-  const old=document.getElementById('next-btn');
+  const old=document.getElementById('nav-btns');
   if(old)old.remove();
-  const btn=document.createElement('button');
-  btn.id='next-btn';btn.className='next-btn';
-  btn.textContent='次の問題 ▶';
-  btn.onclick=()=>{advance();};
-  fb.appendChild(btn);
+  const wrap=document.createElement('div');
+  wrap.id='nav-btns';wrap.className='nav-btns';
+  if(S.idx>0){
+    const back=document.createElement('button');
+    back.className='nav-btn nav-back';
+    back.textContent='◀ 前の問題';
+    back.onclick=()=>{goBack();};
+    wrap.appendChild(back);
+  }
+  const next=document.createElement('button');
+  next.className='nav-btn nav-next';
+  next.textContent='次の問題 ▶';
+  next.onclick=()=>{advance();};
+  wrap.appendChild(next);
+  fb.appendChild(wrap);
 }
 
 // ═══ AUDIO PLAYBACK ═══
