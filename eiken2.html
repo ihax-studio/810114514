@@ -304,7 +304,7 @@ color:#1c1c1e;display:flex;flex-direction:column}
     <div class="q-text" id="q-text"></div>
     <div class="choices" id="choices"></div>
     <div class="fb" id="fb" style="display:none">
-      <div class="fb-sentence" id="fb-sentence" onclick="speakEn(this.textContent)" style="cursor:pointer"></div>
+      <div class="fb-sentence" id="fb-sentence" onclick="speakEnSentence()" style="cursor:pointer"></div>
       <div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div>
       <div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div>
     </div>
@@ -823,7 +823,7 @@ function restartAll(){
     '<div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer-bar" style="width:100%"></div></div>'+
     '<div class="q-tag" id="q-tag"></div><div class="q-text" id="q-text"></div>'+
     '<div class="choices" id="choices"></div>'+
-    '<div class="fb" id="fb" style="display:none"><div class="fb-sentence" id="fb-sentence" onclick="speakEn(this.textContent)" style="cursor:pointer"></div><div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div><div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div></div></div>';
+    '<div class="fb" id="fb" style="display:none"><div class="fb-sentence" id="fb-sentence" onclick="speakEnSentence()" style="cursor:pointer"></div><div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div><div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div></div></div>';
   render();
 }
 function goHome(){
@@ -1012,33 +1012,30 @@ function handleChoice(btn){
 
   // ── Multi-select mode ──
   if(multiNeed>0){
-    if(!_multiState)_multiState={need:multiNeed,selected:[],info:getMultiCorrects(q)};
+    if(!_multiState)_multiState={need:multiNeed,selected:[],info:getMultiCorrects(q),missed:false};
     if(_multiState.selected.includes(chosen))return;
     _multiState.selected.push(chosen);
     const isRight=_multiState.info.corrects.includes(chosen);
     if(!isRight){
-      // Wrong pick → game over, show all correct
-      btn.classList.add('wrong');
+      // Wrong pick → mark wrong, keep going
+      btn.classList.add('wrong');btn.classList.add('disabled');
       playSnd('wrong');
-      S.answered=true;stopQTimer();
-      S.wrong++;if(!S.wrongs.includes(q.id))S.wrongs.push(q.id);
-      // Reveal all correct
-      document.querySelectorAll('#choices .ch').forEach(b=>{
-        b.classList.add('disabled');
-        if(_multiState.info.corrects.includes(parseInt(b.dataset.i,10)))b.classList.add('correct');
-      });
-      _multiState=null;
-      showFeedback(q);
-      return;
+      _multiState.missed=true;
+    }else{
+      // Correct pick
+      btn.classList.add('correct');btn.classList.add('disabled');
+      playSnd('correct');
     }
-    // Correct pick
-    btn.classList.add('correct');btn.classList.add('disabled');
-    playSnd('correct');
-    if(_multiState.selected.filter(s=>_multiState.info.corrects.includes(s)).length>=multiNeed){
-      // All correct selected!
+    // Check if all correct ones have been found
+    const foundCorrects=_multiState.selected.filter(s=>_multiState.info.corrects.includes(s)).length;
+    if(foundCorrects>=multiNeed){
       S.answered=true;stopQTimer();
-      S.correct++;if(!S.corrects.includes(q.id))S.corrects.push(q.id);
       document.querySelectorAll('#choices .ch').forEach(b=>b.classList.add('disabled'));
+      if(_multiState.missed){
+        S.wrong++;if(!S.wrongs.includes(q.id))S.wrongs.push(q.id);
+      }else{
+        S.correct++;if(!S.corrects.includes(q.id))S.corrects.push(q.id);
+      }
       _multiState=null;
       showFeedback(q);
     }
@@ -1183,6 +1180,11 @@ function speakEn(text){
   u.lang='en-US';u.rate=S.speed;
   window.speechSynthesis.speak(u);
 }
+function speakEnSentence(){
+  if(S.idx>=EK2Q.length)return;
+  const q=getQ();
+  speakEn(q.cs||q.q);
+}
 
 // ═══ DONE ═══
 function showDone(){
@@ -1202,7 +1204,7 @@ function resetAll(){
     '<div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer-bar" style="width:100%"></div></div>'+
     '<div class="q-tag" id="q-tag"></div><div class="q-text" id="q-text"></div>'+
     '<div class="choices" id="choices"></div>'+
-    '<div class="fb" id="fb" style="display:none"><div class="fb-sentence" id="fb-sentence" onclick="speakEn(this.textContent)" style="cursor:pointer"></div><div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div><div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div></div></div>';
+    '<div class="fb" id="fb" style="display:none"><div class="fb-sentence" id="fb-sentence" onclick="speakEnSentence()" style="cursor:pointer"></div><div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div><div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div></div></div>';
   render();
 }
 
