@@ -764,6 +764,7 @@ function getQ(){return EK2Q[getOrder()[S.idx]];}
 
 // ═══ START ═══
 function startQuiz(){
+  haptic();
   unlockAudio().then(()=>{
 
     const ss=document.getElementById('start-screen');
@@ -1211,6 +1212,7 @@ function showFeedback(q){
 
 function advance(){
   if(!S.answered)return;
+  haptic();
   if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
   S.idx++;save();render();
 }
