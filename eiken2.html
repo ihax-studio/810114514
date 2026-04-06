@@ -304,7 +304,7 @@ color:#1c1c1e;display:flex;flex-direction:column}
     <div class="q-text" id="q-text"></div>
     <div class="choices" id="choices"></div>
     <div class="fb" id="fb" style="display:none">
-      <div class="fb-sentence" id="fb-sentence"></div>
+      <div class="fb-sentence" id="fb-sentence" onclick="speakEn(this.textContent)" style="cursor:pointer"></div>
       <div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div>
       <div class="fb-tip" id="fb-tip" onclick="speakJp(this.textContent)"></div>
     </div>
@@ -741,7 +741,11 @@ function timeUp(){
   document.getElementById('fb-sentence').textContent=q.cs;
   document.getElementById('fb-jp').textContent=q.jt;
   const tip=document.getElementById('fb-tip');
-  if(q.st){tip.textContent=q.st;tip.style.display='block';}else{tip.style.display='none';}
+  if(q.st){
+    tip.textContent=q.st;tip.style.display='block';
+    if(q.st.includes('混同')){tip.style.background='rgba(255,59,48,.08)';tip.style.color='#ff3b30';}
+    else{tip.style.background='';tip.style.color='';}
+  }else{tip.style.display='none';}
   playAudio();
   save();
   showNextBtn();
@@ -963,7 +967,11 @@ function handleChoice(btn){
   document.getElementById('fb-sentence').textContent=q.cs;
   document.getElementById('fb-jp').textContent=q.jt;
   const tip=document.getElementById('fb-tip');
-  if(q.st){tip.textContent=q.st;tip.style.display='block';}else{tip.style.display='none';}
+  if(q.st){
+    tip.textContent=q.st;tip.style.display='block';
+    if(q.st.includes('混同')){tip.style.background='rgba(255,59,48,.08)';tip.style.color='#ff3b30';}
+    else{tip.style.background='';tip.style.color='';}
+  }else{tip.style.display='none';}
   // Play question audio after answer
   playAudio();
   save();
@@ -1045,15 +1053,21 @@ function toggleSpeed(){
   if(_audio)_audio.playbackRate=S.speed;
 }
 
-// ═══ SCREEN READER (日本語読み上げ) ═══
+// ═══ SCREEN READER ═══
 function speakJp(text){
   if(!text)return;
-  // Pause mp3 while reading
   if(_audio){_audio.pause();}
   window.speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
   u.lang='ja-JP';u.rate=1.1;
-  u.onend=()=>{};
+  window.speechSynthesis.speak(u);
+}
+function speakEn(text){
+  if(!text)return;
+  if(_audio){_audio.pause();}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';u.rate=S.speed;
   window.speechSynthesis.speak(u);
 }
 
