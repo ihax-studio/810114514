@@ -1057,6 +1057,7 @@ overflow:hidden;
     <div class="hg-list">
       <div class="hcard" onclick="openS('card',4)"><div class="hi ig">🔤</div><div class="hcard-info"><div class="hcard-name">2級 単語</div><div class="hcard-desc">教科書索引 + 過去5年補足 699語</div></div><div class="badge">699</div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('card',5)"><div class="hi it">📌</div><div class="hcard-info"><div class="hcard-name">2級 熟語・句動詞</div><div class="hcard-desc">218フレーズ</div></div><div class="badge">218</div><div class="chev">›</div></div>
+      <div class="hcard" onclick="openEiken2Quiz()"><div class="hi ir">🔥</div><div class="hcard-info"><div class="hcard-name">2級 穴埋め問題集</div><div class="hcard-desc">熟語・句動詞 299問 + 音声</div></div><div class="badge">299</div><div class="chev">›</div></div>
     </div>
     <div class="hg-lbl">参考書</div>
     <div class="hg-list">
@@ -6176,6 +6177,554 @@ if('serviceWorker' in navigator){
     <button onclick="document.getElementById('mnemonic-blur-overlay').style.display='none'" style="margin-top:12px;padding:10px 24px;border-radius:55px;border:none;background:rgba(0,0,0,.06);font-size:14px;font-family:inherit;cursor:pointer;color:#000">閉じる</button>
   </div>
 </div>
+
+
+<!-- ══════════ EIKEN2 穴埋め問題集 ══════════ -->
+<div id="ek2-overlay" style="display:none">
+  <div class="ek2-hdr">
+    <button class="ek2-back" onclick="closeEiken2Quiz()">‹</button>
+    <div class="ek2-title">2級 穴埋め問題集</div>
+    <div class="ek2-count" id="ek2-count">1 / 299</div>
+  </div>
+  <div class="ek2-body" id="ek2-body">
+    <div class="ek2-card" id="ek2-card">
+      <div class="ek2-q" id="ek2-q"></div>
+      <div class="ek2-choices" id="ek2-choices"></div>
+      <div class="ek2-feedback" id="ek2-feedback" style="display:none">
+        <div class="ek2-sentence" id="ek2-sentence"></div>
+        <div class="ek2-jp" id="ek2-jp"></div>
+        <div class="ek2-tip" id="ek2-tip"></div>
+      </div>
+    </div>
+  </div>
+  <div class="ek2-footer">
+    <div class="ek2-score">
+      <span class="ek2-sc-g" id="ek2-sc-g">0</span>
+      <span class="ek2-sc-f" id="ek2-sc-f">0</span>
+    </div>
+    <button class="ek2-audio-btn" id="ek2-audio-btn" onclick="playEk2Audio()">🔊</button>
+  </div>
+</div>
+
+<style>
+#ek2-overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(150deg,#eef2f8 0%,#f8f2fc 50%,#edf7f2 100%);
+  display:flex;flex-direction:column;
+  animation:ek2In .4s cubic-bezier(.77,0,.18,1) both;
+}
+#ek2-overlay.closing{animation:ek2Out .35s cubic-bezier(.77,0,.18,1) both}
+@keyframes ek2In{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes ek2Out{from{transform:translateX(0)}to{transform:translateX(100%)}}
+.ek2-hdr{
+  display:flex;align-items:center;gap:10px;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 10px;
+  background:rgba(255,255,255,.7);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);
+  border-bottom:1px solid rgba(0,0,0,.06);
+}
+.ek2-back{
+  font-size:28px;background:none;border:none;color:#007aff;cursor:pointer;
+  padding:0 6px;line-height:1;font-weight:300;
+}
+.ek2-title{font-size:17px;font-weight:700;flex:1}
+.ek2-count{font-size:13px;color:#8e8e93;font-weight:500}
+.ek2-body{
+  flex:1;overflow-y:auto;padding:20px 16px;
+  -webkit-overflow-scrolling:touch;
+}
+.ek2-card{
+  background:rgba(255,255,255,.8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-radius:20px;border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 4px 20px rgba(0,0,0,.08);
+  padding:24px 20px;
+  animation:ek2CardIn .4s cubic-bezier(.77,0,.18,1) both;
+}
+@keyframes ek2CardIn{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.ek2-q{
+  font-size:18px;font-weight:600;line-height:1.6;color:#1c1c1e;
+  margin-bottom:20px;word-break:break-word;
+}
+.ek2-choices{display:flex;flex-direction:column;gap:10px}
+.ek2-ch-btn{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;border-radius:14px;
+  background:rgba(255,255,255,.9);border:1.5px solid rgba(0,0,0,.08);
+  font-size:16px;font-weight:500;cursor:pointer;
+  transition:transform .15s ease,background .2s,border-color .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.ek2-ch-btn:active{transform:scale(.97)}
+.ek2-ch-num{
+  width:28px;height:28px;border-radius:8px;
+  background:rgba(0,122,255,.1);color:#007aff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;flex-shrink:0;
+}
+.ek2-ch-btn.correct{
+  background:rgba(52,199,89,.15)!important;border-color:rgba(52,199,89,.5)!important;
+  animation:ek2Pop .5s cubic-bezier(.34,1.56,.64,1) both;
+}
+.ek2-ch-btn.correct .ek2-ch-num{background:rgba(52,199,89,.25);color:#1a7a35}
+.ek2-ch-btn.wrong{
+  background:rgba(255,59,48,.12)!important;border-color:rgba(255,59,48,.4)!important;
+  animation:ek2Shake .45s ease both;
+}
+.ek2-ch-btn.wrong .ek2-ch-num{background:rgba(255,59,48,.2);color:#c0001a}
+.ek2-ch-btn.disabled{pointer-events:none;opacity:.55}
+@keyframes ek2Pop{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
+@keyframes ek2Shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.ek2-feedback{
+  margin-top:18px;padding-top:16px;border-top:1px solid rgba(0,0,0,.06);
+  animation:ek2FadeIn .35s ease both;
+}
+@keyframes ek2FadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ek2-sentence{font-size:16px;font-weight:600;color:#1c1c1e;line-height:1.5;margin-bottom:6px}
+.ek2-jp{font-size:14px;color:#8e8e93;line-height:1.5;margin-bottom:6px}
+.ek2-tip{font-size:13px;color:#5856d6;font-weight:500;line-height:1.4}
+.ek2-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px calc(env(safe-area-inset-bottom,0px) + 14px);
+  background:rgba(255,255,255,.7);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);
+  border-top:1px solid rgba(0,0,0,.06);
+}
+.ek2-score{display:flex;gap:16px;font-size:15px;font-weight:600}
+.ek2-sc-g::before{content:"✓ ";color:#34c759}
+.ek2-sc-f::before{content:"✗ ";color:#ff3b30}
+.ek2-sc-g{color:#34c759}.ek2-sc-f{color:#ff3b30}
+.ek2-audio-btn{
+  font-size:24px;background:rgba(0,122,255,.1);
+  width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .15s ease;
+}
+.ek2-audio-btn:active{transform:scale(.9)}
+@media(min-width:768px){
+  .ek2-body{max-width:680px;margin:0 auto;width:100%}
+}
+</style>
+<script>
+// ── Eiken2 Fill-in-Blank Quiz ──
+const EK2Q=[
+{id:972,q:"Comics ( ) more than a third of all sales of commercial publications in Japan.",ch:["account for", "count in", "explain to", "occupy for"],a:1,at:"account for",af:"eiken2-audio/Q972.mp3",cs:"Comics account for more than a third of all sales of commercial publications in Japan.",jt:"漫画は日本の商業出版物の全売上の3分の1以上を占めている。",st:"account for = ～を説明する、～を占める"},
+{id:973,q:"They were asked to account ( ) the accident.",ch:["of", "in", "after", "for"],a:4,at:"for",af:"eiken2-audio/Q973.mp3",cs:"They were asked to account for the accident.",jt:"彼らはその事故の原因を説明するよう求められた。",st:"account for = ～を説明する、～を占める"},
+{id:974,q:"He takes ( ) his father in character.",ch:["of", "on", "by", "after"],a:4,at:"after",af:"eiken2-audio/Q974.mp3",cs:"He takes after his father in character.",jt:"彼は性格が父親に似ている。",st:""},
+{id:975,q:"Cows live ( ) grass.",ch:["on", "by", "with", "from"],a:1,at:"on",af:"eiken2-audio/Q975.mp3",cs:"Cows live on grass.",jt:"牛は草を食べて生きている。",st:""},
+{id:976,q:"I'm going to apply ( ) that job they advertised.",ch:["in", "of", "for", "at"],a:3,at:"for",af:"eiken2-audio/Q976.mp3",cs:"I'm going to apply for that job they advertised.",jt:"広告に出ていたあの仕事に応募するつもりだ。",st:""},
+{id:977,q:"These rules apply ( ) everybody alike.",ch:["from", "of", "for", "to"],a:4,at:"to",af:"eiken2-audio/Q977.mp3",cs:"These rules apply to everybody alike.",jt:"これらの規則はすべての人に等しく適用される。",st:"apply to = ～に当てはまる"},
+{id:978,q:"She is suffering ( ) influenza.",ch:["into", "from", "out", "after"],a:2,at:"from",af:"eiken2-audio/Q978.mp3",cs:"She is suffering from influenza.",jt:"彼女はインフルエンザにかかっている。",st:""},
+{id:979,q:"Some people believe ( ) ghosts.",ch:["in", "of", "to", "with"],a:1,at:"in",af:"eiken2-audio/Q979.mp3",cs:"Some people believe in ghosts.",jt:"幽霊の存在を信じている人もいる。",st:"believe in = ～を信じる"},
+{id:980,q:"This is the only way we can deal ( ) the problem.",ch:["out", "in", "by", "with"],a:4,at:"with",af:"eiken2-audio/Q980.mp3",cs:"This is the only way we can deal with the problem.",jt:"これがその問題に対処できる唯一の方法だ。",st:""},
+{id:981,q:"Stick ( ) the task until it is finished.",ch:["on", "up", "to", "out"],a:3,at:"to",af:"eiken2-audio/Q981.mp3",cs:"Stick to the task until it is finished.",jt:"仕事が終わるまでそれに取り組み続けなさい。",st:""},
+{id:982,q:"We must ( ) a repairman to repair our car at once.",ch:["send away", "send for", "ask out", "ask off"],a:2,at:"send for",af:"eiken2-audio/Q982.mp3",cs:"We must send for a repairman to repair our car at once.",jt:"すぐに修理工を呼んで車を直してもらわなければならない。",st:""},
+{id:983,q:"We all ( ) world peace.",ch:["hope for", "hope in", "hope of", "hope to"],a:1,at:"hope for",af:"eiken2-audio/Q983.mp3",cs:"We all hope for world peace.",jt:"私たちは皆、世界平和を望んでいる。",st:""},
+{id:984,q:"He kept ( ) telling lies.",ch:["by", "onto", "in", "on"],a:4,at:"on",af:"eiken2-audio/Q984.mp3",cs:"He kept on telling lies.",jt:"彼はうそをつき続けた。",st:""},
+{id:985,q:"Keep ( ) these instructions carefully.",ch:["to", "on", "off", "into"],a:1,at:"to",af:"eiken2-audio/Q985.mp3",cs:"Keep to these instructions carefully.",jt:"これらの指示に注意深く従いなさい。",st:""},
+{id:986,q:"Don't step into the grass. = Keep ( ) the grass.",ch:["out", "on", "in", "off"],a:4,at:"off",af:"eiken2-audio/Q986.mp3",cs:"Don't step into the grass. = Keep off the grass.",jt:"芝生に立ち入らないでください。＝芝生に入らないでください。",st:""},
+{id:987,q:"I came ( ) a useful piece of information while looking through the file.",ch:["by", "for", "across", "with"],a:3,at:"across",af:"eiken2-audio/Q987.mp3",cs:"I came across a useful piece of information while looking through the file.",jt:"ファイルを調べている間に、役立つ情報を偶然見つけた。",st:""},
+{id:988,q:"How healthy you are ( ) how well you take care of your body.",ch:["deals with", "comes up with", "depends on", "concentrates on"],a:3,at:"depends on",af:"eiken2-audio/Q988.mp3",cs:"How healthy you are depends on how well you take care of your body.",jt:"あなたの健康状態は、どれだけ体をよく手入れするかによって決まる。",st:""},
+{id:989,q:"Eventually I ( ) an organization that helps homeless people.",ch:["asked", "relied on", "turned", "wanted"],a:2,at:"relied on",af:"eiken2-audio/Q989.mp3",cs:"Eventually I relied on an organization that helps homeless people.",jt:"最終的に私はホームレスの人々を支援する団体に頼った。",st:""},
+{id:990,q:"He's a reliable boss, so you can always count ( ) him.",ch:["by", "on", "out", "to"],a:2,at:"on",af:"eiken2-audio/Q990.mp3",cs:"He's a reliable boss, so you can always count on him.",jt:"彼は信頼できる上司なので、いつでも頼ることができる。",st:""},
+{id:991,q:"It never ( ) me that she was only pretending to be cheerful.",ch:["referred to", "happened", "struck", "occurred"],a:4,at:"occurred",af:"eiken2-audio/Q991.mp3",cs:"It never occurred me that she was only pretending to be cheerful.",jt:"彼女が明るいふりをしているだけだとは、まったく気づかなかった。",st:""},
+{id:992,q:"He disagreed ( ) me on the grounds that it would cost too much.",ch:["at", "in", "with", "if"],a:3,at:"with",af:"eiken2-audio/Q992.mp3",cs:"He disagreed with me on the grounds that it would cost too much.",jt:"彼は費用がかかりすぎるという理由で私に反対した。",st:""},
+{id:993,q:"Don't eat food that doesn't ( ) with you.",ch:["taste", "agree", "appeal", "fit"],a:2,at:"agree",af:"eiken2-audio/Q993.mp3",cs:"Don't eat food that doesn't agree with you.",jt:"体に合わない食べ物は食べないようにしなさい。",st:"agree with = ～に同意する"},
+{id:994,q:"I would ( appreciate / it / you / if / to / agree / could ) this proposal.",ch:["appreciate it if you could agree to", "appreciate it if you to agree could", "appreciate you if it could agree to", "appreciate could you agree if it to"],a:1,at:"appreciate it if you could agree to",af:"eiken2-audio/Q994.mp3",cs:"I would appreciate it if you could agree to this proposal.",jt:"この提案に同意していただければ幸いです。",st:""},
+{id:995,q:"My opinion is different from your opinion. = My opinion ( ) from ( ) you.",ch:["differs, yours", "differs, your", "differ, yours", "differ, you"],a:1,at:"differs, yours",af:"eiken2-audio/Q995.mp3",cs:"My opinion is different from your opinion. = My opinion differs, yours from ( ) you.",jt:"私の意見はあなたの意見と異なる。＝私の意見はあなたの意見と異なる。",st:""},
+{id:996,q:"I'm sure Sam can ( ) to the victory of our team in the finals.",ch:["contribute", "attribute", "distribute", "tribute"],a:1,at:"contribute",af:"eiken2-audio/Q996.mp3",cs:"I'm sure Sam can contribute to the victory of our team in the finals.",jt:"サムはきっと決勝戦でチームの勝利に貢献できると思う。",st:""},
+{id:997,q:"This job asks ( ) English fluency.",ch:["for", "of", "with", "on"],a:1,at:"for",af:"eiken2-audio/Q997.mp3",cs:"This job asks for English fluency.",jt:"この仕事は英語の流暢さを必要とする。",st:""},
+{id:998,q:"John has been ( ) the ID card he lost yesterday.",ch:["discovering", "finding out", "looking for", "searching"],a:3,at:"looking for",af:"eiken2-audio/Q998.mp3",cs:"John has been looking for the ID card he lost yesterday.",jt:"ジョンは昨日なくしたIDカードをずっと探している。",st:""},
+{id:999,q:"Water consists ( ) oxygen and hydrogen.",ch:["in", "of", "by", "for"],a:2,at:"of",af:"eiken2-audio/Q999.mp3",cs:"Water consists of oxygen and hydrogen.",jt:"水は酸素と水素からできている。",st:""},
+{id:1000,q:"Happiness consists ( ) contentment. A basketball team consists ( ) five players.",ch:["in, of", "of, in", "in, in", "of, of"],a:1,at:"in, of",af:"eiken2-audio/Q1000.mp3",cs:"Happiness consists in, of contentment. A basketball team consists ( ) five players.",jt:"幸福は満足の中にある。バスケットボールのチームは5人の選手で構成されている。",st:""},
+{id:1001,q:"Christmas falls ( ) Monday this year.",ch:["in", "on", "to", "over"],a:2,at:"on",af:"eiken2-audio/Q1001.mp3",cs:"Christmas falls on Monday this year.",jt:"今年のクリスマスは月曜日にあたる。",st:""},
+{id:1002,q:"My sister majored ( ) business at university.",ch:["at", "in", "with", "for"],a:2,at:"in",af:"eiken2-audio/Q1002.mp3",cs:"My sister majored in business at university.",jt:"姉は大学でビジネスを専攻した。",st:""},
+{id:1003,q:"My brother specializes ( ) Ancient Greek history.",ch:["at", "in", "to", "of"],a:2,at:"in",af:"eiken2-audio/Q1003.mp3",cs:"My brother specializes in Ancient Greek history.",jt:"兄は古代ギリシャ史を専門としている。",st:""},
+{id:1004,q:"Millions of people die ( ) hunger every year.",ch:["because", "of", "mainly", "near"],a:2,at:"of",af:"eiken2-audio/Q1004.mp3",cs:"Millions of people die of hunger every year.",jt:"毎年何百万人もの人々が飢えで亡くなっている。",st:""},
+{id:1005,q:"A lack of sleep is ( ) my health.",ch:["asking for", "telling on", "heating off", "depriving of"],a:2,at:"telling on",af:"eiken2-audio/Q1005.mp3",cs:"A lack of sleep is telling on my health.",jt:"睡眠不足が私の健康に影響を及ぼしている。",st:""},
+{id:1006,q:"I don't approve ( ) my son staying out after 9 p.m.",ch:["of", "on", "to", "for"],a:1,at:"of",af:"eiken2-audio/Q1006.mp3",cs:"I don't approve of my son staying out after 9 p.m.",jt:"私は息子が夜9時以降に外出することを認めていない。",st:""},
+{id:1007,q:"The house was broken ( ) while the owner was on holiday.",ch:["away", "into", "out", "with"],a:2,at:"into",af:"eiken2-audio/Q1007.mp3",cs:"The house was broken into while the owner was on holiday.",jt:"家主が休暇中の間に、その家に泥棒が入った。",st:""},
+{id:1008,q:"The police are looking ( ) the cause of the murder.",ch:["after", "around", "like", "into"],a:4,at:"into",af:"eiken2-audio/Q1008.mp3",cs:"The police are looking into the cause of the murder.",jt:"警察はその殺人事件の原因を調査している。",st:""},
+{id:1009,q:"Let's ask the neighbors to ( ) the dog while we're away.",ch:["care about", "keep up", "look after", "watch out"],a:3,at:"look after",af:"eiken2-audio/Q1009.mp3",cs:"Let's ask the neighbors to look after the dog while we're away.",jt:"外出中に近所の人に犬の世話を頼みましょう。",st:""},
+{id:1010,q:"How long does it take to ( ) to the theater from here?",ch:["enter", "reach", "get", "drop"],a:3,at:"get",af:"eiken2-audio/Q1010.mp3",cs:"How long does it take to get to the theater from here?",jt:"ここから劇場まで行くのにどのくらい時間がかかりますか？",st:""},
+{id:1011,q:"Please ( ) using a mobile phone in the bus.",ch:["prohibit from", "turn off", "refrain from", "give up"],a:3,at:"refrain from",af:"eiken2-audio/Q1011.mp3",cs:"Please refrain from using a mobile phone in the bus.",jt:"バスの中では携帯電話の使用をお控えください。",st:""},
+{id:1012,q:"I look ( ) the teacher at once.",ch:["up", "in", "on", "to"],a:3,at:"on",af:"eiken2-audio/Q1012.mp3",cs:"I look on the teacher at once.",jt:"私はすぐにその先生に注目した。",st:""},
+{id:1013,q:"You were foolish enough to part ( ) all your money on one night.",ch:["for", "with", "on", "in"],a:2,at:"with",af:"eiken2-audio/Q1013.mp3",cs:"You were foolish enough to part with all your money on one night.",jt:"あなたは一晩でお金を全部手放してしまうほど愚かだった。",st:""},
+{id:1014,q:"The Prime Minister insisted on ( ) this proposal.",ch:["that we accept", "us to accept", "our accepting", "for us to accept"],a:3,at:"our accepting",af:"eiken2-audio/Q1014.mp3",cs:"The Prime Minister insisted on our accepting this proposal.",jt:"首相は私たちがこの提案を受け入れるよう強く求めた。",st:""},
+{id:1015,q:"Mary asked ( ) his father.",ch:["for", "into", "after", "on"],a:3,at:"after",af:"eiken2-audio/Q1015.mp3",cs:"Mary asked after his father.",jt:"メアリーは彼の父親の様子を尋ねた。",st:""},
+{id:1016,q:"Her carelessness resulted ( ) an accident. The accident resulted ( ) her carelessness.",ch:["in, from", "from, in", "in, in", "from, from"],a:1,at:"in, from",af:"eiken2-audio/Q1016.mp3",cs:"Her carelessness resulted in, from an accident. The accident resulted ( ) her carelessness.",jt:"彼女の不注意が事故を引き起こした。その事故は彼女の不注意から生じた。",st:""},
+{id:1017,q:"We asked many persons about the new store, but no one has heard ( ) it.",ch:["by", "from", "of", "to"],a:3,at:"of",af:"eiken2-audio/Q1017.mp3",cs:"We asked many persons about the new store, but no one has heard of it.",jt:"その新しい店について多くの人に聞いたが、誰もそれを聞いたことがなかった。",st:""},
+{id:1018,q:"You'll hear ( ) me within a couple of days.",ch:["by", "for", "from", "with"],a:3,at:"from",af:"eiken2-audio/Q1018.mp3",cs:"You'll hear from me within a couple of days.",jt:"2、3日以内に私から連絡があるでしょう。",st:""},
+{id:1019,q:"UFO stands ( ) unidentified flying object.",ch:["by", "for", "up", "with"],a:2,at:"for",af:"eiken2-audio/Q1019.mp3",cs:"UFO stands for unidentified flying object.",jt:"UFOは「未確認飛行物体」の略である。",st:""},
+{id:1020,q:"What a relief that she got ( ) all her exams.",ch:["along", "off", "on", "through"],a:4,at:"through",af:"eiken2-audio/Q1020.mp3",cs:"What a relief that she got through all her exams.",jt:"彼女がすべての試験に合格して本当によかった。",st:""},
+{id:1021,q:"She has gone through all sorts of hardship.",ch:["has been destined", "has required", "has avoided", "has experienced"],a:4,at:"has experienced",af:"eiken2-audio/Q1021.mp3",cs:"She has gone through all sorts of hardship.",jt:"彼女はあらゆる種類の苦労を経験してきた。",st:""},
+{id:1022,q:"Would you care ( ) a cup of tea?",ch:["for", "of", "to", "with"],a:1,at:"for",af:"eiken2-audio/Q1022.mp3",cs:"Would you care for a cup of tea?",jt:"お茶を一杯いかがですか？",st:""},
+{id:1023,q:"We can never do ( ) food and water.",ch:["without", "with", "away", "for"],a:1,at:"without",af:"eiken2-audio/Q1023.mp3",cs:"We can never do without food and water.",jt:"私たちは食べ物と水なしでは決して生きていけない。",st:""},
+{id:1024,q:"You shouldn't try to do two things at once. Concentrate ( ) one thing at a time.",ch:["at", "on", "in", "to"],a:2,at:"on",af:"eiken2-audio/Q1024.mp3",cs:"You shouldn't try to do two things at once. Concentrate on one thing at a time.",jt:"一度に二つのことをしようとするべきではない。一度に一つのことに集中しなさい。",st:""},
+{id:1025,q:"We are not related, but I ( ) upon him as a brother.",ch:["see", "look", "give", "take"],a:2,at:"look",af:"eiken2-audio/Q1025.mp3",cs:"We are not related, but I look upon him as a brother.",jt:"私たちは親戚ではないが、私は彼を兄弟のように思っている。",st:""},
+{id:1026,q:"He does not ( ) in to anybody. = He does not ( ) in to anybody.",ch:["give", "put", "take", "hand"],a:1,at:"give",af:"eiken2-audio/Q1026.mp3",cs:"He does not give in to anybody. = He does not ( ) in to anybody.",jt:"彼は誰にも屈しない。＝彼は誰にも屈しない。",st:"give up/give awayと混同注意"},
+{id:1027,q:"It is not your fault. You are not to ( ) for it.",ch:["blame", "accuse", "charge", "scold"],a:1,at:"blame",af:"eiken2-audio/Q1027.mp3",cs:"It is not your fault. You are not to blame for it.",jt:"あなたのせいではない。あなたはそれについて責められる立場にない。",st:""},
+{id:1028,q:"He succeeded ( ) flying across the Atlantic. The prince succeeded ( ) the throne.",ch:["in, to", "to, in", "in, in", "to, to"],a:1,at:"in, to",af:"eiken2-audio/Q1028.mp3",cs:"He succeeded in, to flying across the Atlantic. The prince succeeded ( ) the throne.",jt:"彼は大西洋横断飛行に成功した。その王子は王位を継承した。",st:""},
+{id:1029,q:"He participated in the conference. = He ( ) part in the conference.",ch:["got", "took", "gave", "put"],a:2,at:"took",af:"eiken2-audio/Q1029.mp3",cs:"He participated in the conference. = He took part in the conference.",jt:"彼はその会議に参加した。＝彼はその会議に参加した。",st:""},
+{id:1030,q:"What will become of us if a war breaks out?",ch:["dwell on", "take off", "hang on", "happen to"],a:4,at:"happen to",af:"eiken2-audio/Q1030.mp3",cs:"What will become of us if a war breaks out?",jt:"戦争が起きたら私たちはどうなるのだろう？",st:""},
+{id:1031,q:"This situation calls for quick action.",ch:["visits", "commands", "hesitates", "requires"],a:4,at:"requires",af:"eiken2-audio/Q1031.mp3",cs:"This situation calls for quick action.",jt:"この状況は迅速な行動を必要としている。",st:""},
+{id:1032,q:"His natural intelligence and experience enabled him to ( ) with the problem.",ch:["attack", "accord", "deal", "stay"],a:3,at:"deal",af:"eiken2-audio/Q1032.mp3",cs:"His natural intelligence and experience enabled him to deal with the problem.",jt:"生まれ持った知性と経験のおかげで、彼はその問題に対処することができた。",st:""},
+{id:1033,q:"My sister would often stand by me when I was in trouble.",ch:["assist", "comfort", "prepare", "support"],a:4,at:"support",af:"eiken2-audio/Q1033.mp3",cs:"My sister would often stand by me when I was in trouble.",jt:"私が困っているとき、姉はよく味方になってくれたものだ。",st:""},
+{id:1034,q:"Many people enjoy visiting their friends at Christmas time.",ch:["coming in", "calling on", "taking care of", "taking account of"],a:2,at:"calling on",af:"eiken2-audio/Q1034.mp3",cs:"Many people enjoy visiting their friends at Christmas time.",jt:"クリスマスの時期に友人を訪ねることを楽しむ人は多い。",st:""},
+{id:1035,q:"Our students' accident added to the teachers' troubles.",ch:["led", "demanded", "increased", "decreased"],a:3,at:"increased",af:"eiken2-audio/Q1035.mp3",cs:"Our students' accident added to the teachers' troubles.",jt:"生徒たちの事故は教師たちの悩みを増やした。",st:""},
+{id:1036,q:"Susan's savings will soon amount to one million yen.",ch:["look like", "total", "decrease to", "amount to"],a:2,at:"total",af:"eiken2-audio/Q1036.mp3",cs:"Susan's savings will soon amount to one million yen.",jt:"スーザンの貯金はまもなく100万円に達するだろう。",st:""},
+{id:1037,q:"Unfortunately, our calculations failed to allow for possible errors in the experiment.",ch:["take into consideration", "permit", "give an account of", "prevent"],a:1,at:"take into consideration",af:"eiken2-audio/Q1037.mp3",cs:"Unfortunately, our calculations failed to allow for possible errors in the experiment.",jt:"残念ながら、私たちの計算では実験における誤りの可能性を考慮できていなかった。",st:"take on / take up / take off と混同注意"},
+{id:1038,q:"Let's carry on this discussion.",ch:["stop", "continue", "start", "enjoy"],a:2,at:"continue",af:"eiken2-audio/Q1038.mp3",cs:"Let's carry on this discussion.",jt:"この議論を続けましょう。",st:"carry outと混同注意"},
+{id:1039,q:"There are many men and women who cling to traditional sex roles.",ch:["make light of", "stick to", "relate to", "look down on"],a:2,at:"stick to",af:"eiken2-audio/Q1039.mp3",cs:"There are many men and women who cling to traditional sex roles.",jt:"伝統的な性別役割にこだわる男女は多い。",st:""},
+{id:1040,q:"Fresh vegetables are hard to come by in the winter.",ch:["see", "grow", "get", "sell"],a:3,at:"get",af:"eiken2-audio/Q1040.mp3",cs:"Fresh vegetables are hard to come by in the winter.",jt:"冬には新鮮な野菜を手に入れにくい。",st:""},
+{id:1041,q:"You compensate for this defect by working very hard.",ch:["make up for", "care about", "ask about", "give up"],a:1,at:"make up for",af:"eiken2-audio/Q1041.mp3",cs:"You compensate for this defect by working very hard.",jt:"あなたはとても一生懸命働くことでこの欠点を補っている。",st:"make out / make up for と混同注意"},
+{id:1042,q:"Susie will go over the lesson this evening.",ch:["review", "enjoy", "master", "require"],a:1,at:"review",af:"eiken2-audio/Q1042.mp3",cs:"Susie will go over the lesson this evening.",jt:"スージーは今夜その授業を復習するつもりだ。",st:""},
+{id:1043,q:"Julie hit on the idea while they were discussing the problem.",ch:["discovered", "opposed", "suggested", "supported"],a:1,at:"discovered",af:"eiken2-audio/Q1043.mp3",cs:"Julie hit on the idea while they were discussing the problem.",jt:"ジュリーはその問題を議論している最中に、そのアイデアをひらめいた。",st:""},
+{id:1044,q:"I tried very hard to come up with a name for my new pet dog.",ch:["think of", "deal with", "put down", "know of"],a:1,at:"think of",af:"eiken2-audio/Q1044.mp3",cs:"I tried very hard to come up with a name for my new pet dog.",jt:"新しいペットの犬の名前を考え出そうと一生懸命努力した。",st:"come acrossと混同注意"},
+{id:1045,q:"The discussion led to several major changes in the company.",ch:["resulted in", "looked for", "put", "disagreed with"],a:1,at:"resulted in",af:"eiken2-audio/Q1045.mp3",cs:"The discussion led to several major changes in the company.",jt:"その議論は会社にいくつかの大きな変化をもたらした。",st:""},
+{id:1046,q:"If you get into trouble, don't rely on me for help.",ch:["look up", "look to", "look up to", "look through"],a:2,at:"look to",af:"eiken2-audio/Q1046.mp3",cs:"If you get into trouble, don't rely on me for help.",jt:"困ったことになっても、助けを求めて私に頼らないでください。",st:""},
+{id:1047,q:"The storm having died away, we headed for Yokohama.",ch:["put", "kept", "got", "made"],a:4,at:"made",af:"eiken2-audio/Q1047.mp3",cs:"The storm having died away, we headed for Yokohama.",jt:"嵐が収まったので、私たちは横浜へ向かった。",st:""},
+{id:1048,q:"The big car pulled up at the traffic light.",ch:["hurried", "stopped", "turned"],a:2,at:"stopped",af:"eiken2-audio/Q1048.mp3",cs:"The big car pulled up at the traffic light.",jt:"その大きな車は信号で止まった。",st:""},
+{id:1049,q:"The student referred to the accident he had witnessed.",ch:["made", "mentioned", "passed", "submitted"],a:2,at:"mentioned",af:"eiken2-audio/Q1049.mp3",cs:"The student referred to the accident he had witnessed.",jt:"その学生は、自分が目撃した事故について言及した。",st:""},
+{id:1050,q:"She had better set about her work immediately.",ch:["stop", "choose", "decide", "begin"],a:4,at:"begin",af:"eiken2-audio/Q1050.mp3",cs:"She had better set about her work immediately.",jt:"彼女はすぐに仕事に取りかかった方がいい。",st:""},
+{id:1051,q:"People who wait on you here are very friendly.",ch:["entertain", "serve", "bring", "welcome"],a:2,at:"serve",af:"eiken2-audio/Q1051.mp3",cs:"People who wait on you here are very friendly.",jt:"ここで接客してくれる人たちはとても感じがいい。",st:""},
+{id:1052,q:"Many children in this country don't get attended to when they become sick.",ch:["waited for", "cared for", "extended", "mended"],a:2,at:"cared for",af:"eiken2-audio/Q1052.mp3",cs:"Many children in this country don't get attended to when they become sick.",jt:"この国では、多くの子供たちが病気になっても適切な手当てを受けられない。",st:""},
+{id:1053,q:"I'll tell you what I am driving at.",ch:["aiming at", "running into", "looking for", "carrying on"],a:1,at:"aiming at",af:"eiken2-audio/Q1053.mp3",cs:"I'll tell you what I am driving at.",jt:"私が言いたいことを話しましょう。",st:""},
+{id:1054,q:"Now that you're a grown-up, you must answer for what you say and do incorrectly.",ch:["take responsibility for", "compensate for", "brush up on", "come up with"],a:1,at:"take responsibility for",af:"eiken2-audio/Q1054.mp3",cs:"Now that you're a grown-up, you must answer for what you say and do incorrectly.",jt:"もう大人なのだから、言ったこと・やったことの誤りに責任を持たなければならない。",st:""},
+{id:1055,q:"The woman burst into tears at the news.",ch:["started tearing the paper", "became angry", "fainted", "began crying"],a:4,at:"began crying",af:"eiken2-audio/Q1055.mp3",cs:"The woman burst into tears at the news.",jt:"その女性はその知らせを聞いて突然泣き出した。",st:""},
+{id:1056,q:"Anne cared for her sick neighbors.",ch:["thought about", "was in charge of", "took care of", "worried"],a:3,at:"took care of",af:"eiken2-audio/Q1056.mp3",cs:"Anne cared for her sick neighbors.",jt:"アンは病気の近所の人たちの世話をした。",st:""},
+{id:1057,q:"We cannot dispense with sleep for too many days.",ch:["change", "do with", "do without", "do away with"],a:3,at:"do without",af:"eiken2-audio/Q1057.mp3",cs:"We cannot dispense with sleep for too many days.",jt:"何日も睡眠なしで過ごすことはできない。",st:""},
+{id:1058,q:"They finally got over the shock of their father's death.",ch:["overcame", "escaped", "challenged", "avoided"],a:1,at:"overcame",af:"eiken2-audio/Q1058.mp3",cs:"They finally got over the shock of their father's death.",jt:"彼らはついに父親の死のショックから立ち直った。",st:""},
+{id:1059,q:"Sue ran into Mary in the shopping mall.",ch:["Sue ran into the shopping mall to see Mary.", "Sue happened to meet Mary at the shopping mall.", "Sue and Mary jogged together at the shopping mall.", "Sue and Mary had a traffic accident inside the shopping mall."],a:2,at:"Sue happened to meet Mary at the shopping mall.",af:"eiken2-audio/Q1059.mp3",cs:"Sue ran into Mary in the shopping mall.",jt:"スーはショッピングモールでメアリーに偶然出会った。",st:""},
+{id:1060,q:"We all long for world peace.",ch:["He made a long sentence.", "I'll support you as long as I live.", "She will come here before long.", "The girl seems to long to be an actress."],a:4,at:"The girl seems to long to be an actress.",af:"eiken2-audio/Q1060.mp3",cs:"We all long for world peace.",jt:"私たちは皆、世界平和を切望している。",st:""},
+{id:1061,q:"Last month the company had to ( ) several hundred factory workers.",ch:["stir up", "lay off", "come across", "turn over"],a:2,at:"lay off",af:"eiken2-audio/Q1061.mp3",cs:"Last month the company had to lay off several hundred factory workers.",jt:"先月、その会社は工場労働者数百人を一時解雇しなければならなかった。",st:""},
+{id:1062,q:"He suddenly ( ) up the phone while I was speaking.",ch:["shut", "hung", "cut", "hang"],a:2,at:"hung",af:"eiken2-audio/Q1062.mp3",cs:"He suddenly hung up the phone while I was speaking.",jt:"私が話している途中で、彼は突然電話を切った。",st:""},
+{id:1063,q:"The garden party was called ( ) because of the storm.",ch:["for", "on", "off", "out"],a:3,at:"off",af:"eiken2-audio/Q1063.mp3",cs:"The garden party was called off because of the storm.",jt:"嵐のためにガーデンパーティーは中止になった。",st:""},
+{id:1064,q:"( ) down the TV, will you? It's too loud.",ch:["Switch", "Turn", "Volume", "Control"],a:2,at:"Turn",af:"eiken2-audio/Q1064.mp3",cs:"Turn down the TV, will you? It's too loud.",jt:"テレビの音を下げてくれない？うるさすぎる。",st:"turn out/turn upと混同注意"},
+{id:1065,q:"He ( ) the invitation to the party.",ch:["beat", "down", "off", "turned"],a:4,at:"turned",af:"eiken2-audio/Q1065.mp3",cs:"He turned the invitation to the party.",jt:"彼はパーティーへの招待を断った。",st:""},
+{id:1066,q:"John forgot to ( ) his homework yesterday.",ch:["turn in", "hand in", "give in", "turn"],a:1,at:"turn in",af:"eiken2-audio/Q1066.mp3",cs:"John forgot to turn in his homework yesterday.",jt:"ジョンは昨日宿題を提出するのを忘れた。",st:""},
+{id:1067,q:"I cannot ( ) a kimono by myself, so my mother always helps me out.",ch:["wear", "wearing", "wear out", "put on"],a:4,at:"put on",af:"eiken2-audio/Q1067.mp3",cs:"I cannot put on a kimono by myself, so my mother always helps me out.",jt:"私は一人で着物を着られないので、いつも母に助けてもらっている。",st:""},
+{id:1068,q:"What a mess! Please ( ) your toys, Akira.",ch:["hang up", "play off", "put away", "take away"],a:3,at:"put away",af:"eiken2-audio/Q1068.mp3",cs:"What a mess! Please put away your toys, Akira.",jt:"なんて散らかっているの！アキラ、おもちゃを片付けなさい。",st:""},
+{id:1069,q:"They ( ) their plan without difficulty.",ch:["came out", "carried out", "had on", "got on"],a:2,at:"carried out",af:"eiken2-audio/Q1069.mp3",cs:"They carried out their plan without difficulty.",jt:"彼らは難なく計画を実行した。",st:""},
+{id:1070,q:"I always ( ) my homework before I turn it in.",ch:["fill in", "look over", "put together", "make out"],a:2,at:"look over",af:"eiken2-audio/Q1070.mp3",cs:"I always look over my homework before I turn it in.",jt:"私はいつも宿題を提出する前に見直す。",st:""},
+{id:1071,q:"Unknown words should be ( ) in a dictionary.",ch:["looked up", "checked with", "consulted by", "discovered from"],a:1,at:"looked up",af:"eiken2-audio/Q1071.mp3",cs:"Unknown words should be looked up in a dictionary.",jt:"知らない単語は辞書で調べるべきだ。",st:""},
+{id:1072,q:"I can't ( ) this math problem in my head. I need a calculator.",ch:["come up", "go on", "work out", "get on"],a:3,at:"work out",af:"eiken2-audio/Q1072.mp3",cs:"I can't work out this math problem in my head. I need a calculator.",jt:"この数学の問題を暗算で解くことができない。電卓が必要だ。",st:""},
+{id:1073,q:"I can't figure ( ) how to use this new cell phone.",ch:["around", "in", "out", "up"],a:3,at:"out",af:"eiken2-audio/Q1073.mp3",cs:"I can't figure out how to use this new cell phone.",jt:"この新しい携帯電話の使い方が分からない。",st:""},
+{id:1074,q:"She spoke in such a low voice that I could hardly make out what she said.",ch:["understand", "write down", "learn", "translate"],a:1,at:"understand",af:"eiken2-audio/Q1074.mp3",cs:"She spoke in such a low voice that I could hardly make out what she said.",jt:"彼女はとても小さな声で話したので、何を言っているのかほとんど聞き取れなかった。",st:"make upと混同注意"},
+{id:1075,q:"I think I left ( ) at the restaurant.",ch:["my credit card alone", "hold of my credit card", "my credit card behind", "of my credit card"],a:3,at:"my credit card behind",af:"eiken2-audio/Q1075.mp3",cs:"I think I left my credit card behind at the restaurant.",jt:"レストランにクレジットカードを置き忘れてきたと思う。",st:""},
+{id:1076,q:"\"Did you hear the softball team manager resigned?\" \"Really? Who'll be ( )?\"",ch:["take over", "take the job", "taking over", "taking up"],a:3,at:"taking over",af:"eiken2-audio/Q1076.mp3",cs:"\"Did you hear the softball team manager resigned?\" \"Really? Who'll be taking over?\"",jt:"「ソフトボールチームのマネージャーが辞任したって聞いた？」「本当に？誰が引き継ぐの？」",st:""},
+{id:1077,q:"I'd like to take ( ) all the terrible things I said about her.",ch:["about", "along", "back", "over"],a:3,at:"back",af:"eiken2-audio/Q1077.mp3",cs:"I'd like to take back all the terrible things I said about her.",jt:"彼女について言った酷いことを全部取り消したい。",st:""},
+{id:1078,q:"When I retired, I realized it was time to begin a new hobby.",ch:["try on", "go on", "put on", "take up"],a:4,at:"take up",af:"eiken2-audio/Q1078.mp3",cs:"When I retired, I realized it was time to begin a new hobby.",jt:"退職したとき、新しい趣味を始める時期だと気づいた。",st:"take on / take in と混同注意"},
+{id:1079,q:"He listened to the lecture, but could take ( ) note of it.",ch:["to", "in", "up", "through"],a:2,at:"in",af:"eiken2-audio/Q1079.mp3",cs:"He listened to the lecture, but could take in note of it.",jt:"彼は講義を聴いたが、内容をほとんど理解できなかった。",st:"take on/take up/take offと混同注意"},
+{id:1080,q:"She ( ) greater responsibilities when she was promoted.",ch:["take in", "take on", "take over", "take up"],a:2,at:"take on",af:"eiken2-audio/Q1080.mp3",cs:"She take on greater responsibilities when she was promoted.",jt:"彼女は昇進したとき、より大きな責任を引き受けた。",st:"take in / take off / take up と混同注意"},
+{id:1081,q:"I like these jeans. May I ( )?",ch:["try them on", "take off it", "give it try", "wear them a try"],a:1,at:"try them on",af:"eiken2-audio/Q1081.mp3",cs:"I like these jeans. May I try them on?",jt:"このジーンズが気に入りました。試着してもいいですか？",st:""},
+{id:1082,q:"I must buy a new suit. This one is ( ).",ch:["turned around", "ready", "worn out", "exhausted"],a:3,at:"worn out",af:"eiken2-audio/Q1082.mp3",cs:"I must buy a new suit. This one is worn out.",jt:"新しいスーツを買わなければならない。これは使い古してしまった。",st:""},
+{id:1083,q:"His brother went to the station with him to ( ) me off.",ch:["meet", "call", "take", "see"],a:4,at:"see",af:"eiken2-audio/Q1083.mp3",cs:"His brother went to the station with him to see me off.",jt:"彼の兄（弟）は彼と一緒に駅まで私を見送りに来てくれた。",st:""},
+{id:1084,q:"I don't believe the story was really true. Somebody must have ( ) it up.",ch:["given", "kept", "made", "put"],a:3,at:"made",af:"eiken2-audio/Q1084.mp3",cs:"I don't believe the story was really true. Somebody must have made it up.",jt:"その話が本当だとは思えない。誰かが作り話をしたに違いない。",st:""},
+{id:1085,q:"I'm still not sure if we can afford the trip. I'll have to ( ) with my wife.",ch:["discuss", "exchange it", "go over", "talk it over"],a:4,at:"talk it over",af:"eiken2-audio/Q1085.mp3",cs:"I'm still not sure if we can afford the trip. I'll have to talk it over with my wife.",jt:"旅行の費用が払えるかどうかまだ分からない。妻と話し合わなければならない。",st:""},
+{id:1086,q:"Mr. Stephens used to smoke a pack of cigarettes a day, but now he has cut ( ) to half a pack.",ch:["away", "off", "down", "out"],a:3,at:"down",af:"eiken2-audio/Q1086.mp3",cs:"Mr. Stephens used to smoke a pack of cigarettes a day, but now he has cut down to half a pack.",jt:"スティーブンスさんはかつて1日に1箱たばこを吸っていたが、今は半箱に減らした。",st:""},
+{id:1087,q:"Lucy : Could you show me how to use this computer? Ben : Sure. It's rather complicated, and I'll speak slowly so you can put ( ) some important points.",ch:["down", "in", "up", "through"],a:1,at:"down",af:"eiken2-audio/Q1087.mp3",cs:"Lucy : Could you show me how to use this computer? Ben : Sure. It's rather complicated, and I'll speak slowly so you can put down some important points.",jt:"ルーシー：このコンピューターの使い方を教えてもらえますか？　ベン：もちろん。かなり複雑なので、重要なポイントをメモできるようにゆっくり話します。",st:""},
+{id:1088,q:"I felt let down and depressed when he didn't phone me.",ch:["reduced", "relieved", "convinced", "disappointed"],a:4,at:"disappointed",af:"eiken2-audio/Q1088.mp3",cs:"I felt let down and depressed when he didn't phone me.",jt:"彼が電話をくれなかったとき、がっかりして落ち込んだ。",st:""},
+{id:1089,q:"Close investigation will bring out what he has done.",ch:["conceal", "reveal", "regulate", "revise"],a:2,at:"reveal",af:"eiken2-audio/Q1089.mp3",cs:"Close investigation will bring out what he has done.",jt:"徹底的な調査で、彼がしたことが明らかになるだろう。",st:""},
+{id:1090,q:"Don't cross his name on the list.",ch:["put off", "leave out", "get away", "take after"],a:2,at:"leave out",af:"eiken2-audio/Q1090.mp3",cs:"Don't cross his name on the list.",jt:"リストから彼の名前を消さないでください。",st:""},
+{id:1091,q:"Did you call up Charlie and tell him the news?",ch:["ask", "telephone", "demand", "visit"],a:2,at:"telephone",af:"eiken2-audio/Q1091.mp3",cs:"Did you call up Charlie and tell him the news?",jt:"チャーリーに電話してそのニュースを伝えましたか？",st:""},
+{id:1092,q:"The meeting was put off till the next week.",ch:["cancelled", "opened", "postponed", "reserved"],a:3,at:"postponed",af:"eiken2-audio/Q1092.mp3",cs:"The meeting was put off till the next week.",jt:"会議は翌週に延期された。",st:"put out/put up withと混同注意"},
+{id:1093,q:"The hotel clerk asked me to fill out the form.",ch:["complete", "write", "copy", "read"],a:1,at:"complete",af:"eiken2-audio/Q1093.mp3",cs:"The hotel clerk asked me to fill out the form.",jt:"ホテルの係員は私に用紙に記入するよう頼んだ。",st:""},
+{id:1094,q:"It was with great difficulty that I could hold back my anger.",ch:["express", "control", "soften", "overcome"],a:2,at:"control",af:"eiken2-audio/Q1094.mp3",cs:"It was with great difficulty that I could hold back my anger.",jt:"怒りを抑えるのに大変苦労した。",st:"hold on/hold outと混同注意"},
+{id:1095,q:"It is hard to keep up that kind of lifestyle.",ch:["destroy", "maintain", "analyze", "hide"],a:2,at:"maintain",af:"eiken2-audio/Q1095.mp3",cs:"It is hard to keep up that kind of lifestyle.",jt:"そのような生活スタイルを維持し続けるのは難しい。",st:""},
+{id:1096,q:"My mother picked out a dress that she particularly liked.",ch:["chose", "showed", "bought", "respected"],a:1,at:"chose",af:"eiken2-audio/Q1096.mp3",cs:"My mother picked out a dress that she particularly liked.",jt:"母は特に気に入ったドレスを選び出した。",st:""},
+{id:1097,q:"I pointed out that we needed more money for the poor.",ch:["doubted", "accepted", "indicated", "was afraid"],a:3,at:"indicated",af:"eiken2-audio/Q1097.mp3",cs:"I pointed out that we needed more money for the poor.",jt:"私は、貧しい人々のためにもっとお金が必要だと指摘した。",st:""},
+{id:1098,q:"If you put aside a certain sum every month, you will soon have enough for your trip.",ch:["forget", "steal", "save", "throw away"],a:3,at:"save",af:"eiken2-audio/Q1098.mp3",cs:"If you put aside a certain sum every month, you will soon have enough for your trip.",jt:"毎月一定の金額を貯めておけば、すぐに旅行に十分なお金が貯まるだろう。",st:""},
+{id:1099,q:"Police have not ruled out the possibility that the man was murdered.",ch:["attached importance to", "been aware of", "excluded", "supported"],a:3,at:"excluded",af:"eiken2-audio/Q1099.mp3",cs:"Police have not ruled out the possibility that the man was murdered.",jt:"警察はその男性が殺害された可能性を排除していない。",st:""},
+{id:1100,q:"I'm planning to set up a joint venture with them.",ch:["come over", "establish", "get out", "make in"],a:2,at:"establish",af:"eiken2-audio/Q1100.mp3",cs:"I'm planning to set up a joint venture with them.",jt:"私は彼らと合弁事業を設立する計画を立てている。",st:""},
+{id:1101,q:"The cows were brought up on the farm.",ch:["born", "caught", "raised", "taken"],a:3,at:"raised",af:"eiken2-audio/Q1101.mp3",cs:"The cows were brought up on the farm.",jt:"その牛たちは農場で育てられた。",st:""},
+{id:1102,q:"When was this novel brought out?",ch:["finished", "completed", "published", "written"],a:3,at:"published",af:"eiken2-audio/Q1102.mp3",cs:"When was this novel brought out?",jt:"この小説はいつ出版されましたか？",st:""},
+{id:1103,q:"Please put out your cigarettes while you are fueling your car.",ch:["export", "execute", "extinguish", "exchange"],a:3,at:"extinguish",af:"eiken2-audio/Q1103.mp3",cs:"Please put out your cigarettes while you are fueling your car.",jt:"車に給油中はたばこを消してください。",st:"put off/put up withと混同注意"},
+{id:1104,q:"John couldn't wait to show off his new car to his friends.",ch:["silently show", "proudly show", "kindly show", "suddenly show"],a:2,at:"proudly show",af:"eiken2-audio/Q1104.mp3",cs:"John couldn't wait to show off his new car to his friends.",jt:"ジョンは友人たちに新しい車を自慢したくて待ちきれなかった。",st:""},
+{id:1105,q:"Global warming will ( ) a lot of unfavorable changes in the future.",ch:["come about", "bring about", "a lot of", "unfavorable"],a:2,at:"bring about",af:"eiken2-audio/Q1105.mp3",cs:"Global warming will bring about a lot of unfavorable changes in the future.",jt:"地球温暖化は将来、多くの好ましくない変化をもたらすだろう。",st:""},
+{id:1106,q:"[意味の近い表現を選べ] I took a day off yesterday.",ch:["Take off your shoes here.", "The plane took off from Heathrow for Tokyo.", "I am taking tomorrow off.", ""],a:3,at:"I am taking tomorrow off.",af:"eiken2-audio/Q1106.mp3",cs:"[意味の近い表現を選べ] I took a day off yesterday.",jt:"私は昨日一日休みを取った。",st:""},
+{id:1107,q:"[pick upを使った文で正しい用法を3つ選べ]",ch:["She picked up those flowers from her own garden.", "If you live abroad, it is easier to pick up the local language.", "Could you go to the station and pick up your mother?", "Can you pick up some milk from the shop on your way home?"],a:2,at:"If you live abroad, it is easier to pick up the local language.",af:"eiken2-audio/Q1107.mp3",cs:"[pick upを使った文で正しい用法を3つ選べ]",jt:"「pick up」を使った文として正しい用法を3つ選べ。",st:""},
+{id:1108,q:"You're a child and shouldn't ( ) until late with grown-ups.",ch:["get up", "give up", "show up", "stay up"],a:4,at:"stay up",af:"eiken2-audio/Q1108.mp3",cs:"You're a child and shouldn't stay up until late with grown-ups.",jt:"あなたは子どもなので、大人たちと一緒に夜遅くまで起きていてはいけない。",st:""},
+{id:1109,q:"He stands ( ) as the best speaker among them.",ch:["out", "by", "for", "at"],a:1,at:"out",af:"eiken2-audio/Q1109.mp3",cs:"He stands out as the best speaker among them.",jt:"彼は彼らの中で最高のスピーカーとして際立っている。",st:""},
+{id:1110,q:"Eve fainted and it was at least an hour before she ( ).",ch:["came for", "made up", "came to", "made on"],a:3,at:"came to",af:"eiken2-audio/Q1110.mp3",cs:"Eve fainted and it was at least an hour before she came to.",jt:"イブは気を失い、意識を取り戻すまで少なくとも1時間かかった。",st:""},
+{id:1112,q:"Don't ( ) in with your remarks while I am speaking.",ch:["interrupt", "cut", "take", "get"],a:2,at:"cut",af:"eiken2-audio/Q1112.mp3",cs:"Don't cut in with your remarks while I am speaking.",jt:"私が話している間に口を挟まないでください。",st:""},
+{id:1113,q:"Computers may be very useful, but the problem is that mine breaks ( ) as often as my car does.",ch:["down", "out", "in", "up"],a:1,at:"down",af:"eiken2-audio/Q1113.mp3",cs:"Computers may be very useful, but the problem is that mine breaks down as often as my car does.",jt:"コンピューターはとても便利かもしれないが、問題は私のコンピューターが車と同じくらいよく故障することだ。",st:""},
+{id:1114,q:"Do earthquakes ( ) often in America?",ch:["break out", "come up", "event", "occur"],a:4,at:"occur",af:"eiken2-audio/Q1114.mp3",cs:"Do earthquakes occur often in America?",jt:"アメリカでは地震が頻繁に起きますか？",st:""},
+{id:1115,q:"How did the car accident occur?",ch:["come about", "drop in", "give way", "show up"],a:1,at:"come about",af:"eiken2-audio/Q1115.mp3",cs:"How did the car accident occur?",jt:"その交通事故はどのように起きたのですか？",st:""},
+{id:1116,q:"He promised to come but he hasn't ( ) yet.",ch:["turned up", "turned over", "turned in", "turned away"],a:1,at:"turned up",af:"eiken2-audio/Q1116.mp3",cs:"He promised to come but he hasn't turned up yet.",jt:"彼は来ると約束したのに、まだ現れていない。",st:""},
+{id:1117,q:"It really gets on my nerves that Robert shows up late for every class.",ch:["comes", "expands", "leaves", "overflows"],a:1,at:"comes",af:"eiken2-audio/Q1117.mp3",cs:"It really gets on my nerves that Robert shows up late for every class.",jt:"ロバートが毎回授業に遅刻してくるのは本当に神経に障る。",st:""},
+{id:1118,q:"It usually takes a little while to ( ) in a new house.",ch:["settle down", "settle on", "settle up", "settle through"],a:1,at:"settle down",af:"eiken2-audio/Q1118.mp3",cs:"It usually takes a little while to settle down in a new house.",jt:"新しい家に落ち着くには、たいてい少し時間がかかる。",st:""},
+{id:1119,q:"I'm too tired to cook tonight. Why don't we eat ( ) somewhere?",ch:["out", "on", "beyond", "up"],a:1,at:"out",af:"eiken2-audio/Q1119.mp3",cs:"I'm too tired to cook tonight. Why don't we eat out somewhere?",jt:"今夜は疲れすぎて料理できない。どこかで外食しない？",st:""},
+{id:1120,q:"The dry season there will set in soon.",ch:["abolish", "begin", "beset", "wear"],a:2,at:"begin",af:"eiken2-audio/Q1120.mp3",cs:"The dry season there will set in soon.",jt:"あそこの乾季はもうすぐ始まるだろう。",st:""},
+{id:1121,q:"My father set out for the mountain this morning.",ch:["headed for", "climbed up", "ran to", "walked around"],a:1,at:"headed for",af:"eiken2-audio/Q1121.mp3",cs:"My father set out for the mountain this morning.",jt:"父は今朝、山に向けて出発した。",st:""},
+{id:1122,q:"Their marriage has broken up.",ch:["come to an end", "become weak", "lost control", "started suddenly"],a:1,at:"come to an end",af:"eiken2-audio/Q1122.mp3",cs:"Their marriage has broken up.",jt:"彼らの結婚は破綻した。",st:""},
+{id:1123,q:"The bomb went off.",ch:["explained", "exercised", "experimented", "exploded"],a:4,at:"exploded",af:"eiken2-audio/Q1123.mp3",cs:"The bomb went off.",jt:"爆弾が爆発した。",st:""},
+{id:1124,q:"Look out! There's a bicycle coming.",ch:["Step up", "Stay calm", "Watch out", "Pass out"],a:3,at:"Watch out",af:"eiken2-audio/Q1124.mp3",cs:"Look out! There's a bicycle coming.",jt:"気をつけて！自転車が来ているよ。",st:""},
+{id:1125,q:"The plane for Paris will take off on time today.",ch:["arrive", "get", "move", "depart"],a:4,at:"depart",af:"eiken2-audio/Q1125.mp3",cs:"The plane for Paris will take off on time today.",jt:"パリ行きの飛行機は今日、定刻通りに離陸する予定だ。",st:"take on/take inと混同注意"},
+{id:1126,q:"The thieves made off in a waiting car.",ch:["entered", "escaped", "exploded", "exclaimed"],a:2,at:"escaped",af:"eiken2-audio/Q1126.mp3",cs:"The thieves made off in a waiting car.",jt:"泥棒たちは待機していた車で逃げ去った。",st:""},
+{id:1127,q:"The man passed away at age 100.",ch:["died", "reached", "lived", "looked"],a:1,at:"died",af:"eiken2-audio/Q1127.mp3",cs:"The man passed away at age 100.",jt:"その男性は100歳で亡くなった。",st:""},
+{id:1128,q:"The rumor turned out to be true.",ch:["proved", "found", "heard", "showed"],a:1,at:"proved",af:"eiken2-audio/Q1128.mp3",cs:"The rumor turned out to be true.",jt:"そのうわさは本当だということがわかった。",st:""},
+{id:1129,q:"Please excuse me ( ) being so late. I was caught in heavy traffic.",ch:["for", "from", "of", "to"],a:1,at:"for",af:"eiken2-audio/Q1129.mp3",cs:"Please excuse me for being so late. I was caught in heavy traffic.",jt:"こんなに遅くなって申し訳ありません。渋滞にはまってしまいました。",st:""},
+{id:1130,q:"The executives attributed the slowdown ( ) the government's economic policy.",ch:["from", "in", "to", "except"],a:3,at:"to",af:"eiken2-audio/Q1130.mp3",cs:"The executives attributed the slowdown to the government's economic policy.",jt:"幹部たちは業績の低迷を政府の経済政策のせいにした。",st:""},
+{id:1131,q:"The students ( ) most of their free time to the clean-up campaign sponsored by the local community.",ch:["contributed", "attributed", "substituted", "distributed"],a:1,at:"contributed",af:"eiken2-audio/Q1131.mp3",cs:"The students contributed most of their free time to the clean-up campaign sponsored by the local community.",jt:"その学生たちは地域社会が主催した清掃活動に自分たちの自由時間のほとんどを捧げた。",st:""},
+{id:1132,q:"He has ( ) his life to helping poor people.",ch:["declared", "declined", "deserved", "devoted"],a:4,at:"devoted",af:"eiken2-audio/Q1132.mp3",cs:"He has devoted his life to helping poor people.",jt:"彼は貧しい人々を助けることに生涯を捧げてきた。",st:""},
+{id:1133,q:"He was named William ( ) his uncle.",ch:["after", "through", "from", "to"],a:1,at:"after",af:"eiken2-audio/Q1133.mp3",cs:"He was named William after his uncle.",jt:"彼はおじにちなんでウィリアムと名付けられた。",st:""},
+{id:1134,q:"He can't ( ) right from wrong yet.",ch:["say", "tell", "speak", "talk"],a:2,at:"tell",af:"eiken2-audio/Q1134.mp3",cs:"He can't tell right from wrong yet.",jt:"彼はまだ善悪の区別がつかない。",st:""},
+{id:1135,q:"He could not distinguish silk ( ) cotton.",ch:["for", "between", "from", "with"],a:3,at:"from",af:"eiken2-audio/Q1135.mp3",cs:"He could not distinguish silk from cotton.",jt:"彼は絹と綿を見分けることができなかった。",st:""},
+{id:1136,q:"Please ( ) me for not having written sooner.",ch:["forgive", "allow", "permit", "admit"],a:1,at:"forgive",af:"eiken2-audio/Q1136.mp3",cs:"Please forgive me for not having written sooner.",jt:"もっと早くお手紙を差し上げなかったことをお許しください。",st:""},
+{id:1137,q:"They have ( ) a new tax on wine.",ch:["composed", "exposed", "imposed", "supposed"],a:3,at:"imposed",af:"eiken2-audio/Q1137.mp3",cs:"They have imposed a new tax on wine.",jt:"彼らはワインに新たな税を課した。",st:""},
+{id:1138,q:"John filled ( ).",ch:["water the glass", "the glass by water", "the glass water", "the glass with water"],a:4,at:"the glass with water",af:"eiken2-audio/Q1138.mp3",cs:"John filled the glass with water.",jt:"ジョンはグラスに水を満たした。",st:""},
+{id:1139,q:"I helped ( ).",ch:["his homework", "him with his homework", "him his homework", "homework"],a:2,at:"him with his homework",af:"eiken2-audio/Q1139.mp3",cs:"I helped him with his homework.",jt:"私は彼の宿題を手伝った。",st:""},
+{id:1140,q:"Life ( ) to a voyage.",ch:["compares", "is comparing", "is compared", "compared"],a:3,at:"is compared",af:"eiken2-audio/Q1140.mp3",cs:"Life is compared to a voyage.",jt:"人生は航海に例えられる。",st:""},
+{id:1141,q:"The American actress said she was much impressed ( ) Japanese traditional theater.",ch:["at", "by", "for", "with"],a:4,at:"with",af:"eiken2-audio/Q1141.mp3",cs:"The American actress said she was much impressed with Japanese traditional theater.",jt:"そのアメリカ人女優は日本の伝統芸能にとても感銘を受けたと語った。",st:""},
+{id:1142,q:"I asked the waiter ( ) tea, but he brought milk.",ch:["of", "about", "to", "for"],a:4,at:"for",af:"eiken2-audio/Q1142.mp3",cs:"I asked the waiter for tea, but he brought milk.",jt:"私はウェイターにお茶を頼んだが、彼はミルクを持ってきた。",st:""},
+{id:1143,q:"Come! I'll treat you ( ) a soda since you're so broke.",ch:["to", "for", "with", "by"],a:1,at:"to",af:"eiken2-audio/Q1143.mp3",cs:"Come! I'll treat you to a soda since you're so broke.",jt:"さあ！そんなにお金がないなら、ジュースをおごってあげるよ。",st:""},
+{id:1144,q:"I regarded him ( ) a friend but he betrayed me.",ch:["out", "of", "to", "as"],a:4,at:"as",af:"eiken2-audio/Q1144.mp3",cs:"I regarded him as a friend but he betrayed me.",jt:"私は彼を友人だと思っていたが、彼は私を裏切った。",st:""},
+{id:1146,q:"To hear him speak, one would ( ) him for an Englishman.",ch:["take", "change", "go", "give"],a:1,at:"take",af:"eiken2-audio/Q1146.mp3",cs:"To hear him speak, one would take him for an Englishman.",jt:"彼が話すのを聞けば、誰でも彼をイギリス人だと思うだろう。",st:""},
+{id:1147,q:"They mistook him ( ) his brother.",ch:["as", "but", "for", "with"],a:3,at:"for",af:"eiken2-audio/Q1147.mp3",cs:"They mistook him for his brother.",jt:"彼らは彼を彼の兄（弟）と間違えた。",st:""},
+{id:1148,q:"They thanked the rescue team ( ) saving their child.",ch:["for", "because", "since", "as"],a:1,at:"for",af:"eiken2-audio/Q1148.mp3",cs:"They thanked the rescue team for saving their child.",jt:"彼らは子どもを救ってくれた救助隊に感謝した。",st:""},
+{id:1149,q:"They congratulated him ( ) his success.",ch:["by", "in", "on", "with"],a:3,at:"on",af:"eiken2-audio/Q1149.mp3",cs:"They congratulated him on his success.",jt:"彼らは彼の成功を祝福した。",st:""},
+{id:1150,q:"Would you please exchange this glass ( ) a clean one?",ch:["for", "by", "on", "into"],a:1,at:"for",af:"eiken2-audio/Q1150.mp3",cs:"Would you please exchange this glass for a clean one?",jt:"このグラスをきれいなものと交換していただけますか？",st:""},
+{id:1151,q:"I left the cooking ( ) my sister.",ch:["under", "in", "to", "of"],a:3,at:"to",af:"eiken2-audio/Q1151.mp3",cs:"I left the cooking to my sister.",jt:"私は料理を妹（姉）に任せた。",st:""},
+{id:1152,q:"Nothing is more necessary than ( ) this lesson home to the young.",ch:["making", "taking", "bringing", "putting"],a:3,at:"bringing",af:"eiken2-audio/Q1152.mp3",cs:"Nothing is more necessary than bringing this lesson home to the young.",jt:"この教訓を若者たちにしっかりと理解させることほど必要なことはない。",st:""},
+{id:1153,q:"The person who saved the child from drowning has been ( ) with an award for bravery.",ch:["given", "taken", "presented", "promised"],a:3,at:"presented",af:"eiken2-audio/Q1153.mp3",cs:"The person who saved the child from drowning has been presented with an award for bravery.",jt:"溺れかけた子どもを救った人は、勇敢な行為として賞を贈られた。",st:""},
+{id:1154,q:"Can you supply me ( ) all I need?",ch:["with", "for", "to", "of"],a:1,at:"with",af:"eiken2-audio/Q1154.mp3",cs:"Can you supply me with all I need?",jt:"私が必要なものをすべて供給していただけますか？",st:""},
+{id:1155,q:"Please ( ) me ( ) your family.",ch:["remember, to", "remind, of", "recall, to", "recollect, of"],a:1,at:"remember, to",af:"eiken2-audio/Q1155.mp3",cs:"Please remember, to me ( ) your family.",jt:"覚えておいてください、私にとってあなたは家族です。",st:""},
+{id:1156,q:"We cannot substitute water ( ) oil.",ch:["for", "with", "to", "by"],a:1,at:"for",af:"eiken2-audio/Q1156.mp3",cs:"We cannot substitute water for oil.",jt:"私たちは石油を水で代替することはできない。",st:""},
+{id:1157,q:"He ordered the book from a bookshop in London.",ch:["He ordered the book from a bookshop in London.", "He ordered the book to a bookshop in London.", "He placed an order for a bookshop in London with the book.", "He placed an order at a bookshop in London for the book."],a:1,at:"He ordered the book from a bookshop in London.",af:"eiken2-audio/Q1157.mp3",cs:"He ordered the book from a bookshop in London.",jt:"彼はロンドンの書店にその本を注文した。",st:""},
+{id:1158,q:"Schoolboys usually look up ( ) great athletes.",ch:["for", "to", "from", "in"],a:2,at:"to",af:"eiken2-audio/Q1158.mp3",cs:"Schoolboys usually look up to great athletes.",jt:"男子生徒たちはたいてい偉大なスポーツ選手を尊敬する。",st:"look down onと混同注意"},
+{id:1159,q:"He always looks down on her for not being good at cooking.",ch:["praises", "likes", "despises", "laughs"],a:3,at:"despises",af:"eiken2-audio/Q1159.mp3",cs:"He always looks down on her for not being good at cooking.",jt:"彼は料理が得意でないという理由で、いつも彼女を見下している。",st:""},
+{id:1160,q:"Hey, ( ) out! There's a car coming! I ( ) back on those days as the happiest time of my life.",ch:["look", "watch", "see", "find"],a:1,at:"look",af:"eiken2-audio/Q1160.mp3",cs:"Hey, look out! There's a car coming! I ( ) back on those days as the happiest time of my life.",jt:"おい、気をつけろ！車が来ているぞ！私はあの頃を人生で最も幸せな時期として振り返っている。",st:""},
+{id:1161,q:"When Sam was visiting San Francisco, he decided to ( ) in on his uncle who lived there.",ch:["drop", "go", "come", "fall"],a:1,at:"drop",af:"eiken2-audio/Q1161.mp3",cs:"When Sam was visiting San Francisco, he decided to drop in on his uncle who lived there.",jt:"サムはサンフランシスコを訪れた際、そこに住んでいるおじのところにふらっと立ち寄ることにした。",st:""},
+{id:1162,q:"He is a pleasant person who ( ) on well with everybody.",ch:["takes", "catches", "makes", "gets"],a:4,at:"gets",af:"eiken2-audio/Q1162.mp3",cs:"He is a pleasant person who gets on well with everybody.",jt:"彼はみんなとうまくやっていける感じのいい人だ。",st:""},
+{id:1163,q:"She can't ( ) her roommate.",ch:["get along with", "get used with", "get rid with", "get on to"],a:1,at:"get along with",af:"eiken2-audio/Q1163.mp3",cs:"She can't get along with her roommate.",jt:"彼女はルームメートとうまくやっていけない。",st:""},
+{id:1164,q:"I hope I can get through with my Christmas cards by tomorrow at the latest.",ch:["buy", "finish", "mail", "write"],a:2,at:"finish",af:"eiken2-audio/Q1164.mp3",cs:"I hope I can get through with my Christmas cards by tomorrow at the latest.",jt:"遅くとも明日までにクリスマスカードを書き終えられるといいのだが。",st:""},
+{id:1165,q:"You had better brush ( ) your English before you go abroad.",ch:["up", "off", "away", "down"],a:1,at:"up",af:"eiken2-audio/Q1165.mp3",cs:"You had better brush up your English before you go abroad.",jt:"海外に行く前に英語をやり直しておいた方がいい。",st:""},
+{id:1166,q:"It is no use asking him ( ) money. We must make every effort to make up ( ) the damage.",ch:["at", "for", "of", "with"],a:2,at:"for",af:"eiken2-audio/Q1166.mp3",cs:"It is no use asking him for money. We must make every effort to make up ( ) the damage.",jt:"彼にお金を頼んでも無駄だ。私たちは損害を補うために全力を尽くさなければならない。",st:"make out/make up forと混同注意"},
+{id:1167,q:"Tokyo may ( ) short of water again this summer.",ch:["cut", "set", "leave", "run"],a:4,at:"run",af:"eiken2-audio/Q1167.mp3",cs:"Tokyo may run short of water again this summer.",jt:"東京は今年の夏もまた水不足になるかもしれない。",st:""},
+{id:1168,q:"To my regret, the result fell ( ) of my expectation.",ch:["short", "lack", "few", "scarce"],a:1,at:"short",af:"eiken2-audio/Q1168.mp3",cs:"To my regret, the result fell short of my expectation.",jt:"残念ながら、結果は私の期待に届かなかった。",st:""},
+{id:1169,q:"Okay, let's go on to the next topic before we ( ) of time.",ch:["let go", "end up", "run out", "come off"],a:3,at:"run out",af:"eiken2-audio/Q1169.mp3",cs:"Okay, let's go on to the next topic before we run out of time.",jt:"さあ、時間がなくなる前に次のテーマに移りましょう。",st:"run into/run shortと混同注意"},
+{id:1170,q:"My mother finally has given in to my view.",ch:["yielded", "got", "succeeded", "opposed"],a:1,at:"yielded",af:"eiken2-audio/Q1170.mp3",cs:"My mother finally has given in to my view.",jt:"母はついに私の意見に折れた。",st:""},
+{id:1171,q:"Tom stood up for his friend in the argument.",ch:["defended", "gave his number to", "punished", "encouraged"],a:1,at:"defended",af:"eiken2-audio/Q1171.mp3",cs:"Tom stood up for his friend in the argument.",jt:"トムは言い争いの中で友人を擁護した。",st:""},
+{id:1172,q:"It is time we did away with some of the old regulations.",ch:["moved", "renewed", "inclined", "abolished"],a:4,at:"abolished",af:"eiken2-audio/Q1172.mp3",cs:"It is time we did away with some of the old regulations.",jt:"そろそろ古い規則のいくつかを廃止する時期だ。",st:""},
+{id:1173,q:"How did he get away from the fire?",ch:["receive", "go far", "run into", "escape"],a:4,at:"escape",af:"eiken2-audio/Q1173.mp3",cs:"How did he get away from the fire?",jt:"彼はどうやって火事から逃げたのですか？",st:""},
+{id:1174,q:"Having to live up to the high expectations of their parents sometimes destroys children.",ch:["Being expected to live without their parents", "Having to satisfy their parents' high expectations", "Having to give up following their parents' expectations", "Having to leave their parents"],a:2,at:"Having to satisfy their parents' high expectations",af:"eiken2-audio/Q1174.mp3",cs:"Having to live up to the high expectations of their parents sometimes destroys children.",jt:"親の高い期待に応えなければならないことが、子どもを追い詰めることがある。",st:""},
+{id:1175,q:"He proposed that they put up at the hotel.",ch:["stay at", "live in", "arrive at", "call on"],a:1,at:"stay at",af:"eiken2-audio/Q1175.mp3",cs:"He proposed that they put up at the hotel.",jt:"彼はそのホテルに泊まることを提案した。",st:""},
+{id:1176,q:"She couldn't stand his rudeness.",ch:["calm down", "stir up", "put up with", "take away"],a:3,at:"put up with",af:"eiken2-audio/Q1176.mp3",cs:"She couldn't stand his rudeness.",jt:"彼女は彼の無礼さに耐えられなかった。",st:"put off / put out と混同注意"},
+{id:1177,q:"Jim was a long way behind the other runners, but he managed to catch up with them.",ch:["overtake", "chase", "miss", "drive"],a:1,at:"overtake",af:"eiken2-audio/Q1177.mp3",cs:"Jim was a long way behind the other runners, but he managed to catch up with them.",jt:"ジムは他の走者よりずっと遅れていたが、なんとか追いつくことができた。",st:"keep up withと混同注意"},
+{id:1178,q:"In order to keep up with what's happening in the world, I try to read a newspaper every day.",ch:["catch up on", "stay informed about", "find out about", "learn about"],a:2,at:"stay informed about",af:"eiken2-audio/Q1178.mp3",cs:"In order to keep up with what's happening in the world, I try to read a newspaper every day.",jt:"世界で起きていることについていくために、私は毎日新聞を読むよう心がけている。",st:"catch up withと混同注意"},
+{id:1179,q:"We've been asked to ( ) some new ideas to change the situation.",ch:["come up with", "end up with", "keep up with", "put up with"],a:1,at:"come up with",af:"eiken2-audio/Q1179.mp3",cs:"We've been asked to come up with some new ideas to change the situation.",jt:"私たちは状況を変えるための新しいアイデアを考え出すよう求められている。",st:"come across / come about と混同注意"},
+{id:1180,q:"You should not speak ( ) of others.",ch:["bad", "harmful", "ill", "worse"],a:3,at:"ill",af:"eiken2-audio/Q1180.mp3",cs:"You should not speak ill of others.",jt:"他人の悪口を言うべきではない。",st:""},
+{id:1181,q:"The children constantly broke in on our conversation.",ch:["The children never listened to our conversation.", "The children were always the center of our conversation.", "The children were always opposed to what we said.", "The children kept interrupting us when we talked."],a:4,at:"The children kept interrupting us when we talked.",af:"eiken2-audio/Q1181.mp3",cs:"The children constantly broke in on our conversation.",jt:"子どもたちは私たちの会話にしょっちゅう割り込んできた。",st:""},
+{id:1182,q:"You should take what he said into ( ).",ch:["amount", "counting", "liking", "consideration"],a:4,at:"consideration",af:"eiken2-audio/Q1182.mp3",cs:"You should take what he said into consideration.",jt:"彼が言ったことを考慮に入れるべきだ。",st:""},
+{id:1183,q:"I hope that you will ( ) advantage of this special offer.",ch:["get", "have", "make", "take"],a:4,at:"take",af:"eiken2-audio/Q1183.mp3",cs:"I hope that you will take advantage of this special offer.",jt:"この特別なオファーをぜひ活用していただければと思います。",st:""},
+{id:1184,q:"She often uses her free time for reading. = She often makes use ( ) her free time for reading.",ch:["in", "of", "to", "with"],a:2,at:"of",af:"eiken2-audio/Q1184.mp3",cs:"She often uses her free time for reading. = She often makes use of her free time for reading.",jt:"彼女はよく自由時間を読書に使う。＝彼女はよく自由時間を読書に活用する。",st:""},
+{id:1185,q:"Make the ( ) of this opportunity, or you will be sorry.",ch:["care of", "charge to", "most of", "leave over"],a:3,at:"most of",af:"eiken2-audio/Q1185.mp3",cs:"Make the most of of this opportunity, or you will be sorry.",jt:"この機会を最大限に活かしなさい、さもないと後悔しますよ。",st:""},
+{id:1186,q:"Can you ( ) room for one more person?",ch:["walk", "move", "make", "take"],a:3,at:"make",af:"eiken2-audio/Q1186.mp3",cs:"Can you make room for one more person?",jt:"もう一人分の場所を作っていただけますか？",st:""},
+{id:1187,q:"Make ( ) that there are no cars coming when you cross the street.",ch:["sure", "good", "complete", "due"],a:1,at:"sure",af:"eiken2-audio/Q1187.mp3",cs:"Make sure that there are no cars coming when you cross the street.",jt:"道路を渡るときは、車が来ていないかを必ず確認しなさい。",st:""},
+{id:1188,q:"Computers ( ) a tremendous role in our everyday life.",ch:["load", "play", "do", "run"],a:2,at:"play",af:"eiken2-audio/Q1188.mp3",cs:"Computers play a tremendous role in our everyday life.",jt:"コンピューターは私たちの日常生活において非常に大きな役割を果たしている。",st:""},
+{id:1189,q:"Sue shook ( ) with him.",ch:["the hand", "hands", "each hand", "a hand"],a:2,at:"hands",af:"eiken2-audio/Q1189.mp3",cs:"Sue shook hands with him.",jt:"スーは彼と握手した。",st:""},
+{id:1190,q:"It is not easy to make ( ).",ch:["a friend in", "friend with", "friends to", "friends with"],a:4,at:"friends with",af:"eiken2-audio/Q1190.mp3",cs:"It is not easy to make friends with.",jt:"友達を作ることは簡単ではない。",st:""},
+{id:1191,q:"My husband and I take ( ) looking after the baby.",ch:["away", "shelter", "off", "turns"],a:4,at:"turns",af:"eiken2-audio/Q1191.mp3",cs:"My husband and I take turns looking after the baby.",jt:"夫と私は交互に赤ちゃんの世話をしている。",st:""},
+{id:1192,q:"She always takes sides with my opinion.",ch:["takes advantage of", "takes for granted", "ignores", "supports"],a:4,at:"supports",af:"eiken2-audio/Q1192.mp3",cs:"She always takes sides with my opinion.",jt:"彼女はいつも私の意見に味方する。",st:""},
+{id:1193,q:"We changed ( ) at Nagoya and went to Kyoto.",ch:["a train", "trains", "the trains", "two trains"],a:2,at:"trains",af:"eiken2-audio/Q1193.mp3",cs:"We changed trains at Nagoya and went to Kyoto.",jt:"私たちは名古屋で電車を乗り換えて京都へ行った。",st:""},
+{id:1194,q:"Are you going to take part in that speech contest?",ch:["prepare for", "pay for", "participate in", "look forward to"],a:3,at:"participate in",af:"eiken2-audio/Q1194.mp3",cs:"Are you going to take part in that speech contest?",jt:"あなたはそのスピーチコンテストに参加するつもりですか？",st:""},
+{id:1195,q:"She takes pride ( ) her own beauty.",ch:["on", "of", "in", "at"],a:3,at:"in",af:"eiken2-audio/Q1195.mp3",cs:"She takes pride in her own beauty.",jt:"彼女は自分の美しさを誇りにしている。",st:""},
+{id:1196,q:"She is proud of being such a good cook. = She ( ) herself on being such a good cook.",ch:["prides", "praises", "boasts", "flatters"],a:1,at:"prides",af:"eiken2-audio/Q1196.mp3",cs:"She is proud of being such a good cook. = She prides herself on being such a good cook.",jt:"彼女は料理がとても得意なことを誇りにしている。＝彼女は料理がとても得意なことを自慢にしている。",st:""},
+{id:1197,q:"His remark ( ) trouble.",ch:["arose from", "caused for", "gave rise to", "raised up"],a:3,at:"gave rise to",af:"eiken2-audio/Q1197.mp3",cs:"His remark gave rise to trouble.",jt:"彼の発言がトラブルを引き起こした。",st:""},
+{id:1198,q:"She gave ( ) to a cute baby at the age of twenty-five.",ch:["birth", "life", "delivery", "care"],a:1,at:"birth",af:"eiken2-audio/Q1198.mp3",cs:"She gave birth to a cute baby at the age of twenty-five.",jt:"彼女は25歳のときにかわいい赤ちゃんを産んだ。",st:""},
+{id:1199,q:"All cars have to give ( ) to a police car.",ch:["road", "money", "time", "way"],a:4,at:"way",af:"eiken2-audio/Q1199.mp3",cs:"All cars have to give way to a police car.",jt:"すべての車はパトカーに道を譲らなければならない。",st:""},
+{id:1200,q:"I'm afraid Fred had something to do ( ) the accident.",ch:["on", "in", "with", "lot of"],a:3,at:"with",af:"eiken2-audio/Q1200.mp3",cs:"I'm afraid Fred had something to do with the accident.",jt:"フレッドはその事故に関わっていたのではないかと思う。",st:""},
+{id:1201,q:"This car is giving me so much trouble that I'm going to ( ) rid of it.",ch:["get", "follow", "claim", "bring"],a:1,at:"get",af:"eiken2-audio/Q1201.mp3",cs:"This car is giving me so much trouble that I'm going to get rid of it.",jt:"この車はトラブルばかりだから、手放すつもりだ。",st:""},
+{id:1202,q:"John told his mother he wanted to leave school, but later he ( ) of it.",ch:["came out", "hit on an idea", "thought better", "was proud"],a:3,at:"thought better",af:"eiken2-audio/Q1202.mp3",cs:"John told his mother he wanted to leave school, but later he thought better of it.",jt:"ジョンは母親に学校を辞めたいと言ったが、後になって思い直した。",st:""},
+{id:1203,q:"How ( ) did you pay for the new car? / I didn't think ( ) of the new plan.",ch:["cost", "high", "far", "much"],a:4,at:"much",af:"eiken2-audio/Q1203.mp3",cs:"How much did you pay for the new car? / I didn't think ( ) of the new plan.",jt:"新しい車にいくら払ったの？／新しい計画をたいしたものだと思わなかった。",st:""},
+{id:1204,q:"Don't make too much of Mike's ideas.",ch:["adopt too many of", "be too impatient of", "think too easily about", "think too highly of"],a:4,at:"think too highly of",af:"eiken2-audio/Q1204.mp3",cs:"Don't make too much of Mike's ideas.",jt:"マイクのアイデアを過大評価しすぎないように。",st:""},
+{id:1205,q:"To make sense of the patient's condition it was necessary to know about her personal history.",ch:["take off", "improve", "prohibit", "understand"],a:4,at:"understand",af:"eiken2-audio/Q1205.mp3",cs:"To make sense of the patient's condition it was necessary to know about her personal history.",jt:"患者の状態を理解するためには、彼女の病歴を知ることが必要だった。",st:""},
+{id:1206,q:"Don't make ( ) ( ) of yourself.",ch:["a fool", "foolish", "stupid", "the"],a:1,at:"a fool",af:"eiken2-audio/Q1206.mp3",cs:"Don't make a fool ( ) of yourself.",jt:"自分を馬鹿にするようなことをしてはいけない。",st:""},
+{id:1207,q:"The other children often made ( ) of him because he was always so serious.",ch:["use", "light", "sure", "fun"],a:4,at:"fun",af:"eiken2-audio/Q1207.mp3",cs:"The other children often made fun of him because he was always so serious.",jt:"他の子どもたちはいつも彼をからかっていた。なぜなら彼はいつもとても真剣だったからだ。",st:""},
+{id:1208,q:"The baker had run out of brown bread, so we had to make ( ) with white.",ch:["up", "out", "off", "do"],a:4,at:"do",af:"eiken2-audio/Q1208.mp3",cs:"The baker had run out of brown bread, so we had to make do with white.",jt:"パン屋の黒パンが売り切れていたので、私たちは白パンで間に合わせなければならなかった。",st:"run into/run shortと混同注意"},
+{id:1209,q:"He is a difficult person to ( ) business with.",ch:["see", "have", "start", "do"],a:4,at:"do",af:"eiken2-audio/Q1209.mp3",cs:"He is a difficult person to do business with.",jt:"彼は取引のしにくい人だ。",st:""},
+{id:1210,q:"A: I haven't seen ( ) of him lately. B: Neither have I. I am afraid he may be ill.",ch:["lot", "little", "any", "much"],a:4,at:"much",af:"eiken2-audio/Q1210.mp3",cs:"A: I haven't seen much of him lately. B: Neither have I. I am afraid he may be ill.",jt:"A：最近彼にあまり会わないね。B：私もそうよ。病気かもしれないと心配している。",st:""},
+{id:1211,q:"I ( ) the sights of Paris with him.",ch:["saw", "did", "made", "took"],a:1,at:"saw",af:"eiken2-audio/Q1211.mp3",cs:"I saw the sights of Paris with him.",jt:"彼と一緒にパリの名所を見物した。",st:""},
+{id:1212,q:"If you get too excited in an argument, you're likely to ( ) the main point.",ch:["keep up with", "lose sight of", "pay attention to", "think much of"],a:2,at:"lose sight of",af:"eiken2-audio/Q1212.mp3",cs:"If you get too excited in an argument, you're likely to lose sight of the main point.",jt:"議論で興奮しすぎると、本題を見失いがちだ。",st:""},
+{id:1213,q:"I caught sight of my old friend in the crowd.",ch:["saw", "touched", "was faced with", "looked up to"],a:1,at:"saw",af:"eiken2-audio/Q1213.mp3",cs:"I caught sight of my old friend in the crowd.",jt:"人混みの中で旧友の姿を見かけた。",st:""},
+{id:1214,q:"I hope that solar-powered cars will take the place of gasoline engine cars before long.",ch:["happen", "put", "replace", "run"],a:3,at:"replace",af:"eiken2-audio/Q1214.mp3",cs:"I hope that solar-powered cars will take the place of gasoline engine cars before long.",jt:"太陽電池で動く車がまもなくガソリンエンジン車に取って代わることを願っている。",st:""},
+{id:1215,q:"He always finds fault with something in my personality.",ch:["criticizes", "praises", "respects", "despises"],a:1,at:"criticizes",af:"eiken2-audio/Q1215.mp3",cs:"He always finds fault with something in my personality.",jt:"彼はいつも私の性格のどこかに欠点を見つける。",st:""},
+{id:1216,q:"Bob said to Mary, \"I will get in touch with you by mail as soon as I arrive there.\"",ch:["content", "contact", "contest", "contract"],a:2,at:"contact",af:"eiken2-audio/Q1216.mp3",cs:"Bob said to Mary, \"I will get in touch with you by mail as soon as I arrive there.\"",jt:"ボブはメアリーに「そこに着いたらすぐにメールで連絡するよ」と言った。",st:""},
+{id:1217,q:"Since our English teacher is very fond of poetry, she encourages us to learn some poem by ( ).",ch:["memory", "head", "heart", "mind"],a:3,at:"heart",af:"eiken2-audio/Q1217.mp3",cs:"Since our English teacher is very fond of poetry, she encourages us to learn some poem by heart.",jt:"私たちの英語の先生は詩がとても好きなので、いくつかの詩を暗記するように勧めてくれる。",st:""},
+{id:1218,q:"John and Bill are twins, but they don't seem to have much in ( ).",ch:["general", "particular", "usual", "common"],a:4,at:"common",af:"eiken2-audio/Q1218.mp3",cs:"John and Bill are twins, but they don't seem to have much in common.",jt:"ジョンとビルは双子だが、あまり共通点がないようだ。",st:""},
+{id:1219,q:"He began to put his idea into practice. = He began to carry ( ) his idea.",ch:["in", "out", "on", "over"],a:2,at:"out",af:"eiken2-audio/Q1219.mp3",cs:"He began to put his idea into practice. = He began to carry out his idea.",jt:"彼は自分のアイデアを実行に移し始めた。＝彼は自分のアイデアを実践し始めた。",st:"carry onと混同注意"},
+{id:1220,q:"His mother kept an eye on him.",ch:["watched", "caught", "loved", "chose"],a:1,at:"watched",af:"eiken2-audio/Q1220.mp3",cs:"His mother kept an eye on him.",jt:"彼の母親は彼から目を離さなかった。",st:""},
+{id:1221,q:"Please ( ) attention to me when I'm speaking to you!",ch:["make", "pay", "take", "get"],a:2,at:"pay",af:"eiken2-audio/Q1221.mp3",cs:"Please pay attention to me when I'm speaking to you!",jt:"私が話しているときはちゃんと注意を向けてください！",st:""},
+{id:1222,q:"As a matter of fact, he took little ( ) of their children. = In fact, he paid little attention to their children.",ch:["caution", "favor", "regards", "notice"],a:4,at:"notice",af:"eiken2-audio/Q1222.mp3",cs:"As a matter of fact, he took little notice of their children. = In fact, he paid little attention to their children.",jt:"実際のところ、彼は彼らの子どもたちにほとんど注意を払わなかった。＝実際、彼は彼らの子どもたちにほとんど注意を払わなかった。",st:""},
+{id:1223,q:"We're looking for someone to ( ) care of our pets.",ch:["take", "get", "give", "be"],a:1,at:"take",af:"eiken2-audio/Q1223.mp3",cs:"We're looking for someone to take care of our pets.",jt:"ペットの世話をしてくれる人を探しています。",st:""},
+{id:1224,q:"Why don't you ( ) some ice cream?",ch:["keep up with", "help yourself to", "make much of", "get out of"],a:2,at:"help yourself to",af:"eiken2-audio/Q1224.mp3",cs:"Why don't you help yourself to some ice cream?",jt:"アイスクリームを自由に召し上がってください。",st:""},
+{id:1225,q:"A: Please say ( ) to Tom. B: OK. I will.",ch:["regards", "wish", "best", "hello"],a:4,at:"hello",af:"eiken2-audio/Q1225.mp3",cs:"A: Please say hello to Tom. B: OK. I will.",jt:"A：トムによろしく伝えてください。B：わかりました。そうします。",st:""},
+{id:1226,q:"Don't forget to give my best ( ) to your parents when you are back home.",ch:["regard", "regards", "reward", "regarding"],a:2,at:"regards",af:"eiken2-audio/Q1226.mp3",cs:"Don't forget to give my best regards to your parents when you are back home.",jt:"家に帰ったときは、ご両親によろしくお伝えするのを忘れずに。",st:""},
+{id:1227,q:"The competition which took ( ) on Saturday was a great success.",ch:["site", "place", "time", "pace"],a:2,at:"place",af:"eiken2-audio/Q1227.mp3",cs:"The competition which took place on Saturday was a great success.",jt:"土曜日に行われたその大会は大成功だった。",st:""},
+{id:1228,q:"What he says doesn't ( ) any sense at all.",ch:["understand", "make", "feel", "touch"],a:2,at:"make",af:"eiken2-audio/Q1228.mp3",cs:"What he says doesn't make any sense at all.",jt:"彼の言うことはまったく意味をなさない。",st:""},
+{id:1229,q:"While I was waiting for the train, I killed ( ) by doing a crossword puzzle.",ch:["hour", "minute", "period", "time"],a:4,at:"time",af:"eiken2-audio/Q1229.mp3",cs:"While I was waiting for the train, I killed time by doing a crossword puzzle.",jt:"電車を待っている間、クロスワードパズルをして時間をつぶした。",st:""},
+{id:1230,q:"A: Can I use this ticket next Sunday? B: Yes, it holds ( ) till the end of this month.",ch:["nice", "good", "wonderful", "splendid"],a:2,at:"good",af:"eiken2-audio/Q1230.mp3",cs:"A: Can I use this ticket next Sunday? B: Yes, it holds good till the end of this month.",jt:"A：このチケットは来週の日曜日に使えますか？B：はい、今月末まで有効です。",st:""},
+{id:1231,q:"I ( ) a terrible dream last night.",ch:["took", "held", "had", "saw"],a:3,at:"had",af:"eiken2-audio/Q1231.mp3",cs:"I had a terrible dream last night.",jt:"昨夜ひどい夢を見た。",st:""},
+{id:1232,q:"His daughter came ( ) age last year.",ch:["on", "to", "of", "for"],a:3,at:"of",af:"eiken2-audio/Q1232.mp3",cs:"His daughter came of age last year.",jt:"彼の娘は去年成人した。",st:""},
+{id:1233,q:"I've put ( ) weight again.",ch:["to", "on", "in", "for"],a:2,at:"on",af:"eiken2-audio/Q1233.mp3",cs:"I've put on weight again.",jt:"また体重が増えてしまった。",st:""},
+{id:1234,q:"Be sure to drop me a ( ) as soon as you get to Los Angeles.",ch:["letter", "phone", "line", "news"],a:3,at:"line",af:"eiken2-audio/Q1234.mp3",cs:"Be sure to drop me a line as soon as you get to Los Angeles.",jt:"ロサンゼルスに着いたらすぐに必ず手紙をください。",st:""},
+{id:1235,q:"The student took great ( ) to solve the problems.",ch:["effects", "struggles", "senses", "pains"],a:4,at:"pains",af:"eiken2-audio/Q1235.mp3",cs:"The student took great pains to solve the problems.",jt:"その学生は問題を解くために大変な苦労をした。",st:""},
+{id:1236,q:"Mr. Johnson always felt ( ) in the old hotel.",ch:["at least", "at home", "at most", "at last"],a:2,at:"at home",af:"eiken2-audio/Q1236.mp3",cs:"Mr. Johnson always felt at home in the old hotel.",jt:"ジョンソン氏はその古いホテルでいつもくつろいだ気分になった。",st:""},
+{id:1237,q:"Take off your coat and make ( ) at home.",ch:["us", "myself", "you", "yourself"],a:4,at:"yourself",af:"eiken2-audio/Q1237.mp3",cs:"Take off your coat and make yourself at home.",jt:"コートを脱いで、どうぞくつろいでください。",st:"take on/take inと混同注意"},
+{id:1238,q:"Be a good girl and help me.",ch:["Sweetly", "Behave yourself and", "Ask her to", "Please"],a:2,at:"Behave yourself and",af:"eiken2-audio/Q1238.mp3",cs:"Be a good girl and help me.",jt:"いい子にして手伝ってちょうだい。",st:""},
+{id:1239,q:"He managed to make both ends ( ).",ch:["met", "meeting", "meet", "to meet"],a:3,at:"meet",af:"eiken2-audio/Q1239.mp3",cs:"He managed to make both ends meet.",jt:"彼はなんとか収支を合わせた。",st:""},
+{id:1240,q:"The two quarreling children sat making ( ) at each other.",ch:["thumbs", "cheeks", "faces", "eyes"],a:3,at:"faces",af:"eiken2-audio/Q1240.mp3",cs:"The two quarreling children sat making faces at each other.",jt:"けんかをしていた2人の子どもは互いに向かい合ってしかめっ面をして座っていた。",st:""},
+{id:1241,q:"Excuse me, but it is time to have your temperature ( ).",ch:["take", "taken", "taking", "to take"],a:2,at:"taken",af:"eiken2-audio/Q1241.mp3",cs:"Excuse me, but it is time to have your temperature taken.",jt:"すみませんが、そろそろ体温を測る時間ですよ。",st:""},
+{id:1242,q:"A: Hey, Carl told me that he just won 5 million dollars! B: He did not. He was just ( ).",ch:["shaking your hand", "pulling your leg", "tapping your back", "saying hello"],a:2,at:"pulling your leg",af:"eiken2-audio/Q1242.mp3",cs:"A: Hey, Carl told me that he just won 5 million dollars! B: He did not. He was just pulling your leg.",jt:"A：ねえ、カールが500万ドル当たったって言ってたよ！B：そんなわけないよ。からかっていただけだよ。",st:""},
+{id:1243,q:"A: I'm leaving for the party. B: ( ).",ch:["Have a good time.", "I don't mind.", "Don't let it get you down.", "Sorry, but we are going out without you."],a:1,at:"Have a good time.",af:"eiken2-audio/Q1243.mp3",cs:"A: I'm leaving for the party. B: Have a good time..",jt:"A：パーティーに行ってきます。B：楽しんできてね。",st:""},
+{id:1244,q:"I don't know what it is like. = I have no ( ) of what it is like.",ch:["knowing", "thinking", "idea", "feeling"],a:3,at:"idea",af:"eiken2-audio/Q1244.mp3",cs:"I don't know what it is like. = I have no idea of what it is like.",jt:"それがどんなものか知らない。＝それがどんなものかまったくわからない。",st:""},
+{id:1245,q:"I took it for granted that you would come to the party. = I ( ) that you would come to the party.",ch:["assumed", "bet", "say", "report"],a:1,at:"assumed",af:"eiken2-audio/Q1245.mp3",cs:"I took it for granted that you would come to the party. = I assumed that you would come to the party.",jt:"あなたがパーティーに来るのは当然だと思っていた。＝あなたがパーティーに来ると思っていた。",st:""},
+{id:1246,q:"If someone has his own way, he ( ).",ch:["lives on his own income.", "loses his way.", "gets what he wishes.", "is on the way."],a:3,at:"gets what he wishes.",af:"eiken2-audio/Q1246.mp3",cs:"If someone has his own way, he gets what he wishes..",jt:"自分の思い通りにするとは、望んでいるものを手に入れるということだ。",st:""},
+{id:1247,q:"Her Chinese leaves much to be desired.",ch:["Her Chinese leaves much to be desired.", "Her Chinese leaves nothing to be desired.", "Her Chinese leaves much room for improvement.", "Her Chinese is perfect."],a:3,at:"Her Chinese leaves much room for improvement.",af:"eiken2-audio/Q1247.mp3",cs:"Her Chinese leaves much to be desired.",jt:"彼女の中国語はまだまだ改善の余地がある。",st:""},
+{id:1248,q:"Hurry up, or you won't ( ) it to the meeting.",ch:["do", "get", "have", "make"],a:4,at:"make",af:"eiken2-audio/Q1248.mp3",cs:"Hurry up, or you won't make it to the meeting.",jt:"急がないと会議に間に合わないよ。",st:""},
+{id:1249,q:"Take it easy! Don't ( ) your temper.",ch:["break", "miss", "drop", "lose"],a:4,at:"lose",af:"eiken2-audio/Q1249.mp3",cs:"Take it easy! Don't lose your temper.",jt:"落ち着いて！怒りを爆発させないで。",st:""},
+{id:1250,q:"It is good to ( ) early ( ).",ch:["keep, hours", "have, time", "make, start", "take, rest"],a:1,at:"keep, hours",af:"eiken2-audio/Q1250.mp3",cs:"It is good to keep, hours early ( ).",jt:"早起きの習慣をつけることはよいことだ。",st:""},
+{id:1251,q:"The secret between Tom and me ( ) ( ) light.",ch:["came to", "brought to", "got to", "put to"],a:1,at:"came to",af:"eiken2-audio/Q1251.mp3",cs:"The secret between Tom and me came to ( ) light.",jt:"トムと私の間の秘密が明るみに出た。",st:""},
+{id:1252,q:"We are glad that the strike has finished. = We are glad that the strike has come to ( ).",ch:["a stop", "a close", "a halt", "an end"],a:4,at:"an end",af:"eiken2-audio/Q1252.mp3",cs:"We are glad that the strike has finished. = We are glad that the strike has come to an end.",jt:"ストライキが終わって嬉しい。＝ストライキが終わって嬉しい。",st:""},
+{id:1253,q:"There's no hurry; take your ( ). / You'll have your own office soon, but for the ( ) being you'll have to share one.",ch:["chance", "moment", "turn", "time"],a:4,at:"time",af:"eiken2-audio/Q1253.mp3",cs:"There's no hurry; take your time. / You'll have your own office soon, but for the ( ) being you'll have to share one.",jt:"急がなくていい。ゆっくりやって。／すぐに自分のオフィスが持てるようになるよ、でも当面は一緒に使わなければならない。",st:""},
+{id:1254,q:"Are you going to ( ) a visit to China this fall?",ch:["do", "pay", "go", "make"],a:2,at:"pay",af:"eiken2-audio/Q1254.mp3",cs:"Are you going to pay a visit to China this fall?",jt:"今秋、中国を訪問するつもりですか？",st:""},
+{id:1255,q:"Let's make believe that we know nothing about the matter.",ch:["insist", "accept", "forget", "pretend"],a:4,at:"pretend",af:"eiken2-audio/Q1255.mp3",cs:"Let's make believe that we know nothing about the matter.",jt:"その件については何も知らないふりをしましょう。",st:""},
+{id:1256,q:"They found it difficult to make a living.",ch:["receive", "earn", "do", "form"],a:2,at:"earn",af:"eiken2-audio/Q1256.mp3",cs:"They found it difficult to make a living.",jt:"彼らは生計を立てることが難しいと感じた。",st:""},
+{id:1257,q:"I will see to it that you meet her at the party.",ch:["suggest", "advise", "arrange", "propose"],a:3,at:"arrange",af:"eiken2-audio/Q1257.mp3",cs:"I will see to it that you meet her at the party.",jt:"あなたがパーティーで彼女に会えるよう手配します。",st:""},
+{id:1258,q:"We had words again last night, so today we're not speaking.",ch:["had a quarrel", "talked a lot", "had a discussion", "made a decision"],a:1,at:"had a quarrel",af:"eiken2-audio/Q1258.mp3",cs:"We had words again last night, so today we're not speaking.",jt:"昨夜また口げんかをしたので、今日は口をきいていない。",st:""},
+{id:1259,q:"If you break your word, you will lose your reputation.",ch:["promise", "career", "mind", "way"],a:1,at:"promise",af:"eiken2-audio/Q1259.mp3",cs:"If you break your word, you will lose your reputation.",jt:"約束を破れば、あなたの評判は落ちるだろう。",st:""},
+{id:1260,q:"He is unable to make up his mind which university is better for him.",ch:["decide", "worry about", "remember", "forget"],a:1,at:"decide",af:"eiken2-audio/Q1260.mp3",cs:"He is unable to make up his mind which university is better for him.",jt:"彼はどちらの大学が自分に向いているか決心がつかない。",st:"make out/make up forと混同注意"},
+{id:1261,q:"The Boy Scout told him to hold his tongue and speak her own language.",ch:["encourages me", "comes to my ears", "lost his way", "keep quiet"],a:4,at:"keep quiet",af:"eiken2-audio/Q1261.mp3",cs:"The Boy Scout told him to hold his tongue and speak her own language.",jt:"ボーイスカウトは彼に黙っているよう言い、彼女自身の言葉で話すよう言った。",st:""},
+{id:1262,q:"The little boy lost his way because the country's landmark had not been there.",ch:["lost his way", "lost time", "worry hours", "anger"],a:1,at:"lost his way",af:"eiken2-audio/Q1262.mp3",cs:"The little boy lost his way because the country's landmark had not been there.",jt:"その国の目印がなかったため、その少年は道に迷った。",st:""},
+{id:1263,q:"I am ( ) to meet my old friend this afternoon.",ch:["having", "scheduling", "supposed", "used"],a:3,at:"supposed",af:"eiken2-audio/Q1263.mp3",cs:"I am supposed to meet my old friend this afternoon.",jt:"今日の午後、旧友と会うことになっている。",st:""},
+{id:1264,q:"This appliance is ( ) to meet all your needs.",ch:["passive", "fit", "served", "designed"],a:4,at:"designed",af:"eiken2-audio/Q1264.mp3",cs:"This appliance is designed to meet all your needs.",jt:"この器具はあなたのあらゆるニーズを満たすように設計されています。",st:""},
+{id:1265,q:"Parents are ( ) to look after their children.",ch:["devoted", "asked", "obliged", "supposed"],a:3,at:"obliged",af:"eiken2-audio/Q1265.mp3",cs:"Parents are obliged to look after their children.",jt:"親は子どもの世話をする義務がある。",st:""},
+{id:1266,q:"Speak her own language.",ch:["go on talking", "keep quiet", "behave himself", "do as told"],a:1,at:"go on talking",af:"eiken2-audio/Q1266.mp3",cs:"Speak her own language.",jt:"彼女自身の言葉で話しなさい。",st:""},
+{id:1267,q:"Everyone is fed up ( ) his stupid jokes.",ch:["for", "on", "out", "with"],a:4,at:"with",af:"eiken2-audio/Q1267.mp3",cs:"Everyone is fed up with his stupid jokes.",jt:"みんな彼のくだらない冗談にうんざりしている。",st:""},
+{id:1268,q:"The band is composed ( ) five members.",ch:["in", "of", "through", "up"],a:2,at:"of",af:"eiken2-audio/Q1268.mp3",cs:"The band is composed of five members.",jt:"そのバンドは5人のメンバーで構成されている。",st:""},
+{id:1269,q:"Everything we know of ( ) one or more elements.",ch:["makes up from", "are made up by", "is made up for", "is made up of"],a:4,at:"is made up of",af:"eiken2-audio/Q1269.mp3",cs:"Everything we know of is made up of one or more elements.",jt:"私たちが知るあらゆるものは、1つまたは複数の元素からできている。",st:""},
+{id:1270,q:"Wendy's father is opposed ( ) her going to Egypt by herself.",ch:["against", "for", "in", "to"],a:4,at:"to",af:"eiken2-audio/Q1270.mp3",cs:"Wendy's father is opposed to her going to Egypt by herself.",jt:"ウェンディの父親は彼女が一人でエジプトに行くことに反対している。",st:""},
+{id:1271,q:"She was carried away by the music.",ch:["was absorbed in", "was gone with", "was angry at", "was tired of"],a:1,at:"was absorbed in",af:"eiken2-audio/Q1271.mp3",cs:"She was carried away by the music.",jt:"彼女は音楽に夢中になった。",st:""},
+{id:1272,q:"She was ( ) a dark suit at the meeting.",ch:["dressed", "dressed herself", "dressed in", "dressed up"],a:3,at:"dressed in",af:"eiken2-audio/Q1272.mp3",cs:"She was dressed in a dark suit at the meeting.",jt:"彼女は会議でダークスーツを着ていた。",st:""}
+];
+// Total: 299 questions (2 skipped: no choices)
+
+let _ek2={idx:0,correct:0,wrong:0,audio:null,answered:false};
+const _ek2Save=()=>{try{localStorage.setItem('ek2_progress',JSON.stringify({idx:_ek2.idx,correct:_ek2.correct,wrong:_ek2.wrong}));}catch(_){}};
+const _ek2Load=()=>{try{const s=localStorage.getItem('ek2_progress');if(s){const d=JSON.parse(s);_ek2.idx=d.idx||0;_ek2.correct=d.correct||0;_ek2.wrong=d.wrong||0;}}catch(_){}};
+
+function openEiken2Quiz(){
+  if(typeof haptic!=='undefined')haptic.confirm?.();
+  _ek2Load();
+  if(_ek2.idx>=EK2Q.length)_ek2.idx=0;
+  const ov=document.getElementById('ek2-overlay');
+  ov.style.display='flex';
+  ov.classList.remove('closing');
+  document.getElementById('home').classList.add('hidden');
+  renderEk2();
+}
+
+function closeEiken2Quiz(){
+  if(typeof haptic!=='undefined')haptic();
+  const ov=document.getElementById('ek2-overlay');
+  ov.classList.add('closing');
+  document.getElementById('home').classList.remove('hidden');
+  setTimeout(()=>{ov.style.display='none';ov.classList.remove('closing');},350);
+  if(_ek2.audio){_ek2.audio.pause();_ek2.audio=null;}
+  _ek2Save();
+}
+
+function renderEk2(){
+  if(_ek2.idx>=EK2Q.length){
+    // Completed all
+    document.getElementById('ek2-body').innerHTML=
+      '<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:16px">🎉</div>'+
+      '<div style="font-size:22px;font-weight:700;margin-bottom:8px">全問完了！</div>'+
+      '<div style="font-size:15px;color:#8e8e93">正解 '+_ek2.correct+' / 不正解 '+_ek2.wrong+'</div>'+
+      '<button onclick="_ek2.idx=0;_ek2.correct=0;_ek2.wrong=0;_ek2Save();renderEk2();" style="margin-top:24px;padding:12px 32px;border-radius:14px;background:#007aff;color:#fff;border:none;font-size:16px;font-weight:600;cursor:pointer">もう一度</button></div>';
+    document.getElementById('ek2-count').textContent=EK2Q.length+' / '+EK2Q.length;
+    return;
+  }
+  _ek2.answered=false;
+  const q=EK2Q[_ek2.idx];
+  document.getElementById('ek2-count').textContent=(_ek2.idx+1)+' / '+EK2Q.length;
+  document.getElementById('ek2-q').textContent=q.q;
+  document.getElementById('ek2-sc-g').textContent=_ek2.correct;
+  document.getElementById('ek2-sc-f').textContent=_ek2.wrong;
+  document.getElementById('ek2-feedback').style.display='none';
+  // Render choices
+  const chEl=document.getElementById('ek2-choices');
+  chEl.innerHTML=q.ch.map((c,i)=>
+    `<button class="ek2-ch-btn" data-idx="${i}" data-ans="${i+1}">
+      <span class="ek2-ch-num">${i+1}</span><span>${c}</span>
+    </button>`
+  ).join('');
+  // Re-animate card
+  const card=document.getElementById('ek2-card');
+  card.style.animation='none';void card.offsetWidth;
+  card.style.animation='ek2CardIn .4s cubic-bezier(.77,0,.18,1) both';
+  // Auto play audio
+  playEk2Audio();
+}
+
+function handleEk2Choice(btn){
+  if(_ek2.answered)return;
+  _ek2.answered=true;
+  const q=EK2Q[_ek2.idx];
+  const chosen=parseInt(btn.dataset.ans,10);
+  const isCorrect=chosen===q.a;
+  // Disable all
+  document.querySelectorAll('#ek2-choices .ek2-ch-btn').forEach(b=>{
+    b.classList.add('disabled');
+    if(parseInt(b.dataset.ans,10)===q.a)b.classList.add('correct');
+  });
+  if(!isCorrect){
+    btn.classList.add('wrong');
+    _ek2.wrong++;
+    if(typeof haptic!=='undefined')haptic.error?.();
+  }else{
+    _ek2.correct++;
+    if(typeof haptic!=='undefined'){
+      for(let k=0;k<3;k++)setTimeout(()=>haptic.error?.(),k*30);
+    }
+  }
+  document.getElementById('ek2-sc-g').textContent=_ek2.correct;
+  document.getElementById('ek2-sc-f').textContent=_ek2.wrong;
+  // Show feedback
+  const fb=document.getElementById('ek2-feedback');
+  fb.style.display='block';
+  document.getElementById('ek2-sentence').textContent=q.cs;
+  document.getElementById('ek2-jp').textContent=q.jt;
+  document.getElementById('ek2-tip').textContent=q.st||'';
+  // Play audio
+  playEk2Audio();
+  // Auto advance after 3s
+  setTimeout(()=>{
+    if(!_ek2.answered)return;
+    _ek2.idx++;_ek2Save();renderEk2();
+  },3000);
+}
+
+// Delegated click
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.ek2-ch-btn');
+  if(btn&&!btn.classList.contains('disabled'))handleEk2Choice(btn);
+});
+
+// Tap to skip delay
+document.addEventListener('touchend',e=>{
+  if(!_ek2.answered)return;
+  if(e.target.closest('.ek2-ch-btn,.ek2-back,.ek2-audio-btn'))return;
+  if(!document.getElementById('ek2-overlay')||document.getElementById('ek2-overlay').style.display==='none')return;
+  _ek2.idx++;_ek2Save();renderEk2();
+},{passive:true});
+
+function playEk2Audio(){
+  if(_ek2.idx>=EK2Q.length)return;
+  const q=EK2Q[_ek2.idx];
+  if(_ek2.audio){_ek2.audio.pause();}
+  _ek2.audio=new Audio(q.af);
+  _ek2.audio.play().catch(()=>{});
+}
+</script>
 
 </body>
 </html>
