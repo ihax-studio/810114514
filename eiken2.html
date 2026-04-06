@@ -138,6 +138,13 @@ color:#1c1c1e;display:flex;flex-direction:column}
 .fb-sentence{font-size:16px;font-weight:600;color:#1c1c1e;line-height:1.55;margin-bottom:8px}
 .fb-jp{font-size:14px;color:#8e8e93;line-height:1.55;margin-bottom:8px}
 .fb-tip{font-size:13px;color:#5856d6;font-weight:500;line-height:1.45;padding:8px 12px;background:rgba(88,86,214,.06);border-radius:10px}
+.next-btn{
+  display:block;width:100%;margin-top:18px;padding:15px;border-radius:14px;
+  background:#007aff;color:#fff;border:none;font-size:17px;font-weight:700;
+  cursor:pointer;transition:transform .12s;
+  animation:fbIn .3s ease both;
+}
+.next-btn:active{transform:scale(.96)}
 
 /* ══ FOOTER ══ */
 .ftr{
@@ -641,7 +648,7 @@ let _audio=null;
 let _advTimer=null;
 let _paused=false;
 let _qTimer=null;
-const Q_TIME=15000; // 15 seconds to answer
+const Q_TIME=30000; // 30 seconds to answer
 
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({idx:S.idx,correct:S.correct,wrong:S.wrong,shuffled:S.shuffled,order:S.order}));}catch(_){}}
 function load(){try{const s=localStorage.getItem(SAVE_KEY);if(s){const d=JSON.parse(s);S.idx=d.idx||0;S.correct=d.correct||0;S.wrong=d.wrong||0;S.shuffled=!!d.shuffled;S.order=d.order||null;}}catch(_){}}
@@ -724,7 +731,7 @@ function timeUp(){
   if(q.st){tip.textContent=q.st;tip.style.display='block';}else{tip.style.display='none';}
   playAudio();
   save();
-  _advTimer=setTimeout(advance,3500);
+  showNextBtn();
 }
 
 // ═══ PAUSE ═══
@@ -743,7 +750,8 @@ function pauseQuiz(){
     '<div class="pause-title">一時停止</div>'+
     '<div class="pause-sub">Q'+(S.idx+1)+' / '+EK2Q.length+'<br>✓ '+S.correct+' ✗ '+S.wrong+'</div>'+
     '<button class="pause-resume" onclick="resumeQuiz()">▶ 再開</button>'+
-    '<button class="pause-home" onclick="goHome()">ホームに戻る</button>'+
+    '<button class="pause-home" onclick="restartAll()">最初からやり直す</button>'+
+    '<button class="pause-home" style="margin-top:8px" onclick="goHome()">ホームに戻る</button>'+
     '</div>';
   document.body.appendChild(ov);
 }
@@ -753,6 +761,19 @@ function resumeQuiz(){
   if(!S.answered)startQTimer();
   const ov=document.getElementById('pause-overlay');
   if(ov){ov.classList.add('out');setTimeout(()=>ov.remove(),250);}
+}
+function restartAll(){
+  _paused=false;
+  const ov=document.getElementById('pause-overlay');
+  if(ov)ov.remove();
+  S.idx=0;S.correct=0;S.wrong=0;save();
+  document.getElementById('main').innerHTML=
+    '<div class="card" id="card"><div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>'+
+    '<div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer-bar" style="width:100%"></div></div>'+
+    '<div class="q-tag" id="q-tag"></div><div class="q-text" id="q-text"></div>'+
+    '<div class="choices" id="choices"></div>'+
+    '<div class="fb" id="fb" style="display:none"><div class="fb-sentence" id="fb-sentence"></div><div class="fb-jp" id="fb-jp"></div><div class="fb-tip" id="fb-tip"></div></div></div>';
+  render();
 }
 function goHome(){
   save();
@@ -870,7 +891,8 @@ function handleChoice(btn){
   // Play question audio after answer
   playAudio();
   save();
-  _advTimer=setTimeout(advance,3500);
+  // Show next button (no auto-advance)
+  showNextBtn();
 }
 
 function advance(){
@@ -884,12 +906,18 @@ document.addEventListener('click',e=>{
   const btn=e.target.closest('.ch');
   if(btn&&!btn.classList.contains('disabled'))handleChoice(btn);
 });
-// Tap to skip
-document.addEventListener('touchend',e=>{
-  if(!S.answered||_paused)return;
-  if(e.target.closest('.ch,.hdr-back,.hdr-btn,.hdr-count,.audio-btn,.done-btn,.pause-overlay,.qlist-overlay'))return;
-  advance();
-},{passive:true});
+// Next button
+function showNextBtn(){
+  const fb=document.getElementById('fb');
+  if(!fb)return;
+  const old=document.getElementById('next-btn');
+  if(old)old.remove();
+  const btn=document.createElement('button');
+  btn.id='next-btn';btn.className='next-btn';
+  btn.textContent='次の問題 ▶';
+  btn.onclick=()=>{advance();};
+  fb.appendChild(btn);
+}
 
 // ═══ AUDIO PLAYBACK ═══
 function playAudio(){
