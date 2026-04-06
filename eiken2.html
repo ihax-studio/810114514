@@ -136,8 +136,10 @@ color:#1c1c1e;display:flex;flex-direction:column}
 }
 @keyframes fbIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .fb-sentence{font-size:16px;font-weight:600;color:#1c1c1e;line-height:1.55;margin-bottom:8px}
-.fb-jp{font-size:14px;color:#8e8e93;line-height:1.55;margin-bottom:8px}
-.fb-tip{font-size:13px;color:#5856d6;font-weight:500;line-height:1.45;padding:8px 12px;background:rgba(88,86,214,.06);border-radius:10px}
+.fb-jp{font-size:14px;color:#8e8e93;line-height:1.55;margin-bottom:8px;cursor:pointer;transition:background .2s;padding:4px 8px;border-radius:8px;margin:-4px -8px;margin-bottom:4px}
+.fb-jp:active{background:rgba(0,0,0,.04)}
+.fb-tip{font-size:13px;color:#5856d6;font-weight:500;line-height:1.45;padding:8px 12px;background:rgba(88,86,214,.06);border-radius:10px;cursor:pointer;transition:background .2s}
+.fb-tip:active{background:rgba(88,86,214,.12)}
 .nav-btns{display:flex;gap:10px;margin-top:18px;animation:fbIn .3s ease both}
 .nav-btn{
   flex:1;padding:15px;border-radius:14px;
@@ -165,6 +167,13 @@ color:#1c1c1e;display:flex;flex-direction:column}
   transition:transform .12s ease,background .2s;
 }
 .audio-btn:active{transform:scale(.88);background:rgba(0,122,255,.2)}
+.speed-btn{
+  font-size:13px;font-weight:700;background:rgba(0,0,0,.06);color:#1c1c1e;
+  padding:6px 12px;border-radius:10px;border:none;cursor:pointer;
+  transition:transform .12s,background .2s;
+}
+.speed-btn:active{transform:scale(.92)}
+.speed-btn.fast{background:rgba(88,86,214,.15);color:#5856d6}
 .audio-btn.playing{animation:audioPulse .6s ease infinite alternate}
 @keyframes audioPulse{from{transform:scale(1)}to{transform:scale(1.08)}}
 
@@ -296,17 +305,18 @@ color:#1c1c1e;display:flex;flex-direction:column}
     <div class="choices" id="choices"></div>
     <div class="fb" id="fb" style="display:none">
       <div class="fb-sentence" id="fb-sentence"></div>
-      <div class="fb-jp" id="fb-jp"></div>
-      <div class="fb-tip" id="fb-tip"></div>
+      <div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div>
+      <div class="fb-tip" id="fb-tip" onclick="speakJp(this.textContent)"></div>
     </div>
   </div>
 </div>
 
 <div class="ftr" id="quiz-ftr" style="display:none">
   <div class="score">
-    <span class="sc-g" id="sc-g">0</span>
+    <span class="sc-g" id="sc-g" onclick="openCorrectList()" style="cursor:pointer">0</span>
     <span class="sc-f" id="sc-f" onclick="openWrongList()" style="cursor:pointer">0</span>
   </div>
+  <button class="speed-btn" id="speed-btn" onclick="toggleSpeed()">1x</button>
   <button class="audio-btn" id="audio-btn" onclick="playAudio()">🔊</button>
 </div>
 
@@ -645,15 +655,15 @@ function unlockAudio(){
 
 // ═══ STATE ═══
 const SAVE_KEY='ek2q_state';
-let S={idx:0,correct:0,wrong:0,answered:false,shuffled:false,order:null,started:false,wrongs:[]};
+let S={idx:0,correct:0,wrong:0,answered:false,shuffled:false,order:null,started:false,wrongs:[],corrects:[],speed:1};
 let _audio=null;
 let _advTimer=null;
 let _paused=false;
 let _qTimer=null;
 const Q_TIME=30000; // 30 seconds to answer
 
-function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({idx:S.idx,correct:S.correct,wrong:S.wrong,shuffled:S.shuffled,order:S.order,wrongs:S.wrongs}));}catch(_){}}
-function load(){try{const s=localStorage.getItem(SAVE_KEY);if(s){const d=JSON.parse(s);S.idx=d.idx||0;S.correct=d.correct||0;S.wrong=d.wrong||0;S.shuffled=!!d.shuffled;S.order=d.order||null;S.wrongs=d.wrongs||[];}}catch(_){}}
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({idx:S.idx,correct:S.correct,wrong:S.wrong,shuffled:S.shuffled,order:S.order,wrongs:S.wrongs,corrects:S.corrects,speed:S.speed}));}catch(_){}}
+function load(){try{const s=localStorage.getItem(SAVE_KEY);if(s){const d=JSON.parse(s);S.idx=d.idx||0;S.correct=d.correct||0;S.wrong=d.wrong||0;S.shuffled=!!d.shuffled;S.order=d.order||null;S.wrongs=d.wrongs||[];S.corrects=d.corrects||[];S.speed=d.speed||1;}}catch(_){}}
 
 function getOrder(){
   if(S.shuffled&&S.order&&S.order.length===EK2Q.length)return S.order;
@@ -769,7 +779,7 @@ function restartAll(){
   _paused=false;
   const ov=document.getElementById('pause-overlay');
   if(ov)ov.remove();
-  S.idx=0;S.correct=0;S.wrong=0;S.wrongs=[];save();
+  S.idx=0;S.correct=0;S.wrong=0;S.wrongs=[];S.corrects=[];save();
   document.getElementById('main').innerHTML=
     '<div class="card" id="card"><div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>'+
     '<div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer-bar" style="width:100%"></div></div>'+
@@ -852,6 +862,36 @@ function closeWrongList(){
   if(ov){ov.classList.add('out');setTimeout(()=>ov.remove(),250);}
 }
 
+// ═══ CORRECT LIST ═══
+function openCorrectList(){
+  if(!S.corrects.length)return;
+  stopQTimer();
+  const ov=document.createElement('div');
+  ov.className='qlist-overlay';ov.id='correct-overlay';
+  let items='';
+  S.corrects.forEach((qid,i)=>{
+    const q=EK2Q.find(x=>x.id===qid);
+    if(!q)return;
+    items+=`<div class="qlist-item" data-cid="${qid}"><span class="qlist-num" style="background:rgba(52,199,89,.12);color:#34c759">${i+1}</span><span class="qlist-q">${q.q}<br><span style="font-size:12px;color:#34c759;font-weight:600">→ ${q.at}</span></span></div>`;
+  });
+  ov.innerHTML=
+    '<div class="qlist-hdr"><button class="qlist-close" onclick="closeCorrectList()">閉じる</button><div class="qlist-title">正解した問題 ('+S.corrects.length+')</div></div>'+
+    '<div class="qlist-body">'+items+'</div>';
+  document.body.appendChild(ov);
+  ov.querySelector('.qlist-body').addEventListener('click',e=>{
+    const item=e.target.closest('.qlist-item');
+    if(!item)return;
+    const qid=parseInt(item.dataset.cid,10);
+    const order=getOrder();
+    const idx=order.findIndex(oi=>EK2Q[oi].id===qid);
+    if(idx>=0){S.idx=idx;save();closeCorrectList();render();}
+  });
+}
+function closeCorrectList(){
+  const ov=document.getElementById('correct-overlay');
+  if(ov){ov.classList.add('out');setTimeout(()=>ov.remove(),250);}
+}
+
 // ═══ SHUFFLE ═══
 function toggleShuffle(){
   S.shuffled=!S.shuffled;
@@ -861,7 +901,7 @@ function toggleShuffle(){
     for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]];}
     S.order=a;
   }else{S.order=null;}
-  S.idx=0;S.correct=0;S.wrong=0;S.wrongs=[];save();render();
+  S.idx=0;S.correct=0;S.wrong=0;S.wrongs=[];S.corrects=[];save();render();
 
 }
 
@@ -911,6 +951,7 @@ function handleChoice(btn){
     playSnd('wrong');
   }else{
     S.correct++;
+    if(!S.corrects.includes(q.id))S.corrects.push(q.id);
     playSnd('correct');
   }
   document.getElementById('sc-g').textContent=S.correct;
@@ -987,11 +1028,33 @@ function playAudio(){
   const q=getQ();
   if(_audio){_audio.pause();}
   _audio=new Audio(q.af);
+  _audio.playbackRate=S.speed;
   const btn=document.getElementById('audio-btn');
   btn.classList.add('playing');
   _audio.onended=()=>btn.classList.remove('playing');
   _audio.onerror=()=>btn.classList.remove('playing');
   _audio.play().catch(()=>btn.classList.remove('playing'));
+}
+
+function toggleSpeed(){
+  S.speed=S.speed===1?1.2:1;
+  save();
+  const btn=document.getElementById('speed-btn');
+  btn.textContent=S.speed===1?'1x':'1.2x';
+  btn.classList.toggle('fast',S.speed===1.2);
+  if(_audio)_audio.playbackRate=S.speed;
+}
+
+// ═══ SCREEN READER (日本語読み上げ) ═══
+function speakJp(text){
+  if(!text)return;
+  // Pause mp3 while reading
+  if(_audio){_audio.pause();}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='ja-JP';u.rate=1.1;
+  u.onend=()=>{};
+  window.speechSynthesis.speak(u);
 }
 
 // ═══ DONE ═══
@@ -1006,7 +1069,7 @@ function showDone(){
     '<button class="done-btn" onclick="resetAll()">もう一度</button></div>';
 }
 function resetAll(){
-  S.idx=0;S.correct=0;S.wrong=0;S.wrongs=[];save();
+  S.idx=0;S.correct=0;S.wrong=0;S.wrongs=[];S.corrects=[];save();
   document.getElementById('main').innerHTML=
     '<div class="card" id="card"><div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>'+
     '<div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer-bar" style="width:100%"></div></div>'+
@@ -1018,6 +1081,9 @@ function resetAll(){
 
 // ═══ INIT ═══
 document.getElementById('btn-shuffle').style.opacity=S.shuffled?'1':'.4';
+const _spBtn=document.getElementById('speed-btn');
+_spBtn.textContent=S.speed===1.2?'1.2x':'1x';
+_spBtn.classList.toggle('fast',S.speed===1.2);
 if(S.idx>=EK2Q.length)S.idx=0;
 
 </script>
