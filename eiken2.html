@@ -140,6 +140,43 @@ color:#1c1c1e;display:flex;flex-direction:column}
 .fb-jp:active{background:rgba(0,0,0,.04)}
 .fb-tip{font-size:13px;color:#5856d6;font-weight:500;line-height:1.45;padding:8px 12px;background:rgba(88,86,214,.06);border-radius:10px;cursor:pointer;transition:background .2s}
 .fb-tip:active{background:rgba(88,86,214,.12)}
+/* ══ SEARCH OVERLAY ══ */
+.search-overlay{
+  position:fixed;inset:0;z-index:8000;
+  background:rgba(0,0,0,.4);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:center;
+  animation:pauseIn .25s ease both;
+}
+.search-overlay.out{animation:pauseOut .2s ease both;pointer-events:none}
+.search-box{
+  background:rgba(255,255,255,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-radius:20px;padding:28px 24px;text-align:center;
+  box-shadow:0 12px 40px rgba(0,0,0,.18);
+  min-width:280px;max-width:340px;width:85%;
+  animation:pauseBoxIn .3s cubic-bezier(.34,1.56,.64,1) both;
+}
+.search-title{font-size:18px;font-weight:700;margin-bottom:16px}
+.search-input{
+  width:100%;padding:14px 16px;border-radius:14px;
+  border:2px solid rgba(0,122,255,.3);background:rgba(255,255,255,.9);
+  font-size:20px;font-weight:600;text-align:center;
+  outline:none;-webkit-appearance:none;
+  transition:border-color .2s;
+}
+.search-input:focus{border-color:#007aff}
+.search-hint{font-size:12px;color:#8e8e93;margin-top:10px;line-height:1.4}
+.search-go{
+  width:100%;margin-top:14px;padding:13px;border-radius:14px;
+  background:#007aff;color:#fff;border:none;font-size:16px;font-weight:700;
+  cursor:pointer;transition:transform .12s;
+}
+.search-go:active{transform:scale(.96)}
+.search-cancel{
+  width:100%;margin-top:8px;padding:10px;border-radius:12px;
+  background:transparent;color:#8e8e93;border:none;font-size:14px;font-weight:600;
+  cursor:pointer;
+}
+
 .nav-btns{display:flex;gap:10px;margin-top:18px;animation:fbIn .3s ease both}
 .nav-btn{
   flex:1;padding:15px;border-radius:14px;
@@ -293,6 +330,7 @@ color:#1c1c1e;display:flex;flex-direction:column}
   <div class="hdr-title">穴埋め問題集</div>
   <button class="hdr-btn" id="btn-pause" onclick="pauseQuiz()" title="一時停止">⏸</button>
   <button class="hdr-btn" id="btn-shuffle" onclick="toggleShuffle()" title="シャッフル">🔀</button>
+  <button class="hdr-btn" id="btn-search" onclick="openSearch()" title="問題検索">🔍</button>
   <div class="hdr-count" id="hdr-count" onclick="openQList()">1 / 299</div>
 </div>
 
@@ -930,6 +968,54 @@ function closeCorrectList(){
   if(ov){ov.classList.add('out');setTimeout(()=>ov.remove(),250);}
 }
 
+// ═══ SEARCH BY QUESTION ID ═══
+function openSearch(){
+  stopQTimer();
+  const ov=document.createElement('div');
+  ov.className='search-overlay';ov.id='search-overlay';
+  ov.innerHTML=
+    '<div class="search-box">'+
+    '<div class="search-title">🔍 問題番号で移動</div>'+
+    '<input class="search-input" id="search-input" type="number" inputmode="numeric" placeholder="972〜1272" min="972" max="1272">'+
+    '<div class="search-hint">問題番号 (Q972〜Q1272) を入力</div>'+
+    '<button class="search-go" onclick="doSearch()">移動</button>'+
+    '<button class="search-cancel" onclick="closeSearch()">キャンセル</button>'+
+    '</div>';
+  document.body.appendChild(ov);
+  setTimeout(()=>document.getElementById('search-input').focus(),100);
+  // Enter to submit
+  document.getElementById('search-input').addEventListener('keydown',e=>{
+    if(e.key==='Enter')doSearch();
+    if(e.key==='Escape')closeSearch();
+  });
+}
+function doSearch(){
+  const input=document.getElementById('search-input');
+  if(!input)return;
+  const id=parseInt(input.value,10);
+  if(isNaN(id))return;
+  const order=getOrder();
+  const idx=order.findIndex(oi=>EK2Q[oi].id===id);
+  if(idx>=0){
+    S.idx=idx;save();
+    closeSearch();
+    render();
+  }else{
+    input.style.borderColor='#ff3b30';
+    input.placeholder='見つかりません';
+    input.value='';
+  }
+}
+function closeSearch(){
+  const ov=document.getElementById('search-overlay');
+  if(ov){ov.classList.add('out');setTimeout(()=>ov.remove(),200);}
+  if(!S.answered)startQTimer();
+}
+
+// Enter×2 to open search
+let _lastEnterTime=0;
+
+
 // ═══ SHUFFLE ═══
 function toggleShuffle(){
   S.shuffled=!S.shuffled;
@@ -958,7 +1044,7 @@ function render(){
   document.getElementById('sc-f').textContent=S.wrong;
   document.getElementById('prog-bar').style.width=(S.idx/EK2Q.length*100)+'%';
   const mn=isMulti(q);
-  document.getElementById('q-tag').textContent='Q'+(S.idx+1)+(mn?' · '+mn+'つ選べ':'');
+  document.getElementById('q-tag').textContent='Q'+q.id+' ('+(S.idx+1)+'/'+EK2Q.length+')'+(mn?' · '+mn+'つ選べ':'');
   document.getElementById('q-text').innerHTML=q.q.replace('( )','<span class="blank" id="blank">(      )</span>');
   document.getElementById('fb').style.display='none';
   const chEl=document.getElementById('choices');
@@ -1104,8 +1190,15 @@ document.addEventListener('click',e=>{
 });
 // Keyboard 1-4 to select choice, Enter/→ for next, ← for back
 document.addEventListener('keydown',e=>{
+  if(document.getElementById('search-overlay'))return; // search open, don't interfere
   if(_paused||!S.started)return;
   const k=e.key;
+  // Double Enter → open search
+  if(k==='Enter'){
+    const now=Date.now();
+    if(now-_lastEnterTime<400){openSearch();_lastEnterTime=0;return;}
+    _lastEnterTime=now;
+  }
   if(!S.answered&&(k==='1'||k==='2'||k==='3'||k==='4')){
     const btn=document.querySelector('#choices .ch[data-i="'+k+'"]');
     if(btn&&!btn.classList.contains('disabled'))handleChoice(btn);
