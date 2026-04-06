@@ -947,6 +947,17 @@ document.addEventListener('click',e=>{
   const btn=e.target.closest('.ch');
   if(btn&&!btn.classList.contains('disabled'))handleChoice(btn);
 });
+// Keyboard 1-4 to select choice, Enter/→ for next, ← for back
+document.addEventListener('keydown',e=>{
+  if(_paused||!S.started)return;
+  const k=e.key;
+  if(!S.answered&&(k==='1'||k==='2'||k==='3'||k==='4')){
+    const btn=document.querySelector('#choices .ch[data-i="'+k+'"]');
+    if(btn&&!btn.classList.contains('disabled'))handleChoice(btn);
+  }
+  if(S.answered&&(k==='Enter'||k==='ArrowRight'))advance();
+  if(S.answered&&k==='ArrowLeft')goBack();
+});
 // Next button
 function showNextBtn(){
   const fb=document.getElementById('fb');
