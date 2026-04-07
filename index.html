@@ -4622,7 +4622,7 @@ if(inputText.length>=5){
 }
 
 /* ── Google search option ── */
-html+=`<div class="smart-result" style="animation-delay:${delayIdx*60}ms;background:rgba(66,133,244,.06);border-color:rgba(66,133,244,.15)" onclick="event.stopPropagation();if(typeof haptic==='function')haptic();else if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();window.open('https://www.google.com/search?q='+encodeURIComponent('${inputText.replace(/'/g,"\\'")}'+' 意味 英語'),'_blank')">
+html+=`<div class="smart-result" style="animation-delay:${delayIdx*60}ms;background:rgba(66,133,244,.06);border-color:rgba(66,133,244,.15)" onclick="event.stopPropagation();if(typeof haptic==='function')haptic();else haptic.confirm();window.open('https://www.google.com/search?q='+encodeURIComponent('${inputText.replace(/'/g,"\\'")}'+' 意味 英語'),'_blank')">
   <div style="font-size:20px;width:36px;height:36px;border-radius:9px;background:rgba(66,133,244,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">🔍</div>
   <div class="smart-info">
     <div class="smart-word">Googleで検索</div>
@@ -6936,10 +6936,10 @@ function playEk2Audio(){
 <style>
 #listen-ov{position:fixed;inset:0;z-index:9000;
   background:linear-gradient(150deg,#eef2f8 0%,#f0edfc 50%,#edf7f2 100%);
-  visibility:hidden;opacity:0;transform:translateX(40%);
+  visibility:hidden;opacity:0;transform:translateX(40%);pointer-events:none;
   transition:transform .45s cubic-bezier(.32,.72,.37,1),opacity .35s ease,visibility 0s .45s;
   display:flex;flex-direction:column;overflow:hidden}
-#listen-ov.on{visibility:visible;opacity:1;transform:translateX(0);transition:transform .45s cubic-bezier(.32,.72,.37,1),opacity .35s ease,visibility 0s 0s}
+#listen-ov.on{visibility:visible;opacity:1;transform:translateX(0);pointer-events:auto;transition:transform .45s cubic-bezier(.32,.72,.37,1),opacity .35s ease,visibility 0s 0s}
 .lis-hdr{display:flex;align-items:center;gap:10px;padding:calc(var(--sat,0px)+14px) 16px 12px;
   background:rgba(255,255,255,.72);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
   border-bottom:1px solid rgba(0,0,0,.05);position:relative;z-index:2}
@@ -6947,7 +6947,7 @@ function playEk2Audio(){
 .lis-back:active{transform:scale(.85)}
 .lis-ttl{font-size:17px;font-weight:700;flex:1;letter-spacing:-.02em}
 .lis-count{font-size:13px;color:#007aff;font-weight:600}
-#lis-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px 24px}
+#lis-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 24px}
 #listen-player{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 8px;min-height:52vh}
 .lis-en{font-size:44px;font-weight:800;letter-spacing:-.04em;text-align:center;color:#1c1c1e;
   cursor:pointer;padding:10px 18px;border-radius:16px;transition:background .2s;word-break:break-word}
@@ -7057,7 +7057,7 @@ function detectPOS(en){
 
 /* ── Open ── */
 window.openListenMode=function(){
-  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  haptic.confirm();
   const ov=document.getElementById('listen-ov');
   ov.classList.add('on');
   document.getElementById('listen-player').style.display='none';
@@ -7089,7 +7089,7 @@ function buildSelector(){
   sel.innerHTML=html;
   sel.querySelectorAll('.lis-sel-card').forEach(c=>{
     c.addEventListener('click',()=>{
-      if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+      haptic.confirm();
       startSet(c.dataset.lisKey);
     });
   });
@@ -7158,25 +7158,31 @@ function renderWord(){
 
 /* ── TTS ── */
 function speakEng(text,cb){
-  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  if(!text){if(cb)cb();return;}
+  haptic.confirm();
   window.speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
   u.lang='en-US';u.rate=1.1;
-  const voices=speechSynthesis.getVoices();
-  const pick=voices.find(v=>v.name==='Alex')||voices.find(v=>v.lang==='en-US'&&v.localService)||voices.find(v=>v.lang.startsWith('en'));
-  if(pick)u.voice=pick;
+  try{
+    const voices=speechSynthesis.getVoices();
+    const pick=voices.find(v=>v.name==='Alex')||voices.find(v=>v.lang==='en-US'&&v.localService)||voices.find(v=>v.lang.startsWith('en'));
+    if(pick)u.voice=pick;
+  }catch(_){}
   u.onend=()=>{if(cb)cb();};
   u.onerror=()=>{if(cb)cb();};
   speechSynthesis.speak(u);
 }
 function speakJpn(text,cb){
-  if(typeof haptic==='object'&&haptic)haptic();
+  if(!text){if(cb)cb();return;}
+  haptic();
   window.speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
   u.lang='ja-JP';u.rate=1.3;
-  const voices=speechSynthesis.getVoices();
-  const pick=voices.find(v=>v.lang==='ja-JP'&&v.localService)||voices.find(v=>v.lang.startsWith('ja'));
-  if(pick)u.voice=pick;
+  try{
+    const voices=speechSynthesis.getVoices();
+    const pick=voices.find(v=>v.lang==='ja-JP'&&v.localService)||voices.find(v=>v.lang.startsWith('ja'));
+    if(pick)u.voice=pick;
+  }catch(_){}
   u.onend=()=>{if(cb)cb();};
   u.onerror=()=>{if(cb)cb();};
   speechSynthesis.speak(u);
@@ -7195,28 +7201,35 @@ function playWord(){
   const w=_lisData[_lisIdx];
   const enEl=document.getElementById('lis-en');
   enEl.classList.add('speaking');
-  speakEng(w.e,()=>{
+  // iOS Safari: onend sometimes doesn't fire, add timeout fallback
+  let enDone=false;
+  const enTimeout=setTimeout(()=>{if(!enDone){enDone=true;afterEn();}},3000);
+  speakEng(w.e,()=>{if(!enDone){enDone=true;clearTimeout(enTimeout);afterEn();}});
+  function afterEn(){
     if(!_lisPlaying)return;
     enEl.classList.remove('speaking');
-    speakJpn(w.j,()=>{
-      if(!_lisPlaying)return;
-      _lisTimer=setTimeout(()=>{
-        _lisIdx++;
-        if(_lisIdx>=_lisData.length){
-          _lisPlaying=false;
-          document.getElementById('lis-play-btn').textContent='▶';
-          renderWord();
-          return;
-        }
-        playWord();
-      },200);
-    });
-  });
+    let jaDone=false;
+    const jaTimeout=setTimeout(()=>{if(!jaDone){jaDone=true;afterJa();}},3000);
+    speakJpn(w.j,()=>{if(!jaDone){jaDone=true;clearTimeout(jaTimeout);afterJa();}});
+  }
+  function afterJa(){
+    if(!_lisPlaying)return;
+    _lisTimer=setTimeout(()=>{
+      _lisIdx++;
+      if(_lisIdx>=_lisData.length){
+        _lisPlaying=false;
+        document.getElementById('lis-play-btn').textContent='▶';
+        renderWord();
+        return;
+      }
+      playWord();
+    },200);
+  }
 }
 
 /* ── Controls ── */
 window.listenToggle=function(){
-  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  haptic.confirm();
   if(_lisPlaying){
     _lisPlaying=false;
     window.speechSynthesis.cancel();
@@ -7231,7 +7244,7 @@ window.listenToggle=function(){
   }
 };
 window.listenNext=function(){
-  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  haptic.confirm();
   window.speechSynthesis.cancel();
   if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
   document.getElementById('lis-en').classList.remove('speaking');
@@ -7242,7 +7255,7 @@ window.listenNext=function(){
   if(_lisPlaying)playWord();
 };
 window.listenPrev=function(){
-  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  haptic.confirm();
   window.speechSynthesis.cancel();
   if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
   document.getElementById('lis-en').classList.remove('speaking');
@@ -7253,7 +7266,7 @@ window.listenPrev=function(){
   if(_lisPlaying)playWord();
 };
 window.listenRestart=function(){
-  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  haptic.confirm();
   _lisPlaying=false;
   window.speechSynthesis.cancel();
   if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
@@ -7265,7 +7278,7 @@ window.listenRestart=function(){
   renderWord();
 };
 window.closeListenMode=function(){
-  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  haptic.confirm();
   _lisPlaying=false;
   window.speechSynthesis.cancel();
   if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
@@ -7276,7 +7289,7 @@ window.closeListenMode=function(){
 
 /* ── Tap handlers ── */
 window.listenTapEn=function(){
-  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  haptic.confirm();
   if(!_lisData.length)return;
   const w=_lisData[_lisIdx];
   const el=document.getElementById('lis-en');
@@ -7284,12 +7297,12 @@ window.listenTapEn=function(){
   speakEng(w.e,()=>el.classList.remove('speaking'));
 };
 window.listenTapJa=function(){
-  if(typeof haptic==='object'&&haptic)haptic();
+  haptic();
   if(!_lisData.length)return;
   speakJpn(_lisData[_lisIdx].j);
 };
 window.listenTapGoro=function(){
-  if(typeof haptic==='object'&&haptic)haptic();
+  haptic();
   if(!_lisData.length)return;
   const gk=_lisData[_lisIdx].e.toLowerCase().trim();
   if(typeof GORO!=='undefined'&&GORO[gk])speakJpn(GORO[gk]);
