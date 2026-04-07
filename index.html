@@ -2824,7 +2824,7 @@ window.Sf=i=>{
     // Unshuffle (back to order)
     d.shuffled=false;
     d.deck=[...SRC[c.src]];
-    try{const a=new Audio('not-shake.mp3');a.play().catch(()=>{});}catch(e){}
+    try{const a=new Audio('shuffle.caf');a.play().catch(()=>{});}catch(e){}
   }
   d.idx=0;d.st={g:0,h:0,f:0};d.hist=[];d.prev=null;
   document.getElementById('sg'+i).textContent=0;
@@ -7009,6 +7009,7 @@ function playEk2Audio(){
     <button class="lis-ctrl-btn" onclick="listenPrev()">⏮</button>
     <button class="lis-ctrl-btn lis-ctrl-play" id="lis-play-btn" onclick="listenToggle()">▶</button>
     <button class="lis-ctrl-btn" onclick="listenNext()">⏭</button>
+    <button class="lis-ctrl-btn" id="lis-speed-btn" onclick="listenSpeed()" style="font-size:13px;font-weight:700">1x</button>
   </div>
 </div>
 
@@ -7016,11 +7017,17 @@ function playEk2Audio(){
 /* ══════════ LISTENING MODE ══════════ */
 (function(){
 const LIS_KEY='inglish_listen_progress';
+const LIS_SPEED_KEY='inglish_listen_speed';
 let _lisData=[];
 let _lisIdx=0;
 let _lisPlaying=false;
 let _lisTimer=null;
 let _lisDataKey='';
+let _lisGen=0; // generation counter to prevent stale callback races
+const SPEED_STEPS=[1,0.8,1.2,1.5,2];
+let _lisSpeedIdx=(function(){try{const s=parseInt(localStorage.getItem(LIS_SPEED_KEY));return(s>=0&&s<SPEED_STEPS.length)?s:0;}catch(_){return 0;}})();
+
+function getSpeed(){return SPEED_STEPS[_lisSpeedIdx];}
 
 const LIS_GROUPS=[
   {label:'準1級',sets:[
@@ -7055,6 +7062,24 @@ function detectPOS(en){
   return '';
 }
 
+/* Estimate TTS duration (ms) based on text length + speed */
+function estimateTTSDuration(text,lang){
+  if(!text)return 500;
+  const charCount=text.length;
+  // English ~80ms/char at rate 1, Japanese ~120ms/char at rate 1
+  const msPerChar=lang==='en'?80:120;
+  const base=Math.max(800,charCount*msPerChar);
+  // Adjust for speed
+  return Math.round(base/getSpeed())+500; // +500ms safety margin
+}
+
+/* Cancel all pending playback state */
+function cancelPlayback(){
+  _lisGen++;
+  window.speechSynthesis.cancel();
+  if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
+}
+
 /* ── Open ── */
 window.openListenMode=function(){
   haptic.confirm();
@@ -7065,6 +7090,9 @@ window.openListenMode=function(){
   document.getElementById('lis-controls').style.display='none';
   document.getElementById('lis-ttl').textContent='リスニング学習';
   document.getElementById('lis-count').textContent='';
+  // Init speed button display
+  const sb=document.getElementById('lis-speed-btn');
+  if(sb)sb.textContent=getSpeed()+'x';
   buildSelector();
 };
 
@@ -7103,8 +7131,7 @@ function startSet(key){
   if(!set)return;
   // Stop current
   _lisPlaying=false;
-  window.speechSynthesis.cancel();
-  if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
+  cancelPlayback();
   _lisDataKey=key;
   _lisData=set.get();
   const prog=loadProg();
@@ -7156,13 +7183,13 @@ function renderWord(){
   saveProg();
 }
 
-/* ── TTS ── */
-function speakEng(text,cb){
+/* ── TTS (with generation guard) ── */
+function speakEng(text,cb,skipCancel){
   if(!text){if(cb)cb();return;}
   haptic.confirm();
-  window.speechSynthesis.cancel();
+  if(!skipCancel)window.speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
-  u.lang='en-US';u.rate=1.1;
+  u.lang='en-US';u.rate=1.1*getSpeed();
   try{
     const voices=speechSynthesis.getVoices();
     const pick=voices.find(v=>v.name==='Alex')||voices.find(v=>v.lang==='en-US'&&v.localService)||voices.find(v=>v.lang.startsWith('en'));
@@ -7172,12 +7199,12 @@ function speakEng(text,cb){
   u.onerror=()=>{if(cb)cb();};
   speechSynthesis.speak(u);
 }
-function speakJpn(text,cb){
+function speakJpn(text,cb,skipCancel){
   if(!text){if(cb)cb();return;}
   haptic();
-  window.speechSynthesis.cancel();
+  if(!skipCancel)window.speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
-  u.lang='ja-JP';u.rate=1.3;
+  u.lang='ja-JP';u.rate=1.3*getSpeed();
   try{
     const voices=speechSynthesis.getVoices();
     const pick=voices.find(v=>v.lang==='ja-JP'&&v.localService)||voices.find(v=>v.lang.startsWith('ja'));
@@ -7201,20 +7228,27 @@ function playWord(){
   const w=_lisData[_lisIdx];
   const enEl=document.getElementById('lis-en');
   enEl.classList.add('speaking');
-  // iOS Safari: onend sometimes doesn't fire, add timeout fallback
+  // Capture current generation to detect stale callbacks
+  const gen=_lisGen;
+  const stale=()=>gen!==_lisGen;
+  // Timeout based on text length (not a fixed 3s)
   let enDone=false;
-  const enTimeout=setTimeout(()=>{if(!enDone){enDone=true;afterEn();}},3000);
-  speakEng(w.e,()=>{if(!enDone){enDone=true;clearTimeout(enTimeout);afterEn();}});
+  const enMs=estimateTTSDuration(w.e,'en');
+  const enTimeout=setTimeout(()=>{if(!enDone&&!stale()){enDone=true;afterEn();}},enMs);
+  // skipCancel=true: don't call cancel() since we just started fresh
+  speakEng(w.e,()=>{if(!enDone&&!stale()){enDone=true;clearTimeout(enTimeout);afterEn();}},true);
   function afterEn(){
-    if(!_lisPlaying)return;
+    if(stale()||!_lisPlaying)return;
     enEl.classList.remove('speaking');
     let jaDone=false;
-    const jaTimeout=setTimeout(()=>{if(!jaDone){jaDone=true;afterJa();}},3000);
-    speakJpn(w.j,()=>{if(!jaDone){jaDone=true;clearTimeout(jaTimeout);afterJa();}});
+    const jaMs=estimateTTSDuration(w.j,'ja');
+    const jaTimeout=setTimeout(()=>{if(!jaDone&&!stale()){jaDone=true;afterJa();}},jaMs);
+    speakJpn(w.j,()=>{if(!jaDone&&!stale()){jaDone=true;clearTimeout(jaTimeout);afterJa();}},true);
   }
   function afterJa(){
-    if(!_lisPlaying)return;
+    if(stale()||!_lisPlaying)return;
     _lisTimer=setTimeout(()=>{
+      if(stale()||!_lisPlaying)return;
       _lisIdx++;
       if(_lisIdx>=_lisData.length){
         _lisPlaying=false;
@@ -7232,8 +7266,7 @@ window.listenToggle=function(){
   haptic.confirm();
   if(_lisPlaying){
     _lisPlaying=false;
-    window.speechSynthesis.cancel();
-    if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
+    cancelPlayback();
     document.getElementById('lis-play-btn').textContent='▶';
     document.getElementById('lis-en').classList.remove('speaking');
   }else{
@@ -7245,8 +7278,7 @@ window.listenToggle=function(){
 };
 window.listenNext=function(){
   haptic.confirm();
-  window.speechSynthesis.cancel();
-  if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
+  cancelPlayback();
   document.getElementById('lis-en').classList.remove('speaking');
   if(!_lisData.length)return;
   _lisIdx++;
@@ -7256,8 +7288,7 @@ window.listenNext=function(){
 };
 window.listenPrev=function(){
   haptic.confirm();
-  window.speechSynthesis.cancel();
-  if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
+  cancelPlayback();
   document.getElementById('lis-en').classList.remove('speaking');
   if(!_lisData.length)return;
   _lisIdx--;
@@ -7268,8 +7299,7 @@ window.listenPrev=function(){
 window.listenRestart=function(){
   haptic.confirm();
   _lisPlaying=false;
-  window.speechSynthesis.cancel();
-  if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
+  cancelPlayback();
   document.getElementById('lis-en').classList.remove('speaking');
   document.getElementById('lis-play-btn').textContent='▶';
   if(!_lisData.length)return;
@@ -7277,11 +7307,22 @@ window.listenRestart=function(){
   saveProg();
   renderWord();
 };
+window.listenSpeed=function(){
+  haptic.confirm();
+  _lisSpeedIdx=(_lisSpeedIdx+1)%SPEED_STEPS.length;
+  try{localStorage.setItem(LIS_SPEED_KEY,_lisSpeedIdx);}catch(_){}
+  const sb=document.getElementById('lis-speed-btn');
+  if(sb)sb.textContent=getSpeed()+'x';
+  // If currently playing, restart current word at new speed
+  if(_lisPlaying){
+    cancelPlayback();
+    playWord();
+  }
+};
 window.closeListenMode=function(){
   haptic.confirm();
   _lisPlaying=false;
-  window.speechSynthesis.cancel();
-  if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
+  cancelPlayback();
   document.getElementById('lis-en').classList.remove('speaking');
   saveProg();
   document.getElementById('listen-ov').classList.remove('on');

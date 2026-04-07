@@ -5,7 +5,7 @@ const FILES_TO_CACHE = [
   '/810.html',
   '/index.html',
   '/yaju.css', // 必要なCSS
-  '/main.js',  // 必要なら
+  '/index.js',
   '/bg.png',
   '/b1.png','/b2.png','/b3.png','/b4.png','/b5.png','/b6.png','/b7.png','/b8.png','/b9.png','/b10.png','/b11.png',
   '/ball.png','/114514.png','/red.png',
