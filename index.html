@@ -2585,14 +2585,23 @@ function speakJp(text){
   speechSynthesis.speak(u);
 }
 // ═══ SOUND EFFECTS (quiz) ═══
-const _quizSnd={
-  correct:new Audio('success.caf'),
-  wrong:new Audio('retry.caf')
-};
-try{_quizSnd.correct.load();_quizSnd.wrong.load();}catch(_){}
 function playSnd(name){
-  const a=_quizSnd[name];if(!a)return;
-  a.currentTime=0;a.play().catch(()=>{});
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator();
+    const g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    g.gain.value=0.18;
+    if(name==='correct'){
+      o.frequency.value=880;o.type='sine';
+      o.start();g.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.25);
+      setTimeout(()=>{o.stop();ctx.close();},300);
+    }else if(name==='wrong'){
+      o.frequency.value=220;o.type='square';
+      o.start();g.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.4);
+      setTimeout(()=>{o.stop();ctx.close();},450);
+    }
+  }catch(_){}
 }
 // Preload voices (iOS needs this on user gesture)
 let _voicesLoaded=false;
