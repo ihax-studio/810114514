@@ -6795,6 +6795,8 @@ function renderEk2(){
   card.style.animation='ek2CardIn .4s cubic-bezier(.77,0,.18,1) both';
   // Auto play audio
   playEk2Audio();
+  // English screen reader on question change
+  speakEn(q.cs||q.q);
 }
 
 function handleEk2Choice(btn){
@@ -6811,9 +6813,11 @@ function handleEk2Choice(btn){
   if(!isCorrect){
     btn.classList.add('wrong');
     _ek2.wrong++;
+    playSnd('wrong');
     if(typeof haptic!=='undefined')haptic.error?.();
   }else{
     _ek2.correct++;
+    playSnd('correct');
     if(typeof haptic!=='undefined'){
       for(let k=0;k<3;k++)setTimeout(()=>haptic.error?.(),k*30);
     }
@@ -6824,8 +6828,11 @@ function handleEk2Choice(btn){
   const fb=document.getElementById('ek2-feedback');
   fb.style.display='block';
   document.getElementById('ek2-sentence').textContent=q.cs;
+  document.getElementById('ek2-sentence').onclick=()=>speakEn(q.cs);
   document.getElementById('ek2-jp').textContent=q.jt;
+  document.getElementById('ek2-jp').onclick=()=>speakJp(q.jt);
   document.getElementById('ek2-tip').textContent=q.st||'';
+  if(q.st)document.getElementById('ek2-tip').onclick=()=>speakJp(q.st);
   // Play audio
   playEk2Audio();
   // Auto advance after 3s
@@ -6838,7 +6845,13 @@ function handleEk2Choice(btn){
 // Delegated click
 document.addEventListener('click',e=>{
   const btn=e.target.closest('.ek2-ch-btn');
-  if(btn&&!btn.classList.contains('disabled'))handleEk2Choice(btn);
+  if(!btn)return;
+  if(btn.classList.contains('disabled')){
+    const txt=btn.querySelector('span:last-child')?.textContent||'';
+    if(txt)speakEn(txt);
+    return;
+  }
+  handleEk2Choice(btn);
 });
 
 // Tap to skip delay
