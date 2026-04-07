@@ -1071,6 +1071,10 @@ overflow:hidden;
       <div class="hcard" onclick="openS('list','c')"><div class="hi ir">⚠️</div><div class="hcard-info"><div class="hcard-name">混同注意ペア</div><div class="hcard-desc">10ペア</div></div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','a')"><div class="hi id2">🎯</div><div class="hcard-info"><div class="hcard-name">頻出テーマ</div><div class="hcard-desc">環境・社会・ビジネス</div></div><div class="chev">›</div></div>
     </div>
+    <div class="hg-lbl">リスニング学習</div>
+    <div class="hg-list">
+      <div class="hcard" onclick="openListenMode()"><div class="hi ib">🎧</div><div class="hcard-info"><div class="hcard-name">単語読み上げモード</div><div class="hcard-desc">英語→和訳を自動で読み上げ</div></div><div class="badge" id="b-listen">---</div><div class="chev">›</div></div>
+    </div>
     <div class="hg-lbl">やり直し</div>
     <div class="hg-list">
       <div class="hcard" onclick="openS('card-forgot',0)"><div class="hi ir">🔄</div><div class="hcard-info"><div class="hcard-name">忘れた単語だけ復習</div><div class="hcard-desc">忘れた・難しいマークの単語だけ出題</div></div><div class="badge" id="b-retry">0</div><div class="chev">›</div></div>
@@ -1213,6 +1217,7 @@ overflow:hidden;
             <div class="s-row"><div class="s-label">自動で次の問題に進む</div><div class="s-toggle on" id="s-auto-next"><div class="s-knob"></div></div></div>
             <div class="s-row"><div class="s-label">答え表示時に読み上げ</div><div class="s-toggle" id="s-auto-speak"><div class="s-knob"></div></div></div>
             <div class="s-row"><div class="s-label">問題切り替わり時に読み上げ</div><div class="s-toggle" id="s-q-speak"><div class="s-knob"></div></div></div>
+            <div class="s-row"><div class="s-label">語呂合わせを表示＆読み上げ</div><div class="s-toggle" id="s-goro"><div class="s-knob"></div></div></div>
           </div>
         </div>
         <!-- Gesture -->
@@ -2660,7 +2665,7 @@ function render(i){
   // Goroawase mnemonic
   const goKey=wordText.toLowerCase().trim();
   const goEl=document.getElementById('go'+i),gtEl=document.getElementById('gt'+i);
-  if(GORO[goKey]){goEl.style.display='';gtEl.textContent=GORO[goKey];}else{goEl.style.display='none';}
+  if(isGoroOn()&&GORO[goKey]){goEl.style.display='';gtEl.textContent=GORO[goKey];}else{goEl.style.display='none';}
   document.getElementById('fu'+i).textContent = (isV&&w.f)||'';
 
   // Underline the target word in example sentences
@@ -2743,6 +2748,17 @@ window.Fl=i=>{
     if(typeof startCardAnswerTimer==='function')startCardAnswerTimer(i);
     if(typeof isAutoSpeak==='function'&&isAutoSpeak()){
       const w=d.deck[d.idx];if(w)speakEn(w.e||w.w||'');
+    }
+    // Speak goro if toggle ON
+    if(isGoroOn()){
+      const w=d.deck[d.idx];
+      const gk=(w.e||w.w||'').toLowerCase().trim();
+      if(GORO[gk]){
+        const goEl=document.getElementById('go'+i);if(goEl)goEl.style.display='';
+        const gtEl=document.getElementById('gt'+i);if(gtEl)gtEl.textContent=GORO[gk];
+        const delay=isAutoSpeak()?1200:200;
+        setTimeout(()=>speakJp(GORO[gk]),delay);
+      }
     }
   }
   if(!d.flipped&&typeof stopQuizTimer==='function')stopQuizTimer();
@@ -4601,6 +4617,16 @@ if(inputText.length>=5){
   delayIdx++;
 }
 
+/* ── Gemini search option ── */
+html+=`<div class="smart-result" style="animation-delay:${delayIdx*60}ms;background:rgba(66,133,244,.06);border-color:rgba(66,133,244,.15)" onclick="event.stopPropagation();window.open('https://gemini.google.com/app?q='+encodeURIComponent('${inputText.replace(/'/g,"\\'")}'),'_blank')">
+  <div class="lis-sel-icon" style="font-size:20px;width:36px;height:36px;border-radius:9px;background:rgba(66,133,244,.12)">✨</div>
+  <div class="smart-info">
+    <div class="smart-word">Geminiで検索</div>
+    <div class="smart-meaning" style="font-size:11px;color:#4285f4">${inputText.length>30?inputText.slice(0,30)+'…':inputText}</div>
+  </div>
+</div>`;
+delayIdx++;
+
 /* Show instant results immediately */
 const instantHtml=html;
 if(instantHtml){
@@ -5428,6 +5454,8 @@ const Q_SPEAK_KEY='inglish_q_speak';
 function isAutoNext(){return localStorage.getItem(AUTO_NEXT_KEY)!=='0';}
 function isAutoSpeak(){return localStorage.getItem(AUTO_SPEAK_KEY)==='1';}
 function isQSpeak(){return localStorage.getItem(Q_SPEAK_KEY)==='1';}
+const GORO_KEY='inglish_goro';
+function isGoroOn(){return localStorage.getItem(GORO_KEY)==='1';}
 document.getElementById('s-auto-next').addEventListener('click',function(){
   haptic();
   const on=!this.classList.contains('on');
@@ -5446,10 +5474,17 @@ document.getElementById('s-q-speak').addEventListener('click',function(){
   this.classList.toggle('on',on);
   localStorage.setItem(Q_SPEAK_KEY,on?'1':'0');
 });
+document.getElementById('s-goro').addEventListener('click',function(){
+  haptic();
+  const on=!this.classList.contains('on');
+  this.classList.toggle('on',on);
+  localStorage.setItem(GORO_KEY,on?'1':'0');
+});
 function syncQuizToggles(){
   document.getElementById('s-auto-next').classList.toggle('on',isAutoNext());
   document.getElementById('s-auto-speak').classList.toggle('on',isAutoSpeak());
   document.getElementById('s-q-speak').classList.toggle('on',isQSpeak());
+  document.getElementById('s-goro').classList.toggle('on',isGoroOn());
 }
 
 // Quiz timer state
@@ -5529,7 +5564,13 @@ function quizTimeUp(i){
     });
   }
   // Always speak + haptic on time up
-  if(d.idx<d.deck.length){haptic.confirm();speakEn(d.deck[d.idx].e||d.deck[d.idx].w||'');}
+  if(d.idx<d.deck.length){
+    haptic.confirm();speakEn(d.deck[d.idx].e||d.deck[d.idx].w||'');
+    if(isGoroOn()){
+      const gk=(d.deck[d.idx].e||d.deck[d.idx].w||'').toLowerCase().trim();
+      if(GORO[gk])setTimeout(()=>speakJp(GORO[gk]),1200);
+    }
+  }
   // Set up pending advance — tap anywhere to advance after 2s
   _pendingAdvance={panel:i,result:'f',timer:null};
   delayedAdvance(()=>{
@@ -5634,6 +5675,11 @@ document.addEventListener('click',e=>{
   if(d.idx<d.deck.length){
     haptic.confirm();
     speakEn(d.deck[d.idx].e||d.deck[d.idx].w||'');
+    // Goro TTS
+    if(isGoroOn()){
+      const gk=(d.deck[d.idx].e||d.deck[d.idx].w||'').toLowerCase().trim();
+      if(GORO[gk])setTimeout(()=>speakJp(GORO[gk]),1200);
+    }
   }
   const result=isCorrect?'g':'f';
   // Set up pending advance — tap anywhere to advance after 2s
@@ -6880,6 +6926,251 @@ function playEk2Audio(){
   _ek2.audio=new Audio(q.af);
   _ek2.audio.play().catch(()=>{});
 }
+</script>
+
+<!-- ══════════ LISTENING MODE ══════════ -->
+<style>
+#listen-ov{position:fixed;inset:0;z-index:9000;background:linear-gradient(150deg,#eef2f8 0%,#f0edfc 50%,#edf7f2 100%);display:none;flex-direction:column;overflow:hidden}
+#listen-ov.on{display:flex}
+.lis-hdr{display:flex;align-items:center;gap:10px;padding:calc(var(--sat,0px)+14px) 16px 12px;background:rgba(255,255,255,.72);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);border-bottom:1px solid rgba(0,0,0,.05);position:relative;z-index:2}
+.lis-back{font-size:28px;background:none;border:none;color:#007aff;cursor:pointer;padding:0 4px;line-height:1;font-weight:300}
+.lis-ttl{font-size:17px;font-weight:700;flex:1;letter-spacing:-.02em}
+.lis-count{font-size:13px;color:#007aff;font-weight:600}
+#listen-select{flex:1;overflow-y:auto;padding:20px 16px;-webkit-overflow-scrolling:touch}
+#listen-player{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 24px;gap:12px;overflow:hidden}
+.lis-en{font-size:38px;font-weight:800;letter-spacing:-.03em;text-align:center;color:#1c1c1e;animation:lisIn .4s cubic-bezier(.34,1.05,.64,1) both}
+.lis-ja{font-size:22px;font-weight:500;color:#8e8e93;text-align:center;margin-top:4px;animation:lisIn .4s .1s cubic-bezier(.34,1.05,.64,1) both}
+.lis-pos{font-size:14px;font-weight:600;color:#5856d6;background:rgba(88,86,214,.1);padding:4px 14px;border-radius:10px;margin-top:8px;animation:lisIn .4s .15s cubic-bezier(.34,1.05,.64,1) both}
+.lis-prog{font-size:13px;color:#8e8e93;margin-top:16px}
+@keyframes lisIn{from{opacity:0;transform:translateY(18px) scale(.95)}to{opacity:1;transform:none}}
+.lis-controls{display:flex;align-items:center;justify-content:center;gap:20px;padding:20px 20px calc(var(--sab,0px)+20px);background:rgba(255,255,255,.72);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border-top:1px solid rgba(0,0,0,.05)}
+.lis-ctrl-btn{width:52px;height:52px;border-radius:50%;border:none;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s;background:rgba(0,0,0,.06)}
+.lis-ctrl-btn:active{transform:scale(.9)}
+.lis-ctrl-play{width:68px;height:68px;font-size:28px;background:linear-gradient(135deg,#007aff,#5856d6);color:#fff;box-shadow:0 4px 20px rgba(0,122,255,.3)}
+.lis-sel-card{background:rgba(255,255,255,.82);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-radius:16px;border:1px solid rgba(255,255,255,.9);box-shadow:0 4px 16px rgba(0,0,0,.06);padding:16px;margin-bottom:10px;cursor:pointer;transition:transform .12s;display:flex;align-items:center;gap:12px}
+.lis-sel-card:active{transform:scale(.97)}
+.lis-sel-icon{font-size:28px;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lis-sel-name{font-size:16px;font-weight:700;color:#1c1c1e}
+.lis-sel-desc{font-size:12px;color:#8e8e93;margin-top:2px}
+.lis-sel-badge{margin-left:auto;font-size:13px;font-weight:700;color:#007aff;background:rgba(0,122,255,.08);padding:4px 10px;border-radius:8px}
+.lis-prog-bar{width:100%;max-width:300px;height:4px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden;margin-top:12px}
+.lis-prog-fill{height:100%;background:linear-gradient(90deg,#007aff,#5856d6);border-radius:2px;transition:width .3s}
+</style>
+
+<div id="listen-ov">
+  <div class="lis-hdr">
+    <button class="lis-back" onclick="closeListenMode()">‹</button>
+    <div class="lis-ttl" id="lis-ttl">リスニング学習</div>
+    <div class="lis-count" id="lis-count"></div>
+  </div>
+  <div id="listen-select"></div>
+  <div id="listen-player" style="display:none">
+    <div class="lis-en" id="lis-en"></div>
+    <div class="lis-ja" id="lis-ja"></div>
+    <div class="lis-pos" id="lis-pos"></div>
+    <div class="lis-prog" id="lis-prog-txt"></div>
+    <div class="lis-prog-bar"><div class="lis-prog-fill" id="lis-prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="lis-controls" id="lis-controls" style="display:none">
+    <button class="lis-ctrl-btn" onclick="listenPrev()">⏮</button>
+    <button class="lis-ctrl-btn lis-ctrl-play" id="lis-play-btn" onclick="listenToggle()">▶</button>
+    <button class="lis-ctrl-btn" onclick="listenNext()">⏭</button>
+  </div>
+</div>
+
+<script>
+/* ══════════ LISTENING MODE ══════════ */
+(function(){
+const LIS_KEY='inglish_listen_progress';
+let _lisData=[];
+let _lisIdx=0;
+let _lisPlaying=false;
+let _lisTimer=null;
+let _lisDataKey='';
+
+const LIS_SETS=[
+  {key:'P1W',name:'Pass単 準1 単語',icon:'📗',desc:'1,488語',get:()=>P1W.map(w=>({e:w.e,j:w.j}))},
+  {key:'P1P',name:'Pass単 準1 熟語',icon:'📎',desc:'222句',get:()=>P1P.map(w=>({e:w.e,j:w.j}))},
+  {key:'ID',name:'準1 イディオム',icon:'💡',desc:'30個',get:()=>ID.map(w=>({e:w.w,j:w.m}))},
+  {key:'E2W',name:'2級 単語',icon:'🔤',desc:'699語',get:()=>E2W.map(w=>({e:w.e,j:w.j}))},
+  {key:'E2P',name:'2級 熟語',icon:'📌',desc:'218句',get:()=>E2P.map(w=>({e:w.e,j:w.j}))},
+  {key:'ALL',name:'全データセット',icon:'📚',desc:'全単語',get:()=>[...P1W.map(w=>({e:w.e,j:w.j})),...P1P.map(w=>({e:w.e,j:w.j})),...ID.map(w=>({e:w.w,j:w.m})),...E2W.map(w=>({e:w.e,j:w.j})),...E2P.map(w=>({e:w.e,j:w.j}))]},
+];
+
+function loadLisProgress(){try{return JSON.parse(localStorage.getItem(LIS_KEY))||{};}catch(_){return {};}}
+function saveLisProgress(){try{const p=loadLisProgress();p[_lisDataKey]=_lisIdx;localStorage.setItem(LIS_KEY,JSON.stringify(p));}catch(_){}}
+
+function detectPOS(en){
+  const w=en.toLowerCase().trim();
+  if(/^(be |have |get |take |make |do |go |come |put |set |keep |let |run |give |turn |bring |hold |carry |call |cut |break |fall |look |stand |sit |lay |lie |throw |pull |push |pick |draw |drop |catch |hang |blow |burn |dig |grow |hide |hit |hurt |shut |spread |stick |strike |swim |tear |wear |win )|( up| down| on| off| out| in| away| back| through| over| into| for| with| about| to)$/.test(w)||/\s/.test(w)&&/^[a-z]/.test(w)) return 'フレーズ / 句動詞';
+  if(/(ate|ize|ise|ify|en|ish)$/.test(w)&&w.length>4) return '動詞 (verb)';
+  if(/(tion|sion|ment|ness|ity|ence|ance|ism|ist|er|or|dom|ship|hood|ure|age|al|ry|cy|ty)$/.test(w)&&w.length>4) return '名詞 (noun)';
+  if(/(ous|ive|ful|less|able|ible|ent|ant|ial|ical|ic|ary|ory|al|ish|esque|oid|ward)$/.test(w)&&w.length>4) return '形容詞 (adjective)';
+  if(/(ly)$/.test(w)&&w.length>4) return '副詞 (adverb)';
+  const j=_lisData[_lisIdx]?.j||'';
+  if(/〜を|〜に|する|させる|なる/.test(j)) return '動詞 (verb)';
+  if(/な$|の$|的な|しい$/.test(j)) return '形容詞 (adjective)';
+  return '';
+}
+
+window.openListenMode=function(){
+  if(typeof haptic==='function')haptic.confirm?.();else if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  const ov=document.getElementById('listen-ov');
+  ov.classList.add('on');
+  document.getElementById('listen-select').style.display='block';
+  document.getElementById('listen-player').style.display='none';
+  document.getElementById('lis-controls').style.display='none';
+  document.getElementById('lis-ttl').textContent='データを選択';
+  document.getElementById('lis-count').textContent='';
+  // Build selector
+  const sel=document.getElementById('listen-select');
+  const prog=loadLisProgress();
+  sel.innerHTML=LIS_SETS.map(s=>{
+    const saved=prog[s.key]||0;
+    const total=s.get().length;
+    const resumeTxt=saved>0?`<div style="font-size:11px;color:#34c759;margin-top:2px">▶ ${saved+1}番目から再開</div>`:'';
+    return `<div class="lis-sel-card" data-lis-key="${s.key}">
+      <div class="lis-sel-icon">${s.icon}</div>
+      <div><div class="lis-sel-name">${s.name}</div><div class="lis-sel-desc">${s.desc}</div>${resumeTxt}</div>
+      <div class="lis-sel-badge">${total}</div>
+    </div>`;
+  }).join('');
+  sel.querySelectorAll('.lis-sel-card').forEach(c=>{
+    c.addEventListener('click',()=>{
+      if(typeof haptic==='function')haptic();else if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+      const key=c.dataset.lisKey;
+      startListenSet(key);
+    });
+  });
+  // Update badge on home
+  const totalAll=LIS_SETS.find(s=>s.key==='ALL').get().length;
+  const bEl=document.getElementById('b-listen');
+  if(bEl)bEl.textContent=totalAll;
+};
+
+function startListenSet(key){
+  const set=LIS_SETS.find(s=>s.key===key);
+  if(!set)return;
+  _lisDataKey=key;
+  _lisData=set.get();
+  const prog=loadLisProgress();
+  _lisIdx=prog[key]||0;
+  if(_lisIdx>=_lisData.length)_lisIdx=0;
+  _lisPlaying=false;
+  document.getElementById('listen-select').style.display='none';
+  document.getElementById('listen-player').style.display='flex';
+  document.getElementById('lis-controls').style.display='flex';
+  document.getElementById('lis-ttl').textContent=set.name;
+  document.getElementById('lis-play-btn').textContent='▶';
+  renderLisWord();
+}
+
+function renderLisWord(){
+  if(_lisIdx>=_lisData.length){_lisIdx=0;}
+  const w=_lisData[_lisIdx];
+  const en=document.getElementById('lis-en');
+  const ja=document.getElementById('lis-ja');
+  const pos=document.getElementById('lis-pos');
+  en.textContent=w.e;
+  ja.textContent=w.j;
+  const posText=detectPOS(w.e);
+  pos.textContent=posText;
+  pos.style.display=posText?'':'none';
+  en.style.animation='none';ja.style.animation='none';pos.style.animation='none';
+  void en.offsetWidth;
+  en.style.animation='lisIn .4s cubic-bezier(.34,1.05,.64,1) both';
+  ja.style.animation='lisIn .4s .1s cubic-bezier(.34,1.05,.64,1) both';
+  pos.style.animation='lisIn .4s .15s cubic-bezier(.34,1.05,.64,1) both';
+  document.getElementById('lis-prog-txt').textContent=(_lisIdx+1)+' / '+_lisData.length;
+  document.getElementById('lis-prog-fill').style.width=((_lisIdx+1)/_lisData.length*100)+'%';
+  document.getElementById('lis-count').textContent=(_lisIdx+1)+'/'+_lisData.length;
+  saveLisProgress();
+}
+
+function speakLisEn(text,cb){
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';u.rate=1.1;
+  u.onend=()=>{if(cb)cb();};
+  u.onerror=()=>{if(cb)cb();};
+  window.speechSynthesis.speak(u);
+}
+function speakLisJa(text,cb){
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='ja-JP';u.rate=1.3;
+  u.onend=()=>{if(cb)cb();};
+  u.onerror=()=>{if(cb)cb();};
+  window.speechSynthesis.speak(u);
+}
+
+function playCurrentWord(){
+  if(!_lisPlaying)return;
+  if(_lisIdx>=_lisData.length){
+    _lisPlaying=false;
+    document.getElementById('lis-play-btn').textContent='▶';
+    return;
+  }
+  renderLisWord();
+  const w=_lisData[_lisIdx];
+  speakLisEn(w.e,()=>{
+    if(!_lisPlaying)return;
+    speakLisJa(w.j,()=>{
+      if(!_lisPlaying)return;
+      _lisTimer=setTimeout(()=>{
+        _lisIdx++;
+        if(_lisIdx>=_lisData.length){
+          _lisPlaying=false;
+          document.getElementById('lis-play-btn').textContent='▶';
+          renderLisWord();
+          return;
+        }
+        playCurrentWord();
+      },200);
+    });
+  });
+}
+
+window.listenToggle=function(){
+  if(typeof haptic==='function')haptic();else if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  if(_lisPlaying){
+    _lisPlaying=false;
+    window.speechSynthesis.cancel();
+    if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
+    document.getElementById('lis-play-btn').textContent='▶';
+  }else{
+    _lisPlaying=true;
+    document.getElementById('lis-play-btn').textContent='⏸';
+    playCurrentWord();
+  }
+};
+window.listenNext=function(){
+  if(typeof haptic==='function')haptic();else if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  window.speechSynthesis.cancel();
+  if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
+  _lisIdx++;
+  if(_lisIdx>=_lisData.length)_lisIdx=0;
+  renderLisWord();
+  if(_lisPlaying)playCurrentWord();
+};
+window.listenPrev=function(){
+  if(typeof haptic==='function')haptic();else if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  window.speechSynthesis.cancel();
+  if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
+  _lisIdx--;
+  if(_lisIdx<0)_lisIdx=_lisData.length-1;
+  renderLisWord();
+  if(_lisPlaying)playCurrentWord();
+};
+window.closeListenMode=function(){
+  if(typeof haptic==='function')haptic();else if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  _lisPlaying=false;
+  window.speechSynthesis.cancel();
+  if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
+  saveLisProgress();
+  document.getElementById('listen-ov').classList.remove('on');
+};
+})();
 </script>
 
 </body>
