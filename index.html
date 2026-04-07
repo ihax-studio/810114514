@@ -6937,7 +6937,7 @@ function playEk2Audio(){
 .lis-ttl{font-size:17px;font-weight:700;flex:1;letter-spacing:-.02em}
 .lis-count{font-size:13px;color:#007aff;font-weight:600}
 #listen-select{padding:0}
-#listen-player{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 24px;gap:12px}
+#listen-player{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px 20px;gap:12px}
 .lis-en{font-size:38px;font-weight:800;letter-spacing:-.03em;text-align:center;color:#1c1c1e;animation:lisIn .4s cubic-bezier(.34,1.05,.64,1) both}
 .lis-ja{font-size:22px;font-weight:500;color:#8e8e93;text-align:center;margin-top:4px;animation:lisIn .4s .1s cubic-bezier(.34,1.05,.64,1) both}
 .lis-pos{font-size:14px;font-weight:600;color:#5856d6;background:rgba(88,86,214,.1);padding:4px 14px;border-radius:10px;margin-top:8px;animation:lisIn .4s .15s cubic-bezier(.34,1.05,.64,1) both}
@@ -6963,15 +6963,15 @@ function playEk2Audio(){
     <div class="lis-ttl" id="lis-ttl">リスニング学習</div>
     <div class="lis-count" id="lis-count"></div>
   </div>
-  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 16px" id="lis-body">
-    <div id="listen-player" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:200px">
+  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 16px 20px" id="lis-body">
+    <div id="listen-player" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:280px">
       <div class="lis-en" id="lis-en"></div>
       <div class="lis-ja" id="lis-ja"></div>
       <div class="lis-pos" id="lis-pos"></div>
       <div class="lis-prog" id="lis-prog-txt"></div>
       <div class="lis-prog-bar"><div class="lis-prog-fill" id="lis-prog-fill" style="width:0%"></div></div>
     </div>
-    <div id="listen-select" style="margin-top:16px"></div>
+    <div id="listen-select" style="margin-top:24px"></div>
   </div>
   <div class="lis-controls" id="lis-controls" style="display:none">
     <button class="lis-ctrl-btn" onclick="listenPrev()">⏮</button>
