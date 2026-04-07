@@ -1072,6 +1072,8 @@ function render(){
   _rendered=true;
   S.answered=false;
   _multiState=null;
+  _fbChainAbort=true;
+  window.speechSynthesis.cancel();
   if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
   const q=getQ();
   document.getElementById('hdr-count').textContent=(S.idx+1)+' / '+EK2Q.length;
@@ -1207,9 +1209,50 @@ function showFeedback(q){
     if(q.st.includes('混同')){tip.style.background='rgba(255,59,48,.08)';tip.style.color='#ff3b30';}
     else{tip.style.background='';tip.style.color='';}
   }else{tip.style.display='none';}
-  speakJp(q.jt); playAudio();
+  playFeedbackChain(q);
   save();
   showNextBtn();
+}
+
+// ═══ FEEDBACK AUDIO CHAIN: EN mp3 → JP TTS → EN TTS (sequential, no overlap) ═══
+let _fbChainAbort=false;
+function playFeedbackChain(q){
+  _fbChainAbort=true;
+  setTimeout(()=>{
+    _fbChainAbort=false;
+    // Step 1: Play English MP3
+    if(_audio){_audio.pause();}
+    window.speechSynthesis.cancel();
+    _audio=new Audio(q.af);
+    _audio.playbackRate=S.speed;
+    const btn=document.getElementById('audio-btn');
+    btn.classList.add('playing');
+    _audio.onerror=()=>{btn.classList.remove('playing');fbStep2(q);};
+    _audio.onended=()=>{btn.classList.remove('playing');fbStep2(q);};
+    _audio.play().catch(()=>{btn.classList.remove('playing');fbStep2(q);});
+  },50);
+}
+function fbStep2(q){
+  // Step 2: Japanese TTS
+  if(_fbChainAbort)return;
+  if(!q.jt){fbStep3(q);return;}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(q.jt);
+  u.lang='ja-JP';u.rate=1.1;
+  u.onend=()=>fbStep3(q);
+  u.onerror=()=>fbStep3(q);
+  window.speechSynthesis.speak(u);
+}
+function fbStep3(q){
+  // Step 3: English sentence TTS
+  if(_fbChainAbort)return;
+  const text=q.cs||q.q;
+  if(!text)return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';u.rate=S.speed;
+  const v=_getAlexVoice();if(v)u.voice=v;
+  window.speechSynthesis.speak(u);
 }
 
 function advance(){
@@ -1307,12 +1350,22 @@ function speakJp(text){
   u.lang='ja-JP';u.rate=1.1;
   window.speechSynthesis.speak(u);
 }
+let _cachedAlexVoice=null;
+window.speechSynthesis.onvoiceschanged=()=>{_cachedAlexVoice=null;};
+window.speechSynthesis.getVoices();
+function _getAlexVoice(){
+  if(_cachedAlexVoice)return _cachedAlexVoice;
+  const voices=window.speechSynthesis.getVoices();
+  _cachedAlexVoice=voices.find(v=>v.name==='Alex')||voices.find(v=>v.lang.startsWith('en')&&v.localService)||null;
+  return _cachedAlexVoice;
+}
 function speakEn(text){
   if(!text)return;
   if(_audio){_audio.pause();}
   window.speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
   u.lang='en-US';u.rate=S.speed;
+  const v=_getAlexVoice();if(v)u.voice=v;
   window.speechSynthesis.speak(u);
 }
 function speakEnSentence(){
