@@ -1212,6 +1212,7 @@ overflow:hidden;
           <div class="s-group">
             <div class="s-row"><div class="s-label">自動で次の問題に進む</div><div class="s-toggle on" id="s-auto-next"><div class="s-knob"></div></div></div>
             <div class="s-row"><div class="s-label">答え表示時に読み上げ</div><div class="s-toggle" id="s-auto-speak"><div class="s-knob"></div></div></div>
+            <div class="s-row"><div class="s-label">問題切り替わり時に読み上げ</div><div class="s-toggle" id="s-q-speak"><div class="s-knob"></div></div></div>
           </div>
         </div>
         <!-- Gesture -->
@@ -2585,22 +2586,15 @@ function speakJp(text){
   speechSynthesis.speak(u);
 }
 // ═══ SOUND EFFECTS (quiz) ═══
+let _sndCache={};
 function playSnd(name){
   try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const o=ctx.createOscillator();
-    const g=ctx.createGain();
-    o.connect(g);g.connect(ctx.destination);
-    g.gain.value=0.18;
-    if(name==='correct'){
-      o.frequency.value=880;o.type='sine';
-      o.start();g.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.25);
-      setTimeout(()=>{o.stop();ctx.close();},300);
-    }else if(name==='wrong'){
-      o.frequency.value=220;o.type='square';
-      o.start();g.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.4);
-      setTimeout(()=>{o.stop();ctx.close();},450);
-    }
+    const src=name==='correct'?'success.caf':name==='wrong'?'retry.caf':null;
+    if(!src)return;
+    if(!_sndCache[name]){_sndCache[name]=new Audio(src);}
+    const a=_sndCache[name];
+    a.currentTime=0;
+    a.play().catch(()=>{});
   }catch(_){}
 }
 // Preload voices (iOS needs this on user gesture)
@@ -5430,8 +5424,10 @@ function delayedAdvance(fn){
 // Auto-next & auto-speak settings
 const AUTO_NEXT_KEY='inglish_auto_next';
 const AUTO_SPEAK_KEY='inglish_auto_speak';
+const Q_SPEAK_KEY='inglish_q_speak';
 function isAutoNext(){return localStorage.getItem(AUTO_NEXT_KEY)!=='0';}
 function isAutoSpeak(){return localStorage.getItem(AUTO_SPEAK_KEY)==='1';}
+function isQSpeak(){return localStorage.getItem(Q_SPEAK_KEY)==='1';}
 document.getElementById('s-auto-next').addEventListener('click',function(){
   haptic();
   const on=!this.classList.contains('on');
@@ -5444,9 +5440,16 @@ document.getElementById('s-auto-speak').addEventListener('click',function(){
   this.classList.toggle('on',on);
   localStorage.setItem(AUTO_SPEAK_KEY,on?'1':'0');
 });
+document.getElementById('s-q-speak').addEventListener('click',function(){
+  haptic();
+  const on=!this.classList.contains('on');
+  this.classList.toggle('on',on);
+  localStorage.setItem(Q_SPEAK_KEY,on?'1':'0');
+});
 function syncQuizToggles(){
   document.getElementById('s-auto-next').classList.toggle('on',isAutoNext());
   document.getElementById('s-auto-speak').classList.toggle('on',isAutoSpeak());
+  document.getElementById('s-q-speak').classList.toggle('on',isQSpeak());
 }
 
 // Quiz timer state
@@ -5589,8 +5592,7 @@ function renderQuiz(i){
   }
   startQuizTimer(i);
   // Speak English word when question changes (screen reader)
-  const w=d.deck[d.idx];
-  if(w)speakEn(w.e||w.w||'');
+  if(isQSpeak()){const w=d.deck[d.idx];if(w)speakEn(w.e||w.w||'');}
 }
 
 // Handle quiz choice click (delegated)
@@ -6805,7 +6807,7 @@ function renderEk2(){
   // Auto play audio
   playEk2Audio();
   // English screen reader on question change
-  speakEn(q.cs||q.q);
+  if(typeof isQSpeak==='function'&&isQSpeak())speakEn(q.cs||q.q);
 }
 
 function handleEk2Choice(btn){
