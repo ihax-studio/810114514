@@ -7005,6 +7005,7 @@ function playEk2Audio(){
     <div id="listen-select"></div>
   </div>
   <div class="lis-controls" id="lis-controls" style="display:none">
+    <button class="lis-ctrl-btn" onclick="listenRestart()" style="font-size:16px">↺</button>
     <button class="lis-ctrl-btn" onclick="listenPrev()">⏮</button>
     <button class="lis-ctrl-btn lis-ctrl-play" id="lis-play-btn" onclick="listenToggle()">▶</button>
     <button class="lis-ctrl-btn" onclick="listenNext()">⏭</button>
@@ -7060,6 +7061,7 @@ window.openListenMode=function(){
   const ov=document.getElementById('listen-ov');
   ov.classList.add('on');
   document.getElementById('listen-player').style.display='none';
+  document.getElementById('listen-select').style.display='block';
   document.getElementById('lis-controls').style.display='none';
   document.getElementById('lis-ttl').textContent='リスニング学習';
   document.getElementById('lis-count').textContent='';
@@ -7249,6 +7251,18 @@ window.listenPrev=function(){
   if(_lisIdx<0)_lisIdx=_lisData.length-1;
   renderWord();
   if(_lisPlaying)playWord();
+};
+window.listenRestart=function(){
+  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  _lisPlaying=false;
+  window.speechSynthesis.cancel();
+  if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
+  document.getElementById('lis-en').classList.remove('speaking');
+  document.getElementById('lis-play-btn').textContent='▶';
+  if(!_lisData.length)return;
+  _lisIdx=0;
+  saveProg();
+  renderWord();
 };
 window.closeListenMode=function(){
   if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
