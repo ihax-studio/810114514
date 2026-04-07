@@ -2734,6 +2734,10 @@ function render(i){
       if(panel)panel.classList.remove('quiz-active');
     }
   }
+  // Speak word on card change (tap mode only; quiz mode speaks in renderQuiz)
+  if(typeof getQuizMode==='function'&&getQuizMode()==='tap'&&typeof isQSpeak==='function'&&isQSpeak()){
+    const w=d.deck[d.idx];if(w)speakEn(w.e||w.w||'');
+  }
 }
 
 /* ═══ CONTROLS ═══ */
@@ -4617,11 +4621,11 @@ if(inputText.length>=5){
   delayIdx++;
 }
 
-/* ── Gemini search option ── */
-html+=`<div class="smart-result" style="animation-delay:${delayIdx*60}ms;background:rgba(66,133,244,.06);border-color:rgba(66,133,244,.15)" onclick="event.stopPropagation();window.open('https://gemini.google.com/app?q='+encodeURIComponent('${inputText.replace(/'/g,"\\'")}'),'_blank')">
-  <div class="lis-sel-icon" style="font-size:20px;width:36px;height:36px;border-radius:9px;background:rgba(66,133,244,.12)">✨</div>
+/* ── Google search option ── */
+html+=`<div class="smart-result" style="animation-delay:${delayIdx*60}ms;background:rgba(66,133,244,.06);border-color:rgba(66,133,244,.15)" onclick="event.stopPropagation();if(typeof haptic==='function')haptic();else if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();window.open('https://www.google.com/search?q='+encodeURIComponent('${inputText.replace(/'/g,"\\'")}'+' 意味 英語'),'_blank')">
+  <div style="font-size:20px;width:36px;height:36px;border-radius:9px;background:rgba(66,133,244,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">🔍</div>
   <div class="smart-info">
-    <div class="smart-word">Geminiで検索</div>
+    <div class="smart-word">Googleで検索</div>
     <div class="smart-meaning" style="font-size:11px;color:#4285f4">${inputText.length>30?inputText.slice(0,30)+'…':inputText}</div>
   </div>
 </div>`;
@@ -6930,30 +6934,37 @@ function playEk2Audio(){
 
 <!-- ══════════ LISTENING MODE ══════════ -->
 <style>
-#listen-ov{position:fixed;inset:0;z-index:9000;background:linear-gradient(150deg,#eef2f8 0%,#f0edfc 50%,#edf7f2 100%);display:none;flex-direction:column;overflow:hidden}
-#listen-ov.on{display:flex}
+#listen-ov{position:fixed;inset:0;z-index:9000;background:linear-gradient(150deg,#eef2f8 0%,#f0edfc 50%,#edf7f2 100%);display:none;flex-direction:column;overflow:hidden;transform:translateX(100%);transition:transform .4s cubic-bezier(.32,.72,.37,1.12)}
+#listen-ov.on{display:flex;transform:translateX(0)}
+#listen-ov.closing{transform:translateX(100%)}
 .lis-hdr{display:flex;align-items:center;gap:10px;padding:calc(var(--sat,0px)+14px) 16px 12px;background:rgba(255,255,255,.72);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);border-bottom:1px solid rgba(0,0,0,.05);position:relative;z-index:2}
-.lis-back{font-size:28px;background:none;border:none;color:#007aff;cursor:pointer;padding:0 4px;line-height:1;font-weight:300}
+.lis-back{font-size:28px;background:none;border:none;color:#007aff;cursor:pointer;padding:0 4px;line-height:1;font-weight:300;transition:transform .15s}
+.lis-back:active{transform:scale(.85)}
 .lis-ttl{font-size:17px;font-weight:700;flex:1;letter-spacing:-.02em}
 .lis-count{font-size:13px;color:#007aff;font-weight:600}
 #listen-select{padding:0}
-#listen-player{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px 20px;gap:12px}
-.lis-en{font-size:38px;font-weight:800;letter-spacing:-.03em;text-align:center;color:#1c1c1e;animation:lisIn .4s cubic-bezier(.34,1.05,.64,1) both}
-.lis-ja{font-size:22px;font-weight:500;color:#8e8e93;text-align:center;margin-top:4px;animation:lisIn .4s .1s cubic-bezier(.34,1.05,.64,1) both}
-.lis-pos{font-size:14px;font-weight:600;color:#5856d6;background:rgba(88,86,214,.1);padding:4px 14px;border-radius:10px;margin-top:8px;animation:lisIn .4s .15s cubic-bezier(.34,1.05,.64,1) both}
-.lis-prog{font-size:13px;color:#8e8e93;margin-top:16px}
+#listen-player{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px;gap:4px;min-height:40vh}
+.lis-en{font-size:42px;font-weight:800;letter-spacing:-.04em;text-align:center;color:#1c1c1e;cursor:pointer;padding:8px 16px;border-radius:14px;transition:background .2s}
+.lis-en:active{background:rgba(0,122,255,.08)}
+.lis-en.speaking{animation:lisPulse 1s ease infinite}
+@keyframes lisPulse{0%,100%{opacity:1}50%{opacity:.6}}
+.lis-ja{font-size:24px;font-weight:500;color:#8e8e93;text-align:center;margin-top:2px;cursor:pointer;padding:6px 14px;border-radius:12px;transition:background .2s}
+.lis-ja:active{background:rgba(0,0,0,.04)}
+.lis-pos{font-size:13px;font-weight:600;color:#5856d6;background:rgba(88,86,214,.08);padding:4px 14px;border-radius:10px;margin-top:10px}
+.lis-prog{font-size:13px;color:#8e8e93;margin-top:20px}
 @keyframes lisIn{from{opacity:0;transform:translateY(18px) scale(.95)}to{opacity:1;transform:none}}
-.lis-controls{display:flex;align-items:center;justify-content:center;gap:20px;padding:20px 20px calc(var(--sab,0px)+20px);background:rgba(255,255,255,.72);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border-top:1px solid rgba(0,0,0,.05)}
-.lis-ctrl-btn{width:52px;height:52px;border-radius:50%;border:none;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s;background:rgba(0,0,0,.06)}
-.lis-ctrl-btn:active{transform:scale(.9)}
-.lis-ctrl-play{width:68px;height:68px;font-size:28px;background:linear-gradient(135deg,#007aff,#5856d6);color:#fff;box-shadow:0 4px 20px rgba(0,122,255,.3)}
-.lis-sel-card{background:rgba(255,255,255,.82);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-radius:16px;border:1px solid rgba(255,255,255,.9);box-shadow:0 4px 16px rgba(0,0,0,.06);padding:16px;margin-bottom:10px;cursor:pointer;transition:transform .12s;display:flex;align-items:center;gap:12px}
+.lis-controls{display:flex;align-items:center;justify-content:center;gap:24px;padding:18px 20px calc(var(--sab,0px)+18px);background:rgba(255,255,255,.72);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border-top:1px solid rgba(0,0,0,.05)}
+.lis-ctrl-btn{width:54px;height:54px;border-radius:50%;border:none;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s;background:rgba(0,0,0,.06)}
+.lis-ctrl-btn:active{transform:scale(.85)}
+.lis-ctrl-play{width:72px;height:72px;font-size:30px;background:linear-gradient(135deg,#007aff,#5856d6);color:#fff;box-shadow:0 6px 24px rgba(0,122,255,.35)}
+.lis-sel-card{background:rgba(255,255,255,.82);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-radius:16px;border:1.5px solid rgba(255,255,255,.9);box-shadow:0 4px 16px rgba(0,0,0,.06);padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:transform .12s,border-color .2s,background .2s;display:flex;align-items:center;gap:12px}
 .lis-sel-card:active{transform:scale(.97)}
-.lis-sel-icon{font-size:28px;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.lis-sel-name{font-size:16px;font-weight:700;color:#1c1c1e}
-.lis-sel-desc{font-size:12px;color:#8e8e93;margin-top:2px}
-.lis-sel-badge{margin-left:auto;font-size:13px;font-weight:700;color:#007aff;background:rgba(0,122,255,.08);padding:4px 10px;border-radius:8px}
-.lis-prog-bar{width:100%;max-width:300px;height:4px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden;margin-top:12px}
+.lis-sel-card.selected{border-color:#007aff;background:rgba(0,122,255,.06)}
+.lis-sel-icon{font-size:26px;width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lis-sel-name{font-size:15px;font-weight:700;color:#1c1c1e}
+.lis-sel-desc{font-size:11px;color:#8e8e93;margin-top:2px}
+.lis-sel-badge{margin-left:auto;font-size:12px;font-weight:700;color:#007aff;background:rgba(0,122,255,.08);padding:3px 9px;border-radius:8px}
+.lis-prog-bar{width:100%;max-width:280px;height:4px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden;margin-top:10px}
 .lis-prog-fill{height:100%;background:linear-gradient(90deg,#007aff,#5856d6);border-radius:2px;transition:width .3s}
 </style>
 
@@ -6964,9 +6975,9 @@ function playEk2Audio(){
     <div class="lis-count" id="lis-count"></div>
   </div>
   <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 16px 20px" id="lis-body">
-    <div id="listen-player" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:280px">
-      <div class="lis-en" id="lis-en"></div>
-      <div class="lis-ja" id="lis-ja"></div>
+    <div id="listen-player" style="display:none">
+      <div class="lis-en" id="lis-en" onclick="listenTapEn()"></div>
+      <div class="lis-ja" id="lis-ja" onclick="listenTapJa()"></div>
       <div class="lis-pos" id="lis-pos"></div>
       <div class="lis-prog" id="lis-prog-txt"></div>
       <div class="lis-prog-bar"><div class="lis-prog-fill" id="lis-prog-fill" style="width:0%"></div></div>
@@ -7016,9 +7027,10 @@ function detectPOS(en){
 }
 
 window.openListenMode=function(){
-  if(typeof haptic==='function')haptic.confirm?.();else if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
   const ov=document.getElementById('listen-ov');
-  ov.classList.add('on');
+  ov.style.display='flex';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('on')));
   document.getElementById('listen-select').style.display='block';
   document.getElementById('listen-player').style.display='none';
   document.getElementById('lis-controls').style.display='none';
@@ -7065,8 +7077,7 @@ function startListenSet(key){
   document.getElementById('lis-play-btn').textContent='▶';
   // Highlight selected card
   document.querySelectorAll('#listen-select .lis-sel-card').forEach(c=>{
-    c.style.borderColor=c.dataset.lisKey===key?'#007aff':'rgba(255,255,255,.9)';
-    c.style.background=c.dataset.lisKey===key?'rgba(0,122,255,.06)':'rgba(255,255,255,.82)';
+    c.classList.toggle('selected',c.dataset.lisKey===key);
   });
   document.getElementById('lis-body').scrollTop=0;
   renderLisWord();
@@ -7095,6 +7106,7 @@ function renderLisWord(){
 }
 
 function speakLisEn(text,cb){
+  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
   window.speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
   u.lang='en-US';u.rate=1.1;
@@ -7103,6 +7115,7 @@ function speakLisEn(text,cb){
   window.speechSynthesis.speak(u);
 }
 function speakLisJa(text,cb){
+  if(typeof haptic==='object'&&haptic)haptic();
   window.speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
   u.lang='ja-JP';u.rate=1.3;
@@ -7116,12 +7129,16 @@ function playCurrentWord(){
   if(_lisIdx>=_lisData.length){
     _lisPlaying=false;
     document.getElementById('lis-play-btn').textContent='▶';
+    document.getElementById('lis-en').classList.remove('speaking');
     return;
   }
   renderLisWord();
   const w=_lisData[_lisIdx];
+  const enEl=document.getElementById('lis-en');
+  enEl.classList.add('speaking');
   speakLisEn(w.e,()=>{
     if(!_lisPlaying)return;
+    enEl.classList.remove('speaking');
     speakLisJa(w.j,()=>{
       if(!_lisPlaying)return;
       _lisTimer=setTimeout(()=>{
@@ -7170,12 +7187,29 @@ window.listenPrev=function(){
   if(_lisPlaying)playCurrentWord();
 };
 window.closeListenMode=function(){
-  if(typeof haptic==='function')haptic();else if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
   _lisPlaying=false;
   window.speechSynthesis.cancel();
   if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
   saveLisProgress();
-  document.getElementById('listen-ov').classList.remove('on');
+  const ov=document.getElementById('listen-ov');
+  ov.classList.remove('on');
+  setTimeout(()=>{ov.style.display='none';},400);
+};
+
+// Tap en word → haptic + speak English
+window.listenTapEn=function(){
+  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  if(!_lisData.length)return;
+  const w=_lisData[_lisIdx];
+  document.getElementById('lis-en').classList.add('speaking');
+  speakLisEn(w.e,()=>document.getElementById('lis-en').classList.remove('speaking'));
+};
+// Tap ja word → haptic + speak Japanese
+window.listenTapJa=function(){
+  if(typeof haptic==='object'&&haptic)haptic();
+  if(!_lisData.length)return;
+  speakLisJa(_lisData[_lisIdx].j);
 };
 
 // Swipe right to close

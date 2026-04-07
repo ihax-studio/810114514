@@ -842,7 +842,7 @@ function timeUp(){
     if(q.st.includes('混同')){tip.style.background='rgba(255,59,48,.08)';tip.style.color='#ff3b30';}
     else{tip.style.background='';tip.style.color='';}
   }else{tip.style.display='none';}
-  speakJp(q.jt); playAudio();
+  playAudio();
   save();
   showNextBtn();
 }
@@ -1207,7 +1207,7 @@ function showFeedback(q){
     if(q.st.includes('混同')){tip.style.background='rgba(255,59,48,.08)';tip.style.color='#ff3b30';}
     else{tip.style.background='';tip.style.color='';}
   }else{tip.style.display='none';}
-  speakJp(q.jt); playAudio();
+  playAudio();
   save();
   showNextBtn();
 }
