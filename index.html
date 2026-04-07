@@ -6934,38 +6934,57 @@ function playEk2Audio(){
 
 <!-- ══════════ LISTENING MODE ══════════ -->
 <style>
-#listen-ov{position:fixed;inset:0;z-index:9000;background:linear-gradient(150deg,#eef2f8 0%,#f0edfc 50%,#edf7f2 100%);display:none;flex-direction:column;overflow:hidden;transform:translateX(100%);transition:transform .4s cubic-bezier(.32,.72,.37,1.12)}
-#listen-ov.on{display:flex;transform:translateX(0)}
-#listen-ov.closing{transform:translateX(100%)}
-.lis-hdr{display:flex;align-items:center;gap:10px;padding:calc(var(--sat,0px)+14px) 16px 12px;background:rgba(255,255,255,.72);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);border-bottom:1px solid rgba(0,0,0,.05);position:relative;z-index:2}
+#listen-ov{position:fixed;inset:0;z-index:9000;
+  background:linear-gradient(150deg,#eef2f8 0%,#f0edfc 50%,#edf7f2 100%);
+  visibility:hidden;opacity:0;transform:translateX(40%);
+  transition:transform .45s cubic-bezier(.32,.72,.37,1),opacity .35s ease,visibility 0s .45s;
+  display:flex;flex-direction:column;overflow:hidden}
+#listen-ov.on{visibility:visible;opacity:1;transform:translateX(0);transition:transform .45s cubic-bezier(.32,.72,.37,1),opacity .35s ease,visibility 0s 0s}
+.lis-hdr{display:flex;align-items:center;gap:10px;padding:calc(var(--sat,0px)+14px) 16px 12px;
+  background:rgba(255,255,255,.72);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
+  border-bottom:1px solid rgba(0,0,0,.05);position:relative;z-index:2}
 .lis-back{font-size:28px;background:none;border:none;color:#007aff;cursor:pointer;padding:0 4px;line-height:1;font-weight:300;transition:transform .15s}
 .lis-back:active{transform:scale(.85)}
 .lis-ttl{font-size:17px;font-weight:700;flex:1;letter-spacing:-.02em}
 .lis-count{font-size:13px;color:#007aff;font-weight:600}
-#listen-select{padding:0}
-#listen-player{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px;gap:4px;min-height:40vh}
-.lis-en{font-size:42px;font-weight:800;letter-spacing:-.04em;text-align:center;color:#1c1c1e;cursor:pointer;padding:8px 16px;border-radius:14px;transition:background .2s}
+#lis-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px 24px}
+#listen-player{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 8px;min-height:52vh}
+.lis-en{font-size:44px;font-weight:800;letter-spacing:-.04em;text-align:center;color:#1c1c1e;
+  cursor:pointer;padding:10px 18px;border-radius:16px;transition:background .2s;word-break:break-word}
 .lis-en:active{background:rgba(0,122,255,.08)}
 .lis-en.speaking{animation:lisPulse 1s ease infinite}
-@keyframes lisPulse{0%,100%{opacity:1}50%{opacity:.6}}
-.lis-ja{font-size:24px;font-weight:500;color:#8e8e93;text-align:center;margin-top:2px;cursor:pointer;padding:6px 14px;border-radius:12px;transition:background .2s}
+@keyframes lisPulse{0%,100%{opacity:1}50%{opacity:.55}}
+.lis-ja{font-size:24px;font-weight:500;color:var(--sub,#8e8e93);text-align:center;margin-top:6px;
+  cursor:pointer;padding:6px 14px;border-radius:12px;transition:background .2s}
 .lis-ja:active{background:rgba(0,0,0,.04)}
+.lis-goro{font-size:14px;font-weight:600;color:var(--y,#ff9500);background:rgba(255,149,0,.08);
+  padding:6px 16px;border-radius:12px;margin-top:10px;text-align:center;max-width:90%;cursor:pointer}
+.lis-goro:active{background:rgba(255,149,0,.16)}
 .lis-pos{font-size:13px;font-weight:600;color:#5856d6;background:rgba(88,86,214,.08);padding:4px 14px;border-radius:10px;margin-top:10px}
-.lis-prog{font-size:13px;color:#8e8e93;margin-top:20px}
-@keyframes lisIn{from{opacity:0;transform:translateY(18px) scale(.95)}to{opacity:1;transform:none}}
-.lis-controls{display:flex;align-items:center;justify-content:center;gap:24px;padding:18px 20px calc(var(--sab,0px)+18px);background:rgba(255,255,255,.72);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border-top:1px solid rgba(0,0,0,.05)}
-.lis-ctrl-btn{width:54px;height:54px;border-radius:50%;border:none;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s;background:rgba(0,0,0,.06)}
+.lis-prog{font-size:13px;color:var(--sub,#8e8e93);margin-top:20px}
+.lis-prog-bar{width:100%;max-width:260px;height:4px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden;margin-top:8px}
+.lis-prog-fill{height:100%;background:linear-gradient(90deg,#007aff,#5856d6);border-radius:2px;transition:width .3s}
+@keyframes lisIn{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
+.lis-controls{display:flex;align-items:center;justify-content:center;gap:24px;
+  padding:16px 20px calc(var(--sab,0px)+16px);
+  background:rgba(255,255,255,.72);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
+  border-top:1px solid rgba(0,0,0,.05)}
+.lis-ctrl-btn{width:54px;height:54px;border-radius:50%;border:none;font-size:22px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:transform .12s;background:rgba(0,0,0,.06)}
 .lis-ctrl-btn:active{transform:scale(.85)}
 .lis-ctrl-play{width:72px;height:72px;font-size:30px;background:linear-gradient(135deg,#007aff,#5856d6);color:#fff;box-shadow:0 6px 24px rgba(0,122,255,.35)}
-.lis-sel-card{background:rgba(255,255,255,.82);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-radius:16px;border:1.5px solid rgba(255,255,255,.9);box-shadow:0 4px 16px rgba(0,0,0,.06);padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:transform .12s,border-color .2s,background .2s;display:flex;align-items:center;gap:12px}
+.lis-sel-sec{font-size:13px;font-weight:700;color:var(--sub,#8e8e93);margin:18px 0 8px;letter-spacing:.04em}
+.lis-sel-sec:first-child{margin-top:6px}
+.lis-sel-card{background:rgba(255,255,255,.82);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border-radius:16px;border:1.5px solid rgba(255,255,255,.9);box-shadow:0 4px 16px rgba(0,0,0,.06);
+  padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:transform .12s,border-color .2s,background .2s;
+  display:flex;align-items:center;gap:12px}
 .lis-sel-card:active{transform:scale(.97)}
 .lis-sel-card.selected{border-color:#007aff;background:rgba(0,122,255,.06)}
-.lis-sel-icon{font-size:26px;width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lis-sel-icon{font-size:24px;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .lis-sel-name{font-size:15px;font-weight:700;color:#1c1c1e}
-.lis-sel-desc{font-size:11px;color:#8e8e93;margin-top:2px}
+.lis-sel-desc{font-size:11px;color:var(--sub,#8e8e93);margin-top:1px}
 .lis-sel-badge{margin-left:auto;font-size:12px;font-weight:700;color:#007aff;background:rgba(0,122,255,.08);padding:3px 9px;border-radius:8px}
-.lis-prog-bar{width:100%;max-width:280px;height:4px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden;margin-top:10px}
-.lis-prog-fill{height:100%;background:linear-gradient(90deg,#007aff,#5856d6);border-radius:2px;transition:width .3s}
 </style>
 
 <div id="listen-ov">
@@ -6974,15 +6993,16 @@ function playEk2Audio(){
     <div class="lis-ttl" id="lis-ttl">リスニング学習</div>
     <div class="lis-count" id="lis-count"></div>
   </div>
-  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 16px 20px" id="lis-body">
+  <div id="lis-body">
     <div id="listen-player" style="display:none">
       <div class="lis-en" id="lis-en" onclick="listenTapEn()"></div>
       <div class="lis-ja" id="lis-ja" onclick="listenTapJa()"></div>
+      <div class="lis-goro" id="lis-goro" style="display:none" onclick="listenTapGoro()"></div>
       <div class="lis-pos" id="lis-pos"></div>
       <div class="lis-prog" id="lis-prog-txt"></div>
       <div class="lis-prog-bar"><div class="lis-prog-fill" id="lis-prog-fill" style="width:0%"></div></div>
     </div>
-    <div id="listen-select" style="margin-top:24px"></div>
+    <div id="listen-select"></div>
   </div>
   <div class="lis-controls" id="lis-controls" style="display:none">
     <button class="lis-ctrl-btn" onclick="listenPrev()">⏮</button>
@@ -7001,224 +7021,273 @@ let _lisPlaying=false;
 let _lisTimer=null;
 let _lisDataKey='';
 
-const LIS_SETS=[
-  {key:'P1W',name:'Pass単 準1 単語',icon:'📗',desc:'1,488語',get:()=>P1W.map(w=>({e:w.e,j:w.j}))},
-  {key:'P1P',name:'Pass単 準1 熟語',icon:'📎',desc:'222句',get:()=>P1P.map(w=>({e:w.e,j:w.j}))},
-  {key:'ID',name:'準1 イディオム',icon:'💡',desc:'30個',get:()=>ID.map(w=>({e:w.w,j:w.m}))},
-  {key:'E2W',name:'2級 単語',icon:'🔤',desc:'699語',get:()=>E2W.map(w=>({e:w.e,j:w.j}))},
-  {key:'E2P',name:'2級 熟語',icon:'📌',desc:'218句',get:()=>E2P.map(w=>({e:w.e,j:w.j}))},
-  {key:'ALL',name:'全データセット',icon:'📚',desc:'全単語',get:()=>[...P1W.map(w=>({e:w.e,j:w.j})),...P1P.map(w=>({e:w.e,j:w.j})),...ID.map(w=>({e:w.w,j:w.m})),...E2W.map(w=>({e:w.e,j:w.j})),...E2P.map(w=>({e:w.e,j:w.j}))]},
+const LIS_GROUPS=[
+  {label:'準1級',sets:[
+    {key:'V',name:'準1 10年傾向',icon:'🃏',get:()=>V.map(w=>({e:w.w,j:w.m}))},
+    {key:'P1W',name:'Pass単 準1 単語',icon:'📗',get:()=>P1W.map(w=>({e:w.e,j:w.j}))},
+    {key:'P1P',name:'Pass単 準1 熟語',icon:'📎',get:()=>P1P.map(w=>({e:w.e,j:w.j}))},
+    {key:'ID',name:'準1 イディオム',icon:'💡',get:()=>ID.map(w=>({e:w.w,j:w.m}))},
+  ]},
+  {label:'2級',sets:[
+    {key:'E2W',name:'2級 単語',icon:'🔤',get:()=>E2W.map(w=>({e:w.e,j:w.j}))},
+    {key:'E2P',name:'2級 熟語',icon:'📌',get:()=>E2P.map(w=>({e:w.e,j:w.j}))},
+  ]},
+  {label:'まとめ',sets:[
+    {key:'ALL_P1',name:'準1 全部',icon:'📚',get:()=>[...V.map(w=>({e:w.w,j:w.m})),...P1W.map(w=>({e:w.e,j:w.j})),...P1P.map(w=>({e:w.e,j:w.j})),...ID.map(w=>({e:w.w,j:w.m}))]},
+    {key:'ALL_E2',name:'2級 全部',icon:'📚',get:()=>[...E2W.map(w=>({e:w.e,j:w.j})),...E2P.map(w=>({e:w.e,j:w.j}))]},
+    {key:'ALL',name:'全データセット',icon:'🌐',get:()=>[...V.map(w=>({e:w.w,j:w.m})),...P1W.map(w=>({e:w.e,j:w.j})),...P1P.map(w=>({e:w.e,j:w.j})),...ID.map(w=>({e:w.w,j:w.m})),...E2W.map(w=>({e:w.e,j:w.j})),...E2P.map(w=>({e:w.e,j:w.j}))]},
+  ]},
 ];
+// Flat list for lookup
+const LIS_ALL=LIS_GROUPS.flatMap(g=>g.sets);
 
-function loadLisProgress(){try{return JSON.parse(localStorage.getItem(LIS_KEY))||{};}catch(_){return {};}}
-function saveLisProgress(){try{const p=loadLisProgress();p[_lisDataKey]=_lisIdx;localStorage.setItem(LIS_KEY,JSON.stringify(p));}catch(_){}}
+function loadProg(){try{return JSON.parse(localStorage.getItem(LIS_KEY))||{};}catch(_){return {};}}
+function saveProg(){try{const p=loadProg();p[_lisDataKey]=_lisIdx;localStorage.setItem(LIS_KEY,JSON.stringify(p));}catch(_){}}
 
 function detectPOS(en){
   const w=en.toLowerCase().trim();
-  if(/^(be |have |get |take |make |do |go |come |put |set |keep |let |run |give |turn |bring |hold |carry |call |cut |break |fall |look |stand |sit |lay |lie |throw |pull |push |pick |draw |drop |catch |hang |blow |burn |dig |grow |hide |hit |hurt |shut |spread |stick |strike |swim |tear |wear |win )|( up| down| on| off| out| in| away| back| through| over| into| for| with| about| to)$/.test(w)||/\s/.test(w)&&/^[a-z]/.test(w)) return 'フレーズ / 句動詞';
-  if(/(ate|ize|ise|ify|en|ish)$/.test(w)&&w.length>4) return '動詞 (verb)';
-  if(/(tion|sion|ment|ness|ity|ence|ance|ism|ist|er|or|dom|ship|hood|ure|age|al|ry|cy|ty)$/.test(w)&&w.length>4) return '名詞 (noun)';
-  if(/(ous|ive|ful|less|able|ible|ent|ant|ial|ical|ic|ary|ory|al|ish|esque|oid|ward)$/.test(w)&&w.length>4) return '形容詞 (adjective)';
-  if(/(ly)$/.test(w)&&w.length>4) return '副詞 (adverb)';
-  const j=_lisData[_lisIdx]?.j||'';
-  if(/〜を|〜に|する|させる|なる/.test(j)) return '動詞 (verb)';
-  if(/な$|の$|的な|しい$/.test(j)) return '形容詞 (adjective)';
+  if(/\s/.test(w)) return 'フレーズ';
+  if(/(ate|ize|ise|ify|en|ish)$/.test(w)&&w.length>4) return '動詞';
+  if(/(tion|sion|ment|ness|ity|ence|ance|ism|ist|er|or)$/.test(w)&&w.length>4) return '名詞';
+  if(/(ous|ive|ful|less|able|ible|ent|ant|ial|ical|ic)$/.test(w)&&w.length>4) return '形容詞';
+  if(/(ly)$/.test(w)&&w.length>4) return '副詞';
   return '';
 }
 
+/* ── Open ── */
 window.openListenMode=function(){
   if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
   const ov=document.getElementById('listen-ov');
-  ov.style.display='flex';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('on')));
-  document.getElementById('listen-select').style.display='block';
+  ov.classList.add('on');
   document.getElementById('listen-player').style.display='none';
   document.getElementById('lis-controls').style.display='none';
   document.getElementById('lis-ttl').textContent='リスニング学習';
   document.getElementById('lis-count').textContent='';
-  // Build selector
-  const sel=document.getElementById('listen-select');
-  const prog=loadLisProgress();
-  sel.innerHTML='<div style="font-size:13px;font-weight:700;color:#8e8e93;margin-bottom:10px;letter-spacing:.04em">データを選択</div>'+LIS_SETS.map(s=>{
-    const saved=prog[s.key]||0;
-    const total=s.get().length;
-    const resumeTxt=saved>0?`<div style="font-size:11px;color:#34c759;margin-top:2px">▶ ${saved+1}番目から再開</div>`:'';
-    return `<div class="lis-sel-card" data-lis-key="${s.key}">
-      <div class="lis-sel-icon">${s.icon}</div>
-      <div><div class="lis-sel-name">${s.name}</div><div class="lis-sel-desc">${s.desc}</div>${resumeTxt}</div>
-      <div class="lis-sel-badge">${total}</div>
-    </div>`;
-  }).join('');
-  sel.querySelectorAll('.lis-sel-card').forEach(c=>{
-    c.addEventListener('click',()=>{
-      if(typeof haptic==='function')haptic();else if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
-      const key=c.dataset.lisKey;
-      startListenSet(key);
-    });
-  });
-  // Update badge on home
-  const totalAll=LIS_SETS.find(s=>s.key==='ALL').get().length;
-  const bEl=document.getElementById('b-listen');
-  if(bEl)bEl.textContent=totalAll;
+  buildSelector();
 };
 
-function startListenSet(key){
-  const set=LIS_SETS.find(s=>s.key===key);
+function buildSelector(){
+  const sel=document.getElementById('listen-select');
+  const prog=loadProg();
+  let html='';
+  LIS_GROUPS.forEach(g=>{
+    html+=`<div class="lis-sel-sec">${g.label}</div>`;
+    g.sets.forEach(s=>{
+      const data=s.get();
+      const saved=prog[s.key]||0;
+      const resume=saved>0?`<div style="font-size:10px;color:#34c759;margin-top:1px">▶ ${saved+1}番目から再開</div>`:'';
+      const sel=_lisDataKey===s.key?' selected':'';
+      html+=`<div class="lis-sel-card${sel}" data-lis-key="${s.key}">
+        <div class="lis-sel-icon">${s.icon}</div>
+        <div><div class="lis-sel-name">${s.name}</div><div class="lis-sel-desc">${data.length}語</div>${resume}</div>
+        <div class="lis-sel-badge">${data.length}</div>
+      </div>`;
+    });
+  });
+  sel.innerHTML=html;
+  sel.querySelectorAll('.lis-sel-card').forEach(c=>{
+    c.addEventListener('click',()=>{
+      if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+      startSet(c.dataset.lisKey);
+    });
+  });
+  const bEl=document.getElementById('b-listen');
+  if(bEl){const all=LIS_ALL.find(s=>s.key==='ALL');if(all)bEl.textContent=all.get().length;}
+}
+
+/* ── Start set ── */
+function startSet(key){
+  const set=LIS_ALL.find(s=>s.key===key);
   if(!set)return;
+  // Stop current
+  _lisPlaying=false;
+  window.speechSynthesis.cancel();
+  if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
   _lisDataKey=key;
   _lisData=set.get();
-  const prog=loadLisProgress();
+  const prog=loadProg();
   _lisIdx=prog[key]||0;
   if(_lisIdx>=_lisData.length)_lisIdx=0;
-  _lisPlaying=false;
   document.getElementById('listen-player').style.display='flex';
   document.getElementById('lis-controls').style.display='flex';
   document.getElementById('lis-ttl').textContent=set.name;
   document.getElementById('lis-play-btn').textContent='▶';
-  // Highlight selected card
+  // Highlight
   document.querySelectorAll('#listen-select .lis-sel-card').forEach(c=>{
     c.classList.toggle('selected',c.dataset.lisKey===key);
   });
   document.getElementById('lis-body').scrollTop=0;
-  renderLisWord();
+  renderWord();
 }
 
-function renderLisWord(){
-  if(_lisIdx>=_lisData.length){_lisIdx=0;}
+/* ── Render ── */
+function renderWord(){
+  if(!_lisData.length)return;
+  if(_lisIdx>=_lisData.length)_lisIdx=0;
   const w=_lisData[_lisIdx];
   const en=document.getElementById('lis-en');
   const ja=document.getElementById('lis-ja');
   const pos=document.getElementById('lis-pos');
+  const goro=document.getElementById('lis-goro');
   en.textContent=w.e;
   ja.textContent=w.j;
-  const posText=detectPOS(w.e);
-  pos.textContent=posText;
-  pos.style.display=posText?'':'none';
-  en.style.animation='none';ja.style.animation='none';pos.style.animation='none';
+  // Animate
+  en.style.animation='none';ja.style.animation='none';
   void en.offsetWidth;
-  en.style.animation='lisIn .4s cubic-bezier(.34,1.05,.64,1) both';
-  ja.style.animation='lisIn .4s .1s cubic-bezier(.34,1.05,.64,1) both';
-  pos.style.animation='lisIn .4s .15s cubic-bezier(.34,1.05,.64,1) both';
+  en.style.animation='lisIn .35s cubic-bezier(.34,1.05,.64,1) both';
+  ja.style.animation='lisIn .35s .08s cubic-bezier(.34,1.05,.64,1) both';
+  // POS
+  const p=detectPOS(w.e);
+  pos.textContent=p;pos.style.display=p?'':'none';
+  // Goro
+  const gk=w.e.toLowerCase().trim();
+  if(typeof GORO!=='undefined'&&GORO[gk]){
+    goro.textContent='🧠 '+GORO[gk];
+    goro.style.display='';
+  }else{
+    goro.style.display='none';
+  }
+  // Progress
   document.getElementById('lis-prog-txt').textContent=(_lisIdx+1)+' / '+_lisData.length;
   document.getElementById('lis-prog-fill').style.width=((_lisIdx+1)/_lisData.length*100)+'%';
   document.getElementById('lis-count').textContent=(_lisIdx+1)+'/'+_lisData.length;
-  saveLisProgress();
+  saveProg();
 }
 
-function speakLisEn(text,cb){
+/* ── TTS ── */
+function speakEng(text,cb){
   if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
   window.speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
   u.lang='en-US';u.rate=1.1;
+  const voices=speechSynthesis.getVoices();
+  const pick=voices.find(v=>v.name==='Alex')||voices.find(v=>v.lang==='en-US'&&v.localService)||voices.find(v=>v.lang.startsWith('en'));
+  if(pick)u.voice=pick;
   u.onend=()=>{if(cb)cb();};
   u.onerror=()=>{if(cb)cb();};
-  window.speechSynthesis.speak(u);
+  speechSynthesis.speak(u);
 }
-function speakLisJa(text,cb){
+function speakJpn(text,cb){
   if(typeof haptic==='object'&&haptic)haptic();
   window.speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
   u.lang='ja-JP';u.rate=1.3;
+  const voices=speechSynthesis.getVoices();
+  const pick=voices.find(v=>v.lang==='ja-JP'&&v.localService)||voices.find(v=>v.lang.startsWith('ja'));
+  if(pick)u.voice=pick;
   u.onend=()=>{if(cb)cb();};
   u.onerror=()=>{if(cb)cb();};
-  window.speechSynthesis.speak(u);
+  speechSynthesis.speak(u);
 }
 
-function playCurrentWord(){
-  if(!_lisPlaying)return;
+/* ── Auto play ── */
+function playWord(){
+  if(!_lisPlaying||!_lisData.length)return;
   if(_lisIdx>=_lisData.length){
     _lisPlaying=false;
     document.getElementById('lis-play-btn').textContent='▶';
     document.getElementById('lis-en').classList.remove('speaking');
     return;
   }
-  renderLisWord();
+  renderWord();
   const w=_lisData[_lisIdx];
   const enEl=document.getElementById('lis-en');
   enEl.classList.add('speaking');
-  speakLisEn(w.e,()=>{
+  speakEng(w.e,()=>{
     if(!_lisPlaying)return;
     enEl.classList.remove('speaking');
-    speakLisJa(w.j,()=>{
+    speakJpn(w.j,()=>{
       if(!_lisPlaying)return;
       _lisTimer=setTimeout(()=>{
         _lisIdx++;
         if(_lisIdx>=_lisData.length){
           _lisPlaying=false;
           document.getElementById('lis-play-btn').textContent='▶';
-          renderLisWord();
+          renderWord();
           return;
         }
-        playCurrentWord();
+        playWord();
       },200);
     });
   });
 }
 
+/* ── Controls ── */
 window.listenToggle=function(){
-  if(typeof haptic==='function')haptic();else if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
   if(_lisPlaying){
     _lisPlaying=false;
     window.speechSynthesis.cancel();
     if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
     document.getElementById('lis-play-btn').textContent='▶';
+    document.getElementById('lis-en').classList.remove('speaking');
   }else{
+    if(!_lisData.length)return;
     _lisPlaying=true;
     document.getElementById('lis-play-btn').textContent='⏸';
-    playCurrentWord();
+    playWord();
   }
 };
 window.listenNext=function(){
-  if(typeof haptic==='function')haptic();else if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
   window.speechSynthesis.cancel();
   if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
+  document.getElementById('lis-en').classList.remove('speaking');
+  if(!_lisData.length)return;
   _lisIdx++;
   if(_lisIdx>=_lisData.length)_lisIdx=0;
-  renderLisWord();
-  if(_lisPlaying)playCurrentWord();
+  renderWord();
+  if(_lisPlaying)playWord();
 };
 window.listenPrev=function(){
-  if(typeof haptic==='function')haptic();else if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
+  if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
   window.speechSynthesis.cancel();
   if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
+  document.getElementById('lis-en').classList.remove('speaking');
+  if(!_lisData.length)return;
   _lisIdx--;
   if(_lisIdx<0)_lisIdx=_lisData.length-1;
-  renderLisWord();
-  if(_lisPlaying)playCurrentWord();
+  renderWord();
+  if(_lisPlaying)playWord();
 };
 window.closeListenMode=function(){
   if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
   _lisPlaying=false;
   window.speechSynthesis.cancel();
   if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
-  saveLisProgress();
-  const ov=document.getElementById('listen-ov');
-  ov.classList.remove('on');
-  setTimeout(()=>{ov.style.display='none';},400);
+  document.getElementById('lis-en').classList.remove('speaking');
+  saveProg();
+  document.getElementById('listen-ov').classList.remove('on');
 };
 
-// Tap en word → haptic + speak English
+/* ── Tap handlers ── */
 window.listenTapEn=function(){
   if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();
   if(!_lisData.length)return;
   const w=_lisData[_lisIdx];
-  document.getElementById('lis-en').classList.add('speaking');
-  speakLisEn(w.e,()=>document.getElementById('lis-en').classList.remove('speaking'));
+  const el=document.getElementById('lis-en');
+  el.classList.add('speaking');
+  speakEng(w.e,()=>el.classList.remove('speaking'));
 };
-// Tap ja word → haptic + speak Japanese
 window.listenTapJa=function(){
   if(typeof haptic==='object'&&haptic)haptic();
   if(!_lisData.length)return;
-  speakLisJa(_lisData[_lisIdx].j);
+  speakJpn(_lisData[_lisIdx].j);
+};
+window.listenTapGoro=function(){
+  if(typeof haptic==='object'&&haptic)haptic();
+  if(!_lisData.length)return;
+  const gk=_lisData[_lisIdx].e.toLowerCase().trim();
+  if(typeof GORO!=='undefined'&&GORO[gk])speakJpn(GORO[gk]);
 };
 
-// Swipe right to close
-let _lisSwX=0,_lisSwY=0;
-const lisOv=document.getElementById('listen-ov');
-lisOv.addEventListener('touchstart',e=>{_lisSwX=e.touches[0].clientX;_lisSwY=e.touches[0].clientY;},{passive:true});
-lisOv.addEventListener('touchend',e=>{
-  const dx=e.changedTouches[0].clientX-_lisSwX;
-  const dy=Math.abs(e.changedTouches[0].clientY-_lisSwY);
+/* ── Swipe right to close ── */
+let _sx=0,_sy=0;
+const ov=document.getElementById('listen-ov');
+ov.addEventListener('touchstart',e=>{_sx=e.touches[0].clientX;_sy=e.touches[0].clientY;},{passive:true});
+ov.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-_sx;
+  const dy=Math.abs(e.changedTouches[0].clientY-_sy);
   if(dx>80&&dy<60)closeListenMode();
 },{passive:true});
 })();
