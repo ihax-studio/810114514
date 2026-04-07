@@ -2574,6 +2574,26 @@ function speakEn(text){
   if(pick)u.voice=pick;
   speechSynthesis.speak(u);
 }
+function speakJp(text){
+  if(!text||!window.speechSynthesis)return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='ja-JP';u.rate=1.1;
+  const voices=speechSynthesis.getVoices();
+  const jp=voices.find(v=>v.lang==='ja-JP'&&v.localService)||voices.find(v=>v.lang.startsWith('ja'));
+  if(jp)u.voice=jp;
+  speechSynthesis.speak(u);
+}
+// ═══ SOUND EFFECTS (quiz) ═══
+const _quizSnd={
+  correct:new Audio('success.caf'),
+  wrong:new Audio('retry.caf')
+};
+try{_quizSnd.correct.load();_quizSnd.wrong.load();}catch(_){}
+function playSnd(name){
+  const a=_quizSnd[name];if(!a)return;
+  a.currentTime=0;a.play().catch(()=>{});
+}
 // Preload voices (iOS needs this on user gesture)
 let _voicesLoaded=false;
 function preloadVoices(){if(!_voicesLoaded){_voicesLoaded=true;try{speechSynthesis.getVoices();}catch(_){}}}
@@ -5484,6 +5504,7 @@ function quizTimeUp(i){
   const d=DK[i];
   if(d.idx>=d.deck.length)return;
   haptic.error();
+  playSnd('wrong');
   showQuizResultIndicator('f');
   // Show correct answer
   const choicesEl=document.getElementById('qc-'+i);
@@ -5558,12 +5579,21 @@ function renderQuiz(i){
     ).join('');
   }
   startQuizTimer(i);
+  // Speak English word when question changes (screen reader)
+  const w=d.deck[d.idx];
+  if(w)speakEn(w.e||w.w||'');
 }
 
 // Handle quiz choice click (delegated)
 document.addEventListener('click',e=>{
   const btn=e.target.closest('.quiz-choice');
-  if(!btn||btn.classList.contains('disabled'))return;
+  if(!btn)return;
+  // If disabled (already answered), speak Japanese on tap
+  if(btn.classList.contains('disabled')){
+    const jpText=btn.dataset.answer||btn.querySelector('span:last-child')?.textContent||'';
+    if(jpText)speakJp(jpText);
+    return;
+  }
   stopQuizTimer();
   const i=parseInt(btn.dataset.panel,10);
   const answer=btn.dataset.answer;
@@ -5578,11 +5608,13 @@ document.addEventListener('click',e=>{
   if(!isCorrect){
     btn.classList.add('wrong');
     haptic.error();
+    playSnd('wrong');
   }else{
     // Correct: ultraBurst haptic + firework
     const delay=30;
     for(let k=0;k<5;k++){setTimeout(()=>haptic.error(),k*delay);}
     spawnFirework(btn);
+    playSnd('correct');
   }
   // Show result indicator (✓/✗) between shuffle & star
   showQuizResultIndicator(isCorrect?'g':'f');
