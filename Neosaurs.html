@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Neosaurs</title>
+    <link rel="icon" type="image/svg+xml" href="appicon.svg">
+    <link rel="icon" type="image/png" sizes="512x512" href="appicon.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="appicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="appicon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Neosaurs">
+    <meta name="theme-color" content="#0a0a1e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="supported-color-schemes" content="dark">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>!function(){if(window.navigator.standalone||window.matchMedia&&(window.matchMedia("(display-mode: standalone)").matches||window.matchMedia("(display-mode: fullscreen)").matches)){var t=document.createElement("style");t.textContent=["html{background:#0a0a0a!important;overflow:hidden!important;position:fixed!important;inset:0!important;width:100%!important;height:100%!important}","body{transform-origin:center top!important;overflow:hidden!important}","body.loaded{transform:scale(1.05)!important}","#editorToolbar{bottom:calc(env(safe-area-inset-bottom,0px) + 12px)!important;z-index:99999!important}","#editorTopBar{z-index:99999!important}","#editorToolbarExpandBtn{z-index:99999!important}",".menu{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 80px)!important}",".victory-content,.lost-content{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px)!important}",".victory-overlay,.lost-overlay{padding-bottom:env(safe-area-inset-bottom,0px)!important}","#gameUI .hud{top:calc(env(safe-area-inset-top,0px) + 10px)!important}","#gameUI .lives-bar{bottom:calc(env(safe-area-inset-bottom,0px) + 20px)!important;top:auto!important}"].join(""),document.head.appendChild(t)}}();</script>
+    <script>window._neoToken=function(){for(var e="neo"+Math.floor(Date.now()/3e4)+"saur",o=0,n=0;n<e.length;n++)o=(o<<5)-o+e.charCodeAt(n)|0;return"n"+Math.abs(o).toString(36)},function(){window._earlyGameCode=null,window._earlyGameError=!1;var e="_520aa37cc92c2c7c.js?v="+Date.now(),o=new XMLHttpRequest;o.open("GET",e,!0),o.setRequestHeader("X-Neo-Auth",window._neoToken()),o.onload=function(){if(200===o.status&&o.responseText&&o.responseText.length>100){window._earlyGameCode=o.responseText;try{Object.defineProperty(o,"responseText",{value:"",writable:!1})}catch(e){}try{Object.defineProperty(o,"response",{value:"",writable:!1})}catch(e){}}else window._earlyGameError=!0},o.onerror=function(){window._earlyGameError=!0},o.send()}();</script>
+</head>
+<body>
+    <script>/* === Device/Resolution Gate === */
+!function(){
+    var ua=navigator.userAgent||'';
+    var isIOS=/iPhone|iPod/i.test(ua)&&!/iPad/i.test(ua);
+    var isIPad=/iPad/i.test(ua)||(/Macintosh/i.test(ua)&&navigator.maxTouchPoints>1);
+    var isVisionPro=/VisionOS|Vision Pro|RealityKit/i.test(ua);
+    var isWindows=/Windows/i.test(ua);
+    var blocked=false;
+    var reason='';
+
+    /* --- iPadOS and visionOS: NEVER blur --- */
+    if(isIPad||isVisionPro){blocked=false;}
+    /* --- iOS (iPhone/iPod) checks --- */
+    else if(isIOS){
+        /* iOS version check: require iOS 26+ */
+        var iosVer=0;
+        var m=ua.match(/OS (\d+)[_\.]/);
+        if(m)iosVer=parseInt(m[1],10);
+        if(iosVer>0&&iosVer<26){
+            blocked=true;
+            reason='ios-version';
+        }else{
+            /* Resolution check for iOS */
+            var sw=screen.width*window.devicePixelRatio;
+            var sh=screen.height*window.devicePixelRatio;
+            var pw=Math.max(sw,sh);
+            var ph=Math.min(sw,sh);
+            /* Special exception: 2736x1260 is allowed */
+            var is2736x1260=(pw>=2730&&pw<=2742&&ph>=1254&&ph<=1266);
+            /* ≤ 2570x1180: allowed */
+            var isSmallEnough=(pw<=2570&&ph<=1180);
+            /* ≥ 2800x1300: blur (unless exception) */
+            var isTooBig=(pw>=2800&&ph>=1300);
+            if(is2736x1260){
+                blocked=false;
+            }else if(isSmallEnough){
+                blocked=false;
+            }else if(isTooBig){
+                blocked=true;
+                reason='ios-resolution';
+            }else{
+                /* Between 2570-2800 range: allowed (default is display) */
+                blocked=false;
+            }
+        }
+    }
+    /* --- Windows: 14" and above → blur --- */
+    else if(isWindows){
+        /* Estimate screen diagonal in inches from resolution and devicePixelRatio */
+        var sw2=screen.width;
+        var sh2=screen.height;
+        var dpr=window.devicePixelRatio||1;
+        /* Physical pixels */
+        var ppw=sw2*dpr;
+        var pph=sh2*dpr;
+        /* Estimate PPI: typical laptop ~120-160ppi, desktop ~96ppi */
+        /* Use screen diagonal estimation: assume ~120 PPI for modern laptops */
+        var diagPx=Math.sqrt(ppw*ppw+pph*pph);
+        /* Heuristic: CSS pixels diagonal / 96 gives approximate inches for standard displays */
+        var diagCSS=Math.sqrt(sw2*sw2+sh2*sh2);
+        var approxInches=diagCSS/96;
+        /* Also check raw CSS resolution: 14" laptops typically have ≥1536 CSS width or ≥1440x900 */
+        /* More reliable: check if screen width suggests 14"+ */
+        /* Common 14" resolutions: 1920x1080 (at 125-150% scaling → 1536x864 or 1280x720 CSS) */
+        /* Common 15.6": 1920x1080 at 125% → 1536x864 CSS */
+        /* Common 13": 1920x1080 at 150% → 1280x720 CSS or 2560x1600 at 200% → 1280x800 */
+        /* Better heuristic: physical pixel count */
+        /* 14"+ laptops typically: ≥1920x1080 physical, desktops ≥1920x1080 */
+        /* Use available screen size as proxy */
+        var availW=screen.availWidth||sw2;
+        var availH=screen.availHeight||sh2;
+        /* If CSS resolution suggests 14" or larger */
+        /* 14" at 100% = 1920x1080 CSS, at 125% = 1536x864, at 150% = 1280x720 */
+        /* Diagonal physical pixels for 14" 1920x1080 ≈ 2203px → at 157ppi */
+        /* Better: just use CSS diagonal > ~15.5 inches at 96dpi standard */
+        if(approxInches>=14){
+            blocked=true;
+            reason='windows-screen';
+        }
+    }
+
+    if(blocked){
+        var lang=(navigator.language||'ja').toLowerCase();
+        var isJa=lang.startsWith('ja');
+        var msg='';
+        if(reason==='ios-version'){
+            msg=isJa?'iOS 26.0以降が必要です':'Requires iOS 26.0 or later';
+        }else if(reason==='ios-resolution'){
+            msg=isJa?'このデバイスの解像度には対応していません':'This device resolution is not supported';
+        }else if(reason==='windows-screen'){
+            msg=isJa?'このディスプレイサイズには対応していません':'This display size is not supported';
+        }
+        var overlay=document.createElement('div');
+        overlay.id='neoDeviceGate';
+        overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;z-index:999999;display:flex;justify-content:center;align-items:center;flex-direction:column;backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);background:rgba(0,0,0,0.5);';
+        overlay.innerHTML='<p style="color:rgba(255,255,255,0.7);font-size:1.1rem;font-family:-apple-system,BlinkMacSystemFont,sans-serif;text-align:center;padding:2rem;letter-spacing:0.05em;">'+msg+'</p>';
+        /* Block all interaction beneath */
+        overlay.addEventListener('touchstart',function(e){e.preventDefault();e.stopPropagation();},{passive:false,capture:true});
+        overlay.addEventListener('touchmove',function(e){e.preventDefault();e.stopPropagation();},{passive:false,capture:true});
+        overlay.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();},{capture:true});
+        document.body.appendChild(overlay);
+        /* Also prevent game from loading */
+        window.__neoDeviceBlocked=true;
+    }
+}();
+</script>
+    <script>!function(){var t=location.hostname;if(!("https:"===location.protocol&&t.endsWith(".netlify.app")||"localhost"===t||"127.0.0.1"===t))throw document.documentElement.innerHTML='<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="background:#000;color:#333;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;"><p></p></body></html>',new Error("")}();</script>
+    <noscript>
+        <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a1e;display:flex;justify-content:center;align-items:center;z-index:999999;">
+            <p style="color:#fff;font-size:1.2rem;font-family:-apple-system,BlinkMacSystemFont,sans-serif;text-align:center;padding:2rem;">JavaScriptを有効にしてください<br><span style="color:rgba(255,255,255,0.4);font-size:0.85rem;">Please enable JavaScript to play this game.</span></p>
+        </div>
+    </noscript>
+    <div id="preloaderScreen" class="preloader-overlay">
+        <div class="preloader-content">
+            <div id="preloaderStatus" class="preloader-status sf-font"></div>
+            <div id="preloaderBar" class="preloader-bar-container">
+                <div id="preloaderBarFill" class="preloader-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+    <script>document.getElementById("preloaderScreen").addEventListener("touchstart",function(t){if(navigator.vibrate&&navigator.vibrate(10),window.iosHaptic)try{window.iosHaptic()}catch(t){}},{passive:!0}),document.getElementById("preloaderStatus").addEventListener("touchstart",function(t){if(t.stopPropagation(),navigator.vibrate&&navigator.vibrate([10,30,10]),window.iosHaptic&&window.iosHaptic.confirm)try{window.iosHaptic.confirm()}catch(t){}},{passive:!0});</script>
+    <div id="firstIntroScreen" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;background:linear-gradient(135deg,#0a0a0a 0%,#1a1a2e 100%);z-index:9999;justify-content:center;align-items:center;flex-direction:column;overflow:hidden;-webkit-transform:translateZ(0);transform:translateZ(0);">
+        <div id="firstIntroTitle" style="font-size:3.2rem;font-weight:800;color:#fff;letter-spacing:0.04em;opacity:0;transform:translateY(50px) translateZ(0);transition:transform 0.6s cubic-bezier(0.22,1,0.36,1),opacity 0.6s ease;will-change:transform,opacity;cursor:pointer;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-backface-visibility:hidden;backface-visibility:hidden;">Neosaurs</div>
+        <div id="firstIntroLines" style="margin-top:2.5rem;text-align:center;">
+            <p class="first-intro-line" data-ja="こんにちは" data-en="Hello" data-zh="你好" data-ko="안녕하세요" style="color:rgba(255,255,255,0.85);font-size:1.7rem;margin:1.6rem 0;line-height:1.6;opacity:0;transform:translateY(35px);transition:transform 0.6s cubic-bezier(0.22,1,0.36,1),opacity 0.6s ease;will-change:transform,opacity;-webkit-backface-visibility:hidden;backface-visibility:hidden;font-weight:600;">こんにちは</p>
+            <p class="first-intro-line" data-ja="このゲームは3Dゲームです" data-en="This is a 3D game" data-zh="这是一个3D游戏" data-ko="이것은 3D 게임입니다" style="color:rgba(255,255,255,0.75);font-size:1.5rem;margin:1.6rem 0;line-height:1.6;opacity:0;transform:translateY(35px);transition:transform 0.6s cubic-bezier(0.22,1,0.36,1),opacity 0.6s ease;will-change:transform,opacity;-webkit-backface-visibility:hidden;backface-visibility:hidden;font-weight:600;">このゲームは3Dゲームです</p>
+            <p class="first-intro-line" data-ja="PCやタブレットなどでも遊べます" data-en="Play on PC, tablet, and more" data-zh="也可在电脑和平板上玩" data-ko="PC나 태블릿에서도 플레이 가능" style="color:rgba(255,255,255,0.75);font-size:1.5rem;margin:1.6rem 0;line-height:1.6;opacity:0;transform:translateY(35px);transition:transform 0.6s cubic-bezier(0.22,1,0.36,1),opacity 0.6s ease;will-change:transform,opacity;-webkit-backface-visibility:hidden;backface-visibility:hidden;font-weight:600;">PCやタブレットなどでも遊べます</p>
+            <p class="first-intro-line" id="firstIntroShareLine" data-ja-html="<img src='share.png' alt='share' style='width:20px;height:auto;filter:brightness(10);vertical-align:middle;'>から共有して遊ぼう！" data-en-html="Share with <img src='share.png' alt='share' style='width:20px;height:auto;filter:brightness(10);vertical-align:middle;'> and play!" data-zh-html="通过 <img src='share.png' alt='share' style='width:20px;height:auto;filter:brightness(10);vertical-align:middle;'> 分享来玩吧！" data-ko-html="<img src='share.png' alt='share' style='width:20px;height:auto;filter:brightness(10);vertical-align:middle;'>로 공유해서 놀자!" style="color:rgba(255,255,255,0.65);font-size:1.25rem;margin:1.2rem 0;opacity:0;transform:translateY(35px);transition:transform 0.6s cubic-bezier(0.22,1,0.36,1),opacity 0.6s ease;will-change:transform,opacity;-webkit-backface-visibility:hidden;backface-visibility:hidden;font-weight:600;display:flex;align-items:center;justify-content:center;gap:0.5rem;"><img src="share.png" alt="share" style="width:20px;height:auto;filter:brightness(10);vertical-align:middle;">から共有して遊ぼう！</p>
+        </div>
+        <p id="firstIntroTapHint" data-ja="タップで始める" data-en="Tap to start" data-zh="点击开始" data-ko="탭하여 시작" style="position:absolute;bottom:60px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.35);font-size:1.3rem;font-weight:600;letter-spacing:0.08em;opacity:0;transition:opacity 0.6s ease;-webkit-user-select:none;user-select:none;">タップで始める</p>
+    </div>
+    <script>!function(){var t=(navigator.language||"ja").toLowerCase(),e=t.startsWith("zh")?"zh":t.startsWith("ko")?"ko":t.startsWith("en")?"en":"ja";if("ja"!==e){document.querySelectorAll(".first-intro-line").forEach(function(t){var a=t.getAttribute("data-"+e+"-html");if(a)t.innerHTML=a;else{var n=t.getAttribute("data-"+e);n&&(t.textContent=n)}});var a=document.getElementById("firstIntroTapHint");if(a){var n=a.getAttribute("data-"+e);n&&(a.textContent=n)}}var r=navigator.userAgent,i=/iPhone|iPad|iPod/i.test(r)||"MacIntel"===navigator.platform&&navigator.maxTouchPoints>1?'-apple-system, "SF Pro Display", "SF Pro", sans-serif':"Arial, sans-serif",o=document.getElementById("firstIntroScreen");o&&(o.style.fontFamily=i,document.getElementById("firstIntroTitle").style.fontFamily=i,o.querySelectorAll(".first-intro-line").forEach(function(t){t.style.fontFamily=i}))}();</script>
+    <div id="welcomeScreen" class="liquid-glass menu" style="display: none;">
+        <input id="welcomeTitleInput" class="glow-text sf-font welcome-slidable" value="🦕 NEOSAURS" maxlength="20" autocomplete="off" autocorrect="off" spellcheck="false" style="background:none;border:none;outline:none;text-align:center;width:90%;caret-color:rgba(0,255,136,0.6);-webkit-user-select:text;user-select:text;">
+        <p id="welcomeSubtitle" class="subtitle sf-font welcome-slidable">√64 64 & 8</p>
+        <p id="translateResult" class="subtitle sf-font welcome-slidable" style="display:none;opacity:0;transform:translateY(15px);transition:opacity 0.4s ease,transform 0.4s ease;margin-top:-1rem;font-size:1.2rem;color:rgba(255,255,255,0.8);"></p>
+        <div id="platformInfo" class="platform-badge sf-font welcome-slidable"></div>
+        <p id="benchHint" class="sf-font welcome-slidable" style="font-size:0.65rem;color:rgba(255,255,255,0.35);margin-top:-1.5rem;margin-bottom:1rem;cursor:pointer;">タップで性能検証</p>
+        <button id="welcomeStartButton" class="liquid-button primary sf-font haptic-btn welcome-slidable">始める</button>
+        <button id="welcomeCreateBtn" class="liquid-button sf-font haptic-btn welcome-slidable" style="background:linear-gradient(135deg,rgba(255,204,0,0.2),rgba(255,136,0,0.2));border-color:rgba(255,204,0,0.4);font-size:1rem;padding:0.6rem 2rem;margin-top:0.3rem;">作る</button>
+        <button id="welcomeMapBtn" class="liquid-button sf-font haptic-btn welcome-slidable" style="background:rgba(100,150,255,0.15);border-color:rgba(100,150,255,0.35);font-size:0.85rem;padding:0.5rem 1.8rem;margin-top:0.3rem;">WORLD MAP</button>
+        <button id="welcomeShareBtn" class="share-arrow-btn sf-font welcome-slidable" aria-label="シェア"><img src="share.png" alt="share" style="width:22px;height:auto;filter:brightness(10);vertical-align:middle;object-fit:contain;aspect-ratio:auto;"></button>
+        <button id="welcomeSettingsBtn" class="settings-arrow-btn sf-font welcome-slidable" aria-label="設定">→</button>
+    </div>
+    <div id="celestialTransit" class="celestial-transit-overlay" style="display: none;">
+        <canvas id="celestialCanvas"></canvas>
+        <div id="celestialLabel" class="celestial-label sf-font"></div>
+        <div id="celestialTapHint" class="celestial-tap-hint sf-font">TAP</div>
+    </div>
+    <div id="introScreen" class="intro-overlay" style="display: none;">
+        <div class="intro-content liquid-glass">
+            <h2 id="introText1" class="intro-text sf-font">卵を取り返そう</h2>
+            <p id="introText2" class="intro-subtext sf-font">3個集めるとクリア</p>
+            <button id="introStartButton" class="liquid-button primary sf-font haptic-btn">スタート</button>
+        </div>
+    </div>
+    <div id="gameUI" style="display: none;">
+        <div class="hud liquid-glass">
+            <div class="hud-item hud-inline"><span class="hud-label sf-font">スコア</span><span id="score" class="hud-value sf-font">0</span></div>
+            <div class="hud-item hud-inline"><span class="hud-label sf-font">卵</span><span id="eggCount" class="hud-value sf-font">0/3</span></div>
+        </div>
+        <div id="livesBar" class="lives-bar">
+            <span id="lives" class="lives-hearts sf-font">❤️❤️❤️</span>
+        </div>
+        <div id="crosshair"></div>
+        <div id="chargeIndicator" class="charge-bar">
+            <div id="chargeBar"></div>
+        </div>
+        <div id="damageFlash" class="damage-flash"></div>
+        <button id="exitVRButton" class="liquid-button sf-font haptic-btn" style="display: none;">Exit VR</button>
+    </div>
+    <div id="winMenu" class="victory-overlay" style="display: none;">
+        <canvas id="dotsCanvas"></canvas>
+        <div class="victory-content">
+            <h1 class="victory-text sf-font">おめでとう！</h1>
+            <div class="stats liquid-glass">
+                <p class="sf-font" id="i18n-finalScore">最終スコア: <span id="finalScore">0</span></p>
+                <p class="sf-font" id="i18n-maxCombo">最大コンボ: <span id="maxCombo">0</span></p>
+            </div>
+            <div style="display:flex;justify-content:center;align-items:center;gap:0.8rem;margin-top:0.3rem;">
+                <button id="winToTitleBtn" class="liquid-button sf-font haptic-btn" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);font-size:0.9rem;padding:0.5rem 1.5rem;text-transform:none;letter-spacing:normal;"><span style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;">←</span> タイトル</button>
+                <button id="restartButton" class="liquid-button primary sf-font haptic-btn">つぎへ</button>
+            </div>
+        </div>
+    </div>
+    <div id="worldMapScreen" class="world-map-overlay" style="display: none;">
+        <canvas id="mapGlobeCanvas"></canvas>
+        <div class="world-map-ui">
+            <h2 class="sf-font world-map-title">🌍 WORLD MAP</h2>
+            <div id="mapCourseList" class="map-course-list"></div>
+            <button id="mapCloseButton" class="liquid-button sf-font haptic-btn">とじる</button>
+        </div>
+    </div>
+    <div id="lostMenu" class="lost-overlay" style="display: none;">
+        <div class="lost-content">
+            <h1 class="lost-text sf-font">負け</h1>
+            <div class="stats liquid-glass">
+                <p class="sf-font">スコア: <span id="lostScore">0</span></p>
+            </div>
+            <div style="display:flex;justify-content:center;align-items:center;gap:0.8rem;margin-top:0.3rem;">
+                <button id="lostToTitleBtn" class="liquid-button sf-font haptic-btn" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);font-size:0.9rem;padding:0.5rem 1.5rem;text-transform:none;letter-spacing:normal;"><span style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;">←</span> タイトル</button>
+                <button id="lostRestartButton" class="liquid-button primary sf-font haptic-btn">リトライ</button>
+            </div>
+        </div>
+    </div>
+    <div id="colorPickerOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:99990;display:none;justify-content:center;align-items:center;flex-direction:column;">
+        <div id="colorPickerCircle" style="width:140px;height:140px;border-radius:50%;border:3px solid rgba(255,255,255,0.3);display:flex;justify-content:center;align-items:center;transform:scale(0);opacity:0;transition:transform 0.6s cubic-bezier(0.34,1.56,0.64,1),opacity 0.5s ease;overflow:hidden;">
+            <input type="color" id="starColorInput" value="#00cc88" style="width:200%;height:200%;border:none;cursor:pointer;-webkit-appearance:none;padding:0;margin:-50%;">
+        </div>
+        <p id="colorPickerLabel" style="color:rgba(255,255,255,0.7);font-size:1rem;font-family:-apple-system,sans-serif;margin-top:1.5rem;opacity:0;transition:opacity 0.5s ease 0.3s;">色を選ぼう</p>
+        <button id="colorPickerStartBtn" style="margin-top:1.5rem;padding:0.7rem 2.5rem;font-size:1.1rem;border-radius:50px;color:#fff;cursor:pointer;font-family:-apple-system,sans-serif;background:rgba(0,255,136,0.3);border:2px solid rgba(0,255,136,0.5);opacity:0;transition:opacity 0.5s ease 0.5s;-webkit-tap-highlight-color:transparent;">OK</button>
+    </div>
+    <div id="courseEditorScreen" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;background:#111;z-index:99990;">
+        <canvas id="editorCanvas" style="width:100%;height:100%;display:block;touch-action:none;"></canvas>
+        <div id="editorToolbar" style="position:fixed;bottom:env(safe-area-inset-bottom,0);left:50%;transform:translateX(-50%);background:rgba(120,120,130,0.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:28px;padding:8px 16px;display:flex;align-items:center;gap:10px;z-index:99992;max-width:92vw;overflow-x:auto;-webkit-overflow-scrolling:touch;">
+            <div class="editor-item" data-type="egg" style="font-size:2rem;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none;">🥚</div>
+            <div class="editor-item" data-type="mountain" style="font-size:2rem;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none;">🏔️</div>
+            <div class="editor-item" data-type="rock" style="font-size:2rem;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none;">🪨</div>
+            <div class="editor-item" data-type="coin" style="font-size:2rem;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none;">🪙</div>
+            <div class="editor-item" data-type="cloud" style="font-size:2rem;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none;">☁️</div>
+            <div class="editor-item editor-lockable" data-type="pond" data-unlock-eggs="40" style="font-size:2rem;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none;">🌊</div>
+            <div class="editor-item editor-lockable" data-type="sprout" data-unlock-eggs="40" style="font-size:2rem;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none;">🌱</div>
+            <div class="editor-item editor-lockable" data-type="heart" data-unlock-eggs="50" style="font-size:2rem;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none;">❤️</div>
+            <div class="editor-item editor-lockable" data-type="poop" data-unlock-eggs="50" style="font-size:2rem;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none;">💩</div>
+            <div class="editor-item editor-lockable" data-type="fan" data-unlock-eggs="65" style="font-size:2rem;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none;">🌀</div>
+            <div class="editor-item editor-lockable" data-type="rainbow" data-unlock-eggs="77" style="font-size:2rem;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none;">🌈</div>
+            <div class="editor-item editor-lockable" data-type="notify" data-unlock-eggs="100" style="font-size:2rem;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none;">🔔</div>
+            <div class="editor-item editor-lockable" data-type="bigegg" data-unlock-eggs="100" style="font-size:2rem;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none;">✨</div>
+            <div style="border-left:1px solid rgba(255,255,255,0.2);height:2rem;margin:0 2px;"></div>
+            <div class="editor-item editor-lockable" data-type="tower" data-unlock-eggs="150" style="font-size:2rem;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none;">🗼</div>
+            <div class="editor-item editor-lockable" data-type="block" data-unlock-eggs="125" style="font-size:2rem;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none;">🧱</div>
+            <button id="editorBlockSettingsBtn" style="font-size:0.7rem;background:rgba(255,150,50,0.2);border:1px solid rgba(255,150,50,0.4);border-radius:10px;padding:3px 8px;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap;font-family:-apple-system,sans-serif;">設定</button>
+            <div style="border-left:1px solid rgba(255,255,255,0.2);height:2rem;margin:0 4px;"></div>
+            <div class="editor-item" data-type="eraser" style="font-size:2rem;cursor:pointer;-webkit-user-select:none;user-select:none;touch-action:none;">🧹</div>
+            <div style="border-left:1px solid rgba(255,255,255,0.2);height:2rem;margin:0 4px;"></div>
+            <button id="editorExpandBtn" style="font-size:1.3rem;background:linear-gradient(180deg,rgba(80,200,120,0.35) 0%,rgba(40,140,70,0.45) 100%);border:2px solid rgba(80,200,120,0.6);border-radius:14px;padding:6px 14px;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.2);text-shadow:0 1px 2px rgba(0,0,0,0.4);font-weight:700;font-family:-apple-system,sans-serif;transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.3s ease;">＋土地</button>
+        </div>
+        <div id="editorTopBar" style="position:fixed;top:env(safe-area-inset-top,0);left:0;width:100%;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;z-index:99992;">
+            <div style="display:flex;align-items:center;gap:8px;">
+                <button id="editorBackBtn" style="background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);border-radius:50%;width:52px;height:52px;color:#fff;font-size:1.8rem;cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;">←</button>
+                <button id="editorUndoBtn" style="background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);border-radius:50%;width:42px;height:42px;color:#fff;font-size:1.15rem;cursor:pointer;-webkit-tap-highlight-color:transparent;">↩</button>
+                <button id="editorRedoBtn" style="background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);border-radius:50%;width:42px;height:42px;color:#fff;font-size:1.15rem;cursor:pointer;-webkit-tap-highlight-color:transparent;opacity:0.4;">↪</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <button id="editorMapBtn" style="background:rgba(100,150,255,0.2);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(100,150,255,0.4);border-radius:18px;padding:8px 16px;color:#fff;font-size:0.9rem;font-family:-apple-system,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;">🗺️ MAP</button>
+                <button id="editorBGMBtn" style="background:rgba(180,100,255,0.2);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(180,100,255,0.4);border-radius:18px;padding:8px 16px;color:#fff;font-size:0.9rem;font-family:-apple-system,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;">♪ BGM</button>
+                <input type="color" id="editorBallColor" value="#ff4444" style="display:none;width:36px;height:36px;border:2px solid rgba(255,255,255,0.3);border-radius:50%;-webkit-appearance:none;cursor:pointer;padding:0;background:none;overflow:hidden;">
+                <button id="editorHapticBtn" style="display:none;background:rgba(255,100,200,0.2);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,100,200,0.4);border-radius:16px;padding:6px 12px;color:#fff;font-size:0.75rem;font-family:-apple-system,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;">振動</button>
+                <button id="editorXRBtn" style="display:none;background:rgba(120,80,255,0.3);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(120,80,255,0.5);border-radius:22px;padding:10px 18px;color:#fff;font-size:0.9rem;font-family:-apple-system,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;">🥽 XR</button>
+                <button id="editorPlayBtn" style="background:rgba(0,255,136,0.3);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(0,255,136,0.5);border-radius:22px;padding:10px 26px;color:#fff;font-size:1rem;font-family:-apple-system,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;">▶ Play</button>
+            </div>
+            <div id="editorEggCount" style="color:rgba(255,255,255,0.7);font-size:0.85rem;font-family:-apple-system,sans-serif;">🥚 ×3</div>
+        </div>
+        <button id="editorToolbarExpandBtn" aria-label="展開">↑</button>
+        <input type="file" id="editorBGMFile" accept="audio/*" style="display:none;">
+    </div>
+    <!-- Neo Intro Animation Overlay -->
+    <div id="neoIntroOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;z-index:99985;overflow:hidden;pointer-events:none;-webkit-transform:translateZ(0);transform:translateZ(0);">
+        <canvas id="neoIntroCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;"></canvas>
+        <div id="neoIntroTitle" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) translateZ(0) scale(0.3);opacity:0;font-family:'Orbitron',-apple-system,sans-serif;font-size:clamp(2.5rem,8vw,5rem);font-weight:900;color:#fff;text-shadow:0 0 40px rgba(0,255,136,0.6),0 0 80px rgba(0,255,136,0.3);letter-spacing:0.12em;white-space:nowrap;will-change:transform,opacity;-webkit-backface-visibility:hidden;backface-visibility:hidden;">NEOSAURS</div>
+        <div id="neoIntroMapWrap" style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;justify-content:center;align-items:center;opacity:0;transform:scale(1.8);will-change:transform,opacity;-webkit-backface-visibility:hidden;backface-visibility:hidden;">
+            <div style="display:flex;gap:clamp(1rem,4vw,2.5rem);align-items:center;">
+                <div style="font-size:clamp(2rem,6vw,4rem);text-shadow:0 0 20px rgba(100,150,255,0.5);">🗺️</div>
+                <div style="font-size:clamp(2rem,6vw,4rem);text-shadow:0 0 20px rgba(255,200,50,0.5);">⭐</div>
+                <div style="font-size:clamp(2rem,6vw,4rem);text-shadow:0 0 20px rgba(0,255,136,0.5);">🦕</div>
+                <div style="font-size:clamp(2rem,6vw,4rem);text-shadow:0 0 20px rgba(255,100,100,0.5);">🥚</div>
+                <div style="font-size:clamp(2rem,6vw,4rem);text-shadow:0 0 20px rgba(180,100,255,0.5);">🌍</div>
+            </div>
+        </div>
+    </div>
+    <script>!function(){
+        var _neoIntroPlayed=false;
+        var _neoBypass=false;
+
+        function waitForBtn(cb){
+            var btn=document.getElementById('welcomeStartButton');
+            if(btn)return cb(btn);
+            var obs=new MutationObserver(function(){
+                var b=document.getElementById('welcomeStartButton');
+                if(b){obs.disconnect();cb(b);}
+            });
+            obs.observe(document.documentElement,{childList:true,subtree:true});
+        }
+
+        waitForBtn(function(btn){
+            btn.addEventListener('click',function handler(e){
+                if(_neoBypass||_neoIntroPlayed)return;
+                _neoIntroPlayed=true;
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                e.stopPropagation();
+                playNeoIntro(function(){
+                    _neoBypass=true;
+                    btn.click();
+                    _neoBypass=false;
+                });
+            },true);
+        });
+
+        function playNeoIntro(onDone){
+            var overlay=document.getElementById('neoIntroOverlay');
+            var canvas=document.getElementById('neoIntroCanvas');
+            var title=document.getElementById('neoIntroTitle');
+            var mapWrap=document.getElementById('neoIntroMapWrap');
+            if(!overlay||!canvas){onDone();return;}
+
+            overlay.style.display='block';
+            overlay.style.pointerEvents='auto';
+            var ctx=canvas.getContext('2d');
+            var W=canvas.width=window.innerWidth*2;
+            var H=canvas.height=window.innerHeight*2;
+            canvas.style.width=window.innerWidth+'px';
+            canvas.style.height=window.innerHeight+'px';
+            ctx.scale(2,2);
+            var w=W/2,h=H/2;
+
+            /* blur welcome screen */
+            var ws=document.getElementById('welcomeScreen');
+            if(ws){
+                ws.style.transition='filter 0.5s ease-out, opacity 0.5s ease-out';
+                ws.style.filter='blur(20px)';
+                ws.style.opacity='0';
+            }
+
+            /* play hello.mp3 */
+            try{
+                var helloAud=window.__preloadedAudios&&window.__preloadedAudios['hello.mp3'];
+                if(!helloAud)helloAud=new Audio('hello.mp3');
+                helloAud.currentTime=0;
+                helloAud.volume=0.7;
+                helloAud.play().catch(function(){});
+            }catch(ex){}
+
+            /* haptic */
+            try{if(navigator.vibrate)navigator.vibrate([15,40,15]);}catch(ex){}
+            try{if(window.iosHaptic&&window.iosHaptic.confirm)window.iosHaptic.confirm();}catch(ex){}
+
+            /* pixel field-to-sky animation */
+            var startT=performance.now();
+            var PHASE1=800; /* field to sky */
+            var PHASE2=600; /* title zoom */
+            var PHASE3=500; /* map/star scale */
+            var TOTAL=PHASE1+PHASE2+PHASE3+200;
+            var titleShown=false;
+            var mapShown=false;
+            var pixelSize=Math.max(4,Math.floor(w/80));
+
+            function drawField(progress){
+                /* progress 0→1: camera moves from field (ground) up to sky */
+                ctx.clearRect(0,0,w,h);
+
+                var skyTop=Math.max(0,0.6-progress*0.6);
+                var groundY=h*(0.45-progress*0.7);
+
+                /* sky gradient */
+                var gSky=ctx.createLinearGradient(0,0,0,h);
+                gSky.addColorStop(0,'#0a0a2e');
+                gSky.addColorStop(0.3,'#111144');
+                gSky.addColorStop(0.6,'#1a2255');
+                gSky.addColorStop(1,'#2a3a6e');
+                ctx.fillStyle=gSky;
+                ctx.fillRect(0,0,w,h);
+
+                /* stars (pixel) */
+                var starSeed=42;
+                function seededRand(){starSeed=(starSeed*9301+49297)%233280;return starSeed/233280;}
+                var starAlpha=Math.min(1,progress*2);
+                for(var i=0;i<60;i++){
+                    var sx=seededRand()*w;
+                    var sy=seededRand()*h*0.7;
+                    var sb=0.3+seededRand()*0.7;
+                    ctx.fillStyle='rgba(255,255,255,'+(sb*starAlpha).toFixed(2)+')';
+                    ctx.fillRect(Math.floor(sx/pixelSize)*pixelSize,Math.floor(sy/pixelSize)*pixelSize,pixelSize,pixelSize);
+                }
+
+                /* ground/field - pixel art style island */
+                if(groundY<h+50){
+                    /* ocean */
+                    var oceanTop=Math.max(0,groundY+40);
+                    if(oceanTop<h){
+                        ctx.fillStyle='#1a3a5a';
+                        ctx.fillRect(0,oceanTop,w,h-oceanTop);
+                        /* pixel waves */
+                        for(var wx=0;wx<w;wx+=pixelSize*3){
+                            var wy=oceanTop+Math.sin(wx*0.02+progress*8)*pixelSize*2;
+                            ctx.fillStyle='rgba(80,160,220,0.4)';
+                            ctx.fillRect(wx,wy,pixelSize*2,pixelSize);
+                        }
+                    }
+
+                    /* island */
+                    var islandCX=w*0.5;
+                    var islandW=w*0.6;
+                    for(var ix=-islandW/2;ix<islandW/2;ix+=pixelSize){
+                        var rel=ix/(islandW/2);
+                        var ih=30*(1-rel*rel)+Math.sin(ix*0.1)*5;
+                        var iy=groundY-ih;
+                        /* grass */
+                        ctx.fillStyle='#2d5a1e';
+                        ctx.fillRect(Math.floor((islandCX+ix)/pixelSize)*pixelSize,Math.floor(iy/pixelSize)*pixelSize,pixelSize,Math.floor((ih+10)/pixelSize)*pixelSize);
+                        /* dirt */
+                        ctx.fillStyle='#5a3a1a';
+                        ctx.fillRect(Math.floor((islandCX+ix)/pixelSize)*pixelSize,Math.floor((groundY+5)/pixelSize)*pixelSize,pixelSize,pixelSize*3);
+                    }
+
+                    /* trees - pixel style */
+                    var trees=[[0.3,25],[0.45,20],[0.6,30],[0.7,18]];
+                    for(var ti=0;ti<trees.length;ti++){
+                        var tx=w*trees[ti][0];
+                        var tHeight=trees[ti][1];
+                        var tBase=groundY-15-tHeight;
+                        /* trunk */
+                        ctx.fillStyle='#4a2a0a';
+                        ctx.fillRect(Math.floor(tx/pixelSize)*pixelSize,Math.floor(tBase/pixelSize)*pixelSize+pixelSize*2,pixelSize,pixelSize*3);
+                        /* leaves */
+                        ctx.fillStyle='#1a6a1a';
+                        for(var ly=-2;ly<=1;ly++){
+                            var lw=3-Math.abs(ly);
+                            for(var lx=-lw;lx<=lw;lx++){
+                                ctx.fillRect(Math.floor(tx/pixelSize)*pixelSize+lx*pixelSize,Math.floor(tBase/pixelSize)*pixelSize+ly*pixelSize,pixelSize,pixelSize);
+                            }
+                        }
+                    }
+
+                    /* dino silhouette on island */
+                    var dinoX=w*0.5;
+                    var dinoY=groundY-25;
+                    var dinoPixels=[[0,0],[1,0],[2,0],[3,0],[3,-1],[4,-1],[4,-2],[3,-2],[2,-1],[1,-1],[0,-1],[0,-2],[-1,-2],[-1,-1],[-2,0],[-2,1],[-1,1],[0,1],[1,1],[2,1]];
+                    ctx.fillStyle='#00cc88';
+                    var dp=pixelSize*1.5;
+                    for(var di=0;di<dinoPixels.length;di++){
+                        ctx.fillRect(Math.floor(dinoX/dp)*dp+dinoPixels[di][0]*dp,Math.floor(dinoY/dp)*dp+dinoPixels[di][1]*dp,dp,dp);
+                    }
+                }
+            }
+
+            function animate(now){
+                var elapsed=now-startT;
+                var p1=Math.min(1,elapsed/PHASE1);
+                var eased=1-Math.pow(1-p1,3); /* easeOutCubic */
+
+                drawField(eased);
+
+                /* Phase 2: Title zoom in */
+                if(elapsed>=PHASE1*0.4&&!titleShown){
+                    titleShown=true;
+                    title.style.transition='transform 0.8s cubic-bezier(0.22,1,0.36,1), opacity 0.4s ease';
+                    title.style.opacity='1';
+                    title.style.transform='translate(-50%,-50%) translateZ(0) scale(1)';
+                }
+
+                /* Phase 3: Map/star icons scale in */
+                if(elapsed>=PHASE1+PHASE2&&!mapShown){
+                    mapShown=true;
+                    /* fade title out */
+                    title.style.transition='opacity 0.3s ease';
+                    title.style.opacity='0';
+                    /* scale map icons in */
+                    mapWrap.style.transition='transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.4s ease';
+                    mapWrap.style.opacity='1';
+                    mapWrap.style.transform='scale(1)';
+                }
+
+                if(elapsed<TOTAL){
+                    requestAnimationFrame(animate);
+                }else{
+                    /* done - fade out overlay */
+                    overlay.style.transition='opacity 0.3s ease';
+                    overlay.style.opacity='0';
+                    setTimeout(function(){
+                        overlay.style.display='none';
+                        overlay.style.opacity='1';
+                        overlay.style.pointerEvents='none';
+                        /* restore welcome screen for game's own hide logic */
+                        if(ws){
+                            ws.style.filter='';
+                            ws.style.opacity='1';
+                            ws.style.transition='';
+                        }
+                        onDone();
+                    },350);
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+    }();</script>
+    <script>!function(){var e=["https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js","https://unpkg.com/three@0.160.0/build/three.min.js","https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"],t=!1;function n(e){if(!t){t=!0;try{new Function(e)()}catch(t){try{(0,eval)(e)}catch(e){}}}}!function r(o){if(!(t||o>=e.length)){var i=new XMLHttpRequest;i.open("GET",e[o],!0),i.onload=function(){if(200===i.status&&!t){var e=i.responseText;try{Object.defineProperty(i,"responseText",{value:""})}catch(e){}try{Object.defineProperty(i,"response",{value:""})}catch(e){}n(e),e=null}},i.onerror=function(){r(o+1)},i.ontimeout=function(){r(o+1)},i.timeout=8e3,i.send()}}(0),setTimeout(function(){if("undefined"==typeof THREE&&!t)for(var r=0;r<e.length;r++)try{var o=new XMLHttpRequest;if(o.open("GET",e[r],!1),o.send(),200===o.status){var i=o.responseText;try{Object.defineProperty(o,"responseText",{value:""})}catch(e){}n(i),i=null;break}}catch(e){}},100)}();</script>
+    <script>!function(){var e=document.createElement("style");e.textContent=["* { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; -webkit-tap-highlight-color: transparent !important; }","html, body { position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; touch-action: none; margin: 0; padding: 0; }","canvas { touch-action: none; }","input, textarea { -webkit-user-select: text !important; user-select: text !important; }"].join("\n"),document.head.appendChild(e),document.addEventListener("touchmove",function(e){"CANVAS"===e.target.tagName&&1===e.touches.length||e.target.closest&&e.target.closest(".scrollable")||e.preventDefault()},{passive:!1}),document.addEventListener("touchstart",function(e){"BUTTON"!==e.target.tagName&&"INPUT"!==e.target.tagName&&e.touches.length},{passive:!0});var t=0;document.addEventListener("touchend",function(e){var n=Date.now();n-t<300&&e.preventDefault(),t=n},{passive:!1})}(),function(){var e=navigator.userAgent,t=/iPhone|iPad|iPod|Android/i.test(e)||"MacIntel"===navigator.platform&&navigator.maxTouchPoints>1||"ontouchstart"in window&&navigator.maxTouchPoints>1,n=/Safari\//.test(e)&&!/Chrome\//.test(e)&&!/CriOS/.test(e)&&!/OPR\//.test(e)&&!/Edg\//.test(e);function o(){if(!t&&!(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||navigator.maxTouchPoints>1)){var e=document.getElementById("blockOverlay");e&&e.remove();var n=document.createElement("div");n.id="blockOverlay",n.style.cssText="position:fixed;top:0;left:0;width:100%;height:100vh;height:100dvh;background:#000;z-index:999999;display:flex;justify-content:center;align-items:center;cursor:pointer;",n.innerHTML='<img src="eee.jpg" style="width:100%;height:100%;object-fit:contain;">',n.addEventListener("click",function(){n.remove()}),document.body.appendChild(n),setTimeout(function(){n.parentNode&&n.remove()},3e3)}}document.addEventListener("keydown",function(e){if((e.metaKey||e.ctrlKey)&&("+"===e.key||"-"===e.key||"="===e.key||"0"===e.key))return e.preventDefault(),e.stopPropagation(),!1},!0),document.addEventListener("wheel",function(e){(e.ctrlKey||e.metaKey)&&e.preventDefault()},{passive:!1}),document.addEventListener("keydown",function(e){if(!window.__neosaurDevMode)return(!e.metaKey&&!e.ctrlKey||"s"!==e.key&&"S"!==e.key)&&(!e.metaKey&&!e.ctrlKey||"u"!==e.key&&"U"!==e.key)?"F12"===e.key||(e.ctrlKey||e.metaKey)&&e.shiftKey&&/^[iIjJcC]$/.test(e.key)||e.metaKey&&e.altKey&&/^[iIuUcCrReE]$/.test(e.key)||e.ctrlKey&&e.shiftKey&&("e"===e.key||"E"===e.key)?(e.preventDefault(),e.stopPropagation(),t||o(),!1):!e.metaKey&&!e.ctrlKey||"p"!==e.key&&"P"!==e.key?void(e.metaKey&&e.shiftKey&&("r"===e.key||"R"===e.key)&&e.altKey):(e.preventDefault(),e.stopPropagation(),t||o(),!1):(e.preventDefault(),e.stopPropagation(),t||o(),!1)},!0),t||setTimeout(function(){setInterval(function(){window.__neosaurDevMode||(window.outerWidth-window.innerWidth>250||window.outerHeight-window.innerHeight>250)&&o()},1500)},3e3),document.addEventListener("contextmenu",function(e){e.preventDefault()}),window.addEventListener("beforeprint",function(e){e.preventDefault()}),document.body.style.webkitUserSelect="none",document.body.style.userSelect="none",document.body.style.webkitTouchCallout="none",document.addEventListener("copy",function(e){e.preventDefault()}),document.addEventListener("paste",function(e){e.preventDefault()}),document.addEventListener("cut",function(e){e.preventDefault()}),document.addEventListener("selectstart",function(e){e.preventDefault()}),document.body.style.overscrollBehavior="none",document.addEventListener("gesturestart",function(e){e.preventDefault()}),document.addEventListener("gesturechange",function(e){e.preventDefault()}),document.addEventListener("gestureend",function(e){e.preventDefault()}),document.addEventListener("touchmove",function(e){e.touches.length>1&&e.preventDefault()},{passive:!1}),document.addEventListener("wheel",function(e){e.target.closest&&e.target.closest("#editorToolbar, #mapCourseList, .map-course-list, #benchHelpArea")||e.preventDefault()},{passive:!1}),document.addEventListener("keydown",function(e){["ArrowUp","ArrowDown","PageUp","PageDown","Home","End"].includes(e.key)&&!e.target.closest("input,textarea")&&(!window.GameState||window.GameState.gameStarted)}),document.addEventListener("dragstart",function(e){e.preventDefault()}),document.addEventListener("drop",function(e){e.preventDefault()}),document.addEventListener("dragover",function(e){e.preventDefault()});try{var r=window.matchMedia("print");r.addEventListener?r.addEventListener("change",function(e){e.matches&&(document.body.style.display="none",setTimeout(function(){document.body.style.display=""},100))}):r.addListener&&r.addListener(function(){document.body.style.display="none",setTimeout(function(){document.body.style.display=""},100)})}catch(e){}t&&Object.defineProperty(document,"webkitHidden",{get:function(){return!1}}),setTimeout(function(){document.querySelectorAll("script:not([src])").forEach(function(e){e.textContent&&e.textContent.length>50&&(e.textContent="")}),document.querySelectorAll("script[src]").forEach(function(e){/cdn\.jsdelivr|unpkg|cdnjs/i.test(e.src)||(e.removeAttribute("src"),e.textContent="")})},3e3);try{if(navigator.clipboard&&navigator.clipboard.writeText,navigator.clipboard){var i=navigator.clipboard.writeText.bind(navigator.clipboard);navigator.clipboard.writeText=function(e){return e&&(e.length>200||/function|var |let |const |document\.|window\.|THREE\./i.test(e))?Promise.resolve():i(e)}}}catch(e){}try{var a=document.execCommand.bind(document);document.execCommand=function(e){if("copy"===e||"cut"===e){var t=window.getSelection();if(t&&t.toString().length>100)return t.removeAllRanges(),!1}return a.apply(document,arguments)}}catch(e){}try{var c=window.getSelection;window.getSelection=function(){var e=c.call(window);if(e&&e.toString().length>300)try{e.removeAllRanges()}catch(e){}return e}}catch(e){}try{new MutationObserver(function(e){e.forEach(function(e){"childList"===e.type&&e.addedNodes.forEach(function(e){e.tagName&&("SCRIPT"===e.tagName&&e.src&&!/netlify\.app|localhost|cdn\.jsdelivr|unpkg|cdnjs/i.test(e.src)&&e.remove(),e.id&&/firebug|devtools|inspector|__vue|__react/i.test(e.id)&&e.remove(),"IFRAME"===e.tagName&&e.src&&!/netlify\.app|localhost/i.test(e.src)&&e.remove())}),"attributes"===e.type&&e.attributeName})}).observe(document.documentElement,{childList:!0,subtree:!0,attributes:!0})}catch(e){}try{Object.defineProperty(document.documentElement,"outerHTML",{get:function(){return"<!DOCTYPE html><html><head></head><body></body></html>"},configurable:!0})}catch(e){}try{Object.defineProperty(document.documentElement,"innerHTML",{get:function(){return"<head></head><body></body>"},configurable:!0})}catch(e){}try{Object.defineProperty(document.head,"innerHTML",{get:function(){return""},configurable:!0})}catch(e){}try{var s=XMLSerializer.prototype.serializeToString;XMLSerializer.prototype.serializeToString=function(e){return e===document||e===document.documentElement||e===document.head||e===document.body?"<!DOCTYPE html><html><head></head><body></body></html>":s.call(this,e)}}catch(e){}try{Document.prototype.cloneNode,Document.prototype.cloneNode=function(e){return document.implementation.createHTMLDocument("")}}catch(e){}try{var d=navigator.sendBeacon;d&&(navigator.sendBeacon=function(e,t){return("string"!=typeof e||!/\.js(\?|$)|style\.css/i.test(e))&&d.apply(this,arguments)})}catch(e){}document.addEventListener("keydown",function(e){if(!window.__neosaurDevMode)return!e.metaKey&&!e.ctrlKey||!e.shiftKey||"s"!==e.key&&"S"!==e.key?e.metaKey&&e.altKey&&("u"===e.key||"U"===e.key)?(e.preventDefault(),e.stopPropagation(),!1):void 0:(e.preventDefault(),e.stopPropagation(),!1)},!0);var l=function(){};console.log=l,console.warn=l,console.error=l,console.info=l,console.debug=l,console.trace=l,console.dir=l,console.dirxml=l,console.table=l,console.group=l,console.groupEnd=l,console.groupCollapsed=l,console.count=l,console.countReset=l,console.time=l,console.timeEnd=l,console.timeLog=l,console.assert=l,console.clear=l,console.profile=l,console.profileEnd=l,function(){var e=!1;function t(){if(!e){e=!0;var t=window.fetch;window.fetch=function(e){var n="string"==typeof e?e:e&&e.url?e.url:"";return/\.js(\?|$)|style\.css|\.html(\?|$)/i.test(n)&&!/cdn\.jsdelivr|unpkg|cdnjs|fonts\.googleapis|fonts\.gstatic/i.test(n)?Promise.resolve(new Response("",{status:403})):t.apply(this,arguments)};var n=XMLHttpRequest.prototype.open,o=XMLHttpRequest.prototype.send;XMLHttpRequest.prototype.open=function(e,t){return"string"==typeof t&&/\.js(\?|$)|style\.css|\.html(\?|$)/i.test(t)&&!/cdn\.jsdelivr|unpkg|cdnjs/i.test(t)&&(this.__neoBlocked=!0),n.apply(this,arguments)},XMLHttpRequest.prototype.send=function(){if(!this.__neoBlocked)return o.apply(this,arguments);try{Object.defineProperty(this,"responseText",{get:function(){return""}})}catch(e){}try{Object.defineProperty(this,"response",{get:function(){return""}})}catch(e){}try{Object.defineProperty(this,"status",{get:function(){return 403}})}catch(e){}var e=this;setTimeout(function(){e.onload&&e.onload()},0)};var r=URL.createObjectURL;URL.createObjectURL=function(e){return e&&e.type&&/javascript|html|css/i.test(e.type)&&e.size>500?"about:blank":r.apply(this,arguments)};var i=window.open;window.open=function(e){return"string"==typeof e&&/\.js(\?|$)|style\.css|view-source:/i.test(e)?null:i.apply(this,arguments)}}}var n=setInterval(function(){window.__gameReady&&(clearInterval(n),setTimeout(t,2e3))},500);setTimeout(function(){t()},15e3)}(),setTimeout(function(){setInterval(function(){if(!window.__neosaurDevMode){var e=new Image,t=performance.now();Object.defineProperty(e,"id",{get:function(){performance.now()-t>50&&o()}}),e.id}},5e3)},3e3),function(){if(!window.__neosaurDevMode){var e=document.createElement("div");Object.defineProperty(e,"id",{get:function(){o()}}),window.__devtrapEl=e}}(),n&&!t&&setTimeout(function(){var e=new RegExp(""),t=0;e.toString=function(){return++t>1&&o(),""},setInterval(function(){window.__neosaurDevMode||(t=0,Function.prototype.toString.call(e))},2e3)},3e3),window.addEventListener("keydown",function(e){if(!window.__neosaurDevMode&&e.metaKey&&e.altKey){var n=e.key.toLowerCase();if(-1!=="icures".indexOf(n))return e.preventDefault(),e.stopImmediatePropagation(),t||o(),!1}},!0)}(),window.addEventListener("DOMContentLoaded",function(){!function(e){if("undefined"==typeof THREE)var t=0,n=setInterval(function(){if(t+=100,"undefined"!=typeof THREE)clearInterval(n),e();else if(t>=1e4){clearInterval(n);var o=(navigator.language||"ja").toLowerCase(),r=o.startsWith("ja"),i=o.startsWith("zh"),a=o.startsWith("ko"),c=r?"3Dエンジンの読み込みに失敗":i?"3D引擎加载失败":a?"3D 엔진 로딩 실패":"3D engine load failed",s=r?"再読み込み":i?"重新加载":a?"새로고침":"Reload";document.getElementById("preloaderScreen").innerHTML='<p style="color:#f00;">'+c+'<br><button onclick="location.reload()" style="padding:1rem 2rem;font-size:1.2rem;background:rgba(255,0,0,0.3);border:2px solid #f00;border-radius:50px;color:#fff;cursor:pointer;margin-top:1rem;">'+s+"</button></p>"}},100);else e()}(function(){var e=document.getElementById("preloaderStatus"),t=document.getElementById("preloaderBarFill"),n=!1,o=(navigator.language||"ja").toLowerCase(),r=o.startsWith("ja"),i=o.startsWith("zh"),a=o.startsWith("ko");e.textContent=r?"読み込み中...":i?"加载中...":a?"로딩 중...":"Loading...",requestAnimationFrame(function(){e.style.opacity="1",e.style.transform="translateY(0)",document.getElementById("preloaderBar").style.opacity="1"}),window.runFirstIntro=function(){var e=document.getElementById("firstIntroScreen");if(e){e.style.display="flex";var t=document.getElementById("firstIntroTitle"),n=e.querySelectorAll(".first-intro-line"),o=document.getElementById("firstIntroTapHint"),r=0,i=!1,a=!1,c=null,s=.3,l=d["last.mp3"]||new Audio("last.mp3"),u=d["hello.mp3"]||new Audio("hello.mp3");e.addEventListener("touchstart",m,{passive:!0}),e.addEventListener("click",m),requestAnimationFrame(function(){if(t.style.opacity="1",t.style.transform="translateY(0)",navigator.vibrate&&navigator.vibrate([10,30,10]),window.iosHaptic&&window.iosHaptic.confirm)try{window.iosHaptic.confirm()}catch(e){}}),setTimeout(function(){t.style.transition="transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.4s ease",t.style.transform="translateY(-50px)",t.style.opacity="0",setTimeout(function(){i=!0,navigator.vibrate&&navigator.vibrate([10,30,10]),n.forEach(function(e,t){setTimeout(function(){if(e.style.transition="transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s ease",e.style.opacity="1",e.style.transform="translateY(0)",navigator.vibrate&&navigator.vibrate(10),window.iosHaptic)try{window.iosHaptic()}catch(e){}},t*(1e3*s+400))});var e=n.length*(1e3*s+400)+600;setTimeout(function(){o.style.opacity="1",a=!0,c=setTimeout(function(){p()},2e3)},e)},500)},1200),e.addEventListener("click",function t(){a&&(e.removeEventListener("click",t),p())}),e.addEventListener("touchend",function t(n){a&&(e.removeEventListener("touchend",t),p())},{passive:!0})}function m(){if(navigator.vibrate&&navigator.vibrate(10),window.iosHaptic)try{window.iosHaptic()}catch(e){}if(1===++r)try{l.currentTime=0,l.volume=.7,l.play().catch(function(){})}catch(e){}r>=3&&!i&&(s=.2)}function p(){if("none"!==e.style.display){c&&clearTimeout(c);try{u.currentTime=0,u.volume=.7,u.play().catch(function(){})}catch(e){}window.__helloAudio=u,e.querySelectorAll("#firstIntroTitle, .first-intro-line, #firstIntroTapHint").forEach(function(e,t){e.style.transition="transform 0.8s cubic-bezier(0.4,0,0.2,1), opacity 0.6s ease",e.style.transform="translateY(-60px)",e.style.opacity="0"}),setTimeout(function(){e.style.transition="opacity 0.3s ease",e.style.opacity="0"},500),setTimeout(function(){e.style.display="none",e.style.transform="",e.style.opacity="";var t=document.getElementById("welcomeScreen");t.style.transform="scale(0.8)",t.style.opacity="0",t.style.transition="none",t.style.display="flex",t.offsetHeight,t.style.transition="transform 1s cubic-bezier(0.22,1,0.36,1), opacity 0.8s ease",t.style.transform="scale(1)",t.style.opacity="1",t.querySelectorAll(".welcome-slidable").forEach(function(e,t){e.style.transition="none",e.style.opacity="0",e.style.transform="translateY(25px)",e.offsetHeight,e.style.transition="transform 0.8s cubic-bezier(0.22,1,0.36,1) "+(.08*t+.2)+"s, opacity 0.8s ease "+(.08*t+.2)+"s",e.style.transform="translateY(0)",e.style.opacity="1"});try{localStorage.setItem("neosaur_introSeen","1")}catch(e){}},850)}}};var c=["Back.mp3","hel.mp3","hello.mp3"],s=["ccc.mp3","theme.mp3","BGM-2.mp3","classic.mp3","xmen.mp3","tung.mp3","get.mp3","Explode.mp3","good.mp3","last.mp3","lock.mp3","macR.mp3","macC.mp3","macL.mp3","BEA.mp3","tock.mp3","dm.mp3","lost.mp3","winsong.mp3","intro.mp3","score.mp3","up.mp3","nnn.mp3","dmm.mp3","stop.mp3","return.mp3","1st.mp3","st.mp3","new.mp3","8-dm.mp3","8-good.mp3","64bit-d.mp3","star.mp3","next-c.mp3","jump.mp3","item-j.mp3","8-j.mp3","c-hover.mp3","77-clear.mp3"],d={},l=0,u=c.length,m=!1,p=!1;function f(){m&&p&&y()}function y(){if(!n){n=!0,window.__preloadedAudios=d,t&&(t.style.width="100%");var e=document.getElementById("preloaderScreen");e.classList.add("loaded"),setTimeout(function(){e.style.display="none",document.body.classList.add("loaded");var t=!1;try{t=!localStorage.getItem("neosaur_introSeen")}catch(e){}if(/VisionOS|Vision Pro/i.test(navigator.userAgent)&&t){try{localStorage.setItem("neosaur_introSeen","1")}catch(e){}t=!1}if(t)runFirstIntro();else{var n=document.getElementById("welcomeScreen");n.style.display="flex";var o=n.querySelectorAll(".welcome-slidable");o.forEach(function(e){var t="fixed"===window.getComputedStyle(e).position;e.style.transition="none",t||(e.style.transform="translateY(30px)"),e.style.opacity="0"}),n.offsetHeight,requestAnimationFrame(function(){requestAnimationFrame(function(){o.forEach(function(e,t){var n="fixed"===window.getComputedStyle(e).position;e.style.transition="transform 0.8s cubic-bezier(0.4,0,0.2,1) "+.1*t+"s, opacity 0.8s ease "+.1*t+"s",n||(e.style.transform="translateY(0)"),e.style.opacity="1"})})})}var r=0;function i(){if(!(r>=s.length)){var e=s[r++],t=new Audio(e);t.preload="auto",d[e]=t,window.__preloadedAudios[e]=t,t.addEventListener("canplaythrough",function(){setTimeout(i,50)},{once:!0}),t.addEventListener("error",function(){setTimeout(i,50)},{once:!0}),t.load()}}i(),i(),i(),i(),i(),i(),i(),i()},350)}}function v(){var e=document.createElement("div");e.style.cssText="position:fixed;top:0;left:0;width:100%;height:100vh;height:100dvh;background:rgba(0,0,0,0.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:99999;";var t=r,n=i,o=a,c=t?"ゲームの読み込みに失敗しました":n?"游戏加载失败":o?"게임 로딩 실패":"Failed to load game",s=t?"再読み込み":n?"重新加载":o?"새로고침":"Reload",d=t?"全てリセット":n?"全部重置":o?"전부 초기화":"Reset All";e.innerHTML='<p style="color:#fff;font-size:1.2rem;margin-bottom:1.5rem;font-family:-apple-system,sans-serif;text-align:center;">'+c+'</p><button id="errReloadBtn" style="padding:0.8rem 2.5rem;font-size:1rem;background:rgba(0,255,136,0.3);border:2px solid rgba(0,255,136,0.5);border-radius:50px;color:#fff;cursor:pointer;font-family:-apple-system,sans-serif;margin:0.3rem;-webkit-tap-highlight-color:transparent;">'+s+'</button><button id="errResetBtn" style="padding:0.6rem 2rem;font-size:0.85rem;background:rgba(255,68,68,0.15);border:1.5px solid rgba(255,68,68,0.35);border-radius:50px;color:rgba(255,255,255,0.6);cursor:pointer;font-family:-apple-system,sans-serif;margin:0.3rem;-webkit-tap-highlight-color:transparent;">'+d+"</button>",document.body.appendChild(e),document.getElementById("errReloadBtn").addEventListener("click",function(){"caches"in window&&caches.keys().then(function(e){e.forEach(function(e){caches.delete(e)})}).catch(function(){}),setTimeout(function(){location.reload()},200)}),document.getElementById("errResetBtn").addEventListener("click",function(){var e=document.createElement("div");e.style.cssText="position:fixed;top:0;left:0;width:100%;height:100vh;height:100dvh;background:rgba(0,0,0,0.8);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:100000;";var r=t?"セーブデータも全て消えます<br>本当にリセットしますか？":n?"所有存档数据将被删除<br>确定要重置吗？":o?"모든 세이브 데이터가 삭제됩니다<br>정말 초기화하시겠습니까?":"All save data will be deleted.<br>Are you sure?",i=t?"リセット":n?"重置":o?"초기화":"Reset",a=t?"キャンセル":n?"取消":o?"취소":"Cancel";e.innerHTML='<p style="color:#ff6666;font-size:1.1rem;margin-bottom:1rem;font-family:-apple-system,sans-serif;text-align:center;">'+r+'</p><div style="display:flex;gap:0.6rem;"><button id="errResetYes" style="padding:0.6rem 1.5rem;border-radius:50px;color:#fff;font-size:0.9rem;background:rgba(255,68,68,0.3);border:2px solid rgba(255,68,68,0.5);cursor:pointer;font-family:-apple-system,sans-serif;">'+i+'</button><button id="errResetNo" style="padding:0.6rem 1.5rem;border-radius:50px;color:#fff;font-size:0.9rem;background:rgba(255,255,255,0.08);border:2px solid rgba(255,255,255,0.2);cursor:pointer;font-family:-apple-system,sans-serif;">'+a+"</button></div>",document.body.appendChild(e),document.getElementById("errResetYes").addEventListener("click",function(){try{localStorage.clear()}catch(e){}"caches"in window&&caches.keys().then(function(e){e.forEach(function(e){caches.delete(e)})}).catch(function(){}),"serviceWorker"in navigator&&navigator.serviceWorker.getRegistrations().then(function(e){e.forEach(function(e){e.unregister()})}).catch(function(){}),setTimeout(function(){location.reload()},500)}),document.getElementById("errResetNo").addEventListener("click",function(){e.remove()})})}function g(e){try{new Function(e)()}catch(t){try{(0,eval)(e)}catch(e){v()}}}function h(){var e="_520aa37cc92c2c7c.js?v="+Date.now(),t=new XMLHttpRequest;t.open("GET",e,!0),t.setRequestHeader("X-Neo-Auth",window._neoToken()),t.onload=function(){if(200===t.status&&t.responseText&&t.responseText.length>100){var e=t.responseText;try{Object.defineProperty(t,"responseText",{value:"",writable:!1})}catch(e){}try{Object.defineProperty(t,"response",{value:"",writable:!1})}catch(e){}g(e),e=null}else v()},t.onerror=function(){v()},t.send()}!function(){if(window._earlyGameCode){var e=window._earlyGameCode;window._earlyGameCode=null,g(e),e=null}else if(window._earlyGameError)h();else var t=0,n=setInterval(function(){if(t++,window._earlyGameCode){clearInterval(n);var e=window._earlyGameCode;window._earlyGameCode=null,g(e),e=null}else(window._earlyGameError||t>50)&&(clearInterval(n),h())},100)}(),c.forEach(function(n){var o=new Audio(n);function c(){l++,function(){var n=Math.round(l/u*100);t&&(t.style.width=n+"%");var o=n<100?r?"BGMを読み込み中... ":i?"正在加载BGM... ":a?"BGM 로딩 중... ":"Loading BGM... ":r?"読み込み中... ":i?"加载中... ":a?"로딩 중... ":"Loading... ";e&&(e.textContent=o+n+"%")}(),l>=u&&(m=!0,f())}o.preload="auto",d[n]=o,o.addEventListener("canplaythrough",c,{once:!0}),o.addEventListener("error",c,{once:!0}),o.load()});var w=setInterval(function(){window.__gameReady&&(clearInterval(w),p=!0,f())},100);setTimeout(function(){n||(m=!0,p=!0,y())},3e3)})});</script>
+    <script>!function(){var t=null;window.addEventListener("load",function(){var e=document.getElementById("welcomeTitleInput"),n=document.getElementById("welcomeSubtitle"),a=document.getElementById("translateResult");e&&n&&a&&(e.addEventListener("input",function(){var s=e.value.replace(/^🦕\s*/,"").trim();if(s.length<2)return"none"!==a.style.display&&(a.style.opacity="0",a.style.transform="translateY(15px)",setTimeout(function(){a.style.display="none"},400)),void("none"===n.style.display&&(n.style.display="",n.style.opacity="1"));var o=/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(s)?"ja|en":"en|ja";t&&clearTimeout(t),t=setTimeout(function(){fetch("https://api.mymemory.translated.net/get?q="+encodeURIComponent(s)+"&langpair="+o).then(function(t){return t.json()}).then(function(t){if(t&&t.responseData&&t.responseData.translatedText){var e=t.responseData.translatedText;if(e.toUpperCase()===s.toUpperCase())return;n.style.opacity="0",setTimeout(function(){n.style.display="none"},400),a.textContent=e,a.style.display="",requestAnimationFrame(function(){a.style.opacity="1",a.style.transform="translateY(0)"})}}).catch(function(){})},300)}),e.addEventListener("blur",function(){e.value.trim()&&"🦕"!==e.value.trim()||(e.value="🦕 NEOSAURS")}))})}();</script>
+    <script>"serviceWorker"in navigator&&window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});</script>
+    <script>
+    /* === WORLDMAP FLOW FIX ===
+     * Fix: After clearing ANY stage (EARTH, SUN, MOON), pressing "つぎへ" (next)
+     * ALWAYS shows the WORLDMAP screen so the player can pick the next course.
+     *
+     * Original bug: only fullClear (totalClears>=14 && totalEggsNeeded===150)
+     * showed the worldmap. Normal wins called restartFromWin() which skipped
+     * the worldmap and went directly to showCelestialTransit().
+     *
+     * This patch intercepts the restartButton click in capture phase to force
+     * the worldmap path for every win. Custom course wins are unaffected
+     * (the _isCustomCourse check runs first inside the game's handler).
+     */
+    !function(){
+        var _patched=false;
+        var _pi=setInterval(function(){
+            var btn=document.getElementById('restartButton');
+            if(!btn||!window.GameState)return;
+            if(_patched){clearInterval(_pi);return;}
+            _patched=true;
+            clearInterval(_pi);
+            btn.addEventListener('click',function(){
+                if(btn.dataset.fullClear!=='1'){
+                    var gs=window.GameState;
+                    if(gs){
+                        gs.totalClears=(gs.totalClears||0)+1;
+                    }
+                }
+                btn.dataset.fullClear='1';
+            },true);
+        },200);
+    }();
+    </script>
+</body>
+</html>
