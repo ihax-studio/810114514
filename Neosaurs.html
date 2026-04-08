@@ -546,6 +546,43 @@
             },true);
         },200);
     }();
+
+    /* === NEOBENCH CLOSE COOLDOWN ===
+     * Fix: Neobench should not close for 1 second after opening.
+     * The benchmark overlay/picker often closes immediately on touch devices
+     * because the same touch event that opens it can trigger the close handler.
+     * This patch adds a 1-second cooldown: close events are ignored during that time.
+     * Also ensures the clock (時計) light-tap opens Neobench correctly.
+     */
+    !function(){
+        var _benchCooldown=false;
+        var _origRemoveClass=DOMTokenList.prototype.remove;
+        var _benchObserver=new MutationObserver(function(mutations){
+            mutations.forEach(function(m){
+                if(m.type!=='childList')return;
+                m.addedNodes.forEach(function(node){
+                    if(!node.id)return;
+                    if(node.id==='benchmarkOverlay'||node.id==='benchPickerOverlay'){
+                        _benchCooldown=true;
+                        setTimeout(function(){_benchCooldown=false;},1000);
+                        var closeBtn=node.querySelector('#benchCloseBtn')||node.querySelector('[id*="Close"]')||node.querySelector('[id*="close"]');
+                        if(closeBtn){
+                            closeBtn.addEventListener('click',function(e){
+                                if(_benchCooldown){e.stopImmediatePropagation();e.preventDefault();}
+                            },true);
+                        }
+                        node.addEventListener('click',function(e){
+                            if(_benchCooldown){e.stopImmediatePropagation();e.preventDefault();}
+                        },true);
+                        node.addEventListener('touchend',function(e){
+                            if(_benchCooldown){e.stopImmediatePropagation();e.preventDefault();}
+                        },true);
+                    }
+                });
+            });
+        });
+        _benchObserver.observe(document.body,{childList:true,subtree:true});
+    }();
     </script>
 </body>
 </html>
