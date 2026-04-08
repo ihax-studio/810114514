@@ -1,588 +1,478 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>数学III・C</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>三角関数マスター</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
-html,body{width:100%;height:100%;overflow:hidden;background:#f2f2f7;
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",sans-serif}
-#cv{display:block;width:100%;background:#fafafa}
-/* tab bar */
-.tabs{display:flex;background:rgba(249,249,249,.94);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
-  border-top:.5px solid #c6c6c8;padding-bottom:env(safe-area-inset-bottom,0)}
-.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0 4px;
-  font:500 10px/1 -apple-system,sans-serif;background:none;border:none;color:#8e8e93;cursor:pointer;transition:color .15s}
-.tabs button.on{color:var(--tc,#007aff)}
-.tabs button span.ico{font-size:20px;line-height:1}
-/* controls */
-.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 14px;background:#fff;border-bottom:.5px solid #c6c6c8}
-.bar select,.bar input[type=number]{background:#e5e5ea;border:none;border-radius:10px;color:#1c1c1e;
-  padding:6px 10px;font:14px -apple-system,sans-serif;text-align:center}
-.bar select{padding-right:24px;-webkit-appearance:none;appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238e8e93'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 8px center}
-.bar input[type=number]{width:56px}
-.bar input[type=range]{height:22px;-webkit-appearance:none;appearance:none;background:transparent;flex:1 1 80px;max-width:160px}
-.bar input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:#d1d1d6}
-.bar input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;
-  background:#fff;box-shadow:0 .5px 4px rgba(0,0,0,.2);margin-top:-9px}
-.pill{padding:5px 12px;font:500 13px -apple-system,sans-serif;border-radius:20px;border:1.5px solid #c6c6c8;
-  background:none;color:#8e8e93;cursor:pointer;transition:all .2s}
-.pill.on{background:var(--c,#007aff)18;border-color:var(--c,#007aff);color:var(--c,#007aff)}
-.vals{font:500 12px -apple-system,sans-serif}
-/* Apple Pencil floating label */
-#pencil-label{position:fixed;pointer-events:none;opacity:0;
-  transform:scale(.8);transition:opacity .15s,transform .2s cubic-bezier(.4,.0,.2,1);
-  background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
-  border-radius:14px;padding:8px 14px;box-shadow:0 2px 16px rgba(0,0,0,.12);z-index:999;
-  font:600 15px/1.3 -apple-system,"SF Pro Display",sans-serif;color:#1c1c1e;white-space:nowrap}
-#pencil-label.show{opacity:1;transform:scale(1)}
-#pencil-label .deg{font-size:22px;font-weight:700;letter-spacing:-.5px}
-#pencil-label .pres{font-size:13px;color:#8e8e93;font-weight:500;margin-top:2px}
+:root{--bg:#fff;--card:#f8f8fa;--border:#e5e5ea;--text:#1c1c1e;--dim:#8e8e93;--blue:#007aff;--red:#ff3b30;--orange:#ff9500;--green:#34c759;--purple:#af52de;--teal:#5ac8fa;--pink:#ff2d55}
+body{font-family:-apple-system,'SF Pro Text','SF Pro Display','Helvetica Neue',sans-serif;
+background:var(--bg);color:var(--text);padding:0 0 40px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.mono{font-family:'SF Mono','Menlo',monospace}
+
+/* Sticky nav */
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:.5px solid var(–border);padding:10px 16px 0}
+.nav h1{font-size:18px;font-weight:800;letter-spacing:-.5px}
+.nav-tabs{display:flex;gap:0;margin-top:8px;overflow-x:auto;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nt{padding:7px 14px;font-size:12px;font-weight:600;color:var(–dim);border-bottom:2.5px solid transparent;cursor:pointer;white-space:nowrap;transition:.2s}
+.nt.on{color:var(–blue);border-color:var(–blue)}
+
+.pg{display:none;padding:16px;max-width:620px;margin:0 auto}
+.pg.show{display:block}
+
+/* Cards */
+.cd{background:var(–card);border-radius:14px;padding:16px;margin-bottom:14px}
+.cd h2{font-size:16px;font-weight:800;margin-bottom:10px}
+.cd h3{font-size:13px;font-weight:700;color:var(–blue);margin:14px 0 6px;border-left:3px solid var(–blue);padding-left:8px}
+.cd p{font-size:13px;margin:5px 0}
+.fb{background:#fff;border:1px solid var(–border);border-radius:10px;padding:12px;margin:8px 0;
+text-align:center;font-family:‘SF Mono’,monospace;font-size:14px;font-weight:600;line-height:2}
+.fb .y{color:var(–orange)}.fb .p{color:var(–pink)}.fb .g{color:var(–green)}.fb .b{color:var(–blue)}.fb .r{color:var(–red)}
+.tip{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;margin:8px 0;font-size:12px}
+.tip::before{content:’💡 ’}
+.warn{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:10px 12px;margin:8px 0;font-size:12px;color:#991b1b}
+.warn::before{content:’⚠️ ’}
+.note{font-size:11px;color:var(–dim);background:#f0f1f5;border-radius:8px;padding:6px 10px;margin:6px 0}
+.note b{color:var(–blue)}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;font-size:11px;font-family:‘SF Mono’,monospace;margin:8px 0}
+.tbl th,.tbl td{padding:5px 3px;text-align:center;border:1px solid var(–border)}
+.tbl th{background:#f0f1f5;font-weight:700;font-size:10px}
+.tbl tr.hl{background:#eff6ff}
+
+/* Unit circle SVG */
+.uc{max-width:300px;margin:8px auto}
+.uc-vals{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+.uv{background:#fff;border:1px solid var(–border);border-radius:10px;padding:10px 4px;text-align:center}
+.uv .l{font-size:9px;color:var(–dim);font-weight:600}.uv .n{font-size:16px;font-weight:800;font-family:‘SF Mono’,monospace;margin-top:2px}
+
+/* Puzzle */
+.pz-bank{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;justify-content:center}
+.chip{padding:7px 12px;background:#fff;border:1.5px solid var(–border);border-radius:10px;
+font-family:‘SF Mono’,monospace;font-size:12px;font-weight:600;cursor:pointer;transition:.15s}
+.chip:active{transform:scale(.96)}
+.chip.sel{border-color:var(–blue);background:#eff6ff;color:var(–blue)}
+.chip.used{opacity:.25;pointer-events:none}
+.slot{min-height:34px;border:2px dashed var(–border);border-radius:8px;display:flex;align-items:center;
+justify-content:center;font-family:‘SF Mono’,monospace;font-size:12px;font-weight:600;transition:.2s;padding:4px}
+.slot.hi{border-color:var(–blue);background:#eff6ff}
+.slot.ok{border-style:solid;border-color:var(–green);background:#f0fdf4;color:var(–green)}
+.slot.ng-flash{border-color:var(–red);background:#fef2f2}
+
+/* Quiz */
+.qc{background:var(–card);border:1.5px solid var(–border);border-radius:14px;padding:16px;margin-bottom:10px;transition:.3s}
+.qc.is-ok{border-color:var(–green);background:#f0fdf4}.qc.is-ng{border-color:var(–red);background:#fef2f2}
+.qctx{font-size:11px;color:var(–dim);margin-bottom:5px}
+.qstem{font-family:‘SF Mono’,monospace;font-size:15px;font-weight:700;line-height:1.8;margin:6px 0 12px;text-align:center}
+.qstem .bl{color:var(–blue);border-bottom:2px dashed var(–blue);padding:0 4px}
+.qstem .gf{color:var(–green)}.qstem .rf{color:var(–red);text-decoration:line-through}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.op{font-family:‘SF Mono’,monospace;font-size:11px;font-weight:600;padding:12px 6px;text-align:center;
+background:#fff;border:1.5px solid var(–border);border-radius:10px;cursor:pointer;transition:.15s;line-height:1.3}
+.op:active{transform:scale(.97)}
+.op.ok{background:#dcfce7;border-color:var(–green);color:#166534}
+.op.ng{background:#fef2f2;border-color:var(–red);color:#991b1b}
+.op.dead{pointer-events:none;opacity:.3}
+.expl{margin-top:10px;padding:10px 12px;background:#eff6ff;border-radius:10px;font-size:12px;line-height:1.8}
+.expl b{color:var(–orange)}
+
+.btn{display:block;width:100%;padding:14px;font-family:-apple-system,sans-serif;font-size:14px;font-weight:700;
+border:none;border-radius:12px;cursor:pointer;text-align:center;margin-top:10px}
+.btn:active{opacity:.8}
+.btn-a{background:var(–blue);color:#fff}.btn-b{background:var(–card);border:1.5px solid var(–border);color:var(–text)}
+
+.sts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+.s{background:#fff;border:1px solid var(–border);border-radius:10px;padding:8px;text-align:center}
+.s .n{font-size:18px;font-weight:900;font-family:‘SF Mono’,monospace}
+.s .n.gg{color:var(–green)}.s .n.rr{color:var(–red)}.s .n.bb{color:var(–blue)}
+.s .l{font-size:8px;color:var(–dim)}
+.badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;color:#fff;margin-right:4px}
+.badge.b1{background:var(–blue)}.badge.b2{background:var(–orange)}.badge.b3{background:var(–purple)}.badge.b4{background:var(–pink)}.badge.b5{background:var(–green)}
+.res{background:var(–card);border-radius:14px;padding:24px;text-align:center;margin:14px 0}
+.res .em{font-size:44px}.res .msg{font-size:18px;font-weight:800}.res .det{font-size:12px;color:var(–dim);margin-top:4px}
+.qi{background:var(–card);border:1px solid var(–border);border-radius:12px;padding:12px;margin:6px 0;cursor:pointer;display:flex;align-items:center;gap:10px}
+.qi:active{background:#eff6ff}
+.qi .t{font-size:13px;font-weight:700}.qi .d{font-size:9px;color:var(–dim)}
+
+/* Canvas viz */
+.memo-toggle{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;font-size:11px;font-weight:600;
+border-radius:20px;border:1.5px solid var(–border);background:#fff;color:var(–dim);cursor:pointer;margin:8px 0}
+.memo-toggle.on{border-color:var(–blue);color:var(–blue);background:#eff6ff}
+.memo-toggle::before{content:‘✏️’}
+.memo-wrap{margin:8px 0;border-radius:12px;overflow:hidden;border:1.5px solid var(–border);position:relative;display:none}
+.memo-wrap.show{display:block}
+.memo-canvas{display:block;width:100%;height:160px;background:#fff;touch-action:none;cursor:crosshair}
+.memo-bar{display:flex;gap:6px;padding:6px 10px;background:var(–card);border-top:1px solid var(–border);align-items:center}
+.memo-bar .mc{width:24px;height:24px;border-radius:50%;border:2px solid var(–border);cursor:pointer}
+.memo-bar .mc.on{border-color:var(–blue);box-shadow:0 0 0 2px #007aff44}
+.memo-bar .mclear{font-size:11px;font-weight:600;color:var(–red);cursor:pointer;margin-left:auto;padding:4px 10px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2}
+.memo-bar .mw{display:flex;align-items:center;gap:3px;margin-left:8px}
+.memo-bar .mw input{width:60px;height:18px;-webkit-appearance:none;background:transparent}
+.memo-bar .mw input::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:var(–border)}
+.memo-bar .mw input::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(–blue);margin-top:-6px}
+.memo-pressure{font-size:9px;color:var(–dim);padding:2px 6px}
+
+/* Canvas viz */
+.vbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
+.vbar select{background:var(–card);border:1px solid var(–border);border-radius:8px;padding:5px 8px;font:13px -apple-system;color:var(–text)}
+.vbar input[type=range]{height:20px;-webkit-appearance:none;background:transparent;flex:1;max-width:140px}
+.vbar input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:var(–border)}
+.vbar input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(–blue);margin-top:-8px;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.pill{padding:5px 12px;font-size:11px;font-weight:600;border-radius:20px;border:1.5px solid var(–border);background:none;color:var(–dim);cursor:pointer}
+.pill.on{background:#eff6ff;border-color:var(–blue);color:var(–blue)}
+canvas.viz{display:block;width:100%;border-radius:12px;background:var(–card);border:1px solid var(–border)}
 </style>
+
 </head>
 <body>
-<div id="app"></div>
-<div id="pencil-label"><div class="deg">0°</div><div class="pres">pressure: 0</div></div>
+<div class="nav">
+<h1>三角関数マスター</h1>
+<div class="nav-tabs" id="ntabs"></div>
+</div>
+<div id="p0" class="pg"></div>
+<div id="p1" class="pg"></div>
+<div id="p2" class="pg"></div>
+<div id="p3" class="pg"></div>
+<div id="p4" class="pg"></div>
 
 <script type="module">
-import{haptic}from'https://esm.sh/ios-haptics';
-window._hap=haptic||function(){};
-</script>
-<script>
-window._hap=window._hap||function(){};
-const hap=()=>{try{window._hap()}catch(e){}};
+let _h=null;
+try{const m=await import('https://cdn.jsdelivr.net/npm/ios-haptics/+esm');_h=m.haptic||m.default||null}catch(e){}
+const H={tap(){if(_h)try{_h()}catch(e){}},ok(){if(_h)try{_h('success')}catch(e){}},ng(){if(_h)try{_h('error')}catch(e){}},med(){if(_h)try{_h('medium')}catch(e){}}};
+const PI=Math.PI,TAU=2*PI;
+const fmt=v=>{if(!isFinite(v))return'—';return+(v.toFixed(3))+''};
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
 
-const TAU=2*Math.PI,PI=Math.PI;
-const tr4=v=>Math.trunc(v*10000)/10000;
-const fmt=v=>{if(!isFinite(v))return'—';const t=tr4(v);if(t===0)return'0';return t.toFixed(4).replace(/0+$/,'').replace(/\.$/,'')};
+// ===== TABS =====
+const TABS=[{id:'input',label:'📖 INPUT'},{id:'pz',label:'🧩 パズル'},{id:'quiz',label:'📝 OUTPUT'},{id:'viz',label:'📊 ビジュアル'}];
+let cur='input';
+function renderNav(){
+document.getElementById('ntabs').innerHTML=TABS.map(t=>`<div class="nt${t.id===cur?' on':''}" data-t="${t.id}">${t.label}</div>`).join('');
+document.querySelectorAll('.nt').forEach(n=>{n.onclick=()=>{H.tap();cur=n.dataset.t;renderNav();showPg();if(cur==='viz')setTimeout(drawAllViz,50)}});
+}
+function showPg(){TABS.forEach((t,i)=>document.getElementById('p'+i).classList.toggle('show',t.id===cur))}
 
-/* ── Colors ── */
-const SYS={pink:'#ff2d55',teal:'#5ac8fa',orange:'#ff9500',green:'#34c759',
-  purple:'#af52de',blue:'#007aff',red:'#ff3b30',
-  bg:'#f2f2f7',graphBg:'#fafafa',grid:'#e8e8ed',axis:'#c7c7cc',
-  label:'#1c1c1e',label2:'#636366',label3:'#8e8e93'};
+// ===== SPECIAL ANGLES =====
+const SA=[{d:0,r:'0',s:'0',c:'1',t:'0'},{d:30,r:'π/6',s:'1/2',c:'√3/2',t:'1/√3'},{d:45,r:'π/4',s:'√2/2',c:'√2/2',t:'1'},{d:60,r:'π/3',s:'√3/2',c:'1/2',t:'√3'},{d:90,r:'π/2',s:'1',c:'0',t:'—'},{d:120,r:'2π/3',s:'√3/2',c:'-1/2',t:'-√3'},{d:135,r:'3π/4',s:'√2/2',c:'-√2/2',t:'-1'},{d:150,r:'5π/6',s:'1/2',c:'-√3/2',t:'-1/√3'},{d:180,r:'π',s:'0',c:'-1',t:'0'},{d:210,r:'7π/6',s:'-1/2',c:'-√3/2',t:'1/√3'},{d:225,r:'5π/4',s:'-√2/2',c:'-√2/2',t:'1'},{d:240,r:'4π/3',s:'-√3/2',c:'-1/2',t:'√3'},{d:270,r:'3π/2',s:'-1',c:'0',t:'—'},{d:300,r:'5π/3',s:'-√3/2',c:'1/2',t:'-√3'},{d:315,r:'7π/4',s:'-√2/2',c:'√2/2',t:'-1'},{d:330,r:'11π/6',s:'-1/2',c:'√3/2',t:'-1/√3'}];
+let ucI=0;
 
-/* ── Gradient helper ── */
-function lerpC(c1,c2,t){
-  const p=(s,o)=>parseInt(s.slice(o,o+2),16),m=(a,b)=>Math.round(a+(b-a)*t);
-  return`rgb(${m(p(c1,1),p(c2,1))},${m(p(c1,3),p(c2,3))},${m(p(c1,5),p(c2,5))})`;
+// ===== P0: INPUT =====
+function renderInput(){
+const a=SA[ucI],cx=140,cy=140,R=115;
+let dots='';SA.forEach((d,i)=>{const rad=d.d*PI/180,x=cx+R*Math.cos(rad),y=cy-R*Math.sin(rad),on=i===ucI;
+if(on)dots+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${'#007aff'}" stroke-width="2" stroke-dasharray="4,3"/><line x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${x.toFixed(1)}" y2="${cy}" stroke="${'#ff2d55'}" stroke-width="1.5" opacity=".6"/><line x1="${cx}" y1="${y.toFixed(1)}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${'#34c759'}" stroke-width="1.5" opacity=".6"/>`;
+dots+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${on?7:4}" fill="${on?'#007aff':'#c7c7cc'}" stroke="${on?'#fff':'none'}" stroke-width="${on?2:0}" data-i="${i}" style="cursor:pointer"/>`;});
+
+document.getElementById('p0').innerHTML=`
+<div class="cd"><h2>🔵 単位円（タップで切替）</h2>
+<p style="font-size:11px;color:var(--dim)"><span style="color:var(--green)">■cos(横)</span> <span style="color:var(--pink)">■sin(縦)</span></p>
+<div class="uc"><svg viewBox="0 0 280 280" style="width:100%">
+<line x1="0" y1="${cy}" x2="280" y2="${cy}" stroke="#e5e5ea"/><line x1="${cx}" y1="0" x2="${cx}" y2="280" stroke="#e5e5ea"/>
+<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#c7c7cc" stroke-width="1.5"/>${dots}</svg></div>
+<div style="text-align:center;margin-bottom:8px"><span style="font-size:20px;font-weight:900" class="mono">${a.d}° = ${a.r}</span></div>
+<div class="uc-vals">
+<div class="uv"><div class="l">sinθ</div><div class="n" style="color:var(--pink)">${a.s}</div></div>
+<div class="uv"><div class="l">cosθ</div><div class="n" style="color:var(--green)">${a.c}</div></div>
+<div class="uv"><div class="l">tanθ</div><div class="n" style="color:var(--orange)">${a.t}</div></div></div>
+<table class="tbl"><tr><th>θ</th><th>rad</th><th style="color:var(--pink)">sin</th><th style="color:var(--green)">cos</th><th style="color:var(--orange)">tan</th></tr>
+${SA.map(d=>`<tr${d.d===a.d?' class="hl"':''}><td>${d.d}°</td><td>${d.r}</td><td style="color:var(--pink)">${d.s}</td><td style="color:var(--green)">${d.c}</td><td style="color:var(--orange)">${d.t}</td></tr>`).join('')}</table>
+<div class="tip">sinは <b>0→1/2→√2/2→√3/2→1</b> で上がって戻る。cosは逆順。</div></div>
+
+<div class="cd"><h2>⭐ 加法定理（丸暗記！）</h2>
+<div class="fb">sin(α+β) = <span class="y">sinαcosβ</span> + <span class="p">cosαsinβ</span><br>sin(α−β) = <span class="y">sinαcosβ</span> − <span class="p">cosαsinβ</span></div>
+<div class="tip">sinは「<b>別種の積の和</b>」。符号は元と<b>同じ</b></div>
+<div class="fb">cos(α+β) = <span class="g">cosαcosβ</span> − <span class="p">sinαsinβ</span><br>cos(α−β) = <span class="g">cosαcosβ</span> + <span class="p">sinαsinβ</span></div>
+<div class="warn">cosは「<b>同種の積の差</b>」。符号は元と<b>逆</b>！</div>
+<div class="fb">tan(α+β) = <span class="y">(tanα+tanβ)</span>/<span class="b">(1−tanαtanβ)</span><br>tan(α−β) = <span class="y">(tanα−tanβ)</span>/<span class="b">(1+tanαtanβ)</span></div>
+<div class="tip">分子は素直。分母は「1 ∓ 積」（<b>符号逆</b>）</div></div>
+
+<div class="cd"><h2>🔥 2倍角の公式（α=β=θで導出）</h2>
+<div class="fb"><span class="y">sin2θ = 2sinθcosθ</span></div>
+<div class="fb"><span class="g">cos2θ = cos²θ − sin²θ</span>　←基本<br><span class="g">= 2cos²θ − 1</span>　←cos統一<br><span class="g">= 1 − 2sin²θ</span>　←sin統一</div>
+<div class="fb"><span class="b">tan2θ = 2tanθ/(1−tan²θ)</span></div>
+<div class="note">全部 加法定理にα=β=θ代入するだけ。<b>暗記不要で導ける</b></div></div>
+
+<div class="cd"><h2>✨ 三角関数の合成</h2>
+<div class="fb"><span class="y">a</span>sinθ + <span class="p">b</span>cosθ = <span class="g">r</span>·sin(θ+α)<br>r = √(a²+b²)　cosα = a/r　sinα = b/r</div>
+<div class="tip">最大値 = r、最小値 = −r</div></div>
+
+<div class="cd"><h2>📐 半角の公式（次数下げ）</h2>
+<div class="fb">sin²θ = <span class="p">(1−cos2θ)/2</span><br>cos²θ = <span class="g">(1+cos2θ)/2</span><br>sinθcosθ = <span class="y">sin2θ/2</span></div></div>`;
+
+document.getElementById('p0').querySelectorAll('circle[data-i]').forEach(c=>{c.onclick=()=>{H.tap();ucI=+c.dataset.i;renderInput()}});
 }
 
-/* ── Canvas helpers ── */
-function setupCvs(c){
-  const x=c.getContext('2d'),d=window.devicePixelRatio||1;
-  const r=c.getBoundingClientRect(),W=r.width,H=r.height;
-  c.width=W*d;c.height=H*d;x.scale(d,d);
-  x.fillStyle=SYS.graphBg;x.fillRect(0,0,W,H);
-  return{x,W,H};
+// ===== P1: PUZZLES (table + formula match) =====
+const TP_A=[0,30,45,60,90];
+let tp=null,fm=null;
+function initTP(){const ans={},vals=[];TP_A.forEach(d=>{const a=SA.find(x=>x.d===d);['sin','cos','tan'].forEach(f=>{const k=d+'-'+f;const v=f==='sin'?a.s:f==='cos'?a.c:a.t;ans[k]=v;vals.push(v)})});const u=shuffle([...new Set(vals)]);tp={ans,slots:{},chips:u.map((v,i)=>({id:i,val:v,used:false})),sel:null,score:0,wrong:0,total:15}}
+const FM_I=[{l:'sin(α+β)',r:'sinαcosβ+cosαsinβ'},{l:'sin(α−β)',r:'sinαcosβ−cosαsinβ'},{l:'cos(α+β)',r:'cosαcosβ−sinαsinβ'},{l:'cos(α−β)',r:'cosαcosβ+sinαsinβ'},{l:'tan(α+β)',r:'(tanα+tanβ)/(1−tanαtanβ)'},{l:'tan(α−β)',r:'(tanα−tanβ)/(1+tanαtanβ)'},{l:'sin2θ',r:'2sinθcosθ'},{l:'cos2θ①',r:'cos²θ−sin²θ'},{l:'cos2θ②',r:'2cos²θ−1'},{l:'cos2θ③',r:'1−2sin²θ'},{l:'tan2θ',r:'2tanθ/(1−tan²θ)'},{l:'合成r',r:'√(a²+b²)'}];
+function initFM(){const rp=shuffle(FM_I.map(x=>x.r));fm={rp:rp.map((v,i)=>({id:i,val:v,used:false})),matched:{},sel:null,score:0,wrong:0}}
+
+function renderPZ(){
+if(!tp)initTP();if(!fm)initFM();
+const el=document.getElementById('p1'),fl=Object.keys(tp.slots).length;
+let rows='';TP_A.forEach(d=>{let cells=`<td style="font-weight:700">${d}°</td>`;['sin','cos','tan'].forEach(f=>{const k=d+'-'+f;
+cells+=tp.slots[k]?`<td class="mono" style="color:var(--green);font-weight:700">${tp.slots[k]}</td>`:`<td><div class="slot${tp.sel!==null?' hi':''}" data-k="${k}" style="min-height:30px;margin:1px;font-size:11px;border-radius:6px;cursor:pointer">?</div></td>`});rows+=`<tr>${cells}</tr>`});
+
+const fl2=Object.keys(fm.matched).length;
+let frows=FM_I.map((it,i)=>`<div style="display:flex;gap:5px;align-items:center;margin:4px 0">
+<div style="flex:0 0 36%;text-align:right;font-family:'SF Mono',monospace;font-size:12px;font-weight:600">${it.l}</div>
+<div style="color:var(--dim);font-weight:900">=</div>
+<div style="flex:1">${fm.matched[i]!==undefined?`<div class="slot ok" style="font-size:10px">${fm.matched[i]}</div>`:`<div class="slot${fm.sel!==null?' hi':''}" data-fi="${i}" style="font-size:10px;cursor:pointer">?</div>`}</div></div>`).join('');
+
+el.innerHTML=`
+<div class="cd"><h2>🧩 特殊角テーブルパズル</h2>
+<p style="font-size:11px;color:var(--dim)">①値を選択 → ②表の?をタップ</p>
+<div class="sts"><div class="s"><div class="n bb">${fl}/${tp.total}</div><div class="l">配置</div></div><div class="s"><div class="n gg">${tp.score}</div><div class="l">正解</div></div><div class="s"><div class="n rr">${tp.wrong}</div><div class="l">ミス</div></div></div>
+<table class="tbl"><tr><th>θ</th><th style="color:var(--pink)">sin</th><th style="color:var(--green)">cos</th><th style="color:var(--orange)">tan</th></tr>${rows}</table>
+<div class="pz-bank">${tp.chips.map(c=>`<div class="chip${c.used?' used':''}${tp.sel===c.id?' sel':''}" data-id="${c.id}">${c.val}</div>`).join('')}</div>
+${fl>=tp.total?`<div class="res"><div class="em">${tp.wrong===0?'🔥':'👍'}</div><div class="msg">${tp.wrong===0?'完璧！':'クリア！'}</div></div><button class="btn btn-a" id="tpR">リセット</button>`:''}</div>
+
+<div class="cd"><h2>🔗 公式マッチングパズル</h2>
+<div class="sts"><div class="s"><div class="n bb">${fl2}/${FM_I.length}</div><div class="l">配置</div></div><div class="s"><div class="n gg">${fm.score}</div><div class="l">正解</div></div><div class="s"><div class="n rr">${fm.wrong}</div><div class="l">ミス</div></div></div>
+${frows}
+<div class="pz-bank">${fm.rp.map(c=>`<div class="chip${c.used?' used':''}${fm.sel===c.id?' sel':''}" data-fid="${c.id}" style="font-size:10px">${c.val}</div>`).join('')}</div>
+${fl2>=FM_I.length?`<div class="res"><div class="em">🔥</div><div class="msg">クリア！</div></div><button class="btn btn-a" id="fmR">リセット</button>`:''}</div>`;
+
+// Table puzzle events
+el.querySelectorAll('.chip[data-id]').forEach(c=>{c.onclick=()=>{H.tap();const id=+c.dataset.id;tp.sel=tp.sel===id?null:id;renderPZ()}});
+el.querySelectorAll('.slot[data-k]').forEach(s=>{s.onclick=()=>{if(tp.sel===null)return;const k=s.dataset.k,chip=tp.chips[tp.sel];
+if(chip.val===tp.ans[k]){H.ok();tp.slots[k]=chip.val;if(!Object.entries(tp.ans).some(([key,v])=>!tp.slots[key]&&v===chip.val))chip.used=true;tp.score++;tp.sel=null}
+else{H.ng();tp.wrong++;s.classList.add('ng-flash');setTimeout(()=>s.classList.remove('ng-flash'),400)}renderPZ()}});
+// Formula match events
+el.querySelectorAll('.chip[data-fid]').forEach(c=>{c.onclick=()=>{H.tap();const id=+c.dataset.fid;fm.sel=fm.sel===id?null:id;renderPZ()}});
+el.querySelectorAll('.slot[data-fi]').forEach(s=>{s.onclick=()=>{if(fm.sel===null)return;const idx=+s.dataset.fi,chip=fm.rp[fm.sel];
+if(chip.val===FM_I[idx].r){H.ok();fm.matched[idx]=chip.val;chip.used=true;fm.score++;fm.sel=null}
+else{H.ng();fm.wrong++;s.classList.add('ng-flash');setTimeout(()=>s.classList.remove('ng-flash'),400)}renderPZ()}});
+const r1=el.querySelector('#tpR');if(r1)r1.onclick=()=>{H.tap();initTP();renderPZ()};
+const r2=el.querySelector('#fmR');if(r2)r2.onclick=()=>{H.tap();initFM();renderPZ()};
 }
 
-function makeG(ox,oy,w,h,x0,x1,y0,y1){
-  return{
-    mx:v=>ox+(v-x0)/(x1-x0)*w-w/2,
-    my:v=>oy-(v-y0)/(y1-y0)*h+h/2,
-    ix:s=>(s-ox+w/2)/w*(x1-x0)+x0,
-    ox,oy,w,h,x0,x1,y0,y1
-  };
-}
-
-function drawGrid(x,g,xs,ys){
-  x.fillStyle='#fafafa';x.fillRect(g.ox-g.w/2-1,g.oy-g.h/2-1,g.w+2,g.h+2);
-  x.strokeStyle=SYS.grid;x.lineWidth=.5;
-  if(ys)for(let v=Math.ceil(g.y0/ys)*ys;v<=g.y1;v+=ys){const y=g.my(v);x.beginPath();x.moveTo(g.ox-g.w/2,y);x.lineTo(g.ox+g.w/2,y);x.stroke()}
-  if(xs)for(let v=Math.ceil(g.x0/xs)*xs;v<=g.x1;v+=xs){const xx=g.mx(v);x.beginPath();x.moveTo(xx,g.oy-g.h/2);x.lineTo(xx,g.oy+g.h/2);x.stroke()}
-  x.strokeStyle=SYS.axis;x.lineWidth=1;
-  const y0=g.my(0),x0_=g.mx(0);
-  if(y0>=g.oy-g.h/2&&y0<=g.oy+g.h/2){x.beginPath();x.moveTo(g.ox-g.w/2,y0);x.lineTo(g.ox+g.w/2,y0);x.stroke()}
-  if(x0_>=g.ox-g.w/2&&x0_<=g.ox+g.w/2){x.beginPath();x.moveTo(x0_,g.oy-g.h/2);x.lineTo(x0_,g.oy+g.h/2);x.stroke()}
-}
-
-function gradCurve(x,fn,c1,c2,g,skip){
-  const top=g.oy-g.h/2-5,bot=g.oy+g.h/2+5;
-  const steps=Math.max(400,Math.floor(g.w*1.5)),dx=(g.x1-g.x0)/steps;
-  let pX=null,pY=null;x.lineWidth=2.5;x.lineCap='round';
-  for(let i=0;i<=steps;i++){
-    const a=g.x0+i*dx;
-    if(skip&&skip(a)){pX=null;continue}
-    let v;try{v=fn(a)}catch(e){pX=null;continue}
-    if(!isFinite(v)){pX=null;continue}
-    const sx=g.mx(a),sy=g.my(v);
-    if(sy<top||sy>bot){pX=null;continue}
-    if(pX!==null){x.strokeStyle=lerpC(c1,c2,i/steps);x.beginPath();x.moveTo(pX,pY);x.lineTo(sx,sy);x.stroke()}
-    pX=sx;pY=sy;
-  }
-}
-
-function gradSeg(x,x1,y1,x2,y2,c1,c2,N){
-  x.lineCap='round';x.lineWidth=3;
-  for(let i=0;i<N;i++){const a=i/N,b=(i+1)/N;x.strokeStyle=lerpC(c1,c2,a);
-    x.beginPath();x.moveTo(x1+(x2-x1)*a,y1+(y2-y1)*a);x.lineTo(x1+(x2-x1)*b,y1+(y2-y1)*b);x.stroke()}
-}
-
-/* ── Special angles ── */
-const SPEC=[
-  [0,'0','1','0'],[30,'1/2','√3/2','1/√3'],[45,'√2/2','√2/2','1'],[60,'√3/2','1/2','√3'],
-  [90,'1','0','—'],[120,'√3/2','−1/2','−√3'],[135,'√2/2','−√2/2','−1'],[150,'1/2','−√3/2','−1/√3'],
-  [180,'0','−1','0'],[210,'−1/2','−√3/2','1/√3'],[225,'−√2/2','−√2/2','1'],[240,'−√3/2','−1/2','√3'],
-  [270,'−1','0','—'],[300,'−√3/2','1/2','−√3'],[315,'−√2/2','√2/2','−1'],[330,'−1/2','√3/2','−1/√3']
+// ===== P2: OUTPUT (STEP QUIZ) =====
+const Q=[
+{title:'練習7(1) sin·cos(7π/12)',badge:'b1',bl:'加法定理',steps:[{ctx:'sin(π/3+π/4)に使う公式？',stem:'sin(α+β) = <span class="bl">?</span>',ans:'sinαcosβ+cosαsinβ',opts:['sinαcosβ+cosαsinβ','cosαcosβ−sinαsinβ','2sinαcosα','tanα+tanβ'],expl:'sinは<b>別種の積の和</b>'},{ctx:'代入して計算',stem:'(√3/2)(√2/2)+(1/2)(√2/2) = <span class="bl">?</span>',ans:'(√6+√2)/4',opts:['(√6+√2)/4','(√6−√2)/4','√2/2','(√3+1)/4'],expl:'√3·√2=√6, 分母4共通'},{ctx:'cos(7/12π)の計算',stem:'cos(π/3)cos(π/4)−sin(π/3)sin(π/4) = <span class="bl">?</span>',ans:'(√2−√6)/4',opts:['(√2−√6)/4','(√6−√2)/4','(√2+√6)/4','−√2/2'],expl:'(1/2)(√2/2)−(√3/2)(√2/2) = <b>(√2−√6)/4</b>'}]},
+{title:'練習8(1) sin2θ=cosθ',badge:'b2',bl:'2倍角',steps:[{ctx:'sin2θを展開',stem:'sin2θ = <span class="bl">?</span>',ans:'2sinθcosθ',opts:['2sinθcosθ','cos²θ−sin²θ','1−2sin²θ','2cos²θ−1'],expl:'sin2θ = <b>2sinθcosθ</b>'},{ctx:'次にやるべき操作は？',stem:'<span class="bl">?</span>',ans:'移項して因数分解',opts:['移項して因数分解','cosθで割る','2乗する','sinに変換'],expl:'<b>割るとcosθ=0の解を失う！</b>'},{ctx:'因数分解',stem:'<span class="bl">?</span> = 0',ans:'cosθ(2sinθ−1)',opts:['cosθ(2sinθ−1)','sinθ(2cosθ−1)','2sinθ(cosθ−1)','(sinθ−cosθ)'],expl:'cosθをくくり出す'},{ctx:'cosθ=0 → θ=?',stem:'θ = <span class="bl">?</span>',ans:'π/2, 3π/2',opts:['π/2, 3π/2','0, π','π/4, 3π/4','π/3, 2π/3'],expl:'x=0 → 上と下'},{ctx:'sinθ=1/2 → θ=?',stem:'θ = <span class="bl">?</span>',ans:'π/6, 5π/6',opts:['π/6, 5π/6','π/3, 2π/3','π/4, 3π/4','π/6, 7π/6'],expl:'y=1/2 → 第1,第2象限'}]},
+{title:'練習8(2) cos2θ=cosθ',badge:'b2',bl:'2倍角',steps:[{ctx:'cos統一するとどの形？',stem:'cos2θ = <span class="bl">?</span>',ans:'2cos²θ−1',opts:['2cos²θ−1','1−2sin²θ','cos²θ−sin²θ','2sinθcosθ'],expl:'右辺がcosだから<b>cos統一</b>'},{ctx:'因数分解',stem:'2cos²θ−cosθ−1=0 → <span class="bl">?</span>',ans:'(2cosθ+1)(cosθ−1)=0',opts:['(2cosθ+1)(cosθ−1)=0','(2cosθ−1)(cosθ+1)=0','cosθ(2cosθ−1)=0','(cosθ+1)²=0'],expl:'t=cosθで 2t²−t−1=(2t+1)(t−1)'},{ctx:'cosθ=−1/2 → θ=?',stem:'θ = <span class="bl">?</span>',ans:'2π/3, 4π/3',opts:['2π/3, 4π/3','π/3, 5π/3','π/3, 2π/3','3π/4, 5π/4'],expl:'x=−1/2 → 第2, 第3象限'},{ctx:'cosθ=1 → θ=?',stem:'θ = <span class="bl">?</span>',ans:'0',opts:['0','π','π/2','2π'],expl:'x=1 → θ=0'}]},
+{title:'練習9 2直線のなす角',badge:'b1',bl:'加法定理',steps:[{ctx:'tanα=3, tanβ=1/2。使う公式？',stem:'tan(α−β) = <span class="bl">?</span>',ans:'(tanα−tanβ)/(1+tanαtanβ)',opts:['(tanα−tanβ)/(1+tanαtanβ)','(tanα+tanβ)/(1−tanαtanβ)','tanα−tanβ','tanαtanβ'],expl:'引き算→分母は<b>+</b>'},{ctx:'分子 3−1/2',stem:'= <span class="bl">?</span>',ans:'5/2',opts:['5/2','7/2','3/2','1/2'],expl:'6/2−1/2 = <b>5/2</b>'},{ctx:'分母 1+3/2',stem:'= <span class="bl">?</span>',ans:'5/2',opts:['5/2','7/2','3/2','2'],expl:'2/2+3/2 = <b>5/2</b>'},{ctx:'tanθ=1 → θ=?',stem:'θ = <span class="bl">?</span>',ans:'π/4',opts:['π/4','π/6','π/3','π/2'],expl:'tan(π/4)=1 → <b>45°</b>'}]},
+{title:'練習10(1) sinθ+cosθ合成',badge:'b3',bl:'合成',steps:[{ctx:'a=1, b=1。r=?',stem:'r = <span class="bl">?</span>',ans:'√2',opts:['√2','2','1','√3'],expl:'1+1=2 → <b>√2</b>'},{ctx:'α=?',stem:'α = <span class="bl">?</span>',ans:'π/4',opts:['π/4','π/6','π/3','π/2'],expl:'cos=sin=1/√2 → <b>π/4</b>'},{ctx:'結果は？',stem:'sinθ+cosθ = <span class="bl">?</span>',ans:'√2sin(θ+π/4)',opts:['√2sin(θ+π/4)','√2cos(θ+π/4)','2sin(θ+π/4)','sin(θ+π/4)'],expl:'r=√2, α=π/4'}]},
+{title:'練習11(1) √3sinθ−cosθ=1',badge:'b4',bl:'合成+方程式',steps:[{ctx:'r=?',stem:'r = √(3+1) = <span class="bl">?</span>',ans:'2',opts:['2','√3','√2','4'],expl:'4→<b>2</b>'},{ctx:'α=?',stem:'α = <span class="bl">?</span>',ans:'−π/6',opts:['−π/6','π/6','π/3','−π/3'],expl:'cos=√3/2, sin=−1/2'},{ctx:'sin(θ−π/6)=?',stem:'= <span class="bl">?</span>',ans:'1/2',opts:['1/2','1','√2/2','√3/2'],expl:'÷2'},{ctx:'θ=?',stem:'θ = <span class="bl">?</span>',ans:'π/3, π',opts:['π/3, π','π/6, 5π/6','π/3, 2π/3','0, π'],expl:'θ−π/6=π/6→π/3, θ−π/6=5π/6→π'}]},
+{title:'応用2(1) sinθ+√3cosθ最大最小',badge:'b5',bl:'応用',steps:[{ctx:'r=?',stem:'r = <span class="bl">?</span>',ans:'2',opts:['2','√3','√2','4'],expl:'1+3=4→<b>2</b>'},{ctx:'θ+π/3の範囲(0≤θ≤π)',stem:'<span class="bl">?</span>',ans:'π/3≤θ+π/3≤4π/3',opts:['π/3≤θ+π/3≤4π/3','0≤θ+π/3≤π','π/3≤θ+π/3≤π','0≤θ+π/3≤4π/3'],expl:'θ=0→π/3, θ=π→4π/3'},{ctx:'最大値',stem:'= <span class="bl">?</span>',ans:'2',opts:['2','√3','1','4'],expl:'sin(π/2)=1 → 2×1=<b>2</b>'},{ctx:'最小値',stem:'= <span class="bl">?</span>',ans:'−√3',opts:['−√3','−2','−1','0'],expl:'sin(4π/3)=−√3/2 → <b>−√3</b>'}]},
+{title:'応用7 半円PH+HB最大値',badge:'b5',bl:'応用',steps:[{ctx:'直径に対する円周角',stem:'∠APB = <span class="bl">?</span>',ans:'π/2',opts:['π/2','π/3','π/4','θ'],expl:'直径→<b>直角</b>'},{ctx:'AP, BP=?',stem:'AP=<span class="bl">?</span>',ans:'2cosθ, 2sinθ',opts:['2cosθ, 2sinθ','cosθ, sinθ','2sinθ, 2cosθ','sinθ, cosθ'],expl:'斜辺2に対しcos, sin'},{ctx:'PH=?',stem:'PH = <span class="bl">?</span>',ans:'2sinθcosθ',opts:['2sinθcosθ','sin²θ','cos²θ','sinθ+cosθ'],expl:'= sin2θ'},{ctx:'合成後の最大値',stem:'= <span class="bl">?</span>',ans:'√2+1',opts:['√2+1','√2','2','√2−1'],expl:'√2sin(2θ−π/4)+1 の最大'},{ctx:'θ=?',stem:'θ = <span class="bl">?</span>',ans:'3π/8',opts:['3π/8','π/4','π/3','π/8'],expl:'2θ=3π/4→θ=<b>3π/8</b>'}]},
+{title:'総合シャッフル',badge:'b1',bl:'総合',steps:[{ctx:'cos(α−β)の真ん中の符号',stem:'cos(α−β)=cosαcosβ <span class="bl">?</span> sinαsinβ',ans:'+',opts:['+','−','×','÷'],expl:'cos(−)→真ん中は<b>+</b>'},{ctx:'sin2θ=?',stem:'sin2θ = <span class="bl">?</span>',ans:'2sinθcosθ',opts:['2sinθcosθ','cos²θ−sin²θ','1−2sin²θ','sin²θ+cos²θ'],expl:'同じ項×2'},{ctx:'3sinθ+4cosθのr',stem:'r = <span class="bl">?</span>',ans:'5',opts:['5','7','√7','√13'],expl:'9+16=25→<b>5</b>'},{ctx:'sin²θ=?',stem:'sin²θ = <span class="bl">?</span>',ans:'(1−cos2θ)/2',opts:['(1−cos2θ)/2','(1+cos2θ)/2','cos2θ/2','1−cos2θ'],expl:'半角公式'}]},
 ];
-const fSp=d=>{const n=((d%360)+360)%360;return SPEC.find(a=>a[0]===n)};
+let qs=null;
+function initQS(qi){qs={qi,si:0,ans:false,sel:-1,score:0,wrong:0,wrongs:[]}}
+function renderQ(){
+if(!qs){renderQMenu();return}const el=document.getElementById('p2'),quiz=Q[qs.qi];if(!quiz){renderQMenu();return}
+if(qs.si>=quiz.steps.length){const t=quiz.steps.length,pct=Math.round(qs.score/t*100);
+el.innerHTML=`<div class="res"><div class="em">${pct===100?'🔥':pct>=60?'👍':'💪'}</div><div class="msg">${pct===100?'完璧！':pct>=60?'いい感じ':'復習しよう'}</div><div class="det">${qs.score}/${t}正解 (${pct}%)</div></div>
+${qs.wrongs.length?`<div class="cd"><h3>間違えた問題</h3>${qs.wrongs.map(w=>`<div style="background:#fff;border-radius:8px;padding:8px;margin:4px 0;font-size:11px"><div style="color:var(--dim)">${w.ctx}</div><div class="mono" style="color:var(--green);font-weight:700">→ ${w.ans}</div></div>`).join('')}</div>`:''}
+<button class="btn btn-a" id="qRe">もう1回</button>${qs.qi<Q.length-1?`<button class="btn btn-a" id="qNx" style="margin-top:6px;background:var(--purple)">次の問題 →</button>`:''}<button class="btn btn-b" id="qBk" style="margin-top:6px">問題一覧</button>`;
+el.querySelector('#qRe').onclick=()=>{H.tap();initQS(qs.qi);renderQ()};const nx=el.querySelector('#qNx');if(nx)nx.onclick=()=>{H.tap();initQS(qs.qi+1);renderQ()};el.querySelector('#qBk').onclick=()=>{H.tap();qs=null;renderQ()};return}
 
-/* ── Functions for 微分/積分 ── */
+const step=quiz.steps[qs.si],cIdx=step.opts.indexOf(step.ans);let stemH=step.stem;
+if(qs.ans){stemH=qs.sel===cIdx?stemH.replace(/<span class="bl">.*?<\/span>/g,`<span class="gf">${step.ans}</span>`):stemH.replace(/<span class="bl">.*?<\/span>/g,`<span class="rf">${step.opts[qs.sel]}</span> → <span class="gf">${step.ans}</span>`)}
+
+el.innerHTML=`<div class="sts"><div class="s"><div class="n bb">${qs.si+1}/${quiz.steps.length}</div><div class="l">Step</div></div><div class="s"><div class="n gg">${qs.score}</div><div class="l">正解</div></div><div class="s"><div class="n rr">${qs.wrong}</div><div class="l">ミス</div></div></div>
+<div class="qc${qs.ans?(qs.sel===cIdx?' is-ok':' is-ng'):''}"><div style="margin-bottom:4px"><span class="badge ${quiz.badge}">${quiz.bl}</span><span style="font-size:12px;font-weight:700">${quiz.title}</span></div>
+<div class="qctx">${step.ctx}</div><div class="qstem">${stemH}</div>
+<div class="opts">${step.opts.map((o,i)=>{let c='op';if(qs.ans){if(i===cIdx)c+=' ok';else if(i===qs.sel)c+=' ng';else c+=' dead'}return`<div class="${c}" data-i="${i}">${o}</div>`}).join('')}</div>
+${qs.ans?`<div class="expl">${step.expl}</div>`:''}</div>
+<div style="text-align:center"><button class="memo-toggle" id="memoTog">メモ帳</button></div>
+<div class="memo-wrap" id="memoWrap">
+<canvas class="memo-canvas" id="memoCv"></canvas>
+<div class="memo-bar">
+<div class="mc on" data-c="#1c1c1e" style="background:#1c1c1e"></div>
+<div class="mc" data-c="#007aff" style="background:#007aff"></div>
+<div class="mc" data-c="#ff3b30" style="background:#ff3b30"></div>
+<div class="mc" data-c="#34c759" style="background:#34c759"></div>
+<div class="mw"><input type="range" id="memoW" min="1" max="8" value="2"></div>
+<div class="mclear" id="memoClear">消す</div>
+</div></div>
+${qs.ans?`<button class="btn btn-a" id="qN">次へ →</button>`:''}<button class="btn btn-b" id="qB2" style="margin-top:6px">問題一覧</button>`;
+
+// Memo pad setup
+setTimeout(()=>{setupMemo()},30);
+
+if(!qs.ans)el.querySelectorAll('.op').forEach(o=>{o.onclick=()=>{const i=+o.dataset.i;qs.sel=i;qs.ans=true;
+if(i===cIdx){qs.score++;H.ok()}else{qs.wrong++;H.ng();qs.wrongs.push({ctx:step.ctx,ans:step.ans})}renderQ();
+setTimeout(()=>{const e=el.querySelector('.expl');if(e)e.scrollIntoView({behavior:'smooth',block:'center'})},100)}});
+const n=el.querySelector('#qN');if(n)n.onclick=()=>{H.tap();qs.si++;qs.ans=false;qs.sel=-1;renderQ();window.scrollTo(0,0)};
+el.querySelector('#qB2').onclick=()=>{H.tap();qs=null;renderQ()};
+}
+function renderQMenu(){document.getElementById('p2').innerHTML=`<div class="cd"><h2>📝 OUTPUT — 問題集</h2><p style="font-size:12px;color:var(--dim)">教科書の問題をステップバイステップで</p></div>
+${Q.map((q,i)=>`<div class="qi" data-qi="${i}"><span class="badge ${q.badge}">${q.bl}</span><div><div class="t">${q.title}</div><div class="d">${q.steps.length} Steps</div></div></div>`).join('')}`;
+document.querySelectorAll('.qi').forEach(c=>{c.onclick=()=>{H.tap();initQS(+c.dataset.qi);renderQ()}})}
+
+// ===== MEMO PAD =====
+let memoColor='#1c1c1e',memoWidth=2,memoOpen=false,memoData=null;
+function setupMemo(){
+const tog=document.getElementById('memoTog');
+const wrap=document.getElementById('memoWrap');
+const cv=document.getElementById('memoCv');
+if(!tog||!cv)return;
+
+// Restore state
+if(memoOpen){wrap.classList.add('show');tog.classList.add('on')}
+
+tog.onclick=()=>{H.tap();memoOpen=!memoOpen;wrap.classList.toggle('show');tog.classList.toggle('on');
+if(memoOpen)initMemoCanvas()};
+
+if(memoOpen)initMemoCanvas();
+}
+
+function initMemoCanvas(){
+const cv=document.getElementById('memoCv');if(!cv)return;
+const dpr=devicePixelRatio||1;
+const rect=cv.getBoundingClientRect();
+cv.width=rect.width*dpr;cv.height=rect.height*dpr;
+const x=cv.getContext('2d');x.scale(dpr,dpr);
+x.fillStyle='#fff';x.fillRect(0,0,rect.width,rect.height);
+// Restore saved drawing
+if(memoData){try{const img=new Image();img.onload=()=>{x.drawImage(img,0,0,rect.width,rect.height)};img.src=memoData}catch(e){}}
+// Grid dots
+x.fillStyle='#e5e5ea';
+for(let gx=20;gx<rect.width;gx+=20)for(let gy=20;gy<rect.height;gy+=20){x.beginPath();x.arc(gx,gy,.5,0,TAU);x.fill()}
+
+let drawing=false,lastX=0,lastY=0;
+function getPos(e){const r=cv.getBoundingClientRect();
+const touch=e.touches?e.touches[0]:e;
+return{x:touch.clientX-r.left,y:touch.clientY-r.top,p:e.pressure||.5}}
+
+function startDraw(e){e.preventDefault();drawing=true;const pos=getPos(e);lastX=pos.x;lastY=pos.y}
+function moveDraw(e){if(!drawing)return;e.preventDefault();const pos=getPos(e);
+const x=cv.getContext('2d');const dpr=devicePixelRatio||1;
+const w=memoWidth*(e.pointerType==='pen'?pos.p*2.5:1);
+x.save();x.setTransform(dpr,0,0,dpr,0,0);
+x.strokeStyle=memoColor;x.lineWidth=w;x.lineCap='round';x.lineJoin='round';
+x.beginPath();x.moveTo(lastX,lastY);x.lineTo(pos.x,pos.y);x.stroke();
+x.restore();lastX=pos.x;lastY=pos.y}
+function endDraw(){if(drawing){drawing=false;try{memoData=cv.toDataURL()}catch(e){}}}
+
+cv.addEventListener('pointerdown',startDraw);
+cv.addEventListener('pointermove',moveDraw);
+cv.addEventListener('pointerup',endDraw);
+cv.addEventListener('pointerleave',endDraw);
+
+// Color buttons
+document.querySelectorAll('.memo-bar .mc').forEach(c=>{c.onclick=()=>{H.tap();memoColor=c.dataset.c;
+document.querySelectorAll('.memo-bar .mc').forEach(b=>b.classList.remove('on'));c.classList.add('on')}});
+// Width slider
+const ws=document.getElementById('memoW');if(ws)ws.oninput=e=>{memoWidth=+e.target.value};
+// Clear
+const cl=document.getElementById('memoClear');if(cl)cl.onclick=()=>{H.tap();memoData=null;initMemoCanvas()};
+}
+
+// ===== P3: VIZ =====
 const FUNCS=[
-  {name:'sin x',f:Math.sin,df:Math.cos,x0:-PI,x1:PI,y0:-1.5,y1:1.5,da:0,db:PI},
-  {name:'cos x',f:Math.cos,df:a=>-Math.sin(a),x0:-PI,x1:PI,y0:-1.5,y1:1.5,da:0,db:PI},
-  {name:'tan x',f:Math.tan,df:a=>1/Math.cos(a)**2,x0:-PI*.9,x1:PI*.9,y0:-4,y1:4,skip:a=>Math.abs(Math.cos(a))<.04,da:0,db:1},
-  {name:'x²',f:a=>a*a,df:a=>2*a,x0:-3,x1:3,y0:-2,y1:9,da:0,db:2},
-  {name:'x³',f:a=>a**3,df:a=>3*a*a,x0:-2,x1:2,y0:-8,y1:8,da:-1,db:1},
-  {name:'eˣ',f:Math.exp,df:Math.exp,x0:-2,x1:3,y0:-1,y1:8,da:0,db:1},
-  {name:'ln x',f:Math.log,df:a=>1/a,x0:.05,x1:5,y0:-3,y1:3,da:1,db:Math.E},
+{name:'sin x',f:Math.sin,df:Math.cos,x0:-PI,x1:PI,y0:-1.5,y1:1.5},
+{name:'cos x',f:Math.cos,df:a=>-Math.sin(a),x0:-PI,x1:PI,y0:-1.5,y1:1.5},
+{name:'x²',f:a=>a*a,df:a=>2*a,x0:-3,x1:3,y0:-1,y1:9},
+{name:'eˣ',f:Math.exp,df:Math.exp,x0:-2,x1:3,y0:-1,y1:8},
 ];
-
-/* ── Curves ── */
 const CURVES=[
-  {name:'サイクロイド',fx:t=>t-Math.sin(t),fy:t=>1-Math.cos(t),t0:0,t1:4*PI,xc:2*PI,yc:1,xr:2*PI+1,yr:2.5},
-  {name:'アステロイド',fx:t=>Math.cos(t)**3,fy:t=>Math.sin(t)**3,t0:0,t1:TAU,xc:0,yc:0,xr:1.3,yr:1.3},
-  {name:'カージオイド',fx:t=>(1+Math.cos(t))*Math.cos(t),fy:t=>(1+Math.cos(t))*Math.sin(t),t0:0,t1:TAU,xc:.5,yc:0,xr:2.5,yr:2.2},
-  {name:'リサージュ(3:2)',fx:t=>Math.sin(3*t),fy:t=>Math.sin(2*t),t0:0,t1:TAU,xc:0,yc:0,xr:1.3,yr:1.3},
-  {name:'バラ曲線',fx:t=>Math.cos(3*t)*Math.cos(t),fy:t=>Math.cos(3*t)*Math.sin(t),t0:0,t1:PI,xc:0,yc:0,xr:1.3,yr:1.3},
+{name:'サイクロイド',fx:t=>t-Math.sin(t),fy:t=>1-Math.cos(t),t0:0,t1:4*PI,xc:2*PI,yc:1,xr:2*PI+1,yr:2.5},
+{name:'アステロイド',fx:t=>Math.cos(t)**3,fy:t=>Math.sin(t)**3,t0:0,t1:TAU,xc:0,yc:0,xr:1.3,yr:1.3},
+{name:'カージオイド',fx:t=>(1+Math.cos(t))*Math.cos(t),fy:t=>(1+Math.cos(t))*Math.sin(t),t0:0,t1:TAU,xc:.5,yc:0,xr:2.5,yr:2.2},
 ];
+let vz={fi:0,pt:.5,showD:true,ci:0,ctp:.5};
 
-/* ══════════════════════════════════════
-   STATE
-   ══════════════════════════════════════ */
-const S={
-  tab:'trig',
-  ang:45,sh:{s:true,c:true,t:true},
-  fi:0,pt:1,showD:true,showT:true,
-  ia:0,ib:PI,in_:10,showR:true,
-  cre:1,cim:1,cpow:2,cshowP:true,crange:4,
-  ci:0,ctp:.5,
-  drag:false,dragTarget:null,
-  pencil:{active:false,x:0,y:0,pressure:0,angle:0}
-};
+function lerpC(a,b,t){const p=(s,o)=>parseInt(s.slice(o,o+2),16),m=(x,y)=>Math.round(x+(y-x)*t);return`rgb(${m(p(a,1),p(b,1))},${m(p(a,3),p(b,3))},${m(p(a,5),p(b,5))})`}
 
-let cvs,ctx;
+function buildViz(){
+document.getElementById('p3').innerHTML=`
+<div class="cd"><h2>∂ 微分ビジュアライザ</h2>
+<div class="vbar"><select id="vf">${FUNCS.map((f,i)=>`<option value="${i}">${f.name}</option>`).join('')}</select>
+<button class="pill${vz.showD?' on':''}" id="vtD">f'(x)表示</button>
+<span style="font-size:10px;color:var(--dim)">x=</span><input type="range" id="vpt" min="0" max="1" step=".01" value=".5"></div>
+<canvas class="viz" id="cvD" style="height:220px"></canvas>
+<div id="dvV" style="font:600 12px 'SF Mono',monospace;color:var(--dim);padding:6px 0"></div></div>
 
-/* ── Apple Pencil floating label ── */
-const pencilEl=document.getElementById('pencil-label');
-function showPencilLabel(x,y,deg,pressure){
-  pencilEl.querySelector('.deg').textContent=Math.round(deg)+'°';
-  pencilEl.querySelector('.pres').textContent='pressure: '+pressure.toFixed(3);
-  pencilEl.style.left=(x+20)+'px';
-  pencilEl.style.top=(y-60)+'px';
-  pencilEl.classList.add('show');
-}
-function hidePencilLabel(){pencilEl.classList.remove('show')}
+<div class="cd"><h2>∞ パラメトリック曲線</h2>
+<div class="vbar"><select id="vc">${CURVES.map((c,i)=>`<option value="${i}">${c.name}</option>`).join('')}</select>
+<span style="font-size:10px;color:var(--dim)">t=</span><input type="range" id="vctp" min="0" max="1" step=".005" value=".5"></div>
+<canvas class="viz" id="cvC" style="height:220px"></canvas></div>`;
 
-/* ══════════════════════════════════════
-   RENDER
-   ══════════════════════════════════════ */
-function render(){
-  if(!cvs)return;
-  const{x,W,H}=setupCvs(cvs);
-
-  if(S.tab==='trig') drawTrig(x,W,H);
-  else if(S.tab==='deriv') drawDeriv(x,W,H);
-  else if(S.tab==='integ') drawInteg(x,W,H);
-  else if(S.tab==='complex') drawComplex(x,W,H);
-  else if(S.tab==='curve') drawCurve(x,W,H);
-
-  updateControls();
+document.getElementById('vf').onchange=e=>{H.tap();vz.fi=+e.target.value;drawAllViz()};
+document.getElementById('vtD').onclick=()=>{H.tap();vz.showD=!vz.showD;document.getElementById('vtD').classList.toggle('on');drawAllViz()};
+document.getElementById('vpt').oninput=e=>{vz.pt=+e.target.value;drawAllViz()};
+document.getElementById('vc').onchange=e=>{H.tap();vz.ci=+e.target.value;drawAllViz()};
+document.getElementById('vctp').oninput=e=>{vz.ctp=+e.target.value;drawAllViz()};
+// Drag on deriv canvas
+let drag=false;
+const cvD=document.getElementById('cvD');
+cvD.addEventListener('pointerdown',()=>{drag=true});
+window.addEventListener('pointermove',e=>{if(!drag)return;e.preventDefault();const r=cvD.getBoundingClientRect();const t=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));vz.pt=t;document.getElementById('vpt').value=t;drawAllViz()});
+window.addEventListener('pointerup',()=>{drag=false});
 }
 
-/* ── Trig ── */
-function drawTrig(x,W,H){
-  const wide=W>550;
-  const R=wide?Math.min(W*.16,H*.32):Math.min(W*.26,H*.16);
-  const cx=wide?W*.22:W*.5,cy=wide?H*.45:H*.27;
-  const rad=S.ang*PI/180,sV=Math.sin(rad),cV=Math.cos(rad);
-  const isA=Math.abs(cV)<.05,tV=isA?null:Math.tan(rad);
-
-  // unit circle
-  x.strokeStyle=SYS.grid;x.lineWidth=.5;
-  x.beginPath();x.moveTo(cx-R*1.4,cy);x.lineTo(cx+R*1.6,cy);x.moveTo(cx,cy-R*1.4);x.lineTo(cx,cy+R*1.4);x.stroke();
-  x.strokeStyle=SYS.axis;x.lineWidth=1.5;x.beginPath();x.arc(cx,cy,R,0,TAU);x.stroke();
-  x.fillStyle=SYS.blue+'15';x.beginPath();x.moveTo(cx,cy);x.arc(cx,cy,R*.22,0,-rad,rad>0);x.closePath();x.fill();
-  x.strokeStyle=SYS.blue;x.lineWidth=1.5;x.beginPath();x.arc(cx,cy,R*.22,0,-rad,rad>0);x.stroke();
-  const px=cx+R*cV,py=cy-R*sV;
-  x.strokeStyle=SYS.label3;x.lineWidth=1.5;x.beginPath();x.moveTo(cx,cy);x.lineTo(px,py);x.stroke();
-  if(S.sh.c)gradSeg(x,cx,cy,px,cy,'#5ac8fa','#32ade6',20);
-  if(S.sh.s)gradSeg(x,px,cy,px,py,'#ff2d55','#ff6b8a',20);
-  if(S.sh.t&&tV!==null){
-    const tlx=cx+R,cl=Math.max(cy-R*3.5,Math.min(cy+R*3.5,cy-R*tV));
-    x.strokeStyle=SYS.orange+'22';x.lineWidth=1;x.beginPath();x.moveTo(tlx,cy-R*2.5);x.lineTo(tlx,cy+R*2.5);x.stroke();
-    gradSeg(x,tlx,cy,tlx,cl,'#ffcc00','#ff9500',20);
-    x.strokeStyle=SYS.orange+'44';x.setLineDash([4,4]);x.lineWidth=1;x.beginPath();x.moveTo(cx,cy);x.lineTo(tlx,cl);x.stroke();x.setLineDash([]);
-    x.fillStyle=SYS.orange;x.beginPath();x.arc(tlx,cl,4,0,TAU);x.fill();
-  }
-  x.fillStyle=SYS.label;x.beginPath();x.arc(px,py,5,0,TAU);x.fill();
-  x.strokeStyle=SYS.graphBg;x.lineWidth=2;x.stroke();
-
-  // graph
-  const gox=wide?W*.73:W*.5,goy=wide?H*.5:H*.72,gw=wide?W*.42:W*.86,gh=wide?H*.8:H*.42;
-  const g=makeG(gox,goy,gw,gh,-PI,PI,-3,3);
-  drawGrid(x,g,PI/2,1);
-  x.setLineDash([2,4]);x.strokeStyle=SYS.axis+'88';x.lineWidth=.5;
-  [1,-1].forEach(v=>{const y=g.my(v);x.beginPath();x.moveTo(gox-gw/2,y);x.lineTo(gox+gw/2,y);x.stroke()});
-  x.setLineDash([]);
-  if(S.sh.t){x.setLineDash([4,6]);x.strokeStyle=SYS.orange+'33';x.lineWidth=1;
-    [PI/2,-PI/2].forEach(a=>{const xx=g.mx(a);x.beginPath();x.moveTo(xx,goy-gh/2);x.lineTo(xx,goy+gh/2);x.stroke()});x.setLineDash([])}
-  if(S.sh.s)gradCurve(x,Math.sin,'#ff2d55','#ff6b8a',g,null);
-  if(S.sh.c)gradCurve(x,Math.cos,'#5ac8fa','#32ade6',g,null);
-  if(S.sh.t)gradCurve(x,Math.tan,'#ffcc00','#ff9500',g,a=>Math.abs(Math.cos(a))<.04);
-  const mapped=((rad%TAU+TAU)%TAU);const mRad=mapped>PI?mapped-TAU:mapped;
-  const cX=g.mx(mRad);
-  x.strokeStyle=SYS.label+'11';x.lineWidth=1;x.beginPath();x.moveTo(cX,goy-gh/2);x.lineTo(cX,goy+gh/2);x.stroke();
-  if(S.sh.s){x.fillStyle=SYS.pink;x.beginPath();x.arc(cX,g.my(sV),4,0,TAU);x.fill()}
-  if(S.sh.c){x.fillStyle=SYS.teal;x.beginPath();x.arc(cX,g.my(cV),4,0,TAU);x.fill()}
-  if(S.sh.t&&tV!==null){const sy=g.my(tV);if(sy>=goy-gh/2&&sy<=goy+gh/2){x.fillStyle=SYS.orange;x.beginPath();x.arc(cX,sy,4,0,TAU);x.fill()}}
-
-  // store layout for interaction
-  S._trig={cx,cy,R,g};
+function drawAllViz(){
+drawDeriv();drawCurve();
 }
 
-/* ── Deriv ── */
-function drawDeriv(x,W,H){
-  const fn=FUNCS[S.fi];
-  const g=makeG(W*.5,H*.5,W*.88,H*.82,fn.x0,fn.x1,fn.y0,fn.y1);
-  const xs=fn.x1-fn.x0>8?2:fn.x1-fn.x0>3?1:.5,ys=fn.y1-fn.y0>8?2:1;
-  drawGrid(x,g,xs,ys);
-  gradCurve(x,fn.f,'#ff2d55','#ff6b8a',g,fn.skip);
-  if(S.showD)gradCurve(x,fn.df,'#5ac8fa','#32ade6',g,fn.skip);
-  if(S.showT){
-    const fv=fn.f(S.pt),dv=fn.df(S.pt);
-    if(isFinite(fv)&&isFinite(dv)){
-      const tanFn=a=>fv+dv*(a-S.pt);
-      x.strokeStyle=SYS.orange+'66';x.lineWidth=1.5;x.setLineDash([6,4]);
-      x.beginPath();x.moveTo(g.mx(fn.x0),g.my(tanFn(fn.x0)));x.lineTo(g.mx(fn.x1),g.my(tanFn(fn.x1)));x.stroke();x.setLineDash([]);
-      const sx=g.mx(S.pt),sy=g.my(fv);
-      if(sy>=g.oy-g.h/2&&sy<=g.oy+g.h/2){
-        x.fillStyle=SYS.label;x.beginPath();x.arc(sx,sy,6,0,TAU);x.fill();
-        x.fillStyle=SYS.graphBg;x.beginPath();x.arc(sx,sy,3,0,TAU);x.fill();
-      }
-    }
-  }
-  x.font='12px -apple-system,sans-serif';x.fillStyle=SYS.pink;x.textAlign='left';
-  x.fillText('f(x) = '+fn.name,g.ox-g.w/2+10,g.oy-g.h/2+18);
-  if(S.showD){x.fillStyle=SYS.teal;x.fillText("f'(x)",g.ox-g.w/2+10,g.oy-g.h/2+34)}
-  S._deriv={g};
+function drawDeriv(){
+const cv=document.getElementById('cvD');if(!cv)return;
+const dpr=devicePixelRatio||1,rect=cv.getBoundingClientRect(),W=rect.width,Hh=rect.height;
+cv.width=W*dpr;cv.height=Hh*dpr;const x=cv.getContext('2d');x.scale(dpr,dpr);
+x.fillStyle='#f8f8fa';x.fillRect(0,0,W,Hh);
+const fn=FUNCS[vz.fi],pad=28,gw=W-pad*2,gh=Hh-pad*2;
+const mx=v=>pad+(v-fn.x0)/(fn.x1-fn.x0)*gw;
+const my=v=>pad+gh-(v-fn.y0)/(fn.y1-fn.y0)*gh;
+// Grid
+x.strokeStyle='#e5e5ea';x.lineWidth=.5;
+for(let v=Math.ceil(fn.y0);v<=fn.y1;v++){const y=my(v);x.beginPath();x.moveTo(pad,y);x.lineTo(pad+gw,y);x.stroke()}
+for(let v=Math.ceil(fn.x0);v<=fn.x1;v++){const xx=mx(v);x.beginPath();x.moveTo(xx,pad);x.lineTo(xx,pad+gh);x.stroke()}
+x.strokeStyle='#c7c7cc';x.lineWidth=1;const y0=my(0),x0=mx(0);
+if(y0>=pad&&y0<=pad+gh){x.beginPath();x.moveTo(pad,y0);x.lineTo(pad+gw,y0);x.stroke()}
+if(x0>=pad&&x0<=pad+gw){x.beginPath();x.moveTo(x0,pad);x.lineTo(x0,pad+gh);x.stroke()}
+// f(x)
+const steps=400,dx=(fn.x1-fn.x0)/steps;let pX=null,pY=null;x.lineWidth=2.5;x.lineCap='round';
+for(let i=0;i<=steps;i++){const a=fn.x0+i*dx;let v;try{v=fn.f(a)}catch(e){pX=null;continue}if(!isFinite(v)){pX=null;continue}
+const sx=mx(a),sy=my(v);if(sy<pad-5||sy>pad+gh+5){pX=null;continue}
+if(pX!==null){x.strokeStyle=lerpC('#ff2d55','#ff6b8a',i/steps);x.beginPath();x.moveTo(pX,pY);x.lineTo(sx,sy);x.stroke()}pX=sx;pY=sy}
+// f'(x)
+if(vz.showD){pX=null;for(let i=0;i<=steps;i++){const a=fn.x0+i*dx;let v;try{v=fn.df(a)}catch(e){pX=null;continue}if(!isFinite(v)){pX=null;continue}
+const sx=mx(a),sy=my(v);if(sy<pad-5||sy>pad+gh+5){pX=null;continue}
+if(pX!==null){x.strokeStyle=lerpC('#5ac8fa','#32ade6',i/steps);x.beginPath();x.moveTo(pX,pY);x.lineTo(sx,sy);x.stroke()}pX=sx;pY=sy}}
+// Point + tangent
+const pt=fn.x0+(fn.x1-fn.x0)*vz.pt,fv=fn.f(pt),dv=fn.df(pt);
+if(isFinite(fv)&&isFinite(dv)){const tanFn=a=>fv+dv*(a-pt);x.strokeStyle='#ff950055';x.lineWidth=1.5;x.setLineDash([5,4]);
+x.beginPath();x.moveTo(mx(fn.x0),my(tanFn(fn.x0)));x.lineTo(mx(fn.x1),my(tanFn(fn.x1)));x.stroke();x.setLineDash([]);
+const sx=mx(pt),sy=my(fv);x.fillStyle='#1c1c1e';x.beginPath();x.arc(sx,sy,5,0,TAU);x.fill();x.fillStyle='#fff';x.beginPath();x.arc(sx,sy,2.5,0,TAU);x.fill()}
+x.font='bold 11px -apple-system';x.fillStyle='#ff2d55';x.fillText('f(x)='+fn.name,pad+4,pad+13);
+if(vz.showD){x.fillStyle='#5ac8fa';x.fillText("f'(x)",pad+4,pad+27)}
+const dvV=document.getElementById('dvV');if(dvV)dvV.innerHTML=`<span style="color:#ff2d55">f(${fmt(pt)})=${fmt(fv)}</span>　<span style="color:#5ac8fa">f'(${fmt(pt)})=${fmt(dv)}</span>　<span style="color:#ff9500">傾き=${fmt(dv)}</span>`;
 }
 
-/* ── Integ ── */
-function drawInteg(x,W,H){
-  const fn=FUNCS[S.fi];
-  const g=makeG(W*.5,H*.52,W*.88,H*.78,fn.x0,fn.x1,fn.y0,fn.y1);
-  const xs=fn.x1-fn.x0>8?2:1,ys=fn.y1-fn.y0>8?2:1;
-  drawGrid(x,g,xs,ys);
-  const lo=Math.max(fn.x0,Math.min(S.ia,S.ib)),hi=Math.min(fn.x1,Math.max(S.ia,S.ib));
-  if(hi>lo){
-    const y0=g.my(0),steps=200,dx=(hi-lo)/steps;
-    x.fillStyle=SYS.green+'20';x.beginPath();x.moveTo(g.mx(lo),y0);
-    for(let i=0;i<=steps;i++){const xv=lo+i*dx;let fv;try{fv=fn.f(xv)}catch(e){fv=0}if(!isFinite(fv))fv=0;x.lineTo(g.mx(xv),g.my(fv))}
-    x.lineTo(g.mx(hi),y0);x.closePath();x.fill();
-    if(S.showR&&S.in_>0){
-      const dx2=(hi-lo)/S.in_;
-      for(let i=0;i<S.in_;i++){const xi=lo+i*dx2;let fv;try{fv=fn.f(xi+dx2/2)}catch(e){continue}
-        if(!isFinite(fv))continue;
-        const lx=g.mx(xi),rx=g.mx(xi+dx2),ty=g.my(fv),by=g.my(0),col=fv>=0?SYS.green:SYS.red;
-        x.fillStyle=col+'22';x.fillRect(Math.min(lx,rx),Math.min(ty,by),Math.abs(rx-lx),Math.abs(ty-by));
-        x.strokeStyle=col+'55';x.lineWidth=.5;x.strokeRect(Math.min(lx,rx),Math.min(ty,by),Math.abs(rx-lx),Math.abs(ty-by))}
-    }
-  }
-  gradCurve(x,fn.f,'#ff2d55','#ff6b8a',g,fn.skip);
-  [['a',S.ia,SYS.blue],['b',S.ib,SYS.purple]].forEach(([l,v,c])=>{
-    if(v>=fn.x0&&v<=fn.x1){const sx=g.mx(v);x.strokeStyle=c;x.lineWidth=2;x.beginPath();x.moveTo(sx,g.oy-g.h/2);x.lineTo(sx,g.oy+g.h/2);x.stroke();
-      x.fillStyle=c;x.beginPath();x.arc(sx,g.oy-g.h/2+12,7,0,TAU);x.fill();
-      x.fillStyle='#fff';x.font='bold 9px -apple-system,sans-serif';x.textAlign='center';x.fillText(l,sx,g.oy-g.h/2+15)}
-  });
-  S._integ={g};
+function drawCurve(){
+const cv=document.getElementById('cvC');if(!cv)return;
+const dpr=devicePixelRatio||1,rect=cv.getBoundingClientRect(),W=rect.width,Hh=rect.height;
+cv.width=W*dpr;cv.height=Hh*dpr;const x=cv.getContext('2d');x.scale(dpr,dpr);
+x.fillStyle='#f8f8fa';x.fillRect(0,0,W,Hh);
+const cr=CURVES[vz.ci],pad=28,gw=W-pad*2,gh=Hh-pad*2;
+const x0=cr.xc-cr.xr,x1=cr.xc+cr.xr,y0=cr.yc-cr.yr,y1=cr.yc+cr.yr;
+const mx=v=>pad+(v-x0)/(x1-x0)*gw;
+const my=v=>pad+gh-(v-y0)/(y1-y0)*gh;
+x.strokeStyle='#e5e5ea';x.lineWidth=.5;const ax=mx(0),ay=my(0);
+if(ax>=pad&&ax<=pad+gw){x.beginPath();x.moveTo(ax,pad);x.lineTo(ax,pad+gh);x.stroke()}
+if(ay>=pad&&ay<=pad+gh){x.beginPath();x.moveTo(pad,ay);x.lineTo(pad+gw,ay);x.stroke()}
+const steps=800,dt=(cr.t1-cr.t0)/steps;let pX=null,pY=null;x.lineWidth=2.5;x.lineCap='round';
+for(let i=0;i<=steps;i++){const t=cr.t0+i*dt,vx=cr.fx(t),vy=cr.fy(t);if(!isFinite(vx)||!isFinite(vy)){pX=null;continue}
+const sx=mx(vx),sy=my(vy);if(pX!==null){x.strokeStyle=lerpC('#af52de','#da7cff',i/steps);x.beginPath();x.moveTo(pX,pY);x.lineTo(sx,sy);x.stroke()}pX=sx;pY=sy}
+const tV=cr.t0+(cr.t1-cr.t0)*vz.ctp,ptx=cr.fx(tV),pty=cr.fy(tV);
+if(isFinite(ptx)&&isFinite(pty)){const sx=mx(ptx),sy=my(pty);x.fillStyle='#1c1c1e';x.beginPath();x.arc(sx,sy,5,0,TAU);x.fill();x.fillStyle='#fff';x.beginPath();x.arc(sx,sy,2.5,0,TAU);x.fill()}
+x.font='11px -apple-system';x.fillStyle='#af52de';x.fillText(`${cr.name}  t=${fmt(tV)}  (${fmt(ptx)}, ${fmt(pty)})`,pad+4,pad+13);
 }
 
-/* ── Complex ── */
-function drawComplex(x,W,H){
-  const range=S.crange;const ox=W*.5,oy=H*.5,sc=Math.min(W,H)*.42/range;
-  const gs=range>20?5:range>8?2:1;
-  x.strokeStyle=SYS.grid;x.lineWidth=.5;
-  for(let i=Math.ceil(-range/gs)*gs;i<=range;i+=gs){
-    x.beginPath();x.moveTo(ox+i*sc,0);x.lineTo(ox+i*sc,H);x.stroke();
-    x.beginPath();x.moveTo(0,oy-i*sc);x.lineTo(W,oy-i*sc);x.stroke();}
-  x.strokeStyle=SYS.axis;x.lineWidth=1;
-  x.beginPath();x.moveTo(0,oy);x.lineTo(W,oy);x.stroke();
-  x.beginPath();x.moveTo(ox,0);x.lineTo(ox,H);x.stroke();
-  x.strokeStyle=SYS.axis+'66';x.lineWidth=1;x.beginPath();x.arc(ox,oy,sc,0,TAU);x.stroke();
-  const r_=Math.sqrt(S.cre**2+S.cim**2),th=Math.atan2(S.cim,S.cre);
-  if(r_>.05){x.strokeStyle=SYS.blue+'22';x.lineWidth=1;x.beginPath();x.arc(ox,oy,r_*sc,0,TAU);x.stroke();
-    const aR=Math.min(30,r_*sc*.35);x.fillStyle=SYS.blue+'12';x.beginPath();x.moveTo(ox,oy);x.arc(ox,oy,aR,0,-th,th>0);x.closePath();x.fill();
-    x.strokeStyle=SYS.blue;x.lineWidth=1.5;x.beginPath();x.arc(ox,oy,aR,0,-th,th>0);x.stroke()}
-  const zx=ox+S.cre*sc,zy=oy-S.cim*sc;
-  gradSeg(x,ox,oy,zx,zy,'#af52de','#da7cff',20);
-  x.fillStyle=SYS.purple;x.beginPath();x.arc(zx,zy,6,0,TAU);x.fill();
-  x.fillStyle=SYS.graphBg;x.beginPath();x.arc(zx,zy,3,0,TAU);x.fill();
-  x.font='bold 12px -apple-system,sans-serif';x.fillStyle=SYS.purple;x.textAlign='left';x.fillText('z',zx+10,zy-10);
-  if(S.cshowP){
-    const rn=Math.pow(r_,S.cpow),tn_=th*S.cpow,zr=rn*Math.cos(tn_),zi=rn*Math.sin(tn_);
-    if(isFinite(zr)&&isFinite(zi)){
-      const znx=ox+zr*sc,zny=oy-zi*sc;
-      gradSeg(x,ox,oy,znx,zny,'#ffcc00','#ff9500',20);
-      x.fillStyle=SYS.orange;x.beginPath();x.arc(znx,zny,5,0,TAU);x.fill();
-      x.font='bold 12px -apple-system,sans-serif';x.fillStyle=SYS.orange;
-      const sup=String(S.cpow).split('').map(c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[+c]||c).join('');
-      x.fillText('z'+sup,znx+10,zny-10);
-    }
-  }
-  S._complex={ox,oy,sc,range};
-}
-
-/* ── Curve ── */
-function drawCurve(x,W,H){
-  const cv=CURVES[S.ci];
-  const g=makeG(W*.5,H*.5,W*.88,H*.82,cv.xc-cv.xr,cv.xc+cv.xr,cv.yc-cv.yr,cv.yc+cv.yr);
-  drawGrid(x,g,cv.xr>5?2:cv.xr>1.5?1:.5,cv.yr>5?2:cv.yr>1.5?1:.5);
-  const steps=1000,dt=(cv.t1-cv.t0)/steps;
-  let pX=null,pY=null;x.lineWidth=2.5;x.lineCap='round';
-  for(let i=0;i<=steps;i++){const t=cv.t0+i*dt,vx=cv.fx(t),vy=cv.fy(t);
-    if(!isFinite(vx)||!isFinite(vy)){pX=null;continue}
-    const sx=g.mx(vx),sy=g.my(vy);
-    if(pX!==null){x.strokeStyle=lerpC('#af52de','#da7cff',i/steps);x.beginPath();x.moveTo(pX,pY);x.lineTo(sx,sy);x.stroke()}
-    pX=sx;pY=sy;}
-  const tVal=cv.t0+(cv.t1-cv.t0)*S.ctp,ptx=cv.fx(tVal),pty=cv.fy(tVal);
-  if(isFinite(ptx)&&isFinite(pty)){const sx=g.mx(ptx),sy=g.my(pty);
-    x.fillStyle=SYS.label;x.beginPath();x.arc(sx,sy,6,0,TAU);x.fill();
-    x.fillStyle=SYS.graphBg;x.beginPath();x.arc(sx,sy,3,0,TAU);x.fill()}
-}
-
-/* ══════════════════════════════════════
-   CONTROLS (vanilla DOM)
-   ══════════════════════════════════════ */
-function updateControls(){
-  const bar=document.getElementById('ctrl');if(!bar)return;
-  // vals
-  const vals=document.getElementById('vals');if(!vals)return;
-  if(S.tab==='trig'){
-    const rad=S.ang*PI/180,sp=fSp(S.ang),sV=Math.sin(rad),cV=Math.cos(rad),isA=Math.abs(cV)<.05;
-    let tanT=isA?'tan→'+(Math.sin(rad)>0==Math.cos(rad)>=0?'+∞':'−∞'):`tan=${fmt(Math.tan(rad))}`;
-    if(sp&&sp[3]==='—')tanT='tan=±∞';else if(sp)tanT=`tan=${sp[3]}(${fmt(Math.tan(rad))})`;
-    vals.innerHTML=`<span style="color:${SYS.pink}">sin=${sp?sp[1]+'('+fmt(sV)+')':fmt(sV)}</span> `+
-      `<span style="color:${SYS.teal}">cos=${sp?sp[2]+'('+fmt(cV)+')':fmt(cV)}</span> `+
-      `<span style="color:${SYS.orange}">${tanT}</span>`;
-  }else if(S.tab==='deriv'){
-    const fn=FUNCS[S.fi],fv=fn.f(S.pt),dv=fn.df(S.pt);
-    vals.innerHTML=`<span style="color:${SYS.pink}">f(${fmt(S.pt)})=${fmt(fv)}</span> `+
-      `<span style="color:${SYS.teal}">f'(${fmt(S.pt)})=${fmt(dv)}</span>`;
-  }else if(S.tab==='integ'){
-    const fn=FUNCS[S.fi],lo=Math.min(S.ia,S.ib),hi=Math.max(S.ia,S.ib);
-    let area=0;const h=(hi-lo)/2000;for(let i=0;i<2000;i++){const v=fn.f(lo+(i+.5)*h);if(isFinite(v))area+=v*h}
-    if(S.ia>S.ib)area=-area;
-    vals.innerHTML=`<span style="color:${SYS.green};font-weight:600;font-size:14px">∫f(x)dx ≈ ${fmt(area)}</span>`;
-  }else if(S.tab==='complex'){
-    const r_=Math.sqrt(S.cre**2+S.cim**2),th=Math.atan2(S.cim,S.cre);
-    vals.innerHTML=`<span style="color:${SYS.purple}">z=${fmt(S.cre)}${S.cim>=0?'+':'−'}${fmt(Math.abs(S.cim))}i</span> `+
-      `<span style="color:${SYS.blue}">|z|=${fmt(r_)} arg=${fmt(th)}rad</span>`;
-  }else if(S.tab==='curve'){
-    const cv=CURVES[S.ci],tVal=cv.t0+(cv.t1-cv.t0)*S.ctp;
-    vals.innerHTML=`<span style="color:${SYS.purple}">t=${fmt(tVal)} (${isFinite(cv.fx(tVal))?fmt(cv.fx(tVal)):'—'},${isFinite(cv.fy(tVal))?fmt(cv.fy(tVal)):'—'})</span>`;
-  }
-}
-
-/* ══════════════════════════════════════
-   BUILD UI
-   ══════════════════════════════════════ */
-function buildApp(){
-  const app=document.getElementById('app');
-  app.innerHTML=`
-    <div id="ctrl" class="bar"></div>
-    <div id="vals" class="bar vals"></div>
-    <canvas id="cv"></canvas>
-    <div class="tabs" id="tabs"></div>`;
-  cvs=document.getElementById('cv');
-  resize();
-  buildTabs();
-  buildControls();
-  render();
-}
-
-function resize(){
-  if(!cvs)return;
-  const app=document.getElementById('app');
-  const ctrl=document.getElementById('ctrl');
-  const vals=document.getElementById('vals');
-  const tabs=document.getElementById('tabs');
-  const h=window.innerHeight-(ctrl?ctrl.offsetHeight:0)-(vals?vals.offsetHeight:0)-(tabs?tabs.offsetHeight:0);
-  cvs.style.height=Math.max(100,h)+'px';
-  render();
-}
-
-const TABDEF=[
-  {id:'trig',label:'三角関数',ico:'∿',color:SYS.pink},
-  {id:'deriv',label:'微分',ico:'∂',color:SYS.teal},
-  {id:'integ',label:'積分',ico:'∫',color:SYS.green},
-  {id:'complex',label:'複素数',ico:'ℂ',color:SYS.purple},
-  {id:'curve',label:'曲線',ico:'∞',color:SYS.orange},
-];
-
-function buildTabs(){
-  const el=document.getElementById('tabs');
-  el.innerHTML=TABDEF.map(t=>`<button data-tab="${t.id}" style="--tc:${t.color}" class="${S.tab===t.id?'on':''}"><span class="ico">${t.ico}</span><span>${t.label}</span></button>`).join('');
-  el.querySelectorAll('button').forEach(b=>b.onclick=()=>{hap();S.tab=b.dataset.tab;buildTabs();buildControls();render()});
-}
-
-function buildControls(){
-  const el=document.getElementById('ctrl');
-  if(S.tab==='trig'){
-    el.innerHTML=`<span style="color:#636366;font-weight:500">θ=</span>
-      <input type="number" id="angN" value="${S.ang}" style="width:56px">
-      <span style="color:#8e8e93;font-size:12px">°</span>
-      <input type="range" id="angR" min="0" max="360" value="${((S.ang%360)+360)%360}">
-      <button class="pill ${S.sh.s?'on':''}" style="--c:${SYS.pink}" data-k="s">sin</button>
-      <button class="pill ${S.sh.c?'on':''}" style="--c:${SYS.teal}" data-k="c">cos</button>
-      <button class="pill ${S.sh.t?'on':''}" style="--c:${SYS.orange}" data-k="t">tan</button>`;
-    el.querySelector('#angN').oninput=e=>{S.ang=parseInt(e.target.value)||0;hap();render()};
-    el.querySelector('#angR').oninput=e=>{S.ang=+e.target.value;el.querySelector('#angN').value=S.ang;hap();render()};
-    el.querySelectorAll('.pill').forEach(b=>b.onclick=()=>{hap();S.sh[b.dataset.k]=!S.sh[b.dataset.k];b.classList.toggle('on');render()});
-  }else if(S.tab==='deriv'){
-    el.innerHTML=`<select id="fsel">${FUNCS.map((f,i)=>`<option value="${i}"${i===S.fi?' selected':''}>${f.name}</option>`).join('')}</select>
-      <button class="pill ${S.showD?'on':''}" style="--c:${SYS.teal}" id="togD">f'(x)</button>
-      <button class="pill ${S.showT?'on':''}" style="--c:${SYS.orange}" id="togT">接線</button>`;
-    el.querySelector('#fsel').onchange=e=>{S.fi=+e.target.value;S.pt=1;hap();render()};
-    el.querySelector('#togD').onclick=()=>{hap();S.showD=!S.showD;buildControls();render()};
-    el.querySelector('#togT').onclick=()=>{hap();S.showT=!S.showT;buildControls();render()};
-  }else if(S.tab==='integ'){
-    el.innerHTML=`<select id="fsel">${FUNCS.map((f,i)=>`<option value="${i}"${i===S.fi?' selected':''}>${f.name}</option>`).join('')}</select>
-      <button class="pill ${S.showR?'on':''}" style="--c:${SYS.green}" id="togR">区分求積</button>
-      <span style="color:#636366;font-weight:600">a=</span><input type="number" id="iaI" value="${tr4(S.ia)}" step="0.1" style="width:52px;border-left:3px solid ${SYS.blue}">
-      <span style="color:#636366;font-weight:600">b=</span><input type="number" id="ibI" value="${tr4(S.ib)}" step="0.1" style="width:52px;border-left:3px solid ${SYS.purple}">
-      <span style="color:#8e8e93">n=</span><input type="range" id="nR" min="1" max="100" value="${S.in_}" style="width:70px"><span style="color:#8e8e93;font-size:11px">${S.in_}</span>`;
-    el.querySelector('#fsel').onchange=e=>{S.fi=+e.target.value;const fn=FUNCS[S.fi];S.ia=fn.da;S.ib=fn.db;hap();buildControls();render()};
-    el.querySelector('#togR').onclick=()=>{hap();S.showR=!S.showR;buildControls();render()};
-    el.querySelector('#iaI').oninput=e=>{const v=parseFloat(e.target.value);if(isFinite(v))S.ia=v;render()};
-    el.querySelector('#ibI').oninput=e=>{const v=parseFloat(e.target.value);if(isFinite(v))S.ib=v;render()};
-    el.querySelector('#nR').oninput=e=>{S.in_=+e.target.value;hap();buildControls();render()};
-  }else if(S.tab==='complex'){
-    el.innerHTML=`<span style="color:#636366">z=</span><input type="number" id="creI" value="${S.cre}" step="0.1" style="width:50px">
-      <span style="color:#636366">+i</span><input type="number" id="cimI" value="${S.cim}" step="0.1" style="width:50px">
-      <span style="color:#8e8e93">n=</span><input type="number" id="cpI" value="${S.cpow}" min="1" max="12" style="width:40px">
-      <button class="pill ${S.cshowP?'on':''}" style="--c:${SYS.orange}" id="togP">zⁿ</button>`;
-    el.querySelector('#creI').oninput=e=>{const v=parseFloat(e.target.value);if(isFinite(v))S.cre=v;render()};
-    el.querySelector('#cimI').oninput=e=>{const v=parseFloat(e.target.value);if(isFinite(v))S.cim=v;render()};
-    el.querySelector('#cpI').oninput=e=>{const v=parseInt(e.target.value);if(v>=1&&v<=12)S.cpow=v;render()};
-    el.querySelector('#togP').onclick=()=>{hap();S.cshowP=!S.cshowP;buildControls();render()};
-  }else if(S.tab==='curve'){
-    el.innerHTML=`<select id="csel">${CURVES.map((c,i)=>`<option value="${i}"${i===S.ci?' selected':''}>${c.name}</option>`).join('')}</select>
-      <span style="color:#8e8e93">t=</span><input type="range" id="tpR" min="0" max="1" step="0.002" value="${S.ctp}" style="flex:1;max-width:200px">`;
-    el.querySelector('#csel').onchange=e=>{S.ci=+e.target.value;S.ctp=.5;hap();render()};
-    el.querySelector('#tpR').oninput=e=>{S.ctp=+e.target.value;hap();render()};
-  }
-}
-
-/* ══════════════════════════════════════
-   POINTER / APPLE PENCIL
-   ══════════════════════════════════════ */
-function onPointerDown(e){
-  // Apple Pencil: show floating label only
-  if(e.pointerType==='pen'){
-    S.pencil.active=true;
-    handlePencil(e);
-    return;
-  }
-  // finger/mouse: drag interaction
-  S.drag=true;
-  handleDrag(e);
-}
-
-function onPointerMove(e){
-  if(e.pointerType==='pen'&&S.pencil.active){
-    e.preventDefault();
-    handlePencil(e);
-    return;
-  }
-  if(S.drag){e.preventDefault();handleDrag(e)}
-}
-
-function onPointerUp(e){
-  if(e.pointerType==='pen'){S.pencil.active=false;hidePencilLabel();return}
-  S.drag=false;S.dragTarget=null;
-}
-
-function handlePencil(e){
-  const r=cvs.getBoundingClientRect();
-  const mx=e.clientX-r.left,my=e.clientY-r.top;
-  const pressure=e.pressure||0;
-
-  // calculate angle based on current tab
-  let deg=0;
-  if(S.tab==='trig'&&S._trig){
-    const{cx,cy}=S._trig;
-    let a=Math.atan2(-(my-cy),mx-cx);if(a<0)a+=TAU;
-    deg=a*180/PI;
-    S.ang=Math.round(deg);
-    render();
-  }else if(S.tab==='complex'&&S._complex){
-    const{ox,oy,sc}=S._complex;
-    S.cre=tr4((mx-ox)/sc);S.cim=tr4(-(my-oy)/sc);
-    deg=Math.atan2(S.cim,S.cre)*180/PI;if(deg<0)deg+=360;
-    render();
-  }else{
-    deg=Math.atan2(-(my-r.height/2),mx-r.width/2)*180/PI;if(deg<0)deg+=360;
-  }
-
-  showPencilLabel(e.clientX,e.clientY,deg,pressure);
-}
-
-function handleDrag(e){
-  const r=cvs.getBoundingClientRect();
-  const mx=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
-  const my=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
-
-  if(S.tab==='trig'&&S._trig){
-    const{cx,cy,R}=S._trig;
-    if(Math.hypot(mx-cx,my-cy)<R*2){
-      let a=Math.atan2(-(my-cy),mx-cx);if(a<0)a+=TAU;
-      S.ang=Math.round(a*180/PI);
-      const angN=document.getElementById('angN');if(angN)angN.value=S.ang;
-      const angR=document.getElementById('angR');if(angR)angR.value=((S.ang%360)+360)%360;
-      render();
-    }
-  }else if(S.tab==='deriv'&&S._deriv){
-    const fn=FUNCS[S.fi],v=S._deriv.g.ix(mx);
-    S.pt=Math.max(fn.x0+.01,Math.min(fn.x1-.01,v));
-    render();
-  }else if(S.tab==='integ'&&S._integ){
-    const fn=FUNCS[S.fi],v=S._integ.g.ix(mx);
-    const da=Math.abs(S._integ.g.mx(S.ia)-mx),db=Math.abs(S._integ.g.mx(S.ib)-mx);
-    if(!S.dragTarget)S.dragTarget=da<db?'a':'b';
-    const clamped=Math.max(fn.x0,Math.min(fn.x1,v));
-    if(S.dragTarget==='a'){S.ia=tr4(clamped);const el=document.getElementById('iaI');if(el)el.value=tr4(S.ia)}
-    else{S.ib=tr4(clamped);const el=document.getElementById('ibI');if(el)el.value=tr4(S.ib)}
-    render();
-  }else if(S.tab==='complex'&&S._complex){
-    const{ox,oy,sc}=S._complex;
-    S.cre=tr4((mx-ox)/sc);S.cim=tr4(-(my-oy)/sc);
-    S.crange=Math.min(50,Math.max(3,Math.sqrt(S.cre**2+S.cim**2)*1.8));
-    render();
-  }
-}
-
-/* ══════════════════════════════════════
-   INIT
-   ══════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded',()=>{
-  buildApp();
-  window.addEventListener('resize',()=>{resize()});
-  // Canvas pointer events
-  document.getElementById('cv').addEventListener('pointerdown',onPointerDown);
-  window.addEventListener('pointermove',onPointerMove);
-  window.addEventListener('pointerup',onPointerUp);
-  // touch fallback
-  document.getElementById('cv').addEventListener('touchstart',e=>{if(e.touches.length===1){S.drag=true;handleDrag(e)}},{passive:true});
-  window.addEventListener('touchmove',e=>{if(S.drag){e.preventDefault();handleDrag(e)}},{passive:false});
-  window.addEventListener('touchend',()=>{S.drag=false;S.dragTarget=null});
-});
+// ===== INIT =====
+renderNav();renderInput();initTP();initFM();renderPZ();renderQMenu();buildViz();showPage();
+setTimeout(drawAllViz,100);
 </script>
+
 </body>
 </html>
