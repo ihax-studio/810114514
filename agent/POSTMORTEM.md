@@ -54,70 +54,94 @@ NVIDIA 8GB GPU で爆死した全問題が、統合メモリ 64GB で根本解�
 | 動かせるモデル(4bit) | **~33Bパラメータ** | ~13Bパラメータ | **~33Bパラメータ** |
 | 動かせるモデル(8bit) | **~20Bパラメータ** | ~8Bパラメータ | **~20Bパラメータ** |
 
-### 結論: メモリ容量 > チップ世代
+### 結論: 60GB GPU + 400GB SSD で限界突破
 
 ```
-ターゲット: M5 Pro 64GB
+ターゲット: M5 Pro 64GB (2026)
 - メモリ帯域: ~273 GB/s (Proチップ)
 - 統合メモリ: 64GB
-- Neural Engine: 次世代 (embedding処理に活用)
+- SSD: 400GB (モデル保管 + KV overflow)
+- GPU割り当て: 60GB (sudo sysctl iogpu.wired_limit_mb=61440)
+- macOS用: 4GB + SSD swap 20GB (保険)
 ```
 
-### 64GBで70Bを動かす方法
+### 60GB GPU メモリ予算
 
 ```
-=== メモリ予算 (64GB) ===
+=== 75%制限を突破 ===
+デフォルト: 64GB × 75% = 48GB しかGPUに使えない
+sudo sysctl iogpu.wired_limit_mb=61440 で 60GB に引き上げ
+macOS: 4GB物理 + 20GB仮想メモリ(SSD 15GB/s) で十分動く
 
-OS + システム:          ~8GB
-Embedding model:        ~1GB (all-MiniLM-L6-v2)
-SQLite + cache:         ~1GB
-─────────────────────────────
-使用可能:              ~54GB
+=== 60GB で何が載るか ===
 
-=== 70B 3bit量子化 (推奨) ===
-モデル本体:            ~32GB
-KV cache (ctx=2048):    ~5GB
-推論ワーキング:         ~3GB
-合計:                  ~40GB → 余裕あり✓ (14GB残)
+70B 6bit (ほぼ原品質): モデル53GB + KV 5GB = 58GB ✓
+70B 5bit + 8K context:  モデル47GB + KV 8GB = 55GB ✓
+70B 4bit + 16K context: モデル40GB + KV 15GB = 55GB ✓
+Coder32B + 8B 同時:     20GB + 9GB = 29GB ✓ (31GB余り)
+8B + 1M context:        モデル5GB + KV 16GB = 21GB ✓ (39GB余り!)
 
-=== 70B 4bit量子化 (ギリギリ) ===
-モデル本体:            ~40GB
-KV cache (ctx=2048):    ~5GB
-推論ワーキング:         ~3GB
-合計:                  ~48GB → 動くが他アプリ閉じる必要あり
-
-=== 33B + 8B 同時ロード (安定運用) ===
-33B 4bit:              ~20GB
-8B 4bit:                ~5GB
-KV cache (ctx=4096):    ~4GB
-Embedding:              ~1GB
-合計:                  ~30GB → 余裕大✓ (24GB残、記憶ムキムキ)
+=== 1M コンテキスト (100万トークン) ===
+70Bでは1MのKVcache = 128GB → 不可能
+8Bなら1MのKVcache = 16GB → 可能！
+KV Q4量子化なら4GBまで縮小 → モデル5GB + KV 4GB = 9GB
+→ 残り51GBを記憶システム・embeddingに全振り
+→ 記憶システムが知性を補完、8Bでも実質70B級の文脈理解
 ```
 
-### 4つのプリセット
+### SSD 400GB ストレージ計画
 
-| プリセット | 構成 | 使用メモリ | 用途 |
-|-----------|------|-----------|------|
-| **balanced** | 33B + 8B 同時 | ~30GB | **推奨**。記憶に24GB使える |
-| **max_quality** | 70B(3bit) ↔ 8B 切替 | ~40GB | 最高品質。切替に数秒 |
-| **extreme** | 70B(4bit) 単体 | ~48GB | 一発勝負。記憶は最小限 |
-| **lightweight** | 8B 単体 | ~9GB | 全メモリを記憶+embeddingに |
+```
+全モデル保管:                ~202GB
+  70B 6bit:    ~60GB
+  70B 5bit:    ~50GB
+  70B 4bit:    ~42GB
+  Coder 32B:   ~22GB
+  General 32B: ~22GB
+  8B:          ~6GB
+
+KV cache overflow:           ~50GB
+FineTuning用データ:          ~50GB
+余り (新モデル追加):         ~98GB
+──────────────────────────────────
+合計:                        400GB
+
+全モデルをSSDに保管し、用途に応じてGPUにロードする。
+モデル切り替えはSSD 15GB/s → 70B 4bitを3秒でロード可能。
+```
+
+### 8つのプリセット
+
+| プリセット | 構成 | GPU使用 | コンテキスト | 用途 |
+|-----------|------|---------|-------------|------|
+| **architect** | 70B 6bit | 58GB | 4K | OS設計・アーキテクチャ |
+| **developer** | 70B 5bit | 55GB | 8K | 開発メイン |
+| **longcontext** | 70B 4bit | 55GB | 16K | 大規模コード解析 |
+| **million** | 8B 1M ctx | 21GB | **1M** | プロジェクト全体理解 |
+| **hybrid_1m** | 8B(1M) ↔ 32B切替 | 9-28GB | 1M→8K | 読む(1M)→書く(32B) |
+| **balanced** | Coder32B + 8B | 29GB | 8K | コード特化 + 記憶 |
+| **swift_dev** | 32B + 8B | 29GB | 8K | Swift/SwiftUI開発 |
+| **lightweight** | 8B | 9GB | 8K | Xcode+Figma同時OK |
 
 ### M5 Proでの推論速度予測
 
 ```
 M5 Pro 帯域 273 GB/s での推定 tok/s:
-- 70B 3bit: ~8-12 tok/s  (十分読めるスピード)
-- 70B 4bit: ~6-9 tok/s   (やや遅いが許容範囲)
-- 33B 4bit: ~15-25 tok/s (快適)
-- 8B 4bit:  ~40-60 tok/s (高速)
+- 70B 6bit: ~5-8 tok/s   (設計議論に十分)
+- 70B 5bit: ~7-10 tok/s  (開発に快適)
+- 70B 4bit: ~8-12 tok/s  (サクサク)
+- 33B 4bit: ~15-25 tok/s (爆速)
+- 8B 4bit:  ~40-60 tok/s (瞬殺)
+- 8B 1M ctx: ~20-30 tok/s (KV Q4量子化時)
 
-※ LLM推論はメモリ帯域律速。Pro(273) vs Max(400) で約30%差。
-※ ただし70Bの品質差は速度差を補って余りある。
+※ LLM推論はメモリ帯域律速。
+※ 70B 6bitの品質はDeepSeek/Qwen超え (ほぼfloat16原品質)。
+※ 1Mコンテキストは8Bモデルだが、記憶システムが知性を補完。
 ```
 
-**記事で学んだ「GPUが足りない」を繰り返さないために、64GBは必須。
-そして70Bを3bit量子化で攻略することで、8GB GPU時代の限界を完全突破する。**
+**8GB GPU爆死 → 60GB GPU + 400GB SSD。
+70Bほぼ原品質 & 1Mコンテキスト & OS開発・ネイティブ開発全対応。
+記事の全教訓を昇華した究極構成。**
 
 ---
 

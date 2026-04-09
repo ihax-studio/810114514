@@ -32,7 +32,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from mlx_engine import MLXEngine, get_hardware_config, PRESETS, MODEL_CATALOG
+from mlx_engine import (
+    MLXEngine, get_hardware_config, setup_gpu_allocation,
+    PRESETS, MODEL_CATALOG, SSD_STORAGE_PLAN,
+)
 from memory import MemoryManager
 
 # ---------------------------------------------------------------------------
@@ -164,8 +167,10 @@ class HealthResponse(BaseModel):
     primary_model: str
     secondary_model: Optional[str]
     memory_gb: float
+    gpu_budget_gb: float
     estimated_usage_gb: float
-    remaining_gb: float
+    remaining_gpu_gb: float
+    ssd_budget_gb: float
     chip: str
     memory_stats: dict
 
@@ -211,8 +216,10 @@ async def health():
         primary_model=config["primary_model"],
         secondary_model=config.get("secondary_model"),
         memory_gb=config["memory_gb"],
+        gpu_budget_gb=config["gpu_budget_gb"],
         estimated_usage_gb=config["estimated_usage_gb"],
-        remaining_gb=config["remaining_gb"],
+        remaining_gpu_gb=config["remaining_gpu_gb"],
+        ssd_budget_gb=config["ssd_budget_gb"],
         chip=config["chip"],
         memory_stats=mem.get_stats(),
     )
@@ -229,9 +236,17 @@ async def list_presets():
             "primary": p["primary"],
             "secondary": p["secondary"],
             "total_gb": cat["total_gb"],
+            "max_context": cat["max_context"],
             "quality": cat["quality"],
+            "use_case": cat.get("use_case", ""),
         }
     return result
+
+
+@app.get("/ssd")
+async def ssd_storage():
+    """SSD 400GBストレージ計画"""
+    return SSD_STORAGE_PLAN
 
 
 @app.post("/preset")
@@ -458,20 +473,28 @@ async def memory_summarize():
 if __name__ == "__main__":
     import uvicorn
 
+    # GPU割り当てチェック
+    setup_gpu_allocation()
+
     config = get_hardware_config(DEFAULT_PRESET)
 
     print("=" * 60)
-    print("  iHax Agent Server v0.2")
-    print("  http://localhost:8000")
-    print("  API docs: http://localhost:8000/docs")
+    print("  iHax Agent Server v0.3")
+    print("  M5 Pro 64GB / 60GB GPU / 400GB SSD")
+    print("  http://localhost:8000/docs")
     print("=" * 60)
-    print(f"  Chip:      {config['chip']}")
-    print(f"  Memory:    {config['memory_gb']:.0f} GB")
-    print(f"  Preset:    {config['preset']} - {config['preset_description']}")
-    print(f"  Primary:   {config['primary_model']}")
-    print(f"  Secondary: {config.get('secondary_model', 'None')}")
-    print(f"  Usage:     ~{config['estimated_usage_gb']} GB / {config['memory_gb']:.0f} GB")
-    print(f"  Remaining: ~{config['remaining_gb']:.0f} GB (記憶+embedding用)")
+    print(f"  Chip:       {config['chip']}")
+    print(f"  RAM:        {config['memory_gb']:.0f} GB")
+    print(f"  GPU Budget: {config['gpu_budget_gb']} GB")
+    print(f"  SSD Budget: {config['ssd_budget_gb']} GB")
+    print(f"  Preset:     {config['preset']}")
+    print(f"              {config['preset_description']}")
+    print(f"  Primary:    {config['primary_model']}")
+    print(f"              {config.get('primary_use_case', '')}")
+    print(f"  Secondary:  {config.get('secondary_model', 'None')}")
+    print(f"  Context:    {config['primary_context']} tokens")
+    print(f"  GPU Usage:  ~{config['estimated_usage_gb']} / {config['gpu_budget_gb']} GB")
+    print(f"  Remaining:  ~{config['remaining_gpu_gb']:.0f} GB")
     print("=" * 60)
 
     uvicorn.run(app, host="0.0.0.0", port=8000)
