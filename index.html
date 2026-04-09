@@ -6932,347 +6932,329 @@ function playEk2Audio(){
 }
 </script>
 
-<!-- ══════════ LISTENING MODE (Pass単 Pre1 専用) ══════════ -->
+<!-- ══════════ LISTENING MODE v2 (Pass単 Pre1 専用) ══════════ -->
 <style>
 #listen-ov{position:fixed;inset:0;z-index:9000;
   background:linear-gradient(150deg,#eef2f8 0%,#f0edfc 50%,#edf7f2 100%);
-  visibility:hidden;opacity:0;transform:translateX(40%);pointer-events:none;
-  transition:transform .45s cubic-bezier(.32,.72,.37,1),opacity .35s ease,visibility 0s .45s;
-  display:flex;flex-direction:column;overflow:hidden}
-#listen-ov.on{visibility:visible;opacity:1;transform:translateX(0);pointer-events:auto;transition:transform .45s cubic-bezier(.32,.72,.37,1),opacity .35s ease,visibility 0s 0s}
-.lis-hdr{display:flex;align-items:center;gap:10px;padding:calc(var(--sat,0px)+14px) 16px 12px;
+  display:none;flex-direction:column;overflow:hidden}
+#listen-ov.on{display:flex}
+#lis-hdr{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 12px;
   background:rgba(255,255,255,.72);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
   border-bottom:1px solid rgba(0,0,0,.05);position:relative;z-index:2}
-.lis-back{font-size:28px;background:none;border:none;color:#007aff;cursor:pointer;padding:0 4px;line-height:1;font-weight:300;transition:transform .15s}
-.lis-back:active{transform:scale(.85)}
-.lis-ttl{font-size:17px;font-weight:700;flex:1;letter-spacing:-.02em}
-.lis-count{font-size:13px;color:#007aff;font-weight:600}
-#lis-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 24px}
-#listen-player{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 8px;min-height:52vh}
-.lis-en{font-size:44px;font-weight:800;letter-spacing:-.04em;text-align:center;color:#1c1c1e;
-  cursor:pointer;padding:10px 18px;border-radius:16px;transition:background .2s;word-break:break-word}
-.lis-en:active{background:rgba(0,122,255,.08)}
-.lis-en.speaking{animation:lisPulse 1s ease infinite}
-@keyframes lisPulse{0%,100%{opacity:1}50%{opacity:.55}}
-.lis-ja{font-size:24px;font-weight:500;color:var(--sub,#8e8e93);text-align:center;margin-top:6px;
-  cursor:pointer;padding:6px 14px;border-radius:12px;transition:background .2s}
-.lis-ja:active{background:rgba(0,0,0,.04)}
-.lis-prog{font-size:13px;color:var(--sub,#8e8e93);margin-top:20px}
-.lis-prog-bar{width:100%;max-width:260px;height:4px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden;margin-top:8px}
-.lis-prog-fill{height:100%;background:linear-gradient(90deg,#007aff,#5856d6);border-radius:2px;transition:width .3s}
-@keyframes lisIn{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
-.lis-speed-lbl{font-size:11px;color:var(--sub,#8e8e93);margin-top:14px;font-weight:600}
-.lis-controls{display:flex;align-items:center;justify-content:center;gap:24px;
-  padding:16px 20px calc(var(--sab,0px)+16px);
+#lis-back-btn{font-size:28px;background:none;border:none;color:#007aff;cursor:pointer;padding:0 4px;line-height:1;font-weight:300}
+#lis-back-btn:active{transform:scale(.85)}
+#lis-title{font-size:17px;font-weight:700;flex:1;letter-spacing:-.02em;color:#1c1c1e}
+#lis-counter{font-size:13px;color:#007aff;font-weight:600}
+#lis-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 24px}
+#lis-card{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px 16px;min-height:44vh}
+#lis-word-en{font-size:42px;font-weight:800;letter-spacing:-.04em;text-align:center;color:#1c1c1e;
+  padding:10px 18px;border-radius:16px;word-break:break-word;cursor:pointer;transition:background .2s}
+#lis-word-en:active{background:rgba(0,122,255,.08)}
+#lis-word-en.pulse{animation:lisPulse2 .8s ease infinite}
+@keyframes lisPulse2{0%,100%{opacity:1}50%{opacity:.5}}
+#lis-word-ja{font-size:24px;font-weight:500;color:#8e8e93;text-align:center;margin-top:6px;
+  padding:6px 14px;border-radius:12px;cursor:pointer;transition:background .2s}
+#lis-word-ja:active{background:rgba(0,0,0,.04)}
+#lis-progress{font-size:13px;color:#8e8e93;margin-top:20px}
+#lis-bar-wrap{width:100%;max-width:260px;height:4px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden;margin-top:8px}
+#lis-bar-fill{height:100%;background:linear-gradient(90deg,#007aff,#5856d6);border-radius:2px;transition:width .3s;width:0%}
+#lis-speed-info{font-size:11px;color:#8e8e93;margin-top:12px;font-weight:600}
+@keyframes lisSlideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+#lis-word-list{padding:8px 16px 0}
+.lwi{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:10px;cursor:pointer;transition:background .12s;border-left:3px solid transparent}
+.lwi:active{background:rgba(0,122,255,.08)}
+.lwi.now{background:rgba(0,122,255,.08);border-left-color:#007aff}
+.lwi-n{font-size:11px;color:#8e8e93;width:26px;text-align:right;flex-shrink:0;font-weight:600}
+.lwi-e{font-size:14px;font-weight:700;color:#1c1c1e;flex:1}
+.lwi-j{font-size:12px;color:#8e8e93;flex:1;text-align:right}
+#lis-bottom{display:flex;align-items:center;justify-content:center;gap:20px;
+  padding:14px 20px calc(env(safe-area-inset-bottom,0px) + 14px);
   background:rgba(255,255,255,.72);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
   border-top:1px solid rgba(0,0,0,.05)}
-.lis-ctrl-btn{width:54px;height:54px;border-radius:50%;border:none;font-size:22px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;transition:transform .12s;background:rgba(0,0,0,.06)}
-.lis-ctrl-btn:active{transform:scale(.85)}
-.lis-ctrl-play{width:72px;height:72px;font-size:30px;background:linear-gradient(135deg,#007aff,#5856d6);color:#fff;box-shadow:0 6px 24px rgba(0,122,255,.35)}
-.lis-ctrl-speed{width:44px;height:44px;border-radius:50%;border:none;font-size:12px;font-weight:800;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;transition:transform .12s;
-  background:rgba(88,86,214,.1);color:#5856d6}
-.lis-ctrl-speed:active{transform:scale(.85)}
-.lis-word-list{margin-top:16px;padding:0 4px}
-.lis-word-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:background .15s}
-.lis-word-item:active{background:rgba(0,122,255,.08)}
-.lis-word-item.current{background:rgba(0,122,255,.1);border-left:3px solid #007aff}
-.lis-word-num{font-size:11px;color:var(--sub,#8e8e93);width:28px;text-align:right;flex-shrink:0;font-weight:600}
-.lis-word-en{font-size:15px;font-weight:700;color:#1c1c1e;flex:1}
-.lis-word-ja{font-size:13px;color:var(--sub,#8e8e93);flex:1;text-align:right}
+.lb{width:50px;height:50px;border-radius:50%;border:none;font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.06);transition:transform .1s}
+.lb:active{transform:scale(.85)}
+#lis-play{width:68px;height:68px;font-size:28px;background:linear-gradient(135deg,#007aff,#5856d6);color:#fff;border-radius:50%;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,122,255,.3);transition:transform .1s}
+#lis-play:active{transform:scale(.9)}
+#lis-spd{width:40px;height:40px;border-radius:50%;border:none;font-size:11px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;background:rgba(88,86,214,.1);color:#5856d6;transition:transform .1s}
+#lis-spd:active{transform:scale(.85)}
 </style>
 
 <div id="listen-ov">
-  <div class="lis-hdr">
-    <button class="lis-back" onclick="closeListenMode()">‹</button>
-    <div class="lis-ttl" id="lis-ttl">Pass単 準1 単語</div>
-    <div class="lis-count" id="lis-count"></div>
+  <div id="lis-hdr">
+    <button id="lis-back-btn">‹</button>
+    <div id="lis-title">Pass単 準1 単語</div>
+    <div id="lis-counter"></div>
   </div>
-  <div id="lis-body">
-    <div id="listen-player">
-      <div class="lis-en" id="lis-en" onclick="listenTapEn()"></div>
-      <div class="lis-ja" id="lis-ja" onclick="listenTapJa()"></div>
-      <div class="lis-prog" id="lis-prog-txt"></div>
-      <div class="lis-prog-bar"><div class="lis-prog-fill" id="lis-prog-fill" style="width:0%"></div></div>
-      <div class="lis-speed-lbl" id="lis-speed-lbl"></div>
+  <div id="lis-scroll">
+    <div id="lis-card">
+      <div id="lis-word-en"></div>
+      <div id="lis-word-ja"></div>
+      <div id="lis-progress"></div>
+      <div id="lis-bar-wrap"><div id="lis-bar-fill"></div></div>
+      <div id="lis-speed-info"></div>
     </div>
-    <div class="lis-word-list" id="lis-word-list"></div>
+    <div id="lis-word-list"></div>
   </div>
-  <div class="lis-controls" id="lis-controls">
-    <button class="lis-ctrl-btn" onclick="listenRestart()" style="font-size:16px">↺</button>
-    <button class="lis-ctrl-btn" onclick="listenPrev()">⏮</button>
-    <button class="lis-ctrl-btn lis-ctrl-play" id="lis-play-btn" onclick="listenToggle()">▶</button>
-    <button class="lis-ctrl-btn" onclick="listenNext()">⏭</button>
-    <button class="lis-ctrl-speed" id="lis-speed-btn" onclick="listenSpeedUp()">1x</button>
+  <div id="lis-bottom">
+    <button class="lb" id="lis-restart">↺</button>
+    <button class="lb" id="lis-prev">⏮</button>
+    <button id="lis-play">▶</button>
+    <button class="lb" id="lis-next">⏭</button>
+    <button id="lis-spd">1x</button>
   </div>
 </div>
 
 <script>
-/* ══════════ LISTENING MODE – Pass単 Pre1 専用 ══════════ */
+/* ══════════ LISTENING MODE v2 – Pass単 Pre1 ══════════ */
 (function(){
-const LIS_KEY='inglish_listen_progress';
-const LIS_SPEED_KEY='inglish_listen_speed';
-let _lisData=[];
-let _lisIdx=0;
-let _lisPlaying=false;
-let _lisTimer=null;
-/* Speed multiplier: 1=normal, 2=fast */
-let _lisSpeedMode=1;
-const SPEEDS=[
-  {en:1.1,ja:1.3,label:'1x'},
-  {en:1.3,ja:1.5,label:'1.3x'}
-];
+'use strict';
+var LKEY='inglish_lis_prog2';
+var SKEY='inglish_lis_spd2';
+var data=[];
+var idx=0;
+var playing=false;
+var timer=null;
+var spdIdx=0;
+var SPDS=[{en:1.1,ja:1.3,lbl:'1x'},{en:1.3,ja:1.5,lbl:'1.3x'}];
 
-function loadProg(){try{return JSON.parse(localStorage.getItem(LIS_KEY))||{};}catch(_){return {};}}
-function saveProg(){try{const p=loadProg();p['P1W']=_lisIdx;localStorage.setItem(LIS_KEY,JSON.stringify(p));}catch(_){}}
-function loadSpeed(){try{const s=parseInt(localStorage.getItem(LIS_SPEED_KEY));return(s===0||s===1)?s:0;}catch(_){return 0;}}
-function saveSpeed(){try{localStorage.setItem(LIS_SPEED_KEY,String(_lisSpeedMode));}catch(_){}}
-
-function curSpeed(){return SPEEDS[_lisSpeedMode];}
-
-function updateSpeedLabel(){
-  const s=curSpeed();
-  document.getElementById('lis-speed-btn').textContent=s.label;
-  document.getElementById('lis-speed-lbl').textContent='EN '+s.en+'x / JA '+s.ja+'x';
+/* ── DOM refs ── */
+var $ov,$en,$ja,$prog,$fill,$cnt,$playBtn,$spdBtn,$spdInfo,$list;
+function initRefs(){
+  $ov=document.getElementById('listen-ov');
+  $en=document.getElementById('lis-word-en');
+  $ja=document.getElementById('lis-word-ja');
+  $prog=document.getElementById('lis-progress');
+  $fill=document.getElementById('lis-bar-fill');
+  $cnt=document.getElementById('lis-counter');
+  $playBtn=document.getElementById('lis-play');
+  $spdBtn=document.getElementById('lis-spd');
+  $spdInfo=document.getElementById('lis-speed-info');
+  $list=document.getElementById('lis-word-list');
 }
 
-/* ── Open: directly load Pass単 Pre1 ── */
+/* ── Persistence ── */
+function loadIdx(){try{return parseInt(localStorage.getItem(LKEY))||0;}catch(e){return 0;}}
+function saveIdx(){try{localStorage.setItem(LKEY,String(idx));}catch(e){}}
+function loadSpd(){try{var v=parseInt(localStorage.getItem(SKEY));return(v===1)?1:0;}catch(e){return 0;}}
+function saveSpd(){try{localStorage.setItem(SKEY,String(spdIdx));}catch(e){}}
+
+/* ── Open ── */
 window.openListenMode=function(){
-  haptic.confirm();
-  _lisSpeedMode=loadSpeed();
-  _lisData=P1W.map(w=>({e:w.e,j:w.j}));
-  const prog=loadProg();
-  _lisIdx=prog['P1W']||0;
-  if(_lisIdx>=_lisData.length)_lisIdx=0;
-  document.getElementById('listen-ov').classList.add('on');
-  document.getElementById('lis-ttl').textContent='Pass単 準1 単語';
-  document.getElementById('lis-play-btn').textContent='▶';
-  updateSpeedLabel();
-  renderWord();
-  buildWordList();
-  // Update home badge
-  const bEl=document.getElementById('b-listen');
-  if(bEl)bEl.textContent=_lisData.length;
+  try{haptic.confirm();}catch(e){}
+  initRefs();
+  data=[];
+  if(typeof P1W!=='undefined'&&P1W.length){
+    for(var i=0;i<P1W.length;i++) data.push({e:P1W[i].e,j:P1W[i].j});
+  }
+  if(!data.length){alert('単語データが読み込めませんでした');return;}
+  spdIdx=loadSpd();
+  idx=loadIdx();
+  if(idx>=data.length)idx=0;
+  playing=false;
+  if(timer){clearTimeout(timer);timer=null;}
+  try{window.speechSynthesis.cancel();}catch(e){}
+  $ov.classList.add('on');
+  $playBtn.textContent='▶';
+  updSpd();
+  render();
+  buildList();
+  var bEl=document.getElementById('b-listen');
+  if(bEl)bEl.textContent=data.length;
 };
 
-/* ── Build scrollable word list ── */
-function buildWordList(){
-  const container=document.getElementById('lis-word-list');
-  let html='';
-  _lisData.forEach((w,i)=>{
-    const cls=i===_lisIdx?' current':'';
-    html+=`<div class="lis-word-item${cls}" data-lis-i="${i}"><div class="lis-word-num">${i+1}</div><div class="lis-word-en">${w.e}</div><div class="lis-word-ja">${w.j}</div></div>`;
-  });
-  container.innerHTML=html;
-  container.querySelectorAll('.lis-word-item').forEach(el=>{
-    el.addEventListener('click',()=>{
-      haptic.confirm();
-      const wasPlaying=_lisPlaying;
-      if(_lisPlaying){
-        _lisPlaying=false;
-        window.speechSynthesis.cancel();
-        if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
-      }
-      _lisIdx=parseInt(el.dataset.lisI);
-      renderWord();
-      highlightCurrent();
-      if(wasPlaying){
-        _lisPlaying=true;
-        document.getElementById('lis-play-btn').textContent='⏸';
+/* ── Close ── */
+window.closeListenMode=function(){
+  try{haptic.confirm();}catch(e){}
+  stop();
+  saveIdx();
+  $ov.classList.remove('on');
+};
+
+/* ── Render ── */
+function render(){
+  if(!data.length)return;
+  if(idx<0)idx=0;
+  if(idx>=data.length)idx=0;
+  var w=data[idx];
+  $en.textContent=w.e;
+  $ja.textContent=w.j;
+  $en.style.animation='none';$ja.style.animation='none';
+  void $en.offsetWidth;
+  $en.style.animation='lisSlideUp .3s ease both';
+  $ja.style.animation='lisSlideUp .3s .06s ease both';
+  var n=idx+1;
+  $prog.textContent=n+' / '+data.length;
+  $fill.style.width=(n/data.length*100)+'%';
+  $cnt.textContent=n+'/'+data.length;
+  saveIdx();
+  hlList();
+}
+
+/* ── Word list ── */
+function buildList(){
+  var h='';
+  for(var i=0;i<data.length;i++){
+    var c=i===idx?' now':'';
+    h+='<div class="lwi'+c+'" data-i="'+i+'"><div class="lwi-n">'+(i+1)+'</div><div class="lwi-e">'+data[i].e+'</div><div class="lwi-j">'+data[i].j+'</div></div>';
+  }
+  $list.innerHTML=h;
+  var items=$list.querySelectorAll('.lwi');
+  for(var k=0;k<items.length;k++){
+    (function(el){
+      el.addEventListener('click',function(){
+        try{haptic.confirm();}catch(e){}
+        var wasP=playing;
+        stop();
+        idx=parseInt(el.getAttribute('data-i'));
+        render();
+        if(wasP){playing=true;$playBtn.textContent='⏸';playWord();}
+      });
+    })(items[k]);
+  }
+}
+function hlList(){
+  var items=$list.querySelectorAll('.lwi');
+  for(var i=0;i<items.length;i++){
+    if(i===idx)items[i].classList.add('now');
+    else items[i].classList.remove('now');
+  }
+  var cur=$list.querySelector('.lwi.now');
+  if(cur)cur.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ── TTS ── */
+function sayEn(text,cb){
+  if(!text){if(cb)cb();return;}
+  try{window.speechSynthesis.cancel();}catch(e){}
+  var u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';u.rate=SPDS[spdIdx].en;
+  try{
+    var v=speechSynthesis.getVoices();
+    var pick=v.find(function(x){return x.name==='Alex';})||v.find(function(x){return x.lang==='en-US'&&x.localService;})||v.find(function(x){return x.lang.indexOf('en')===0;});
+    if(pick)u.voice=pick;
+  }catch(e){}
+  var done=false;
+  var to=setTimeout(function(){if(!done){done=true;if(cb)cb();}},4000);
+  u.onend=function(){if(!done){done=true;clearTimeout(to);if(cb)cb();}};
+  u.onerror=function(){if(!done){done=true;clearTimeout(to);if(cb)cb();}};
+  speechSynthesis.speak(u);
+}
+function sayJa(text,cb){
+  if(!text){if(cb)cb();return;}
+  try{window.speechSynthesis.cancel();}catch(e){}
+  var clean=text.replace(/、/g,'');
+  var u=new SpeechSynthesisUtterance(clean);
+  u.lang='ja-JP';u.rate=SPDS[spdIdx].ja;
+  try{
+    var v=speechSynthesis.getVoices();
+    var pick=v.find(function(x){return x.lang==='ja-JP'&&x.localService;})||v.find(function(x){return x.lang.indexOf('ja')===0;});
+    if(pick)u.voice=pick;
+  }catch(e){}
+  var done=false;
+  var to=setTimeout(function(){if(!done){done=true;if(cb)cb();}},4000);
+  u.onend=function(){if(!done){done=true;clearTimeout(to);if(cb)cb();}};
+  u.onerror=function(){if(!done){done=true;clearTimeout(to);if(cb)cb();}};
+  speechSynthesis.speak(u);
+}
+
+/* ── Autoplay ── */
+function playWord(){
+  if(!playing||!data.length)return;
+  if(idx>=data.length){stop();render();return;}
+  render();
+  var w=data[idx];
+  $en.classList.add('pulse');
+  sayEn(w.e,function(){
+    if(!playing)return;
+    $en.classList.remove('pulse');
+    sayJa(w.j,function(){
+      if(!playing)return;
+      timer=setTimeout(function(){
+        idx++;
+        if(idx>=data.length){stop();render();return;}
         playWord();
-      }
+      },200);
     });
   });
 }
 
-function highlightCurrent(){
-  document.querySelectorAll('#lis-word-list .lis-word-item').forEach((el,i)=>{
-    el.classList.toggle('current',i===_lisIdx);
+function stop(){
+  playing=false;
+  try{window.speechSynthesis.cancel();}catch(e){}
+  if(timer){clearTimeout(timer);timer=null;}
+  if($en)$en.classList.remove('pulse');
+  if($playBtn)$playBtn.textContent='▶';
+}
+
+/* ── Speed ── */
+function updSpd(){
+  $spdBtn.textContent=SPDS[spdIdx].lbl;
+  $spdInfo.textContent='EN '+SPDS[spdIdx].en+'x / JA '+SPDS[spdIdx].ja+'x';
+}
+
+/* ── Button handlers ── */
+document.addEventListener('DOMContentLoaded',function(){
+  initRefs();
+  document.getElementById('lis-back-btn').addEventListener('click',function(){closeListenMode();});
+  document.getElementById('lis-play').addEventListener('click',function(){
+    try{haptic.confirm();}catch(e){}
+    if(playing){stop();}
+    else{if(!data.length)return;playing=true;$playBtn.textContent='⏸';playWord();}
   });
-  // Scroll current into view
-  const cur=document.querySelector('#lis-word-list .lis-word-item.current');
-  if(cur)cur.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
+  document.getElementById('lis-next').addEventListener('click',function(){
+    try{haptic.confirm();}catch(e){}
+    var wasP=playing;stop();
+    if(!data.length)return;
+    idx++;if(idx>=data.length)idx=0;
+    render();
+    if(wasP){playing=true;$playBtn.textContent='⏸';playWord();}
+  });
+  document.getElementById('lis-prev').addEventListener('click',function(){
+    try{haptic.confirm();}catch(e){}
+    var wasP=playing;stop();
+    if(!data.length)return;
+    idx--;if(idx<0)idx=data.length-1;
+    render();
+    if(wasP){playing=true;$playBtn.textContent='⏸';playWord();}
+  });
+  document.getElementById('lis-restart').addEventListener('click',function(){
+    try{haptic.confirm();}catch(e){}
+    stop();if(!data.length)return;
+    idx=0;saveIdx();render();
+  });
+  document.getElementById('lis-spd').addEventListener('click',function(){
+    try{haptic.confirm();}catch(e){}
+    spdIdx=(spdIdx+1)%SPDS.length;saveSpd();updSpd();
+  });
+  document.getElementById('lis-word-en').addEventListener('click',function(){
+    try{haptic.confirm();}catch(e){}
+    if(!data.length)return;
+    $en.classList.add('pulse');
+    sayEn(data[idx].e,function(){$en.classList.remove('pulse');});
+  });
+  document.getElementById('lis-word-ja').addEventListener('click',function(){
+    try{haptic.confirm();}catch(e){}
+    if(!data.length)return;
+    sayJa(data[idx].j);
+  });
+  /* Swipe right to close */
+  var sx=0,sy=0;
+  $ov.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+  $ov.addEventListener('touchend',function(e){
+    var dx=e.changedTouches[0].clientX-sx;
+    var dy=Math.abs(e.changedTouches[0].clientY-sy);
+    if(dx>80&&dy<60)closeListenMode();
+  },{passive:true});
+});
 
-/* ── Render current word ── */
-function renderWord(){
-  if(!_lisData.length)return;
-  if(_lisIdx>=_lisData.length)_lisIdx=0;
-  const w=_lisData[_lisIdx];
-  const en=document.getElementById('lis-en');
-  const ja=document.getElementById('lis-ja');
-  en.textContent=w.e;
-  ja.textContent=w.j;
-  en.style.animation='none';ja.style.animation='none';
-  void en.offsetWidth;
-  en.style.animation='lisIn .35s cubic-bezier(.34,1.05,.64,1) both';
-  ja.style.animation='lisIn .35s .08s cubic-bezier(.34,1.05,.64,1) both';
-  document.getElementById('lis-prog-txt').textContent=(_lisIdx+1)+' / '+_lisData.length;
-  document.getElementById('lis-prog-fill').style.width=((_lisIdx+1)/_lisData.length*100)+'%';
-  document.getElementById('lis-count').textContent=(_lisIdx+1)+'/'+_lisData.length;
-  saveProg();
-  highlightCurrent();
-}
-
-/* ── TTS ── */
-function speakEng(text,cb){
-  if(!text){if(cb)cb();return;}
-  window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang='en-US';u.rate=curSpeed().en;
-  try{
-    const voices=speechSynthesis.getVoices();
-    const pick=voices.find(v=>v.name==='Alex')||voices.find(v=>v.lang==='en-US'&&v.localService)||voices.find(v=>v.lang.startsWith('en'));
-    if(pick)u.voice=pick;
-  }catch(_){}
-  u.onend=()=>{if(cb)cb();};
-  u.onerror=()=>{if(cb)cb();};
-  speechSynthesis.speak(u);
-}
-function speakJpn(text,cb){
-  if(!text){if(cb)cb();return;}
-  window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text.replace(/、/g,''));
-  u.lang='ja-JP';u.rate=curSpeed().ja;
-  try{
-    const voices=speechSynthesis.getVoices();
-    const pick=voices.find(v=>v.lang==='ja-JP'&&v.localService)||voices.find(v=>v.lang.startsWith('ja'));
-    if(pick)u.voice=pick;
-  }catch(_){}
-  u.onend=()=>{if(cb)cb();};
-  u.onerror=()=>{if(cb)cb();};
-  speechSynthesis.speak(u);
-}
-
-/* ── Auto play: EN → JA → 0.2s → next ── */
-function playWord(){
-  if(!_lisPlaying||!_lisData.length)return;
-  if(_lisIdx>=_lisData.length){
-    _lisPlaying=false;
-    document.getElementById('lis-play-btn').textContent='▶';
-    document.getElementById('lis-en').classList.remove('speaking');
-    return;
-  }
-  renderWord();
-  const w=_lisData[_lisIdx];
-  const enEl=document.getElementById('lis-en');
-  enEl.classList.add('speaking');
-  let enDone=false;
-  const enTimeout=setTimeout(()=>{if(!enDone){enDone=true;afterEn();}},3000);
-  speakEng(w.e,()=>{if(!enDone){enDone=true;clearTimeout(enTimeout);afterEn();}});
-  function afterEn(){
-    if(!_lisPlaying)return;
-    enEl.classList.remove('speaking');
-    let jaDone=false;
-    const jaTimeout=setTimeout(()=>{if(!jaDone){jaDone=true;afterJa();}},3000);
-    speakJpn(w.j,()=>{if(!jaDone){jaDone=true;clearTimeout(jaTimeout);afterJa();}});
-  }
-  function afterJa(){
-    if(!_lisPlaying)return;
-    _lisTimer=setTimeout(()=>{
-      _lisIdx++;
-      if(_lisIdx>=_lisData.length){
-        _lisPlaying=false;
-        document.getElementById('lis-play-btn').textContent='▶';
-        renderWord();
-        return;
-      }
-      playWord();
-    },200);
-  }
-}
-
-/* ── Controls ── */
-window.listenToggle=function(){
-  haptic.confirm();
-  if(_lisPlaying){
-    _lisPlaying=false;
-    window.speechSynthesis.cancel();
-    if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
-    document.getElementById('lis-play-btn').textContent='▶';
-    document.getElementById('lis-en').classList.remove('speaking');
-  }else{
-    if(!_lisData.length)return;
-    _lisPlaying=true;
-    document.getElementById('lis-play-btn').textContent='⏸';
-    playWord();
-  }
-};
-window.listenNext=function(){
-  haptic.confirm();
-  window.speechSynthesis.cancel();
-  if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
-  document.getElementById('lis-en').classList.remove('speaking');
-  if(!_lisData.length)return;
-  _lisIdx++;
-  if(_lisIdx>=_lisData.length)_lisIdx=0;
-  renderWord();
-  if(_lisPlaying)playWord();
-};
-window.listenPrev=function(){
-  haptic.confirm();
-  window.speechSynthesis.cancel();
-  if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
-  document.getElementById('lis-en').classList.remove('speaking');
-  if(!_lisData.length)return;
-  _lisIdx--;
-  if(_lisIdx<0)_lisIdx=_lisData.length-1;
-  renderWord();
-  if(_lisPlaying)playWord();
-};
-window.listenRestart=function(){
-  haptic.confirm();
-  _lisPlaying=false;
-  window.speechSynthesis.cancel();
-  if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
-  document.getElementById('lis-en').classList.remove('speaking');
-  document.getElementById('lis-play-btn').textContent='▶';
-  if(!_lisData.length)return;
-  _lisIdx=0;
-  saveProg();
-  renderWord();
-};
-window.listenSpeedUp=function(){
-  haptic.confirm();
-  _lisSpeedMode=(_lisSpeedMode+1)%SPEEDS.length;
-  saveSpeed();
-  updateSpeedLabel();
-};
-window.closeListenMode=function(){
-  haptic.confirm();
-  _lisPlaying=false;
-  window.speechSynthesis.cancel();
-  if(_lisTimer){clearTimeout(_lisTimer);_lisTimer=null;}
-  document.getElementById('lis-en').classList.remove('speaking');
-  saveProg();
-  document.getElementById('listen-ov').classList.remove('on');
-};
-
-/* ── Tap handlers ── */
-window.listenTapEn=function(){
-  haptic.confirm();
-  if(!_lisData.length)return;
-  const w=_lisData[_lisIdx];
-  const el=document.getElementById('lis-en');
-  el.classList.add('speaking');
-  speakEng(w.e,()=>el.classList.remove('speaking'));
-};
-window.listenTapJa=function(){
-  haptic.confirm();
-  if(!_lisData.length)return;
-  speakJpn(_lisData[_lisIdx].j);
-};
-
-/* ── Swipe right to close ── */
-let _sx=0,_sy=0;
-const ov=document.getElementById('listen-ov');
-ov.addEventListener('touchstart',e=>{_sx=e.touches[0].clientX;_sy=e.touches[0].clientY;},{passive:true});
-ov.addEventListener('touchend',e=>{
-  const dx=e.changedTouches[0].clientX-_sx;
-  const dy=Math.abs(e.changedTouches[0].clientY-_sy);
-  if(dx>80&&dy<60)closeListenMode();
-},{passive:true});
+/* ── Expose for inline onclick on home ── */
+window.listenToggle=function(){document.getElementById('lis-play').click();};
+window.listenNext=function(){document.getElementById('lis-next').click();};
+window.listenPrev=function(){document.getElementById('lis-prev').click();};
+window.listenRestart=function(){document.getElementById('lis-restart').click();};
 })();
 </script>
 
