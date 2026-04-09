@@ -2583,7 +2583,7 @@ function speakEn(text){
 function speakJp(text){
   if(!text||!window.speechSynthesis)return;
   window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);
+  const u=new SpeechSynthesisUtterance(text.replace(/、/g,''));
   u.lang='ja-JP';u.rate=1.1;
   const voices=speechSynthesis.getVoices();
   const jp=voices.find(v=>v.lang==='ja-JP'&&v.localService)||voices.find(v=>v.lang.startsWith('ja'));
@@ -7133,7 +7133,7 @@ function speakEng(text,cb){
 function speakJpn(text,cb){
   if(!text){if(cb)cb();return;}
   window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);
+  const u=new SpeechSynthesisUtterance(text.replace(/、/g,''));
   u.lang='ja-JP';u.rate=curSpeed().ja;
   try{
     const voices=speechSynthesis.getVoices();
