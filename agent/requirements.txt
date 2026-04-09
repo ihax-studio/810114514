@@ -1,0 +1,24 @@
+# iHax Agent - Dependencies
+# ===========================
+# Apple Silicon Mac (M1/M2 Max) 専用
+#
+# インストール:
+#   pip install -r agent/requirements.txt
+#
+# 注意: mlx, mlx-lm は Apple Silicon でのみ動作
+
+# --- Server ---
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.0.0
+
+# --- MLX (Apple Silicon LLM inference) ---
+# 記事で使った PyTorch + CUDA の代わり
+# 統合メモリを直接活用、CUDA OOM とは無縁
+mlx>=0.4.0
+mlx-lm>=0.4.0
+
+# --- Optional: FineTuning ---
+# 記事でやり残した Instruction Tuning 用
+# M1 Max 64GB なら LoRA で 13B モデルの FineTuning が可能
+# mlx-lm[lora]
