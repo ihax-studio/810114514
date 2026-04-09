@@ -7195,60 +7195,58 @@ function updSpd(){
   $spdInfo.textContent='EN '+SPDS[spdIdx].en+'x / JA '+SPDS[spdIdx].ja+'x';
 }
 
-/* ── Button handlers ── */
-document.addEventListener('DOMContentLoaded',function(){
-  initRefs();
-  document.getElementById('lis-back-btn').addEventListener('click',function(){closeListenMode();});
-  document.getElementById('lis-play').addEventListener('click',function(){
-    try{haptic.confirm();}catch(e){}
-    if(playing){stop();}
-    else{if(!data.length)return;playing=true;$playBtn.textContent='⏸';playWord();}
-  });
-  document.getElementById('lis-next').addEventListener('click',function(){
-    try{haptic.confirm();}catch(e){}
-    var wasP=playing;stop();
-    if(!data.length)return;
-    idx++;if(idx>=data.length)idx=0;
-    render();
-    if(wasP){playing=true;$playBtn.textContent='⏸';playWord();}
-  });
-  document.getElementById('lis-prev').addEventListener('click',function(){
-    try{haptic.confirm();}catch(e){}
-    var wasP=playing;stop();
-    if(!data.length)return;
-    idx--;if(idx<0)idx=data.length-1;
-    render();
-    if(wasP){playing=true;$playBtn.textContent='⏸';playWord();}
-  });
-  document.getElementById('lis-restart').addEventListener('click',function(){
-    try{haptic.confirm();}catch(e){}
-    stop();if(!data.length)return;
-    idx=0;saveIdx();render();
-  });
-  document.getElementById('lis-spd').addEventListener('click',function(){
-    try{haptic.confirm();}catch(e){}
-    spdIdx=(spdIdx+1)%SPDS.length;saveSpd();updSpd();
-  });
-  document.getElementById('lis-word-en').addEventListener('click',function(){
-    try{haptic.confirm();}catch(e){}
-    if(!data.length)return;
-    $en.classList.add('pulse');
-    sayEn(data[idx].e,function(){$en.classList.remove('pulse');});
-  });
-  document.getElementById('lis-word-ja').addEventListener('click',function(){
-    try{haptic.confirm();}catch(e){}
-    if(!data.length)return;
-    sayJa(data[idx].j);
-  });
-  /* Swipe right to close */
-  var sx=0,sy=0;
-  $ov.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
-  $ov.addEventListener('touchend',function(e){
-    var dx=e.changedTouches[0].clientX-sx;
-    var dy=Math.abs(e.changedTouches[0].clientY-sy);
-    if(dx>80&&dy<60)closeListenMode();
-  },{passive:true});
+/* ── Button handlers (即時実行 - DOM is already ready) ── */
+initRefs();
+document.getElementById('lis-back-btn').addEventListener('click',function(){closeListenMode();});
+document.getElementById('lis-play').addEventListener('click',function(){
+  try{haptic.confirm();}catch(e){}
+  if(playing){stop();}
+  else{if(!data.length)return;playing=true;$playBtn.textContent='⏸';playWord();}
 });
+document.getElementById('lis-next').addEventListener('click',function(){
+  try{haptic.confirm();}catch(e){}
+  var wasP=playing;stop();
+  if(!data.length)return;
+  idx++;if(idx>=data.length)idx=0;
+  render();
+  if(wasP){playing=true;$playBtn.textContent='⏸';playWord();}
+});
+document.getElementById('lis-prev').addEventListener('click',function(){
+  try{haptic.confirm();}catch(e){}
+  var wasP=playing;stop();
+  if(!data.length)return;
+  idx--;if(idx<0)idx=data.length-1;
+  render();
+  if(wasP){playing=true;$playBtn.textContent='⏸';playWord();}
+});
+document.getElementById('lis-restart').addEventListener('click',function(){
+  try{haptic.confirm();}catch(e){}
+  stop();if(!data.length)return;
+  idx=0;saveIdx();render();
+});
+document.getElementById('lis-spd').addEventListener('click',function(){
+  try{haptic.confirm();}catch(e){}
+  spdIdx=(spdIdx+1)%SPDS.length;saveSpd();updSpd();
+});
+document.getElementById('lis-word-en').addEventListener('click',function(){
+  try{haptic.confirm();}catch(e){}
+  if(!data.length)return;
+  $en.classList.add('pulse');
+  sayEn(data[idx].e,function(){$en.classList.remove('pulse');});
+});
+document.getElementById('lis-word-ja').addEventListener('click',function(){
+  try{haptic.confirm();}catch(e){}
+  if(!data.length)return;
+  sayJa(data[idx].j);
+});
+/* Swipe right to close */
+var sx=0,sy=0;
+$ov.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+$ov.addEventListener('touchend',function(e){
+  var dx=e.changedTouches[0].clientX-sx;
+  var dy=Math.abs(e.changedTouches[0].clientY-sy);
+  if(dx>80&&dy<60)closeListenMode();
+},{passive:true});
 
 /* ── Expose for inline onclick on home ── */
 window.listenToggle=function(){document.getElementById('lis-play').click();};
