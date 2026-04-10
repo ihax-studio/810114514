@@ -1071,10 +1071,6 @@ overflow:hidden;
       <div class="hcard" onclick="openS('list','c')"><div class="hi ir">⚠️</div><div class="hcard-info"><div class="hcard-name">混同注意ペア</div><div class="hcard-desc">10ペア</div></div><div class="chev">›</div></div>
       <div class="hcard" onclick="openS('list','a')"><div class="hi id2">🎯</div><div class="hcard-info"><div class="hcard-name">頻出テーマ</div><div class="hcard-desc">環境・社会・ビジネス</div></div><div class="chev">›</div></div>
     </div>
-    <div class="hg-lbl">リスニング学習</div>
-    <div class="hg-list">
-      <div class="hcard" onclick="openListenMode()"><div class="hi ib">🎧</div><div class="hcard-info"><div class="hcard-name">単語読み上げモード</div><div class="hcard-desc">英語→和訳を自動で読み上げ</div></div><div class="badge" id="b-listen">---</div><div class="chev">›</div></div>
-    </div>
     <div class="hg-lbl">やり直し</div>
     <div class="hg-list">
       <div class="hcard" onclick="openS('card-forgot',0)"><div class="hi ir">🔄</div><div class="hcard-info"><div class="hcard-name">忘れた単語だけ復習</div><div class="hcard-desc">忘れた・難しいマークの単語だけ出題</div></div><div class="badge" id="b-retry">0</div><div class="chev">›</div></div>
@@ -4812,7 +4808,8 @@ function _renderForgotItems(items){
     let extra='';
     if(w.cs)extra+=`<div class="forgot-speak" data-speak="${speakText}" style="font-size:11px;color:#007aff;margin-top:4px;cursor:pointer">📖 ${w.cs}</div>`;
     if(w.st)extra+=`<div style="font-size:10px;color:var(--p);margin-top:2px">💡 ${w.st}</div>`;
-    h+=`<div class="li ans-row forgot-item" data-en="${enText}" data-speak="${speakText}" style="cursor:pointer"><div class="lw">${w.en}</div><div class="lm">${w.ja||''}</div>${extra}<div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px"><span style="font-size:9px;color:var(--sub)">${w.deck}</span><button class="ch forgot-clear-btn" data-word="${enText}" data-deck="${w.deckIdx}" style="font-size:9px;padding:3px 10px;color:var(--g)">✓覚えた</button></div></div>`;
+    const jaText=(w.ja||'').replace(/"/g,'&quot;');
+    h+=`<div class="li ans-row forgot-item" data-en="${enText}" data-ja="${jaText}" data-speak="${speakText}" style="cursor:pointer"><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;min-width:0"><div class="lw">${w.en}</div><div class="lm">${w.ja||''}</div></div><button class="forgot-listen-btn" data-en="${enText}" data-ja="${jaText}" style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:rgba(0,122,255,.1);border:1.5px solid rgba(0,122,255,.25);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s,background .2s" aria-label="読み上げ">🎧</button></div>${extra}<div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px"><span style="font-size:9px;color:var(--sub)">${w.deck}</span><button class="ch forgot-clear-btn" data-word="${enText}" data-deck="${w.deckIdx}" style="font-size:9px;padding:3px 10px;color:var(--g)">✓覚えた</button></div></div>`;
   });
   return h;
 }
@@ -4832,6 +4829,48 @@ function _speakEn(text){
     window.speechSynthesis.speak(u);
   }catch(_){}
 }
+let _forgotSpeaking=false;
+function _speakForgotSeq(en,ja,btn){
+  if(_forgotSpeaking){window.speechSynthesis.cancel();_forgotSpeaking=false;if(btn)btn.style.background='rgba(0,122,255,.1)';return;}
+  if(!en&&!ja)return;
+  _forgotSpeaking=true;
+  if(btn){btn.style.background='rgba(0,122,255,.25)';btn.style.transform='scale(1.15)';}
+  window.speechSynthesis.cancel();
+  // Step 1: Speak English
+  const uEn=new SpeechSynthesisUtterance(en);
+  uEn.lang='en-US';uEn.rate=1.1;
+  try{
+    const voices=speechSynthesis.getVoices();
+    const pick=voices.find(v=>v.name==='Alex')||voices.find(v=>v.lang==='en-US'&&v.localService)||voices.find(v=>v.lang.startsWith('en'));
+    if(pick)uEn.voice=pick;
+  }catch(_){}
+  let enDone=false;
+  const enTimeout=setTimeout(()=>{if(!enDone){enDone=true;afterEn();}},4000);
+  uEn.onend=()=>{if(!enDone){enDone=true;clearTimeout(enTimeout);afterEn();}};
+  uEn.onerror=()=>{if(!enDone){enDone=true;clearTimeout(enTimeout);afterEn();}};
+  speechSynthesis.speak(uEn);
+  function afterEn(){
+    if(!_forgotSpeaking)return;
+    if(!ja){finish();return;}
+    // Step 2: Speak Japanese
+    const uJa=new SpeechSynthesisUtterance(ja);
+    uJa.lang='ja-JP';uJa.rate=1.2;
+    try{
+      const voices=speechSynthesis.getVoices();
+      const pick=voices.find(v=>v.lang==='ja-JP'&&v.localService)||voices.find(v=>v.lang.startsWith('ja'));
+      if(pick)uJa.voice=pick;
+    }catch(_){}
+    let jaDone=false;
+    const jaTimeout=setTimeout(()=>{if(!jaDone){jaDone=true;finish();}},4000);
+    uJa.onend=()=>{if(!jaDone){jaDone=true;clearTimeout(jaTimeout);finish();}};
+    uJa.onerror=()=>{if(!jaDone){jaDone=true;clearTimeout(jaTimeout);finish();}};
+    speechSynthesis.speak(uJa);
+  }
+  function finish(){
+    _forgotSpeaking=false;
+    if(btn){btn.style.background='rgba(0,122,255,.1)';btn.style.transform='';}
+  }
+}
 // ═══ FORGOT LIST EVENT DELEGATION ═══
 document.getElementById('list-cnt').addEventListener('click',e=>{
   // Tab click
@@ -4847,9 +4886,17 @@ document.getElementById('list-cnt').addEventListener('click',e=>{
     if(itemsEl)itemsEl.innerHTML=_renderForgotItems(items);
     return;
   }
+  // 🎧 Listen button tap
+  const lisBtn=e.target.closest('.forgot-listen-btn');
+  if(lisBtn){
+    e.stopPropagation();
+    haptic.confirm();
+    _speakForgotSeq(lisBtn.dataset.en||'',lisBtn.dataset.ja||'',lisBtn);
+    return;
+  }
   // Speak on item tap
   const item=e.target.closest('.forgot-item');
-  if(item&&!e.target.closest('.forgot-clear-btn')){
+  if(item&&!e.target.closest('.forgot-clear-btn')&&!e.target.closest('.forgot-listen-btn')){
     haptic();
     const txt=item.dataset.speak||item.dataset.en||'';
     if(txt)_speakEn(txt);
