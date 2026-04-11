@@ -1122,7 +1122,7 @@ overflow:hidden;
 
 <!-- ══════════ MEMO OVERLAY ══════════ -->
 <!-- ══════════ IFRAME APP OVERLAY ══════════ -->
-<div id="iframe-overlay" style="position:fixed;inset:0;z-index:2147483646;background:#fff;translate:100% 0;scale:1.5;opacity:0;transition:translate .5s cubic-bezier(.34,1.05,.64,1),scale .5s ease,opacity .5s ease;visibility:hidden">
+<div id="iframe-overlay" style="position:fixed;inset:0;z-index:945;background:#fff;translate:100% 0;scale:1.5;opacity:0;transition:translate .5s cubic-bezier(.34,1.05,.64,1),scale .5s ease,opacity .5s ease;visibility:hidden">
   <button id="iframe-back" style="position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);left:16px;z-index:10;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.7);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;color:var(--b);box-shadow:0 2px 10px rgba(0,0,0,.12)">←</button>
   <iframe id="iframe-content" style="position:absolute;inset:0;width:100%;height:100%;border:none" sandbox="allow-scripts allow-same-origin allow-downloads allow-modals" allow="camera;microphone"></iframe>
 </div>
@@ -4634,7 +4634,7 @@ delayIdx++;
 /* Show instant results immediately */
 const instantHtml=html;
 if(instantHtml){
-  trCard.innerHTML='<div class="tr-handle"></div>'+instantHtml+'<div id="tr-translate-slot" style="margin-top:2px"><div style="text-align:center;padding:8px"><div style="width:16px;height:16px;border:2px solid rgba(0,0,0,.06);border-top-color:var(--b);border-radius:50%;animation:spin .6s linear infinite;margin:0 auto"></div></div></div>';
+  trCard.innerHTML='<div class="tr-handle"></div><div id="tr-translate-slot" style="margin-top:2px"><div style="text-align:center;padding:8px"><div style="width:16px;height:16px;border:2px solid rgba(0,0,0,.06);border-top-color:var(--b);border-radius:50%;animation:spin .6s linear infinite;margin:0 auto"></div></div></div>'+instantHtml;
 }else{
   trCard.innerHTML='<div class="tr-handle"></div><div id="tr-translate-slot"><div style="text-align:center;padding:24px"><div style="width:22px;height:22px;border:2.5px solid rgba(0,0,0,.1);border-top-color:var(--b);border-radius:50%;animation:spin .6s linear infinite;margin:0 auto"></div></div></div>';
 }

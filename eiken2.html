@@ -140,6 +140,15 @@ color:#1c1c1e;display:flex;flex-direction:column}
 .fb-jp:active{background:rgba(0,0,0,.04)}
 .fb-tip{font-size:13px;color:#5856d6;font-weight:500;line-height:1.45;padding:8px 12px;background:rgba(88,86,214,.06);border-radius:10px;cursor:pointer;transition:background .2s}
 .fb-tip:active{background:rgba(88,86,214,.12)}
+.fb-choices{margin:10px 0;padding:10px 12px;background:rgba(0,122,255,.04);border-radius:12px;border:1px solid rgba(0,122,255,.08)}
+.fb-choices-title{font-size:11px;font-weight:700;color:#8e8e93;margin-bottom:6px;letter-spacing:.03em}
+.fb-ch-item{display:flex;align-items:baseline;gap:8px;padding:3px 0;font-size:13px;line-height:1.55;color:#1c1c1e}
+.fb-ch-item.ch-correct{color:#34c759;font-weight:600}
+.fb-ch-item.ch-wrong{color:#8e8e93}
+.fb-ch-badge{min-width:18px;height:18px;border-radius:6px;background:rgba(0,0,0,.06);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.fb-ch-item.ch-correct .fb-ch-badge{background:rgba(52,199,89,.15);color:#1a7a35}
+.fb-ch-meaning{color:#5856d6;font-size:12px;margin-left:2px}
+.fb-grammar{margin:8px 0;padding:8px 12px;background:rgba(255,149,0,.06);border-radius:10px;border:1px solid rgba(255,149,0,.12);font-size:13px;color:#7a4a00;font-weight:500;line-height:1.5}
 /* ══ SEARCH OVERLAY ══ */
 .search-overlay{
   position:fixed;inset:0;z-index:8000;
@@ -344,6 +353,8 @@ color:#1c1c1e;display:flex;flex-direction:column}
     <div class="fb" id="fb" style="display:none">
       <div class="fb-sentence" id="fb-sentence" onclick="speakEnSentence()" style="cursor:pointer"></div>
       <div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div>
+      <div class="fb-choices" id="fb-choices"></div>
+      <div class="fb-grammar" id="fb-grammar" style="display:none"></div>
       <div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div>
     </div>
   </div>
@@ -753,6 +764,83 @@ function getKonfuseText(st){
   return lines.join('\n');
 }
 
+// ═══ PHRASE DICTIONARY (auto-built from question data + KONFUSE) ═══
+const PHRASE_DICT={};
+Object.keys(KONFUSE).forEach(k=>{PHRASE_DICT[k]=KONFUSE[k];});
+EK2Q.forEach(q=>{
+  if(!q.st)return;
+  // Pattern: "phrase = meaning" (but not "混同" lines)
+  if(q.st.includes('混同'))return;
+  const m=q.st.match(/^(.+?)\s*=\s*(.+)$/);
+  if(m){
+    const key=m[1].toLowerCase().trim();
+    if(!PHRASE_DICT[key])PHRASE_DICT[key]=m[2].trim();
+  }
+});
+// Cross-reference: map answer phrases to meanings from other questions
+EK2Q.forEach(q=>{
+  if(!q.at||!q.st)return;
+  const at=q.at.toLowerCase().trim();
+  if(!PHRASE_DICT[at]){
+    const m=q.st.match(/^(.+?)\s*=\s*(.+)$/);
+    if(m&&m[1].toLowerCase().trim()!==at){
+      // st defines a different phrase; skip
+    }else if(m){
+      PHRASE_DICT[at]=m[2].trim();
+    }
+  }
+});
+
+function _getVerbBeforeBlank(q){
+  const m=q.q.match(/(\w+)\s*\(\s/);
+  return m?m[1].toLowerCase().replace(/(s|ed|ing)$/,''):'';
+}
+function getChoiceMeanings(q){
+  const verb=_getVerbBeforeBlank(q);
+  const isSingleWordChoices=q.ch.every(c=>!c.includes(' ')&&!c.includes(','));
+  return q.ch.map((choice,i)=>{
+    const isCorrect=(i+1)===q.a;
+    let phrase=choice.toLowerCase().trim();
+    let meaning=null;
+    // For single-word choices (prepositions), combine with verb
+    if(isSingleWordChoices&&verb&&choice.length<=12){
+      phrase=verb+' '+choice.toLowerCase();
+    }
+    meaning=PHRASE_DICT[phrase]||null;
+    // Also try the raw choice
+    if(!meaning)meaning=PHRASE_DICT[choice.toLowerCase().trim()]||null;
+    return{choice,phrase,meaning,isCorrect,index:i+1};
+  });
+}
+function buildChoicesHTML(q){
+  const items=getChoiceMeanings(q);
+  const hasAnyMeaning=items.some(it=>it.meaning);
+  let html='<div class="fb-choices-title">選択肢の意味</div>';
+  items.forEach(it=>{
+    const cls=it.isCorrect?'fb-ch-item ch-correct':'fb-ch-item ch-wrong';
+    const mark=it.isCorrect?'✓ ':'';
+    const meaningStr=it.meaning?' <span class="fb-ch-meaning">= '+it.meaning+'</span>':'';
+    html+=`<div class="${cls}"><span class="fb-ch-badge">${it.index}</span>${mark}${it.choice}${meaningStr}</div>`;
+  });
+  return html;
+}
+function detectGrammar(q){
+  const s=(q.cs||q.q).toLowerCase();
+  const notes=[];
+  if(/if .+ had [\w]+ed|would have (been|[\w]+ed)/.test(s))notes.push('仮定法過去完了');
+  else if(/if .+ were|if .+ [\w]+ed.+would/.test(s))notes.push('仮定法過去');
+  if(/have been [\w]+ing|has been [\w]+ing/.test(s))notes.push('現在完了進行形');
+  else if(/had been [\w]+ing/.test(s))notes.push('過去完了進行形');
+  else if(/have [\w]+ed|has [\w]+ed|have been|has been/.test(s))notes.push('完了形');
+  if(/was [\w]+ed|were [\w]+ed|is [\w]+ed|are [\w]+ed|been [\w]+ed|be [\w]+ed/.test(s))notes.push('受動態');
+  if(/not only .+ but also/.test(s))notes.push('not only A but also B 構文');
+  if(/neither .+ nor/.test(s))notes.push('neither A nor B 構文');
+  if(/so .+ that|such .+ that/.test(s))notes.push('so/such ~ that 構文');
+  if(/it is .+ that .+ (should|do)|it is .+ for .+ to/.test(s))notes.push('形式主語 it 構文');
+  if(/make .+ (at home|[\w]+|do)/.test(s)&&/make/.test(q.at||''))notes.push('使役動詞 make');
+  return notes;
+}
+
 function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({idx:S.idx,correct:S.correct,wrong:S.wrong,shuffled:S.shuffled,order:S.order,wrongs:S.wrongs,corrects:S.corrects,speed:S.speed}));}catch(_){}}
 function load(){try{const s=localStorage.getItem(SAVE_KEY);if(s){const d=JSON.parse(s);S.idx=d.idx||0;S.correct=d.correct||0;S.wrong=d.wrong||0;S.shuffled=!!d.shuffled;S.order=d.order||null;S.wrongs=d.wrongs||[];S.corrects=d.corrects||[];S.speed=d.speed||1;}}catch(_){}}
 
@@ -834,6 +922,14 @@ function timeUp(){
   fb.style.display='block';
   document.getElementById('fb-sentence').textContent=q.cs;
   document.getElementById('fb-jp').textContent=q.jt;
+  // Choice meanings
+  document.getElementById('fb-choices').innerHTML=buildChoicesHTML(q);
+  // Grammar detection
+  const grammar=detectGrammar(q);
+  const gramEl=document.getElementById('fb-grammar');
+  if(grammar.length){gramEl.textContent='文法: '+grammar.join(' / ');gramEl.style.display='block';}
+  else{gramEl.style.display='none';}
+  // Study tip
   const tip=document.getElementById('fb-tip');
   if(q.st){
     const kf=getKonfuseText(q.st);
@@ -841,7 +937,16 @@ function timeUp(){
     tip.style.display='block';
     if(q.st.includes('混同')){tip.style.background='rgba(255,59,48,.08)';tip.style.color='#ff3b30';}
     else{tip.style.background='';tip.style.color='';}
-  }else{tip.style.display='none';}
+  }else{
+    const verb=_getVerbBeforeBlank(q);
+    const at=q.at.toLowerCase().trim();
+    const fullPhrase=verb?(verb+' '+at):at;
+    const autoMeaning=PHRASE_DICT[fullPhrase]||PHRASE_DICT[at]||null;
+    if(autoMeaning){
+      tip.innerHTML=fullPhrase+' = '+autoMeaning;
+      tip.style.display='block';tip.style.background='';tip.style.color='';
+    }else{tip.style.display='none';}
+  }
   speakJp(q.jt); playAudio();
   save();
   showNextBtn();
@@ -885,7 +990,7 @@ function restartAll(){
     '<div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer-bar" style="width:100%"></div></div>'+
     '<div class="q-tag" id="q-tag"></div><div class="q-text" id="q-text"></div>'+
     '<div class="choices" id="choices"></div>'+
-    '<div class="fb" id="fb" style="display:none"><div class="fb-sentence" id="fb-sentence" onclick="speakEnSentence()" style="cursor:pointer"></div><div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div><div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div></div></div>';
+    '<div class="fb" id="fb" style="display:none"><div class="fb-sentence" id="fb-sentence" onclick="speakEnSentence()" style="cursor:pointer"></div><div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div><div class="fb-choices" id="fb-choices"></div><div class="fb-grammar" id="fb-grammar" style="display:none"></div><div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div></div></div>';
   render();
 }
 function goHome(){
@@ -1201,6 +1306,14 @@ function showFeedback(q){
   fb.style.display='block';
   document.getElementById('fb-sentence').textContent=q.cs;
   document.getElementById('fb-jp').textContent=q.jt;
+  // Choice meanings
+  document.getElementById('fb-choices').innerHTML=buildChoicesHTML(q);
+  // Grammar detection
+  const grammar=detectGrammar(q);
+  const gramEl=document.getElementById('fb-grammar');
+  if(grammar.length){gramEl.textContent='文法: '+grammar.join(' / ');gramEl.style.display='block';}
+  else{gramEl.style.display='none';}
+  // Study tip
   const tip=document.getElementById('fb-tip');
   if(q.st){
     const kf=getKonfuseText(q.st);
@@ -1208,7 +1321,17 @@ function showFeedback(q){
     tip.style.display='block';
     if(q.st.includes('混同')){tip.style.background='rgba(255,59,48,.08)';tip.style.color='#ff3b30';}
     else{tip.style.background='';tip.style.color='';}
-  }else{tip.style.display='none';}
+  }else{
+    // Auto-fill tip from PHRASE_DICT if available
+    const verb=_getVerbBeforeBlank(q);
+    const at=q.at.toLowerCase().trim();
+    const fullPhrase=verb?(verb+' '+at):at;
+    const autoMeaning=PHRASE_DICT[fullPhrase]||PHRASE_DICT[at]||null;
+    if(autoMeaning){
+      tip.innerHTML=fullPhrase+' = '+autoMeaning;
+      tip.style.display='block';tip.style.background='';tip.style.color='';
+    }else{tip.style.display='none';}
+  }
   playFeedbackChain(q);
   save();
   showNextBtn();
@@ -1395,7 +1518,7 @@ function resetAll(){
     '<div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer-bar" style="width:100%"></div></div>'+
     '<div class="q-tag" id="q-tag"></div><div class="q-text" id="q-text"></div>'+
     '<div class="choices" id="choices"></div>'+
-    '<div class="fb" id="fb" style="display:none"><div class="fb-sentence" id="fb-sentence" onclick="speakEnSentence()" style="cursor:pointer"></div><div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div><div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div></div></div>';
+    '<div class="fb" id="fb" style="display:none"><div class="fb-sentence" id="fb-sentence" onclick="speakEnSentence()" style="cursor:pointer"></div><div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div><div class="fb-choices" id="fb-choices"></div><div class="fb-grammar" id="fb-grammar" style="display:none"></div><div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div></div></div>';
   render();
 }
 
