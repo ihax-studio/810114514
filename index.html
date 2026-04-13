@@ -1381,6 +1381,21 @@ overflow:hidden;
   </div>
 </div>
 
+<!-- ══════════ FORGOT CATEGORY DELETE DIALOG ══════════ -->
+<div id="forgot-cat-del-dlg" style="display:none;position:fixed;inset:0;z-index:10003;background:rgba(0,0,0,0);transition:background .5s ease;align-items:center;justify-content:center">
+  <div id="forgot-cat-del-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.3);opacity:0;transition:transform .55s cubic-bezier(.34,1.05,.64,1),opacity .55s cubic-bezier(.77,0,.18,1)">
+    <div style="padding:22px 20px 14px">
+      <div style="font-size:36px;margin-bottom:6px">🗑️</div>
+      <div style="font-size:17px;font-weight:700;color:#000;margin-bottom:6px">このカテゴリ全体を削除しますか？</div>
+      <div id="forgot-cat-del-sub" style="font-size:12px;color:rgba(0,0,0,.5);line-height:1.5"></div>
+    </div>
+    <div style="border-top:1px solid rgba(0,0,0,.1);display:flex">
+      <button id="forgot-cat-del-cancel" style="flex:1;padding:14px;font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:500;border-right:1px solid rgba(0,0,0,.1)">キャンセル</button>
+      <button id="forgot-cat-del-ok" style="flex:1;padding:14px;font-size:16px;color:#ff3b30;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700">削除</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════ NO-FORGOT DIALOG ══════════ -->
 <div id="no-forgot-dlg" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0);transition:background .5s ease;align-items:center;justify-content:center">
   <div id="no-forgot-card" style="width:280px;background:rgba(245,245,247,.97);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:16px;overflow:hidden;text-align:center;transform:scale(1.8);opacity:0;transition:transform .8s cubic-bezier(.34,1.05,.64,1),opacity .8s cubic-bezier(.77,0,.18,1)">
@@ -4832,12 +4847,79 @@ function _speakEn(text){
     window.speechSynthesis.speak(u);
   }catch(_){}
 }
+// ═══ FORGOT CATEGORY DELETE ═══
+let _pendingDeleteCat=null;
+function _forgotCatLabel(cat){
+  const f=FORGOT_CATS.find(c=>c.k===cat);
+  return f?f.l:cat;
+}
+function _deleteForgotCategory(cat){
+  fCache=loadCache();
+  // Re-categorize and delete matching
+  Object.keys(fCache).forEach(deckIdx=>{
+    const deck=fCache[deckIdx];
+    Object.keys(deck).forEach(word=>{
+      const d=deck[word];
+      let c='other';
+      if(+deckIdx===5&&d.cs)c='ek2';
+      else if(+deckIdx===0||+deckIdx===3)c='pre1';
+      else if(+deckIdx===1||+deckIdx===2)c='pass';
+      else if(+deckIdx===4||(+deckIdx===5&&!d.cs))c='g2';
+      if(cat==='all'||c===cat){delete deck[word];}
+    });
+    if(Object.keys(deck).length===0)delete fCache[deckIdx];
+  });
+  saveCache(fCache);
+  updateHomeBadges();
+  // Re-render forgot list if open
+  const listCnt=document.getElementById('list-cnt');
+  if(listCnt&&listCnt.innerHTML.includes('forgot-tabs')){
+    _forgotFilter='all';
+    listCnt.innerHTML=buildForgotList();
+  }
+}
+function _openForgotCatDeleteDialog(cat){
+  const items=_getForgotItems();
+  const cnt=cat==='all'?items.length:items.filter(w=>w.cat===cat).length;
+  if(cnt===0)return;
+  _pendingDeleteCat=cat;
+  document.getElementById('forgot-cat-del-sub').innerHTML='「'+_forgotCatLabel(cat)+'」の '+cnt+' 語が削除されます';
+  showDialog('forgot-cat-del-dlg','forgot-cat-del-card');
+  // iOS-style strong haptic
+  haptic.error();
+}
+document.getElementById('forgot-cat-del-cancel').addEventListener('click',()=>{
+  haptic();_pendingDeleteCat=null;hideDialog('forgot-cat-del-dlg','forgot-cat-del-card');
+});
+document.getElementById('forgot-cat-del-ok').addEventListener('click',()=>{
+  haptic.confirm();
+  if(_pendingDeleteCat){_deleteForgotCategory(_pendingDeleteCat);_pendingDeleteCat=null;}
+  hideDialog('forgot-cat-del-dlg','forgot-cat-del-card');
+});
+
+// ═══ FORGOT LIST LONG-PRESS ON CATEGORY TABS ═══
+let _lpTimer=null,_lpTab=null,_lpTriggered=false;
+function _clearLP(){if(_lpTimer){clearTimeout(_lpTimer);_lpTimer=null;}_lpTab=null;}
+document.getElementById('list-cnt').addEventListener('touchstart',e=>{
+  const tab=e.target.closest('.forgot-tab');
+  if(!tab)return;
+  _lpTab=tab;_lpTriggered=false;
+  _lpTimer=setTimeout(()=>{
+    _lpTriggered=true;
+    _openForgotCatDeleteDialog(tab.dataset.cat);
+  },500);
+},{passive:true});
+document.getElementById('list-cnt').addEventListener('touchend',_clearLP,{passive:true});
+document.getElementById('list-cnt').addEventListener('touchmove',_clearLP,{passive:true});
+document.getElementById('list-cnt').addEventListener('touchcancel',_clearLP,{passive:true});
+
 // ═══ FORGOT LIST EVENT DELEGATION ═══
 document.getElementById('list-cnt').addEventListener('click',e=>{
   // Tab click
   const tab=e.target.closest('.forgot-tab');
   if(tab){
     e.stopPropagation();
+    if(_lpTriggered){_lpTriggered=false;return;} // long-press already handled
     haptic();
     _forgotFilter=tab.dataset.cat;
     const items=_getForgotItems();
