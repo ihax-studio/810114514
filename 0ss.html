@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classic Mac Museum</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 100%; height: 100%; overflow: hidden;
+            background: #000;
+            font-family: -apple-system, 'SF Pro Text', 'Hiragino Sans', sans-serif;
+        }
+
+        /* ── Emulator full screen ── */
+        #mac-frame {
+            position: fixed; inset: 0;
+            width: 100vw; height: 100vh;
+            border: none;
+        }
+
+        /* ── Nav floating pill (bottom center) ── */
+        #nav-wrap {
+            position: fixed;
+            bottom: 28px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 200;
+            transition: opacity 0.3s cubic-bezier(.4,0,.2,1),
+                        transform 0.3s cubic-bezier(.4,0,.2,1);
+        }
+        #nav-wrap.hidden {
+            opacity: 0;
+            transform: translateX(-50%) translateY(14px);
+            pointer-events: none;
+        }
+
+        /* outer pill — radius 33px as requested */
+        #nav {
+            display: flex; align-items: center; gap: 3px;
+            padding: 6px 8px;
+            border-radius: 33px;
+            background: rgba(255,255,255,0.10);
+            backdrop-filter: blur(36px) saturate(160%);
+            -webkit-backdrop-filter: blur(36px) saturate(160%);
+            border: 0.5px solid rgba(255,255,255,0.18);
+            box-shadow:
+                0 10px 40px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.18);
+            max-width: 92vw;
+            overflow-x: auto; overflow-y: visible;
+            scrollbar-width: none;
+        }
+        #nav::-webkit-scrollbar { display: none; }
+
+        /* inner buttons */
+        .os-btn {
+            flex-shrink: 0;
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 6px 12px;
+            border-radius: 24px;
+            border: none;
+            background: transparent;
+            color: rgba(255,255,255,0.6);
+            font-size: 12px; font-weight: 500;
+            letter-spacing: 0.1px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s, color 0.15s, transform 0.08s;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .os-btn:active { transform: scale(0.90); }
+        .os-btn.active {
+            background: rgba(255,255,255,0.16);
+            color: #fff;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+        }
+        .os-btn .ico { font-size: 13px; line-height: 1; }
+
+        /* thin divider between buttons (optional visual rhythm) */
+        .sep {
+            width: 0.5px; height: 16px;
+            background: rgba(255,255,255,0.12);
+            flex-shrink: 0;
+        }
+
+        /* ── Toggle button: top-right corner ── */
+        #toggle-btn {
+            position: fixed; top: 16px; right: 16px; z-index: 300;
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            border: 0.5px solid rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.09);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: rgba(255,255,255,0.65);
+            font-size: 15px; line-height: 1;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 14px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.16);
+            transition: background 0.15s, opacity 0.2s, transform 0.1s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #toggle-btn:active { transform: scale(0.87); }
+        #toggle-btn.nav-hidden { opacity: 0.38; }
+
+        /* ── Loading overlay ── */
+        #loading {
+            position: fixed; inset: 0;
+            background: #080808;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 100;
+            transition: opacity 0.4s;
+        }
+        #loading.hidden { opacity: 0; pointer-events: none; }
+        #loading .mac-icon {
+            font-size: 52px; margin-bottom: 14px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        #loading .label {
+            color: rgba(255,255,255,0.28);
+            font-size: 11px; letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        @keyframes pulse {
+            0%,100% { opacity: 0.45; transform: scale(1); }
+            50%      { opacity: 1;    transform: scale(1.07); }
+        }
+    </style>
+</head>
+<body>
+
+<button id="toggle-btn" title="ナビ表示/非表示">⌘</button>
+
+<div id="nav-wrap">
+    <nav id="nav">
+        <button class="os-btn" data-disk="System+1.0"      data-machine="Mac+128K"           data-hd="false" data-mem="8"><span class="ico">🖥</span>Sys 1.0</button>
+        <div class="sep"></div>
+        <button class="os-btn" data-disk="System+3.3"      data-machine="Mac+Plus"           data-hd="false" data-mem="8"><span class="ico">💾</span>Sys 3.3</button>
+        <div class="sep"></div>
+        <button class="os-btn" data-disk="System+6.0.8"    data-machine="Mac+Plus"           data-hd="true"  data-mem="8"><span class="ico">📁</span>Sys 6.0</button>
+        <div class="sep"></div>
+        <button class="os-btn" data-disk="System+7.1"      data-machine="Quadra+650"         data-hd="true"  data-mem="16"><span class="ico">🌈</span>Sys 7.1</button>
+        <div class="sep"></div>
+        <button class="os-btn" data-disk="KanjiTalk+7.5.3" data-machine="Quadra+650"         data-hd="true"  data-mem="64"><span class="ico">🇯🇵</span>漢字Talk 7.5</button>
+        <div class="sep"></div>
+        <button class="os-btn" data-disk="Mac+OS+8.0"      data-machine="Quadra+650"         data-hd="true"  data-mem="64"><span class="ico">🍎</span>Mac OS 8</button>
+        <div class="sep"></div>
+        <button class="os-btn" data-disk="Mac+OS+X+10.3"   data-machine="Power+Mac+G4+(AGP)" data-hd="true"  data-mem="128"><span class="ico">🐆</span>Panther 10.3</button>
+    </nav>
+</div>
+
+<div id="loading">
+    <div class="mac-icon">🍎</div>
+    <div class="label">起動中…</div>
+</div>
+
+<iframe id="mac-frame" src="" allow="cross-origin-isolated"></iframe>
+
+<script>
+    function haptic(type) {
+        if (!navigator.vibrate) return;
+        if (type === 'confirm') navigator.vibrate([10, 40, 10]);
+        else if (type === 'error') navigator.vibrate([15, 30, 15, 30, 15]);
+        else navigator.vibrate(8);
+    }
+
+    const frame     = document.getElementById('mac-frame');
+    const loading   = document.getElementById('loading');
+    const navWrap   = document.getElementById('nav-wrap');
+    const toggleBtn = document.getElementById('toggle-btn');
+    let navVisible  = true;
+
+    toggleBtn.addEventListener('click', () => {
+        haptic();
+        navVisible = !navVisible;
+        navWrap.classList.toggle('hidden', !navVisible);
+        toggleBtn.classList.toggle('nav-hidden', !navVisible);
+    });
+
+    function changeOS(btn) {
+        const { disk, machine, hd, mem } = btn.dataset;
+        const url = `https://infinitemac.org/embed?disk=${disk}&infinite_hd=${hd}&machine=${machine}&memory=${mem}&auto_pause=true`;
+
+        document.querySelectorAll('.os-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        loading.classList.remove('hidden');
+        frame.src = '';
+        setTimeout(() => { frame.src = url; }, 80);
+        haptic();
+    }
+
+    frame.addEventListener('load', () => {
+        if (!frame.src) return;
+        loading.classList.add('hidden');
+    });
+
+    document.querySelectorAll('.os-btn').forEach(btn => {
+        btn.addEventListener('click', () => changeOS(btn));
+    });
+
+    window.addEventListener('load', () => {
+        changeOS(document.querySelector('.os-btn'));
+    });
+</script>
+
+</body>
+</html>
