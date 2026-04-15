@@ -232,10 +232,15 @@ color:#1c1c1e;display:flex;flex-direction:column}
 }
 .audio-btn:active{transform:scale(.88);background:rgba(0,122,255,.22)}
 .speed-btn{
-  font-size:13px;font-weight:700;background:rgba(0,0,0,.06);color:#1c1c1e;
-  padding:6px 12px;border-radius:10px;border:none;cursor:pointer;
+  font-size:15px;font-weight:700;background:rgba(0,0,0,.06);color:#1c1c1e;
+  padding:10px 16px;border-radius:12px;border:none;cursor:pointer;
+  min-width:56px;min-height:40px;
   transition:transform .12s,background .2s;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  position:relative;
 }
+/* Expand effective tap target without visual size change */
+.speed-btn::before{content:"";position:absolute;inset:-8px;border-radius:14px}
 .speed-btn:active{transform:scale(.92)}
 .speed-btn.fast{background:rgba(88,86,214,.15);color:#5856d6}
 .audio-btn.playing{animation:audioPulse .6s ease infinite alternate}
@@ -385,11 +390,45 @@ color:#1c1c1e;display:flex;flex-direction:column}
   <button class="audio-btn" id="audio-btn" aria-label="再読み上げ" onclick="playAudio()">🔊</button>
 </div>
 
+<!-- ios-haptics: official ESM import, per docs:
+     import { haptic } from 'ios-haptics' -->
+<script type="module">
+  import { haptic } from 'https://esm.sh/ios-haptics';
+  // Expose globally so the classic <script> below can use it
+  window.__iosHaptic = haptic;
+  // Eager warm-up so the first tap isn't delayed
+  try{ haptic; }catch(_){}
+</script>
+
+<!-- ═══ BLOCK OS DEFAULT PINCH / ZOOM / DOUBLE-TAP ═══ -->
+<script>
+(()=>{
+  // iOS Safari ignores user-scalable=no since iOS 10 — block via events
+  const stop=e=>{ if(e.cancelable)e.preventDefault(); };
+  // Pinch gesture events (iOS Safari)
+  document.addEventListener('gesturestart',stop,{passive:false});
+  document.addEventListener('gesturechange',stop,{passive:false});
+  document.addEventListener('gestureend',stop,{passive:false});
+  // Multi-touch pinch
+  document.addEventListener('touchmove',e=>{ if(e.touches&&e.touches.length>1)stop(e); },{passive:false});
+  // Double-tap zoom
+  let _lastTap=0;
+  document.addEventListener('touchend',e=>{
+    const now=Date.now();
+    if(now-_lastTap<=350)stop(e);
+    _lastTap=now;
+  },{passive:false});
+  // Ctrl+wheel / trackpad pinch on iPad
+  document.addEventListener('wheel',e=>{ if(e.ctrlKey)stop(e); },{passive:false});
+})();
+</script>
+
 <script>
 // ═══ HAPTIC ═══
-// In-page iOS Safari 17.4+ switch-haptic (Taptic engine) — doesn't depend
-// on an async CDN import so it can fire on the very first tap.
-let _h=null;
+// Primary: window.__iosHaptic (from <script type="module"> import above).
+// Fallback: in-page iOS Safari 17.4+ <input switch> that fires Taptic on
+// .click(). This way haptic works on the very first tap even before the
+// module import resolves, AND keeps working if the CDN fails.
 let _hSwitch=null;
 function _initHSwitch(){
   if(_hSwitch)return;
@@ -406,38 +445,62 @@ function _initHSwitch(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',_initHSwitch,{once:true});
 else _initHSwitch();
-(()=>{
-  // Try parent's haptic first (when inside iframe)
-  try{if(window.parent&&window.parent!==window&&window.parent.haptic){_h={__parent:true};}}catch(_){}
-  if(!_h)import('https://esm.sh/ios-haptics').then(m=>{_h=m.haptic;}).catch(()=>{});
-})();
+
+function _fireSwitch(n){
+  try{ if(!_hSwitch)_initHSwitch(); }catch(_){}
+  if(!_hSwitch)return;
+  // 1 = haptic(), 2 = haptic.confirm(), 3 = haptic.error()
+  for(let k=0;k<n;k++){
+    setTimeout(()=>{ try{_hSwitch.click();}catch(_){} },k*80);
+  }
+}
+
 const haptic=()=>{
-  // 1) Native iOS 17.4+ switch-haptic — fires on every click of the hidden switch
-  try{ if(!_hSwitch)_initHSwitch(); if(_hSwitch)_hSwitch.click(); }catch(_){}
-  // 2) Parent window haptic (iframe context) — re-checked at tap time
-  try{
-    if(_h&&_h.__parent){window.parent.haptic();}
-    else if(_h&&typeof _h==='function'){_h();}
-    else if(window.parent&&window.parent!==window&&typeof window.parent.haptic==='function'){window.parent.haptic();}
-  }catch(_){}
+  // 1) Official ios-haptics (ESM-imported above)
+  try{ if(window.__iosHaptic){ window.__iosHaptic(); return; } }catch(_){}
+  // 2) Parent window (iframe case)
+  try{ if(window.parent&&window.parent!==window&&typeof window.parent.haptic==='function'){ window.parent.haptic(); return; } }catch(_){}
+  // 3) In-page switch fallback
+  _fireSwitch(1);
 };
 haptic.confirm=()=>{
-  try{ if(!_hSwitch)_initHSwitch(); if(_hSwitch)_hSwitch.click(); }catch(_){}
-  try{
-    if(_h&&_h.__parent&&window.parent.haptic&&window.parent.haptic.confirm){window.parent.haptic.confirm();}
-    else if(_h&&_h.confirm){_h.confirm();}
-  }catch(_){}
+  try{ if(window.__iosHaptic&&window.__iosHaptic.confirm){ window.__iosHaptic.confirm(); return; } }catch(_){}
+  try{ if(window.parent&&window.parent!==window&&window.parent.haptic&&window.parent.haptic.confirm){ window.parent.haptic.confirm(); return; } }catch(_){}
+  _fireSwitch(2); // two rapid haptics (per ios-haptics spec)
 };
 haptic.error=()=>{
-  try{ if(!_hSwitch)_initHSwitch(); if(_hSwitch)_hSwitch.click(); }catch(_){}
-  try{
-    if(_h&&_h.__parent&&window.parent.haptic&&window.parent.haptic.error){window.parent.haptic.error();}
-    else if(_h&&_h.error){_h.error();}
-  }catch(_){}
+  try{ if(window.__iosHaptic&&window.__iosHaptic.error){ window.__iosHaptic.error(); return; } }catch(_){}
+  try{ if(window.parent&&window.parent!==window&&window.parent.haptic&&window.parent.haptic.error){ window.parent.haptic.error(); return; } }catch(_){}
+  _fireSwitch(3); // three rapid haptics (per ios-haptics spec)
 };
+// Expose on window so inline onclick="haptic();..." always resolves
+window.haptic=haptic;
+
+// ═══ GLOBAL: fire haptic on EVERY button/interactive tap ═══
+// Delegated capture-phase listener — fires before any per-element handler,
+// so Taptic always runs inside the iOS user-gesture window regardless of
+// how the button was wired up (onclick attr, addEventListener, etc.).
+(()=>{
+  let _lastFire=0;
+  const TAP_SEL='button,[role="button"],a,label,.ch,.nav-btn,.done-btn,.speed-btn,.audio-btn,.pause-resume,.pause-home,#speed-btn,#audio-btn,[onclick],[data-haptic]';
+  const fire=e=>{
+    const el=e.target&&e.target.closest&&e.target.closest(TAP_SEL);
+    if(!el)return;
+    if(el.classList&&el.classList.contains('disabled'))return;
+    const now=Date.now();
+    if(now-_lastFire<120)return; // dedup pointerdown+click pair on same tap
+    _lastFire=now;
+    haptic();
+  };
+  // Capture phase on both events = catches everything, including handlers
+  // that stopPropagation on bubble
+  document.addEventListener('pointerdown',fire,{capture:true,passive:true});
+  document.addEventListener('click',fire,{capture:true,passive:true});
+})();
+
 const hapticWrong=()=>{const d=220;[0,1,2,4,5,6].forEach(i=>setTimeout(()=>haptic.error(),i*d));};
-// Bind haptic to BOTH pointerdown (immediate feedback) AND click (iOS
-// user-gesture window). Dedup within 250ms so it fires once per tap.
+// Fire on pointerdown AND click (dedup 250ms) — guarantees Taptic within
+// the iOS user-gesture window on every single tap.
 function bindTapHaptic(el,kind){
   if(!el||el.__tapHaptic)return;
   el.__tapHaptic=true;
@@ -1321,9 +1384,7 @@ document.getElementById('btn-shuffle').style.opacity=S.shuffled?'1':'.4';
 const _spBtn=document.getElementById('speed-btn');
 _spBtn.textContent=S.speed.toFixed(1)+'x';
 _spBtn.classList.toggle('fast',S.speed>1.15);
-// iOS haptic: bind on pointerdown so Taptic fires synchronously on tap
-bindTapHaptic(_spBtn);
-bindTapHaptic(document.getElementById('audio-btn'));
+// (haptic is handled globally via capture-phase delegation — see top of script)
 if(S.idx>=EK2Q.length)S.idx=0;
 
 </script>
