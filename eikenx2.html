@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="熟語GM2">
+<title>熟語 形副名前置詞</title>
+<link rel="manifest" href="manifest-eikenx2.json">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+<meta name="theme-color" content="#f0f4ff">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;
+-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html{overscroll-behavior:none;width:100%;height:100%;overflow:hidden}
+body{overscroll-behavior:none;width:100%;height:100dvh;overflow:hidden;
+font-family:"SF Pro Display","SF Pro Text",-apple-system,"Noto Sans JP",sans-serif;
+background:linear-gradient(150deg,#eef2f8 0%,#f0edfc 50%,#edf7f2 100%);
+color:#1c1c1e;display:flex;flex-direction:column}
+:root{
+  --sat:env(safe-area-inset-top,0px);
+  --sab:env(safe-area-inset-bottom,0px);
+}
+
+/* ══ START SCREEN ══ */
+.start-screen{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(150deg,#eef2f8 0%,#f0edfc 50%,#edf7f2 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:calc(var(--sat) + 40px) 24px calc(var(--sab) + 40px);
+  animation:startIn .6s ease both;
+}
+.start-screen.out{animation:startOut .5s cubic-bezier(.77,0,.18,1) both;pointer-events:none}
+@keyframes startIn{from{opacity:0}to{opacity:1}}
+@keyframes startOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(1.1)}}
+.start-icon{font-size:72px;margin-bottom:20px;animation:startBounce 2s ease infinite}
+@keyframes startBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.start-title{font-size:28px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px}
+.start-sub{font-size:14px;color:#8e8e93;margin-bottom:36px;text-align:center;line-height:1.5}
+.start-btn{
+  width:180px;height:180px;border-radius:50%;
+  background:linear-gradient(135deg,#007aff,#5856d6);
+  border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:0 8px 32px rgba(0,122,255,.35),0 2px 8px rgba(0,0,0,.1);
+  transition:transform .15s ease;color:#fff;
+}
+.start-btn:active{transform:scale(.93)}
+.start-btn-icon{font-size:48px;margin-bottom:6px}
+.start-btn-text{font-size:20px;font-weight:700}
+.start-resume{
+  margin-top:20px;font-size:15px;color:#007aff;font-weight:600;
+  background:rgba(0,122,255,.08);border:none;cursor:pointer;padding:10px 24px;
+  border-radius:12px;transition:background .2s;
+}
+.start-resume:active{background:rgba(0,122,255,.16)}
+
+/* ══ HEADER ══ */
+.hdr{
+  display:flex;align-items:center;gap:8px;
+  padding:calc(var(--sat) + 14px) 16px 12px;
+  background:rgba(255,255,255,.72);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
+  border-bottom:1px solid rgba(0,0,0,.05);
+  position:relative;z-index:10;
+}
+.hdr-back{font-size:28px;background:none;border:none;color:#007aff;cursor:pointer;padding:0 4px;line-height:1;font-weight:300}
+.hdr-title{font-size:17px;font-weight:700;flex:1;letter-spacing:-.02em}
+.hdr-btn{font-size:18px;background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:8px;transition:background .2s;min-width:34px;text-align:center}
+.hdr-btn:active{background:rgba(0,0,0,.06)}
+.hdr-count{font-size:13px;color:#007aff;font-weight:600;cursor:pointer;padding:4px 10px;border-radius:8px;background:rgba(0,122,255,.08);transition:background .2s}
+.hdr-count:active{background:rgba(0,122,255,.16)}
+
+/* ══ MAIN BODY ══ */
+.main{
+  flex:1;overflow-y:auto;padding:20px 16px 20px;
+  -webkit-overflow-scrolling:touch;
+}
+@media(min-width:768px){.main{max-width:680px;margin:0 auto;width:100%}}
+
+/* ══ CARD ══ */
+.card{
+  background:rgba(255,255,255,.82);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border-radius:22px;border:1px solid rgba(255,255,255,.92);
+  box-shadow:0 6px 24px rgba(0,0,0,.07),0 1px 4px rgba(0,0,0,.04);
+  padding:28px 22px;
+  animation:cardIn .45s cubic-bezier(.77,0,.18,1) both;
+}
+@keyframes cardIn{from{opacity:0;transform:scale(.9) translateY(24px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.q-tag{
+  display:inline-block;font-size:11px;font-weight:600;color:#5856d6;
+  background:rgba(88,86,214,.1);padding:3px 10px;border-radius:8px;margin-bottom:14px;
+}
+.q-text{
+  font-size:19px;font-weight:600;line-height:1.65;color:#1c1c1e;
+  margin-bottom:22px;word-break:break-word;
+}
+.q-text .blank{
+  display:inline-block;min-width:100px;border-bottom:2.5px solid #007aff;
+  text-align:center;color:#007aff;font-weight:700;
+  transition:color .3s,border-color .3s;
+}
+.q-text .blank.revealed{color:#34c759;border-color:#34c759}
+
+/* ══ CHOICES ══ */
+.choices{display:flex;flex-direction:column;gap:10px}
+.ch{
+  display:flex;align-items:center;gap:12px;
+  padding:15px 16px;border-radius:16px;
+  background:rgba(255,255,255,.92);border:1.5px solid rgba(0,0,0,.07);
+  font-size:16px;font-weight:500;cursor:pointer;
+  transition:transform .12s ease,background .2s,border-color .2s;
+}
+.ch:active{transform:scale(.97)}
+.ch-num{
+  width:30px;height:30px;border-radius:9px;
+  background:rgba(0,122,255,.1);color:#007aff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;flex-shrink:0;
+  transition:background .2s,color .2s;
+}
+.ch.correct{background:rgba(52,199,89,.14)!important;border-color:rgba(52,199,89,.5)!important;animation:chPop .5s cubic-bezier(.34,1.56,.64,1) both}
+.ch.correct .ch-num{background:rgba(52,199,89,.25);color:#1a7a35}
+.ch.wrong{background:rgba(255,59,48,.1)!important;border-color:rgba(255,59,48,.4)!important;animation:chShake .45s ease both}
+.ch.wrong .ch-num{background:rgba(255,59,48,.2);color:#c0001a}
+.ch.disabled{pointer-events:none;opacity:.5}
+.ch{flex-wrap:wrap}
+.ch-en{font-weight:600}
+.ch-ja{display:block;width:100%;margin-left:42px;margin-top:3px;font-size:12px;color:#8e8e93;font-weight:500}
+/* ══ REARRANGE ══ */
+.rr-placed,.rr-pool{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;padding:12px;border-radius:14px;margin-bottom:10px}
+.rr-placed{background:rgba(0,122,255,.06);border:2px dashed rgba(0,122,255,.35)}
+.rr-pool{background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06)}
+.rr-empty{font-size:13px;color:#8e8e93;align-self:center}
+.rr-chip{display:inline-flex;align-items:center;padding:10px 14px;border-radius:12px;background:#fff;border:1.5px solid rgba(0,0,0,.08);font-size:15px;font-weight:600;cursor:pointer;transition:transform .12s,background .2s,border-color .2s;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.rr-chip:active{transform:scale(.94)}
+.rr-chip.placed{background:rgba(0,122,255,.1);color:#007aff;border-color:rgba(0,122,255,.35)}
+.rr-chip.rr-disabled{pointer-events:none;opacity:.7}
+.rr-chip.rr-correct{background:rgba(52,199,89,.18)!important;color:#1a7a35!important;border-color:rgba(52,199,89,.5)!important}
+.rr-chip.rr-wrong{background:rgba(255,59,48,.12)!important;color:#c0001a!important;border-color:rgba(255,59,48,.45)!important}
+.rr-submit{width:100%;margin-top:6px;padding:14px;border-radius:14px;background:#007aff;color:#fff;border:none;font-size:16px;font-weight:700;cursor:pointer;transition:transform .12s,opacity .2s}
+.rr-submit:active{transform:scale(.96)}
+.rr-submit:disabled{opacity:.4;pointer-events:none}
+@keyframes chPop{0%{transform:scale(1)}40%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes chShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
+/* ══ FEEDBACK ══ */
+.fb{
+  margin-top:20px;padding-top:18px;border-top:1px solid rgba(0,0,0,.06);
+  animation:fbIn .35s ease both;
+}
+@keyframes fbIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fb-sentence{font-size:16px;font-weight:600;color:#1c1c1e;line-height:1.55;margin-bottom:8px}
+.fb-jp{font-size:14px;color:#8e8e93;line-height:1.55;margin-bottom:8px;cursor:pointer;transition:background .2s;padding:4px 8px;border-radius:8px;margin:-4px -8px;margin-bottom:4px}
+.fb-jp:active{background:rgba(0,0,0,.04)}
+.fb-tip{font-size:13px;color:#5856d6;font-weight:500;line-height:1.45;padding:8px 12px;background:rgba(88,86,214,.06);border-radius:10px;cursor:pointer;transition:background .2s}
+.fb-tip:active{background:rgba(88,86,214,.12)}
+/* ══ SEARCH OVERLAY ══ */
+.search-overlay{
+  position:fixed;inset:0;z-index:8000;
+  background:rgba(0,0,0,.4);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:center;
+  animation:pauseIn .25s ease both;
+}
+.search-overlay.out{animation:pauseOut .2s ease both;pointer-events:none}
+.search-box{
+  background:rgba(255,255,255,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-radius:20px;padding:28px 24px;text-align:center;
+  box-shadow:0 12px 40px rgba(0,0,0,.18);
+  min-width:280px;max-width:340px;width:85%;
+  animation:pauseBoxIn .3s cubic-bezier(.34,1.56,.64,1) both;
+}
+.search-title{font-size:18px;font-weight:700;margin-bottom:16px}
+.search-input{
+  width:100%;padding:14px 16px;border-radius:14px;
+  border:2px solid rgba(0,122,255,.3);background:rgba(255,255,255,.9);
+  font-size:20px;font-weight:600;text-align:center;
+  outline:none;-webkit-appearance:none;
+  transition:border-color .2s;
+}
+.search-input:focus{border-color:#007aff}
+.search-hint{font-size:12px;color:#8e8e93;margin-top:10px;line-height:1.4}
+.search-go{
+  width:100%;margin-top:14px;padding:13px;border-radius:14px;
+  background:#007aff;color:#fff;border:none;font-size:16px;font-weight:700;
+  cursor:pointer;transition:transform .12s;
+}
+.search-go:active{transform:scale(.96)}
+.search-cancel{
+  width:100%;margin-top:8px;padding:10px;border-radius:12px;
+  background:transparent;color:#8e8e93;border:none;font-size:14px;font-weight:600;
+  cursor:pointer;
+}
+
+.nav-btns{display:flex;gap:10px;margin-top:18px;animation:fbIn .3s ease both}
+.nav-btn{
+  flex:1;padding:15px;border-radius:14px;
+  border:none;font-size:16px;font-weight:700;
+  cursor:pointer;transition:transform .12s;
+}
+.nav-btn:active{transform:scale(.96)}
+.nav-next{background:#007aff;color:#fff}
+.nav-back{background:rgba(0,0,0,.06);color:#1c1c1e}
+
+/* ══ FOOTER ══ */
+.ftr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px calc(var(--sab) + 14px);
+  background:rgba(255,255,255,.72);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
+  border-top:1px solid rgba(0,0,0,.05);
+}
+.score{display:flex;gap:18px;font-size:15px;font-weight:700}
+.sc-g{color:#34c759}.sc-g::before{content:"✓ ";font-weight:800}
+.sc-f{color:#ff3b30}.sc-f::before{content:"✗ ";font-weight:800}
+.audio-btn{
+  font-size:22px;background:rgba(0,122,255,.1);
+  width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .12s ease,background .2s;
+}
+.audio-btn:active{transform:scale(.88);background:rgba(0,122,255,.2)}
+.speed-btn{
+  font-size:13px;font-weight:700;background:rgba(0,0,0,.06);color:#1c1c1e;
+  padding:6px 12px;border-radius:10px;border:none;cursor:pointer;
+  transition:transform .12s,background .2s;
+}
+.speed-btn:active{transform:scale(.92)}
+.speed-btn.fast{background:rgba(88,86,214,.15);color:#5856d6}
+.audio-btn.playing{animation:audioPulse .6s ease infinite alternate}
+@keyframes audioPulse{from{transform:scale(1)}to{transform:scale(1.08)}}
+
+/* ══ PROGRESS BAR ══ */
+/* ══ QUESTION TIMER ══ */
+.qtimer-wrap{height:4px;background:rgba(0,0,0,.06);margin:0 -22px;margin-bottom:16px;border-radius:2px;overflow:hidden}
+.qtimer-bar{height:100%;background:linear-gradient(90deg,#34c759,#007aff);border-radius:2px;transition:width .1s linear}
+.qtimer-bar.warn{background:linear-gradient(90deg,#ff9500,#ff3b30)}
+.qtimer-bar.danger{background:#ff3b30;animation:timerPulse .5s ease infinite alternate}
+@keyframes timerPulse{from{opacity:1}to{opacity:.5}}
+
+.prog-wrap{height:3px;background:rgba(0,0,0,.05);margin:0 -22px;margin-top:-28px;margin-bottom:20px}
+.prog-bar{height:100%;background:linear-gradient(90deg,#007aff,#5856d6);border-radius:0 2px 2px 0;transition:width .4s cubic-bezier(.77,0,.18,1)}
+
+/* ══ COMPLETE SCREEN ══ */
+.done{text-align:center;padding:60px 20px}
+.done-emoji{font-size:56px;margin-bottom:16px;animation:doneEmoji .6s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes doneEmoji{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+.done-title{font-size:24px;font-weight:800;margin-bottom:10px;letter-spacing:-.03em}
+.done-sub{font-size:15px;color:#8e8e93;margin-bottom:28px;line-height:1.5}
+.done-btn{
+  padding:14px 36px;border-radius:16px;background:#007aff;color:#fff;
+  border:none;font-size:16px;font-weight:700;cursor:pointer;transition:transform .12s;
+}
+.done-btn:active{transform:scale(.95)}
+
+/* ══ PAUSE OVERLAY ══ */
+.pause-overlay{
+  position:fixed;inset:0;z-index:8888;
+  background:rgba(0,0,0,.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  animation:pauseIn .3s ease both;
+}
+.pause-overlay.out{animation:pauseOut .25s ease both;pointer-events:none}
+@keyframes pauseIn{from{opacity:0}to{opacity:1}}
+@keyframes pauseOut{from{opacity:1}to{opacity:0}}
+.pause-box{
+  background:rgba(255,255,255,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-radius:24px;padding:36px 32px;text-align:center;
+  box-shadow:0 12px 40px rgba(0,0,0,.2);
+  animation:pauseBoxIn .35s cubic-bezier(.34,1.56,.64,1) both;
+  min-width:260px;
+}
+@keyframes pauseBoxIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+.pause-icon{font-size:48px;margin-bottom:12px}
+.pause-title{font-size:22px;font-weight:800;margin-bottom:6px}
+.pause-sub{font-size:14px;color:#8e8e93;margin-bottom:24px;line-height:1.4}
+.pause-resume{
+  width:100%;padding:14px;border-radius:14px;background:#007aff;color:#fff;
+  border:none;font-size:17px;font-weight:700;cursor:pointer;margin-bottom:10px;
+  transition:transform .12s;
+}
+.pause-resume:active{transform:scale(.96)}
+.pause-home{
+  width:100%;padding:12px;border-radius:14px;background:rgba(0,0,0,.05);color:#1c1c1e;
+  border:none;font-size:15px;font-weight:600;cursor:pointer;
+  transition:transform .12s;
+}
+.pause-home:active{transform:scale(.96)}
+
+/* ══ QUESTION LIST OVERLAY ══ */
+.qlist-overlay{
+  position:fixed;inset:0;z-index:7777;
+  background:rgba(255,255,255,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  display:flex;flex-direction:column;
+  animation:qlistIn .3s ease both;
+}
+.qlist-overlay.out{animation:qlistOut .25s ease both;pointer-events:none}
+@keyframes qlistIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes qlistOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(30px)}}
+.qlist-hdr{
+  display:flex;align-items:center;gap:10px;
+  padding:calc(var(--sat) + 14px) 16px 12px;
+  border-bottom:1px solid rgba(0,0,0,.06);
+}
+.qlist-close{font-size:16px;color:#007aff;background:none;border:none;cursor:pointer;font-weight:600;padding:4px 8px}
+.qlist-title{font-size:17px;font-weight:700;flex:1}
+.qlist-body{
+  flex:1;overflow-y:auto;padding:8px 12px calc(var(--sab) + 16px);
+  -webkit-overflow-scrolling:touch;
+}
+.qlist-item{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;border-radius:12px;cursor:pointer;
+  transition:background .15s;
+  border-bottom:1px solid rgba(0,0,0,.04);
+}
+.qlist-item:active{background:rgba(0,122,255,.08)}
+.qlist-item.current{background:rgba(0,122,255,.1)}
+.qlist-num{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;flex-shrink:0;
+  background:rgba(0,0,0,.04);color:#8e8e93;
+}
+.qlist-item.current .qlist-num{background:rgba(0,122,255,.15);color:#007aff}
+.qlist-q{font-size:14px;color:#1c1c1e;flex:1;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+</style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div class="start-screen" id="start-screen">
+  <div class="start-icon">📘</div>
+  <div class="start-title">熟語 形副名前置詞</div>
+  <div class="start-sub">149問 · 熟語マスター · 音声付き<br>第25-26章 形容詞/副詞/名詞/前置詞の熟語</div>
+  <button class="start-btn" id="start-btn" onclick="startQuiz()">
+    <div class="start-btn-icon">▶</div>
+    <div class="start-btn-text">START</div>
+  </button>
+  <div class="start-resume" id="start-resume" style="display:none"></div>
+</div>
+
+<!-- QUIZ UI (hidden until start) -->
+<div class="hdr" id="quiz-hdr" style="display:none">
+  <button class="hdr-back" onclick="pauseQuiz()">‹</button>
+  <div class="hdr-title">熟語 形副名前置詞</div>
+  <button class="hdr-btn" id="btn-pause" onclick="pauseQuiz()" title="一時停止">⏸</button>
+  <button class="hdr-btn" id="btn-shuffle" onclick="toggleShuffle()" title="シャッフル">🔀</button>
+  <button class="hdr-btn" id="btn-search" onclick="openSearch()" title="問題検索">🔍</button>
+  <div class="hdr-count" id="hdr-count" onclick="openQList()">1 / 149</div>
+</div>
+
+<div class="main" id="main" style="display:none">
+  <div class="card" id="card">
+    <div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
+    <div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer-bar" style="width:100%"></div></div>
+    <div class="q-tag" id="q-tag"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="choices" id="choices"></div>
+    <div class="fb" id="fb" style="display:none">
+      <div class="fb-sentence" id="fb-sentence" onclick="speakEnSentence()" style="cursor:pointer"></div>
+      <div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div>
+      <div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div>
+    </div>
+  </div>
+</div>
+
+<div class="ftr" id="quiz-ftr" style="display:none">
+  <div class="score">
+    <span class="sc-g" id="sc-g" onclick="openCorrectList()" style="cursor:pointer">0</span>
+    <span class="sc-f" id="sc-f" onclick="openWrongList()" style="cursor:pointer">0</span>
+  </div>
+  <button class="speed-btn" id="speed-btn" onclick="toggleSpeed()">1x</button>
+  <button class="audio-btn" id="audio-btn" onclick="playAudio()">🔊</button>
+</div>
+
+<script>
+// ═══ HAPTIC ═══
+let _h=null;
+(()=>{
+  // Try parent's haptic first (when inside iframe)
+  try{if(window.parent&&window.parent.haptic){_h={__parent:true};}}catch(_){}
+  if(!_h)import('https://esm.sh/ios-haptics').then(m=>{_h=m.haptic;}).catch(()=>{});
+})();
+const haptic=()=>{try{if(_h&&_h.__parent){window.parent.haptic();}else if(_h){_h();}}catch(_){}};
+haptic.confirm=()=>{try{if(_h&&_h.__parent){window.parent.haptic.confirm();}else if(_h&&_h.confirm){_h.confirm();}}catch(_){}};
+haptic.error=()=>{try{if(_h&&_h.__parent){window.parent.haptic.error();}else if(_h&&_h.error){_h.error();}}catch(_){}};
+const hapticWrong=()=>{const d=220;[0,1,2,4,5,6].forEach(i=>setTimeout(()=>haptic.error(),i*d));};
+// ═══ FORGOT CACHE SYNC ═══
+const FORGOT_KEY='inglish_forgot_cache';
+function syncForgot(q){
+  try{
+    const c=JSON.parse(localStorage.getItem(FORGOT_KEY)||'{}');
+    if(!c[5])c[5]={};
+    c[5][q.at]={m:q.jt,t:Date.now(),cs:q.cs||'',st:q.st||''};
+    localStorage.setItem(FORGOT_KEY,JSON.stringify(c));
+  }catch(_){}
+}
+// ═══ QUESTION DATA ═══
+const EK2Q=[{"id":1273,"q":"We don't think she is ( ) to the job.","ch":["be","equal","exact","enough","worth"],"chj":["be動詞","耐え得る／匹敵する","正確な","十分な","価値がある"],"a":2,"at":"equal","af":"eikenx2-audio/Q1273.mp3","cs":"We don't think she is equal to the job.","jt":"私たちは、彼女がその仕事に適任だとは思っていない。","st":"be equal to ~ = 「~に等しい」「~(仕事など)をするのが務まる」 / equalは数や量が同じ意味でもよく使われるが、ここでは「(能力が)ある」→「務まる」の意味。"},{"id":1274,"q":"Your views are quite opposite ( ) his.","ch":["against","for","over","to"],"chj":["~に反対して","~のために","~を越えて","~に"],"a":4,"at":"to","af":"eikenx2-audio/Q1274.mp3","cs":"Your views are quite opposite to his.","jt":"あなたの考え方は彼の考え方とは正反対だ。","st":"be opposite to ~ = 「~と反対である」 / opposite toで「~と反対である」。"},{"id":1275,"q":"Some day the world will be free ( ) hunger.","ch":["by","from","in","of"],"chj":["~によって","~から","~の中に","~の"],"a":2,"at":"from","af":"eikenx2-audio/Q1275.mp3","cs":"Some day the world will be free from hunger.","jt":"いつの日か世界から飢餓は取り除かれるだろう。","st":"be free from ~ = 「~がない」「~を免れている」 / 「税金や苦痛など好ましくない物事から解放されている」ことを表す。"},{"id":1276,"q":"You don't have to pay for this. It's ( ). Please feel ( ) to have more coffee. We have plenty.","ch":["free","good","cheap","sorry","easy"],"chj":["無料の／自由な","良い","安い","すまない","簡単な"],"a":1,"at":"free","af":"eikenx2-audio/Q1276.mp3","cs":"You don't have to pay for this. It's free. Please feel ( ) to have more coffee. We have plenty.","jt":"これにお金を払う必要はありません。無料です。もっとコーヒーをどうぞ。たくさんあります。","st":"be free (to do) = 「無料」「自由に~できる」 / feel free to doで「遠慮せずに~する」。同じ単語(free)でも複数の意味がある。"},{"id":1277,"q":"He thought no one was ( ) to food as he was.","ch":["indifferent","eager","permanent","particular"],"chj":["無関心な","熱心な","永久の","好みにうるさい"],"a":1,"at":"indifferent","af":"eikenx2-audio/Q1277.mp3","cs":"He thought no one was indifferent to food as he was.","jt":"彼は自分ほど食べ物に無関心な人はいないと思った。","st":"be indifferent to ~ = 「~に無関心である」 / be particular aboutは「~にうるさい」で前置詞が違う。"},{"id":1278,"q":"He is totally dependent ( ) his parents. / Can you stand ( ) your hands?","ch":["of","on","at","to"],"chj":["~の","~に","~で","~に"],"a":2,"at":"on","af":"eikenx2-audio/Q1278.mp3","cs":"He is totally dependent on his parents. / Can you stand ( ) your hands?","jt":"彼は完全に両親に頼っている。/ 逆立ちできますか。","st":"be dependent on ~ = 「~に頼っている」「~次第である」 / stand on one's handsは「逆立ちをする」。"},{"id":1279,"q":"You are old enough to be independent ( ) your parents.","ch":["of","on","in","to"],"chj":["~から","~に","~の中","~へ"],"a":1,"at":"of","af":"eikenx2-audio/Q1279.mp3","cs":"You are old enough to be independent of your parents.","jt":"あなたは両親から独立できる十分な年齢だ。","st":"be independent of ~ = 「~から独立している」 / be dependent onの反意。"},{"id":1280,"q":"When I was a child, I was ( ) of dogs.","ch":["afraid","frightening","scary","terrible"],"chj":["怖がって","恐ろしい(物主語)","怖い(物主語)","ひどい"],"a":1,"at":"afraid","af":"eikenx2-audio/Q1280.mp3","cs":"When I was a child, I was afraid of dogs.","jt":"子供の頃、私は犬を怖がっていた。","st":"be afraid of ~ = 「~を怖がる」 / frightening, scaryは「物事が恐ろしい」、terribleは「ひどい」。人が主語の場合はafraidを用いる。"},{"id":1281,"q":"Mr. Wilson became very ( ) his son's safety.","ch":["similar to","convenient for","different from","anxious about"],"chj":["~と似ている","~に都合が良い","~と違う","~を心配している"],"a":4,"at":"anxious about","af":"eikenx2-audio/Q1281.mp3","cs":"Mr. Wilson became very anxious about his son's safety.","jt":"ウィルソンさんは息子の安全をとても心配した。","st":"be anxious about ~ = 「~を心配している」 / be concerned about, be worried aboutも同意。"},{"id":1282,"q":"She was anxious ( ) a new computer.","ch":["in","for","with","by"],"chj":["~の中","~を求めて","~と","~によって"],"a":2,"at":"for","af":"eikenx2-audio/Q1282.mp3","cs":"She was anxious for a new computer.","jt":"彼女は新しいコンピューターをとても欲しがっていた。","st":"be anxious for ~ = 「~を切望する」 / 1281のbe anxious about(心配)との区別。that節ではthat S will do の形をとる。"},{"id":1283,"q":"The girl was anxious to see her father again.","ch":["was eager to","was sick of seeing","was reluctant to","was impatient about seeing"],"chj":["~することを熱望した","会うことにうんざりしていた","~するのを嫌がっていた","会えずにいらいらしていた"],"a":1,"at":"was eager to","af":"eikenx2-audio/Q1283.mp3","cs":"The girl was anxious to see her father again.","jt":"その少女は再び父親に会うことを切望していた。","st":"be anxious to do = 「~することを切望する」 / be eager to doと同意。"},{"id":1284,"q":"He was eager to watch TV.","ch":["wanted","disliked","returned","hated"],"chj":["~したかった","嫌った","戻った","憎んだ"],"a":1,"at":"wanted","af":"eikenx2-audio/Q1284.mp3","cs":"He was eager to watch TV.","jt":"彼はテレビを見たがっていた。","st":"be eager to do = 「~したがっている／~するのを熱望する」 / 「~したい」の強い願望。want to doよりも強い。"},{"id":1285,"q":"At first, like most children, her child was reluctant to go to kindergarten.","ch":["prepared","unwilling","ready","supposed"],"chj":["準備している","気が進まない","用意ができた","~するはず"],"a":2,"at":"unwilling","af":"eikenx2-audio/Q1285.mp3","cs":"At first, like most children, her child was reluctant to go to kindergarten.","jt":"初めは他の多くの子ども同様、彼女の子どもは幼稚園に行くのを嫌がった。","st":"be reluctant to do = 「~するのは気が進まない」 / reluctant ≒ unwilling。反意はbe willing to do「~する気がある」。"},{"id":1286,"q":"This subject is familiar ( ) me. / I am familiar ( ) this subject.","ch":["to / with","with / to","in / at","at / with"],"chj":["前:to 後:with","前:with 後:to","前:in 後:at","前:at 後:with"],"a":1,"at":"to / with","af":"eikenx2-audio/Q1286.mp3","cs":"This subject is familiar to / with me. / I am familiar ( ) this subject.","jt":"この主題は私にはよく知られている／私はこの主題に詳しい。","st":"be familiar to ~ / be familiar with ~ = 「~によく知られている／~をよく知っている」 / 物が主語→to、人が主語→with。"},{"id":1287,"q":"Japanese students are all familiar ( ) the shape of Italy on the map.","ch":["at","of","in","with"],"chj":["~で","~の","~の中に","~と"],"a":4,"at":"with","af":"eikenx2-audio/Q1287.mp3","cs":"Japanese students are all familiar with the shape of Italy on the map.","jt":"日本人学生は皆、地図上のイタリアの形状をよく知っている。","st":"be familiar with ~ = 「~をよく知っている」 / 日本人学生(人)が主語なのでwithを使う。"},{"id":1288,"q":"We can't say that poverty is solely responsible ( ) crime; there are clearly other influences.","ch":["to","in","at","for"],"chj":["~へ","~の中","~で","~に対して"],"a":4,"at":"for","af":"eikenx2-audio/Q1288.mp3","cs":"We can't say that poverty is solely responsible for crime; there are clearly other influences.","jt":"貧困だけが犯罪の原因だとは言えない。他に明らかな影響もある。","st":"be responsible for ~ = 「~に責任がある」 / 「~に責任がある」「~の原因である」。"},{"id":1289,"q":"My company is very ( ) of the importance of advertising.","ch":["interested","anxious","keen","conscious"],"chj":["興味がある","心配している","熱心な","意識している"],"a":4,"at":"conscious","af":"eikenx2-audio/Q1289.mp3","cs":"My company is very conscious of the importance of advertising.","jt":"私の会社は広告の重要性をとてもよく認識している。","st":"be conscious of ~ = 「~に気付いている／~を知っている」 / 空所直後のofに注目。conscious「意識している」。"},{"id":1290,"q":"The children were not ( ) that they were playing in a dangerous place.","ch":["awake","awakened","aware","awareness"],"chj":["目が覚めて","目を覚まさせた","気付いて","認識(名詞)"],"a":3,"at":"aware","af":"eikenx2-audio/Q1290.mp3","cs":"The children were not aware that they were playing in a dangerous place.","jt":"その子どもたちは危険な場所で遊んでいるという認識がなかった。","st":"be aware that S V... / be aware of ~ = 「~ということに気付いている」 / awareは「気付いている」の形容詞、awake「目が覚めている」とは意味が異なる。"},{"id":1291,"q":"It seems he is aware of her secret.","ch":["ignores","tells","knows","loves"],"chj":["無視する","伝える","知っている","愛している"],"a":3,"at":"knows","af":"eikenx2-audio/Q1291.mp3","cs":"It seems he is aware of her secret.","jt":"彼は彼女の秘密を知っているようだ。","st":"be aware of ~ = 「~に気付いている／~を知っている」 / 反意はbe unaware of ~ , be unconscious of ~ 「~に気付いていない」。"},{"id":1292,"q":"He was envious of her intelligence and graceful behavior.","ch":["jealous of","happy about","ignorant of","scared of"],"chj":["~をうらやむ／ねたむ","~について幸せな","~を知らない","~を怖がる"],"a":1,"at":"jealous of","af":"eikenx2-audio/Q1292.mp3","cs":"He was envious of her intelligence and graceful behavior.","jt":"彼は彼女の知性と優雅な振る舞いをうらやましく思っていた。","st":"be envious of ~ = 「~をうらやむ、ねたむ」 / envious(うらやんで) ≒ jealous。"},{"id":1293,"q":"I am really concerned about my future.","ch":["disappointed at","excited about","worried about","pleased with"],"chj":["~にがっかりして","~にワクワクして","~を心配して","~に喜んで"],"a":3,"at":"worried about","af":"eikenx2-audio/Q1293.mp3","cs":"I am really concerned about my future.","jt":"私は将来のことをとても心配している。","st":"be concerned about ~ = 「~について心配している」 / 動詞concern「心配させる」、be concerned aboutは「心配している」。"},{"id":1294,"q":"He is not concerned with the matter.","ch":["is worried about","is keen on","is dependent on","has nothing to do with"],"chj":["~を心配している","~に熱心である","~に頼っている","~と何の関係もない"],"a":4,"at":"has nothing to do with","af":"eikenx2-audio/Q1294.mp3","cs":"He is not concerned with the matter.","jt":"彼はその件には関係がない。","st":"be concerned with ~ = 「~に関係がある、関心がある」 / 否定にすると「~と関係がない」。"},{"id":1295,"q":"I am certain she will be suitable for the job.","ch":["considerable","appropriate","ripe","mature"],"chj":["かなりの","適切な","熟した","成熟した"],"a":2,"at":"appropriate","af":"eikenx2-audio/Q1295.mp3","cs":"I am certain she will be suitable for the job.","jt":"彼女はその仕事にふさわしいと確信している。","st":"be suitable for ~ = 「~にふさわしい」 / suitable ≒ appropriate。be ripe forは「機が熟している」。"},{"id":1296,"q":"She was apt to lose her temper.","ch":["careless","likely","tended","favored"],"chj":["不注意な","しそうな","~する傾向があった","好まれた"],"a":3,"at":"tended","af":"eikenx2-audio/Q1296.mp3","cs":"She was apt to lose her temper.","jt":"彼女はかっとしやすかった。","st":"be apt to do = 「~する傾向がある／しがちだ」 / lose one's temperは「腹を立てる」。"},{"id":1297,"q":"I was ( ) the business meeting because I was sick.","ch":["present at","admitted to","absent from","forced to"],"chj":["~に出席している","~に入ることを許された","~を欠席している","~を強制された"],"a":3,"at":"absent from","af":"eikenx2-audio/Q1297.mp3","cs":"I was absent from the business meeting because I was sick.","jt":"病気だったので、私は仕事の打ち合わせを欠席した。","st":"be absent from ~ = 「~を欠席する」 / because節「病気だった」から「欠席した」が適切。"},{"id":1298,"q":"This is a movie ( ) of surprises and jokes.","ch":["fill","filled","filling","full"],"chj":["満たす(動詞)","満たされた","満たしている","満ちた(形容詞)"],"a":4,"at":"full","af":"eikenx2-audio/Q1298.mp3","cs":"This is a movie full of surprises and jokes.","jt":"これは驚きと冗談にあふれた映画だ。","st":"be full of ~ = 「~でいっぱいである」 / ofをとるのはfull。filledならwithをとる。"},{"id":1299,"q":"My boy, I'm ( ) of you.","ch":["resign","stair","proud","sweat","resist"],"chj":["辞職する","階段","誇りに思う","汗","抵抗する"],"a":3,"at":"proud","af":"eikenx2-audio/Q1299.mp3","cs":"My boy, I'm proud of you.","jt":"息子よ、お前を誇りに思う。","st":"be proud of ~ = 「~を誇りに思う、自慢する」 / take pride in ~, pride oneself on ~, boast of ~ も同意。"},{"id":1300,"q":"Mary is not very ( ) about the clothes she wears. / Is there anything in ( ) you'd like for dinner?","ch":["particular","private","public","short"],"chj":["特定の／好みがうるさい","私的な","公の","短い"],"a":1,"at":"particular","af":"eikenx2-audio/Q1300.mp3","cs":"Mary is not very particular about the clothes she wears. / Is there anything in ( ) you'd like for dinner?","jt":"メアリーは自分の着る服についてあまりうるさくない。/ 夕食に特にこれといって食べたいものはありますか。","st":"be particular about ~ / in particular = 「~についてうるさい」／「特に」 / particularは「特定の、独特の」。in particularで「特に」。"},{"id":1301,"q":"Tom's idea was similar ( ) mine.","ch":["above","except","in","on","to","under"],"chj":["~の上","~を除いて","~の中","~の上","~に","~の下"],"a":5,"at":"to","af":"eikenx2-audio/Q1301.mp3","cs":"Tom's idea was similar to mine.","jt":"トムの考えは私のに似ていた。","st":"be similar to ~ = 「~に似ている」 / Tom's ideaとmine(=my idea)を比較。"},{"id":1302,"q":"The same is true ( ) some of your friends.","ch":["as","at","in","of"],"chj":["~として","~で","~の中","~について"],"a":4,"at":"of","af":"eikenx2-audio/Q1302.mp3","cs":"The same is true of some of your friends.","jt":"同じことはあなたの友人のうち何人かにも当てはまる。","st":"be true of ~ = 「~に当てはまる」 / of = about。"},{"id":1303,"q":"He doesn't know the world. = He is ( ) the world.","ch":["familiar","afraid of","ignorant of","envious of"],"chj":["よく知っている","怖がっている","~を知らない","~をうらやむ"],"a":3,"at":"ignorant of","af":"eikenx2-audio/Q1303.mp3","cs":"He doesn't know the world. = He is ignorant of the world.","jt":"彼は世の中を知らない。","st":"be ignorant of ~ = 「~を知らない」 / familiarを使う場合はnot familiar with ~ となる。"},{"id":1304,"q":"I'm getting ( ) of driving my old car.","ch":["excited","exhausted","tired","tried"],"chj":["興奮した","疲れ果てた","飽きた／疲れた","試された"],"a":3,"at":"tired","af":"eikenx2-audio/Q1304.mp3","cs":"I'm getting tired of driving my old car.","jt":"古い車を運転するのが嫌になってきた。","st":"be sick of ~ / be tired of ~ = 「~に飽きている」 / beの代わりにgetで「~になる」の変化を表す。"},{"id":1305,"q":"Stop complaining to me. I'm ( ) of your negative attitudes.","ch":["proud","lack","sick","fond"],"chj":["誇りに思う","欠く","うんざりして","~が好き"],"a":3,"at":"sick","af":"eikenx2-audio/Q1305.mp3","cs":"Stop complaining to me. I'm sick of your negative attitudes.","jt":"私に愚痴を言うのはやめて。君の否定的な態度にはうんざりだ。","st":"be sick of ~ = 「~にうんざりしている」 / be sick of = be tired of。"},{"id":1306,"q":"He was ashamed ( ) himself for having made such an unkind remark.","ch":["of","on","in","to"],"chj":["~を","~の上","~の中","~へ"],"a":1,"at":"of","af":"eikenx2-audio/Q1306.mp3","cs":"He was ashamed of himself for having made such an unkind remark.","jt":"彼はそのような心ないことを言ったことで自分を恥じていた。","st":"be ashamed of ~ = 「~を恥じている」 / having + 過去分詞で主節より前の「時」を表す。"},{"id":1307,"q":"The mobile phone is very ( ) with young people.","ch":["wide","popular","small","heavy"],"chj":["広い","人気のある","小さい","重い"],"a":2,"at":"popular","af":"eikenx2-audio/Q1307.mp3","cs":"The mobile phone is very popular with young people.","jt":"その携帯電話は若者に人気だ。","st":"be popular with (among) = 「~に人気がある」 / 空所の後のwith young peopleがヒント。"},{"id":1308,"q":"That country is ( ) in natural resources.","ch":["wealthy","rich","plenty","abundant"],"chj":["裕福な","豊富な","たくさんの","豊富な"],"a":2,"at":"rich","af":"eikenx2-audio/Q1308.mp3","cs":"That country is rich in natural resources.","jt":"その国は天然資源が豊富だ。","st":"be rich in ~ = 「~が豊富にある」 / 「~に豊富である」と言うときはrich inが普通。"},{"id":1309,"q":"The plan is lacking ( ) money.","ch":["by","to","in","on"],"chj":["~によって","~へ","~において","~の上"],"a":3,"at":"in","af":"eikenx2-audio/Q1309.mp3","cs":"The plan is lacking in money.","jt":"その計画はお金が足りない。","st":"be lacking (wanting) in ~ = 「~に欠けている」 / be rich in ~ の反対として覚える。"},{"id":1310,"q":"As far as English is concerned, she is ( ) to ( ) in her class.","ch":["first","best","others","none","second","better"],"chj":["1番目","最高","他の者","誰もいない","2番目","より良い"],"a":5,"at":"second","af":"eikenx2-audio/Q1310.mp3","cs":"As far as English is concerned, she is second to ( ) in her class.","jt":"英語に関して言えば、彼女はクラスの誰にも引けを取らない。","st":"be second to none = 「誰にも劣らない」 / 「誰の次でもない」→「一番だ」。as far as ~ is concernedは「~に関する限り」。"},{"id":1311,"q":"Shakespeare was acquainted ( ) all kinds of poets.","ch":["by","to","at","with"],"chj":["~によって","~へ","~で","~と"],"a":4,"at":"with","af":"eikenx2-audio/Q1311.mp3","cs":"Shakespeare was acquainted with all kinds of poets.","jt":"シェイクスピアはあらゆる種類の詩人と知り合いだった。","st":"be acquainted with ~ = 「~と知り合いである」 / acquaint A with Bで「AにBを知らせる」の受動態。"},{"id":1312,"q":"Children tend to be more ( ) to colds than adults.","ch":["delicate","feeble","keen","subject"],"chj":["繊細な","弱い","熱心な","影響を受けやすい"],"a":4,"at":"subject","af":"eikenx2-audio/Q1312.mp3","cs":"Children tend to be more subject to colds than adults.","jt":"子どもは大人よりも風邪をひきやすい。","st":"be subject to ~ = 「~に影響を受けやすい、~に服従する」 / 形容詞subjectは「服従する」の他に「~の影響を受けやすい」の意味。vulnerable to ~ も同意。"},{"id":1313,"q":"He is good at swimming.","ch":["long","wrong","little","poor"],"chj":["長い","間違った","少ない","下手な"],"a":4,"at":"poor","af":"eikenx2-audio/Q1313.mp3","cs":"He is good at swimming.","jt":"彼は泳ぎが得意だ。","st":"be good at ~ = 「~が得意である」 / 反意はbe bad (poor) at ~。"},{"id":1314,"q":"The book was based on a true story.","ch":["made into","located in","sold by","developed from"],"chj":["~に作り変えられた","~に位置する","~によって売られた","~から発展した"],"a":4,"at":"developed from","af":"eikenx2-audio/Q1314.mp3","cs":"The book was based on a true story.","jt":"その本は実話に基づいていた。","st":"be based on (upon) ~ = 「~に基づいている」 / be developed from「~から作成される」が近い。be made intoは「~(製品)になる」。"},{"id":1315,"q":"We were short of food.","ch":["dumped","found","collected","lacked"],"chj":["投棄された","見つけられた","集められた","欠けていた"],"a":4,"at":"lacked","af":"eikenx2-audio/Q1315.mp3","cs":"We were short of food.","jt":"私たちは食料が不足していた。","st":"be short of ~ = 「~が不足している」 / lackは動詞で「欠く」。run (be) short of も「~が不足する」。"},{"id":1316,"q":"The old man was lost in the computer game.","ch":["was concentrating on","was confused by","was defeated by","was merged into"],"chj":["~に集中していた","~に混乱させられた","~に負かされた","~に合併された"],"a":1,"at":"was concentrating on","af":"eikenx2-audio/Q1316.mp3","cs":"The old man was lost in the computer game.","jt":"その老人はコンピューターゲームに夢中になっていた。","st":"be lost in ~ = 「~に夢中になっている」 / lostは「夢中になっている」。concentrate onが同意。"},{"id":1317,"q":"They are interested in outdoor sports. = They are ( ) outdoor sports.","ch":["keen on","popular with","in charge of","anxious about"],"chj":["~に熱心である","~に人気がある","~を担当する","~を心配する"],"a":1,"at":"keen on","af":"eikenx2-audio/Q1317.mp3","cs":"They are interested in outdoor sports. = They are keen on outdoor sports.","jt":"彼らは屋外スポーツに興味を持っている。","st":"be keen on ~ = 「~に熱中している」 / interested in ≒ keen on。in charge ofは「~を担当している」。"},{"id":1318,"q":"Most people are more or ( ) selfish.","ch":["less","little","few","last"],"chj":["より少ない","少し","ほとんどない","最後"],"a":1,"at":"less","af":"eikenx2-audio/Q1318.mp3","cs":"Most people are more or less selfish.","jt":"ほとんどの人間は多かれ少なかれ利己的だ。","st":"more or less = 「多かれ少なかれ、およそ」 / 対の表現「多かれ少なかれ」「だいたい」の意味。"},{"id":1319,"q":"Sooner or later he'll see what is right and wrong.","ch":["At one time","On time","Behind time","In time"],"chj":["かつて","時間通りに","遅れて","やがて／間に合って"],"a":4,"at":"In time","af":"eikenx2-audio/Q1319.mp3","cs":"Sooner or later he'll see what is right and wrong.","jt":"遅かれ早かれ、彼は何が正しく何が間違いかを知るだろう。","st":"sooner or later = 「遅かれ早かれ、やがて」 / in timeにも「やがて」「間に合って」の意味があり、sooner or laterと同意。"},{"id":1320,"q":"The Japanese economy has been recovering gradually.","ch":["quite a little","little by little","for a little","after a little"],"chj":["かなり","少しずつ","しばらく","しばらくしてから"],"a":2,"at":"little by little","af":"eikenx2-audio/Q1320.mp3","cs":"The Japanese economy has been recovering gradually.","jt":"日本経済は徐々に回復している。","st":"little by little = 「少しずつ」 / gradually「徐々に」の言い換え。"},{"id":1321,"q":"I understood right away what she wanted me to do.","ch":["clearly","strongly","certainly","immediately"],"chj":["はっきり","強く","確かに","すぐに"],"a":4,"at":"immediately","af":"eikenx2-audio/Q1321.mp3","cs":"I understood right away what she wanted me to do.","jt":"彼女が私に何をしてほしいのかすぐにわかった。","st":"right away = 「すぐに」 / at once, right now, in no timeも同意。"},{"id":1322,"q":"It is next to impossible to outdo him in mathematics.","ch":["quite","hardly","almost","often"],"chj":["とても","ほとんど~ない","ほとんど","しばしば"],"a":3,"at":"almost","af":"eikenx2-audio/Q1322.mp3","cs":"It is next to impossible to outdo him in mathematics.","jt":"数学で彼に勝つのはほとんど不可能だ。","st":"next to ~ = 「ほとんど~」 / 「~の隣」のイメージから。impossibleとセットで使われることが多い。"},{"id":1323,"q":"They are better off than they were five years ago.","ch":["are more proud","look better","are worse","are richer"],"chj":["より誇らしい","より良く見える","より悪い","より裕福"],"a":4,"at":"are richer","af":"eikenx2-audio/Q1323.mp3","cs":"They are better off than they were five years ago.","jt":"彼らは5年前よりも暮らし向きがよい。","st":"be well off = 「裕福な、暮らし向きが良い」 / 反意語はbe badly off「暮らし向きが悪い、貧乏な」。"},{"id":1324,"q":"He is ( ) off now than he used to be.","ch":["well","badly","better","worse"],"chj":["良く","悪く","より良く","より悪く"],"a":4,"at":"worse","af":"eikenx2-audio/Q1324.mp3","cs":"He is worse off now than he used to be.","jt":"彼は以前よりも暮らし向きが悪い。","st":"badly off = 「暮らし向きが悪い、貧乏」 / thanがあるので比較級。badly offの比較級はworse off。"},{"id":1325,"q":"He decided to give up beer and other alcohol ( ).","ch":["once and for all","once in a lifetime","in a blue moon","once too often"],"chj":["きっぱりと／これを最後に","一生に一度","極めてまれに","何度も"],"a":1,"at":"once and for all","af":"eikenx2-audio/Q1325.mp3","cs":"He decided to give up beer and other alcohol once and for all.","jt":"彼はビールと他の酒類をきっぱりやめようと決心した。","st":"once (and) for all = 「きっぱりと／これを最後に」 / once in a lifetime「一生に一度」、once in a blue moon「ごくまれに」と区別。"},{"id":1326,"q":"He drops in on me once ( ) a while.","ch":["of","in","at","with","by","on"],"chj":["~の","~の中","~で","~と","~そば","~の上"],"a":2,"at":"in","af":"eikenx2-audio/Q1326.mp3","cs":"He drops in on me once in a while.","jt":"彼は時々私のところに立ち寄る。","st":"once in a while = 「時々、たまには」 / 「ある時間の間に一度」→「ときどき」。drop in on ~ で「~にちょっと立ち寄る」。"},{"id":1327,"q":"I go to the opera ( ).","ch":["now and then","last Sunday","at a time","once upon a time"],"chj":["時々","先週の日曜","一度に","昔々"],"a":1,"at":"now and then","af":"eikenx2-audio/Q1327.mp3","cs":"I go to the opera now and then.","jt":"時々オペラを見に行く。","st":"(every) now and then (again) = 「時々」 / 現在形は通常習慣を表す。"},{"id":1328,"q":"I haven't seen any bears around here so ( ).","ch":["as","for","far","much"],"chj":["~として","~のため","遠く","多く"],"a":3,"at":"far","af":"eikenx2-audio/Q1328.mp3","cs":"I haven't seen any bears around here so far.","jt":"これまでのところ、ここでクマを見かけたことはない。","st":"so far = 「今まで、今までのところ」 / 「現在(現時点)まで」の意味。until nowと同意。"},{"id":1329,"q":"He's been fishing for two hours, but ( ) no fish has taken the bait.","ch":["as if","so as","so that","as yet"],"chj":["まるで~のように","~のように","~するように","今までのところまだ"],"a":4,"at":"as yet","af":"eikenx2-audio/Q1329.mp3","cs":"He's been fishing for two hours, but as yet no fish has taken the bait.","jt":"彼は2時間釣りを続けているが、まだ魚は1匹もかかっていない。","st":"as yet = 「まだ、今までのところ」 / 肯定文・否定文どちらでも使える。so farに近い意味。"},{"id":1330,"q":"You hung that picture ( ) down. The bottom part should be on top.","ch":["being","forward","upside","way"],"chj":["(動名詞)","前へ","上側","方法"],"a":3,"at":"upside","af":"eikenx2-audio/Q1330.mp3","cs":"You hung that picture upside down. The bottom part should be on top.","jt":"その絵を逆さに吊しているよ。下の部分が上になるはずだ。","st":"upside down = 「逆さに」 / upside「上側」がdown「下に」で、ひっくり返っている意味。"},{"id":1331,"q":"The little boy put on his shoes the other way ( ) by mistake.","ch":["off","around","down","back","forward"],"chj":["離れて","周りに","下に","後ろに","前に"],"a":2,"at":"around","af":"eikenx2-audio/Q1331.mp3","cs":"The little boy put on his shoes the other way around by mistake.","jt":"その男の子は間違って靴を反対に履いていた。","st":"the other way around = 「反対に、逆に」 / the other wayだけでも「反対の方に」を表すが、aroundで強調。"},{"id":1332,"q":"The news will go around ( ) to our wishes.","ch":["indifferent","contrary","opposite","owing"],"chj":["無関心な","反対の","正反対の","借りて"],"a":2,"at":"contrary","af":"eikenx2-audio/Q1332.mp3","cs":"The news will go around contrary to our wishes.","jt":"そのニュースは私たちの願いに反して広まってしまうだろう。","st":"contrary to ~ = 「~に反して」 / oppositeは「位置・方向」の反対、contraryは「内容」の反対。"},{"id":1333,"q":"The children were so excited that the teacher found it very difficult to keep them ( ).","ch":["disorderly","in order","out of order","in order to"],"chj":["無秩序に","整って、順序通り","故障して","~するために"],"a":2,"at":"in order","af":"eikenx2-audio/Q1333.mp3","cs":"The children were so excited that the teacher found it very difficult to keep them in order.","jt":"子どもたちはとても興奮していて、先生は彼らをおとなしくさせておくことは難しいと感じた。","st":"in order = 「整って、順序通り」 / find it ~ to doは「~することが~だとわかる」のSVOC構文。in order toは別。"},{"id":1334,"q":"If the copy machine is out of ( ), please contact the customer service center.","ch":["work","mind","condition","order"],"chj":["仕事","心","状態","順序／機能"],"a":4,"at":"order","af":"eikenx2-audio/Q1334.mp3","cs":"If the copy machine is out of order, please contact the customer service center.","jt":"コピー機が故障していたらお客様サービスセンターにご連絡ください。","st":"out of order = 「機械などが故障して」 / 「正常な順序」の意味からorder、「正常な」の反対で「故障して」。反意はin order。"},{"id":1335,"q":"The car got ( ) control and ran into the wall.","ch":["down on","up with","much of","out of","down to"],"chj":["~を下に","~に追いつく","~の多くを","~を失って","~まで"],"a":4,"at":"out of","af":"eikenx2-audio/Q1335.mp3","cs":"The car got out of control and ran into the wall.","jt":"その車は制御を失って壁に突っ込んだ。","st":"out of (one's) control = 「制御できない、抑えが利かない」 / control「制御」からはずれる→「制御できない」のイメージ。run intoは「~に衝突する」。"},{"id":1336,"q":"My old friend called me out of the blue.","ch":["sadly","just in time","suddenly","in a good mood"],"chj":["悲しく","ちょうど間に合って","突然","機嫌良く"],"a":3,"at":"suddenly","af":"eikenx2-audio/Q1336.mp3","cs":"My old friend called me out of the blue.","jt":"旧友から突然電話がかかってきた。","st":"out of the blue = 「突然」 / 「青空から」→「思いがけず、突然」(bolt from the blue「青天の霹靂」と関連)。"},{"id":1337,"q":"Professor Smith's fashion sense is hopelessly out of date.","ch":["fashionable","popular","attractive","old-fashioned"],"chj":["流行の","人気のある","魅力的な","時代遅れの"],"a":4,"at":"old-fashioned","af":"eikenx2-audio/Q1337.mp3","cs":"Professor Smith's fashion sense is hopelessly out of date.","jt":"スミス教授のファッションセンスは絶望的なほど時代遅れだ。","st":"out of date = 「時代遅れの」 / behind the timesも「時代遅れの」と同意。"},{"id":1338,"q":"I'm sorry, but leaving early tomorrow morning is out of the ( ).","ch":["easy","available","impossible","careless","question"],"chj":["簡単な","利用可能な","不可能な","不注意な","問題／疑問"],"a":5,"at":"question","af":"eikenx2-audio/Q1338.mp3","cs":"I'm sorry, but leaving early tomorrow morning is out of the question.","jt":"すみませんが、明日の朝早く発つことはとうてい不可能です。","st":"out of the question = 「問題にならない、とうてい不可能な」 / 「疑問外の」→「問題にならない」。"},{"id":1339,"q":"I saw snow ( ) the first time when I took a trip to New Zealand as a teenager.","ch":["for","at","in","to"],"chj":["~のために","~で","~の中","~へ"],"a":1,"at":"for","af":"eikenx2-audio/Q1339.mp3","cs":"I saw snow for the first time when I took a trip to New Zealand as a teenager.","jt":"10代の頃にニュージーランドに旅行をして初めて雪を見た。","st":"for the first time = 「初めて」 / for the first time in ~ yearsなどで「~年ぶりに」。"},{"id":1340,"q":"He will help us for the time being. = He will help us ( ).","ch":["for a long time","for the present","in time","at once"],"chj":["長い間","今のところ、さしあたり","やがて／間に合って","すぐに"],"a":2,"at":"for the present","af":"eikenx2-audio/Q1340.mp3","cs":"He will help us for the time being. = He will help us for the present.","jt":"しばらくの間、彼は私たちを手伝ってくれる。","st":"for the time being = 「当分の間、さしあたり」 / for the present「さしあたり」、「長い間」「やがて」「すぐに」とは別。"},{"id":1341,"q":"I've been living ( ) since I entered university, and I've had to learn to cook.","ch":["by myself","for myself","on my own","with only one"],"chj":["一人で","自分のために","自分自身で","ただ一人で"],"a":3,"at":"on my own","af":"eikenx2-audio/Q1341.mp3","cs":"I've been living on my own since I entered university, and I've had to learn to cook.","jt":"大学に入って一人暮らしをしているので、料理ができるようにならなければならなかった。","st":"on one's own = 「一人で、独力で」 / 「自分自身のみで」という意味で使われる。"},{"id":1342,"q":"This story, ( ), is about the life of a man.","ch":["at hand","at once","in short","in haste"],"chj":["手元に／近くに","すぐに","要するに","急いで"],"a":3,"at":"in short","af":"eikenx2-audio/Q1342.mp3","cs":"This story, in short, is about the life of a man.","jt":"この話は一言で言うと、ある人の人生に関するものだ。","st":"in short (In a word) = 「要するに」 / 「要するに」のイメージ。in brief, to be brief, in a wordなどとも言う。"},{"id":1343,"q":"My name is Benjamin, but please call me Ben ( ) short.","ch":["in","for","to","into"],"chj":["~の中","~のために","~へ","~の中に"],"a":2,"at":"for","af":"eikenx2-audio/Q1343.mp3","cs":"My name is Benjamin, but please call me Ben for short.","jt":"私の名前はベンジャミンだが、略してベンと呼んでください。","st":"for short = 「略して」 / in short「要するに」とは区別する。"},{"id":1344,"q":"On ( ) thought, I decided not to buy the car.","ch":["sure","second","surprised","large"],"chj":["確かな","二度目の／考え直し","驚いた","大きい"],"a":2,"at":"second","af":"eikenx2-audio/Q1344.mp3","cs":"On second thought, I decided not to buy the car.","jt":"考え直して、その車を買わないことにした。","st":"on second thought = 「考え直して」 / 複数形は「考え直すこと」の意味で、have second thoughtsの形もある。"},{"id":1345,"q":"Keep medicine ( ) of your children.","ch":["out of the reach","out of the way","out of control","out of danger"],"chj":["届かないところ","邪魔にならないところ","手に負えない","危険を脱して"],"a":1,"at":"out of the reach","af":"eikenx2-audio/Q1345.mp3","cs":"Keep medicine out of the reach of your children.","jt":"薬は子供の手の届かないところに置きなさい。","st":"out of the reach of ~ = 「~の手が届かない」 / reachは名詞で「(手や力などの)届く範囲」。beyond (above) ~, a reach of も同意。"},{"id":1346,"q":"Don't leave the medicine within ( ) of the children.","ch":["area","distance","length","reach"],"chj":["地域","距離","長さ","届く範囲"],"a":4,"at":"reach","af":"eikenx2-audio/Q1346.mp3","cs":"Don't leave the medicine within reach of the children.","jt":"子どもの手の届く範囲に薬を置いてはならない。","st":"within reach of ~ = 「~の届く範囲に」 / out of the reach of ~ の反対。"},{"id":1347,"q":"We have long been on bad ( ) with our neighbors.","ch":["terms","condition","temperature","manner"],"chj":["間柄／条件","状態","温度","方法"],"a":1,"at":"terms","af":"eikenx2-audio/Q1347.mp3","cs":"We have long been on bad terms with our neighbors.","jt":"私たちはご近所と長い間仲が悪い。","st":"on ~ terms with ~ = 「~と~の間柄で」 / termsは「関係」。on bad (good)terms with ~で「仲が悪い(良い)」。"},{"id":1348,"q":"When I'm ( ) a hurry, I often can't find my keys.","ch":["much","in","very","at"],"chj":["多くの","~の中","とても","~で"],"a":2,"at":"in","af":"eikenx2-audio/Q1348.mp3","cs":"When I'm in a hurry, I often can't find my keys.","jt":"急いでいるときに限って鍵を見つけられないことがよくある。","st":"in a hurry = 「急いで」 / 「急いで」は状態を表す。"},{"id":1349,"q":"Jim is fixing his car. = Jim is ( ) work on his car.","ch":["in","on","without","beside","at"],"chj":["~の中","~の上","~なしで","~のそばに","~で"],"a":5,"at":"at","af":"eikenx2-audio/Q1349.mp3","cs":"Jim is fixing his car. = Jim is at work on his car.","jt":"ジムは自動車の修理をしている。","st":"at work = 「働いている、仕事中で」 / ここでの意味は「~を修理中」。"},{"id":1350,"q":"The guard went ( ) duty at eight o'clock.","ch":["to","off","of","from"],"chj":["~へ","離れて","~の","~から"],"a":2,"at":"off","af":"eikenx2-audio/Q1350.mp3","cs":"The guard went off duty at eight o'clock.","jt":"その警備員は8時に勤務が終わった。","st":"off duty = 「非番で」 / on duty「勤務中で」⇔ off duty「非番で」。"},{"id":1351,"q":"I could not go to the party because I was on duty.","ch":["in class","in trouble","at work","at ease"],"chj":["授業中で","困って","仕事中で","安心して"],"a":3,"at":"at work","af":"eikenx2-audio/Q1351.mp3","cs":"I could not go to the party because I was on duty.","jt":"仕事中だったので、パーティーには行けなかった。","st":"on duty = 「勤務中で」 / 「仕事中だった」と同じ意味はat work。"},{"id":1352,"q":"My grandmother is getting better by degrees.","ch":["consequently","generally","gradually","happily"],"chj":["結果として","一般的に","徐々に","幸せに"],"a":3,"at":"gradually","af":"eikenx2-audio/Q1352.mp3","cs":"My grandmother is getting better by degrees.","jt":"祖母は徐々に良くなっている。","st":"by degrees = 「だんだん、次第に」 / degreeは「程度」、degreesのように複数形にすることもできる。"},{"id":1353,"q":"She is completely at home with computers.","ch":["making a study of","familiar with","concerned with","studying in her house"],"chj":["~を研究している","~に精通している","~に関係する","家で勉強している"],"a":2,"at":"familiar with","af":"eikenx2-audio/Q1353.mp3","cs":"She is completely at home with computers.","jt":"彼女はコンピューターに精通している。","st":"be at home with ~ = 「~に精通している」 / at home「くつろいで、精通している」という意味。"},{"id":1354,"q":"I still see her from time to time.","ch":["usually","once","always","occasionally"],"chj":["普通","一度","いつも","時々"],"a":4,"at":"occasionally","af":"eikenx2-audio/Q1354.mp3","cs":"I still see her from time to time.","jt":"私はいまだに時々彼女に会う。","st":"from time to time = 「時々」 / 「時々」(every) now and then, at times などと同意。"},{"id":1355,"q":"We keep a supply of canned goods at hand.","ch":["far away","within reach","for fire","too much"],"chj":["遠くに","手の届くところ","火のために","多すぎる"],"a":2,"at":"within reach","af":"eikenx2-audio/Q1355.mp3","cs":"We keep a supply of canned goods at hand.","jt":"私たちは缶詰の食料を手元に置いている。","st":"at hand = 「手元に、近づいて」 / keep ~ at handで「~を手元に置いておく」。supplyは「備蓄」。"},{"id":1356,"q":"I heard the news at first hand.","ch":["firstly","directly","soon","quickly"],"chj":["第一に","直接","すぐに","速く"],"a":2,"at":"directly","af":"eikenx2-audio/Q1356.mp3","cs":"I heard the news at first hand.","jt":"私はその知らせを直接耳にした。","st":"at first hand = 「直接に」 / 反意はsecond hand「間接に」。"},{"id":1357,"q":"In any case, you should accept their invitation, whether you like it or not.","ch":["Incidentally","Quickly","Always","Anyway"],"chj":["ついでに","速く","いつも","とにかく／いずれにしても"],"a":4,"at":"Anyway","af":"eikenx2-audio/Q1357.mp3","cs":"In any case, you should accept their invitation, whether you like it or not.","jt":"いずれにしても、好き嫌いに関わらず招待を受けるべきだ。","st":"in any case = 「いずれにしても、どんな場合でも」 / anyway≒anyhowとも。whether ~ or notは「~であろうとなかろうと」。"},{"id":1358,"q":"Our project is already under way.","ch":["in trouble","in progress","under review","under control"],"chj":["困って","進行中で","審査中で","支配下で"],"a":2,"at":"in progress","af":"eikenx2-audio/Q1358.mp3","cs":"Our project is already under way.","jt":"私たちの計画はすでに進行中だ。","st":"under way = 「進行中で」 / in progress「進行中で」と同意。"},{"id":1359,"q":"Changes in language will continue forever, but no one knows ( ) sure who does the changing.","ch":["for","to","by","in"],"chj":["~のために","~へ","~によって","~の中"],"a":1,"at":"for","af":"eikenx2-audio/Q1359.mp3","cs":"Changes in language will continue forever, but no one knows for sure who does the changing.","jt":"言語の変化は永遠に続くだろうが、誰が変化させているのかを確実には誰も知らない。","st":"for sure (certain) = 「確かに」 / knows for sureで「確実に知っている」。"},{"id":1360,"q":"You will only get laughed at behind your ( ). / 医者は私に背中を下にして横になるように言った。/ The doctor told me to lie down on my ( ).","ch":["back","for","by","in"],"chj":["背中","~のために","~によって","~の中"],"a":1,"at":"back","af":"eikenx2-audio/Q1360.mp3","cs":"You will only get laughed at behind your back. / 医者は私に背中を下にして横になるように言った。/ The doctor told me to lie down on my ( ).","jt":"君は陰口を言われるだけだ。/ 医者は私に横になるように言った。","st":"behind one's back = 「陰で(こっそりと)」 / back「背中」の意味から「陰で」の意味が生まれた。2文目は「背中の上」の意味。"},{"id":1361,"q":"( ) my opinion, she is right.","ch":["In","On","By","As"],"chj":["~の中","~の上","~によって","~として"],"a":1,"at":"In","af":"eikenx2-audio/Q1361.mp3","cs":"In my opinion, she is right.","jt":"私の意見では、彼女は正しい。","st":"in one's opinion = 「~の意見では」 / 「意見の中」というイメージでinを使う。"},{"id":1362,"q":"( ) I didn't like my math teacher, but now I like him very much.","ch":["At first","First of all","In the first place","For the first time"],"chj":["最初は","まず第一に","まず最初に／そもそも","初めて"],"a":1,"at":"At first","af":"eikenx2-audio/Q1362.mp3","cs":"At first I didn't like my math teacher, but now I like him very much.","jt":"最初、私は数学の先生が好きではなかったが、今はとても好きだ。","st":"at first = 「最初は」 / after a while 「しばらくして、やがて」と対照。first of all「まず第一に」"},{"id":1363,"q":"My father is, at ( ), in New York.","ch":["present","now","time","one time"],"chj":["現在","今","時","かつて"],"a":1,"at":"present","af":"eikenx2-audio/Q1363.mp3","cs":"My father is, at present, in New York.","jt":"父は現在ニューヨークにいる。","st":"at present = 「現在」 / 現在進行時制の副詞句。at one timeは「かつて」。"},{"id":1364,"q":"Dad said I must come home at once.","ch":["at the most","immediately","after school","slowly","finally"],"chj":["多くても","すぐに","放課後","ゆっくり","最後に"],"a":2,"at":"immediately","af":"eikenx2-audio/Q1364.mp3","cs":"Dad said I must come home at once.","jt":"父は私にすぐに家に帰ってこなければならないと言った。","st":"at once = 「すぐに」 / right away「すぐに」、right nowなど同意。"},{"id":1365,"q":"All at once the front tire went flat.","ch":["Suddenly","Afterwards","Soon"],"chj":["突然","後で","すぐに"],"a":1,"at":"Suddenly","af":"eikenx2-audio/Q1365.mp3","cs":"All at once the front tire went flat.","jt":"突然、前のタイヤがパンクした。","st":"all at once = 「突然」 / all of a sudden, suddenlyと同意。"},{"id":1366,"q":"A hard-working man like him will succeed in any job in the long run.","ch":["necessarily","without fail","eventually","at an end"],"chj":["必ずしも","必ず","結局","終わって"],"a":3,"at":"eventually","af":"eikenx2-audio/Q1366.mp3","cs":"A hard-working man like him will succeed in any job in the long run.","jt":"彼のようによく働く人は、長い目で見ればどんな仕事をしても成功するだろう。","st":"in the long run = 「結局」 / 「長い目で見れば結局」。eventually「結局、最終的に」が同意。"},{"id":1367,"q":"If Takeshi is in the United States for good, he is there ( ).","ch":["temporarily","permanently","to do good","to rest well"],"chj":["一時的に","永久に","良いことをするため","よく休むため"],"a":2,"at":"permanently","af":"eikenx2-audio/Q1367.mp3","cs":"If Takeshi is in the United States for good, he is there permanently.","jt":"タケシが永久にアメリカ合衆国にいるということは、彼はそこに永遠にいるということだ。","st":"for good = 「永久に」 / for good = forever。temporarily「一時的に」は反意。"},{"id":1368,"q":"You're lucky that you got it for free.","ch":["anything","something","nothing","everything"],"chj":["何でも","何か","何も~ない","すべて"],"a":3,"at":"nothing","af":"eikenx2-audio/Q1368.mp3","cs":"You're lucky that you got it for free.","jt":"それを無料で手に入れたとは幸運だ。","st":"for free = 「無料で」 / free of charge、You're lucky that ~ 「~とは幸運だ」。"},{"id":1369,"q":"She always feels ill at ease when she visits her aunt.","ch":["relaxed","uneasy","happy","refreshed"],"chj":["くつろいだ","落ち着かない、不安な","幸せな","さっぱりした"],"a":2,"at":"uneasy","af":"eikenx2-audio/Q1369.mp3","cs":"She always feels ill at ease when she visits her aunt.","jt":"彼女はおばを訪ねるといつも気まずい。","st":"ill at ease = 「落ち着かない、不安で」 / at ease「くつろいで」の反対。"},{"id":1370,"q":"You must talk to her in person about that issue.","ch":["certainly","directly","secretly","solely"],"chj":["確かに","直接","密かに","ただ一人で"],"a":2,"at":"directly","af":"eikenx2-audio/Q1370.mp3","cs":"You must talk to her in person about that issue.","jt":"その問題については彼女と直接会って話さなければならない。","st":"in person = 「代理でなく、本人で」 / 「他人を通さず、当人が直接」という意味の熟語。"},{"id":1371,"q":"The principal's explanation was very much to the ( ).","ch":["dot","place","point","spot"],"chj":["点","場所","要点","地点"],"a":3,"at":"point","af":"eikenx2-audio/Q1371.mp3","cs":"The principal's explanation was very much to the point.","jt":"校長先生の説明はとても要領を得たものだった。","st":"to the point = 「要領を得て」 / much という副詞の句を「とても」の意味で強調している。principal「校長」。"},{"id":1372,"q":"Students travel half-price on that airline. ( ), have you bought your ticket for New York yet?","ch":["As a result","By the way","Nevertheless","What is more"],"chj":["その結果","ところで","それにもかかわらず","さらに"],"a":2,"at":"By the way","af":"eikenx2-audio/Q1372.mp3","cs":"Students travel half-price on that airline. By the way, have you bought your ticket for New York yet?","jt":"その航空会社では学生は半額で飛行機に乗れるよ。ところで、ニューヨーク行きのチケットを買った？","st":"by the way = 「ところで」 / 前の話題を切り替える時の表現。"},{"id":1373,"q":"Move that box! It is ( ) the way of passers-by.","ch":["up","of","in","at"],"chj":["上に","~の","~の中","~で"],"a":3,"at":"in","af":"eikenx2-audio/Q1373.mp3","cs":"Move that box! It is in the way of passers-by.","jt":"その箱をどかしなさい。通行人の邪魔だ。","st":"in the way = 「邪魔になって」 / 「道に立っている」イメージ。passers-byはpasser-byの複数形。"},{"id":1374,"q":"The judge decided not to send the thief to prison ( ) the fact that he was 85 years old.","ch":["in danger of","in spite of","in touch with","in view of"],"chj":["~の危険がある","~にもかかわらず","~と連絡をとって","~から考えて、~を考慮して"],"a":4,"at":"in view of","af":"eikenx2-audio/Q1374.mp3","cs":"The judge decided not to send the thief to prison in view of the fact that he was 85 years old.","jt":"判事は、彼の高齢を考慮して、その盗賊を刑務所に送らないことに決めた。","st":"in view of ~ = 「~から考えて」 / 「~の見解にたって」の意味。considering「~を考慮して」と同意。"},{"id":1375,"q":"A: Do you have to work overtime a lot? / B: Yes. Last night, ( ), I worked until 10 o'clock.","ch":["for instance","by the way","as an exception","as a rule"],"chj":["たとえば","ところで","例外として","原則として"],"a":1,"at":"for instance","af":"eikenx2-audio/Q1375.mp3","cs":"A: Do you have to work overtime a lot? / B: Yes. Last night, for instance, I worked until 10 o'clock.","jt":"A: 残業は多いのですか。B: はい、例えば、昨夜は10時まで働きました。","st":"for instance (example) = 「たとえば」 / 「たくさん」という返答への実例を述べる。"},{"id":1376,"q":"She is the kind of person who immediately makes you feel ( ) ease.","ch":["at","by","for","in"],"chj":["~で","~によって","~のために","~の中"],"a":1,"at":"at","af":"eikenx2-audio/Q1376.mp3","cs":"She is the kind of person who immediately makes you feel at ease.","jt":"彼女はあなたをすぐに気楽にしてくれるような人だ。","st":"at ease = 「気楽に」 / feel at ease「心安らぐ」。the kind of person who ~「~するような人」。"},{"id":1377,"q":"I agree with you to some ( ).","ch":["points","meaning","extent","way"],"chj":["点","意味","程度","方法"],"a":3,"at":"extent","af":"eikenx2-audio/Q1377.mp3","cs":"I agree with you to some extent.","jt":"ある程度あなたに賛成する。","st":"to a ~ extent (degree) = 「~の程度に」 / to some extentで「ある程度」の意味。"},{"id":1378,"q":"He was in high ( ) in spite of the bad weather.","ch":["courage","heart","mind","spirits"],"chj":["勇気","心","心／精神","元気／気分"],"a":4,"at":"spirits","af":"eikenx2-audio/Q1378.mp3","cs":"He was in high spirits in spite of the bad weather.","jt":"悪天候にもかかわらず彼は元気だった。","st":"in high spirits = 「元気で」 / 複数形の点に注意。in low spiritsで「落ち込んでいる」。"},{"id":1379,"q":"Sorry, but I have to hurry. I have no time to explain this ( ).","ch":["in detail","in fact","in place","in general"],"chj":["詳しく、詳細に","実際に","適所に","一般に"],"a":1,"at":"in detail","af":"eikenx2-audio/Q1379.mp3","cs":"Sorry, but I have to hurry. I have no time to explain this in detail.","jt":"すみませんが、急がなければなりません。詳しく説明する時間はありません。","st":"in detail = 「詳しく、詳細に」 / 時間がないから詳しく説明できない、の流れ。"},{"id":1380,"q":"We arrived there on ( ).","ch":["time","expect","scheduled","timetable"],"chj":["時間","期待","予定された","時刻表"],"a":1,"at":"time","af":"eikenx2-audio/Q1380.mp3","cs":"We arrived there on time.","jt":"私たちは時間通りに着いた。","st":"on time = 「時間通りに」 / 「時間ちょうどに」。ahead of time「時間より早く」、behind time「時間に遅れて」。"},{"id":1381,"q":"I (for / in / not / time / was) the 8:05 train.","ch":["was not in time for"],"chj":["~に間に合わなかった"],"a":1,"at":"was not in time for","af":"eikenx2-audio/Q1381.mp3","cs":"I was not in time for the 8:05 train.","jt":"8時5分の列車に間に合わなかった。","st":"in time for ~ = 「~に間に合って」 / 並べ替え問題。否定文なので not in time for ~ の形。","type":"rearrange","words":["for","in","not","time","was"],"answer_phrase":"was not in time for"},{"id":1382,"q":"The guest made a speech about current economic situations. Everything he said, however, was ( ).","ch":["beside the mark","on the spot","fall back on the time","went out of his way"],"chj":["的はずれの","その場で","~に頼る","わざわざした"],"a":1,"at":"beside the mark","af":"eikenx2-audio/Q1382.mp3","cs":"The guest made a speech about current economic situations. Everything he said, however, was beside the mark.","jt":"ゲストは最新の経済状況について話をした。しかし、彼の言ったことはどれも的外れだった。","st":"beside the mark (point) = 「的はずれの」 / however以降は反対の文脈が続く。beside「~をはずれて」。on the spotは「その場で」。"},{"id":1383,"q":"Raise your arms ( ) your head.","ch":["above","besides","on","up"],"chj":["~の上に","~に加えて","~の上","上"],"a":1,"at":"above","af":"eikenx2-audio/Q1383.mp3","cs":"Raise your arms above your head.","jt":"頭上に手を上げなさい。","st":"above all = 「とりわけ、何よりも」※関連：above ~(位置) / 二文問題としてBill is fair, hardworking, and (    ) all honest.「ビルは公平で勤勉、そして何よりも正直だ」も同語の出題。besidesは「~に加えて」。"},{"id":1384,"q":"She does well in all her subjects, above all, in English.","ch":["in general","in particular","in public","in all"],"chj":["一般的に","特に","公衆の面前で","全部で"],"a":2,"at":"in particular","af":"eikenx2-audio/Q1384.mp3","cs":"She does well in all her subjects, above all, in English.","jt":"彼女はすべての科目において成績が良いが、とりわけ英語が得意だ。","st":"in particular = 「特に」 / above all「とりわけ」と同意。"},{"id":1385,"q":"We took the wheel by turns.","ch":["alternately","carefully","recklessly","willingly"],"chj":["交互に","注意深く","無謀に","喜んで"],"a":1,"at":"alternately","af":"eikenx2-audio/Q1385.mp3","cs":"We took the wheel by turns.","jt":"私たちは順番にハンドルを握った。","st":"by turns = 「代わる代わる、順番に」 / take turns doingで「代わる代わる~する」、in turn「順番に」も同じ。"},{"id":1386,"q":"Come to my office at 3 o'clock p.m. ( ).","ch":["for good","by all means","just in case","later on","without fail"],"chj":["永久に","必ず","念のため","後ほど","必ず"],"a":5,"at":"without fail","af":"eikenx2-audio/Q1386.mp3","cs":"Come to my office at 3 o'clock p.m. without fail.","jt":"午後3時に必ず私のオフィスに来てください。","st":"without fail = 「必ず」 / failure「失敗」、fail「失敗する」からfail「失敗」なし→「必ず」。"},{"id":1387,"q":"Everyone in the city appears to be constantly on the go.","ch":["active","careful","delightful","cooperative"],"chj":["活動的な","注意深い","楽しい","協力的な"],"a":1,"at":"active","af":"eikenx2-audio/Q1387.mp3","cs":"Everyone in the city appears to be constantly on the go.","jt":"その街の人々は絶えず忙しく動き回っているようだ。","st":"on the go = 「忙しくして、活動している」 / always be on the goなどで「常に活動中」。"},{"id":1388,"q":"The delivery will arrive before long.","ch":["late","now","earlier","soon"],"chj":["遅れて","今","早く","すぐに"],"a":4,"at":"soon","af":"eikenx2-audio/Q1388.mp3","cs":"The delivery will arrive before long.","jt":"配達物はまもなく到着する。","st":"before long = 「まもなく」 / before long = soon。"},{"id":1389,"q":"As a rule, I get up at 7:00 every morning.","ch":["Sometimes","Usually","Always","Often"],"chj":["時々","たいてい","いつも","しばしば"],"a":2,"at":"Usually","af":"eikenx2-audio/Q1389.mp3","cs":"As a rule, I get up at 7:00 every morning.","jt":"原則として、私は毎朝7時に起きる。","st":"as a rule = 「概して、一般に」 / ここではusuallyが同意。"},{"id":1390,"q":"The beauty of the sunset was ( ) description.","ch":["over","beyond","above","across"],"chj":["~を越えて","~を超えて","~の上","~を横切って"],"a":2,"at":"beyond","af":"eikenx2-audio/Q1390.mp3","cs":"The beauty of the sunset was beyond description.","jt":"その夕日の美しさは言葉に表せないほどだった。","st":"beyond description = 「言葉に表せない、ほど」 / beyond ~ 「~を超えて」から「~以上に」の意味。"},{"id":1391,"q":"Was that a good novel ( ) your point of view?","ch":["to","in","from","of"],"chj":["~へ","~の中","~から","~の"],"a":3,"at":"from","af":"eikenx2-audio/Q1391.mp3","cs":"Was that a good novel from your point of view?","jt":"あなたから見れば、あれは良い小説でしたか。","st":"from one's point of view = 「~の観点から見ると」 / 「あなたの観点から」→あなたの意見ではというニュアンス。"},{"id":1392,"q":"I can't even think about buying a car, ( ) buying a house.","ch":["nor","all along","beside","let alone"],"chj":["~もまた~ない","最初からずっと","~のそばに","~はもちろん~ない"],"a":4,"at":"let alone","af":"eikenx2-audio/Q1392.mp3","cs":"I can't even think about buying a car, let alone buying a house.","jt":"車の購入さえ考えられないのに、ましてや家の購入など考えられない。","st":"let alone ~ = 「~はもちろん~ない」 / 「~のほうはなおさら~ない」という意味。否定文の後ろに続く。"},{"id":1393,"q":"Perhaps it isn't such a bad village ( ).","ch":["all ever","after all","all in all","by hand"],"chj":["(誤)","結局、やはり","概して","手で"],"a":2,"at":"after all","af":"eikenx2-audio/Q1393.mp3","cs":"Perhaps it isn't such a bad village after all.","jt":"多分そんなに悪い村ではないのかもしれない、結局のところ。","st":"after all = 「結局、やはり」 / 「意外にも/やはり」という結果を表す。"},{"id":1394,"q":"You didn't happen to see Mr. & Mrs. Gear, did you?
+( )
+1. Yes, it happened to them. 2. No, I didn't see him. 3. As a matter of fact, I did. 4. Are you sure? I think they must have met before.","ch":["Yes, it happened to them.","No, I didn't see him.","As a matter of fact, I did.","Are you sure? I think they must have met before."],"chj":["はい、彼らに起こりました","いいえ、彼を見かけませんでした","実を言うと、見ました","本当ですか？彼らは以前に会ったことがあるはずです"],"a":3,"at":"As a matter of fact, I did.","af":"eikenx2-audio/Q1394.mp3","cs":"You didn't happen to see Mr. & Mrs. Gear, did you?
+As a matter of fact, I did.
+1. Yes, it happened to them. 2. No, I didn't see him. 3. As a matter of fact, I did. 4. Are you sure? I think they must have met before.","jt":"Gearさん夫妻を見かけなかったですか。(適切な応答はどれ)","st":"as a matter of fact = 「実を言うと、実は」 / 「相手の予想と異なる事実を述べる」表現。in fact, as is, it is の意味。"},{"id":1395,"q":"We did not ask him to leave. ( ), we tried to persuade him to stay.","ch":["Therefore","At last","However","On the contrary"],"chj":["したがって","ついに","しかしながら","それどころか"],"a":4,"at":"On the contrary","af":"eikenx2-audio/Q1395.mp3","cs":"We did not ask him to leave. On the contrary, we tried to persuade him to stay.","jt":"彼に去ってくれとは頼まなかった。それどころか、私たちは彼に残るよう説得しようとした。","st":"on the contrary = 「それどころか」 / 「逆に、それどころか」の意味。"},{"id":1396,"q":"He is timid ( ) nature.","ch":["upon","by","at","for"],"chj":["~の上","~によって","~で","~のために"],"a":2,"at":"by","af":"eikenx2-audio/Q1396.mp3","cs":"He is timid by nature.","jt":"彼は生まれつき臆病だ。","st":"by nature (birth) = 「生まれながらの」 / 「生まれつき」を表す。timid「臆病な」。"},{"id":1397,"q":"All the doctor's efforts were ( ) and the patient finally died.","ch":["at once","for good","in vain","off and on"],"chj":["すぐに","永久に","むなしく、無駄に","断続的に"],"a":3,"at":"in vain","af":"eikenx2-audio/Q1397.mp3","cs":"All the doctor's efforts were in vain and the patient finally died.","jt":"その医者の努力はすべてむなしく、ついに患者は死んでしまった。","st":"in vain = 「むだに、むなしく」 / 「無意味に」の意味。for goodは「永久に」。"},{"id":1398,"q":"I went to the wrong place ( ) mistake.","ch":["for","at","of","by"],"chj":["~のため","~で","~の","~によって"],"a":4,"at":"by","af":"eikenx2-audio/Q1398.mp3","cs":"I went to the wrong place by mistake.","jt":"私は間違って違う場所に行ってしまった。","st":"by mistake = 「間違って」 / accidentally「誤って」と同意。"},{"id":1399,"q":"She never even gave me a ( ) to talk to her. / A student had filmed the fire by ( ).","ch":["pass","space","turn","chance","mistake"],"chj":["通過","空間","順番","機会／偶然","間違い"],"a":4,"at":"chance","af":"eikenx2-audio/Q1399.mp3","cs":"She never even gave me a chance to talk to her. / A student had filmed the fire by ( ).","jt":"彼女は私に話す機会すら与えなかった。/ 学生がその火事を偶然撮影していた。","st":"by chance (accident) = 「偶然に」 / chanceは「機会」と「偶然」の両意味。2文目は「偶然に」。"},{"id":1400,"q":"By ( ) chance I am a little late coming home, don't wait up for me.","ch":["any","some","no","one"],"chj":["どんな","いくつかの","無い","一つ"],"a":1,"at":"any","af":"eikenx2-audio/Q1400.mp3","cs":"By any chance I am a little late coming home, don't wait up for me.","jt":"ひょっとして帰るのが遅れたら、起きて待たないでください。","st":"by any chance = 「ひょっとして、もしかして」 / chanceは「偶然」。ifと一緒に使うとき「もしひょっとして」。"},{"id":1401,"q":"I'm sure he didn't break your doll ( ) purpose.","ch":["by","at","on","for"],"chj":["~によって","~で","~の上","~のために"],"a":3,"at":"on","af":"eikenx2-audio/Q1401.mp3","cs":"I'm sure he didn't break your doll on purpose.","jt":"彼はわざと君の人形を壊したのではないと思うよ。","st":"on purpose = 「故意に、わざと」 / purposeは「目的、意志」。反意のby accident「偶然に」と区別。"},{"id":1402,"q":"( ) ourselves, he is an unreliable person.","ch":["In","To","Behind","Between"],"chj":["~の中","~へ","~の後","~の間"],"a":4,"at":"Between","af":"eikenx2-audio/Q1402.mp3","cs":"Between ourselves, he is an unreliable person.","jt":"ここだけの話だが、彼は頼りにならない人物だ。","st":"between ourselves = 「ここだけの話だが」 / unreliable「信頼できない」。"},{"id":1403,"q":"She was ( ) herself with happiness.","ch":["beside","between","inside","outside"],"chj":["~のそばに／~を取り乱して","~の間","~の中","~の外"],"a":1,"at":"beside","af":"eikenx2-audio/Q1403.mp3","cs":"She was beside herself with happiness.","jt":"彼女は幸せで我を忘れていた。","st":"beside oneself (with ~) = 「(~で)我を忘れて」 / 「自分自身の横」→「我を忘れて」。"},{"id":1404,"q":"I think what he said was true ( ) a sense.","ch":["on","of","with","in"],"chj":["~の上","~の","~と","~の中"],"a":4,"at":"in","af":"eikenx2-audio/Q1404.mp3","cs":"I think what he said was true in a sense.","jt":"ある意味、彼が言ったことは正しいと思う。","st":"in a sense (way) = 「ある意味(で)」 / 「ある意味の中では」が原意。"},{"id":1405,"q":"A: I wonder if it will rain tonight. / B: It will be fine according to the weather forecast. But ( ), take an umbrella just in ( ).","ch":["case","way","moment","matter"],"chj":["場合","方法","瞬間","事柄"],"a":1,"at":"case","af":"eikenx2-audio/Q1405.mp3","cs":"A: I wonder if it will rain tonight. / B: It will be fine according to the weather forecast. But case, take an umbrella just in ( ).","jt":"A: 今夜は雨が降るかな。B: 天気予報では晴れだよ。でも、万が一の場合に備えて、念のために傘を持って行きなよ。","st":"(just) in case = 「念のため／万一の場合に備えて」 / in case S V ...「~の場合には」。ただしbut 以降の副詞的用法では「念のため」。"},{"id":1406,"q":"All ( ) a sudden, their music teacher rushed out of the classroom.","ch":["at","in","of","on"],"chj":["~で","~の中","~の","~の上"],"a":3,"at":"of","af":"eikenx2-audio/Q1406.mp3","cs":"All of a sudden, their music teacher rushed out of the classroom.","jt":"突然、音楽の先生が教室から飛び出してきた。","st":"all of a sudden = 「突然、出し抜けに」 / 同意表現：suddenly, all at once。"},{"id":1407,"q":"He does not like to make a speech in ( ).","ch":["civic","public","private","social"],"chj":["市民の","公衆／人前","私的な","社会の"],"a":2,"at":"public","af":"eikenx2-audio/Q1407.mp3","cs":"He does not like to make a speech in public.","jt":"彼は人前で演説をするのが好きではない。","st":"in public = 「公然と、人前で」 / 反意：in private「内密に、秘密に」。"},{"id":1408,"q":"Apples were ( ) sale today. They were about 25 cents a pound cheaper than usual.","ch":["at","for","in","on","by","over"],"chj":["~で","~のために","~の中","~の上","~によって","~の上"],"a":4,"at":"on","af":"eikenx2-audio/Q1408.mp3","cs":"Apples were on sale today. They were about 25 cents a pound cheaper than usual.","jt":"今日はリンゴが特売だった。いつもよりも1ポンド当たり約25セント安くなっていた。","st":"on sale = 「売りに出して／特売中」 / 「特売」と「売りに出して」の両方の意味。"},{"id":1409,"q":"He was ( ) what to do.","ch":["out of mind","in common","at best","at a loss"],"chj":["気が狂って","共通に","最良で","途方に暮れて"],"a":4,"at":"at a loss","af":"eikenx2-audio/Q1409.mp3","cs":"He was at a loss what to do.","jt":"彼は何をすべきか途方に暮れていた。","st":"at a loss (for words) = 「困って、途方に暮れて」 / 「何と言っていいかわからない」という場合もある。"},{"id":1410,"q":"According to the weather forecast, it will rain off and ( ).","ch":["off","in","on","out"],"chj":["離れて","~の中","~の上","外へ"],"a":3,"at":"on","af":"eikenx2-audio/Q1410.mp3","cs":"According to the weather forecast, it will rain off and on.","jt":"天気予報によると、断続的に雨が降るだろう。","st":"off and on / on and off = 「断続的に、時折」 / off, onのどちらの順序でも可。"},{"id":1411,"q":"Let me know the time of your arrival in advance so that I can meet you at the station.","ch":["secretly","immediately","beforehand","advantageously"],"chj":["密かに","すぐに","前もって","有利に"],"a":3,"at":"beforehand","af":"eikenx2-audio/Q1411.mp3","cs":"Let me know the time of your arrival in advance so that I can meet you at the station.","jt":"駅まで迎えに行けるよう到着時間を前もって知らせてください。","st":"in advance = 「前もって」 / beforehandと同意。"},{"id":1412,"q":"He sat there for hours on end.","ch":["silently","continuously","at last","in the corner"],"chj":["静かに","連続して","ついに","隅に"],"a":2,"at":"continuously","af":"eikenx2-audio/Q1412.mp3","cs":"He sat there for hours on end.","jt":"彼は何時間もそこに座り続けた。","st":"on end = 「続けて」 / 「終わりへと」→「続けて」。"},{"id":1413,"q":"We lifted the rock by means of a lever.","ch":["using","removing","controlling by","carrying"],"chj":["~を使って","除去する","~によって制御する","運ぶ"],"a":1,"at":"using","af":"eikenx2-audio/Q1413.mp3","cs":"We lifted the rock by means of a lever.","jt":"私たちはてこを使ってその岩を持ち上げた。","st":"by means of ~ = 「~を用いて、~を使って」 / meansは「方法、手段」。"},{"id":1414,"q":"Our campus festival was, on the whole, successful.","ch":["in fact","mostly","in a sense","eventually"],"chj":["実際に","たいてい","ある意味で","最終的に"],"a":2,"at":"mostly","af":"eikenx2-audio/Q1414.mp3","cs":"Our campus festival was, on the whole, successful.","jt":"私たちの学園祭は概して成功だった。","st":"on the whole = 「概して、大体は」 / 「全部の上では」→「概して」。"},{"id":1415,"q":"They had to make such decisions on the spot.","ch":["in advance","at once","later","finally"],"chj":["前もって","すぐに","後で","最後に"],"a":2,"at":"at once","af":"eikenx2-audio/Q1415.mp3","cs":"They had to make such decisions on the spot.","jt":"彼らはその場でそのような決定をしなければならなかった。","st":"on the spot = 「即座に、その場で」 / 「現場で、その場で即座に」の意味。at once「すぐに」と同意。"},{"id":1416,"q":"He does not like to make a speech in public. (重複) / (関連問題) He is shy in private.","ch":["in public","in private"],"chj":["公然と、人前で","内密に、秘密に"],"a":2,"at":"in private","af":"eikenx2-audio/Q1416.mp3","cs":"He does not like to make a speech in public. (重複) / (関連問題) He is shy in private.","jt":"彼は人前で演説をするのが好きではない。/彼は内輪では恥ずかしがり屋だ。","st":"in private = 「内密に、秘密に」 / 反意：in public「公然と、人前で」。"},{"id":1417,"q":"He was ( ) in advance so that I can meet you at the station.","ch":["beforehand"],"chj":["前もって"],"a":1,"at":"beforehand","af":"eikenx2-audio/Q1417.mp3","cs":"He was beforehand in advance so that I can meet you at the station.","jt":"※#1411と同じ問題(in advance)","st":"in advance = 「前もって」 / #1411と関連。"},{"id":1418,"q":"He sat there for hours on end. (重複確認)","ch":["continuously"],"chj":["連続して"],"a":1,"at":"continuously","af":"eikenx2-audio/Q1418.mp3","cs":"He sat there for hours on end. (重複確認)","jt":"彼は何時間もそこに座り続けた。","st":"on end = 「続けて」 / #1412と関連。"},{"id":1419,"q":"We lifted the rock by means of a lever. (関連)","ch":["using"],"chj":["~を使って"],"a":1,"at":"using","af":"eikenx2-audio/Q1419.mp3","cs":"We lifted the rock by means of a lever. (関連)","jt":"てこを用いて岩を持ち上げた。","st":"by means of ~ = 「~を使って」 / #1413と関連。"},{"id":1420,"q":"Our campus festival was, on the whole, successful. (関連)","ch":["mostly"],"chj":["たいてい"],"a":1,"at":"mostly","af":"eikenx2-audio/Q1420.mp3","cs":"Our campus festival was, on the whole, successful. (関連)","jt":"私たちの学園祭は概して成功だった。","st":"on the whole = 「概して、大体は」 / #1414と関連。"},{"id":1421,"q":"They had to make such decisions on the spot. (関連)","ch":["at once"],"chj":["すぐに、即座に"],"a":1,"at":"at once","af":"eikenx2-audio/Q1421.mp3","cs":"They had to make such decisions on the spot. (関連)","jt":"彼らはその場で決定した。","st":"on the spot = 「即座に、その場で」 / #1415と関連。"}];
+
+// ═══ SOUND EFFECTS ═══
+const SND={
+  correct:new Audio('success.caf'),
+  wrong:new Audio('retry.caf'),
+  timeup:new Audio('failure.caf'),
+  next:new Audio('next.caf'),
+  shuffle:new Audio('shuffle.caf'),
+  speedup:new Audio('speedup.caf'),
+  speeddown:new Audio('speeddown.caf'),
+};
+// Preload all
+Object.values(SND).forEach(a=>{a.load();});
+function playSnd(name){
+  const a=SND[name];
+  if(!a)return;
+  a.currentTime=0;
+  a.play().catch(()=>{});
+}
+
+// ═══ AUDIO CONTEXT UNLOCK (iOS) ═══
+let _audioUnlocked=false;
+function unlockAudio(){
+  if(_audioUnlocked)return Promise.resolve();
+  return new Promise(r=>{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const buf=ctx.createBuffer(1,1,22050);
+    const src=ctx.createBufferSource();
+    src.buffer=buf;src.connect(ctx.destination);src.start(0);
+    src.onended=()=>{ctx.close();_audioUnlocked=true;r();};
+    setTimeout(()=>{_audioUnlocked=true;r();},100);
+  });
+}
+
+// ═══ STATE ═══
+const SAVE_KEY='ekx2q_state';
+let S={idx:0,correct:0,wrong:0,answered:false,shuffled:false,order:null,started:false,wrongs:[],corrects:[],speed:1};
+let _audio=null;
+let _advTimer=null;
+let _paused=false;
+let _qTimer=null;
+const Q_TIME=30000; // 30 seconds to answer
+
+// 混同注意ペアの意味対比
+const KONFUSE={
+"give in":"屈する・譲る","give up":"あきらめる","give away":"譲り渡す・ばらす",
+"take on":"引き受ける","take up":"始める・占める","take off":"離陸する・脱ぐ","take in":"理解する・だます","take into consideration":"考慮に入れる",
+"carry on":"続ける","carry out":"実行する",
+"make out":"理解する・判読する","make up":"作り上げる・化粧する","make up for":"埋め合わせる","make do":"間に合わせる","make up one's mind":"決心する",
+"come up with":"思いつく","come across":"偶然出会う","come about":"起こる",
+"turn out":"判明する","turn up":"現れる","turn down":"断る・下げる",
+"hold back":"抑える","hold on":"待つ・しがみつく","hold out":"持ちこたえる",
+"put off":"延期する","put out":"消す","put up with":"我慢する",
+"look up to":"尊敬する","look down on":"見下す",
+"run out":"なくなる","run into":"偶然会う・衝突する","run short":"不足する",
+"keep up with":"遅れずについていく","catch up with":"追いつく","catch up on":"遅れを取り戻す",
+};
+function getKonfuseText(st){
+  if(!st||!st.includes('混同'))return'';
+  // Extract phrases from st like "take on / take in と混同注意"
+  const m=st.match(/(.+?)と混同/);
+  if(!m)return'';
+  const phrases=m[1].split(/\s*[/／]\s*/).map(s=>s.trim()).filter(Boolean);
+  const lines=[];
+  phrases.forEach(p=>{
+    const pl=p.toLowerCase();
+    if(KONFUSE[pl])lines.push(p+' = '+KONFUSE[pl]);
+  });
+  return lines.join('\n');
+}
+
+function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({idx:S.idx,correct:S.correct,wrong:S.wrong,shuffled:S.shuffled,order:S.order,wrongs:S.wrongs,corrects:S.corrects,speed:S.speed}));}catch(_){}}
+function load(){try{const s=localStorage.getItem(SAVE_KEY);if(s){const d=JSON.parse(s);S.idx=d.idx||0;S.correct=d.correct||0;S.wrong=d.wrong||0;S.shuffled=!!d.shuffled;S.order=d.order||null;S.wrongs=d.wrongs||[];S.corrects=d.corrects||[];S.speed=d.speed||1;}}catch(_){}}
+
+function getOrder(){
+  if(S.shuffled&&S.order&&S.order.length===EK2Q.length)return S.order;
+  return Array.from({length:EK2Q.length},(_,i)=>i);
+}
+function getQ(){return EK2Q[getOrder()[S.idx]];}
+
+// ═══ START ═══
+function startQuiz(){
+  haptic();
+  unlockAudio().then(()=>{
+
+    const ss=document.getElementById('start-screen');
+    ss.classList.add('out');
+    setTimeout(()=>{
+      ss.style.display='none';
+      document.getElementById('quiz-hdr').style.display='flex';
+      document.getElementById('main').style.display='';
+      document.getElementById('quiz-ftr').style.display='flex';
+      S.started=true;
+      render();
+    },400);
+  });
+}
+
+// Show resume button on start screen if progress exists
+load();
+if(S.idx>0){
+  const rb=document.getElementById('start-resume');
+  rb.style.display='block';
+  rb.textContent='Q'+(S.idx+1)+'から再開 (✓'+S.correct+' ✗'+S.wrong+')';
+  rb.onclick=startQuiz;
+}
+
+// ═══ QUESTION TIMER ═══
+let _qtStart=0;
+let _qtAnim=null;
+function startQTimer(){
+  stopQTimer();
+  _qtStart=Date.now();
+  const bar=document.getElementById('qtimer-bar');
+  bar.style.width='100%';bar.className='qtimer-bar';
+  function tick(){
+    if(S.answered||_paused){return;}
+    const elapsed=Date.now()-_qtStart;
+    const pct=Math.max(0,1-elapsed/Q_TIME)*100;
+    bar.style.width=pct+'%';
+    if(pct<20){bar.className='qtimer-bar danger';}
+    else if(pct<40){bar.className='qtimer-bar warn';}
+    if(elapsed>=Q_TIME){timeUp();return;}
+    _qtAnim=requestAnimationFrame(tick);
+  }
+  _qtAnim=requestAnimationFrame(tick);
+}
+function stopQTimer(){
+  if(_qtAnim){cancelAnimationFrame(_qtAnim);_qtAnim=null;}
+}
+function timeUp(){
+  if(S.answered)return;
+  S.answered=true;
+  _choiceReadAbort=true;
+  window.speechSynthesis.cancel();
+  stopQTimer();
+  playSnd('timeup');
+  hapticWrong();
+  const q=getQ();
+  S.wrong++;
+  if(!S.wrongs.includes(q.id))S.wrongs.push(q.id);
+  syncForgot(q);
+  document.querySelectorAll('#choices .ch').forEach(b=>{
+    b.classList.add('disabled');
+    if(parseInt(b.dataset.i,10)===q.a)b.classList.add('correct');
+  });
+  document.getElementById('sc-g').textContent=S.correct;
+  document.getElementById('sc-f').textContent=S.wrong;
+  const blank=document.getElementById('blank');
+  if(blank){blank.textContent=q.at;blank.classList.add('revealed');}
+  const fb=document.getElementById('fb');
+  fb.style.display='block';
+  document.getElementById('fb-sentence').textContent=q.cs;
+  document.getElementById('fb-jp').textContent=q.jt;
+  const tip=document.getElementById('fb-tip');
+  if(q.st){
+    const kf=getKonfuseText(q.st);
+    tip.innerHTML=q.st+(kf?'<br><span style="display:block;margin-top:6px;white-space:pre-line;font-size:13px;line-height:1.6">'+kf+'</span>':'');
+    tip.style.display='block';
+    if(q.st.includes('混同')){tip.style.background='rgba(255,59,48,.08)';tip.style.color='#ff3b30';}
+    else{tip.style.background='';tip.style.color='';}
+  }else{tip.style.display='none';}
+  speakJp(q.jt); playAudio();
+  save();
+  showNextBtn();
+}
+
+// ═══ PAUSE ═══
+function pauseQuiz(){
+  if(_paused)return;
+  _paused=true;
+  haptic.error();
+
+  if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
+  stopQTimer();
+  if(_audio){_audio.pause();}
+  const ov=document.createElement('div');
+  ov.className='pause-overlay';ov.id='pause-overlay';
+  ov.innerHTML=
+    '<div class="pause-box">'+
+    '<div class="pause-icon">⏸</div>'+
+    '<div class="pause-title">一時停止</div>'+
+    '<div class="pause-sub">Q'+(S.idx+1)+' / '+EK2Q.length+'<br>✓ '+S.correct+' ✗ '+S.wrong+'</div>'+
+    '<button class="pause-resume" onclick="haptic();resumeQuiz()">▶ 再開</button>'+
+    '<button class="pause-home" onclick="haptic();restartAll()">最初からやり直す</button>'+
+    '</div>';
+  document.body.appendChild(ov);
+}
+function resumeQuiz(){
+  _paused=false;
+
+  if(!S.answered)startQTimer();
+  const ov=document.getElementById('pause-overlay');
+  if(ov){ov.classList.add('out');setTimeout(()=>ov.remove(),250);}
+}
+function restartAll(){
+  _paused=false;
+  const ov=document.getElementById('pause-overlay');
+  if(ov)ov.remove();
+  S.idx=0;S.correct=0;S.wrong=0;S.wrongs=[];S.corrects=[];save();
+  document.getElementById('main').innerHTML=
+    '<div class="card" id="card"><div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>'+
+    '<div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer-bar" style="width:100%"></div></div>'+
+    '<div class="q-tag" id="q-tag"></div><div class="q-text" id="q-text"></div>'+
+    '<div class="choices" id="choices"></div>'+
+    '<div class="fb" id="fb" style="display:none"><div class="fb-sentence" id="fb-sentence" onclick="speakEnSentence()" style="cursor:pointer"></div><div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div><div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div></div></div>';
+  render();
+}
+function goHome(){
+  save();
+  // If inside iframe, close parent overlay
+  try{
+    if(window.parent&&window.parent!==window&&window.parent.closeIframeNow){
+      window.parent.closeIframeNow();return;
+    }
+  }catch(_){}
+  if(window.opener||document.referrer){history.back();}
+  else{window.location.href='index.html';}
+}
+
+// ═══ QUESTION LIST ═══
+function openQList(){
+  haptic();
+  const ov=document.createElement('div');
+  ov.className='qlist-overlay';ov.id='qlist-overlay';
+  const order=getOrder();
+  let items='';
+  for(let i=0;i<EK2Q.length;i++){
+    const q=EK2Q[order[i]];
+    const cur=i===S.idx?'current':'';
+    items+=`<div class="qlist-item ${cur}" data-qi="${i}"><span class="qlist-num">${i+1}</span><span class="qlist-q">${q.q}</span></div>`;
+  }
+  ov.innerHTML=
+    '<div class="qlist-hdr"><button class="qlist-close" onclick="closeQList()">閉じる</button><div class="qlist-title">問題一覧</div></div>'+
+    '<div class="qlist-body" id="qlist-body">'+items+'</div>';
+  document.body.appendChild(ov);
+  // Scroll to current
+  setTimeout(()=>{
+    const cur=ov.querySelector('.qlist-item.current');
+    if(cur)cur.scrollIntoView({block:'center'});
+  },50);
+  // Click to jump
+  ov.querySelector('.qlist-body').addEventListener('click',e=>{
+    const item=e.target.closest('.qlist-item');
+    if(!item)return;
+    const qi=parseInt(item.dataset.qi,10);
+    S.idx=qi;S.correct=0;S.wrong=0;save();
+    closeQList();
+    render();
+  
+  });
+}
+function closeQList(){
+  const ov=document.getElementById('qlist-overlay');
+  if(ov){ov.classList.add('out');setTimeout(()=>ov.remove(),250);}
+}
+
+// ═══ WRONG LIST ═══
+function openWrongList(){
+  if(!S.wrongs.length){return;}
+  haptic();
+  stopQTimer();
+  const ov=document.createElement('div');
+  ov.className='qlist-overlay';ov.id='wrong-overlay';
+  let items='';
+  S.wrongs.forEach((qid,i)=>{
+    const q=EK2Q.find(x=>x.id===qid);
+    if(!q)return;
+    items+=`<div class="qlist-item" data-wid="${qid}"><span class="qlist-num" style="background:rgba(255,59,48,.12);color:#ff3b30">${i+1}</span><span class="qlist-q">${q.q}<br><span style="font-size:12px;color:#34c759;font-weight:600">→ ${q.at}</span></span></div>`;
+  });
+  ov.innerHTML=
+    '<div class="qlist-hdr"><div class="qlist-title">間違えた問題 ('+S.wrongs.length+')</div></div>'+
+    '<div class="qlist-body">'+items+'</div>'+
+    '<button onclick="haptic();closeWrongList()" style="position:fixed;bottom:calc(env(safe-area-inset-bottom,0px)+16px);left:16px;z-index:10;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.7);box-shadow:0 2px 10px rgba(0,0,0,.12);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#007aff">←</button>';
+  document.body.appendChild(ov);
+  // Tap to jump to that question
+  ov.querySelector('.qlist-body').addEventListener('click',e=>{
+    const item=e.target.closest('.qlist-item');
+    if(!item)return;
+    haptic();
+    const qid=parseInt(item.dataset.wid,10);
+    const order=getOrder();
+    const idx=order.findIndex(oi=>EK2Q[oi].id===qid);
+    if(idx>=0){S.idx=idx;save();closeWrongList();render();}
+  });
+}
+function closeWrongList(){
+  const ov=document.getElementById('wrong-overlay');
+  if(ov){ov.classList.add('out');setTimeout(()=>ov.remove(),250);}
+}
+
+// ═══ CORRECT LIST ═══
+function openCorrectList(){
+  if(!S.corrects.length)return;
+  stopQTimer();
+  const ov=document.createElement('div');
+  ov.className='qlist-overlay';ov.id='correct-overlay';
+  let items='';
+  S.corrects.forEach((qid,i)=>{
+    const q=EK2Q.find(x=>x.id===qid);
+    if(!q)return;
+    items+=`<div class="qlist-item" data-cid="${qid}"><span class="qlist-num" style="background:rgba(52,199,89,.12);color:#34c759">${i+1}</span><span class="qlist-q">${q.q}<br><span style="font-size:12px;color:#34c759;font-weight:600">→ ${q.at}</span></span></div>`;
+  });
+  ov.innerHTML=
+    '<div class="qlist-hdr"><button class="qlist-close" onclick="closeCorrectList()">閉じる</button><div class="qlist-title">正解した問題 ('+S.corrects.length+')</div></div>'+
+    '<div class="qlist-body">'+items+'</div>';
+  document.body.appendChild(ov);
+  ov.querySelector('.qlist-body').addEventListener('click',e=>{
+    const item=e.target.closest('.qlist-item');
+    if(!item)return;
+    const qid=parseInt(item.dataset.cid,10);
+    const order=getOrder();
+    const idx=order.findIndex(oi=>EK2Q[oi].id===qid);
+    if(idx>=0){S.idx=idx;save();closeCorrectList();render();}
+  });
+}
+function closeCorrectList(){
+  const ov=document.getElementById('correct-overlay');
+  if(ov){ov.classList.add('out');setTimeout(()=>ov.remove(),250);}
+}
+
+// ═══ SEARCH BY QUESTION ID ═══
+function openSearch(){
+  haptic.error();
+  stopQTimer();
+  const ov=document.createElement('div');
+  ov.className='search-overlay';ov.id='search-overlay';
+  ov.innerHTML=
+    '<div class="search-box">'+
+    '<div class="search-title">🔍 問題番号で移動</div>'+
+    '<input class="search-input" id="search-input" type="number" inputmode="numeric" placeholder="1273〜1421" min="1273" max="1421">'+
+    '<div class="search-hint">問題番号 (Q1273〜Q1421) を入力</div>'+
+    '<button class="search-go" onclick="doSearch()">移動</button>'+
+    '<button class="search-cancel" onclick="closeSearch()">キャンセル</button>'+
+    '</div>';
+  document.body.appendChild(ov);
+  setTimeout(()=>document.getElementById('search-input').focus(),100);
+  // Enter to submit
+  document.getElementById('search-input').addEventListener('keydown',e=>{
+    if(e.key==='Enter')doSearch();
+    if(e.key==='Escape')closeSearch();
+  });
+}
+function doSearch(){
+  const input=document.getElementById('search-input');
+  if(!input)return;
+  const id=parseInt(input.value,10);
+  if(isNaN(id))return;
+  const order=getOrder();
+  const idx=order.findIndex(oi=>EK2Q[oi].id===id);
+  if(idx>=0){
+    S.idx=idx;save();
+    closeSearch();
+    render();
+  }else{
+    input.style.borderColor='#ff3b30';
+    input.placeholder='見つかりません';
+    input.value='';
+  }
+}
+function closeSearch(){
+  const ov=document.getElementById('search-overlay');
+  if(ov){ov.classList.add('out');setTimeout(()=>ov.remove(),200);}
+  if(!S.answered)startQTimer();
+}
+
+// Enter×2 to open search
+let _lastEnterTime=0;
+
+
+// ═══ SHUFFLE ═══
+function toggleShuffle(){
+  haptic();
+  S.shuffled=!S.shuffled;
+  document.getElementById('btn-shuffle').style.opacity=S.shuffled?'1':'.4';
+  if(S.shuffled){
+    const a=Array.from({length:EK2Q.length},(_,i)=>i);
+    for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]];}
+    S.order=a;
+  }else{S.order=null;}
+  S.idx=0;S.correct=0;S.wrong=0;S.wrongs=[];S.corrects=[];save();render();
+  playSnd('shuffle');
+}
+
+// ═══ RENDER ═══
+let _rendered=false;
+function render(){
+  if(S.idx>=EK2Q.length){showDone();return;}
+  if(_rendered)playSnd('next');
+  _rendered=true;
+  S.answered=false;
+  _multiState=null;
+  _fbChainAbort=true;
+  window.speechSynthesis.cancel();
+  if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
+  const q=getQ();
+  document.getElementById('hdr-count').textContent=(S.idx+1)+' / '+EK2Q.length;
+  document.getElementById('sc-g').textContent=S.correct;
+  document.getElementById('sc-f').textContent=S.wrong;
+  document.getElementById('prog-bar').style.width=(S.idx/EK2Q.length*100)+'%';
+  const mn=isMulti(q);
+  document.getElementById('q-tag').textContent='Q'+q.id+' ('+(S.idx+1)+'/'+EK2Q.length+')'+(mn?' · '+mn+'つ選べ':'')+(q.type==='rearrange'?' · 並べ替え':'');
+  document.getElementById('q-text').innerHTML=q.q.replace('( )','<span class="blank" id="blank">(      )</span>');
+  document.getElementById('fb').style.display='none';
+  const chEl=document.getElementById('choices');
+  if(q.type==='rearrange'){
+    renderRearrange(q,chEl);
+  }else{
+    chEl.innerHTML=q.ch.map((c,i)=>
+      `<button class="ch" data-i="${i+1}"><span class="ch-num">${i+1}</span><span class="ch-en">${c}</span>${q.chj&&q.chj[i]?`<span class="ch-ja">${q.chj[i]}</span>`:''}</button>`
+    ).join('');
+  }
+  const card=document.getElementById('card');
+  card.style.animation='none';void card.offsetWidth;
+  card.style.animation='cardIn .45s cubic-bezier(.77,0,.18,1) both';
+  document.getElementById('main').scrollTop=0;
+  // Play question audio, then read each choice aloud
+  playAudioThenReadChoices(q);
+  // Start question timer
+  startQTimer();
+}
+
+// ═══ REARRANGE (並べ替え) ═══
+let _rearrangeState=null;
+function renderRearrange(q,chEl){
+  const words=(q.words||[]).slice();
+  _rearrangeState={pool:words.slice(),placed:[],correct:q.answer_phrase||q.at};
+  chEl.innerHTML=
+    '<div class="rr-placed" id="rr-placed"></div>'+
+    '<div class="rr-pool" id="rr-pool"></div>'+
+    '<button class="rr-submit" id="rr-submit" onclick="submitRearrange()" disabled>並べ替え完了</button>';
+  renderRearrangeChips();
+}
+function renderRearrangeChips(){
+  const placed=document.getElementById('rr-placed');
+  const pool=document.getElementById('rr-pool');
+  if(!placed||!pool||!_rearrangeState)return;
+  placed.innerHTML=_rearrangeState.placed.map((w,i)=>`<span class="rr-chip placed" data-idx="${i}" onclick="rrUnplace(${i})">${w}</span>`).join('')||'<span class="rr-empty">↓語をタップ</span>';
+  pool.innerHTML=_rearrangeState.pool.map((w,i)=>`<span class="rr-chip" data-idx="${i}" onclick="rrPlace(${i})">${w}</span>`).join('');
+  document.getElementById('rr-submit').disabled=_rearrangeState.pool.length>0;
+}
+function rrPlace(i){
+  if(S.answered||!_rearrangeState)return;
+  haptic();
+  const w=_rearrangeState.pool.splice(i,1)[0];
+  _rearrangeState.placed.push(w);
+  renderRearrangeChips();
+}
+function rrUnplace(i){
+  if(S.answered||!_rearrangeState)return;
+  haptic();
+  const w=_rearrangeState.placed.splice(i,1)[0];
+  _rearrangeState.pool.push(w);
+  renderRearrangeChips();
+}
+function submitRearrange(){
+  if(S.answered||!_rearrangeState)return;
+  const q=getQ();
+  S.answered=true;stopQTimer();
+  const user=_rearrangeState.placed.join(' ').trim().toLowerCase();
+  const correct=(_rearrangeState.correct||'').trim().toLowerCase();
+  const ok=user===correct;
+  document.getElementById('rr-submit').disabled=true;
+  document.querySelectorAll('.rr-chip').forEach(c=>c.classList.add('rr-disabled'));
+  if(ok){
+    S.correct++;if(!S.corrects.includes(q.id))S.corrects.push(q.id);
+    playSnd('correct');haptic.confirm();
+    document.querySelectorAll('#rr-placed .rr-chip').forEach(c=>c.classList.add('rr-correct'));
+  }else{
+    S.wrong++;if(!S.wrongs.includes(q.id))S.wrongs.push(q.id);
+    syncForgot(q);
+    playSnd('wrong');hapticWrong();
+    document.querySelectorAll('#rr-placed .rr-chip').forEach(c=>c.classList.add('rr-wrong'));
+  }
+  _rearrangeState=null;
+  showFeedback(q);
+}
+
+// ═══ AUDIO + CHOICES READOUT ═══
+let _choiceReadAbort=false;
+function playAudioThenReadChoices(q){
+  _choiceReadAbort=true;
+  if(S.idx>=EK2Q.length)return;
+  if(_audio){_audio.pause();}
+  window.speechSynthesis.cancel();
+  _audio=new Audio(q.af);
+  _audio.playbackRate=S.speed;
+  const btn=document.getElementById('audio-btn');
+  btn.classList.add('playing');
+  const after=()=>{
+    btn.classList.remove('playing');
+    _choiceReadAbort=false;
+    setTimeout(()=>readChoicesSequentially(q,0),250);
+  };
+  _audio.onended=after;
+  _audio.onerror=after;
+  _audio.play().catch(after);
+}
+function readChoicesSequentially(q,idx){
+  if(S.answered||_paused||_choiceReadAbort)return;
+  if(q.type==='rearrange')return;
+  if(!q.ch||idx>=q.ch.length)return;
+  window.speechSynthesis.cancel();
+  const label=(idx+1)+'. '+q.ch[idx];
+  const u=new SpeechSynthesisUtterance(label);
+  u.lang='en-US';u.rate=S.speed;
+  const v=_getAlexVoice();if(v)u.voice=v;
+  u.onend=()=>readChoicesSequentially(q,idx+1);
+  u.onerror=()=>readChoicesSequentially(q,idx+1);
+  window.speechSynthesis.speak(u);
+}
+
+// ═══ MULTI-SELECT (Xつ選べ) ═══
+let _multiState=null; // {need:3, wrongAnswers:[indices], selected:[]}
+function isMulti(q){
+  const m=q.q.match(/(\d)つ選べ/);
+  return m?parseInt(m[1],10):0;
+}
+function getMultiCorrects(q){
+  // For multi-select: all non-empty choices except the "wrong" one are correct
+  // The single answer field marks the odd-one-out approach won't work universally
+  // So: all choices with content are candidates; answer field = the first correct one
+  // For Q1107 specifically: choices 2,3,4 are correct (index 1,2,3), choice 1 is wrong
+  // General rule: non-empty choices that are valid uses
+  // Since data only has 1 answer, we treat answer as "one of the correct ones"
+  // and all other non-empty choices except 1 wrong one are also correct
+  const need=isMulti(q);
+  const nonEmpty=q.ch.map((_,i)=>i+1).filter(i=>q.ch[i-1]!=='');
+  // wrong ones = total non-empty - need
+  // answer is definitely correct, the remaining (nonEmpty.length - need) are wrong
+  const corrects=[q.a];
+  // We need to figure out which are correct. For now, assume the first (nonEmpty.length-need)
+  // that are NOT the answer are wrong, rest are correct
+  const others=nonEmpty.filter(i=>i!==q.a);
+  const wrongCount=nonEmpty.length-need;
+  const wrongs=others.slice(0,wrongCount);
+  const moreCorrects=others.filter(i=>!wrongs.includes(i));
+  return{corrects:[q.a,...moreCorrects],wrongs};
+}
+
+// ═══ CHOICE HANDLER ═══
+function handleChoice(btn){
+  if(S.answered||_paused)return;
+  const q=getQ();
+  const chosen=parseInt(btn.dataset.i,10);
+  const multiNeed=isMulti(q);
+
+  // ── Multi-select mode ──
+  if(multiNeed>0){
+    if(!_multiState)_multiState={need:multiNeed,selected:[],info:getMultiCorrects(q),missed:false};
+    if(_multiState.selected.includes(chosen))return;
+    _multiState.selected.push(chosen);
+    const isRight=_multiState.info.corrects.includes(chosen);
+    if(!isRight){
+      // Wrong pick → mark wrong, keep going
+      btn.classList.add('wrong');btn.classList.add('disabled');
+      playSnd('wrong');
+      hapticWrong();
+      _multiState.missed=true;
+    }else{
+      // Correct pick
+      btn.classList.add('correct');btn.classList.add('disabled');
+      playSnd('correct');
+      haptic.confirm();
+    }
+    // Check if all correct ones have been found
+    const foundCorrects=_multiState.selected.filter(s=>_multiState.info.corrects.includes(s)).length;
+    if(foundCorrects>=multiNeed){
+      S.answered=true;stopQTimer();
+      document.querySelectorAll('#choices .ch').forEach(b=>b.classList.add('disabled'));
+      if(_multiState.missed){
+        S.wrong++;if(!S.wrongs.includes(q.id))S.wrongs.push(q.id);
+        syncForgot(q);
+      }else{
+        S.correct++;if(!S.corrects.includes(q.id))S.corrects.push(q.id);
+      }
+      _multiState=null;
+      showFeedback(q);
+    }
+    return;
+  }
+
+  // ── Normal single-select ──
+  S.answered=true;
+  stopQTimer();
+  const ok=chosen===q.a;
+  document.querySelectorAll('#choices .ch').forEach(b=>{
+    b.classList.add('disabled');
+    if(parseInt(b.dataset.i,10)===q.a)b.classList.add('correct');
+  });
+  if(!ok){
+    btn.classList.add('wrong');
+    S.wrong++;
+    if(!S.wrongs.includes(q.id))S.wrongs.push(q.id);
+    syncForgot(q);
+    playSnd('wrong');
+    hapticWrong();
+  }else{
+    S.correct++;
+    if(!S.corrects.includes(q.id))S.corrects.push(q.id);
+    playSnd('correct');
+    haptic.confirm();
+  }
+  showFeedback(q);
+}
+
+function showFeedback(q){
+  _choiceReadAbort=true;
+  window.speechSynthesis.cancel();
+  document.getElementById('sc-g').textContent=S.correct;
+  document.getElementById('sc-f').textContent=S.wrong;
+  const blank=document.getElementById('blank');
+  if(blank){blank.textContent=q.at;blank.classList.add('revealed');}
+  const fb=document.getElementById('fb');
+  fb.style.display='block';
+  document.getElementById('fb-sentence').textContent=q.cs;
+  document.getElementById('fb-jp').textContent=q.jt;
+  const tip=document.getElementById('fb-tip');
+  if(q.st){
+    const kf=getKonfuseText(q.st);
+    tip.innerHTML=q.st+(kf?'<br><span style="display:block;margin-top:6px;white-space:pre-line;font-size:13px;line-height:1.6">'+kf+'</span>':'');
+    tip.style.display='block';
+    if(q.st.includes('混同')){tip.style.background='rgba(255,59,48,.08)';tip.style.color='#ff3b30';}
+    else{tip.style.background='';tip.style.color='';}
+  }else{tip.style.display='none';}
+  playFeedbackChain(q);
+  save();
+  showNextBtn();
+}
+
+// ═══ FEEDBACK AUDIO CHAIN: EN mp3 → JP TTS → EN TTS (sequential, no overlap) ═══
+let _fbChainAbort=false;
+function playFeedbackChain(q){
+  _fbChainAbort=true;
+  setTimeout(()=>{
+    _fbChainAbort=false;
+    // Step 1: Play English MP3
+    if(_audio){_audio.pause();}
+    window.speechSynthesis.cancel();
+    _audio=new Audio(q.af);
+    const fbSpeed=S.speed>=1.3?S.speed+0.1:1.3;
+    _audio.playbackRate=fbSpeed;
+    const btn=document.getElementById('audio-btn');
+    btn.classList.add('playing');
+    _audio.onerror=()=>{btn.classList.remove('playing');fbStep2(q);};
+    _audio.onended=()=>{btn.classList.remove('playing');fbStep2(q);};
+    _audio.play().catch(()=>{btn.classList.remove('playing');fbStep2(q);});
+  },50);
+}
+function fbStep2(q){
+  // Step 2: Japanese TTS
+  if(_fbChainAbort)return;
+  if(!q.jt){fbStep3(q);return;}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(q.jt);
+  u.lang='ja-JP';u.rate=1.1;
+  u.onend=()=>fbStep3(q);
+  u.onerror=()=>fbStep3(q);
+  window.speechSynthesis.speak(u);
+}
+function fbStep3(q){
+  // Step 3: English sentence TTS
+  if(_fbChainAbort)return;
+  const text=q.cs||q.q;
+  if(!text)return;
+  window.speechSynthesis.cancel();
+  const fbSpeed=S.speed>=1.3?S.speed+0.1:1.3;
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';u.rate=fbSpeed;
+  const v=_getAlexVoice();if(v)u.voice=v;
+  window.speechSynthesis.speak(u);
+}
+
+function advance(){
+  if(!S.answered)return;
+  haptic();
+  if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
+  S.idx++;save();render();
+}
+function goBack(){
+  if(S.idx<=0)return;
+  stopQTimer();
+  if(_advTimer){clearTimeout(_advTimer);_advTimer=null;}
+  S.idx--;save();render();
+}
+
+// Click delegation
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.ch');
+  if(btn&&!btn.classList.contains('disabled'))handleChoice(btn);
+});
+// Keyboard 1-4 to select choice, Enter/→ for next, ← for back
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('search-overlay'))return; // search open, don't interfere
+  if(_paused||!S.started)return;
+  const k=e.key;
+  // Double Enter → open search
+  if(k==='Enter'){
+    const now=Date.now();
+    if(now-_lastEnterTime<400){openSearch();_lastEnterTime=0;return;}
+    _lastEnterTime=now;
+  }
+  if(!S.answered&&(k==='1'||k==='2'||k==='3'||k==='4')){
+    const btn=document.querySelector('#choices .ch[data-i="'+k+'"]');
+    if(btn&&!btn.classList.contains('disabled'))handleChoice(btn);
+  }
+  if(S.answered&&(k==='Enter'||k==='ArrowRight'))advance();
+  if(S.answered&&k==='ArrowLeft')goBack();
+});
+// Next button
+function showNextBtn(){
+  const fb=document.getElementById('fb');
+  if(!fb)return;
+  const old=document.getElementById('nav-btns');
+  if(old)old.remove();
+  const wrap=document.createElement('div');
+  wrap.id='nav-btns';wrap.className='nav-btns';
+  if(S.idx>0){
+    const back=document.createElement('button');
+    back.className='nav-btn nav-back';
+    back.textContent='◀ 前の問題';
+    back.onclick=()=>{goBack();};
+    wrap.appendChild(back);
+  }
+  const next=document.createElement('button');
+  next.className='nav-btn nav-next';
+  next.textContent='次の問題 ▶';
+  next.onclick=()=>{advance();};
+  wrap.appendChild(next);
+  fb.appendChild(wrap);
+}
+
+// ═══ AUDIO PLAYBACK ═══
+function playAudio(){
+  if(S.idx>=EK2Q.length)return;
+  const q=getQ();
+  if(_audio){_audio.pause();}
+  _audio=new Audio(q.af);
+  _audio.playbackRate=S.speed;
+  const btn=document.getElementById('audio-btn');
+  btn.classList.add('playing');
+  _audio.onended=()=>btn.classList.remove('playing');
+  _audio.onerror=()=>btn.classList.remove('playing');
+  _audio.play().catch(()=>btn.classList.remove('playing'));
+}
+
+function toggleSpeed(){
+  const prev=S.speed;
+  if(S.speed===1)S.speed=1.2;
+  else if(S.speed===1.2)S.speed=1.3;
+  else S.speed=1;
+  save();
+  const btn=document.getElementById('speed-btn');
+  btn.textContent=S.speed===1?'1x':S.speed+'x';
+  btn.classList.toggle('fast',S.speed!==1);
+  if(_audio)_audio.playbackRate=S.speed;
+  playSnd(S.speed>prev?'speedup':'speeddown');
+}
+
+// ═══ SCREEN READER ═══
+function speakJp(text){
+  if(!text)return;
+  if(_audio){_audio.pause();}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='ja-JP';u.rate=1.1;
+  window.speechSynthesis.speak(u);
+}
+let _cachedAlexVoice=null;
+window.speechSynthesis.onvoiceschanged=()=>{_cachedAlexVoice=null;};
+window.speechSynthesis.getVoices();
+function _getAlexVoice(){
+  if(_cachedAlexVoice)return _cachedAlexVoice;
+  const voices=window.speechSynthesis.getVoices();
+  _cachedAlexVoice=voices.find(v=>v.name==='Alex')||voices.find(v=>v.lang.startsWith('en')&&v.localService)||null;
+  return _cachedAlexVoice;
+}
+function speakEn(text){
+  if(!text)return;
+  if(_audio){_audio.pause();}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';u.rate=S.speed;
+  const v=_getAlexVoice();if(v)u.voice=v;
+  window.speechSynthesis.speak(u);
+}
+function speakEnSentence(){
+  if(S.idx>=EK2Q.length)return;
+  const q=getQ();
+  speakEn(q.cs||q.q);
+}
+
+// ═══ DONE ═══
+function showDone(){
+  document.getElementById('hdr-count').textContent=EK2Q.length+' / '+EK2Q.length;
+  document.getElementById('prog-bar').style.width='100%';
+  playSnd('correct');
+  haptic.confirm();
+  document.getElementById('main').innerHTML=
+    '<div class="done"><div class="done-emoji">🎉</div>'+
+    '<div class="done-title">全問完了！</div>'+
+    '<div class="done-sub">正解 '+S.correct+' / 不正解 '+S.wrong+'<br>正答率 '+Math.round(S.correct/(S.correct+S.wrong)*100)+'%</div>'+
+    '<button class="done-btn" onclick="resetAll()">もう一度</button></div>';
+}
+function resetAll(){
+  S.idx=0;S.correct=0;S.wrong=0;S.wrongs=[];S.corrects=[];save();
+  document.getElementById('main').innerHTML=
+    '<div class="card" id="card"><div class="prog-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>'+
+    '<div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer-bar" style="width:100%"></div></div>'+
+    '<div class="q-tag" id="q-tag"></div><div class="q-text" id="q-text"></div>'+
+    '<div class="choices" id="choices"></div>'+
+    '<div class="fb" id="fb" style="display:none"><div class="fb-sentence" id="fb-sentence" onclick="speakEnSentence()" style="cursor:pointer"></div><div class="fb-jp" id="fb-jp" onclick="speakJp(this.textContent)"></div><div class="fb-tip" id="fb-tip" onclick="speakJp(this.innerText)"></div></div></div>';
+  render();
+}
+
+// ═══ INIT ═══
+document.getElementById('btn-shuffle').style.opacity=S.shuffled?'1':'.4';
+const _spBtn=document.getElementById('speed-btn');
+_spBtn.textContent=S.speed===1?'1x':S.speed+'x';
+_spBtn.classList.toggle('fast',S.speed!==1);
+if(S.idx>=EK2Q.length)S.idx=0;
+
+</script>
+</body>
+</html>
