@@ -387,23 +387,71 @@ color:#1c1c1e;display:flex;flex-direction:column}
 
 <script>
 // ═══ HAPTIC ═══
+// In-page iOS Safari 17.4+ switch-haptic (Taptic engine) — doesn't depend
+// on an async CDN import so it can fire on the very first tap.
 let _h=null;
+let _hSwitch=null;
+function _initHSwitch(){
+  if(_hSwitch)return;
+  try{
+    const i=document.createElement('input');
+    i.type='checkbox';
+    i.setAttribute('switch','');
+    i.setAttribute('aria-hidden','true');
+    i.tabIndex=-1;
+    i.style.cssText='position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none';
+    (document.body||document.documentElement).appendChild(i);
+    _hSwitch=i;
+  }catch(_){}
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',_initHSwitch,{once:true});
+else _initHSwitch();
 (()=>{
   // Try parent's haptic first (when inside iframe)
-  try{if(window.parent&&window.parent.haptic){_h={__parent:true};}}catch(_){}
+  try{if(window.parent&&window.parent!==window&&window.parent.haptic){_h={__parent:true};}}catch(_){}
   if(!_h)import('https://esm.sh/ios-haptics').then(m=>{_h=m.haptic;}).catch(()=>{});
 })();
-const haptic=()=>{try{if(_h&&_h.__parent){window.parent.haptic();}else if(_h){_h();}}catch(_){}};
-haptic.confirm=()=>{try{if(_h&&_h.__parent){window.parent.haptic.confirm();}else if(_h&&_h.confirm){_h.confirm();}}catch(_){}};
-haptic.error=()=>{try{if(_h&&_h.__parent){window.parent.haptic.error();}else if(_h&&_h.error){_h.error();}}catch(_){}};
+const haptic=()=>{
+  // 1) Native iOS 17.4+ switch-haptic — fires on every click of the hidden switch
+  try{ if(!_hSwitch)_initHSwitch(); if(_hSwitch)_hSwitch.click(); }catch(_){}
+  // 2) Parent window haptic (iframe context) — re-checked at tap time
+  try{
+    if(_h&&_h.__parent){window.parent.haptic();}
+    else if(_h&&typeof _h==='function'){_h();}
+    else if(window.parent&&window.parent!==window&&typeof window.parent.haptic==='function'){window.parent.haptic();}
+  }catch(_){}
+};
+haptic.confirm=()=>{
+  try{ if(!_hSwitch)_initHSwitch(); if(_hSwitch)_hSwitch.click(); }catch(_){}
+  try{
+    if(_h&&_h.__parent&&window.parent.haptic&&window.parent.haptic.confirm){window.parent.haptic.confirm();}
+    else if(_h&&_h.confirm){_h.confirm();}
+  }catch(_){}
+};
+haptic.error=()=>{
+  try{ if(!_hSwitch)_initHSwitch(); if(_hSwitch)_hSwitch.click(); }catch(_){}
+  try{
+    if(_h&&_h.__parent&&window.parent.haptic&&window.parent.haptic.error){window.parent.haptic.error();}
+    else if(_h&&_h.error){_h.error();}
+  }catch(_){}
+};
 const hapticWrong=()=>{const d=220;[0,1,2,4,5,6].forEach(i=>setTimeout(()=>haptic.error(),i*d));};
-// Fire haptic on pointerdown so iOS Taptic engine triggers synchronously
-// with the user gesture (click fires on release and sometimes misses it).
+// Bind haptic to BOTH pointerdown (immediate feedback) AND click (iOS
+// user-gesture window). Dedup within 250ms so it fires once per tap.
 function bindTapHaptic(el,kind){
   if(!el||el.__tapHaptic)return;
   el.__tapHaptic=true;
-  const h=()=>{ if(kind==='confirm')haptic.confirm(); else if(kind==='error')haptic.error(); else haptic(); };
+  let _last=0;
+  const h=()=>{
+    const now=Date.now();
+    if(now-_last<250)return;
+    _last=now;
+    if(kind==='confirm')haptic.confirm();
+    else if(kind==='error')haptic.error();
+    else haptic();
+  };
   el.addEventListener('pointerdown',h,{passive:true});
+  el.addEventListener('click',h,{passive:true});
 }
 // ═══ FORGOT CACHE SYNC ═══
 const FORGOT_KEY='inglish_forgot_cache';
