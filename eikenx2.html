@@ -787,7 +787,6 @@ function toggleShuffle(){
 let _rendered=false;
 function render(){
   if(S.idx>=EK2Q.length){showDone();return;}
-  if(_rendered)playSnd('next');
   _rendered=true;
   S.answered=false;
   _multiState=null;
@@ -877,39 +876,72 @@ function submitRearrange(){
   showFeedback(q);
 }
 
-// ═══ AUDIO + CHOICES READOUT ═══
+// ═══ AUDIO + 3-PHASE SCREEN READER ═══
+// Phase 1: question MP3 (English audio + sfx)
+// Phase 2: Japanese translation TTS
+// Phase 3: choices TTS (numbered)
 let _choiceReadAbort=false;
 function playAudioThenReadChoices(q){
   _choiceReadAbort=true;
   if(S.idx>=EK2Q.length)return;
   if(_audio){_audio.pause();}
   window.speechSynthesis.cancel();
+  // Switch sound effect
+  playSnd('next');
+  // Phase 1: English MP3
   _audio=new Audio(q.af);
   _audio.playbackRate=S.speed;
   const btn=document.getElementById('audio-btn');
   btn.classList.add('playing');
-  const after=()=>{
+  const afterMp3=()=>{
     btn.classList.remove('playing');
     _choiceReadAbort=false;
-    setTimeout(()=>readChoicesSequentially(q,0),250);
+    setTimeout(()=>phase2_readJa(q),200);
   };
-  _audio.onended=after;
-  _audio.onerror=after;
-  _audio.play().catch(after);
+  _audio.onended=afterMp3;
+  _audio.onerror=afterMp3;
+  _audio.play().catch(afterMp3);
 }
-function readChoicesSequentially(q,idx){
+// Phase 2: Japanese translation
+function phase2_readJa(q){
+  if(S.answered||_paused||_choiceReadAbort)return;
+  if(!q.jt){phase3_readChoices(q,0);return;}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(q.jt);
+  u.lang='ja-JP';u.rate=1.15;
+  u.onend=()=>phase3_readChoices(q,0);
+  u.onerror=()=>phase3_readChoices(q,0);
+  window.speechSynthesis.speak(u);
+}
+// Phase 3: choices (numbered English + Japanese gloss per choice)
+function phase3_readChoices(q,idx){
   if(S.answered||_paused||_choiceReadAbort)return;
   if(q.type==='rearrange')return;
   if(!q.ch||idx>=q.ch.length)return;
   window.speechSynthesis.cancel();
-  const label=(idx+1)+'. '+q.ch[idx];
-  const u=new SpeechSynthesisUtterance(label);
+  const en=(idx+1)+'. '+q.ch[idx];
+  const u=new SpeechSynthesisUtterance(en);
   u.lang='en-US';u.rate=S.speed;
   const v=_getAlexVoice();if(v)u.voice=v;
-  u.onend=()=>readChoicesSequentially(q,idx+1);
-  u.onerror=()=>readChoicesSequentially(q,idx+1);
+  u.onend=()=>{
+    // After EN choice, read JA gloss if available
+    if(S.answered||_paused||_choiceReadAbort){return;}
+    const ja=q.chj&&q.chj[idx];
+    if(ja){
+      const u2=new SpeechSynthesisUtterance(ja);
+      u2.lang='ja-JP';u2.rate=1.2;
+      u2.onend=()=>phase3_readChoices(q,idx+1);
+      u2.onerror=()=>phase3_readChoices(q,idx+1);
+      window.speechSynthesis.speak(u2);
+    }else{
+      phase3_readChoices(q,idx+1);
+    }
+  };
+  u.onerror=()=>phase3_readChoices(q,idx+1);
   window.speechSynthesis.speak(u);
 }
+// Backward-compat alias (some callers still use this name)
+function readChoicesSequentially(q,idx){phase3_readChoices(q,idx);}
 
 // ═══ MULTI-SELECT (Xつ選べ) ═══
 let _multiState=null; // {need:3, wrongAnswers:[indices], selected:[]}
