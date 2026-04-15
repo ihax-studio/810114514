@@ -438,13 +438,19 @@ function _initHSwitch(){
     i.setAttribute('switch','');
     i.setAttribute('aria-hidden','true');
     i.tabIndex=-1;
-    i.style.cssText='position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none';
+    // MUST render as the native iOS switch control (appearance:auto) to
+    // emit Taptic on toggle. Positioned within viewport (not off-screen)
+    // because iOS may skip haptic for elements rendered outside viewport.
+    i.style.cssText='appearance:auto;-webkit-appearance:auto;position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1;margin:0;padding:0';
     (document.body||document.documentElement).appendChild(i);
     _hSwitch=i;
   }catch(_){}
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',_initHSwitch,{once:true});
-else _initHSwitch();
+// Init immediately — main <script> is at end of <body> so body exists
+_initHSwitch();
+if(!_hSwitch&&document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',_initHSwitch,{once:true});
+}
 
 // CRITICAL: first .click() MUST be synchronous. iOS Taptic requires the
 // switch toggle to happen inside the user-gesture call stack — any
@@ -469,16 +475,19 @@ const haptic=()=>{
   _fireSwitchSync();
   try{ if(window.__iosHaptic)window.__iosHaptic(); }catch(_){}
   try{ if(window.parent&&window.parent!==window&&typeof window.parent.haptic==='function')window.parent.haptic(); }catch(_){}
+  try{ if(navigator.vibrate)navigator.vibrate(10); }catch(_){}
 };
 haptic.confirm=()=>{
   _fireSwitch(2); // two rapid (spec)
   try{ if(window.__iosHaptic&&window.__iosHaptic.confirm)window.__iosHaptic.confirm(); }catch(_){}
   try{ if(window.parent&&window.parent!==window&&window.parent.haptic&&window.parent.haptic.confirm)window.parent.haptic.confirm(); }catch(_){}
+  try{ if(navigator.vibrate)navigator.vibrate([10,40,10]); }catch(_){}
 };
 haptic.error=()=>{
   _fireSwitch(3); // three rapid (spec)
   try{ if(window.__iosHaptic&&window.__iosHaptic.error)window.__iosHaptic.error(); }catch(_){}
   try{ if(window.parent&&window.parent!==window&&window.parent.haptic&&window.parent.haptic.error)window.parent.haptic.error(); }catch(_){}
+  try{ if(navigator.vibrate)navigator.vibrate([10,40,10,40,10]); }catch(_){}
 };
 // Expose on window so inline onclick="haptic();..." always resolves
 window.haptic=haptic;
