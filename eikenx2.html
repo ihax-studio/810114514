@@ -446,32 +446,39 @@ function _initHSwitch(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',_initHSwitch,{once:true});
 else _initHSwitch();
 
-function _fireSwitch(n){
+// CRITICAL: first .click() MUST be synchronous. iOS Taptic requires the
+// switch toggle to happen inside the user-gesture call stack — any
+// setTimeout (even 0ms) loses that context and silently does nothing.
+function _fireSwitchSync(){
   try{ if(!_hSwitch)_initHSwitch(); }catch(_){}
   if(!_hSwitch)return;
-  // 1 = haptic(), 2 = haptic.confirm(), 3 = haptic.error()
-  for(let k=0;k<n;k++){
-    setTimeout(()=>{ try{_hSwitch.click();}catch(_){} },k*80);
+  try{ _hSwitch.click(); }catch(_){}
+}
+function _fireSwitch(n){
+  _fireSwitchSync(); // 1st click synchronous — stays in user gesture
+  for(let k=1;k<n;k++){
+    setTimeout(()=>{ try{_hSwitch&&_hSwitch.click();}catch(_){} },k*80);
   }
 }
 
+// Fire EVERY available haptic path — never return early. If one path
+// silently fails (lib not loaded, parent cross-origin, etc.) the others
+// still run. The in-page switch is always fired first synchronously so
+// Taptic is guaranteed inside the iOS user-gesture window.
 const haptic=()=>{
-  // 1) Official ios-haptics (ESM-imported above)
-  try{ if(window.__iosHaptic){ window.__iosHaptic(); return; } }catch(_){}
-  // 2) Parent window (iframe case)
-  try{ if(window.parent&&window.parent!==window&&typeof window.parent.haptic==='function'){ window.parent.haptic(); return; } }catch(_){}
-  // 3) In-page switch fallback
-  _fireSwitch(1);
+  _fireSwitchSync();
+  try{ if(window.__iosHaptic)window.__iosHaptic(); }catch(_){}
+  try{ if(window.parent&&window.parent!==window&&typeof window.parent.haptic==='function')window.parent.haptic(); }catch(_){}
 };
 haptic.confirm=()=>{
-  try{ if(window.__iosHaptic&&window.__iosHaptic.confirm){ window.__iosHaptic.confirm(); return; } }catch(_){}
-  try{ if(window.parent&&window.parent!==window&&window.parent.haptic&&window.parent.haptic.confirm){ window.parent.haptic.confirm(); return; } }catch(_){}
-  _fireSwitch(2); // two rapid haptics (per ios-haptics spec)
+  _fireSwitch(2); // two rapid (spec)
+  try{ if(window.__iosHaptic&&window.__iosHaptic.confirm)window.__iosHaptic.confirm(); }catch(_){}
+  try{ if(window.parent&&window.parent!==window&&window.parent.haptic&&window.parent.haptic.confirm)window.parent.haptic.confirm(); }catch(_){}
 };
 haptic.error=()=>{
-  try{ if(window.__iosHaptic&&window.__iosHaptic.error){ window.__iosHaptic.error(); return; } }catch(_){}
-  try{ if(window.parent&&window.parent!==window&&window.parent.haptic&&window.parent.haptic.error){ window.parent.haptic.error(); return; } }catch(_){}
-  _fireSwitch(3); // three rapid haptics (per ios-haptics spec)
+  _fireSwitch(3); // three rapid (spec)
+  try{ if(window.__iosHaptic&&window.__iosHaptic.error)window.__iosHaptic.error(); }catch(_){}
+  try{ if(window.parent&&window.parent!==window&&window.parent.haptic&&window.parent.haptic.error)window.parent.haptic.error(); }catch(_){}
 };
 // Expose on window so inline onclick="haptic();..." always resolves
 window.haptic=haptic;
