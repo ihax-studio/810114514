@@ -126,9 +126,13 @@ color:#1c1c1e;display:flex;flex-direction:column}
 .ch.wrong{background:rgba(255,59,48,.1)!important;border-color:rgba(255,59,48,.4)!important;animation:chShake .45s ease both}
 .ch.wrong .ch-num{background:rgba(255,59,48,.2);color:#c0001a}
 .ch.disabled{pointer-events:none;opacity:.5}
-.ch{flex-wrap:wrap}
-.ch-en{font-weight:600}
-.ch-ja{display:block;width:100%;margin-left:42px;margin-top:3px;font-size:12px;color:#8e8e93;font-weight:500}
+.ch{align-items:flex-start;padding:14px 16px}
+.ch-num{margin-top:2px}
+.ch-text{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.ch-en{font-size:16px;font-weight:700;color:#1c1c1e;line-height:1.35;letter-spacing:-.01em;word-break:break-word}
+.ch-ja{font-size:13px;font-weight:500;color:#636366;line-height:1.4;word-break:break-word}
+.ch.correct .ch-en{color:#1a7a35}
+.ch.wrong .ch-en{color:#c0001a}
 /* ══ REARRANGE ══ */
 .rr-placed,.rr-pool{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;padding:12px;border-radius:14px;margin-bottom:10px}
 .rr-placed{background:rgba(0,122,255,.06);border:2px dashed rgba(0,122,255,.35)}
@@ -807,7 +811,7 @@ function render(){
     renderRearrange(q,chEl);
   }else{
     chEl.innerHTML=q.ch.map((c,i)=>
-      `<button class="ch" data-i="${i+1}"><span class="ch-num">${i+1}</span><span class="ch-en">${c}</span>${q.chj&&q.chj[i]?`<span class="ch-ja">${q.chj[i]}</span>`:''}</button>`
+      `<button class="ch" data-i="${i+1}"><span class="ch-num">${i+1}</span><span class="ch-text"><span class="ch-en">${c}</span>${q.chj&&q.chj[i]?`<span class="ch-ja">${q.chj[i]}</span>`:''}</span></button>`
     ).join('');
   }
   const card=document.getElementById('card');
