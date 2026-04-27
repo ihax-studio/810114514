@@ -5881,7 +5881,7 @@ window.openClockColorPicker=function(){
   ci.addEventListener('blur',()=>{setTimeout(hide,300);},{once:true});
 }
 window.closeClockColorPicker=function(){}
-document.getElementById('clock-color-custom').addEventListener('input',e=>{
+document.getElementById('clock-color-custom')?.addEventListener('input',e=>{
   const color=e.target.value;
   localStorage.setItem(CLOCK_COLOR_KEY,color);
   applyClockColor();
@@ -6137,6 +6137,667 @@ window.removeProofreadCard=removeProofreadCard;
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
+/* ═══ FORGOT CATEGORY PICKER + PRE-1 LEARNING MODE ═══ */
+(function(){
+'use strict';
+
+/* ══ Forgot category picker ══ */
+function _haptic(){try{if(typeof haptic==='function')haptic();}catch(_){}}
+function _hapticConfirm(){try{if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();else if(typeof haptic==='function')haptic();}catch(_){}}
+
+function countForgotPerCategory(){
+  const cache=loadCache();
+  const counts={};let total=0;
+  Object.keys(cache).forEach(k=>{
+    const n=Object.keys(cache[k]||{}).length;
+    counts[k]=n;total+=n;
+  });
+  return {counts,total};
+}
+
+function showForgotCategoryPicker(){
+  const dlg=document.getElementById('fc-pick-dlg');
+  const card=document.getElementById('fc-pick-card');
+  const list=document.getElementById('fc-pick-list');
+  const {counts,total}=countForgotPerCategory();
+  if(total===0){
+    if(typeof showDialog==='function')showDialog('no-forgot-dlg','no-forgot-card');
+    return;
+  }
+  const ICONS=['🃏','📗','📎','💡','🔤','📌'];
+  const COLORS=['#5856d6','#34c759','#ff3b30','#ff9500','#34c759','#ff9500'];
+  let html='';
+  // All option
+  html+=`<div class="fc-row" data-deck="-1"><div class="fc-ic" style="background:linear-gradient(135deg,#ff2d55,#ff9500);color:#fff">∞</div><div class="fc-info"><div class="fc-name">全カテゴリ</div><div class="fc-cnt">忘れた単語をすべて出題</div></div><div class="fc-bd" style="background:rgba(255,45,85,.15);color:#ff2d55">${total}</div></div>`;
+  // Per category
+  CFG.forEach((c,i)=>{
+    const n=counts[i]||0;
+    const empty=n===0?' fc-empty':'';
+    html+=`<div class="fc-row${empty}" data-deck="${i}"><div class="fc-ic" style="background:${COLORS[i]||'#007aff'}1a;color:${COLORS[i]||'#007aff'}">${ICONS[i]||'📚'}</div><div class="fc-info"><div class="fc-name">${c.title}</div><div class="fc-cnt">${c.lvT||''}</div></div><div class="fc-bd">${n}</div></div>`;
+  });
+  list.innerHTML=html;
+  dlg.style.display='flex';
+  requestAnimationFrame(()=>{
+    dlg.style.background='rgba(0,0,0,.4)';
+    card.style.transform='scale(1)';card.style.opacity='1';
+  });
+  list.querySelectorAll('.fc-row').forEach(row=>{
+    row.addEventListener('click',()=>{
+      if(row.classList.contains('fc-empty')){_haptic();return;}
+      const di=parseInt(row.dataset.deck,10);
+      _hapticConfirm();
+      hideForgotPicker();
+      setTimeout(()=>{startForgotRetry(di);},340);
+    });
+  });
+}
+function hideForgotPicker(){
+  const dlg=document.getElementById('fc-pick-dlg');
+  const card=document.getElementById('fc-pick-card');
+  dlg.style.background='rgba(0,0,0,0)';
+  card.style.transform='scale(.8)';card.style.opacity='0';
+  setTimeout(()=>{dlg.style.display='none';card.style.transform='scale(1.8)';},420);
+}
+document.getElementById('fc-pick-cancel').addEventListener('click',()=>{_haptic();hideForgotPicker();});
+document.getElementById('fc-pick-dlg').addEventListener('click',e=>{if(e.target.id==='fc-pick-dlg'){_haptic();hideForgotPicker();}});
+
+/* ══ Filtered forgot retry (supports category index, -1 = all) ══ */
+function startForgotRetry(deckIdx){
+  const cache=loadCache();
+  const items=[];
+  const matchKeys=deckIdx===-1?Object.keys(cache):(cache[deckIdx]?[String(deckIdx)]:[]);
+  matchKeys.forEach(k=>{
+    const deck=cache[k];if(!deck)return;
+    Object.keys(deck).forEach(word=>{
+      items.push({e:word,j:deck[word].m||'',w:word,m:deck[word].m||'',p:'',l:1,c:'復習',pr:'',f:'忘れた/難しいマーク',t:[],id:[],_origDeck:parseInt(k,10)});
+    });
+  });
+  if(!items.length){if(typeof showDialog==='function')showDialog('no-forgot-dlg','no-forgot-card');return;}
+  // Inject into deck 0 temporarily for the retry (same flow as existing card-forgot)
+  document.getElementById('home').classList.add('hidden');
+  setTimeout(()=>document.getElementById('app').classList.add('vis'),30);
+  document.getElementById('app-dots').style.display='none';
+  document.getElementById('sw-wrap').style.display='flex';
+  document.getElementById('list-wrap').style.display='none';
+  document.getElementById('float-bar').style.display='flex';
+  const label=deckIdx===-1?'全カテゴリ':(CFG[deckIdx]?CFG[deckIdx].title:'カテゴリ');
+  document.getElementById('app-ttl').textContent='🔄 '+label+' 復習 ('+items.length+'語)';
+  DK[0].deck=items;DK[0].idx=0;DK[0].flipped=false;
+  DK[0].st={g:0,h:0,f:0};DK[0].hist=[];DK[0].prev=null;DK[0].shuffled=false;
+  document.getElementById('sg0').textContent=0;
+  document.getElementById('sh0').textContent=0;
+  document.getElementById('sf0').textContent=0;
+  if(typeof jPanel==='function')jPanel(0,false);
+  if(typeof render==='function')render(0);
+}
+
+/* ══ Override the 「忘れた単語だけ復習」 hcard to show picker first ══ */
+const _origOpenS_pre1=window.openS;
+window.openS=function(type,arg){
+  if(type==='card-forgot'&&arg!=='__skipPicker'){
+    _hapticConfirm();
+    showForgotCategoryPicker();
+    return;
+  }
+  return _origOpenS_pre1.call(this,type,arg);
+};
+
+/* ══════════ PHRASE CHAIN DATABASE (芋づる式) ══════════ */
+// Each chain has a head verb/preposition family. Items are matched against the current word/phrase.
+// When the current item matches any phrase in a chain, the entire chain is displayed.
+const PRE1_CHAINS=[
+  {name:'come 系（移動・到来）',items:[
+    {p:'come up with ~',m:'〜を思いつく'},
+    {p:'come across ~',m:'〜に偶然出会う'},
+    {p:'come down with ~',m:'〜の病気にかかる'},
+    {p:'come down to ~',m:'結局〜に行き着く'},
+    {p:'come off',m:'成功する、取れる'},
+    {p:'come through ~',m:'〜を切り抜ける'},
+    {p:'come out',m:'出てくる、公表される'},
+    {p:'come to an end',m:'終わりを迎える'}
+  ]},
+  {name:'go 系（離脱・進行）',items:[
+    {p:'go through ~',m:'〜を経験する、通り抜ける'},
+    {p:'go back on ~',m:'〜を撤回する'},
+    {p:'go for ~',m:'〜を選ぶ、〜に挑戦する'},
+    {p:'go off',m:'(警報が)鳴る、出かける'},
+    {p:'go on',m:'続く、起こる'},
+    {p:'go over ~',m:'〜を見直す'}
+  ]},
+  {name:'get 系（変化・到達）',items:[
+    {p:'get along with ~',m:'〜と仲良くやっていく'},
+    {p:'get over ~',m:'〜を乗り越える'},
+    {p:'get rid of ~',m:'〜を取り除く'},
+    {p:'get away with ~',m:'〜をうまくやり通す'},
+    {p:'get by',m:'なんとかやっていく'},
+    {p:'get down to ~',m:'〜に取りかかる'},
+    {p:'get into ~',m:'〜に入る、興味を持つ'},
+    {p:'get on with ~',m:'〜と仲良くする'},
+    {p:'get used to ~',m:'〜に慣れる'},
+    {p:'get around ~',m:'〜を回避する'}
+  ]},
+  {name:'take 系（取る・引き受ける）',items:[
+    {p:'take in ~',m:'〜を取り込む、理解する'},
+    {p:'take on ~',m:'〜を引き受ける'},
+    {p:'take over ~',m:'〜を引き継ぐ'},
+    {p:'take up ~',m:'〜を始める、占める'},
+    {p:'take off ~',m:'〜を脱ぐ、離陸する'},
+    {p:'take part in ~',m:'〜に参加する'},
+    {p:'take place',m:'起こる、行われる'},
+    {p:'take A for granted',m:'Aを当然のことと思う'},
+    {p:'take advantage of ~',m:'〜を活用する'}
+  ]},
+  {name:'put 系（置く・課す）',items:[
+    {p:'put off ~',m:'〜を延期する'},
+    {p:'put up with ~',m:'〜を我慢する'},
+    {p:'put forward ~',m:'〜を提案する'},
+    {p:'put down ~',m:'〜を置く、けなす'},
+    {p:'put in ~',m:'〜を入れる、費やす'}
+  ]},
+  {name:'bring 系（持ってくる）',items:[
+    {p:'bring about ~',m:'〜をもたらす'},
+    {p:'bring down ~',m:'〜を倒す、下げる'},
+    {p:'bring off ~',m:'〜を成功させる'},
+    {p:'bring on ~',m:'〜を引き起こす'},
+    {p:'bring out ~',m:'〜を引き出す、発売する'},
+    {p:'bring up ~',m:'〜を育てる、持ち出す'}
+  ]},
+  {name:'make 系（作る・生み出す）',items:[
+    {p:'make ends meet',m:'収支を合わせる'},
+    {p:'make do with ~',m:'〜で間に合わせる'},
+    {p:'make it',m:'成功する、間に合う'},
+    {p:'make out ~',m:'〜を理解する'},
+    {p:'make up for ~',m:'〜を埋め合わせる'},
+    {p:'make the most of ~',m:'〜を最大限に活用する'},
+    {p:'make use of ~',m:'〜を利用する'},
+    {p:'make a difference',m:'変化をもたらす、重要である'}
+  ]},
+  {name:'break 系（壊す・分かれる）',items:[
+    {p:'break down',m:'故障する、崩壊する'},
+    {p:'break out',m:'勃発する、脱走する'},
+    {p:'break away from ~',m:'〜から逃げ出す'},
+    {p:'breakup',m:'別れ、崩壊'}
+  ]},
+  {name:'call 系（呼ぶ）',items:[
+    {p:'call for ~',m:'〜を必要とする、求める'},
+    {p:'call off ~',m:'〜を中止する'},
+    {p:'call on ~',m:'〜を訪問する、頼む'}
+  ]},
+  {name:'turn 系（向ける・変える）',items:[
+    {p:'turn out',m:'判明する、結果になる'},
+    {p:'turn down ~',m:'〜を断る、下げる'},
+    {p:'turn in ~',m:'〜を提出する'},
+    {p:'turn to ~',m:'〜に頼る'},
+    {p:'turn around ~',m:'〜を好転させる'},
+    {p:'turn away ~',m:'〜を追い返す'},
+    {p:'turn A into B',m:'AをBに変える'}
+  ]},
+  {name:'set 系（置く・設定）',items:[
+    {p:'set aside ~',m:'〜を取っておく'},
+    {p:'set off ~',m:'出発する、引き起こす'},
+    {p:'set out to do',m:'〜しようと着手する'},
+    {p:'set up ~',m:'〜を設立する、準備する'},
+    {p:'set in',m:'季節・状態が始まる'},
+    {p:'set down ~',m:'〜を書き留める'}
+  ]},
+  {name:'pull 系（引く）',items:[
+    {p:'pull off ~',m:'〜をうまくやり遂げる'},
+    {p:'pull through',m:'困難・病気を乗り越える'}
+  ]},
+  {name:'hold 系（保つ）',items:[
+    {p:'hold back ~',m:'〜を抑える'},
+    {p:'hold off ~',m:'〜を遅らせる'},
+    {p:'hold out ~',m:'持ちこたえる'}
+  ]},
+  {name:'look 系（見る）',items:[
+    {p:'look down on ~',m:'〜を見下す'},
+    {p:'look up to ~',m:'〜を尊敬する'},
+    {p:'look up ~',m:'〜を調べる、上を向く'},
+    {p:'look into ~',m:'〜を調査する'},
+    {p:'look forward to ~',m:'〜を楽しみにしている'}
+  ]},
+  {name:'fall 系（落ちる）',items:[
+    {p:'fall back on ~',m:'〜に頼る'},
+    {p:'fall for ~',m:'〜にだまされる、恋する'},
+    {p:'fall off',m:'減少する、落ちる'},
+    {p:'fall through',m:'計画が失敗する'}
+  ]},
+  {name:'cut 系（切る・削る）',items:[
+    {p:'cut back on ~',m:'〜を削減する'},
+    {p:'cut down on ~',m:'〜を減らす'},
+    {p:'cut in on ~',m:'割り込む'}
+  ]},
+  {name:'give 系（与える）',items:[
+    {p:'give away ~',m:'〜を無料で与える、漏らす'},
+    {p:'give in to ~',m:'〜に屈する'},
+    {p:'give off ~',m:'〜を発する'},
+    {p:'give rise to ~',m:'〜を引き起こす'}
+  ]},
+  {name:'近い意味（思いつく/突然出会う）',items:[
+    {p:'come up with ~',m:'〜を思いつく'},
+    {p:'come across ~',m:'〜に偶然出会う'},
+    {p:'bump into ~',m:'〜に偶然会う'},
+    {p:'figure out ~',m:'〜を理解する、解決する'},
+    {p:'work out ~',m:'〜を解決する、うまくいく'}
+  ]},
+  {name:'近い意味（増減）',items:[
+    {p:'reduce',m:'〜を減らす'},
+    {p:'lessen',m:'減らす、小さくなる'},
+    {p:'diminish',m:'減少する'},
+    {p:'cut down on ~',m:'〜を減らす'},
+    {p:'decline',m:'断る、衰退する'},
+    {p:'decrease',m:'減少する'},
+    {p:'increase',m:'増加する'},
+    {p:'expand',m:'拡大する、広げる'},
+    {p:'enhance',m:'高める、強化する'},
+    {p:'boost',m:'高める、増大させる'}
+  ]},
+  {name:'近い意味（推測・予測）',items:[
+    {p:'predict',m:'予測する'},
+    {p:'anticipate',m:'予期する'},
+    {p:'estimate',m:'見積もる、推定する'},
+    {p:'presume',m:'推定する'},
+    {p:'assume',m:'仮定する、思い込む'},
+    {p:'forecast',m:'予報、予測する'}
+  ]},
+  {name:'近い意味（重要・必要）',items:[
+    {p:'crucial',m:'重要な'},
+    {p:'critical',m:'重要な、批判的な'},
+    {p:'essential',m:'不可欠な、本質的な'},
+    {p:'vital',m:'不可欠な、生命の'},
+    {p:'fundamental',m:'根本的な、基本の'},
+    {p:'significant',m:'重要な、著しい'},
+    {p:'integral',m:'不可欠な'}
+  ]},
+  {name:'近い意味（捨てる・廃棄）',items:[
+    {p:'abandon',m:'捨てる、断念する'},
+    {p:'discard',m:'捨てる'},
+    {p:'dump',m:'捨てる、ゴミ捨て場'},
+    {p:'dispose of ~',m:'〜を処分する'},
+    {p:'do away with ~',m:'〜を廃止する'},
+    {p:'throw away ~',m:'〜を捨てる'}
+  ]},
+  {name:'近い意味（増える・繁栄）',items:[
+    {p:'thrive',m:'繁栄する'},
+    {p:'prosper',m:'繁栄する'},
+    {p:'prosperity',m:'繁栄'},
+    {p:'flourish',m:'繁栄する'},
+    {p:'soar',m:'急上昇する'}
+  ]},
+  {name:'近い意味（〜に従う・固執）',items:[
+    {p:'adhere to ~',m:'〜に固執する、〜を守る'},
+    {p:'stick to ~',m:'〜に固執する'},
+    {p:'comply with ~',m:'〜に従う'},
+    {p:'obey',m:'従う'},
+    {p:'conform',m:'従う、順応する'}
+  ]},
+  {name:'近い意味（明らかにする）',items:[
+    {p:'reveal',m:'明らかにする'},
+    {p:'disclose',m:'明らかにする'},
+    {p:'uncover',m:'明らかにする'},
+    {p:'expose',m:'さらす'},
+    {p:'demonstrate',m:'示す、証明する'}
+  ]},
+  {name:'近い意味（強調する）',items:[
+    {p:'emphasize',m:'強調する'},
+    {p:'highlight',m:'強調する、ハイライト'},
+    {p:'stress',m:'ストレス、強調する'},
+    {p:'underline',m:'下線を引く、強調する'},
+    {p:'play up ~',m:'〜を強調する'}
+  ]},
+  {name:'近い意味（〜を起こす）',items:[
+    {p:'cause',m:'原因、引き起こす'},
+    {p:'bring about ~',m:'〜をもたらす'},
+    {p:'bring on ~',m:'〜を引き起こす'},
+    {p:'give rise to ~',m:'〜を引き起こす'},
+    {p:'lead to ~',m:'〜につながる'},
+    {p:'result in ~',m:'〜という結果になる'}
+  ]}
+];
+
+function _norm(s){return (s||'').toLowerCase().trim().replace(/[\s~().]+/g,' ').replace(/\s+/g,' ').trim();}
+
+function findChainsForWord(word){
+  const w=_norm(word);
+  if(!w)return [];
+  const matches=[];
+  PRE1_CHAINS.forEach(ch=>{
+    let found=false;
+    for(const it of ch.items){
+      const np=_norm(it.p);
+      if(np===w){found=true;break;}
+      // Match "come up with" against "come up with ~" and vice versa
+      if(np.startsWith(w+' ')||w.startsWith(np+' '))continue; // partial — skip unless exact
+    }
+    // Also: if word is a single verb that heads a chain (e.g. "come"), match the chain
+    if(!found){
+      const firstTok=w.split(' ')[0];
+      const chainHeads=ch.items.map(it=>_norm(it.p).split(' ')[0]);
+      if(chainHeads.includes(w)&&w.length>1)found=true;
+      else if(chainHeads.includes(firstTok)&&firstTok===w)found=true;
+    }
+    if(found)matches.push(ch);
+  });
+  return matches;
+}
+
+/* ══════════ PRE-1 LEARNING MODE STATE ══════════ */
+const PRE1_KEY_PROGRESS='inglish_pre1_progress'; // {date, day, viewedToday, total, seenWords:{w:1}}
+const PRE1_KEY_SETTINGS='inglish_pre1_settings'; // {sources:[...], goal:600, chain:1, tts:0, goro:1}
+
+function pre1LoadProgress(){
+  try{const p=JSON.parse(localStorage.getItem(PRE1_KEY_PROGRESS));if(p&&typeof p==='object')return p;}catch(_){}
+  return {date:'',day:1,viewedToday:0,total:0,seenWords:{}};
+}
+function pre1SaveProgress(p){try{localStorage.setItem(PRE1_KEY_PROGRESS,JSON.stringify(p));}catch(_){}}
+function pre1LoadSettings(){
+  try{const s=JSON.parse(localStorage.getItem(PRE1_KEY_SETTINGS));if(s&&typeof s==='object')return Object.assign({sources:['P1W','P1P'],goal:600,chain:1,tts:0,goro:1},s);}catch(_){}
+  return {sources:['P1W','P1P'],goal:600,chain:1,tts:0,goro:1};
+}
+function pre1SaveSettings(s){try{localStorage.setItem(PRE1_KEY_SETTINGS,JSON.stringify(s));}catch(_){}}
+
+function pre1TodayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+function pre1TickDayIfNeeded(){
+  const p=pre1LoadProgress();
+  const today=pre1TodayKey();
+  if(p.date!==today){
+    if(p.date){
+      // Day rolled over
+      const prev=new Date(p.date);const cur=new Date(today);
+      const diff=Math.round((cur-prev)/86400000);
+      if(diff===1){p.day=Math.min(3,(p.day||1)+1);}
+      else if(diff>1){p.day=1;} // gap → reset day counter
+    }
+    p.date=today;p.viewedToday=0;
+    pre1SaveProgress(p);
+  }
+  return p;
+}
+
+function pre1RefreshSettingsUI(){
+  const s=pre1LoadSettings();
+  const p=pre1TickDayIfNeeded();
+  // Source checks
+  document.querySelectorAll('.pre1-src-opt').forEach(el=>{
+    const id='pre1-sc-'+el.dataset.src;
+    const chk=document.getElementById(id);
+    if(chk)chk.classList.toggle('s-on',s.sources.includes(el.dataset.src));
+  });
+  // Goal checks
+  document.querySelectorAll('.pre1-goal-opt').forEach(el=>{
+    const id='pre1-gc-'+el.dataset.goal;
+    const chk=document.getElementById(id);
+    if(chk)chk.classList.toggle('s-on',String(s.goal)===el.dataset.goal);
+  });
+  // Toggles
+  document.getElementById('pre1-chain').classList.toggle('on',s.chain===1);
+  document.getElementById('pre1-tts').classList.toggle('on',s.tts===1);
+  document.getElementById('pre1-goro').classList.toggle('on',s.goro===1);
+  // Progress
+  const dayEl=document.getElementById('pre1-day-display');
+  const progText=document.getElementById('pre1-progress-text');
+  const progBar=document.getElementById('pre1-progress-bar');
+  const totEl=document.getElementById('pre1-total-display');
+  if(dayEl)dayEl.textContent='Day '+(p.day||1)+' / 3';
+  if(progText)progText.textContent=(p.viewedToday||0)+' / '+s.goal;
+  if(progBar)progBar.style.width=Math.min(100,((p.viewedToday||0)/s.goal)*100)+'%';
+  if(totEl)totEl.textContent=(p.total||0)+'語';
+}
+
+/* ══ Settings handlers ══ */
+document.querySelectorAll('.pre1-src-opt').forEach(el=>{
+  el.addEventListener('click',()=>{
+    _haptic();
+    const s=pre1LoadSettings();
+    const src=el.dataset.src;
+    if(s.sources.includes(src)){
+      if(s.sources.length===1){return;} // keep at least 1
+      s.sources=s.sources.filter(x=>x!==src);
+    }else{
+      s.sources.push(src);
+    }
+    pre1SaveSettings(s);pre1RefreshSettingsUI();
+  });
+});
+document.querySelectorAll('.pre1-goal-opt').forEach(el=>{
+  el.addEventListener('click',()=>{
+    _haptic();
+    const s=pre1LoadSettings();
+    s.goal=parseInt(el.dataset.goal,10)||600;
+    pre1SaveSettings(s);pre1RefreshSettingsUI();
+  });
+});
+['chain','tts','goro'].forEach(k=>{
+  const el=document.getElementById('pre1-'+k);
+  if(!el)return;
+  el.addEventListener('click',()=>{
+    _haptic();
+    const s=pre1LoadSettings();
+    s[k]=s[k]===1?0:1;
+    pre1SaveSettings(s);pre1RefreshSettingsUI();
+  });
+});
+document.getElementById('pre1-reset-btn')?.addEventListener('click',()=>{
+  _haptic();
+  if(confirm('Pre-1学習の進捗をリセットしますか？\n（覚えた単語の記録もクリアされます）')){
+    localStorage.removeItem(PRE1_KEY_PROGRESS);
+    pre1RefreshSettingsUI();
+  }
+});
+
+/* Refresh settings UI when settings open */
+const _origOpenSettings=window.openSettings;
+if(typeof _origOpenSettings==='function'){
+  window.openSettings=function(){
+    const r=_origOpenSettings.apply(this,arguments);
+    setTimeout(pre1RefreshSettingsUI,30);
+    return r;
+  };
+}
+
+/* ══════════ PRE-1 SESSION ══════════ */
+let _pre1Session=null;
+// session: {queue:[{src, e, j}], idx, viewedThisSession, settings, hidPanel}
+
+function pre1BuildQueue(s){
+  const p=pre1LoadProgress();
+  const seen=p.seenWords||{};
+  const fc=(typeof loadCache==='function')?loadCache():{};
+  const fSet={};
+  Object.keys(fc).forEach(k=>{Object.keys(fc[k]||{}).forEach(w=>{fSet[w]=1;});});
+  const sources=s.sources||['P1W','P1P'];
+  const pool=[];
+  sources.forEach(srcKey=>{
+    if(!SRC[srcKey])return;
+    SRC[srcKey].forEach(it=>{
+      const word=it.e||it.w||'';
+      if(!word)return;
+      // skip already-seen words this 3-day cycle, unless they're in forgot cache (keep prioritized later)
+      pool.push({srcKey,e:word,j:it.j||it.m||'',_seen:!!seen[word],_forgot:!!fSet[word]});
+    });
+  });
+  // Sort: forgot first (high priority), then unseen, then seen (skipped at end)
+  pool.sort((a,b)=>{
+    if(a._forgot!==b._forgot)return a._forgot?-1:1;
+    if(a._seen!==b._seen)return a._seen?1:-1;
+    return 0;
+  });
+  // Filter out fully-seen items if there are enough unseen+forgot ones
+  const unseen=pool.filter(x=>!x._seen);
+  return unseen.length>=20?unseen:pool;
+}
+
+function pre1Start(){
+  const s=pre1LoadSettings();
+  const p=pre1TickDayIfNeeded();
+  const queue=pre1BuildQueue(s);
+  if(!queue.length){alert('出題できる単語がありません。設定で出題ソースを選択してください。');return;}
+  _pre1Session={queue,idx:0,viewedThisSession:0,settings:s,startCount:p.viewedToday||0};
+  // Close settings if open
+  try{if(typeof closeSettings==='function')closeSettings();}catch(_){}
+  setTimeout(()=>{
+    document.getElementById('pre1-overlay').style.display='block';
+    pre1RenderCurrent();
+  },380);
+}
+
+function pre1End(){
+  const ov=document.getElementById('pre1-overlay');
+  ov.style.display='none';
+  _pre1Session=null;
+  pre1RefreshSettingsUI();
+}
+
+function _esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);}
+
+function pre1RenderCurrent(){
+  if(!_pre1Session)return;
+  const sess=_pre1Session;
+  const p=pre1TickDayIfNeeded();
+  const goal=sess.settings.goal||600;
+  // Update header counter & bar
+  document.getElementById('pre1-counter').textContent=(p.viewedToday||0)+'/'+goal;
+  document.getElementById('pre1-bar').style.width=Math.min(100,((p.viewedToday||0)/goal)*100)+'%';
+  // Pop next item if needed
+  while(sess.idx<sess.queue.length){
+    const cur=sess.queue[sess.idx];
+    if(!cur){sess.idx++;continue;}
+    break;
+  }
+  if(sess.idx>=sess.queue.length){
+    pre1ShowDone(true);
+    return;
+  }
+  const cur=sess.queue[sess.idx];
+  const wrap=document.getElementById('pre1-card-wrap');
+  const goro=(window.GORO&&window.GORO[(cur.e||'').toLowerCase()])||null;
+  const showGoro=sess.settings.goro===1&&goro;
+  const showChain=sess.settings.chain===1;
+  // Source label
+  const srcMap={P1W:{n:'Pass単 単語',c:'#34c759'},P1P:{n:'Pass単 熟語',c:'#ff3b30'},V:{n:'準1級 過去問',c:'#5856d6'}};
+  const srcInfo=srcMap[cur.srcKey]||{n:cur.srcKey,c:'#007aff'};
+  let chainsHtml='';
+  if(showChain){
+    const chains=findChainsForWord(cur.e);
+    if(chains.length){
+      // Show top 1-2 most relevant chains
+      chains.slice(0,2).forEach(ch=>{
+        const items=ch.items.map(it=>{
+          const cur1=_norm(it.p)===_norm(cur.e);
+          return `<div class="pre1-chain-item"><div class="pre1-chain-p${cur1?' pre1-cur':''}">${_esc(it.p)}${cur1?' ←':''}</div><div class="pre1-chain-m">${_esc(it.m)}</div></div>`;
+        }).join('');
+        chainsHtml+=`<div class="pre1-chain"><div class="pre1-chain-hd">${_esc(ch.name)}</div>${items}</div>`;
+      });
+    }
+  }
+  const html=`
+    <div class="pre1-card">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="pre1-tag" style="background:${srcInfo.c}1a;color:${srcInfo.c}">${_esc(srcInfo.n)}</span>
+        <span style="font-size:11px;color:rgba(0,0,0,.4)">${sess.idx+1} / ${sess.queue.length}</span>
+        ${cur._forgot?'<span class="pre1-tag" style="background:rgba(255,59,48,.12);color:#ff3b30">😰 復習</span>':''}
+      </div>
+      <div class="pre1-word">${_esc(cur.e)}</div>
+      <div class="pre1-mean"><span class="pre1-mh">意味</span>${_esc(cur.j)}</div>
+      ${showGoro?`<div class="pre1-goro">${_esc(goro)}</div>`:''}
+      ${chainsHtml}
+    </div>
+  `;
+  wrap.innerHTML=html;
+  document.getElementById('pre1-scroll').scrollTop=0;
+  // TTS
+  if(sess.settings.tts===1&&typeof speakWord==='function'){
+    try{speakWord(cur.e);}catch(_){}
+  }
+}
+
+function pre1Action(act){
+  if(!_pre1Session)return;
+  const sess=_pre1Session;
+  const cur=sess.queue[sess.idx];
+  if(!cur){pre1ShowDone(true);return;}
+  const p=pre1TickDayIfNeeded();
+  const s=sess.settings;
+  // Mark word as seen/forgot in cache and progress
+  if(!p.seenWords)p.seenWords={};
+  if(!p.seenWords[cur.e]){
+    p.seenWords[cur.e]=1;
+    p.total=(p.total||0)+1;
+  }
+  p.viewedToday=(p.viewedToday||0)+1;
+  // For hard/ok, push to forgot cache so existing review flow picks them up
+  if(act==='hard'||act==='ok'){
+    try{
+      const cache=loadCache();
+      // Determine deck index from src
+      const deckMap={V:0,P1W:1,P1P:2,ID:3,E2W:4,E2P:5};
+      const di=deckMap[cur.srcKey]!==undefined?deckMap[cur.srcKey]:1;
+      if(!cache[di])cache[di]={};
+      cache[di][cur.e]={m:cur.j};
+      if(typeof saveCache==='function')saveCache(cache);
+      if(typeof fCache!=='undefined')fCache=cache;
+    }catch(_){}
+  }
+  pre1SaveProgress(p);
+  sess.idx++;
+  sess.viewedThisSession++;
+  // Check goal
+  const goal=s.goal||600;
+  if(p.viewedToday>=goal&&p.viewedToday-1<goal){
+    // First time crossing goal this session
+    pre1ShowDone(false);
+    return;
+  }
+  if(sess.idx>=sess.queue.length){
+    pre1ShowDone(true);
+    return;
+  }
+  pre1RenderCurrent();
+  _haptic();
+}
+
+function pre1ShowDone(noMore){
+  const dlg=document.getElementById('pre1-done-dlg');
+  const card=document.getElementById('pre1-done-card');
+  const msg=document.getElementById('pre1-done-msg');
+  const p=pre1TickDayIfNeeded();
+  const s=pre1LoadSettings();
+  if(noMore){
+    msg.innerHTML=`今日は <b>${p.viewedToday||0}</b> 語見た！<br>累計 <b>${p.total||0}</b> 語覚えてる🔥<br><br>出題できる単語が尽きました。<br>明日 Day ${Math.min(3,(p.day||1)+1)} に続けよう。`;
+    document.getElementById('pre1-done-more').style.display='none';
+  }else{
+    msg.innerHTML=`Day ${p.day||1} の目標 <b>${s.goal}</b> 語クリア🎯<br>累計 <b>${p.total||0}</b> 語覚えてる！<br><br>残り Day ${Math.max(0,3-(p.day||1))} 日、頑張ろう。<br>続けて学習することもできるよ。`;
+    document.getElementById('pre1-done-more').style.display='';
+  }
+  dlg.style.display='flex';
+  requestAnimationFrame(()=>{
+    dlg.style.background='rgba(0,0,0,.4)';
+    card.style.transform='scale(1)';card.style.opacity='1';
+  });
+}
+function pre1HideDone(){
+  const dlg=document.getElementById('pre1-done-dlg');
+  const card=document.getElementById('pre1-done-card');
+  dlg.style.background='rgba(0,0,0,0)';
+  card.style.transform='scale(.8)';card.style.opacity='0';
+  setTimeout(()=>{dlg.style.display='none';card.style.transform='scale(1.8)';},420);
+}
+
+/* ══ Wire up buttons ══ */
+document.getElementById('pre1-start-btn')?.addEventListener('click',()=>{_hapticConfirm();pre1Start();});
+document.getElementById('pre1-back')?.addEventListener('click',()=>{_haptic();pre1End();});
+document.querySelectorAll('.pre1-act').forEach(b=>{
+  b.addEventListener('click',()=>{pre1Action(b.dataset.act);});
+});
+document.getElementById('pre1-done-close')?.addEventListener('click',()=>{_haptic();pre1HideDone();pre1End();});
+document.getElementById('pre1-done-more')?.addEventListener('click',()=>{_hapticConfirm();pre1HideDone();if(_pre1Session)pre1RenderCurrent();});
+
+/* Init UI on load */
+setTimeout(pre1RefreshSettingsUI,400);
+
+})();
+
 </script>
 
 <script>
@@ -7477,669 +8138,6 @@ ov.addEventListener('touchend',e=>{
 .pre1-chain-m{font-size:12px;color:rgba(0,0,0,.6);text-align:right;line-height:1.4}
 .pre1-act:active{transform:scale(.96);transition:transform .12s ease}
 </style>
-
-<script>
-/* ═══ FORGOT CATEGORY PICKER + PRE-1 LEARNING MODE ═══ */
-(function(){
-'use strict';
-
-/* ══ Forgot category picker ══ */
-function _haptic(){try{if(typeof haptic==='function')haptic();}catch(_){}}
-function _hapticConfirm(){try{if(typeof haptic==='object'&&haptic.confirm)haptic.confirm();else if(typeof haptic==='function')haptic();}catch(_){}}
-
-function countForgotPerCategory(){
-  const cache=loadCache();
-  const counts={};let total=0;
-  Object.keys(cache).forEach(k=>{
-    const n=Object.keys(cache[k]||{}).length;
-    counts[k]=n;total+=n;
-  });
-  return {counts,total};
-}
-
-function showForgotCategoryPicker(){
-  const dlg=document.getElementById('fc-pick-dlg');
-  const card=document.getElementById('fc-pick-card');
-  const list=document.getElementById('fc-pick-list');
-  const {counts,total}=countForgotPerCategory();
-  if(total===0){
-    if(typeof showDialog==='function')showDialog('no-forgot-dlg','no-forgot-card');
-    return;
-  }
-  const ICONS=['🃏','📗','📎','💡','🔤','📌'];
-  const COLORS=['#5856d6','#34c759','#ff3b30','#ff9500','#34c759','#ff9500'];
-  let html='';
-  // All option
-  html+=`<div class="fc-row" data-deck="-1"><div class="fc-ic" style="background:linear-gradient(135deg,#ff2d55,#ff9500);color:#fff">∞</div><div class="fc-info"><div class="fc-name">全カテゴリ</div><div class="fc-cnt">忘れた単語をすべて出題</div></div><div class="fc-bd" style="background:rgba(255,45,85,.15);color:#ff2d55">${total}</div></div>`;
-  // Per category
-  CFG.forEach((c,i)=>{
-    const n=counts[i]||0;
-    const empty=n===0?' fc-empty':'';
-    html+=`<div class="fc-row${empty}" data-deck="${i}"><div class="fc-ic" style="background:${COLORS[i]||'#007aff'}1a;color:${COLORS[i]||'#007aff'}">${ICONS[i]||'📚'}</div><div class="fc-info"><div class="fc-name">${c.title}</div><div class="fc-cnt">${c.lvT||''}</div></div><div class="fc-bd">${n}</div></div>`;
-  });
-  list.innerHTML=html;
-  dlg.style.display='flex';
-  requestAnimationFrame(()=>{
-    dlg.style.background='rgba(0,0,0,.4)';
-    card.style.transform='scale(1)';card.style.opacity='1';
-  });
-  list.querySelectorAll('.fc-row').forEach(row=>{
-    row.addEventListener('click',()=>{
-      if(row.classList.contains('fc-empty')){_haptic();return;}
-      const di=parseInt(row.dataset.deck,10);
-      _hapticConfirm();
-      hideForgotPicker();
-      setTimeout(()=>{startForgotRetry(di);},340);
-    });
-  });
-}
-function hideForgotPicker(){
-  const dlg=document.getElementById('fc-pick-dlg');
-  const card=document.getElementById('fc-pick-card');
-  dlg.style.background='rgba(0,0,0,0)';
-  card.style.transform='scale(.8)';card.style.opacity='0';
-  setTimeout(()=>{dlg.style.display='none';card.style.transform='scale(1.8)';},420);
-}
-document.getElementById('fc-pick-cancel').addEventListener('click',()=>{_haptic();hideForgotPicker();});
-document.getElementById('fc-pick-dlg').addEventListener('click',e=>{if(e.target.id==='fc-pick-dlg'){_haptic();hideForgotPicker();}});
-
-/* ══ Filtered forgot retry (supports category index, -1 = all) ══ */
-function startForgotRetry(deckIdx){
-  const cache=loadCache();
-  const items=[];
-  const matchKeys=deckIdx===-1?Object.keys(cache):(cache[deckIdx]?[String(deckIdx)]:[]);
-  matchKeys.forEach(k=>{
-    const deck=cache[k];if(!deck)return;
-    Object.keys(deck).forEach(word=>{
-      items.push({e:word,j:deck[word].m||'',w:word,m:deck[word].m||'',p:'',l:1,c:'復習',pr:'',f:'忘れた/難しいマーク',t:[],id:[],_origDeck:parseInt(k,10)});
-    });
-  });
-  if(!items.length){if(typeof showDialog==='function')showDialog('no-forgot-dlg','no-forgot-card');return;}
-  // Inject into deck 0 temporarily for the retry (same flow as existing card-forgot)
-  document.getElementById('home').classList.add('hidden');
-  setTimeout(()=>document.getElementById('app').classList.add('vis'),30);
-  document.getElementById('app-dots').style.display='none';
-  document.getElementById('sw-wrap').style.display='flex';
-  document.getElementById('list-wrap').style.display='none';
-  document.getElementById('float-bar').style.display='flex';
-  const label=deckIdx===-1?'全カテゴリ':(CFG[deckIdx]?CFG[deckIdx].title:'カテゴリ');
-  document.getElementById('app-ttl').textContent='🔄 '+label+' 復習 ('+items.length+'語)';
-  DK[0].deck=items;DK[0].idx=0;DK[0].flipped=false;
-  DK[0].st={g:0,h:0,f:0};DK[0].hist=[];DK[0].prev=null;DK[0].shuffled=false;
-  document.getElementById('sg0').textContent=0;
-  document.getElementById('sh0').textContent=0;
-  document.getElementById('sf0').textContent=0;
-  if(typeof jPanel==='function')jPanel(0,false);
-  if(typeof render==='function')render(0);
-}
-
-/* ══ Override the 「忘れた単語だけ復習」 hcard to show picker first ══ */
-const _origOpenS_pre1=window.openS;
-window.openS=function(type,arg){
-  if(type==='card-forgot'&&arg!=='__skipPicker'){
-    _hapticConfirm();
-    showForgotCategoryPicker();
-    return;
-  }
-  return _origOpenS_pre1.call(this,type,arg);
-};
-
-/* ══════════ PHRASE CHAIN DATABASE (芋づる式) ══════════ */
-// Each chain has a head verb/preposition family. Items are matched against the current word/phrase.
-// When the current item matches any phrase in a chain, the entire chain is displayed.
-const PRE1_CHAINS=[
-  {name:'come 系（移動・到来）',items:[
-    {p:'come up with ~',m:'〜を思いつく'},
-    {p:'come across ~',m:'〜に偶然出会う'},
-    {p:'come down with ~',m:'〜の病気にかかる'},
-    {p:'come down to ~',m:'結局〜に行き着く'},
-    {p:'come off',m:'成功する、取れる'},
-    {p:'come through ~',m:'〜を切り抜ける'},
-    {p:'come out',m:'出てくる、公表される'},
-    {p:'come to an end',m:'終わりを迎える'}
-  ]},
-  {name:'go 系（離脱・進行）',items:[
-    {p:'go through ~',m:'〜を経験する、通り抜ける'},
-    {p:'go back on ~',m:'〜を撤回する'},
-    {p:'go for ~',m:'〜を選ぶ、〜に挑戦する'},
-    {p:'go off',m:'(警報が)鳴る、出かける'},
-    {p:'go on',m:'続く、起こる'},
-    {p:'go over ~',m:'〜を見直す'}
-  ]},
-  {name:'get 系（変化・到達）',items:[
-    {p:'get along with ~',m:'〜と仲良くやっていく'},
-    {p:'get over ~',m:'〜を乗り越える'},
-    {p:'get rid of ~',m:'〜を取り除く'},
-    {p:'get away with ~',m:'〜をうまくやり通す'},
-    {p:'get by',m:'なんとかやっていく'},
-    {p:'get down to ~',m:'〜に取りかかる'},
-    {p:'get into ~',m:'〜に入る、興味を持つ'},
-    {p:'get on with ~',m:'〜と仲良くする'},
-    {p:'get used to ~',m:'〜に慣れる'},
-    {p:'get around ~',m:'〜を回避する'}
-  ]},
-  {name:'take 系（取る・引き受ける）',items:[
-    {p:'take in ~',m:'〜を取り込む、理解する'},
-    {p:'take on ~',m:'〜を引き受ける'},
-    {p:'take over ~',m:'〜を引き継ぐ'},
-    {p:'take up ~',m:'〜を始める、占める'},
-    {p:'take off ~',m:'〜を脱ぐ、離陸する'},
-    {p:'take part in ~',m:'〜に参加する'},
-    {p:'take place',m:'起こる、行われる'},
-    {p:'take A for granted',m:'Aを当然のことと思う'},
-    {p:'take advantage of ~',m:'〜を活用する'}
-  ]},
-  {name:'put 系（置く・課す）',items:[
-    {p:'put off ~',m:'〜を延期する'},
-    {p:'put up with ~',m:'〜を我慢する'},
-    {p:'put forward ~',m:'〜を提案する'},
-    {p:'put down ~',m:'〜を置く、けなす'},
-    {p:'put in ~',m:'〜を入れる、費やす'}
-  ]},
-  {name:'bring 系（持ってくる）',items:[
-    {p:'bring about ~',m:'〜をもたらす'},
-    {p:'bring down ~',m:'〜を倒す、下げる'},
-    {p:'bring off ~',m:'〜を成功させる'},
-    {p:'bring on ~',m:'〜を引き起こす'},
-    {p:'bring out ~',m:'〜を引き出す、発売する'},
-    {p:'bring up ~',m:'〜を育てる、持ち出す'}
-  ]},
-  {name:'make 系（作る・生み出す）',items:[
-    {p:'make ends meet',m:'収支を合わせる'},
-    {p:'make do with ~',m:'〜で間に合わせる'},
-    {p:'make it',m:'成功する、間に合う'},
-    {p:'make out ~',m:'〜を理解する'},
-    {p:'make up for ~',m:'〜を埋め合わせる'},
-    {p:'make the most of ~',m:'〜を最大限に活用する'},
-    {p:'make use of ~',m:'〜を利用する'},
-    {p:'make a difference',m:'変化をもたらす、重要である'}
-  ]},
-  {name:'break 系（壊す・分かれる）',items:[
-    {p:'break down',m:'故障する、崩壊する'},
-    {p:'break out',m:'勃発する、脱走する'},
-    {p:'break away from ~',m:'〜から逃げ出す'},
-    {p:'breakup',m:'別れ、崩壊'}
-  ]},
-  {name:'call 系（呼ぶ）',items:[
-    {p:'call for ~',m:'〜を必要とする、求める'},
-    {p:'call off ~',m:'〜を中止する'},
-    {p:'call on ~',m:'〜を訪問する、頼む'}
-  ]},
-  {name:'turn 系（向ける・変える）',items:[
-    {p:'turn out',m:'判明する、結果になる'},
-    {p:'turn down ~',m:'〜を断る、下げる'},
-    {p:'turn in ~',m:'〜を提出する'},
-    {p:'turn to ~',m:'〜に頼る'},
-    {p:'turn around ~',m:'〜を好転させる'},
-    {p:'turn away ~',m:'〜を追い返す'},
-    {p:'turn A into B',m:'AをBに変える'}
-  ]},
-  {name:'set 系（置く・設定）',items:[
-    {p:'set aside ~',m:'〜を取っておく'},
-    {p:'set off ~',m:'出発する、引き起こす'},
-    {p:'set out to do',m:'〜しようと着手する'},
-    {p:'set up ~',m:'〜を設立する、準備する'},
-    {p:'set in',m:'季節・状態が始まる'},
-    {p:'set down ~',m:'〜を書き留める'}
-  ]},
-  {name:'pull 系（引く）',items:[
-    {p:'pull off ~',m:'〜をうまくやり遂げる'},
-    {p:'pull through',m:'困難・病気を乗り越える'}
-  ]},
-  {name:'hold 系（保つ）',items:[
-    {p:'hold back ~',m:'〜を抑える'},
-    {p:'hold off ~',m:'〜を遅らせる'},
-    {p:'hold out ~',m:'持ちこたえる'}
-  ]},
-  {name:'look 系（見る）',items:[
-    {p:'look down on ~',m:'〜を見下す'},
-    {p:'look up to ~',m:'〜を尊敬する'},
-    {p:'look up ~',m:'〜を調べる、上を向く'},
-    {p:'look into ~',m:'〜を調査する'},
-    {p:'look forward to ~',m:'〜を楽しみにしている'}
-  ]},
-  {name:'fall 系（落ちる）',items:[
-    {p:'fall back on ~',m:'〜に頼る'},
-    {p:'fall for ~',m:'〜にだまされる、恋する'},
-    {p:'fall off',m:'減少する、落ちる'},
-    {p:'fall through',m:'計画が失敗する'}
-  ]},
-  {name:'cut 系（切る・削る）',items:[
-    {p:'cut back on ~',m:'〜を削減する'},
-    {p:'cut down on ~',m:'〜を減らす'},
-    {p:'cut in on ~',m:'割り込む'}
-  ]},
-  {name:'give 系（与える）',items:[
-    {p:'give away ~',m:'〜を無料で与える、漏らす'},
-    {p:'give in to ~',m:'〜に屈する'},
-    {p:'give off ~',m:'〜を発する'},
-    {p:'give rise to ~',m:'〜を引き起こす'}
-  ]},
-  {name:'近い意味（思いつく/突然出会う）',items:[
-    {p:'come up with ~',m:'〜を思いつく'},
-    {p:'come across ~',m:'〜に偶然出会う'},
-    {p:'bump into ~',m:'〜に偶然会う'},
-    {p:'figure out ~',m:'〜を理解する、解決する'},
-    {p:'work out ~',m:'〜を解決する、うまくいく'}
-  ]},
-  {name:'近い意味（増減）',items:[
-    {p:'reduce',m:'〜を減らす'},
-    {p:'lessen',m:'減らす、小さくなる'},
-    {p:'diminish',m:'減少する'},
-    {p:'cut down on ~',m:'〜を減らす'},
-    {p:'decline',m:'断る、衰退する'},
-    {p:'decrease',m:'減少する'},
-    {p:'increase',m:'増加する'},
-    {p:'expand',m:'拡大する、広げる'},
-    {p:'enhance',m:'高める、強化する'},
-    {p:'boost',m:'高める、増大させる'}
-  ]},
-  {name:'近い意味（推測・予測）',items:[
-    {p:'predict',m:'予測する'},
-    {p:'anticipate',m:'予期する'},
-    {p:'estimate',m:'見積もる、推定する'},
-    {p:'presume',m:'推定する'},
-    {p:'assume',m:'仮定する、思い込む'},
-    {p:'forecast',m:'予報、予測する'}
-  ]},
-  {name:'近い意味（重要・必要）',items:[
-    {p:'crucial',m:'重要な'},
-    {p:'critical',m:'重要な、批判的な'},
-    {p:'essential',m:'不可欠な、本質的な'},
-    {p:'vital',m:'不可欠な、生命の'},
-    {p:'fundamental',m:'根本的な、基本の'},
-    {p:'significant',m:'重要な、著しい'},
-    {p:'integral',m:'不可欠な'}
-  ]},
-  {name:'近い意味（捨てる・廃棄）',items:[
-    {p:'abandon',m:'捨てる、断念する'},
-    {p:'discard',m:'捨てる'},
-    {p:'dump',m:'捨てる、ゴミ捨て場'},
-    {p:'dispose of ~',m:'〜を処分する'},
-    {p:'do away with ~',m:'〜を廃止する'},
-    {p:'throw away ~',m:'〜を捨てる'}
-  ]},
-  {name:'近い意味（増える・繁栄）',items:[
-    {p:'thrive',m:'繁栄する'},
-    {p:'prosper',m:'繁栄する'},
-    {p:'prosperity',m:'繁栄'},
-    {p:'flourish',m:'繁栄する'},
-    {p:'soar',m:'急上昇する'}
-  ]},
-  {name:'近い意味（〜に従う・固執）',items:[
-    {p:'adhere to ~',m:'〜に固執する、〜を守る'},
-    {p:'stick to ~',m:'〜に固執する'},
-    {p:'comply with ~',m:'〜に従う'},
-    {p:'obey',m:'従う'},
-    {p:'conform',m:'従う、順応する'}
-  ]},
-  {name:'近い意味（明らかにする）',items:[
-    {p:'reveal',m:'明らかにする'},
-    {p:'disclose',m:'明らかにする'},
-    {p:'uncover',m:'明らかにする'},
-    {p:'expose',m:'さらす'},
-    {p:'demonstrate',m:'示す、証明する'}
-  ]},
-  {name:'近い意味（強調する）',items:[
-    {p:'emphasize',m:'強調する'},
-    {p:'highlight',m:'強調する、ハイライト'},
-    {p:'stress',m:'ストレス、強調する'},
-    {p:'underline',m:'下線を引く、強調する'},
-    {p:'play up ~',m:'〜を強調する'}
-  ]},
-  {name:'近い意味（〜を起こす）',items:[
-    {p:'cause',m:'原因、引き起こす'},
-    {p:'bring about ~',m:'〜をもたらす'},
-    {p:'bring on ~',m:'〜を引き起こす'},
-    {p:'give rise to ~',m:'〜を引き起こす'},
-    {p:'lead to ~',m:'〜につながる'},
-    {p:'result in ~',m:'〜という結果になる'}
-  ]}
-];
-
-function _norm(s){return (s||'').toLowerCase().trim().replace(/[\s~().]+/g,' ').replace(/\s+/g,' ').trim();}
-
-function findChainsForWord(word){
-  const w=_norm(word);
-  if(!w)return [];
-  const matches=[];
-  PRE1_CHAINS.forEach(ch=>{
-    let found=false;
-    for(const it of ch.items){
-      const np=_norm(it.p);
-      if(np===w){found=true;break;}
-      // Match "come up with" against "come up with ~" and vice versa
-      if(np.startsWith(w+' ')||w.startsWith(np+' '))continue; // partial — skip unless exact
-    }
-    // Also: if word is a single verb that heads a chain (e.g. "come"), match the chain
-    if(!found){
-      const firstTok=w.split(' ')[0];
-      const chainHeads=ch.items.map(it=>_norm(it.p).split(' ')[0]);
-      if(chainHeads.includes(w)&&w.length>1)found=true;
-      else if(chainHeads.includes(firstTok)&&firstTok===w)found=true;
-    }
-    if(found)matches.push(ch);
-  });
-  return matches;
-}
-
-/* ══════════ PRE-1 LEARNING MODE STATE ══════════ */
-const PRE1_KEY_PROGRESS='inglish_pre1_progress'; // {date, day, viewedToday, total, seenWords:{w:1}}
-const PRE1_KEY_SETTINGS='inglish_pre1_settings'; // {sources:[...], goal:600, chain:1, tts:0, goro:1}
-
-function pre1LoadProgress(){
-  try{const p=JSON.parse(localStorage.getItem(PRE1_KEY_PROGRESS));if(p&&typeof p==='object')return p;}catch(_){}
-  return {date:'',day:1,viewedToday:0,total:0,seenWords:{}};
-}
-function pre1SaveProgress(p){try{localStorage.setItem(PRE1_KEY_PROGRESS,JSON.stringify(p));}catch(_){}}
-function pre1LoadSettings(){
-  try{const s=JSON.parse(localStorage.getItem(PRE1_KEY_SETTINGS));if(s&&typeof s==='object')return Object.assign({sources:['P1W','P1P'],goal:600,chain:1,tts:0,goro:1},s);}catch(_){}
-  return {sources:['P1W','P1P'],goal:600,chain:1,tts:0,goro:1};
-}
-function pre1SaveSettings(s){try{localStorage.setItem(PRE1_KEY_SETTINGS,JSON.stringify(s));}catch(_){}}
-
-function pre1TodayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-
-function pre1TickDayIfNeeded(){
-  const p=pre1LoadProgress();
-  const today=pre1TodayKey();
-  if(p.date!==today){
-    if(p.date){
-      // Day rolled over
-      const prev=new Date(p.date);const cur=new Date(today);
-      const diff=Math.round((cur-prev)/86400000);
-      if(diff===1){p.day=Math.min(3,(p.day||1)+1);}
-      else if(diff>1){p.day=1;} // gap → reset day counter
-    }
-    p.date=today;p.viewedToday=0;
-    pre1SaveProgress(p);
-  }
-  return p;
-}
-
-function pre1RefreshSettingsUI(){
-  const s=pre1LoadSettings();
-  const p=pre1TickDayIfNeeded();
-  // Source checks
-  document.querySelectorAll('.pre1-src-opt').forEach(el=>{
-    const id='pre1-sc-'+el.dataset.src;
-    const chk=document.getElementById(id);
-    if(chk)chk.classList.toggle('s-on',s.sources.includes(el.dataset.src));
-  });
-  // Goal checks
-  document.querySelectorAll('.pre1-goal-opt').forEach(el=>{
-    const id='pre1-gc-'+el.dataset.goal;
-    const chk=document.getElementById(id);
-    if(chk)chk.classList.toggle('s-on',String(s.goal)===el.dataset.goal);
-  });
-  // Toggles
-  document.getElementById('pre1-chain').classList.toggle('on',s.chain===1);
-  document.getElementById('pre1-tts').classList.toggle('on',s.tts===1);
-  document.getElementById('pre1-goro').classList.toggle('on',s.goro===1);
-  // Progress
-  const dayEl=document.getElementById('pre1-day-display');
-  const progText=document.getElementById('pre1-progress-text');
-  const progBar=document.getElementById('pre1-progress-bar');
-  const totEl=document.getElementById('pre1-total-display');
-  if(dayEl)dayEl.textContent='Day '+(p.day||1)+' / 3';
-  if(progText)progText.textContent=(p.viewedToday||0)+' / '+s.goal;
-  if(progBar)progBar.style.width=Math.min(100,((p.viewedToday||0)/s.goal)*100)+'%';
-  if(totEl)totEl.textContent=(p.total||0)+'語';
-}
-
-/* ══ Settings handlers ══ */
-document.querySelectorAll('.pre1-src-opt').forEach(el=>{
-  el.addEventListener('click',()=>{
-    _haptic();
-    const s=pre1LoadSettings();
-    const src=el.dataset.src;
-    if(s.sources.includes(src)){
-      if(s.sources.length===1){return;} // keep at least 1
-      s.sources=s.sources.filter(x=>x!==src);
-    }else{
-      s.sources.push(src);
-    }
-    pre1SaveSettings(s);pre1RefreshSettingsUI();
-  });
-});
-document.querySelectorAll('.pre1-goal-opt').forEach(el=>{
-  el.addEventListener('click',()=>{
-    _haptic();
-    const s=pre1LoadSettings();
-    s.goal=parseInt(el.dataset.goal,10)||600;
-    pre1SaveSettings(s);pre1RefreshSettingsUI();
-  });
-});
-['chain','tts','goro'].forEach(k=>{
-  const el=document.getElementById('pre1-'+k);
-  if(!el)return;
-  el.addEventListener('click',()=>{
-    _haptic();
-    const s=pre1LoadSettings();
-    s[k]=s[k]===1?0:1;
-    pre1SaveSettings(s);pre1RefreshSettingsUI();
-  });
-});
-document.getElementById('pre1-reset-btn')?.addEventListener('click',()=>{
-  _haptic();
-  if(confirm('Pre-1学習の進捗をリセットしますか？\n（覚えた単語の記録もクリアされます）')){
-    localStorage.removeItem(PRE1_KEY_PROGRESS);
-    pre1RefreshSettingsUI();
-  }
-});
-
-/* Refresh settings UI when settings open */
-const _origOpenSettings=window.openSettings;
-if(typeof _origOpenSettings==='function'){
-  window.openSettings=function(){
-    const r=_origOpenSettings.apply(this,arguments);
-    setTimeout(pre1RefreshSettingsUI,30);
-    return r;
-  };
-}
-
-/* ══════════ PRE-1 SESSION ══════════ */
-let _pre1Session=null;
-// session: {queue:[{src, e, j}], idx, viewedThisSession, settings, hidPanel}
-
-function pre1BuildQueue(s){
-  const p=pre1LoadProgress();
-  const seen=p.seenWords||{};
-  const fc=(typeof loadCache==='function')?loadCache():{};
-  const fSet={};
-  Object.keys(fc).forEach(k=>{Object.keys(fc[k]||{}).forEach(w=>{fSet[w]=1;});});
-  const sources=s.sources||['P1W','P1P'];
-  const pool=[];
-  sources.forEach(srcKey=>{
-    if(!SRC[srcKey])return;
-    SRC[srcKey].forEach(it=>{
-      const word=it.e||it.w||'';
-      if(!word)return;
-      // skip already-seen words this 3-day cycle, unless they're in forgot cache (keep prioritized later)
-      pool.push({srcKey,e:word,j:it.j||it.m||'',_seen:!!seen[word],_forgot:!!fSet[word]});
-    });
-  });
-  // Sort: forgot first (high priority), then unseen, then seen (skipped at end)
-  pool.sort((a,b)=>{
-    if(a._forgot!==b._forgot)return a._forgot?-1:1;
-    if(a._seen!==b._seen)return a._seen?1:-1;
-    return 0;
-  });
-  // Filter out fully-seen items if there are enough unseen+forgot ones
-  const unseen=pool.filter(x=>!x._seen);
-  return unseen.length>=20?unseen:pool;
-}
-
-function pre1Start(){
-  const s=pre1LoadSettings();
-  const p=pre1TickDayIfNeeded();
-  const queue=pre1BuildQueue(s);
-  if(!queue.length){alert('出題できる単語がありません。設定で出題ソースを選択してください。');return;}
-  _pre1Session={queue,idx:0,viewedThisSession:0,settings:s,startCount:p.viewedToday||0};
-  // Close settings if open
-  try{if(typeof closeSettings==='function')closeSettings();}catch(_){}
-  setTimeout(()=>{
-    document.getElementById('pre1-overlay').style.display='block';
-    pre1RenderCurrent();
-  },380);
-}
-
-function pre1End(){
-  const ov=document.getElementById('pre1-overlay');
-  ov.style.display='none';
-  _pre1Session=null;
-  pre1RefreshSettingsUI();
-}
-
-function _esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);}
-
-function pre1RenderCurrent(){
-  if(!_pre1Session)return;
-  const sess=_pre1Session;
-  const p=pre1TickDayIfNeeded();
-  const goal=sess.settings.goal||600;
-  // Update header counter & bar
-  document.getElementById('pre1-counter').textContent=(p.viewedToday||0)+'/'+goal;
-  document.getElementById('pre1-bar').style.width=Math.min(100,((p.viewedToday||0)/goal)*100)+'%';
-  // Pop next item if needed
-  while(sess.idx<sess.queue.length){
-    const cur=sess.queue[sess.idx];
-    if(!cur){sess.idx++;continue;}
-    break;
-  }
-  if(sess.idx>=sess.queue.length){
-    pre1ShowDone(true);
-    return;
-  }
-  const cur=sess.queue[sess.idx];
-  const wrap=document.getElementById('pre1-card-wrap');
-  const goro=(window.GORO&&window.GORO[(cur.e||'').toLowerCase()])||null;
-  const showGoro=sess.settings.goro===1&&goro;
-  const showChain=sess.settings.chain===1;
-  // Source label
-  const srcMap={P1W:{n:'Pass単 単語',c:'#34c759'},P1P:{n:'Pass単 熟語',c:'#ff3b30'},V:{n:'準1級 過去問',c:'#5856d6'}};
-  const srcInfo=srcMap[cur.srcKey]||{n:cur.srcKey,c:'#007aff'};
-  let chainsHtml='';
-  if(showChain){
-    const chains=findChainsForWord(cur.e);
-    if(chains.length){
-      // Show top 1-2 most relevant chains
-      chains.slice(0,2).forEach(ch=>{
-        const items=ch.items.map(it=>{
-          const cur1=_norm(it.p)===_norm(cur.e);
-          return `<div class="pre1-chain-item"><div class="pre1-chain-p${cur1?' pre1-cur':''}">${_esc(it.p)}${cur1?' ←':''}</div><div class="pre1-chain-m">${_esc(it.m)}</div></div>`;
-        }).join('');
-        chainsHtml+=`<div class="pre1-chain"><div class="pre1-chain-hd">${_esc(ch.name)}</div>${items}</div>`;
-      });
-    }
-  }
-  const html=`
-    <div class="pre1-card">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="pre1-tag" style="background:${srcInfo.c}1a;color:${srcInfo.c}">${_esc(srcInfo.n)}</span>
-        <span style="font-size:11px;color:rgba(0,0,0,.4)">${sess.idx+1} / ${sess.queue.length}</span>
-        ${cur._forgot?'<span class="pre1-tag" style="background:rgba(255,59,48,.12);color:#ff3b30">😰 復習</span>':''}
-      </div>
-      <div class="pre1-word">${_esc(cur.e)}</div>
-      <div class="pre1-mean"><span class="pre1-mh">意味</span>${_esc(cur.j)}</div>
-      ${showGoro?`<div class="pre1-goro">${_esc(goro)}</div>`:''}
-      ${chainsHtml}
-    </div>
-  `;
-  wrap.innerHTML=html;
-  document.getElementById('pre1-scroll').scrollTop=0;
-  // TTS
-  if(sess.settings.tts===1&&typeof speakWord==='function'){
-    try{speakWord(cur.e);}catch(_){}
-  }
-}
-
-function pre1Action(act){
-  if(!_pre1Session)return;
-  const sess=_pre1Session;
-  const cur=sess.queue[sess.idx];
-  if(!cur){pre1ShowDone(true);return;}
-  const p=pre1TickDayIfNeeded();
-  const s=sess.settings;
-  // Mark word as seen/forgot in cache and progress
-  if(!p.seenWords)p.seenWords={};
-  if(!p.seenWords[cur.e]){
-    p.seenWords[cur.e]=1;
-    p.total=(p.total||0)+1;
-  }
-  p.viewedToday=(p.viewedToday||0)+1;
-  // For hard/ok, push to forgot cache so existing review flow picks them up
-  if(act==='hard'||act==='ok'){
-    try{
-      const cache=loadCache();
-      // Determine deck index from src
-      const deckMap={V:0,P1W:1,P1P:2,ID:3,E2W:4,E2P:5};
-      const di=deckMap[cur.srcKey]!==undefined?deckMap[cur.srcKey]:1;
-      if(!cache[di])cache[di]={};
-      cache[di][cur.e]={m:cur.j};
-      if(typeof saveCache==='function')saveCache(cache);
-      if(typeof fCache!=='undefined')fCache=cache;
-    }catch(_){}
-  }
-  pre1SaveProgress(p);
-  sess.idx++;
-  sess.viewedThisSession++;
-  // Check goal
-  const goal=s.goal||600;
-  if(p.viewedToday>=goal&&p.viewedToday-1<goal){
-    // First time crossing goal this session
-    pre1ShowDone(false);
-    return;
-  }
-  if(sess.idx>=sess.queue.length){
-    pre1ShowDone(true);
-    return;
-  }
-  pre1RenderCurrent();
-  _haptic();
-}
-
-function pre1ShowDone(noMore){
-  const dlg=document.getElementById('pre1-done-dlg');
-  const card=document.getElementById('pre1-done-card');
-  const msg=document.getElementById('pre1-done-msg');
-  const p=pre1TickDayIfNeeded();
-  const s=pre1LoadSettings();
-  if(noMore){
-    msg.innerHTML=`今日は <b>${p.viewedToday||0}</b> 語見た！<br>累計 <b>${p.total||0}</b> 語覚えてる🔥<br><br>出題できる単語が尽きました。<br>明日 Day ${Math.min(3,(p.day||1)+1)} に続けよう。`;
-    document.getElementById('pre1-done-more').style.display='none';
-  }else{
-    msg.innerHTML=`Day ${p.day||1} の目標 <b>${s.goal}</b> 語クリア🎯<br>累計 <b>${p.total||0}</b> 語覚えてる！<br><br>残り Day ${Math.max(0,3-(p.day||1))} 日、頑張ろう。<br>続けて学習することもできるよ。`;
-    document.getElementById('pre1-done-more').style.display='';
-  }
-  dlg.style.display='flex';
-  requestAnimationFrame(()=>{
-    dlg.style.background='rgba(0,0,0,.4)';
-    card.style.transform='scale(1)';card.style.opacity='1';
-  });
-}
-function pre1HideDone(){
-  const dlg=document.getElementById('pre1-done-dlg');
-  const card=document.getElementById('pre1-done-card');
-  dlg.style.background='rgba(0,0,0,0)';
-  card.style.transform='scale(.8)';card.style.opacity='0';
-  setTimeout(()=>{dlg.style.display='none';card.style.transform='scale(1.8)';},420);
-}
-
-/* ══ Wire up buttons ══ */
-document.getElementById('pre1-start-btn')?.addEventListener('click',()=>{_hapticConfirm();pre1Start();});
-document.getElementById('pre1-back')?.addEventListener('click',()=>{_haptic();pre1End();});
-document.querySelectorAll('.pre1-act').forEach(b=>{
-  b.addEventListener('click',()=>{pre1Action(b.dataset.act);});
-});
-document.getElementById('pre1-done-close')?.addEventListener('click',()=>{_haptic();pre1HideDone();pre1End();});
-document.getElementById('pre1-done-more')?.addEventListener('click',()=>{_hapticConfirm();pre1HideDone();if(_pre1Session)pre1RenderCurrent();});
-
-/* Init UI on load */
-setTimeout(pre1RefreshSettingsUI,400);
-
-})();
-</script>
 
 </body>
 </html>
