@@ -1411,46 +1411,71 @@ _spBtn.classList.toggle('fast',S.speed!==1);
 if(S.idx>=EK2Q.length)S.idx=0;
 
 /* ════════════════════════════════════════════════════════════
-   TAPTIC GESTURE — どこでも数字を描いて回答する
-   1〜4の数字をジェスチャーで認識し、対応する選択肢をclick()
-   Apple Intelligence風のグラデーション軌跡 + 認識結果プレビュー
+   TAPTIC GESTURE v4 — 指の本数で直接 2/3/4 を表現
+   ────────────────────────────────────────────────────────────
+   ・1本指で描画 → 形状認識(1 or 4)
+   ・2本指で描画/タップ → 答えは 2
+   ・3本指で描画/タップ → 答えは 3
+   ・4本指で描画/タップ → 答えは 4
+   ・既存の選択肢ボタンタップも有効
+   ・Apple Intelligence風グラデ軌跡
+   ・音: 描き始め/なぞり/認識成功/正解/不正解
    ════════════════════════════════════════════════════════════ */
 (function(){
-  // ── Style注入 ──
+  'use strict';
+
+  /* ── Style注入 ─────────────────── */
   const style=document.createElement('style');
   style.textContent=`
     #tg-canvas{
       position:fixed;inset:0;z-index:8000;
-      pointer-events:auto;
-      touch-action:none;
-      background:transparent;
+      pointer-events:auto;touch-action:none;background:transparent;
+    }
+    #tg-canvas.off{pointer-events:none;display:none}
+    #tg-finger-badge{
+      position:fixed;
+      top:50%;left:50%;
+      transform:translate(-50%,-50%) scale(.6);
+      z-index:8001;pointer-events:none;
+      width:120px;height:120px;border-radius:50%;
+      background:rgba(20,20,22,.78);
+      backdrop-filter:blur(20px) saturate(180%);
+      -webkit-backdrop-filter:blur(20px) saturate(180%);
+      border:1.5px solid rgba(255,255,255,.18);
+      display:flex;align-items:center;justify-content:center;
+      font-family:"SF Pro Display",-apple-system,sans-serif;
+      font-size:64px;font-weight:200;letter-spacing:-0.04em;
+      color:#fff;
+      opacity:0;
+      transition:opacity .18s, transform .25s cubic-bezier(.2,.8,.2,1);
+    }
+    #tg-finger-badge.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+    #tg-finger-badge .lbl{
+      font-size:10px;font-weight:600;letter-spacing:.12em;
+      color:rgba(255,255,255,.55);text-transform:uppercase;
+      position:absolute;bottom:18px;
     }
     #tg-preview{
       position:fixed;top:50%;left:50%;
       transform:translate(-50%,-50%) scale(.7);
-      z-index:8001;pointer-events:none;
+      z-index:8002;pointer-events:none;
       font-size:200px;font-weight:200;
-      font-family:"SF Pro Display","SF Pro Text",-apple-system,sans-serif;
-      letter-spacing:-0.04em;
-      opacity:0;
-      transition:opacity .22s ease, transform .28s cubic-bezier(.2,.8,.2,1);
+      font-family:"SF Pro Display",-apple-system,sans-serif;
+      letter-spacing:-0.04em;opacity:0;
+      transition:opacity .22s, transform .28s cubic-bezier(.2,.8,.2,1);
       background:linear-gradient(135deg,#ff6ec4 0%,#a06bff 25%,#5b8dff 50%,#3ddbd0 75%,#7ce26b 100%);
       background-size:200% 200%;
       -webkit-background-clip:text;background-clip:text;
       -webkit-text-fill-color:transparent;color:transparent;
       filter:drop-shadow(0 0 30px rgba(160,107,255,.35)) drop-shadow(0 0 60px rgba(255,110,196,.2));
-      animation:tgGradShift 3s ease infinite;
+      animation:tgGradShift 3s ease infinite;white-space:nowrap;
     }
-    #tg-preview.show{
-      opacity:1;
-      transform:translate(-50%,-50%) scale(1);
-    }
+    #tg-preview.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
     #tg-preview.miss{
       background:linear-gradient(135deg,#ff453a,#ff9f0a);
       -webkit-background-clip:text;background-clip:text;
       filter:drop-shadow(0 0 24px rgba(255,69,58,.4));
-      font-size:90px;
-      animation:none;
+      font-size:90px;animation:none;
     }
     @keyframes tgGradShift{
       0%{background-position:0% 50%}
@@ -1459,38 +1484,41 @@ if(S.idx>=EK2Q.length)S.idx=0;
     }
     #tg-toast{
       position:fixed;left:50%;top:max(env(safe-area-inset-top,0px),12px);
-      transform:translate(-50%,-12px);
-      z-index:8002;pointer-events:none;
+      transform:translate(-50%,-12px);z-index:8003;pointer-events:none;
       background:rgba(20,20,22,.78);
       backdrop-filter:blur(20px) saturate(180%);
       -webkit-backdrop-filter:blur(20px) saturate(180%);
-      color:#fff;font-size:12px;font-weight:500;
-      letter-spacing:.04em;
+      color:#fff;font-size:12px;font-weight:500;letter-spacing:.04em;
       padding:8px 14px;border-radius:100px;
       border:1px solid rgba(255,255,255,.1);
-      opacity:0;
-      transition:opacity .25s, transform .25s cubic-bezier(.2,.8,.2,1);
+      opacity:0;transition:opacity .25s, transform .25s cubic-bezier(.2,.8,.2,1);
+      max-width:90vw;text-align:center;
     }
     #tg-toast.show{opacity:1;transform:translate(-50%,0)}
-    /* オーバーレイ無効化(start screen, pause, search, qlist 等) */
-    #tg-canvas.off{pointer-events:none;display:none}
   `;
   document.head.appendChild(style);
 
-  // ── DOM注入 ──
+  /* ── DOM ─────────────────── */
   const canvas=document.createElement('canvas');
   canvas.id='tg-canvas';
   document.body.appendChild(canvas);
+
+  const fingerBadge=document.createElement('div');
+  fingerBadge.id='tg-finger-badge';
+  fingerBadge.innerHTML='<span class="num">2</span><span class="lbl">fingers</span>';
+  document.body.appendChild(fingerBadge);
+  const fingerBadgeNum=fingerBadge.querySelector('.num');
+
   const preview=document.createElement('div');
   preview.id='tg-preview';
   document.body.appendChild(preview);
+
   const toast=document.createElement('div');
   toast.id='tg-toast';
-  toast.textContent='指で 1 / 2 / 3 / 4 をなぞる';
   document.body.appendChild(toast);
 
   const ctx=canvas.getContext('2d');
-  let dpr=window.devicePixelRatio||1;
+  const dpr=window.devicePixelRatio||1;
   function resize(){
     canvas.width=window.innerWidth*dpr;
     canvas.height=window.innerHeight*dpr;
@@ -1503,27 +1531,37 @@ if(S.idx>=EK2Q.length)S.idx=0;
   window.addEventListener('resize',resize);
   window.addEventListener('orientationchange',()=>setTimeout(resize,100));
 
-  // ── ジェスチャー有効判定 ──
-  // start screen表示中 / pause中 / 回答済 / シート開いてる時は無効
+  /* ── 状態 ─────────────────── */
   function isActive(){
     if(typeof S==='undefined'||!S)return false;
-    if(!S.started)return false;
-    if(S.answered)return false;
+    if(!S.started||S.answered)return false;
     if(typeof _paused!=='undefined'&&_paused)return false;
-    // ダイアログ系オーバーレイが開いている
     if(document.querySelector('#qlist-overlay,#search-overlay,#wronglist-overlay,#correctlist-overlay,#pause-overlay'))return false;
-    // 選択肢が無い
     if(!document.querySelector('#choices .ch'))return false;
     return true;
   }
-  function syncCanvasState(){
-    if(isActive()){canvas.classList.remove('off');}
-    else{canvas.classList.add('off');}
+  function syncState(){
+    if(isActive()){
+      canvas.classList.remove('off');
+    }else{
+      canvas.classList.add('off');
+      // クリーンアップ
+      activePointers.clear();
+      strokes=[];currentStroke=[];drawing=false;
+      maxFingerCount=0;
+      hideFingerBadge();
+      clearCanvas();
+    }
   }
-  // 状態変化を定期監視(MutationObserverだと重い)
-  setInterval(syncCanvasState,200);
+  setInterval(syncState,200);
 
-  // ── トースト表示(初回のみガイド) ──
+  /* ── トースト ─────────────────── */
+  function showToast(text,ms=2400){
+    toast.textContent=text;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t=setTimeout(()=>toast.classList.remove('show'),ms);
+  }
   let toastShown=false;
   const origStartQuiz=window.startQuiz;
   if(typeof origStartQuiz==='function'){
@@ -1531,298 +1569,484 @@ if(S.idx>=EK2Q.length)S.idx=0;
       const r=origStartQuiz.apply(this,arguments);
       if(!toastShown){
         toastShown=true;
-        setTimeout(()=>{
-          toast.classList.add('show');
-          setTimeout(()=>toast.classList.remove('show'),3500);
-        },800);
+        setTimeout(()=>showToast('1本指=1or4 / 2本指=2 / 3本指=3 / 4本指=4',4000),900);
       }
       return r;
     };
   }
 
-  // ── タッチパススルー判定 ──
-  // 選択肢ボタン・ヘッダーボタン・フィードバック領域は通常タップを優先
-  function isInteractiveTarget(x,y){
-    const el=document.elementFromPoint(x,y);
-    if(!el)return false;
-    return !!el.closest('button, .ch, .hdr-btn, .hdr-back, .hdr-count, .audio-btn, .speed-btn, .fb, #fb, .nav-btn, .start-btn, input, textarea, a, [onclick]');
+  /* ── ハプティクス ─────────────────── */
+  function hap(ms){if(navigator.vibrate)navigator.vibrate(ms);}
+  function hapStart(){if(typeof haptic==='function')haptic();else hap(4);}
+  function hapHit(){if(typeof haptic!=='undefined'&&haptic.success)haptic.success();else hap(15);}
+  function hapMiss(){if(typeof haptic!=='undefined'&&haptic.error)haptic.error();else hap([20,30,20]);}
+
+  /* ── サウンド ─────────────────── */
+  let audioCtx=null;
+  function ensureAudio(){
+    if(!audioCtx){
+      try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(_){audioCtx=null;}
+    }
+    if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();
+    return audioCtx;
   }
+  function snd(type){
+    const ac=ensureAudio();
+    if(!ac)return;
+    const t=ac.currentTime;
+    if(type==='draw'){
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.type='sine';o.frequency.value=1800;
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(0.06,t+0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.08);
+      o.connect(g);g.connect(ac.destination);
+      o.start(t);o.stop(t+0.1);
+    }else if(type==='trace'){
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.type='triangle';o.frequency.value=2200+Math.random()*400;
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(0.025,t+0.003);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.04);
+      o.connect(g);g.connect(ac.destination);
+      o.start(t);o.stop(t+0.06);
+    }else if(type==='recognize'){
+      [660,990].forEach((f,i)=>{
+        const o=ac.createOscillator(),g=ac.createGain();
+        o.type='sine';o.frequency.value=f;
+        const st=t+i*0.06;
+        g.gain.setValueAtTime(0,st);
+        g.gain.linearRampToValueAtTime(0.12,st+0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001,st+0.18);
+        o.connect(g);g.connect(ac.destination);
+        o.start(st);o.stop(st+0.2);
+      });
+    }else if(type==='correct'){
+      [523.25,659.25,783.99].forEach((f,i)=>{
+        const o=ac.createOscillator(),g=ac.createGain();
+        o.type='triangle';o.frequency.value=f;
+        const st=t+i*0.07;
+        g.gain.setValueAtTime(0,st);
+        g.gain.linearRampToValueAtTime(0.18,st+0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001,st+0.28);
+        o.connect(g);g.connect(ac.destination);
+        o.start(st);o.stop(st+0.3);
+      });
+    }else if(type==='wrong'){
+      [392,294].forEach((f,i)=>{
+        const o=ac.createOscillator(),g=ac.createGain();
+        o.type='sawtooth';o.frequency.value=f;
+        const st=t+i*0.09;
+        g.gain.setValueAtTime(0,st);
+        g.gain.linearRampToValueAtTime(0.14,st+0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001,st+0.22);
+        o.connect(g);g.connect(ac.destination);
+        o.start(st);o.stop(st+0.25);
+      });
+    }else if(type==='miss'){
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.type='square';o.frequency.value=180;
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(0.08,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.16);
+      o.connect(g);g.connect(ac.destination);
+      o.start(t);o.stop(t+0.18);
+    }
+  }
+  // 正解/不正解音は MutationObserver で
+  const observer=new MutationObserver(muts=>{
+    for(const m of muts){
+      if(m.type==='attributes'&&m.attributeName==='class'){
+        const t=m.target;
+        if(t.classList&&t.classList.contains('ch')){
+          if(t.classList.contains('correct')&&!t.dataset.tgFired){
+            t.dataset.tgFired='1';
+            const wrongs=document.querySelectorAll('#choices .ch.wrong');
+            if(wrongs.length===0)snd('correct');
+          }else if(t.classList.contains('wrong')&&!t.dataset.tgFired){
+            t.dataset.tgFired='1';
+            snd('wrong');
+          }
+        }
+      }
+      if(m.type==='childList'&&m.target.id==='choices')attachChObserver();
+    }
+  });
+  function attachChObserver(){
+    const ce=document.getElementById('choices');
+    if(!ce)return;
+    observer.disconnect();
+    observer.observe(ce,{childList:true,subtree:false});
+    ce.querySelectorAll('.ch').forEach(b=>{
+      delete b.dataset.tgFired;
+      observer.observe(b,{attributes:true,attributeFilter:['class']});
+    });
+  }
+  setInterval(attachChObserver,400);
 
-  // ── 描画 & 認識 ──
-  let drawing=false;
-  let points=[];
-  let dragStartedOnInteractive=false;
-  let totalDistance=0;
-  let lastPoint=null;
-
+  /* ── 描画ユーティリティ ─────────────────── */
   function clearCanvas(){
     ctx.clearRect(0,0,canvas.width/dpr,canvas.height/dpr);
   }
-
-  function drawTrail(){
-    clearCanvas();
-    if(points.length<2)return;
-    // フェード付きトレイル: 最近の点ほど濃く
-    const N=points.length;
-    // 1. 太いグロー(背面)
-    ctx.lineCap='round';ctx.lineJoin='round';
-    for(let pass=0;pass<3;pass++){
-      const lw=[22,12,5][pass];
-      const alpha=[0.18,0.45,1.0][pass];
-      ctx.lineWidth=lw;
-      // Apple Intelligence グラデ: 軌跡に沿って色変化
-      for(let i=1;i<N;i++){
-        const t=i/(N-1); // 0→1
-        // ピンク→パープル→ブルー→ティール→グリーン
-        const grad=ctx.createLinearGradient(points[i-1].x,points[i-1].y,points[i].x,points[i].y);
-        const c0=tgColorAt(t-1/N);
-        const c1=tgColorAt(t);
-        grad.addColorStop(0,`rgba(${c0[0]},${c0[1]},${c0[2]},${alpha})`);
-        grad.addColorStop(1,`rgba(${c1[0]},${c1[1]},${c1[2]},${alpha})`);
-        ctx.strokeStyle=grad;
-        ctx.beginPath();
-        ctx.moveTo(points[i-1].x,points[i-1].y);
-        ctx.lineTo(points[i].x,points[i].y);
-        ctx.stroke();
-      }
-    }
-  }
-
-  // Apple Intelligence パレットの t∈[0,1] 補間
   function tgColorAt(t){
     t=Math.max(0,Math.min(1,t));
-    const stops=[
-      [255,110,196], // pink
-      [160,107,255], // purple
-      [91,141,255],  // blue
-      [61,219,208],  // teal
-      [124,226,107]  // green
-    ];
+    const stops=[[255,110,196],[160,107,255],[91,141,255],[61,219,208],[124,226,107]];
     const seg=t*(stops.length-1);
     const i=Math.floor(seg);
     const f=seg-i;
     if(i>=stops.length-1)return stops[stops.length-1];
     const a=stops[i],b=stops[i+1];
-    return [
-      Math.round(a[0]+(b[0]-a[0])*f),
-      Math.round(a[1]+(b[1]-a[1])*f),
-      Math.round(a[2]+(b[2]-a[2])*f)
-    ];
+    return [Math.round(a[0]+(b[0]-a[0])*f),Math.round(a[1]+(b[1]-a[1])*f),Math.round(a[2]+(b[2]-a[2])*f)];
   }
-
-  // フェードアウトアニメ
+  function drawAllStrokes(strokeArr){
+    clearCanvas();
+    const totalPts=strokeArr.reduce((n,s)=>n+s.length,0);
+    if(totalPts<2)return;
+    ctx.lineCap='round';ctx.lineJoin='round';
+    for(let pass=0;pass<3;pass++){
+      const lw=[22,12,5][pass],alpha=[0.18,0.45,1.0][pass];
+      ctx.lineWidth=lw;
+      let g=0;
+      for(const stroke of strokeArr){
+        for(let i=1;i<stroke.length;i++){
+          const t0=g/Math.max(1,totalPts-1),t1=(g+1)/Math.max(1,totalPts-1);
+          const c0=tgColorAt(t0),c1=tgColorAt(t1);
+          const grad=ctx.createLinearGradient(stroke[i-1].x,stroke[i-1].y,stroke[i].x,stroke[i].y);
+          grad.addColorStop(0,`rgba(${c0[0]},${c0[1]},${c0[2]},${alpha})`);
+          grad.addColorStop(1,`rgba(${c1[0]},${c1[1]},${c1[2]},${alpha})`);
+          ctx.strokeStyle=grad;
+          ctx.beginPath();
+          ctx.moveTo(stroke[i-1].x,stroke[i-1].y);
+          ctx.lineTo(stroke[i].x,stroke[i].y);
+          ctx.stroke();
+          g++;
+        }
+        g++;
+      }
+    }
+  }
   let fadeRAF=null;
-  function fadeOutTrail(){
+  function fadeOutTrail(snapshot){
     cancelAnimationFrame(fadeRAF);
-    let alpha=1;
     const startTime=performance.now();
     function step(){
       const t=(performance.now()-startTime)/300;
       if(t>=1){clearCanvas();return;}
-      alpha=1-t;
-      // 元のtrailをalphaで再描画する代わりに、shadowで消す
-      ctx.globalAlpha=alpha;
-      drawTrail();
+      ctx.globalAlpha=1-t;
+      drawAllStrokes(snapshot);
       ctx.globalAlpha=1;
       fadeRAF=requestAnimationFrame(step);
     }
     fadeRAF=requestAnimationFrame(step);
   }
 
-  // ── ハプティクス ──
-  function hap(ms){
-    if(navigator.vibrate)navigator.vibrate(ms);
+  /* ── 指バッジ表示 ─────────────────── */
+  function showFingerBadge(n){
+    fingerBadgeNum.textContent=n;
+    fingerBadge.classList.add('show');
   }
-  // 既存のhaptic関数があれば併用
-  function hapStart(){if(typeof haptic==='function')haptic();else hap(4);}
-  function hapHit(){if(typeof haptic!=='undefined'&&haptic.success)haptic.success();else hap(15);}
-  function hapMiss(){if(typeof haptic!=='undefined'&&haptic.error)haptic.error();else hap([20,30,20]);}
+  function hideFingerBadge(){
+    fingerBadge.classList.remove('show');
+  }
 
-  // ── ポインタイベント ──
+  /* ── ポインタ管理 ─────────────────── */
+  const activePointers=new Map();
+  let drawing=false;
+  let currentStroke=[]; // 1本指描画用
+  let strokes=[];
+  let lastTracePlay=0;
+  let maxFingerCount=0; // セッション中の最大同時指数
+  let sessionActive=false; // 何らかの指が触れている状態
+  let commitTimer=null;
+
+  function isInteractive(x,y){
+    const el=document.elementFromPoint(x,y);
+    if(!el)return null;
+    return el.closest('button, .ch, .hdr-btn, .hdr-back, .hdr-count, .audio-btn, .speed-btn, .fb, #fb, .nav-btn, .start-btn, input, textarea, a, [onclick]');
+  }
+
+  /* ── ポインタイベント ─────────────────── */
   canvas.addEventListener('pointerdown',(e)=>{
-    if(!isActive()){return;}
-    // 選択肢などインタラクティブ要素の上で開始した場合はジェスチャー無視
-    if(isInteractiveTarget(e.clientX,e.clientY)){
-      dragStartedOnInteractive=true;
-      // クリックイベントを通すため、canvasのpointer-eventsを一時的に切る
-      // 代わりにこのイベントを再発火させる必要があるため、preventDefaultしない
-      // → 簡単な解決: その場でcanvasを瞬間的に透過させ、要素にclickを送る
-      const target=document.elementFromPoint(e.clientX,e.clientY);
-      canvas.style.pointerEvents='none';
-      requestAnimationFrame(()=>{canvas.style.pointerEvents='auto';});
-      if(target&&target.click){
-        // 既にクリック相当の要素は自分でclickを発火
-        // ただしdocumentレベルでclickハンドラがあるのでそれが拾う想定
-        const ev=new MouseEvent('click',{bubbles:true,cancelable:true,clientX:e.clientX,clientY:e.clientY});
-        target.dispatchEvent(ev);
+    if(!isActive())return;
+    ensureAudio();
+    const x=e.clientX,y=e.clientY;
+
+    // インタラクティブ要素 → そっちに送る(指1本目のみ)
+    if(activePointers.size===0){
+      const targetEl=isInteractive(x,y);
+      if(targetEl){
+        canvas.style.pointerEvents='none';
+        requestAnimationFrame(()=>{canvas.style.pointerEvents='auto';});
+        const ev=new MouseEvent('click',{bubbles:true,cancelable:true,clientX:x,clientY:y});
+        targetEl.dispatchEvent(ev);
+        return;
       }
-      return;
     }
-    dragStartedOnInteractive=false;
+
     e.preventDefault();
     try{canvas.setPointerCapture(e.pointerId);}catch(_){}
-    drawing=true;
-    points=[{x:e.clientX,y:e.clientY,t:performance.now()}];
-    totalDistance=0;
-    lastPoint={x:e.clientX,y:e.clientY};
-    cancelAnimationFrame(fadeRAF);
-    clearCanvas();
-    preview.classList.remove('show','miss');
-    hapStart();
+    activePointers.set(e.pointerId,{x,y,t:performance.now(),startX:x,startY:y});
+    sessionActive=true;
+    const cnt=activePointers.size;
+    if(cnt>maxFingerCount)maxFingerCount=cnt;
+
+    if(cnt>=2){
+      // 2本以上 = 指本数モード
+      // 進行中の1本指描画があれば破棄
+      drawing=false;currentStroke=[];strokes=[];clearCanvas();
+      preview.classList.remove('show','miss');
+      cancelAnimationFrame(fadeRAF);
+      showFingerBadge(Math.min(4,maxFingerCount));
+      hapStart();snd('draw');
+    }else{
+      // 1本指 = 描画モード
+      drawing=true;
+      currentStroke=[{x,y,t:performance.now()}];
+      preview.classList.remove('show','miss');
+      cancelAnimationFrame(fadeRAF);
+      hapStart();snd('draw');
+    }
   },{passive:false});
 
   canvas.addEventListener('pointermove',(e)=>{
-    if(!drawing)return;
+    const p=activePointers.get(e.pointerId);
+    if(!p)return;
     e.preventDefault();
-    const last=points[points.length-1];
-    const dx=e.clientX-last.x,dy=e.clientY-last.y;
-    if(dx*dx+dy*dy<3)return;
-    points.push({x:e.clientX,y:e.clientY,t:performance.now()});
-    if(lastPoint){
-      const ddx=e.clientX-lastPoint.x,ddy=e.clientY-lastPoint.y;
-      totalDistance+=Math.sqrt(ddx*ddx+ddy*ddy);
+    p.x=e.clientX;p.y=e.clientY;p.t=performance.now();
+
+    if(activePointers.size>=2){
+      // 指本数モード: バッジ位置を指の重心に追従
+      let cx=0,cy=0;
+      for(const ap of activePointers.values()){cx+=ap.x;cy+=ap.y;}
+      cx/=activePointers.size;cy/=activePointers.size;
+      // バッジ位置更新(translate)
+      fingerBadge.style.left=cx+'px';
+      fingerBadge.style.top=cy+'px';
+      // 指本数が増えたら更新
+      const cnt=activePointers.size;
+      if(cnt>maxFingerCount){
+        maxFingerCount=cnt;
+        showFingerBadge(Math.min(4,maxFingerCount));
+        hapStart();
+      }
+      return;
     }
-    lastPoint={x:e.clientX,y:e.clientY};
-    drawTrail();
+
+    // 1本指描画
+    if(!drawing||activePointers.size!==1)return;
+    const last=currentStroke[currentStroke.length-1];
+    const dx=p.x-last.x,dy=p.y-last.y;
+    if(dx*dx+dy*dy<3)return;
+    currentStroke.push({x:p.x,y:p.y,t:performance.now()});
+    drawAllStrokes([...strokes,currentStroke]);
+    const now=performance.now();
+    if(now-lastTracePlay>50){
+      lastTracePlay=now;
+      snd('trace');
+    }
   },{passive:false});
 
-  function endStroke(){
-    if(!drawing)return;
-    drawing=false;
-    // 短すぎ・小さすぎは無視
-    if(points.length<5||totalDistance<40){
-      fadeOutTrail();
+  function endPointer(e){
+    const p=activePointers.get(e.pointerId);
+    if(!p)return;
+    activePointers.delete(e.pointerId);
+
+    if(activePointers.size===0&&sessionActive){
+      // 全部離れた = セッション終了 → 確定処理
+      sessionActive=false;
+      finalize();
+    }
+  }
+  canvas.addEventListener('pointerup',(e)=>{e.preventDefault();endPointer(e);},{passive:false});
+  canvas.addEventListener('pointercancel',endPointer);
+  canvas.addEventListener('pointerleave',endPointer);
+
+  /* ── 確定処理 ─────────────────── */
+  function finalize(){
+    const fingers=maxFingerCount;
+    maxFingerCount=0;
+    hideFingerBadge();
+
+    if(fingers>=2){
+      // 指本数 = 答え
+      const n=Math.min(4,fingers);
+      drawing=false;currentStroke=[];strokes=[];
+      clearCanvas();
+      triggerSelection(n,'fingers');
       return;
     }
-    const digit=recognize(points);
-    if(digit===null||digit<1||digit>4){
-      // 不明
+
+    // 1本指描画 → 形状認識(1 or 4)
+    if(!drawing&&strokes.length===0){
+      // 何も描いてない
+      return;
+    }
+    drawing=false;
+    if(currentStroke.length>=3){
+      strokes.push(currentStroke.slice());
+    }
+    currentStroke=[];
+
+    if(strokes.length===0){
+      return;
+    }
+
+    // 全体BB
+    let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity,total=0;
+    for(const s of strokes){
+      for(const pt of s){
+        if(pt.x<minX)minX=pt.x;if(pt.x>maxX)maxX=pt.x;
+        if(pt.y<minY)minY=pt.y;if(pt.y>maxY)maxY=pt.y;
+        total++;
+      }
+    }
+    const W=maxX-minX,H=maxY-minY;
+    const minSize=Math.min(window.innerWidth,window.innerHeight)*0.06;
+    const snapshot=strokes.slice();
+    strokes=[];
+
+    if(Math.max(W,H)<minSize||total<5){
+      fadeOutTrail(snapshot);
+      return;
+    }
+
+    const result=recognize1or4(snapshot,{minX,maxX,minY,maxY,W,H});
+    if(result===null){
       preview.textContent='?';
       preview.classList.add('show','miss');
-      hapMiss();
+      hapMiss();snd('miss');
       setTimeout(()=>{
         preview.classList.remove('show','miss');
-        fadeOutTrail();
-      },500);
+        fadeOutTrail(snapshot);
+      },550);
       return;
     }
-    // 該当する選択肢があるか確認
-    const btn=document.querySelector('#choices .ch[data-i="'+digit+'"]');
+    triggerSelection(result,'gesture',snapshot);
+  }
+
+  /* ── 選択肢クリック発火 ─────────────────── */
+  function triggerSelection(n,source,snapshot){
+    if(n<1||n>4){
+      if(snapshot)fadeOutTrail(snapshot);
+      return;
+    }
+    const btn=document.querySelector('#choices .ch[data-i="'+n+'"]');
     if(!btn||btn.classList.contains('disabled')){
-      preview.textContent=digit;
+      preview.textContent=String(n);
       preview.classList.add('show','miss');
-      hapMiss();
+      hapMiss();snd('miss');
       setTimeout(()=>{
         preview.classList.remove('show','miss');
-        fadeOutTrail();
+        if(snapshot)fadeOutTrail(snapshot);
       },450);
       return;
     }
-    preview.textContent=digit;
+    preview.textContent=String(n);
+    preview.classList.remove('miss');
     preview.classList.add('show');
-    hapHit();
-    // 少し見せてから回答
+    hapHit();snd('recognize');
+    const delay=source==='fingers'?160:280;
     setTimeout(()=>{
       btn.click();
-      setTimeout(()=>{
-        preview.classList.remove('show');
-      },200);
-      fadeOutTrail();
-    },280);
+      setTimeout(()=>preview.classList.remove('show'),200);
+      if(snapshot)fadeOutTrail(snapshot);
+    },delay);
   }
-  canvas.addEventListener('pointerup',(e)=>{e.preventDefault();endStroke();},{passive:false});
-  canvas.addEventListener('pointercancel',endStroke);
-  canvas.addEventListener('pointerleave',endStroke);
 
-  /* ────────────────────────────────────────────
-     認識ロジック (1, 2, 3, 4)
-     特徴量:
-       - aspect = w/h
-       - turnsX, turnsY = x/y方向の折り返し回数
-       - 始点/終点の正規化座標
+  /* ════════════════════════════════════════════
+     1本指描画の認識 — 1 か 4 のみ
+     ════════════════════════════════════════════
+     1: 縦線(細長い、aspect小、直線的)
+     4: 縦線+横線の組み合わせ(aspectが中庸、コーナーあり、終点が右or下)
      ──────────────────────────────────────────── */
-  function recognize(pts){
+  function recognize1or4(strokeArr,bb){
+    // 全点をフラットに
+    const pts=[];
+    for(const s of strokeArr)for(const p of s)pts.push(p);
     if(pts.length<5)return null;
-    let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
-    for(const p of pts){
-      if(p.x<minX)minX=p.x;if(p.x>maxX)maxX=p.x;
-      if(p.y<minY)minY=p.y;if(p.y>maxY)maxY=p.y;
-    }
-    const w=maxX-minX,h=maxY-minY;
-    const minSize=Math.min(window.innerWidth,window.innerHeight)*0.06;
-    if(Math.max(w,h)<minSize)return null;
-    const aspect=h>0?w/h:999;
+    const {W,H,minX,maxX,minY,maxY}=bb;
+    const aspect=H>0?W/H:999;
 
-    // 1: 縦に細長い線
-    if(aspect<0.4&&h>w*2.0){
+    // ── 1 の判定 ──
+    // (a) 細長い縦線
+    if(aspect<0.45&&H>W*1.8){
       return 1;
     }
-
-    const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
-    const turnsX=countTurns(xs,w*0.18);
-    const turnsY=countTurns(ys,h*0.18);
-
-    const start=pts[0],end=pts[pts.length-1];
-    const sxN=w>0?(start.x-minX)/w:0.5;
-    const syN=h>0?(start.y-minY)/h:0.5;
-    const exN=w>0?(end.x-minX)/w:0.5;
-    const eyN=h>0?(end.y-minY)/h:0.5;
-
-    // 3: x方向の折り返し2回以上 = 右に2回突き出る
-    //    終点が左寄り(0.6以下)、始点も左寄りor上、垂直方向は基本下向き
-    if(turnsX>=2){
-      // 3 と 4 の区別: 4 はYのturn少ない/縦移動支配的
-      // 3 は xが右に2回行く
-      return 3;
-    }
-
-    // 2: 始点が左上、終点が右下、対角線方向
-    //    turnsX=1〜2、底辺が水平に近い
-    if(syN<0.45 && eyN>0.5 && exN>0.45 && sxN<0.6){
-      return 2;
-    }
-
-    // 4: 縦の動きが支配的 + 横方向に1回曲がる、終点が下or右
-    //    aspect が中庸(0.4〜1.2)、turnsX>=1 or turnsY>=1
-    if(h>w*0.5 && (turnsX>=1||turnsY>=1)){
-      // 4 の特徴: 縦方向に大きく動いた後、水平に抜ける
-      // または縦線2本+横線(2筆書きだが今は単一筆想定)
-      if(eyN>0.55||exN>0.6){
-        return 4;
+    // (b) 直線性が高く縦長(斜めの1も拾う)
+    if(aspect<0.7&&H>W){
+      const start=pts[0],end=pts[pts.length-1];
+      const directDist=Math.hypot(end.x-start.x,end.y-start.y);
+      let pathDist=0;
+      for(let i=1;i<pts.length;i++)pathDist+=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y);
+      if(pathDist>0&&directDist/pathDist>0.85){
+        return 1;
       }
     }
+    // 複数ストロークの 1(線+点とか)は今は対応しない
+    if(strokeArr.length>=2){
+      // 2ストローク以上で全体が縦長→1の可能性
+      if(aspect<0.5&&H>W*1.3)return 1;
+      // それ以外は 4 として扱う候補
+    }
 
-    // フォールバック: 縦長で細い → 1
-    if(aspect<0.5&&h>w*1.3){
-      return 1;
+    // ── 4 の判定 ──
+    // 4は縦線+横線(または縦+横+縦)の組み合わせ
+    // 特徴: aspect 0.4〜1.5、コーナー(鋭角)が1〜2個ある、または複数ストローク
+    const start=pts[0],end=pts[pts.length-1];
+    const sxN=W>0?(start.x-minX)/W:0.5;
+    const syN=H>0?(start.y-minY)/H:0.5;
+    const exN=W>0?(end.x-minX)/W:0.5;
+    const eyN=H>0?(end.y-minY)/H:0.5;
+
+    // 鋭角検出
+    let sharpestAngle=180;
+    const seg=Math.max(2,Math.floor(pts.length/30));
+    for(let i=seg;i<pts.length-seg;i+=seg){
+      const a=pts[i-seg],b=pts[i],c=pts[i+seg];
+      const v1x=b.x-a.x,v1y=b.y-a.y;
+      const v2x=c.x-b.x,v2y=c.y-b.y;
+      const m1=Math.hypot(v1x,v1y),m2=Math.hypot(v2x,v2y);
+      if(m1<W*0.05||m2<W*0.05)continue;
+      const dot=(v1x*v2x+v1y*v2y)/(m1*m2);
+      const ang=Math.acos(Math.max(-1,Math.min(1,dot)))*180/Math.PI;
+      const inner=180-ang;
+      if(inner<sharpestAngle)sharpestAngle=inner;
     }
-    // 対角線傾向 → 2
-    if(syN<0.5&&eyN>0.5&&exN>sxN){
-      return 2;
+    const hasSharpCorner=sharpestAngle<110;
+
+    // x方向折り返し
+    let turnsX=0,lastDir=0,pivot=pts[0].x;
+    const thr=W*0.18;
+    for(let i=1;i<pts.length;i++){
+      const diff=pts[i].x-pivot;
+      if(Math.abs(diff)<thr)continue;
+      const dir=diff>0?1:-1;
+      if(lastDir!==0&&dir!==lastDir)turnsX++;
+      lastDir=dir;pivot=pts[i].x;
     }
+
+    // 4 の決定打:
+    //  - 複数ストローク (確実に 4)
+    if(strokeArr.length>=2)return 4;
+    //  - 鋭角あり + 終点が右or下
+    if(hasSharpCorner&&(exN>0.5||eyN>0.7))return 4;
+    //  - x方向に折り返しあり + aspect中庸
+    if(turnsX>=1&&aspect>0.4&&aspect<1.5)return 4;
+    //  - 横長すぎない+縦長すぎない+鋭角
+    if(hasSharpCorner&&aspect>0.4&&aspect<2.0)return 4;
+
+    // 判定不能
     return null;
   }
 
-  function countTurns(arr,threshold){
-    if(arr.length<3)return 0;
-    let turns=0;
-    let lastDir=0;
-    let pivot=arr[0];
-    for(let i=1;i<arr.length;i++){
-      const diff=arr[i]-pivot;
-      if(Math.abs(diff)<threshold)continue;
-      const dir=diff>0?1:-1;
-      if(lastDir!==0&&dir!==lastDir)turns++;
-      lastDir=dir;
-      pivot=arr[i];
-    }
-    return turns;
-  }
-
-  // 公開API
-  window.TapticGesture={recognize,enable:()=>canvas.classList.remove('off'),disable:()=>canvas.classList.add('off')};
+  /* ── 公開API ─────────────────── */
+  window.TapticGesture={
+    recognize1or4,
+    enable:()=>canvas.classList.remove('off'),
+    disable:()=>canvas.classList.add('off'),
+    snd
+  };
 })();
-
 </script>
 
 </body>
