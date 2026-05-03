@@ -1936,20 +1936,15 @@ if(S.idx>=EK2Q.length)S.idx=0;
     if(n<1||n>4){fadeOutTrail();return;}
     const btn=document.querySelector('#choices .ch[data-i="'+n+'"]');
     if(!btn||btn.classList.contains('disabled')){
-      // 該当する選択肢が無い → 軌跡をフェードして終わり
       hapMiss();snd('miss');
       fadeOutTrail();
       return;
     }
+    // 即座に発火 — 一筆書きで指を離した瞬間に採点
     hapHit();snd('recognize');
-    // インテリジェンス色のグラデ数字をフラッシュ表示
     showFlash(n);
-    // タップは少し見せてから発火、描画は軌跡と重ねて発火
-    const delay=source==='fingers-tap'?180:source==='fingers-draw'?220:240;
-    setTimeout(()=>{
-      btn.click();
-      fadeOutTrail();
-    },delay);
+    btn.click();
+    fadeOutTrail();
   }
 
   /* ════════════════════════════════════════════
