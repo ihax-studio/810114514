@@ -1564,7 +1564,6 @@ if(S.idx>=EK2Q.length)S.idx=0;
       reset();
     }
   }
-  setInterval(syncState,200);
 
   function reset(){
     pointerStrokes.clear();
@@ -1674,9 +1673,12 @@ if(S.idx>=EK2Q.length)S.idx=0;
       o.start(t);o.stop(t+0.18);
     }
   }
-  // 正解/不正解音
+  // 統合 MutationObserver — 状態同期 + 正解/不正解音
+  // body の subtree を監視して、関係ある変化があった時だけ syncState() と音判定を実行
   const observer=new MutationObserver(muts=>{
+    let stateChanged=false;
     for(const m of muts){
+      // 選択肢ボタンのclass変化(正解/不正解音)
       if(m.type==='attributes'&&m.attributeName==='class'){
         const t=m.target;
         if(t.classList&&t.classList.contains('ch')){
@@ -1688,22 +1690,30 @@ if(S.idx>=EK2Q.length)S.idx=0;
             t.dataset.tgFired='1';
             snd('wrong');
           }
+          stateChanged=true; // disabled付与など状態変化に追従
         }
       }
-      if(m.type==='childList'&&m.target.id==='choices')attachChObserver();
+      // childListの変化 — 新しい問題ロード、オーバーレイ追加削除など
+      if(m.type==='childList'){
+        // 新規 .ch ボタンには tgFired をリセット(MutationObserver が attribute で拾えるよう既存登録は不要、subtree:trueで届く)
+        for(const node of m.addedNodes){
+          if(node.nodeType===1&&node.classList&&node.classList.contains('ch')){
+            delete node.dataset.tgFired;
+          }
+        }
+        stateChanged=true;
+      }
     }
+    if(stateChanged)syncState();
   });
-  function attachChObserver(){
-    const ce=document.getElementById('choices');
-    if(!ce)return;
-    observer.disconnect();
-    observer.observe(ce,{childList:true,subtree:false});
-    ce.querySelectorAll('.ch').forEach(b=>{
-      delete b.dataset.tgFired;
-      observer.observe(b,{attributes:true,attributeFilter:['class']});
-    });
-  }
-  setInterval(attachChObserver,400);
+  observer.observe(document.body,{
+    subtree:true,
+    childList:true,
+    attributes:true,
+    attributeFilter:['class','style']
+  });
+  // 初期同期
+  syncState();
 
   /* ── 描画 ──────────────────────────────
      各指ごとに違うカラー帯を割り当て:
@@ -1808,25 +1818,32 @@ if(S.idx>=EK2Q.length)S.idx=0;
   }
 
   /* ── ポインタイベント ─────────────────── */
+  // インタラクティブ要素タップ処理: 重複click防止
+  let lastSyntheticClickTime=0;
   canvas.addEventListener('pointerdown',(e)=>{
     if(!isActive())return;
     ensureAudio();
     const x=e.clientX,y=e.clientY;
 
-    // インタラクティブ要素 → そっちに送る(セッション開始時=指0本のみ)
+    // インタラクティブ要素タップ(セッション開始時=指0本のときだけ)
     if(pointerStrokes.size===0){
       const targetEl=isInteractive(x,y);
       if(targetEl){
+        // 200ms以内の重複click防止
+        const now=performance.now();
+        if(now-lastSyntheticClickTime<200)return;
+        lastSyntheticClickTime=now;
+        // canvas を瞬間透過させ、後続のmove/upは通常フロー
         canvas.style.pointerEvents='none';
         requestAnimationFrame(()=>{canvas.style.pointerEvents='auto';});
-        const ev=new MouseEvent('click',{bubbles:true,cancelable:true,clientX:x,clientY:y});
-        targetEl.dispatchEvent(ev);
+        targetEl.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,clientX:x,clientY:y}));
         return;
       }
-      // 新セッション開始 → 完了ストロークをクリア(前回の残り)
+      // 新セッション開始 → 進行中のフェード/軌跡を確実にクリーンアップ
       completedStrokes=[];
       nextFingerIdx=0;
       cancelAnimationFrame(fadeRAF);
+      fadeRAF=null;
       clearCanvas();
     }
 
